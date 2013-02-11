@@ -76,6 +76,11 @@ public class XMPPServerPipelineFactory implements ChannelPipelineFactory {
     public ChannelPipeline getPipeline() throws Exception {
         ChannelPipeline pipeline = Channels.pipeline();
 
+
+//        pipeline.addLast("XmlFrameDecoder", new XMLFrameDecoder());
+//        pipeline.addLast("XmlElementDecoder", new XMLElementDecoder());
+//        pipeline.addLast("xmpp", new XMPPChatDelivery(channel, handler));
+        
         pipeline.addLast("decoder", new StringDecoder());
         pipeline.addLast("encoder", new StringEncoder());
         pipeline.addLast("xmpp", new XMPPChatDelivery(channel, handler));

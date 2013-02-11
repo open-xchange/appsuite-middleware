@@ -47,34 +47,55 @@
  *
  */
 
-package com.openexchange.realtime.xmpp.converter;
+package com.openexchange.realtime.xmpp.transformer;
 
-import org.joox.JOOX;
-import org.joox.Match;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.chat.ChatMessage;
+import com.openexchange.realtime.payload.PayloadElement;
+import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
+import com.openexchange.realtime.util.ElementPath;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link MessageBodyToXMPP}
+ * {@link XMPPPayloadElementTransformer}
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class MessageBodyToXMPP extends AbstractPOJOConverter {
+public class XMPPPayloadElementTransformer implements PayloadElementTransformer {
 
-    @Override
-    public String getInputFormat() {
-        return "chatMessage";
+    public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
+
+    private static final String EXTERNAL_FORMAT = "xml";
+
+    private final String internalFormat;
+
+    private final ElementPath elementPath;
+
+    public XMPPPayloadElementTransformer(String internalFormat, ElementPath elementPath) {
+        this.internalFormat = internalFormat;
+        this.elementPath = elementPath;
     }
 
     @Override
-    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
-        ChatMessage message = (ChatMessage) data;
-
-        Match xml = JOOX.$("body").append(message.getMessage());
-
-        return xml.toString();
+    public ElementPath getElementPath() {
+        return elementPath;
     }
 
+    @Override
+    public PayloadElement incoming(PayloadElement payload, ServerSession session) throws OXException {
+        Object data = payload.getData();
+        SimpleConverter simpleConverter = SERVICES.get().getService(SimpleConverter.class);
+        Object converted = simpleConverter.convert(payload.getFormat(), internalFormat, data, session);
+        return new PayloadElement(converted, internalFormat, payload.getNamespace(), payload.getElementName());
+    }
+
+    @Override
+    public PayloadElement outgoing(PayloadElement payload, ServerSession session) throws OXException {
+        Object data = payload.getData();
+        SimpleConverter simpleConverter = SERVICES.get().getService(SimpleConverter.class);
+        Object converted = simpleConverter.convert(payload.getFormat(), EXTERNAL_FORMAT, data, session);
+        return new PayloadElement(converted, Byte.class.getSimpleName(), payload.getNamespace(), payload.getElementName());
+    }
 }

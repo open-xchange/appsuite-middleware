@@ -49,8 +49,17 @@
 
 package com.openexchange.realtime.xmpp.packet;
 
+import static org.joox.JOOX.$;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import org.joox.Match;
+import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -60,11 +69,15 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class XMPPStanza {
 
+    public static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
+
     protected JID to;
 
     private String id;
 
     private ServerSession session;
+
+    protected Collection<PayloadTree> payloads;
 
     protected XMPPStanza(ServerSession session) {
         this.session = session;
@@ -102,7 +115,15 @@ public abstract class XMPPStanza {
         }
     }
 
-    public static XMPPStanza getStanza(Match xml, ServerSession session) {
+    public Collection<PayloadTree> getPayloads() {
+        return payloads;
+    }
+
+    public void setPayloads(Collection<PayloadTree> payloads) {
+        this.payloads = payloads;
+    }
+
+    public static XMPPStanza getStanza(Match xml, ServerSession session) throws OXException {
         String id = xml.id().trim().toLowerCase();
 
         if (id.equals("message")) {
@@ -114,6 +135,24 @@ public abstract class XMPPStanza {
         }
 
         return null;
+    }
+    
+    public List<Match> payloadsToXML() throws OXException {
+        List<Match> retval = new ArrayList<Match>();
+        
+        for (PayloadTree payload : payloads) {
+            PayloadTreeNode rootNode = payload.getRoot();
+            Match root = writeNode(rootNode);
+            retval.add(root);
+        }
+        
+        return retval;
+    }
+
+    private Match writeNode(PayloadTreeNode rootNode) throws OXException {
+        SimpleConverter simpleConverter = SERVICES.get().getService(SimpleConverter.class);
+        Object converted = simpleConverter.convert(rootNode.getFormat(), "xml", rootNode, session);
+        return $(converted);
     }
 
     public abstract String toXML(ServerSession session) throws OXException;

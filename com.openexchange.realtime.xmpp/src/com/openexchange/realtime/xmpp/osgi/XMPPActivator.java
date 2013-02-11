@@ -21,6 +21,9 @@ import com.openexchange.realtime.xmpp.internal.XMPPComponent;
 import com.openexchange.realtime.xmpp.internal.XMPPHandler;
 import com.openexchange.realtime.xmpp.internal.XMPPServerPipelineFactory;
 import com.openexchange.realtime.xmpp.internal.extension.XMPPChatExtension;
+import com.openexchange.realtime.xmpp.packet.XMPPStanza;
+import com.openexchange.realtime.xmpp.transformer.XMPPPayloadElementTransformer;
+import com.openexchange.realtime.xmpp.transformer.XMPPPayloadTreeTransformer;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 
@@ -33,7 +36,9 @@ public class XMPPActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        XMPPChatExtension.SERVICES_REFERENCE.set(this);
+        XMPPChatExtension.SERVICES.set(this);
+        XMPPStanza.SERVICES.set(this);
+        XMPPPayloadElementTransformer.SERVICES.set(this);
 
         final XMPPChannel channel = new XMPPChannel();
         final XMPPHandler handler = new XMPPHandler();
@@ -51,6 +56,10 @@ public class XMPPActivator extends HousekeepingActivator {
                     }
                     component.putExtension(service);
                     handler.addComponent(component);
+                }
+                
+                for (XMPPPayloadElementTransformer transformer : service.getElementTransformers()) {
+                    XMPPPayloadTreeTransformer.transformers.put(transformer.getElementPath(), transformer);
                 }
             }
 
@@ -70,6 +79,10 @@ public class XMPPActivator extends HousekeepingActivator {
                 }
                 for (String remove : toRemove) {
                     handler.removeComponent(remove);
+                }
+                
+                for (XMPPPayloadElementTransformer transformer : service.getElementTransformers()) {
+                    XMPPPayloadTreeTransformer.transformers.remove(transformer.getElementPath());
                 }
             }
         });
@@ -100,7 +113,7 @@ public class XMPPActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        XMPPChatExtension.SERVICES_REFERENCE.set(null);
+        XMPPChatExtension.SERVICES.set(null);
         super.stopBundle();
     }
 

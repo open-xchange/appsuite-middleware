@@ -47,34 +47,71 @@
  *
  */
 
-package com.openexchange.realtime.xmpp.converter;
+package com.openexchange.realtime.xmpp.transformer;
 
-import org.joox.JOOX;
-import org.joox.Match;
-import com.openexchange.conversion.simple.SimpleConverter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.chat.ChatMessage;
+import com.openexchange.realtime.payload.PayloadElement;
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
+import com.openexchange.realtime.payload.transformer.PayloadTreeTransformer;
+import com.openexchange.realtime.util.ElementPath;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link MessageBodyToXMPP}
+ * {@link XMPPPayloadTreeTransformer}
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class MessageBodyToXMPP extends AbstractPOJOConverter {
+public class XMPPPayloadTreeTransformer implements PayloadTreeTransformer {
+
+    public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
+
+    public static Map<ElementPath, XMPPPayloadElementTransformer> transformers = new HashMap<ElementPath, XMPPPayloadElementTransformer>();
 
     @Override
-    public String getInputFormat() {
-        return "chatMessage";
+    public PayloadTree incoming(PayloadTree payloadTree, ServerSession session) throws OXException {
+        PayloadTreeNode root = payloadTree.getRoot();
+        return new PayloadTree(incoming(session, root));
+    }
+
+    private PayloadTreeNode incoming(ServerSession session, PayloadTreeNode root) throws OXException {
+        PayloadElement converted = transformers.get(root.getElementPath()).incoming(root.getPayloadElement(), session);
+        PayloadElement transformedElement = new PayloadElement(converted);
+
+        PayloadTreeNode retval = new PayloadTreeNode(transformedElement);
+
+        if (root.hasChildren()) {
+            for (PayloadTreeNode child : root.getChildren()) {
+                retval.addChild(incoming(session, child));
+            }
+        }
+
+        return retval;
     }
 
     @Override
-    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
-        ChatMessage message = (ChatMessage) data;
+    public PayloadTree outgoing(PayloadTree payloadTree, ServerSession session) throws OXException {
+        PayloadTreeNode root = payloadTree.getRoot();
+        return new PayloadTree(outgoing(session, root));
+    }
 
-        Match xml = JOOX.$("body").append(message.getMessage());
+    private PayloadTreeNode outgoing(ServerSession session, PayloadTreeNode root) throws OXException {
+        PayloadElement converted = transformers.get(root.getElementPath()).outgoing(root.getPayloadElement(), session);
+        PayloadElement transformedElement = new PayloadElement(converted);
 
-        return xml.toString();
+        PayloadTreeNode retval = new PayloadTreeNode(transformedElement);
+
+        if (root.hasChildren()) {
+            for (PayloadTreeNode child : root.getChildren()) {
+                retval.addChild(outgoing(session, child));
+            }
+        }
+
+        return retval;
     }
 
 }

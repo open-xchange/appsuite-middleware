@@ -47,34 +47,60 @@
  *
  */
 
-package com.openexchange.realtime.xmpp.converter;
+package com.openexchange.realtime.xmpp.internal;
 
-import org.joox.JOOX;
-import org.joox.Match;
-import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.chat.ChatMessage;
-import com.openexchange.tools.session.ServerSession;
+import java.util.ArrayList;
+import java.util.List;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.events.XMLEvent;
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.channel.ChannelHandlerContext;
+import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import com.fasterxml.aalto.AsyncXMLInputFactory;
+import com.fasterxml.aalto.AsyncXMLStreamReader;
+import com.fasterxml.aalto.evt.EventAllocatorImpl;
+import com.fasterxml.aalto.stax.InputFactoryImpl;
+
 
 /**
- * {@link MessageBodyToXMPP}
- * 
+ * {@link XMLFrameDecoder}
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class MessageBodyToXMPP extends AbstractPOJOConverter {
+public class XMLFrameDecoder extends FrameDecoder {
 
-    @Override
-    public String getInputFormat() {
-        return "chatMessage";
+    private static final AsyncXMLInputFactory factory;
+    private static final EventAllocatorImpl allocator;
+
+    static {
+        factory = new InputFactoryImpl();
+        factory.setProperty(AsyncXMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
+        allocator = EventAllocatorImpl.getDefaultInstance();
+    }
+
+    private final AsyncXMLStreamReader reader;
+
+    public XMLFrameDecoder() {
+        super(true);
+
+        reader = factory.createAsyncXMLStreamReader();
     }
 
     @Override
-    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
-        ChatMessage message = (ChatMessage) data;
+    protected Object decode(ChannelHandlerContext ctx, Channel channel, ChannelBuffer buffer) throws Exception {
+        final List<XMLEvent> result = new ArrayList<XMLEvent>();
 
-        Match xml = JOOX.$("body").append(message.getMessage());
+        byte[] chunk = new byte[buffer.readableBytes()];
+        buffer.readBytes(chunk);
 
-        return xml.toString();
+        reader.getInputFeeder().feedInput(chunk, 0, chunk.length);
+
+        while (reader.hasNext() && reader.next() != AsyncXMLStreamReader.EVENT_INCOMPLETE) {
+            result.add(allocator.allocate(reader));
+        }
+
+        return result;
     }
 
 }

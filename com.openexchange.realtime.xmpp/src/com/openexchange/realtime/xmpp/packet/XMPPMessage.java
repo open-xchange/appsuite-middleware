@@ -49,13 +49,14 @@
 
 package com.openexchange.realtime.xmpp.packet;
 
-import org.joox.JOOX;
+import static org.joox.JOOX.$;
 import org.joox.Match;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.payload.PayloadElement;
-//import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
+import com.openexchange.realtime.payload.transformer.PayloadTreeTransformer;
+import com.openexchange.realtime.xmpp.transformer.XMPPPayloadTreeTransformer;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -75,8 +76,6 @@ public class XMPPMessage extends XMPPStanza {
 
     private String subject;
 
-    private PayloadTree payload;
-
     private String thread;
 
     public XMPPMessage(Type type, ServerSession session) {
@@ -84,9 +83,9 @@ public class XMPPMessage extends XMPPStanza {
         this.type = type;
     }
 
-    public XMPPMessage(Match xml, ServerSession session) {
+    public XMPPMessage(Match xml, ServerSession session) throws OXException {
         super(session);
-        parseXml(xml);
+        parseXml(xml, session);
     }
 
     public JID getFrom() {
@@ -113,14 +112,6 @@ public class XMPPMessage extends XMPPStanza {
         this.subject = subject;
     }
 
-    public PayloadTree getPayload() {
-        return payload;
-    }
-
-    public void setPayload(PayloadTree payload) {
-        this.payload = payload;
-    }
-
     public String getThread() {
         return thread;
     }
@@ -131,30 +122,29 @@ public class XMPPMessage extends XMPPStanza {
 
     @Override
     public String toXML(ServerSession session) throws OXException {
-        Match document = JOOX.$("message").attr("from", from.toString()).attr("type", type.toString());
+        Match document = $("message").attr("from", from.toString()).attr("type", type.toString());
 
         addAttributesAndElements(document);
 
         if (subject != null) {
-            document.append(JOOX.$("subject", subject));
+            document.append($("subject", subject));
         }
         if (thread != null) {
-            document.append(JOOX.$("thread", thread));
+            document.append($("thread", thread));
         }
-        if (payload != null) {
-            PayloadElement p = payload.to("xmpp", session);
-            // replace with:
-            // PayloadTree transformedTree = PayloadTreeTransformer.incoming(PayloadTree payloadTree, ServerSession session)
-            // or look at StanzaTransformer/PayloadTreeTransformer/PayloadElementTransformer/SimpleConverter interaction dependency hell
-            String d = (String) p.getData();
-            Match j = JOOX.$(d);
-            document.append(j);
+        if (payloads != null) {
+            PayloadTreeTransformer transformer = new XMPPPayloadTreeTransformer();
+            for (PayloadTree payload : payloads) {
+                PayloadTree transformedTree = transformer.incoming(payload, session);
+                PayloadTreeNode root = transformedTree.getRoot();
+                document.append((String) root.getData());
+            }
         }
 
         return document.toString();
     }
 
-    private void parseXml(Match xml) {
+    private void parseXml(Match xml, ServerSession session) throws OXException {
         setFrom(new JID(xml.attr("from")));
         setTo(new JID(xml.attr("to")));
         setType(Type.valueOf(xml.attr("type")));
@@ -166,14 +156,13 @@ public class XMPPMessage extends XMPPStanza {
 
         Match body = xml.find("body");
         if (body != null) {
-            setPayload(new PayloadElement(body.toString(), "xmpp"));
-            // replace with:
-            //
-            // setPayload(
-            //  new PayloadTree(
-            //      new PayloadTreeNode(
-            //          new PayloadElement(data, format, namespace, elementName))));
-            // or look at StanzaInitializer + StanzaTranformer/PayloadTreeTransformer/PayloadElementTransformer/SimpleConverter interaction dependency hell
+            PayloadTreeTransformer transformer = new XMPPPayloadTreeTransformer();
+            PayloadTree payloadTree = transformer.outgoing(new PayloadTree(new PayloadTreeNode(new PayloadElement(
+                body.content(),
+                "xml",
+                null,
+                "body"))), session);
+            payloads.add(payloadTree);
         }
     }
 
