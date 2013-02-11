@@ -49,8 +49,13 @@
 
 package com.openexchange.mailaccount.json.osgi;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
 import com.openexchange.mailaccount.Constants;
+import com.openexchange.mailaccount.json.actions.AbstractMailAccountAction;
 import com.openexchange.mailaccount.json.actions.MailAccountActionFactory;
 
 
@@ -76,6 +81,28 @@ public final class MailAccountJSONActivator extends AJAXModuleActivator {
     @Override
     protected void startBundle() throws Exception {
         registerModule(MailAccountActionFactory.getInstance(), Constants.getModule());
+        final BundleContext context = this.context;
+        track(JSlobStorageRegistry.class, new ServiceTrackerCustomizer<JSlobStorageRegistry, JSlobStorageRegistry>() {
+
+            @Override
+            public JSlobStorageRegistry addingService(ServiceReference<JSlobStorageRegistry> reference) {
+                final JSlobStorageRegistry storageRegistry = context.getService(reference);
+                AbstractMailAccountAction.setJSlobStorageRegistry(storageRegistry);
+                return storageRegistry;
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<JSlobStorageRegistry> reference, JSlobStorageRegistry service) {
+                // nothing
+            }
+
+            @Override
+            public void removedService(ServiceReference<JSlobStorageRegistry> reference, JSlobStorageRegistry service) {
+                AbstractMailAccountAction.setJSlobStorageRegistry(null);
+                context.ungetService(reference);
+            }
+        });
+        openTrackers();
     }
 
 }
