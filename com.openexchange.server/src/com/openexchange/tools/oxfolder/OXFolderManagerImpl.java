@@ -575,12 +575,16 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     wc = DBPool.pickupWriteable(ctx);
                 }
                 if (FolderCacheManager.isEnabled()) {
-                    fo.fill(FolderCacheManager.getInstance().getFolderObject(fo.getObjectID(), false, ctx, wc));
-                    if (fo.getParentFolderID() > 0) {
+                    final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
+                    cacheManager.removeFolderObject(fo.getObjectID(), ctx);
+                    fo.fill(cacheManager.getFolderObject(fo.getObjectID(), false, ctx, wc));
+                    final int parentFolderID = fo.getParentFolderID();
+                    if (parentFolderID > 0) {
                         /*
                          * Update parent, too
                          */
-                        FolderCacheManager.getInstance().loadFolderObject(fo.getParentFolderID(), ctx, wc);
+                        cacheManager.removeFolderObject(parentFolderID, ctx);
+                        cacheManager.loadFolderObject(parentFolderID, ctx, wc);
                     }
                 } else {
                     fo.fill(FolderObject.loadFolderObjectFromDB(fo.getObjectID(), ctx, wc));
