@@ -213,6 +213,18 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1307
+pfile=/opt/open-xchange/etc/server.properties
+if ! ox_exists_property com.openexchange.server.considerXForwards $pfile; then
+    ox_set_property com.openexchange.server.considerXForwards false $pfile
+fi
+if ! ox_exists_property com.openexchange.server.forHeader $pfile; then
+    ox_set_property com.openexchange.server.forHeader X-Forwarded-For $pfile
+fi
+if ! ox_exists_property com.openexchange.server.knownProxies $pfile; then
+    ox_set_property com.openexchange.server.knownProxies '' $pfile
+fi
+
 # SoftwareChange_Request-1296
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/cache.properties
