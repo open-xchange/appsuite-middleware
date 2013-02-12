@@ -5,6 +5,7 @@
 * 2013-02-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 24923: Return proper JSlob object
+ - Fix for bug 24920: Fixed typo
 
 * 2013-02-12 - martin.herfurth@open-xchange.com
 
