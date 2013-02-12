@@ -1,5 +1,5 @@
 # Specifies the configuration tree path to  JSlob path mapping
-# <config-tree-path> + ">" + <JSlob-id>//<JSlob-path>
+# <config-tree-path> + ">" + <JSlob-id> + "//" + <JSlob-path>
 # my/config/tree/path>my/jslob//subpath
 
 # Core LOB
