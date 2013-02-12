@@ -727,6 +727,7 @@ public class Login extends AJAXServlet {
             }
         }
         final boolean disableTrimLogin = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.DISABLE_TRIM_LOGIN.getPropertyName()));
+        final boolean formLoginWithoutAuthId = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.FORM_LOGIN_WITHOUT_AUTHID.getPropertyName()));
         LoginConfiguration conf = new LoginConfiguration(
             uiWebPath,
             sessiondAutoLogin,
@@ -742,7 +743,8 @@ public class Login extends AJAXServlet {
             ipCheckWhitelist,
             redirectIPChangeAllowed,
             ranges,
-            disableTrimLogin);
+            disableTrimLogin,
+            formLoginWithoutAuthId);
         confReference.set(conf);
         handlerMap.put(ACTION_FORMLOGIN, new FormLogin(conf));
         handlerMap.put(ACTION_TOKENLOGIN, new TokenLogin(conf));
@@ -975,7 +977,8 @@ public class Login extends AJAXServlet {
                     false,
                     conf.getDefaultClient(),
                     conf.isCookieForceHTTPS(),
-                    conf.isDisableTrimLogin());
+                    conf.isDisableTrimLogin(),
+                    false);
                 return LoginPerformer.getInstance().doLogin(request);
             }
         });
@@ -994,7 +997,7 @@ public class Login extends AJAXServlet {
                     final String login = accessor.<String> getProperty(OAuthProviderConstants.PROP_LOGIN);
                     final String password = accessor.<String> getProperty(OAuthProviderConstants.PROP_PASSWORD);
                     LoginConfiguration conf = confReference.get();
-                    final LoginRequest request = LoginTools.parseLogin(req2, login, password, false, conf.getDefaultClient(), conf.isCookieForceHTTPS());
+                    final LoginRequest request = LoginTools.parseLogin(req2, login, password, false, conf.getDefaultClient(), conf.isCookieForceHTTPS(), false);
                     return LoginPerformer.getInstance().doLogin(request);
                 } catch (final OAuthProblemException e) {
                     try {

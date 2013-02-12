@@ -96,7 +96,8 @@ public final class TokenLogin implements LoginRequestHandler {
             true,
             conf.getDefaultClient(),
             conf.isCookieForceHTTPS(),
-            conf.isDisableTrimLogin());
+            conf.isDisableTrimLogin(),
+            true);
         request.setClientToken(LoginTools.parseParameter(req, LoginFields.CLIENT_TOKEN, true, null));
         Map<String, Object> properties = new HashMap<String, Object>(1);
         {
