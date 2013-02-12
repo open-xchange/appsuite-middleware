@@ -49,45 +49,30 @@
 
 package com.openexchange.admin.console.util;
 
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
 import com.openexchange.admin.console.AbstractTest;
-import com.openexchange.admin.console.BasicCommandlineOptions;
+import com.openexchange.admin.console.util.filestore.ListFilestore;
 
 /**
- * @author cutmasta
+ * Makes {@link ListFilestore} testable.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ListFilestoreTest extends AbstractTest {
+final class ListFilestoreTester extends ListFilestore {
 
-    @Test
-    public void testListFilestore() {
-        resetBuffers();
-        ListFilestoreTester tester = new ListFilestoreTester(this);
-        tester.execute(getMasterCredentialsOptionData());
-        assertEquals("Expected 0 as return code!", 0, returnCode);
+    private AbstractTest test;
+
+    ListFilestoreTester(AbstractTest test) {
+        super();
+        this.test = test;
     }
 
-    @Test
-    public void testListFilestoreCSV() {
-        resetBuffers();
-        ListFilestoreTester tester = new ListFilestoreTester(this);
-        tester.execute(getCSVMasterOptionData());
-        assertEquals("Expected 0 as return code!", 0, returnCode);
+    @Override
+    protected void sysexit(int exitCode) {
+        test.setReturnCode(exitCode);
     }
 
-    @Test
-    public void testListFilestoreWithInvalidCredentials() {
-        resetBuffers();
-        ListFilestoreTester tester = new ListFilestoreTester(this);
-        tester.execute(getWrongMasterCredentialsOptionData());
-        assertEquals("Expected invalid credentials as return code!", BasicCommandlineOptions.SYSEXIT_INVALID_CREDENTIALS, returnCode);
-    }
-
-    @Test
-    public void testListFilestoreWithUnknownOption() {
-        resetBuffers();
-        ListFilestoreTester tester = new ListFilestoreTester(this);
-        tester.execute(getUnknownOptionData());
-        assertEquals("Expected unknown option as return code!", BasicCommandlineOptions.SYSEXIT_UNKNOWN_OPTION, 0, returnCode);
+    @Override
+    public void execute(String[] args) {
+        super.execute(args);
     }
 }

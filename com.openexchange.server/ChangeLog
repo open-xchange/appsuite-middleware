@@ -1,6 +1,7 @@
 * 2013-02-12 - marcus.klein@open-xchange.com
 
  - Story 43545331: Added a hidden configuration property to make the authId parameter optional for the form login.
+ - Story 43561133: Added an option to CLT listfilestore to not load the file store usage, which is an expensive operation.
 
 * 2013-02-08 - martin.herfurth@open-xchange.com
 
