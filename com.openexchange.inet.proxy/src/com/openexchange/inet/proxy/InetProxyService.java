@@ -49,6 +49,7 @@
 
 package com.openexchange.inet.proxy;
 
+import java.util.UUID;
 import com.openexchange.exception.OXException;
 
 /**
@@ -67,11 +68,20 @@ public interface InetProxyService {
     boolean enabled() throws OXException;
 
     /**
+     * Gets the default Inet proxy information.
+     * 
+     * @return The default Inet proxy information
+     * @throws OXException If Inet proxy information cannot be returned
+     */
+    InetProxyInformation getDefaultProxyInformation() throws OXException;
+
+    /**
      * Gets the Inet proxy information.
      * 
+     * @param uuid The UUID of the associated Inet proxy; may be <code>null</code> to return the default one
      * @return The Inet proxy information
      * @throws OXException If Inet proxy information cannot be returned
      */
-    InetProxyInformation getProxyInformation() throws OXException;
+    InetProxyInformation getProxyInformation(UUID uuid) throws OXException;
 
 }
