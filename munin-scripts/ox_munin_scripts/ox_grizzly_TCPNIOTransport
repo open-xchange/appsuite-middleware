@@ -32,16 +32,6 @@ if ( $ARGV[0] and $ARGV[0] eq "config") {
     print "bytes-written.type DERIVE\n";
     print "bytes-written.min 0\n";
 
-    print "client-connect-timeout-millis.label client-connect-timeout-millis\n";
-    print "client-connect-timeout-millis.draw LINE1\n";
-    print "client-connect-timeout-millis.type DERIVE\n";
-    print "client-connect-timeout-millis.min 0\n";
-
-    print "client-socket-so-timeout.label client-socket-so-timeout\n";
-    print "client-socket-so-timeout.draw LINE1\n";
-    print "client-socket-so-timeout.type DERIVE\n";
-    print "client-socket-so-timeout.min 0\n";
-    
     print "last-error.label last-error\n";
     print "last-error.draw LINE1\n";
     print "last-error.type DERIVE\n";
@@ -57,16 +47,6 @@ if ( $ARGV[0] and $ARGV[0] eq "config") {
     print "total-connections-count.type DERIVE\n";
     print "total-connections-count.min 0\n";
 
-    print "read-buffer-size.label read-buffer-size\n";
-    print "read-buffer-size.draw LINE1\n";
-    print "read-buffer-size.type DERIVE\n";
-    print "read-buffer-size.min 0\n";
-
-    print "selector-threads-count.label selector-threads-count\n";
-    print "selector-threads-count.draw LINE1\n";
-    print "selector-threads-count.type DERIVE\n";
-    print "selector-threads-count.min 0\n";
-    
     exit 0;
 }
 
@@ -86,21 +66,7 @@ while (<SHOWRUNTIME>) {
         print "bytes-written.value $val\n";
         next;
     }
-    
-    if ( $_ =~ /TCPNIOTransport,name=Transport,client-connect-timeout-millis/) {
-        s/.*\=//;
-        $val=$_+0;
-        print "client-connect-timeout-millis.value $val\n";
-        next;
-    }
 
-    if ( $_ =~ /TCPNIOTransport,name=Transport,client-socket-so-timeout/) {
-        s/.*\=//;
-        $val=$_+0;
-        print "client-socket-so-timeout.value $val\n";
-        next;
-    }
-    
     if ( $_ =~ /TCPNIOTransport,name=Transport,last-error/) {
         s/.*\=//;
         $val=$_;
@@ -124,19 +90,4 @@ while (<SHOWRUNTIME>) {
         print "total-connections-count.value $val\n";
         next;
     }
-    
-    if ( $_ =~ /TCPNIOTransport,name=Transport,read-buffer-size/) {
-        s/.*\=//;
-        $val=$_+0;
-        print "read-buffer-size.value $val\n";
-        next;
-    }
-
-    if ( $_ =~ /TCPNIOTransport,name=Transport,selector-threads-count/) {
-        s/.*\=//;
-        $val=$_+0;
-        print "selector-threads-count.value $val\n";
-        next;
-    }
-    
 }
