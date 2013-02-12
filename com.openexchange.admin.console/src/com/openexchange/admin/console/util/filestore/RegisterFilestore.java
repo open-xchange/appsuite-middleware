@@ -73,7 +73,7 @@ public class RegisterFilestore extends FilestoreAbstraction {
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
-            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
+            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
 
             final Filestore fstore = new Filestore();
 
