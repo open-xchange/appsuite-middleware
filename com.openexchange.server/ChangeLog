@@ -1,3 +1,7 @@
+* 2013-02-12 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 24759: Resolve recurring Appointments for Contact Halo.
+
 * 2013-02-11 - marc.arens@open-xchange.com
 
  - Fix for bug 24828: Showruntimestats for Grizzly's HttpCodecFilter always returns 0
