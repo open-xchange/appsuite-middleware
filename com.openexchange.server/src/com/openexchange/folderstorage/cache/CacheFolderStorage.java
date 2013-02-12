@@ -54,8 +54,6 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -84,7 +82,6 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
-import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
@@ -518,26 +515,9 @@ public final class CacheFolderStorage implements FolderStorage {
              * Load created folder from real tree
              */
             final int contextId = storageParameters.getContextId();
-            final int userId = storageParameters.getUserId();
-            final FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
             Folder createdFolder = null;
             try {
                 createdFolder = loadFolder(realTreeId, folderId, StorageType.WORKING, true, storageParameters);
-                // Iterate its permissions to determine involved entities
-                for (final Permission permission : createdFolder.getPermissions()) {
-                    if (!permission.isGroup()) {
-                        final int entity = permission.getEntity();
-                        if (entity != userId) {
-                            final FolderMap folderMap = folderMapManagement.optFor(entity, contextId);
-                            if (folderMap != null) {
-                                folderMap.remove(folder.getParentID(), treeId, session);
-                                if (!realTreeId.equals(treeId)) {
-                                    folderMap.remove(folder.getParentID(), realTreeId, session);
-                                }
-                            }
-                        }
-                    }
-                }
                 if (createdFolder.isCacheable()) {
                     putFolder(createdFolder, realTreeId, storageParameters, false);
                 }
@@ -551,25 +531,24 @@ public final class CacheFolderStorage implements FolderStorage {
             /*
              * Remove parent from cache(s)
              */
+            final FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
             final Cache cache = globalCache;
             final String sContextId = Integer.toString(contextId);
-            final String[] trees = new String[] { treeId, realTreeId };
-            for (final String tid : trees) {
+            final int userId = storageParameters.getUserId();
+            for (final String tid : new String[] { treeId, realTreeId }) {
                 final CacheKey cacheKey = newCacheKey(folder.getParentID(), tid);
                 cache.removeFromGroup(cacheKey, sContextId);
-                final FolderMap folderMap = folderMapManagement.optFor(userId, contextId);
-                if (null != folderMap) {
-                    folderMap.remove(folder.getParentID(), tid, session);
-                }
+                // Cleanse parent from caches, too
+                folderMapManagement.dropFor(folder.getParentID(), treeId, userId, contextId, session);
+                folderMapManagement.dropFor(folder.getParentID(), realTreeId, userId, contextId, session);
             }
             if (null != createdFolder) {
-                for (final String tid : trees) {
+                for (final String tid : new String[] { treeId, realTreeId }) {
                     final CacheKey cacheKey = newCacheKey(createdFolder.getParentID(), tid);
                     cache.removeFromGroup(cacheKey, sContextId);
-                    final FolderMap folderMap = folderMapManagement.optFor(userId, contextId);
-                    if (null != folderMap) {
-                        folderMap.remove(createdFolder.getParentID(), tid, session);
-                    }
+                    // Cleanse parent from caches, too
+                    folderMapManagement.dropFor(folder.getParentID(), treeId, userId, contextId, session);
+                    folderMapManagement.dropFor(folder.getParentID(), realTreeId, userId, contextId, session);
                 }
             }
             /*
@@ -665,26 +644,21 @@ public final class CacheFolderStorage implements FolderStorage {
                 }
             }
             final int contextId = session.getContextId();
-            final FolderMap folderMap = optFolderMapFor(session);
+            final int userId = session.getUserId();
             final Cache cache = globalCache;
+            final FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
             if (realTreeId.equals(treeId)) {
                 for (final String folderId : ids) {
                     cache.removeFromGroup(newCacheKey(folderId, treeId), Integer.toString(contextId));
-                    if (null != folderMap) {
-                        folderMap.remove(folderId, treeId, session);
-                    }
+                    folderMapManagement.dropFor(folderId, treeId, userId, contextId);
                 }
             } else {
                 for (final String folderId : ids) {
                     cache.removeFromGroup(newCacheKey(folderId, treeId), Integer.toString(contextId));
-                    if (null != folderMap) {
-                        folderMap.remove(folderId, treeId, session);
-                    }
+                    folderMapManagement.dropFor(folderId, treeId, userId, contextId);
                     // Now for real tree, too
                     cache.removeFromGroup(newCacheKey(folderId, realTreeId), Integer.toString(contextId));
-                    if (null != folderMap) {
-                        folderMap.remove(folderId, realTreeId, session);
-                    }
+                    folderMapManagement.dropFor(folderId, realTreeId, userId, contextId);
                 }
             }
         }
@@ -734,8 +708,9 @@ public final class CacheFolderStorage implements FolderStorage {
                 }
             }
             cache.removeFromGroup(cacheKey, sContextId);
+            final FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
             if (userId > 0) {
-                final FolderMap folderMap = FolderMapManagement.getInstance().optFor(userId, contextId);
+                final FolderMap folderMap = folderMapManagement.optFor(userId, contextId);
                 if (null != folderMap) {
                     if (deleted) {
                         cachedFolder = folderMap.get(id, treeId, optSession);
@@ -745,13 +720,14 @@ public final class CacheFolderStorage implements FolderStorage {
                              */
                             final String parentID = cachedFolder.getParentID();
                             if (null != parentID) {
-                                folderMap.remove(parentID, treeId, optSession);
+                                folderMapManagement.dropFor(parentID, treeId, userId, contextId, optSession);
                             }
                         }
                     }
-                    folderMap.remove(id, treeId, optSession);
                 }
             }
+            folderMapManagement.dropFor(id, treeId, userId, contextId, optSession);
+            // Check for real folder tree
             if (!realTreeId.equals(treeId)) {
                 // Now for real tree, too
                 cacheKey = newCacheKey(id, realTreeId);
@@ -769,7 +745,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 }
                 cache.removeFromGroup(cacheKey, sContextId);
                 if (userId > 0) {
-                    final FolderMap folderMap = FolderMapManagement.getInstance().optFor(userId, contextId);
+                    final FolderMap folderMap = folderMapManagement.optFor(userId, contextId);
                     if (null != folderMap) {
                         if (deleted) {
                             cachedFolder = folderMap.get(id, realTreeId, optSession);
@@ -779,13 +755,13 @@ public final class CacheFolderStorage implements FolderStorage {
                                  */
                                 final String parentID = cachedFolder.getParentID();
                                 if (null != parentID) {
-                                    folderMap.remove(parentID, realTreeId, optSession);
+                                    folderMapManagement.dropFor(parentID, realTreeId, userId, contextId, optSession);
                                 }
                             }
                         }
-                        folderMap.remove(id, realTreeId, optSession);
                     }
                 }
+                folderMapManagement.dropFor(id, realTreeId, userId, contextId, optSession);
             }
         } finally {
             lock.unlock();
@@ -838,32 +814,15 @@ public final class CacheFolderStorage implements FolderStorage {
                      * Obviously folder does not exist
                      */
                     globalCache.removeFromGroup(newCacheKey(folderId, treeId), sContextId);
-                    final FolderMap folderMap = optFolderMapFor(session);
-                    if (null != folderMap) {
-                        folderMap.remove(folderId, treeId, session);
-                    }
+                    FolderMapManagement.getInstance().dropFor(folderId, treeId, userId, contextId, session);
                     return;
                 }
                 {
                     final FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
-                    for (final Permission permission : deleteMe.getPermissions()) {
-                        if (!permission.isGroup()) {
-                            final int entity = permission.getEntity();
-                            if (entity != userId) {
-                                final FolderMap folderMap = folderMapManagement.optFor(entity, contextId);
-                                if (folderMap != null) {
-                                    folderMap.remove(folderId, treeId, session);
-                                    if (!realTreeId.equals(treeId)) {
-                                        folderMap.remove(folderId, realTreeId, session);
-                                    }
-                                    folderMap.remove(deleteMe.getParentID(), treeId, session);
-                                    if (!realTreeId.equals(treeId)) {
-                                        folderMap.remove(deleteMe.getParentID(), realTreeId, session);
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    folderMapManagement.dropFor(folderId, treeId, userId, contextId, session);
+                    folderMapManagement.dropFor(folderId, realTreeId, userId, contextId, session);
+                    folderMapManagement.dropFor(deleteMe.getParentID(), treeId, userId, contextId, session);
+                    folderMapManagement.dropFor(deleteMe.getParentID(), realTreeId, userId, contextId, session);
                 }
                 cacheable = deleteMe.isCacheable();
                 global = deleteMe.isGlobalID();
@@ -899,10 +858,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 if (global) {
                     globalCache.removeFromGroup(newCacheKey(folderId, treeId), sContextId);
                 } else {
-                    final FolderMap folderMap = optFolderMapFor(session);
-                    if (null != folderMap) {
-                        folderMap.remove(folderId, treeId, session);
-                    }
+                    FolderMapManagement.getInstance().dropFor(folderId, treeId, userId, contextId, session);
                 }
                 /*
                  * ... and from parent folder's sub-folder list
@@ -959,10 +915,7 @@ public final class CacheFolderStorage implements FolderStorage {
     private void removeFromSubfolders(final String treeId, final String parentId, final String contextId, final Session session) {
         registry.clearCaches(session.getUserId(), session.getContextId());
         globalCache.removeFromGroup(newCacheKey(parentId, treeId), contextId);
-        final FolderMap folderMap = optFolderMapFor(session);
-        if (null != folderMap) {
-            folderMap.remove(parentId, treeId, session);
-        }
+        FolderMapManagement.getInstance().dropFor(parentId, treeId, session.getUserId(), session.getContextId(), session);
     }
 
     @Override
@@ -1504,44 +1457,15 @@ public final class CacheFolderStorage implements FolderStorage {
             {
                 final int contextId = storageParameters.getContextId();
                 final FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
-                final TIntSet done = new TIntHashSet(16);
-                for (final Permission permission : updatedFolder.getPermissions()) {
-                    if (!permission.isGroup()) {
-                        final int entity = permission.getEntity();
-                        if (entity != userId) {
-                            final FolderMap folderMap = folderMapManagement.optFor(entity, contextId);
-                            if (folderMap != null) {
-                                folderMap.remove(newFolderId, treeId, session);
-                                if (!realTreeId.equals(treeId)) {
-                                    folderMap.remove(newFolderId, realTreeId, session);
-                                }
-                                folderMap.remove(updatedFolder.getParentID(), treeId, session);
-                                if (!realTreeId.equals(treeId)) {
-                                    folderMap.remove(updatedFolder.getParentID(), realTreeId, session);
-                                }
-                            }
-                            done.add(entity);
-                        }
-                    }
-                }
-                for (final Permission permission : storageVersion.getPermissions()) {
-                    if (!permission.isGroup()) {
-                        final int entity = permission.getEntity();
-                        if (entity != userId && !done.contains(entity)) {
-                            final FolderMap folderMap = folderMapManagement.optFor(entity, contextId);
-                            if (folderMap != null) {
-                                folderMap.remove(oldFolderId, treeId, session);
-                                if (!realTreeId.equals(treeId)) {
-                                    folderMap.remove(oldFolderId, realTreeId, session);
-                                }
-                                folderMap.remove(storageVersion.getParentID(), treeId, session);
-                                if (!realTreeId.equals(treeId)) {
-                                    folderMap.remove(storageVersion.getParentID(), realTreeId, session);
-                                }
-                            }
-                        }
-                    }
-                }
+                folderMapManagement.dropFor(newFolderId, treeId, userId, contextId, session);
+                folderMapManagement.dropFor(newFolderId, realTreeId, userId, contextId, session);
+                folderMapManagement.dropFor(updatedFolder.getParentID(), treeId, userId, contextId, session);
+                folderMapManagement.dropFor(updatedFolder.getParentID(), realTreeId, userId, contextId, session);
+                // Others
+                folderMapManagement.dropFor(oldFolderId, treeId, userId, contextId, session);
+                folderMapManagement.dropFor(oldFolderId, realTreeId, userId, contextId, session);
+                folderMapManagement.dropFor(storageVersion.getParentID(), treeId, userId, contextId, session);
+                folderMapManagement.dropFor(storageVersion.getParentID(), realTreeId, userId, contextId, session);
             }
             if (isMove) {
                 /*

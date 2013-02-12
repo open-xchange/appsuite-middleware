@@ -52,11 +52,12 @@ package com.openexchange.folderstorage.cache.memory;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import com.openexchange.mailaccount.Tools;
 import com.openexchange.session.Session;
 
 /**
  * {@link FolderMapManagement}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderMapManagement {
@@ -67,7 +68,7 @@ public final class FolderMapManagement {
 
     /**
      * Gets the {@link FolderMapManagement management} instance.
-     *
+     * 
      * @return The management instance
      */
     public static FolderMapManagement getInstance() {
@@ -93,7 +94,7 @@ public final class FolderMapManagement {
 
     /**
      * Drop caches for given context.
-     *
+     * 
      * @param contextId The context identifier
      */
     public void dropFor(final int contextId) {
@@ -105,7 +106,7 @@ public final class FolderMapManagement {
 
     /**
      * Drop caches for given session's user.
-     *
+     * 
      * @param session The session
      */
     public void dropFor(final Session session) {
@@ -114,14 +115,14 @@ public final class FolderMapManagement {
             contextMap.remove(Integer.valueOf(session.getUserId()));
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive folder cache for user ").append(session.getUserId()).append(" in context ").append(
-                session.getContextId()).toString());
+            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive folder cache for user ").append(session.getUserId()).append(
+                " in context ").append(session.getContextId()).toString());
         }
     }
 
     /**
      * Drop caches for given session's user.
-     *
+     * 
      * @param userId The user identifier
      * @param contextId The context identifier
      */
@@ -131,14 +132,14 @@ public final class FolderMapManagement {
             contextMap.remove(Integer.valueOf(userId));
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive folder cache for user ").append(userId).append(" in context ").append(
-                contextId).toString());
+            LOG.debug(new com.openexchange.java.StringAllocator("Cleaned user-sensitive folder cache for user ").append(userId).append(
+                " in context ").append(contextId).toString());
         }
     }
 
     /**
      * Gets the folder map for specified session.
-     *
+     * 
      * @param session The session
      * @return The folder map
      */
@@ -166,7 +167,7 @@ public final class FolderMapManagement {
 
     /**
      * Optionally gets the folder map for specified session.
-     *
+     * 
      * @param session The session
      * @return The folder map or <code>null</code> if absent
      */
@@ -180,7 +181,7 @@ public final class FolderMapManagement {
 
     /**
      * Optionally gets the folder map for specified user in given context.
-     *
+     * 
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The folder map or <code>null</code> if absent
@@ -191,6 +192,55 @@ public final class FolderMapManagement {
             return null;
         }
         return contextMap.get(Integer.valueOf(userId));
+    }
+
+    /**
+     * Drop folder from all user caches for given context.
+     * 
+     * @param folderId The folder id
+     * @param treeId The tree id
+     * @param optUser The optional user identifier
+     * @param contextId The context identifier
+     */
+    public void dropFor(final String folderId, final String treeId, final int optUser, final int contextId) {
+        dropFor(folderId, treeId, optUser, contextId, null);
+    }
+
+    /**
+     * Drop folder from all user caches for given context.
+     * 
+     * @param folderId The folder id
+     * @param treeId The tree id
+     * @param optUser The optional user identifier
+     * @param contextId The context identifier
+     * @param optSession The optional session
+     */
+    public void dropFor(final String folderId, final String treeId, final int optUser, final int contextId, final Session optSession) {
+        if ((null == folderId) || (null == treeId)) {
+            return;
+        }
+        final ConcurrentMap<Integer, FolderMap> contextMap = map.get(Integer.valueOf(contextId));
+        if (null == contextMap) {
+            return;
+        }
+        //  If folder identifier is not a number AND user identifier is valid
+        //  (because numbers hint to former global folders; e.g. database folders)
+        //  Then it is sufficient to clean in user-associated map only
+        if (Tools.getUnsignedInteger(folderId) < 0 && optUser > 0) {
+            final FolderMap folderMap = contextMap.get(Integer.valueOf(optUser));
+            if (null != folderMap) {
+                folderMap.remove(folderId, treeId, optSession);
+            }
+        } else {
+            // Delete all known
+            for (final FolderMap folderMap : contextMap.values()) {
+                if (null == optSession) {
+                    folderMap.remove(folderId, treeId);
+                } else {
+                    folderMap.remove(folderId, treeId, optSession);
+                }
+            }
+        }
     }
 
 }
