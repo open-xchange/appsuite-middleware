@@ -264,6 +264,21 @@ final class MBeanConsistency implements ConsistencyMBean {
         }
     }
 
+    public List<String> checkOrRepairConfigDB(final boolean repair) throws MBeanException {
+        try {
+            return (List<String>) mbsc.invoke(name, "checkOrRepairConfigDB", new Object[]{repair}, new String[]{"boolean"});
+        } catch (final InstanceNotFoundException e) {
+            exception(e);
+        } catch (final MBeanException e) {
+            exception(e);
+        } catch (final ReflectionException e) {
+            exception(e);
+        } catch (final IOException e) {
+            exception(e);
+        }
+        return null;
+    }
+
     private void exception(final OXException e) throws MBeanException {
         final Exception wrapMe = new Exception(e.getMessage());
         throw new MBeanException(wrapMe, e.getMessage());
@@ -274,4 +289,5 @@ final class MBeanConsistency implements ConsistencyMBean {
         final Exception wrapMe = new Exception(oxe.getMessage());
         throw new MBeanException(wrapMe, e.getMessage());
     }
+
 }

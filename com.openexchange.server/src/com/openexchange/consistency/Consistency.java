@@ -79,6 +79,7 @@ import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.log.LogFactory;
+import com.openexchange.report.internal.Tools;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.sql.DBUtils;
@@ -243,6 +244,140 @@ public abstract class Consistency implements ConsistencyMBean {
         } catch (final Error e) {
             LOG.error(e.getMessage(), e);
             throw e;
+        }
+    }
+
+    /*
+     * FIXME: Here we should call com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorageCommon.deleteContextFromConfigDB(Connection, int)
+     *        for now I copied the code from there (except the empty schema deletion)
+     */
+    private void deleteContextFromConfigDB(final Connection configCon, final int contextId) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Deleting context_server2dbpool mapping for context " + contextId);
+            }
+            // delete context from context_server2db_pool
+            stmt = configCon.prepareStatement("DELETE FROM context_server2db_pool WHERE cid=?");
+            stmt.setInt(1, contextId);
+            stmt.executeUpdate();
+            stmt.close();
+            // tell pool, that database has been removed
+            try {
+                com.openexchange.databaseold.Database.reset(contextId);
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
+            }
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Deleting login2context entries for context " + contextId);
+            }
+            stmt = configCon.prepareStatement("DELETE FROM login2context WHERE cid=?");
+            stmt.setInt(1, contextId);
+            stmt.executeUpdate();
+            stmt.close();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Deleting context entry for context " + contextId);
+            }
+            stmt = configCon.prepareStatement("DELETE FROM context WHERE cid=?");
+            stmt.setInt(1, contextId);
+            stmt.executeUpdate();
+            stmt.close();
+        } finally {
+            if( null != stmt ) {
+                stmt.close();
+            }
+        }
+    }
+    
+    @Override
+    public List<String> checkOrRepairConfigDB(final boolean repair) throws MBeanException {
+        if( repair ) {
+            LOG.info("Repair inconsistent configdb");
+        } else {
+            LOG.info("List inconsistent configdb");
+        }
+        
+        Connection confCon = null;
+        Connection poolCon = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<String> ret = new ArrayList<String>();
+
+        HashMap<String, List<Integer>> schemaMap = new HashMap<String, List<Integer>>();
+        try {
+            final Map<String, Integer> schemaPoolMap = Tools.getAllSchemata(LOG);
+            confCon = Database.get(false);
+            stmt = confCon.prepareStatement("SELECT db_schema,cid FROM context_server2db_pool");
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                final String schema = rs.getString(1);
+                final Integer ctx = Integer.valueOf(rs.getInt(2));
+                if( schemaMap.containsKey(schema)) {
+                    schemaMap.get(schema).add(ctx);
+                } else {
+                    List<Integer> ctxs = new ArrayList<Integer>();
+                    ctxs.add(ctx);
+                    schemaMap.put(schema, ctxs);
+                }
+            }
+            DBUtils.closeSQLStuff(rs, stmt);
+            stmt = null;
+            for(final String schema : schemaMap.keySet()) {
+                List<Integer> ctxs = schemaMap.get(schema);
+                Integer poolid = schemaPoolMap.get(schema);
+                poolCon = Database.get(poolid.intValue(), schema);
+                String contextids = "";
+                for(final Integer c : ctxs) {
+                    contextids += c + ",";
+                }
+                contextids = contextids.substring(0, contextids.length()-1);
+                stmt = poolCon.prepareStatement("SELECT cid FROM login2user WHERE cid IN (" + contextids + ") GROUP BY cid");
+                rs = stmt.executeQuery();
+                while (rs.next()) {
+                    final Integer ctx = Integer.valueOf(rs.getInt(1));
+                    ctxs.remove(ctx);
+                }
+                if( ctxs.size() > 0 ) {
+                    LOG.info("Schema " + schema + " is broken");
+                    for(final Integer ctx : ctxs) {
+                        if( repair ) {
+                            LOG.info("Deleting inconsistent entry for context " + ctx + " from configdb");
+                            deleteContextFromConfigDB(confCon, ctx.intValue()); 
+                            ret.add("Deleted inconsistent entry for context " + ctx + " from configdb");
+                        } else {
+                            LOG.info("Context " + ctx + " does not exist anymore");
+                            ret.add("Context " + ctx + " does not exist anymore");
+                        }
+                    }
+                }
+                DBUtils.closeSQLStuff(rs, stmt);
+                stmt = null;
+                Database.back(poolid.intValue(), poolCon);
+                poolCon = null;
+            }
+            if ( ret.size() == 0 && repair ) {
+                ret.add("there was nothing to repair");
+            }
+            DBUtils.closeSQLStuff(rs, stmt);
+            stmt = null;
+            return ret;
+        } catch (final SQLException e) {
+            LOG.error(e.getMessage(), e);
+            final Exception wrapMe = new Exception(e.getMessage());
+            throw new MBeanException(wrapMe, e.getMessage());
+        } catch (OXException e) {
+            LOG.error(e.getMessage(), e);
+            final Exception wrapMe = new Exception(e.getMessage());
+            throw new MBeanException(wrapMe, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            if (null != confCon) {
+                Database.back(false, confCon);
+            }
+            if (null != poolCon) {
+                Database.back(false, poolCon);
+            }
         }
     }
 
@@ -1251,4 +1386,5 @@ public abstract class Consistency implements ConsistencyMBean {
         }
         return retval;
     }
+    
 }
