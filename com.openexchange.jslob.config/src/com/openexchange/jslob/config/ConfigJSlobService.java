@@ -191,7 +191,7 @@ public final class ConfigJSlobService implements JSlobService {
 
                         Map<String, String>[] maps = map.get(jslobName);
                         if (maps == null) {
-                            maps = new Map[] { new HashMap<String, String>(), new HashMap<String, String>() };
+                            maps = new Map[] { new HashMap<String, String>(32), new HashMap<String, String>(32) };
                             map.put(jslobName, maps);
                         }
 
