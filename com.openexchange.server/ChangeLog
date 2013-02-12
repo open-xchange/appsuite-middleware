@@ -1,3 +1,7 @@
+* 2013-02-12 - marc.arens@open-xchange.com
+
+ - Fix for bug 24914: Exception at osgi log regarding push.mq
+ 
 * 2013-02-12 - martin.herfurth@open-xchange.com
 
  - Fix for bug 24759: Resolve recurring Appointments for Contact Halo.
