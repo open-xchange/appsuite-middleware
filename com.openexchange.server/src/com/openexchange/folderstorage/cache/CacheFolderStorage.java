@@ -683,7 +683,7 @@ public final class CacheFolderStorage implements FolderStorage {
      * @param contextId The context identifier
      */
     public void removeSingleFromCache(final String id, final String treeId, final int userId, final int contextId, final boolean deleted, final Session optSession) {
-        final Lock lock = TreeLockManagement.getInstance().getFor(treeId, userId, contextId).writeLock();
+        final Lock lock = userId > 0 ? TreeLockManagement.getInstance().getFor(treeId, userId, contextId).writeLock() : Session.EMPTY_LOCK;
         try {
             acquire(lock);
         } catch (final OXException e) {
@@ -1603,13 +1603,6 @@ public final class CacheFolderStorage implements FolderStorage {
      */
     private CacheKey newCacheKey(final String folderId, final String treeId) {
         return cacheService.newCacheKey(1, treeId, folderId);
-    }
-
-    /**
-     * Creates a user-bound key.
-     */
-    private CacheKey newCacheKey(final String folderId, final String treeId, final int cid, final int user) {
-        return cacheService.newCacheKey(cid, Integer.valueOf(user), treeId, folderId);
     }
 
     private boolean existsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
