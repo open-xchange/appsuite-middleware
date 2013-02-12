@@ -55,40 +55,17 @@ package com.openexchange.admin.rmi.exceptions;
  */
 public class StorageException extends Exception {
 
-	/**
-	 * For serialization
-	 */
-	private static final long serialVersionUID = -7054584373955744724L;
+    private static final long serialVersionUID = -7054584373955744724L;
 
-	/**
-	 *
-	 */
-	public StorageException() {
+    public StorageException(String message) {
+        super(message);
+    }
 
-	}
+    public StorageException(Throwable cause) {
+        super(cause);
+    }
 
-	/**
-	 * @param message
-	 */
-	public StorageException(String message) {
-		super(message);
-
-	}
-
-	/**
-	 * @param cause
-	 */
-	public StorageException(Throwable cause) {
-		super(cause);
-
-	}
-
-	/**
-	 * @param message
-	 * @param cause
-	 */
-	public StorageException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
+    public StorageException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

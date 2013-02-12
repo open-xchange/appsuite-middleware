@@ -167,28 +167,30 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     }
 
     @Override
-    public Filestore[] listFilestore(final String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        auth = auth == null ? new Credentials("","") : auth;
+    public Filestore[] listFilestore(String searchPattern, Credentials credentials, boolean omitUsage) throws StorageException, InvalidCredentialsException, InvalidDataException {
+        Credentials myCreds = credentials == null ? new Credentials("","") : credentials;
         try {
-            doNullCheck(search_pattern);
-        } catch (final InvalidDataException e1) {
-            log.error("Invalid data sent by client!", e1);
-            throw e1;
+            doNullCheck(searchPattern);
+            if (0 == searchPattern.trim().length()) {
+                throw new InvalidDataException("Search pattern is an empty string.");
+            }
+        } catch (InvalidDataException e) {
+            log.error("Client did not sent a search pattern.", e);
+            throw e;
         }
-        basicauth.doAuthentication(auth);
-
-        log.debug(search_pattern);
-
-        if (search_pattern.trim().length() == 0) {
-            throw new InvalidDataException("Invalid search pattern");
-        }
-
-        return oxutil.listFilestores(search_pattern);
+        basicauth.doAuthentication(myCreds);
+        log.debug(searchPattern);
+        return oxutil.listFilestores(searchPattern, omitUsage);
     }
 
     @Override
-    public Filestore[] listAllFilestore(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        return listFilestore("*", auth);
+    public Filestore[] listFilestore(final String searchPattern, Credentials credentials) throws StorageException, InvalidCredentialsException, InvalidDataException {
+        return listFilestore(searchPattern, credentials, false);
+    }
+
+    @Override
+    public Filestore[] listAllFilestore(Credentials credentials) throws StorageException, InvalidCredentialsException, InvalidDataException {
+        return listFilestore("*", credentials);
     }
 
     @Override

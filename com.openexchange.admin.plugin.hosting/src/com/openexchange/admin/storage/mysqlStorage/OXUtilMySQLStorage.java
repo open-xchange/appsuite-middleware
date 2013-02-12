@@ -601,7 +601,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
-    public Filestore[] listFilestores(final String pattern) throws StorageException {
+    public Filestore[] listFilestores(String pattern, boolean omitUsage) throws StorageException {
         final Connection con;
         try {
             con = cache.getConnectionForConfigDB();
@@ -625,7 +625,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 stores.add(fs);
             }
         } catch (final SQLException e) {
-            throw new StorageException(e);
+            throw new StorageException(e.getMessage(), e);
         } finally {
             closeSQLStuff(result, stmt);
             try {
@@ -634,11 +634,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 LOG.error("Error pushing configdb connection to pool!", e);
             }
         }
-        updateFilestoresWithRealUsage(stores);
-        return stores.toArray(new Filestore[] {});
+        if (!omitUsage) {
+            updateFilestoresWithRealUsage(stores);
+        }
+        return stores.toArray(new Filestore[stores.size()]);
     }
 
-    private List<Integer> listFilestoreIds(final String pattern) throws StorageException {
+    private static List<Integer> listFilestoreIds(final String pattern) throws StorageException {
         final Connection con;
         try {
             con = cache.getConnectionForConfigDB();
@@ -1334,7 +1336,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
     }
 
-    private Collection<FilestoreContextBlock> makeBlocksFromFilestoreContexts() throws StorageException {
+    private static Collection<FilestoreContextBlock> makeBlocksFromFilestoreContexts() throws StorageException {
         final Connection con;
         try {
             con = cache.getConnectionForConfigDB();
@@ -1373,7 +1375,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
     }
 
-    private void updateBlockWithFilestoreUsage(final FilestoreContextBlock block) throws StorageException {
+    private static void updateBlockWithFilestoreUsage(final FilestoreContextBlock block) throws StorageException {
         if (block.size() == 0) {
             return;
         }
@@ -1386,7 +1388,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT cid, used FROM filestore_usage");
+            stmt = con.prepareStatement("SELECT cid,used FROM filestore_usage");
             result = stmt.executeQuery();
             while (result.next()) {
                 final int cid = result.getInt(1);

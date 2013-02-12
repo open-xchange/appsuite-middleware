@@ -46,62 +46,33 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.console.util.filestore;
 
-import java.rmi.Naming;
-import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.rmi.OXUtilInterface;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Filestore;
+package com.openexchange.admin.console.util;
+
+import com.openexchange.admin.console.AbstractTest;
+import com.openexchange.admin.console.util.filestore.ListFilestore;
 
 /**
+ * Makes {@link ListFilestore} testable.
  *
- * @author d7,cutmasta
- *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class RegisterFilestore extends FilestoreAbstraction {
+final class ListFilestoreTester extends ListFilestore {
 
-    public RegisterFilestore(final String[] args2) {
-        final AdminParser parser = new AdminParser("registerfilestore");
+    private AbstractTest test;
 
-        setOptions(parser);
-
-        try {
-            parser.ownparse(args2);
-
-            final Credentials auth = credentialsparsing(parser);
-
-            // get rmi ref
-            final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
-
-            final Filestore fstore = new Filestore();
-
-            parseAndSetFilestorePath(parser, fstore);
-
-            parseAndSetFilestoreSize(parser, fstore);
-
-            parseAndSetFilestoreMaxCtxs(parser, fstore);
-
-            displayRegisteredMessage(String.valueOf(oxutil.registerFilestore(fstore, auth).getId()), parser);
-            sysexit(0);
-        } catch (final Exception e) {
-            printErrors(null, null, e, parser);
-        }
-
+    ListFilestoreTester(AbstractTest test) {
+        super();
+        this.test = test;
     }
 
-    public static void main(final String args[]) {
-        new RegisterFilestore(args);
+    @Override
+    protected void sysexit(int exitCode) {
+        test.setReturnCode(exitCode);
     }
 
-    private void setOptions(final AdminParser parser) {
-        setDefaultCommandLineOptionsWithoutContextID(parser);
-
-        setPathOption(parser, NeededQuadState.needed);
-
-        setSizeOption(parser, String.valueOf(OXUtilInterface.DEFAULT_STORE_SIZE));
-
-        setMaxCtxOption(parser, String.valueOf(OXUtilInterface.DEFAULT_STORE_MAX_CTX));
+    @Override
+    public void execute(String[] args) {
+        super.execute(args);
     }
 }
