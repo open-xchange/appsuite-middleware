@@ -682,8 +682,8 @@ public final class CacheFolderStorage implements FolderStorage {
      * @param treeId The tree identifier
      * @param contextId The context identifier
      */
-    public void removeSingleFromCache(final String id, final String treeId, final int userId, final int contextId, final boolean deleted, final Session optSession) {
-        removeSingleFromCache(id, treeId, userId, contextId, deleted, false, optSession);
+    public void removeSingleFromCache(final String id, final String treeId, final int optUserId, final int contextId, final boolean deleted, final Session optSession) {
+        removeSingleFromCache(id, treeId, optUserId, contextId, deleted, false, optSession);
     }
 
     /**
@@ -693,8 +693,8 @@ public final class CacheFolderStorage implements FolderStorage {
      * @param treeId The tree identifier
      * @param contextId The context identifier
      */
-    public void removeSingleFromCache(final String id, final String treeId, final int userId, final int contextId, final boolean deleted, final boolean userCacheOnly, final Session optSession) {
-        final Lock lock = userId > 0 ? TreeLockManagement.getInstance().getFor(treeId, userId, contextId).writeLock() : Session.EMPTY_LOCK;
+    public void removeSingleFromCache(final String id, final String treeId, final int optUserId, final int contextId, final boolean deleted, final boolean userCacheOnly, final Session optSession) {
+        final Lock lock = optUserId > 0 ? TreeLockManagement.getInstance().getFor(treeId, optUserId, contextId).writeLock() : Session.EMPTY_LOCK;
         try {
             acquire(lock);
         } catch (final OXException e) {
@@ -723,8 +723,8 @@ public final class CacheFolderStorage implements FolderStorage {
                     cache.removeFromGroup(cacheKey, sContextId);
                 }
                 final FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
-                if (userId > 0) {
-                    final FolderMap folderMap = folderMapManagement.optFor(userId, contextId);
+                if (optUserId > 0) {
+                    final FolderMap folderMap = folderMapManagement.optFor(optUserId, contextId);
                     if (null != folderMap) {
                         if (deleted) {
                             final Folder cachedFolder = folderMap.get(id, tid, optSession);
@@ -734,13 +734,13 @@ public final class CacheFolderStorage implements FolderStorage {
                                  */
                                 final String parentID = cachedFolder.getParentID();
                                 if (null != parentID) {
-                                    folderMapManagement.dropFor(parentID, tid, userId, contextId, optSession);
+                                    folderMapManagement.dropFor(parentID, tid, optUserId, contextId, optSession);
                                 }
                             }
                         }
                     }
                 }
-                folderMapManagement.dropFor(id, tid, userId, contextId, optSession);
+                folderMapManagement.dropFor(id, tid, optUserId, contextId, optSession);
             }
         } finally {
             lock.unlock();
