@@ -213,7 +213,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
         cacheFolderStorage = CacheFolderStorage.getInstance();
         cacheFolderStorage.onCacheAvailable();
         // Register folder storage
-        final Dictionary<String, String> dictionary = new Hashtable<String, String>();
+        final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
         dictionary.put("tree", FolderStorage.ALL_TREE_ID);
         registrations = new ArrayList<ServiceRegistration<?>>(4);
         registrations.add(context.registerService(FolderStorage.class, cacheFolderStorage, dictionary));
