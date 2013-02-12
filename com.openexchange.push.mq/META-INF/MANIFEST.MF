@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.push.mq
 Bundle-Version: 7.0.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.context,
+Import-Package: com.openexchange.config,
+ com.openexchange.context,
  com.openexchange.event,
  com.openexchange.exception,
  com.openexchange.folder,
