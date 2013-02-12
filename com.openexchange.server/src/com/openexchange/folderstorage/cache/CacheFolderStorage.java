@@ -335,13 +335,13 @@ public final class CacheFolderStorage implements FolderStorage {
                                                              * Load it
                                                              */
                                                             final Folder rootFolder = loadFolder(realTreeId, folderId, StorageType.WORKING, params);
-                                                            putFolder(rootFolder, realTreeId, params);
+                                                            putFolder(rootFolder, realTreeId, params, false);
                                                             final String[] subfolderIDs = rootFolder.getSubfolderIDs();
                                                             if (null != subfolderIDs) {
                                                                 for (final String subfolderId : subfolderIDs) {
                                                                     final Folder folder =
                                                                         loadFolder(realTreeId, subfolderId, StorageType.WORKING, params);
-                                                                    putFolder(folder, realTreeId, params);
+                                                                    putFolder(folder, realTreeId, params, false);
                                                                 }
                                                             }
                                                             if (debugEnabled) {
@@ -454,7 +454,7 @@ public final class CacheFolderStorage implements FolderStorage {
                     storage.commitTransaction(storageParameters);
                 }
                 if (preparedFolder.isCacheable() && preparedFolder.isGlobalID() != folder.isGlobalID()) {
-                    putFolder(preparedFolder, treeId, storageParameters);
+                    putFolder(preparedFolder, treeId, storageParameters, false);
                 }
                 return preparedFolder;
             } catch (final OXException e) {
@@ -539,7 +539,7 @@ public final class CacheFolderStorage implements FolderStorage {
                     }
                 }
                 if (createdFolder.isCacheable()) {
-                    putFolder(createdFolder, realTreeId, storageParameters);
+                    putFolder(createdFolder, realTreeId, storageParameters, false);
                 }
             } catch (final OXException e) {
                 if (LOG.isDebugEnabled()) {
@@ -577,12 +577,12 @@ public final class CacheFolderStorage implements FolderStorage {
              */
             Folder parentFolder = loadFolder(realTreeId, folder.getParentID(), StorageType.WORKING, true, storageParameters);
             if (parentFolder.isCacheable()) {
-                putFolder(parentFolder, realTreeId, storageParameters);
+                putFolder(parentFolder, realTreeId, storageParameters, true);
             }
             if (null != createdFolder) {
                 parentFolder = loadFolder(realTreeId, createdFolder.getParentID(), StorageType.WORKING, true, storageParameters);
                 if (parentFolder.isCacheable()) {
-                    putFolder(parentFolder, realTreeId, storageParameters);
+                    putFolder(parentFolder, realTreeId, storageParameters, true);
                 }
             }
         } finally {
@@ -598,12 +598,12 @@ public final class CacheFolderStorage implements FolderStorage {
      * @param storageParameters The storage parameters
      * @throws OXException If put into cache fails
      */
-    public void putFolder(final Folder folder, final String treeId, final StorageParameters storageParameters) throws OXException {
+    public void putFolder(final Folder folder, final String treeId, final StorageParameters storageParameters, final boolean invalidate) throws OXException {
         /*
          * Put to cache
          */
         if (folder.isGlobalID()) {
-            globalCache.putInGroup(newCacheKey(folder.getID(), treeId), Integer.toString(storageParameters.getContextId()), folder);
+            globalCache.putInGroup(newCacheKey(folder.getID(), treeId), Integer.toString(storageParameters.getContextId()), folder, invalidate);
         } else {
             getFolderMapFor(storageParameters.getSession()).put(treeId, folder, storageParameters.getSession());
         }
@@ -945,7 +945,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 try {
                     final Folder parentFolder = loadFolder(treeId, parentId, StorageType.WORKING, true, storageParameters);
                     if (parentFolder.isCacheable()) {
-                        putFolder(parentFolder, treeId, storageParameters);
+                        putFolder(parentFolder, treeId, storageParameters, true);
                     }
                 } catch (final Exception e) {
                     // Ignore
@@ -1169,7 +1169,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 /*
                  * Put to cache and return a cloned version
                  */
-                putFolder(folder, treeId, storageParameters);
+                putFolder(folder, treeId, storageParameters, false);
                 return (Folder) folder.clone();
             }
             /*
@@ -1287,7 +1287,7 @@ public final class CacheFolderStorage implements FolderStorage {
                     /*
                      * Put to cache and create a cloned version
                      */
-                    putFolder(folder, treeId, storageParameters);
+                    putFolder(folder, treeId, storageParameters, false);
                     folder = (Folder) folder.clone();
                 }
                 ret[index] = folder;
@@ -1557,24 +1557,24 @@ public final class CacheFolderStorage implements FolderStorage {
                 Folder f = loadFolder(realTreeId, newFolderId, StorageType.WORKING, true, storageParameters);
                 removeSingleFromCache(f.getParentID(), treeId, userId, storageParameters.getSession(), false);
                 if (f.isCacheable()) {
-                    putFolder(f, realTreeId, storageParameters);
+                    putFolder(f, realTreeId, storageParameters, true);
                 }
                 f = loadFolder(realTreeId, oldParentId, StorageType.WORKING, true, storageParameters);
                 if (f.isCacheable()) {
-                    putFolder(f, realTreeId, storageParameters);
+                    putFolder(f, realTreeId, storageParameters, true);
                 }
                 f = loadFolder(realTreeId, newParentId, StorageType.WORKING, true, storageParameters);
                 if (f.isCacheable()) {
-                    putFolder(f, realTreeId, storageParameters);
+                    putFolder(f, realTreeId, storageParameters, true);
                 }
             } else {
                 final Folder f = loadFolder(realTreeId, newFolderId, StorageType.WORKING, true, storageParameters);
                 if (f.isCacheable()) {
-                    putFolder(f, realTreeId, storageParameters);
+                    putFolder(f, realTreeId, storageParameters, true);
                 }
             }
             if (updatedFolder.isCacheable()) {
-                putFolder(updatedFolder, treeId, storageParameters);
+                putFolder(updatedFolder, treeId, storageParameters, true);
             }
         } finally {
             lock.unlock();

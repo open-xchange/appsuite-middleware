@@ -503,7 +503,7 @@ public final class FolderMap {
                             for (final String subfolderId : subfolderIDs) {
                                 loaded = folderStorage.loadFolder(treeId, subfolderId, StorageType.WORKING, params);
                                 if (loaded.isGlobalID()) {
-                                    folderStorage.putFolder(loaded, treeId, params);
+                                    folderStorage.putFolder(loaded, treeId, params, false);
                                 } else {
                                     folderMap.put(treeId, loaded, session);
                                 }
@@ -554,7 +554,7 @@ public final class FolderMap {
                     for (final SortableId sortableId : subfolders) {
                         final Folder loaded = folderStorage.loadFolder(treeId, sortableId.getId(), StorageType.WORKING, params);
                         if (loaded.isGlobalID()) {
-                            folderStorage.putFolder(loaded, treeId, params);
+                            folderStorage.putFolder(loaded, treeId, params, false);
                         } else {
                             folderMap.put(treeId, loaded, session);
                         }
