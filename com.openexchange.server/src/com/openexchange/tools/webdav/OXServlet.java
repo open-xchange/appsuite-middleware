@@ -122,12 +122,7 @@ public abstract class OXServlet extends WebDavServlet {
 
         @Override
         public String getUserAgent() {
-            /*-
-             * Former code allowed User-Agent header. Needs to be denied as of bug #24654.
-             *
-             * return null == userAgent ? AJAXServlet.sanitizeParam(req.getHeader("user-agent")) : userAgent;
-             */
-            return userAgent;
+            return null == userAgent ? req.getHeader("user-agent") : userAgent;
         }
 
         @Override
