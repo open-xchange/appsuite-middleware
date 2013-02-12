@@ -1,3 +1,7 @@
+* 2013-02-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24923: Return proper JSlob object
+
 * 2013-02-12 - martin.herfurth@open-xchange.com
 
  - Fix for bug 24759: Resolve recurring Appointments for Contact Halo.
