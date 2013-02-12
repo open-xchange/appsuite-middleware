@@ -316,14 +316,18 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                         final Serializable[] keys = ((CacheKey) event.getProperty("key")).getKeys();
                         final String id = keys[2].toString();
                         final String treeId = keys[1].toString();
-                        CacheFolderStorage.getInstance().removeSingleFromCache(id, treeId, -1, contextId, false, null);
+                        removeFromUserCache(id, treeId, contextId);
                     } else if ("OXFolderCache".equals(region)) {
                         final Serializable[] keys = ((CacheKey) event.getProperty("key")).getKeys();
                         final int contextId = Tools.getUnsignedInteger(keys[0].toString());
                         final String id = keys[1].toString();
                         final String treeId = FolderStorage.REAL_TREE_ID;
-                        CacheFolderStorage.getInstance().removeSingleFromCache(id, treeId, -1, contextId, false, null);
+                        removeFromUserCache(id, treeId, contextId);
                     }
+                }
+
+                private void removeFromUserCache(final String id, final String treeId, final int contextId) {
+                    CacheFolderStorage.getInstance().removeSingleFromCache(id, treeId, -1, contextId, false, true, null);
                 }
             };
             final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
