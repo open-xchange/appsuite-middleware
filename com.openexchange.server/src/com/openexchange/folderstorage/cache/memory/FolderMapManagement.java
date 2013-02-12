@@ -226,7 +226,7 @@ public final class FolderMapManagement {
         //  If folder identifier is not a number AND user identifier is valid
         //  (because numbers hint to former global folders; e.g. database folders)
         //  Then it is sufficient to clean in user-associated map only
-        if (Tools.getUnsignedInteger(folderId) < 0 && optUser > 0) {
+        if (optUser > 0 && Tools.getUnsignedInteger(folderId) < 0) {
             final FolderMap folderMap = contextMap.get(Integer.valueOf(optUser));
             if (null != folderMap) {
                 folderMap.remove(folderId, treeId, optSession);
