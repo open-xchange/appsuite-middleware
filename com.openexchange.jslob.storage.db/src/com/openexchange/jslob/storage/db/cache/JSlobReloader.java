@@ -117,23 +117,9 @@ public final class JSlobReloader extends Refresher<JSlob> implements JSlob {
     }
 
     @Override
-    public JSlob setJsonObject(final JSONObject jsonObject) {
-        updateDelegate();
-        js.setJsonObject(jsonObject);
-        return this;
-    }
-
-    @Override
     public JSONObject getMetaObject() {
         updateDelegate();
         return js.getMetaObject();
-    }
-
-    @Override
-    public JSlob setMetaObject(final JSONObject metaObject) {
-        updateDelegate();
-        js.setMetaObject(metaObject);
-        return this;
     }
 
 }
