@@ -314,6 +314,14 @@ public class DefaultDispatcher implements Dispatcher {
         }
     }
 
+    private AJAXActionService getActionServiceSafe(final String action, final AJAXActionServiceFactory factory) {
+        try {
+            return factory.createActionService(action);
+        } catch (final Exception e) {
+            return null;
+        }
+    }
+
 	@Override
 	public boolean mayUseFallbackSession(final String module, final String action) throws OXException {
 	    final StrPair key = new StrPair(module, action);
@@ -323,7 +331,7 @@ public class DefaultDispatcher implements Dispatcher {
 	        if (factory == null) {
 	            ret = Boolean.FALSE;
 	        } else {
-    	        final DispatcherNotes actionMetadata = getActionMetadata(factory.createActionService(action));
+    	        final DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
     	        ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.allowPublicSession());
 	        }
 	        fallbackSessionActionsCache.put(key, ret);
@@ -340,7 +348,7 @@ public class DefaultDispatcher implements Dispatcher {
             if (factory == null) {
                 ret = Boolean.FALSE;
             } else {
-                final DispatcherNotes actionMetadata = getActionMetadata(factory.createActionService(action));
+                final DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
                 ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.noSession());
             }
             omitSessionActionsCache.put(key, ret);
