@@ -65,6 +65,12 @@ if [ ${1:-0} -eq 2 ]; then
 	ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc "$FILE"
     done
 
+    #SoftwareChange_Request-1318
+    pfile=/opt/open-xchange/etc/microformatSubscription.properties
+    if ! ox_exists_property com.openexchange.subscribe.microformats.allowedHosts $pfile; then
+        ox_set_property com.openexchange.subscribe.microformats.allowedHosts '' $pfile
+    fi
+
     #SoftwareChange_Request-1284
     pfile=/opt/open-xchange/etc/crawler.properties
     for prop in com.openexchange.subscribe.crawler.yahoocom \
