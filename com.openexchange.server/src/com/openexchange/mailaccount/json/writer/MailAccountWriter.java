@@ -109,7 +109,6 @@ public final class MailAccountWriter implements MailAccountFields {
         json.put(NAME, account.getName());
         json.put(PRIMARY_ADDRESS, account.getPrimaryAddress());
         json.put(PERSONAL, account.getPersonal());
-        json.put(REPLY_TO, account.getReplyTo());
         json.put(SPAM_HANDLER, account.getSpamHandler());
         // Folder names
         json.put(TRASH, account.getTrash());
@@ -143,6 +142,18 @@ public final class MailAccountWriter implements MailAccountFields {
         }
         if (props.containsKey("pop3.path")) {
             json.put(POP3_PATH, props.get("pop3.path"));
+        }
+        // Reply-to
+        {
+            
+            final String replyTo = account.getReplyTo();
+            if (null == replyTo) {
+                if (props.containsKey("replyto")) {
+                    json.put(MailAccountFields.REPLY_TO, props.get("replyto"));
+                }                
+            } else {
+                json.put(REPLY_TO, replyTo);
+            }
         }
         if (props.containsKey(ADDRESSES)) {
             json.put(ADDRESSES, props.get(ADDRESSES));

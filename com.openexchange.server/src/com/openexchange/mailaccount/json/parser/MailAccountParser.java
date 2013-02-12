@@ -181,8 +181,10 @@ public class MailAccountParser extends DataParser {
             account.setPersonal(parseString(json, MailAccountFields.PERSONAL));
             attributes.add(Attribute.PERSONAL_LITERAL);
         }
+        final Map<String, String> props = new HashMap<String, String>(8);
         if (json.has(MailAccountFields.REPLY_TO)) {
             account.setReplyTo(parseString(json, MailAccountFields.REPLY_TO));
+            props.put("replyto", json.getString(MailAccountFields.REPLY_TO).trim());
             attributes.add(Attribute.REPLY_TO_LITERAL);
         }
         if (json.has(MailAccountFields.SPAM_HANDLER)) {
@@ -255,7 +257,6 @@ public class MailAccountParser extends DataParser {
             account.setConfirmedHamFullname(null == string ? string : string.trim());
             attributes.add(Attribute.CONFIRMED_HAM_FULLNAME_LITERAL);
         }
-        final Map<String, String> props = new HashMap<String, String>(8);
         if (json.hasAndNotNull(MailAccountFields.POP3_DELETE_WRITE_THROUGH)) {
             props.put("pop3.deletewt", json.getString(MailAccountFields.POP3_DELETE_WRITE_THROUGH).trim());
             attributes.add(Attribute.POP3_DELETE_WRITE_THROUGH_LITERAL);
