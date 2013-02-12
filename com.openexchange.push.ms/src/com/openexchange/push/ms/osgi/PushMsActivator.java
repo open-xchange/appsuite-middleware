@@ -52,7 +52,6 @@ package com.openexchange.push.ms.osgi;
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
-import org.osgi.framework.BundleException;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -80,6 +79,8 @@ public class PushMsActivator extends HousekeepingActivator {
      */
     public static final AtomicReference<PushMsInit> INIT_REF = new AtomicReference<PushMsInit>();
 
+    private volatile boolean activated;
+
     /**
      * Initializes a new {@link PushMsActivator}.
      */
@@ -101,7 +102,8 @@ public class PushMsActivator extends HousekeepingActivator {
                 final String ls = System.getProperty("line.separator");
                 final String message = "Start-up of bundle \"com.openexchange.push.ms\" denied, because UDP-based push is enabled." + ls + "Please disable it via \"com.openexchange.push.udp.pushEnabled\" option.";
                 LOG.warn(message);
-                throw new BundleException(message, BundleException.ACTIVATOR_ERROR);
+                // throw new BundleException(message, BundleException.ACTIVATOR_ERROR);
+                return;
             }
         }
         // Proper start-up
@@ -127,6 +129,7 @@ public class PushMsActivator extends HousekeepingActivator {
             track(ManagementService.class, new ManagementRegisterer(context));
             track(TimerService.class);
             openTrackers();
+            activated = true;
         } catch (final Exception e) {
             LOG.error("Starting bundle com.openexchange.push.ms failed: " + e.getMessage(), e);
             throw e;
@@ -135,6 +138,10 @@ public class PushMsActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
+        if (!activated) {
+            super.stopBundle();
+            return;
+        }
         final Log LOG = com.openexchange.log.Log.loggerFor(PushMsActivator.class);
         LOG.info("Stopping bundle: com.openexchange.push.ms");
         try {
@@ -143,7 +150,7 @@ public class PushMsActivator extends HousekeepingActivator {
                 init.close();
                 INIT_REF.set(null);
             }
-            cleanUp();
+            super.stopBundle();
             Services.setServiceLookup(null);
         } catch (final Exception e) {
             LOG.error("Stopping bundle com.openexchange.push.ms failed: " + e.getMessage(), e);

@@ -65,12 +65,22 @@ public class DefaultJSlob implements JSlob, Cloneable {
         private static final long serialVersionUID = 870193683123103886L;
 
         protected EmptyJSlob() {
-            super(null);
+            super();
         }
 
         @Override
         public JSlob setJsonObject(final JSONObject jsonObject) {
             throw new UnsupportedOperationException("EmptyJSlob.setJsonObject()");
+        }
+
+        @Override
+        public DefaultJSlob setId(JSlobId id) {
+            throw new UnsupportedOperationException("EmptyJSlob.setId()");
+        }
+
+        @Override
+        public JSlob setMetaObject(JSONObject metaObject) {
+            throw new UnsupportedOperationException("EmptyJSlob.setMetaObject()");
         }
     }
 
@@ -93,6 +103,32 @@ public class DefaultJSlob implements JSlob, Cloneable {
         super();
     }
 
+    /**
+     * Initializes a new {@link DefaultJSlob}.
+     * 
+     * @param jsonObject The JSON object initially applied to this JSlob
+     */
+    public DefaultJSlob(final JSONObject jsonObject) {
+        super();
+        this.jsonObject = jsonObject;
+        this.metaObject = new JSONObject();
+    }
+
+    /**
+     * Initializes a new {@link DefaultJSlob}.
+     * 
+     * @param other The other JSlob
+     */
+    public DefaultJSlob(final JSlob other) {
+        super();
+        JSONObject jo = other.getJsonObject();
+        this.jsonObject = null == jo ? null : new JSONObject(jo);
+        jo = other.getMetaObject();
+        this.metaObject = null == jo ? null : new JSONObject(jo);
+        final JSlobId otherId = other.getId();
+        this.id = null == otherId ? null : new JSlobId(otherId.getServiceId(), otherId.getId(), otherId.getUser(), otherId.getContext());
+    }
+
     @Override
     public Object clone() {
         try {
@@ -110,25 +146,17 @@ public class DefaultJSlob implements JSlob, Cloneable {
     public String toString() {
         final StringBuilder builder = new StringBuilder(128);
         builder.append("DefaultJSlob {");
-        if (jsonObject != null) {
-            builder.append("jsonObject=").append(jsonObject).append(", ");
+        if (getJsonObject() != null) {
+            builder.append("jsonObject=").append(getJsonObject()).append(", ");
         }
-        if (id != null) {
-            builder.append("id=").append(id);
+        if (getMetaObject() != null) {
+            builder.append("metaObject=").append(getMetaObject()).append(", ");
+        }
+        if (getId() != null) {
+            builder.append("id=").append(getId());
         }
         builder.append('}');
         return builder.toString();
-    }
-
-    /**
-     * Initializes a new {@link DefaultJSlob}.
-     * 
-     * @param jsonObject The JSON object initially applied to this JSlob
-     */
-    public DefaultJSlob(final JSONObject jsonObject) {
-        super();
-        this.jsonObject = jsonObject;
-        this.metaObject = new JSONObject();
     }
 
     @Override
@@ -147,7 +175,12 @@ public class DefaultJSlob implements JSlob, Cloneable {
         return jsonObject;
     }
 
-    @Override
+    /**
+     * Sets the JSON object stored in this JSlob.
+     * 
+     * @param jsonObject The JSON object
+     * @return This JSlob with new JSON object applied
+     */
     public JSlob setJsonObject(final JSONObject jsonObject) {
         this.jsonObject = jsonObject;
         return this;
@@ -158,7 +191,12 @@ public class DefaultJSlob implements JSlob, Cloneable {
         return metaObject;
     }
 
-    @Override
+    /**
+     * Sets the json object with unmodifiable metadata describing the regular payload data
+     * 
+     * @param The metadata object
+     * @return This JSlob with new metadata object applied
+     */
     public JSlob setMetaObject(final JSONObject metaObject) {
         this.metaObject = metaObject;
         return this;

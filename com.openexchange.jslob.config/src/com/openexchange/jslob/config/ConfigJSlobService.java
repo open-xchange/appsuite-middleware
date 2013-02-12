@@ -263,7 +263,8 @@ public final class ConfigJSlobService implements JSlobService {
         final List<JSlob> ret = new ArrayList<JSlob>(list.size() << 1);
         boolean coreIncluded = false;
         for (final JSlob jSlob : list) {
-            addConfigTreeToJslob(session, jSlob);
+            
+            addConfigTreeToJslob(session, new DefaultJSlob(jSlob));
             ret.add(get(jSlob.getId().getId(), session));
             if (jSlob.getId().getId().equals(CORE)) {
                 coreIncluded = true;
@@ -283,7 +284,7 @@ public final class ConfigJSlobService implements JSlobService {
             ret.add(jSlob);
         }
         if (!coreIncluded) {
-            final JSlob jSlob = new DefaultJSlob(new JSONObject());
+            final DefaultJSlob jSlob = new DefaultJSlob(new JSONObject());
             jSlob.setId(new JSlobId(SERVICE_ID, CORE, userId, contextId));
             addConfigTreeToJslob(session, jSlob);
         }
@@ -303,10 +304,15 @@ public final class ConfigJSlobService implements JSlobService {
         /*
          * Get from storage
          */
-        JSlob jsonJSlob = getStorage().opt(new JSlobId(SERVICE_ID, id, userId, contextId));
-        if (null == jsonJSlob) {
-            jsonJSlob = new DefaultJSlob(new JSONObject());
-            jsonJSlob.setId(new JSlobId(SERVICE_ID, id, userId, contextId));
+        final DefaultJSlob jsonJSlob;
+        {
+            final JSlob opt = getStorage().opt(new JSlobId(SERVICE_ID, id, userId, contextId));
+            if (null == opt) {
+                jsonJSlob = new DefaultJSlob(new JSONObject());
+                jsonJSlob.setId(new JSlobId(SERVICE_ID, id, userId, contextId));
+            } else {
+                jsonJSlob = new DefaultJSlob(opt);
+            }
         }
         /*
          * Fill with config cascade settings
@@ -338,7 +344,7 @@ public final class ConfigJSlobService implements JSlobService {
      * @return The {@link DefaultJSlob} instance.
      * @throws OXException If operation fails
      */
-    private void addConfigTreeToJslob(final Session session, final JSlob jsLob) throws OXException {
+    private void addConfigTreeToJslob(final Session session, final DefaultJSlob jsLob) throws OXException {
         try {
             final Map<String, String>[] maps = configTreeEquivalents.get(jsLob.getId().getId());
             if (maps == null) {
@@ -425,13 +431,14 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     @Override
-    public void set(final String id, final JSlob jsonJSlob, final Session session) throws OXException {
+    public void set(final String id, final JSlob jSlob, final Session session) throws OXException {
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
 
-        if (null == jsonJSlob) {
+        if (null == jSlob) {
             getStorage().remove(new JSlobId(SERVICE_ID, id, userId, contextId));
         } else {
+            final DefaultJSlob jsonJSlob = new DefaultJSlob(jSlob);
             final JSONObject jObject = jsonJSlob.getJsonObject();
             if (null == jObject) {
                 getStorage().remove(new JSlobId(SERVICE_ID, id, userId, contextId));
@@ -580,12 +587,16 @@ public final class ConfigJSlobService implements JSlobService {
              * Get JSlob
              */
             final JSONObject storageObject;
-            JSlob jsonJSlob = storage.opt(jslobId);
-            if (null == jsonJSlob) {
-                jsonJSlob = new DefaultJSlob();
-                storageObject = new JSONObject();
-            } else {
-                storageObject = jsonJSlob.getJsonObject();
+            final DefaultJSlob jsonJSlob;
+            {
+                final JSlob opt = storage.opt(jslobId);
+                if (null == opt) {
+                    jsonJSlob = new DefaultJSlob();
+                    storageObject = new JSONObject();
+                } else {
+                    jsonJSlob = new DefaultJSlob(opt);
+                    storageObject = jsonJSlob.getJsonObject();
+                }
             }
             /*
              * Examine path

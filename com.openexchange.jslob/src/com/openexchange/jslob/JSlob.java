@@ -90,26 +90,10 @@ public interface JSlob extends Serializable {
     public JSONObject getJsonObject();
 
     /**
-     * Sets the JSON object stored in this JSlob.
-     * 
-     * @param jsonObject The JSON object
-     * @return This JSlob with new JSON object applied
-     */
-    public JSlob setJsonObject(JSONObject jsonObject);
-
-    /**
      * Gets the json object with unmodifiable metadata describing the regular payload data
      * 
      * @return The metadata object
      */
     public JSONObject getMetaObject();
-
-    /**
-     * Sets the json object with unmodifiable metadata describing the regular payload data
-     * 
-     * @param The metadata object
-     * @return This JSlob with new metadata object applied
-     */
-    public JSlob setMetaObject(JSONObject metaObject);
 
 }
