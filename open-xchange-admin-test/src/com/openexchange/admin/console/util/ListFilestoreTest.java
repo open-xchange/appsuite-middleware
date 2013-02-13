@@ -53,6 +53,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import com.openexchange.admin.console.AbstractTest;
 import com.openexchange.admin.console.BasicCommandlineOptions;
+import com.openexchange.tools.arrays.Arrays;
 
 /**
  * @author cutmasta
@@ -89,5 +90,15 @@ public class ListFilestoreTest extends AbstractTest {
         ListFilestoreTester tester = new ListFilestoreTester(this);
         tester.execute(getUnknownOptionData());
         assertEquals("Expected unknown option as return code!", BasicCommandlineOptions.SYSEXIT_UNKNOWN_OPTION, 0, returnCode);
+    }
+
+    @Test
+    public void testListFilestoreWithOmitUsage() {
+        resetBuffers();
+        ListFilestoreTester tester = new ListFilestoreTester(this);
+        String[] options = getMasterCredentialsOptionData();
+        options = Arrays.add(options, "--omitUsage");
+        tester.execute(options);
+        assertEquals("Expected 0 as return code!", 0, returnCode);
     }
 }
