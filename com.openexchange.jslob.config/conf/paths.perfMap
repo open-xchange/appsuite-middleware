@@ -30,3 +30,8 @@ modules/caldav/url > io.ox/caldav//url
 
 # Migration
 gui > io.ox/migration//gui
+
+# Calendar notifications
+modules/calendar/notifyAcceptedDeclinedAsCreator > io.ox/calendar//notifyAcceptedDeclinedAsCreator
+modules/calendar/notifyAcceptedDeclinedAsParticipant > io.ox/calendar//notifyAcceptedDeclinedAsParticipant
+modules/calendar/notifyNewModifiedDeleted > io.ox/calendar//notifyNewModifiedDeleted
