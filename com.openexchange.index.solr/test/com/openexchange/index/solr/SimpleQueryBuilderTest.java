@@ -118,7 +118,7 @@ public class SimpleQueryBuilderTest extends SimpleQueryBuilder {
     
     @Test
     public void testBug24918() throws Exception {
-        String folderName = "Apstiprināts \"ham";
+        String folderName = "Apstiprin\u0101ts \"ham";
         String folderQuery = buildQueryString("full_name", folderName);
         String accountQuery = buildQueryString("account", 0);
         String queryString = catenateQueriesWithAnd(accountQuery, folderQuery);
