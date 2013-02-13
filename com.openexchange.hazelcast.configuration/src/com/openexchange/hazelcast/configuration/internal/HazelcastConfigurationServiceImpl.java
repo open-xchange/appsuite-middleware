@@ -77,6 +77,12 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
                 .setProperty(GroupProperties.PROP_ENABLE_JMX_DETAILED, "true");
         }
         /*
+         * IPv6 support
+         */
+        if (configService.getBoolProperty("com.openexchange.hazelcast.enableIPv6Support", true)) {
+            config.setProperty(GroupProperties.PROP_PREFER_IPv4_STACK, "false");
+        }
+        /*
          * limit number of redos
          */
         config.setProperty(GroupProperties.PROP_REDO_GIVE_UP_THRESHOLD, "10");
