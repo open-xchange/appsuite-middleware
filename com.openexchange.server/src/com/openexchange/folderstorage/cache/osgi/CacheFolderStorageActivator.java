@@ -330,7 +330,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                 }
             };
             final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
-            dict.put(EventConstants.EVENT_TOPIC, "com/openexchange/cache/invalidate");
+            dict.put(EventConstants.EVENT_TOPIC, "com/openexchange/cache/remote/invalidate");
             registrations.add(context.registerService(EventHandler.class, eventHandler, dict));
         }
     }

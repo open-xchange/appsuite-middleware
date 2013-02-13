@@ -351,7 +351,7 @@ public class NotifyingCache implements Cache, CacheListener {
             properties.put("operation", cacheEvent.getOperation().toString());
             properties.put("group", cacheEvent.getGroupName());
             properties.put("key", cacheEvent.getKey());
-            eventAdmin.postEvent(new Event("com/openexchange/cache/invalidate", properties));
+            eventAdmin.postEvent(new Event("com/openexchange/cache/remote/invalidate", properties));
         }
     }
 
