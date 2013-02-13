@@ -168,7 +168,7 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 mkdir -p %{buildroot}/var/log/open-xchange
-mkdir -m 750 -p %{buildroot}/var/spool/open-xchange/uploads
+mkdir -p %{buildroot}/var/spool/open-xchange/uploads
 rm -f %{configfiles}
 find %{buildroot}/opt/open-xchange/etc \
      %{buildroot}/opt/open-xchange/importCSV \
@@ -510,6 +510,7 @@ ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
 ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
 ox_update_permissions "/var/spool/open-xchange/uploads" open-xchange:root 750
 ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
+exit 0
 
 %clean
 %{__rm} -rf %{buildroot}
