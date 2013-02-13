@@ -102,7 +102,7 @@ public class SimpleQueryBuilderTest extends SimpleQueryBuilder {
         Assert.assertNull(buildQueryStringWithOr("abs", null));
         Assert.assertNull(buildQueryStringWithOr(null, Collections.singleton("abc")));
         Assert.assertNull(buildQueryStringWithOr("abc", null));
-        Assert.assertNull(catenateQueriesWithAnd(null));
+        Assert.assertNull(catenateQueriesWithAnd((String[]) null));
         Assert.assertNull(catenateQueriesWithAnd(null, null));
     }
 
