@@ -54,7 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -138,7 +138,7 @@ public final class TikaPreviewService implements PreviewService {
         /*
          * Get content according to output format
          */
-        /*final String content = */documentHandler.getDocumentContent(inputStream, output);
+        final String content = documentHandler.getDocumentContent(inputStream, output);
         /*
          * Convert meta data to a map
          */
@@ -151,7 +151,6 @@ public final class TikaPreviewService implements PreviewService {
         /*
          * Return preview document
          */
-        List<String> c = new ArrayList<String>();
-        return new TikaPreviewDocument(c, map);
+        return new TikaPreviewDocument(Collections.singletonList(content), map);
     }
 }
