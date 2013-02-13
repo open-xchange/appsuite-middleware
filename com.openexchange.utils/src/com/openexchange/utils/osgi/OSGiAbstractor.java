@@ -38,7 +38,92 @@ import com.openexchange.utils.propertyhandling.PropertyInterface;
  *
  */
 public class OSGiAbstractor implements ServiceLookup {
-    
+
+    private class Logger implements Log {
+
+        private final Log delegate;
+
+        private final String prefixString;
+
+        public Logger(final Log log, final Class<?> clazz) {
+            this.delegate = log;
+            this.prefixString = "Logged for " + clazz.getCanonicalName() + ": ";
+        }
+
+        public boolean isDebugEnabled() {
+            return this.delegate.isDebugEnabled();
+        }
+
+        public boolean isErrorEnabled() {
+            return this.delegate.isErrorEnabled();
+        }
+
+        public boolean isFatalEnabled() {
+            return this.delegate.isFatalEnabled();
+        }
+
+        public boolean isInfoEnabled() {
+            return this.delegate.isInfoEnabled();
+        }
+
+        public boolean isTraceEnabled() {
+            return this.delegate.isTraceEnabled();
+        }
+
+        public boolean isWarnEnabled() {
+            return this.delegate.isWarnEnabled();
+        }
+
+        public void trace(Object message) {
+            this.delegate.trace(prefixString + message);
+        }
+
+        public void trace(Object message, Throwable t) {
+            this.delegate.trace(prefixString + message, t);
+        }
+
+        public void debug(Object message) {
+            this.delegate.debug(prefixString + message);
+        }
+
+        public void debug(Object message, Throwable t) {
+            this.delegate.debug(prefixString + message, t);
+        }
+
+        public void info(Object message) {
+            this.delegate.info(prefixString + message);
+        }
+
+        public void info(Object message, Throwable t) {
+            this.delegate.info(prefixString + message, t);
+        }
+
+        public void warn(Object message) {
+            this.delegate.warn(prefixString + message);
+        }
+
+        public void warn(Object message, Throwable t) {
+            this.delegate.warn(prefixString + message, t);
+        }
+
+        public void error(Object message) {
+            this.delegate.error(prefixString + message);
+        }
+
+        public void error(Object message, Throwable t) {
+            this.delegate.error(prefixString + message, t);
+        }
+
+        public void fatal(Object message) {
+            this.delegate.fatal(prefixString + message);
+        }
+
+        public void fatal(Object message, Throwable t) {
+            this.delegate.fatal(prefixString + message, t);
+        }
+
+    }
+
     private class Entry<T> extends SimpleEntry<T> {
 
         private AvailabilityActivationClosure<T> closure;
@@ -168,7 +253,7 @@ public class OSGiAbstractor implements ServiceLookup {
         }
         
         // Change LOG to the correct class for distinguishing in the logs
-        LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OSGiAbstractor.class.getName() + ":" + clazz.getName()));
+        LOG = new Logger(LOG, clazz);
         this.context = context;
     }
 
