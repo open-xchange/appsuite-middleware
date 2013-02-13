@@ -231,9 +231,8 @@ public final class PUTAction extends AbstractConfigAction {
     /** Sanitizes possible JSON setting */
     public static void sanitizeJsonSetting(final Setting setting) {
         try {
-            final String value = (String) setting.getSingleValue();
+            final JSONObject jConfig = new JSONObject((String) setting.getSingleValue());
             boolean saveBack = false;
-            final JSONObject jConfig = new JSONObject(value);
             final JSONObject jMailConfig = jConfig.optJSONObject("mail");
             if (null != jMailConfig && jMailConfig.hasAndNotNull("signatures")) {
                 final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
