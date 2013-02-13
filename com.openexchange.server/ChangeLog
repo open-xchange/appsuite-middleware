@@ -1,6 +1,7 @@
 * 2013-02-13 - martin.herfurth@open-xchange.com
 
  - Fix for bug 24870: Proper removing of series end.
+ - Fix for bug 24961: Check for bad da_in_month values.
 
 * 2013-02-13 - thorben.betten@open-xchange.com
 
