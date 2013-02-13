@@ -53,6 +53,7 @@ import java.net.URI;
 import java.util.List;
 import javax.management.MBeanException;
 import javax.management.ObjectName;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.exception.OXException;
 
 
@@ -135,36 +136,40 @@ public interface SolrMBean {
     /**
      * Gets a list of all available core stores.
      *
+     * @param credentials The credentials of the OX master admin
      * @return The store list.
      * @throws OXException
      */
-    public List<SolrCoreStore> getAllStores() throws MBeanException;
+    public List<SolrCoreStore> getAllStores(Credentials credentials) throws MBeanException;
 
     /**
      * Registers a new solr core store.
      *
+     * @param credentials The credentials of the OX master admin
      * @param uri The uri that points to the stores mount point.
      * @param maxCores The maximal number of cores handled by this core store.
      * @return The stores id.
      * @throws OXException
      */
-    public int registerCoreStore(URI uri, int maxCores) throws MBeanException;
+    public int registerCoreStore(Credentials credentials, URI uri, int maxCores) throws MBeanException;
 
     /**
      * Modifies an existing core.
      *
+     * @param credentials The credentials of the OX master admin
      * @param id The core stores id.
      * @param uri The uri that points to the stores mount point.
      * @param maxCores The maximal number of cores handled by this core store.
      * @throws OXException
      */
-    public void modifyCoreStore(int id, URI uri, int maxCores) throws MBeanException;
+    public void modifyCoreStore(Credentials credentials, int id, URI uri, int maxCores) throws MBeanException;
 
     /**
      * Unregisters a core store.
      *
+     * @param credentials The credentials of the OX master admin
      * @param id The id of the store to unregister.
      * @throws OXException
      */
-    public void unregisterCoreStore(int id) throws MBeanException;
+    public void unregisterCoreStore(Credentials credentials, int id) throws MBeanException;
 }

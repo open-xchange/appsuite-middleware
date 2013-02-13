@@ -5,6 +5,7 @@ BuildArch:     noarch
 BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
+BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
 %define        ox_release 1
@@ -16,6 +17,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend indexing extension
 Requires:      open-xchange-core >= @OXVERSION@
+Requires:      open-xchange-admin >= @OXVERSION@
 
 %description
 This package contains the extensions for the backend installations implementing the indexing feature.
