@@ -11561,6 +11561,31 @@ msgstr ""
 msgid "A user named %1$s already exists in destination context %2$s."
 msgstr ""
 
+#. No configuration service found
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
+msgid "No configuration service found."
+msgstr ""
+
+#. The value given in the property %1$s is no integer value
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:66
+msgid "The value given in the property %1$s is no integer value."
+msgstr ""
+
+#. Property %1$s not set but required.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:69
+msgid "Property %1$s not set but required."
+msgstr ""
+
+#. Property %1$s claims to have condition but condition not set.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:72
+msgid "Property %1$s claims to have condition but condition not set."
+msgstr ""
+
+#. Property %1$s must be set if %2$s is set to %3$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:75
+msgid "Property %1$s must be set if %2$s is set to %3$s"
+msgstr ""
+
 #. Missing main extension attribute for user %1$s in context %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.voipnow.json/src/com/openexchange/voipnow/json/VoipNowExceptionMessages.java:71
 msgid "Missing main extension attribute for user %1$s in context %2$s."
