@@ -17,16 +17,9 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
-. /opt/open-xchange/lib/oxfunctions.sh
-
-setConfigFilePermissions() {
-    ox_update_permissions "/var/spool/open-xchange/uploads" open-xchange:root 750
-    ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
-}
 
 case "$1" in
     configure)
-        setConfigFilePermissions
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
