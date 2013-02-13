@@ -138,7 +138,7 @@ public final class TikaPreviewService implements PreviewService {
         /*
          * Get content according to output format
          */
-        final String content = documentHandler.getDocumentContent(inputStream, output);
+        /*final String content = */documentHandler.getDocumentContent(inputStream, output);
         /*
          * Convert meta data to a map
          */
