@@ -314,15 +314,14 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     if ("GlobalFolderCache".equals(region)) {
                         final int contextId = Tools.getUnsignedInteger((String) event.getProperty("group"));
                         final Serializable[] keys = ((CacheKey) event.getProperty("key")).getKeys();
-                        final String id = keys[2].toString();
-                        final String treeId = keys[1].toString();
+                        final String id = keys[1].toString();
+                        final String treeId = keys[0].toString();
                         removeFromUserCache(id, treeId, contextId);
                     } else if ("OXFolderCache".equals(region)) {
-                        final Serializable[] keys = ((CacheKey) event.getProperty("key")).getKeys();
-                        final int contextId = Tools.getUnsignedInteger(keys[0].toString());
-                        final String id = keys[1].toString();
+                        CacheKey cacheKey = (CacheKey) event.getProperty("key");
+                        final String id = cacheKey.getKeys()[0].toString();
                         final String treeId = FolderStorage.REAL_TREE_ID;
-                        removeFromUserCache(id, treeId, contextId);
+                        removeFromUserCache(id, treeId, cacheKey.getContextId());
                     }
                 }
 
