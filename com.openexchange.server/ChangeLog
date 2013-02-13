@@ -1,3 +1,7 @@
+* 2013-02-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24939: Added missing entries to paths.perfMap
+
 * 2013-02-12 - marc.arens@open-xchange.com
 
  - Fix for bug 24914: Exception at osgi log regarding push.mq
