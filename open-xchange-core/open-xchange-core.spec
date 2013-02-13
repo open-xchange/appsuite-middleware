@@ -159,6 +159,7 @@ Authors:
     Open-Xchange
 
 %prep
+
 %setup -q
 
 %build
@@ -166,6 +167,8 @@ Authors:
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+mkdir -p %{buildroot}/var/log/open-xchange
+mkdir -m 750 -p %{buildroot}/var/spool/open-xchange/uploads
 rm -f %{configfiles}
 find %{buildroot}/opt/open-xchange/etc \
      %{buildroot}/opt/open-xchange/importCSV \
@@ -173,7 +176,6 @@ find %{buildroot}/opt/open-xchange/etc \
         -printf "%%%config(noreplace) %p\n" > %{configfiles}
 perl -pi -e 's;%{buildroot};;' %{configfiles}
 perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
-
 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
@@ -500,12 +502,14 @@ if ! ox_exists_property com.openexchange.contactcollector.folder.deleteDenied $p
 fi
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
-ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
 for FILE in $PROTECT
 do
     ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
 done
 ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
+ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
+ox_update_permissions "/var/spool/open-xchange/uploads" open-xchange:root 750
+ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -527,6 +531,8 @@ ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
 /opt/open-xchange/sbin/*
 %dir /opt/open-xchange/templates/
 /opt/open-xchange/templates/*
+%dir %attr(750, open-xchange, root) /var/log/open-xchange
+%dir %attr(750, open-xchange, root) /var/spool/open-xchange/uploads
 %doc docs/
 %doc com.openexchange.server/doc/examples
 %doc com.openexchange.server/ChangeLog
