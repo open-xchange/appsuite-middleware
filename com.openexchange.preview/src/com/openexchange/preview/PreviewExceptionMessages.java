@@ -68,6 +68,9 @@ public final class PreviewExceptionMessages implements LocalizableStrings {
     // An I/O error occurred: %1$s
     public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
 
+    // Thumbnail image not available.
+    public static final String THUMBNAIL_NOT_AVAILABLE = "Thumbnail image not available.";
+
     /**
      * Prevent instantiation.
      */

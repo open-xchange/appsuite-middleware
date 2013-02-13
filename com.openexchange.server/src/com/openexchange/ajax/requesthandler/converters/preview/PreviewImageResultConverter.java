@@ -50,9 +50,7 @@
 package com.openexchange.ajax.requesthandler.converters.preview;
 
 import java.io.InputStream;
-
 import javax.activation.FileTypeMap;
-
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -62,6 +60,7 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.preview.PreviewDocument;
+import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -92,32 +91,40 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
 
     @Override
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
-        IFileHolder fileHolder;
-        final Object resultObject = result.getResultObject();
-        if (!(resultObject instanceof IFileHolder)) {
-            throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
+        try {
+            final Object resultObject = result.getResultObject();
+            if (!(resultObject instanceof IFileHolder)) {
+                throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
+            }
+            final IFileHolder fileHolder = (IFileHolder) resultObject;
+
+            final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
+
+            final DataProperties dataProperties = new DataProperties(4);
+            dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder));
+            dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
+            dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
+            dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
+
+            final PreviewDocument previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session, 1);
+
+            requestData.setFormat("file");
+
+            final InputStream thumbnail = previewDocument.getThumbnail();
+            if (null == thumbnail) {
+                // No thumbnail available
+                throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
+            }
+            
+            final String fileName = previewDocument.getMetaData().get("resourcename");
+            final FileHolder responseFileHolder = new FileHolder(thumbnail, -1, "image/jpeg", fileName); // TODO: file length
+            result.setResultObject(responseFileHolder, "file");
+        } catch (final RuntimeException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        fileHolder = (IFileHolder) resultObject;
-
-        final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
-
-        final DataProperties dataProperties = new DataProperties(4);
-        dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder));
-        dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
-        dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
-        dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
-
-        final PreviewDocument previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session, 1);
-
-        requestData.setFormat("file");
-
-        final InputStream thumbnail = previewDocument.getThumbnail();
-        final String fileName = previewDocument.getMetaData().get("resourcename");
-        final FileHolder responseFileHolder = new FileHolder(thumbnail, -1, "image/jpeg", fileName); // TODO: file length
-        result.setResultObject(responseFileHolder, "file");
     }
 
-	private String getContentType(IFileHolder fileHolder) {
+	private String getContentType(final IFileHolder fileHolder) {
 		String contentType = fileHolder.getContentType();
 		if (contentType == null || contentType.equals("application/octet-stream")) {
 			contentType = FileTypeMap.getDefaultFileTypeMap().getContentType(fileHolder.getName());
