@@ -1,3 +1,7 @@
+* 2013-02-13 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 24939: Proper removing of series end.
+
 * 2013-02-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 24939: Added missing entries to paths.perfMap
