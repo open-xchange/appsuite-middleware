@@ -115,7 +115,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                 // No thumbnail available
                 throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
             }
-            
+
             final String fileName = previewDocument.getMetaData().get("resourcename");
             final FileHolder responseFileHolder = new FileHolder(thumbnail, -1, "image/jpeg", fileName); // TODO: file length
             result.setResultObject(responseFileHolder, "file");
