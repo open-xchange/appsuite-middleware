@@ -64,7 +64,11 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         String groupName = configService.getProperty("com.openexchange.cluster.name");
         if (isEmpty(groupName)) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.cluster.name");
-        } else if ("ox".equalsIgnoreCase(groupName)) {
+        }
+        /*
+         * Continue Hazelcast configuration
+         */
+        if ("ox".equalsIgnoreCase(groupName)) {
             LOG.warn("\n\tThe configuration value for \"com.openexchange.cluster.name\" has not been changed from it's default " +
                     "value \"ox\". Please do so to make this warning disappear.\n");
         }
