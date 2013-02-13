@@ -8,6 +8,7 @@
  - Fix for bug 24939: Added missing entries to paths.perfMap
  - Fix for bug 24933: Orderly clean user-sensitive caches
  - Fix for bug 24958: Fixed .yml file for XING crawler
+ - Fix for bug 24916: Added needed field to accepted modifyable user contact fields
 
 * 2013-02-12 - marc.arens@open-xchange.com
 
