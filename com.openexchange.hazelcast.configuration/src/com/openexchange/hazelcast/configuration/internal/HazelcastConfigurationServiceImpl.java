@@ -79,7 +79,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         /*
          * IPv6 support
          */
-        if (configService.getBoolProperty("com.openexchange.hazelcast.enableIPv6Support", true)) {
+        if (configService.getBoolProperty("com.openexchange.hazelcast.enableIPv6Support", false)) {
             config.setProperty(GroupProperties.PROP_PREFER_IPv4_STACK, "false");
         }
         /*
