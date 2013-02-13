@@ -56,8 +56,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
@@ -146,11 +144,24 @@ public final class TikaPreviewService implements PreviewService {
         final String[] names = metadata.names();
         final Map<String, String> map = new HashMap<String, String>(names.length);
         for (final String name : names) {
-            map.put(name.toLowerCase(Locale.US), metadata.get(name));
+            map.put(toLowerCase(name), metadata.get(name));
         }
         /*
          * Return preview document
          */
         return new TikaPreviewDocument(Collections.singletonList(content), map);
+    }
+
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 }
