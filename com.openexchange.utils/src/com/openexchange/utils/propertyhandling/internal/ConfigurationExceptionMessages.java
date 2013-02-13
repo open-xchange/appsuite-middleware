@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,21 +47,30 @@
  *
  */
 
-package com.openexchange.utils;
+package com.openexchange.utils.propertyhandling.internal;
+
+import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link Dummy} - To be removed.
+ * {@link ConfigurationExceptionMessages}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
-public final class Dummy {
+public class ConfigurationExceptionMessages implements LocalizableStrings {
 
-    /**
-     * Initializes a new {@link Dummy}.
-     */
-    public Dummy() {
-        super();
-    }
+    // No configuration service found
+    public static final String NO_CONFIGURATION_SERVICE_FOUND_MSG = "No configuration service found.";
 
+    // The value given in the property %1$s is no integer value
+    public static final String NO_INTEGER_VALUE_MSG = "The value given in the property %1$s is no integer value.";
+
+    // Property %1$s not set but required.
+    public static final String REQUIRED_PROPERTIY_NOT_SET_MSG = "Property %1$s not set but required.";
+
+    // Property %1$s claims to have condition but condition not set.
+    public static final String CONDITION_NOT_SET_MSG = "Property %1$s claims to have condition but condition not set.";
+
+    // Property %1$s must be set if %2$s is set to %3$s
+    public static final String MUST_BE_SET_TO_MSG = "Property %1$s must be set if %2$s is set to %3$s";
 }
