@@ -160,6 +160,9 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
             if (cso.isOrSearch()) {
                 body.put("orSearch", "true");
             }
+            if (cso.isExactMatch()) {
+                body.put("exactMatch", "true");
+            }
 
             @SuppressWarnings("deprecation")
             int singleFolderId = cso.getFolder();
