@@ -122,7 +122,7 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
             /*
              * Serve with best-fit or delegate preview service
              */
-            final PreviewService previewService = getBestFitOrDelegate(mimeType, output);
+            final PreviewService previewService = getBestFitOrDelegate(toLowerCase(mimeType), output);
             return previewService.getPreviewFor(arg, output, session, pages);
         } catch (final IOException e) {
             throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
@@ -134,14 +134,14 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
     @Override
     public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session, int pages) throws OXException {
         final String mimeType = documentData.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);
-        final PreviewService previewService = getBestFitOrDelegate(mimeType, output);
+        final PreviewService previewService = getBestFitOrDelegate(toLowerCase(mimeType), output);
         return previewService.getPreviewFor(documentData, output, session, pages);
     }
 
     @Override
     public void added(final ServiceReference<InternalPreviewService> ref, final InternalPreviewService service) {
         for (final PreviewPolicy policy : service.getPreviewPolicies()) {
-            final String mimeType = policy.getMimeType();
+            final String mimeType = toLowerCase(policy.getMimeType());
             final PreviewOutput output = policy.getOutput();
             ConcurrentMap<PreviewOutput, BlockingQueue<InternalPreviewService>> map = serviceMap.get(mimeType);
             if (map == null) {
@@ -167,7 +167,7 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
     public void removed(final ServiceReference<InternalPreviewService> ref, final InternalPreviewService service) {
         final List<PreviewPolicy> previewPolicies = service.getPreviewPolicies();
         for (final PreviewPolicy policy : previewPolicies) {
-            final String mimeType = policy.getMimeType();
+            final String mimeType = toLowerCase(policy.getMimeType());
             final PreviewOutput output = policy.getOutput();
             final Map<PreviewOutput, BlockingQueue<InternalPreviewService>> map = serviceMap.get(mimeType);
             if (map != null) {
@@ -223,6 +223,19 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
             return o1Quality - o2Quality;
         }
 
+    }
+
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }
