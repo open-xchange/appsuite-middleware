@@ -53,6 +53,16 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 import org.apache.commons.logging.Log;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.NumericRangeQuery;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.util.Version;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.solr.internal.LuceneQueryTools;
 import com.openexchange.index.solr.internal.config.FieldConfiguration;
@@ -81,19 +91,20 @@ import com.openexchange.mail.search.SubjectTerm;
 import com.openexchange.mail.search.ToTerm;
 
 /**
- * {@link CustomTranslator}
- * 
+ * {@link CustomLuceneTranslator}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class CustomTranslator implements QueryTranslator {
+public class CustomLuceneTranslator implements QueryTranslator {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(CustomTranslator.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CustomLuceneTranslator.class);
 
     private Configuration config;
 
     private String name;
 
     private FieldConfiguration fieldConfig;
+
 
     @Override
     public void init(String name, Configuration config, FieldConfiguration fieldConfig) throws TranslationException {
@@ -107,28 +118,33 @@ public class CustomTranslator implements QueryTranslator {
         if (o instanceof SearchTerm<?>) {
             TranslatorVisitor visitor = new TranslatorVisitor(name, config, fieldConfig);
             ((SearchTerm<?>) o).accept(visitor);
-            return visitor.queryBuilder.toString();
+            return visitor.query.toString();
         }
 
         throw new TranslationException("The given object must be of type com.openexchange.mail.search.SearchTerm<?>.");
     }
 
+
     private static final class TranslatorVisitor implements SearchTermVisitor {
 
         private final Configuration config;
 
-        private final StringBuilder queryBuilder;
-
         private final String name;
 
         private final FieldConfiguration fieldConfig;
+
+        private Query query;
+
 
         public TranslatorVisitor(String name, Configuration config, FieldConfiguration fieldConfig) {
             super();
             this.name = name;
             this.config = config;
             this.fieldConfig = fieldConfig;
-            queryBuilder = new StringBuilder(48);
+        }
+        
+        public Query getQuery() {
+            return query;
         }
 
         @Override
@@ -138,80 +154,85 @@ public class CustomTranslator implements QueryTranslator {
                 LOG.warn("AND term was empty. Skipping in search query...");
                 return;
             }
-
-            queryBuilder.append('(');
-            TranslatorVisitor visitor = new TranslatorVisitor(name, config, fieldConfig);
-            terms[0].accept(visitor);
-            queryBuilder.append(visitor.queryBuilder);
-            for (int i = 1; i < terms.length; i++) {
-                queryBuilder.append(" AND ");
+            
+            BooleanQuery booleanQuery = new BooleanQuery();
+            TranslatorVisitor visitor;
+            for (int i = 0; i < terms.length; i++) {
                 SearchTerm<?> searchTerm = terms[i];
                 visitor = new TranslatorVisitor(name, config, fieldConfig);
                 searchTerm.accept(visitor);
-                queryBuilder.append(visitor.queryBuilder);
+                Query queryForTerm = visitor.getQuery();
+                if (queryForTerm != null) {
+                    booleanQuery.add(queryForTerm, Occur.MUST);
+                }
             }
-            queryBuilder.append(')');
+            
+            query = booleanQuery;
         }
 
         @Override
         public void visit(ORTerm term) {
             SearchTerm<?>[] terms = term.getPattern();
             if (terms == null || terms.length == 0) {
-                LOG.warn("OR term was empty. Skipping in search query...");
+                LOG.warn("AND term was empty. Skipping in search query...");
                 return;
             }
-
-            queryBuilder.append('(');
-            TranslatorVisitor visitor = new TranslatorVisitor(name, config, fieldConfig);
-            terms[0].accept(visitor);
-            queryBuilder.append(visitor.queryBuilder);
-            for (int i = 1; i < terms.length; i++) {
-                queryBuilder.append(" OR ");
+            
+            BooleanQuery booleanQuery = new BooleanQuery();
+            TranslatorVisitor visitor;
+            for (int i = 0; i < terms.length; i++) {
                 SearchTerm<?> searchTerm = terms[i];
                 visitor = new TranslatorVisitor(name, config, fieldConfig);
                 searchTerm.accept(visitor);
-                queryBuilder.append(visitor.queryBuilder);
+                Query queryForTerm = visitor.getQuery();
+                if (queryForTerm != null) {
+                    booleanQuery.add(queryForTerm, Occur.SHOULD);
+                }
             }
-            queryBuilder.append(')');
+            
+            query = booleanQuery;
         }
 
         @Override
         public void visit(NOTTerm term) {
-            queryBuilder.append("NOT (");
+            BooleanQuery booleanQuery = new BooleanQuery();
             TranslatorVisitor visitor = new TranslatorVisitor(name, config, fieldConfig);
             term.getPattern().accept(visitor);
-            queryBuilder.append(visitor.queryBuilder);
-            queryBuilder.append(')');
+            Query queryForTerm = visitor.getQuery();
+            if (queryForTerm != null) {
+                booleanQuery.add(queryForTerm, Occur.MUST_NOT);
+            }
+            query = booleanQuery;
         }
 
         @Override
         public void visit(FromTerm term) {
-            appendStringTerm(MailIndexField.FROM, term);
+            constructQuery(MailIndexField.FROM, term);
         }
 
         @Override
         public void visit(ToTerm term) {
-            appendStringTerm(MailIndexField.TO, term);
+            constructQuery(MailIndexField.TO, term);
         }
 
         @Override
         public void visit(CcTerm term) {
-            appendStringTerm(MailIndexField.CC, term);
+            constructQuery(MailIndexField.CC, term);
         }
 
         @Override
         public void visit(BccTerm term) {
-            appendStringTerm(MailIndexField.BCC, term);
+            constructQuery(MailIndexField.BCC, term);
         }
 
         @Override
         public void visit(SubjectTerm term) {
-            appendStringTerm(MailIndexField.SUBJECT, term);
+            constructQuery(MailIndexField.SUBJECT, term);
         }
 
         @Override
         public void visit(BodyTerm term) {
-            appendStringTerm(MailIndexField.CONTENT, term);
+            constructQuery(MailIndexField.CONTENT, term);
         }
 
         @Override
@@ -221,52 +242,50 @@ public class CustomTranslator implements QueryTranslator {
             if (!set) {
                 flags *= -1;
             }
-            String andConcat = " AND ";
-            queryBuilder.append('(');
-            int off = queryBuilder.length();
+
+            BooleanQuery booleanQuery = new BooleanQuery();
             if ((flags & MailMessage.FLAG_ANSWERED) > 0) {
-                appendFlag(MailIndexField.FLAG_ANSWERED, set);
+                appendFlag(booleanQuery, MailIndexField.FLAG_ANSWERED, set);
             }
             if ((flags & MailMessage.FLAG_DELETED) > 0) {
-                appendFlag(MailIndexField.FLAG_DELETED, set);
+                appendFlag(booleanQuery, MailIndexField.FLAG_DELETED, set);
             }
             if ((flags & MailMessage.FLAG_DRAFT) > 0) {
-                appendFlag(MailIndexField.FLAG_DRAFT, set);
+                appendFlag(booleanQuery, MailIndexField.FLAG_DRAFT, set);
             }
             if ((flags & MailMessage.FLAG_FLAGGED) > 0) {
-                appendFlag(MailIndexField.FLAG_FLAGGED, set);
+                appendFlag(booleanQuery, MailIndexField.FLAG_FLAGGED, set);
             }
             if ((flags & MailMessage.FLAG_RECENT) > 0) {
-                appendFlag(MailIndexField.FLAG_RECENT, set);
+                appendFlag(booleanQuery, MailIndexField.FLAG_RECENT, set);
             }
             if ((flags & MailMessage.FLAG_SEEN) > 0) {
-                appendFlag(MailIndexField.FLAG_SEEN, set);
+                appendFlag(booleanQuery, MailIndexField.FLAG_SEEN, set);
             }
             if ((flags & MailMessage.FLAG_USER) > 0) {
-                appendFlag(MailIndexField.FLAG_USER, set);
+                appendFlag(booleanQuery, MailIndexField.FLAG_USER, set);
             }
             if ((flags & MailMessage.FLAG_SPAM) > 0) {
-                appendFlag(MailIndexField.FLAG_SPAM, set);
+                appendFlag(booleanQuery, MailIndexField.FLAG_SPAM, set);
             }
             if ((flags & MailMessage.FLAG_FORWARDED) > 0) {
-                appendFlag(MailIndexField.FLAG_FORWARDED, set);
+                appendFlag(booleanQuery, MailIndexField.FLAG_FORWARDED, set);
             }
             if ((flags & MailMessage.FLAG_READ_ACK) > 0) {
-                appendFlag(MailIndexField.FLAG_READ_ACK, set);
+                appendFlag(booleanQuery, MailIndexField.FLAG_READ_ACK, set);
             }
-            queryBuilder.delete(off, off + andConcat.length()); // Delete first >>" AND "<< prefix
-            queryBuilder.append(')');
+            
+            query = booleanQuery;
         }
 
-        private void appendFlag(MailIndexField mailField, boolean value) {
+        private void appendFlag(BooleanQuery booleanQuery, MailIndexField mailField, boolean value) {
             Set<String> solrFields = fieldConfig.getSolrFields(mailField);
             if (solrFields == null || solrFields.isEmpty()) {
                 LOG.warn("Did not find index fields for parameter " + mailField.toString() + ". Skipping this field in search query...");
                 return;
             }
 
-            String andConcat = " AND ";
-            queryBuilder.append(andConcat).append(solrFields.iterator().next()).append(':').append(value);
+            booleanQuery.add(new TermQuery(new Term(solrFields.iterator().next(), Boolean.toString(value))), Occur.MUST);
         }
 
         @Override
@@ -281,15 +300,13 @@ public class CustomTranslator implements QueryTranslator {
             String name = solrFields.iterator().next();
             switch (comparablePattern.getComparisonType()) {
                 case EQUALS:
-                    queryBuilder.append('(').append(name).append(':').append(comparablePattern.getPattern().intValue()).append(')');
+                    query = new TermQuery(new Term(name, comparablePattern.getPattern().toString()));
                     break;
                 case GREATER_THAN:
-                    queryBuilder.append('(').append(name).append(':').append('[').append(comparablePattern.getPattern().intValue() + 1).append(
-                        " TO ").append(Integer.MAX_VALUE).append(']').append(')');
+                    query = NumericRangeQuery.newIntRange(name, comparablePattern.getPattern().intValue(), Integer.MAX_VALUE, false, true);
                     break;
                 case LESS_THAN:
-                    queryBuilder.append('(').append(name).append(':').append('[').append(0).append(" TO ").append(
-                        comparablePattern.getPattern().intValue() - 1).append(']').append(')');
+                    query = NumericRangeQuery.newIntRange(name, 0, comparablePattern.getPattern().intValue(), true, false);
                     break;
                 default:
                     throw new IllegalStateException("Unknown operator: " + comparablePattern.getComparisonType());
@@ -309,15 +326,13 @@ public class CustomTranslator implements QueryTranslator {
             long time = comparablePattern.getPattern().getTime();
             switch (comparablePattern.getComparisonType()) {
                 case EQUALS:
-                    queryBuilder.append('(').append(name).append(':').append(time).append(')');
+                    query = new TermQuery(new Term(name, String.valueOf(time)));
                     break;
                 case GREATER_THAN:
-                    queryBuilder.append('(').append(name).append(':').append('[').append(time + 1).append(" TO ").append(Long.MAX_VALUE).append(
-                        ']').append(')');
+                    query = NumericRangeQuery.newLongRange(name, time, Long.MAX_VALUE, false, true);
                     break;
                 case LESS_THAN:
-                    queryBuilder.append('(').append(name).append(':').append('[').append(Long.MIN_VALUE).append(" TO ").append(time - 1).append(
-                        ']').append(')');
+                    query = NumericRangeQuery.newLongRange(name, 0L, time, true, false);
                     break;
                 default:
                     throw new IllegalStateException("Unknown operator: " + comparablePattern.getComparisonType());
@@ -337,15 +352,13 @@ public class CustomTranslator implements QueryTranslator {
             long time = comparablePattern.getPattern().getTime();
             switch (comparablePattern.getComparisonType()) {
                 case EQUALS:
-                    queryBuilder.append('(').append(name).append(':').append(time).append(')');
+                    query = new TermQuery(new Term(name, String.valueOf(time)));
                     break;
                 case GREATER_THAN:
-                    queryBuilder.append('(').append(name).append(':').append('[').append(time + 1).append(" TO ").append(Long.MAX_VALUE).append(
-                        ']').append(')');
+                    query = NumericRangeQuery.newLongRange(name, time, Long.MAX_VALUE, false, true);
                     break;
                 case LESS_THAN:
-                    queryBuilder.append('(').append(name).append(':').append('[').append(Long.MIN_VALUE).append(" TO ").append(time - 1).append(
-                        ']').append(')');
+                    query = NumericRangeQuery.newLongRange(name, 0L, time, true, false);
                     break;
                 default:
                     throw new IllegalStateException("Unknown operator: " + comparablePattern.getComparisonType());
@@ -362,46 +375,34 @@ public class CustomTranslator implements QueryTranslator {
             throw new IllegalStateException("Unsupported search term: " + HeaderTerm.class.getName());
         }
 
-        private void appendStringTerm(IndexField indexField, SearchTerm<String> term) {
+        private void constructQuery(IndexField indexField, SearchTerm<String> term) {
             Set<String> solrFields = fieldConfig.getSolrFields(indexField);
             if (solrFields == null || solrFields.isEmpty()) {
                 LOG.warn("Did not find index fields for field " + indexField.toString() + ". Skipping this field in search query...");
                 return;
             }
-
-            String orig = term.getPattern();
-            if (orig == null) {
-                return;
-            }
             
-            orig = orig.trim();
-            boolean isPhrase = false;
-            if (orig.length() > 1 && orig.startsWith("\"") && orig.endsWith("\"")) {
-                orig = orig.substring(1, orig.length() - 1);
-                isPhrase = true;
-            }
-            
-            if (orig.length() == 0) {
-                return;
-            }
-            
-            String pattern = LuceneQueryTools.escapeButWildcards(orig);
+            String pattern = LuceneQueryTools.escapeButWildcards(term.getPattern());
             Iterator<String> it = solrFields.iterator();
-            queryBuilder.append('(');
-            queryBuilder.append(it.next()).append(':').append(pattern);
-            while (it.hasNext()) {
-                String solrField = it.next();
-                queryBuilder.append(" OR ");
-                queryBuilder.append(solrField).append(':');
-                if (isPhrase) {
-                    queryBuilder.append("\"");
-                    queryBuilder.append(pattern);
-                    queryBuilder.append("\"");
-                } else {
-                    queryBuilder.append(pattern);
+            if (solrFields.size() == 1) {
+                try {
+                    QueryParser parser = new QueryParser(Version.LUCENE_CURRENT, it.next(), new StandardAnalyzer(Version.LUCENE_CURRENT));
+                    query = parser.parse(pattern);
+                } catch (ParseException e) {
+                    LOG.warn("Could not parse query.", e);
                 }
+            } else {
+                BooleanQuery booleanQuery = new BooleanQuery();
+                while (it.hasNext()) {
+                    try {
+                        QueryParser parser = new QueryParser(Version.LUCENE_CURRENT, it.next(), new StandardAnalyzer(Version.LUCENE_CURRENT));
+                        booleanQuery.add(parser.parse(pattern), Occur.SHOULD);
+                    } catch (ParseException e) {
+                        LOG.warn("Could not parse query.", e);
+                    }
+                }
+                query = booleanQuery;
             }
-            queryBuilder.append(')');
         }
     }
 

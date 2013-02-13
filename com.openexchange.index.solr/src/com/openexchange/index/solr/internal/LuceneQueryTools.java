@@ -144,5 +144,18 @@ public class LuceneQueryTools {
         sb.append(')');
         return sb.toString();
     }
+    
+    public static String escapeButWildcards(String s) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            // These characters are part of the query syntax and must be escaped
+            if (c == '\u005c\u005c' || c == '+' || c == '-' || c == '!' || c == '(' || c == ')' || c == ':' || c == '^' || c == '[' || c == ']' || c == '\u005c"' || c == '{' || c == '}' || c == '~' || c == '|' || c == '&') {
+                sb.append('\u005c\u005c');
+            }
+            sb.append(c);
+        }
+        return sb.toString();
+    }
 
 }
