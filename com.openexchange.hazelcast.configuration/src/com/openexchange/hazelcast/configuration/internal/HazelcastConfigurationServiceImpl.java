@@ -31,6 +31,7 @@ import com.openexchange.tools.strings.TimeSpanParser;
  * {@link HazelcastConfigurationServiceImpl}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HazelcastConfigurationServiceImpl implements HazelcastConfigurationService {
 
@@ -51,7 +52,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
 
     @Override
     public boolean isEnabled() throws OXException {
-        return Services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.hazelcast.enabled", Boolean.TRUE);
+        return Services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.hazelcast.enabled", true);
     }
 
     @Override
