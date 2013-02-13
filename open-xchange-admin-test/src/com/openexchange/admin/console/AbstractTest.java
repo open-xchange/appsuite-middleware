@@ -51,7 +51,6 @@ package com.openexchange.admin.console;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import junit.framework.TestCase;
 import org.junit.After;
 import org.junit.Before;
 
@@ -59,18 +58,18 @@ public abstract class AbstractTest {
 
     protected  static String TEST_DOMAIN = "example.org";
     protected  static String CHANGE_SUFFIX = "_changed";
-    
+
     protected static String OPTION_CONTEXT_ADMIN_USER = "--adminuser=oxadmin";
     protected static String OPTION_CONTEXT_ADMIN_PWD = "--adminpass=secret";
     protected static String OPTION_SUPER_ADMIN_USER = "--adminuser=oxadminmaster";
     protected static String OPTION_SUPER_ADMIN_PWD = "--adminpass=secret";
     protected static String OPTION_USER_PASSWORD = "--password=foo-user-pass";
-    
+
     protected static String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     protected static String VALID_CHAR_TESTRESOURCE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-+.%$@";
     protected static String VALID_CHAR_TESTGROUP = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-+.%$@";
-    
-    
+
+
     protected int returnCode;
     protected ByteArrayOutputStream errBytes;
     protected ByteArrayOutputStream outBytes;
@@ -134,7 +133,7 @@ public abstract class AbstractTest {
 
     /**
      *
-     * @return String[] with only wrong oxadmin and wrong password option 
+     * @return String[] with only wrong oxadmin and wrong password option
      */
     public static String[] getWrongCredentialsOptionData(){
         final String[] tmp = {OPTION_CONTEXT_ADMIN_USER+"_xyzf00bar", OPTION_CONTEXT_ADMIN_PWD+"_xyzfoobar"};
@@ -144,7 +143,7 @@ public abstract class AbstractTest {
 
     /**
      *
-     * @return String[] with only wrong oxadminmaster and wrong password option 
+     * @return String[] with only wrong oxadminmaster and wrong password option
      */
     public static String[] getWrongMasterCredentialsOptionData(){
         final String[] tmp = {OPTION_SUPER_ADMIN_USER+"_xyzf00bar", OPTION_SUPER_ADMIN_PWD+"_xyzfoobar"};
