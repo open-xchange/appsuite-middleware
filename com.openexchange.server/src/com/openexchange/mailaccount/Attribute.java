@@ -213,6 +213,9 @@ public enum Attribute {
             return switcher.pop3Path();
         case ADDRESSES:
             return switcher.addresses();
+        case META:
+            // Ignore for virtual attribute
+            return null;
         default:
             throw new IllegalArgumentException(getName());
         }
