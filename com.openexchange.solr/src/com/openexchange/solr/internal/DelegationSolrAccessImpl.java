@@ -350,15 +350,18 @@ public class DelegationSolrAccessImpl implements SolrAccessService {
     public void freeResources(SolrCoreIdentifier identifier) {
         if (embeddedAccess.hasActiveCore(identifier)) {
             HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-            if (hazelcast != null && hazelcast.getLifecycleService().isRunning()) {
-                IMap<String, String> solrCores = hazelcast.getMap(SolrCoreTools.SOLR_CORE_MAP);
-                solrCores.lock(identifier.toString());
-                try {
-                    SolrCoreTools.decrementCoreCount(hazelcast, hazelcast.getCluster().getLocalMember());
-                    solrCores.remove(identifier.toString());
-                    embeddedAccess.freeResources(identifier);
-                } finally {
-                    solrCores.unlock(identifier.toString());
+            if (hazelcast != null) {
+                LifecycleService lifecycleService = hazelcast.getLifecycleService();
+                if (lifecycleService != null && lifecycleService.isRunning()) {
+                    IMap<String, String> solrCores = hazelcast.getMap(SolrCoreTools.SOLR_CORE_MAP);
+                    solrCores.lock(identifier.toString());
+                    try {
+                        SolrCoreTools.decrementCoreCount(hazelcast, hazelcast.getCluster().getLocalMember());
+                        solrCores.remove(identifier.toString());
+                        embeddedAccess.freeResources(identifier);
+                    } finally {
+                        solrCores.unlock(identifier.toString());
+                    }
                 }
             }
         }
