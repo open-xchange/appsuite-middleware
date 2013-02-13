@@ -531,8 +531,8 @@ ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
 /opt/open-xchange/sbin/*
 %dir /opt/open-xchange/templates/
 /opt/open-xchange/templates/*
-%dir %attr(750,open-xchange,root) /var/log/open-xchange
-%dir %attr(750,open-xchange,root) /var/spool/open-xchange/uploads
+%dir %attr(750, open-xchange, root) /var/log/open-xchange
+%dir %attr(750, open-xchange, root) /var/spool/open-xchange/uploads
 %doc docs/
 %doc com.openexchange.server/doc/examples
 %doc com.openexchange.server/ChangeLog
