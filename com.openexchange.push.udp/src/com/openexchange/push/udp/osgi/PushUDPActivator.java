@@ -54,6 +54,7 @@ import java.util.Hashtable;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.event.EventFactoryService;
@@ -83,7 +84,7 @@ public class PushUDPActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, EventAdmin.class, EventFactoryService.class, TimerService.class, ContextService.class, FolderService.class, ThreadPoolService.class };
+        return new Class<?>[] { ConfigurationService.class, EventAdmin.class, EventFactoryService.class, ContextService.class, FolderService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -127,6 +128,11 @@ public class PushUDPActivator extends HousekeepingActivator {
              */
             PushInit.getInstance().start();
             registerEventHandler();
+            /*
+             * Service trackers
+             */
+            rememberTracker(new ServiceTracker<TimerService,TimerService>(context, TimerService.class, new TimerCustomizer(context)));
+            openTrackers();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
