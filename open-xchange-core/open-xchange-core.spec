@@ -215,6 +215,13 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1324
+# -----------------------------------------------------------------------
+pfile=/opt/open-xchange/etc/hazelcast.properties
+if ! ox_exists_property com.openexchange.hazelcast.enableIPv6Support $pfile; then
+    ox_set_property com.openexchange.hazelcast.enableIPv6Support false $pfile
+fi
+
 # SoftwareChange_Request-1308
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/hazelcast.properties
