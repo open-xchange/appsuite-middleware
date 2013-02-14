@@ -1,3 +1,7 @@
+* 2013-02-14 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24829: Removed user discovery by e-mail aliases in contact halo
+
 * 2013-02-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 24962: Disabled XING OAuth bundle (as its API is still beta)

@@ -65,34 +65,6 @@ public class ContactHaloImpl implements ContactHalo {
 		if (contact.getInternalUserId() > 0) {
 			user = userService.getUser(contact.getInternalUserId(), session.getContext());
 		}
-		if (user == null) {
-			try {
-				user = userService.searchUser(contact.getEmail1(),
-						session.getContext());
-			} catch (final OXException x) {
-				// Don't care. This is all best effort anyway.
-			}
-		}
-
-		if (user == null) {
-			try {
-				user = userService.searchUser(contact.getEmail2(),
-						session.getContext());
-			} catch (final OXException x) {
-				// Don't care. This is all best effort anyway.
-			}
-		}
-
-		if (user == null) {
-			try {
-				user = userService.searchUser(contact.getEmail3(),
-						session.getContext());
-			} catch (final OXException x) {
-				// Don't care. This is all best effort anyway.
-			}
-		}
-
-
 		contactQuery.setUser(user);
 		final List<Contact> contactsToMerge = new ArrayList<Contact>();
 		if (user != null) {
