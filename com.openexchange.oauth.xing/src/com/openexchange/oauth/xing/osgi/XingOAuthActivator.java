@@ -79,7 +79,7 @@ public final class XingOAuthActivator extends HousekeepingActivator {
             // Do nothing
             final Log log = com.openexchange.log.Log.loggerFor(XingOAuthActivator.class);
             final String ls = System.getProperty("line.separator");
-            log.info(ls + ls + "Bundle 'com.openexchange.oauth.xing' is disabled as per \"\" property in file 'xingoauth.properties'." + ls);
+            log.info(ls + ls + "Bundle 'com.openexchange.oauth.xing' is disabled as per \"com.openexchange.oauth.xing\" property in file 'xingoauth.properties'." + ls);
             return;
         }
         // Proceed
