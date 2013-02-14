@@ -104,4 +104,13 @@ public final class LdapContactInterfaceProvider {
         return ldapContactInterface;
     }
 
+    /**
+     * Gets the folder properties.
+     *
+     * @return the folder properties
+     */
+    public FolderProperties getProperties() {
+        return this.folderProperties;
+    }
+
 }
