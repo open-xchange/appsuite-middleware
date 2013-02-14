@@ -50,6 +50,7 @@
 package com.openexchange.service.indexing.impl.internal;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import javax.management.MBeanException;
@@ -179,8 +180,11 @@ public class IndexingServiceMBeanImpl extends StandardMBean implements IndexingS
             List<? extends Trigger> triggersOfJob = scheduler.getTriggersOfJob(new JobKey(jobName, jobGroup));
             for (Trigger t : triggersOfJob) {
                 TriggerKey key = t.getKey();
+                Date nextFireTime = t.getNextFireTime();
+                Date previousFireTime = t.getPreviousFireTime();
+                Date startTime = t.getStartTime();
                 TriggerState triggerState = scheduler.getTriggerState(key);
-                states.add(key + ": " + triggerState.toString());
+                states.add(key + " (start: " + startTime + ", previous: " + previousFireTime + ", next: " + nextFireTime + "): " + triggerState.toString());
             }
 
             return states;
