@@ -1,3 +1,9 @@
+open-xchange-upsell-multiple (7.0.1-2) unstable; urgency=low
+
+  * Second release candidate for 7.0.1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 14 Feb 2013 13:55:17 +0100
+
 open-xchange-upsell-multiple (7.0.1-1) unstable; urgency=low
 
   * First release candidate for 7.0.1

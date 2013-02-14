@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -213,6 +213,27 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
            fi
        done
     fi
+fi
+
+# SoftwareChange_Request-1330
+pfile=/opt/open-xchange/etc/mime.types
+if ! grep docm $pfile > /dev/null; then
+   ptmp=${pfile}.$$
+   cp $pfile $ptmp
+   cat<<EOF >> $ptmp
+application/vnd.ms-word.document.macroEnabled.12 docm
+application/vnd.ms-word.template dotm
+application/vnd.openxmlformats-officedocument.wordprocessingml.template dotx
+application/vnd.ms-powerpoint.presentation.macroEnabled.12 potm
+application/vnd.openxmlformats-officedocument.presentationml.template potx
+application/vnd.ms-excel.sheet.binary.macroEnabled.12 xlsb
+application/vnd.ms-excel.sheet.macroEnabled.12 xlsm
+application/vnd.openxmlformats-officedocument.spreadsheetml.sheet xlsx
+EOF
+   if [ -s $ptmp ]; then
+      cp $ptmp $pfile
+   fi
+   rm -f $ptmp
 fi
 
 # SoftwareChange_Request-1324
@@ -548,6 +569,8 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/requestwatcher.properties
 
 %changelog
+* Thu Feb 14 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.0.1
 * Fri Feb 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.0.1
 * Tue Jan 29 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -560,8 +583,6 @@ Build for patch 2013-01-23
 Build for patch 2013-01-10
 * Thu Jan 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.0.1
-* Thu Jan 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-01-10
 * Thu Jan 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for public patch 2013-01-15
 * Fri Dec 28 2012 Marcus Klein <marcus.klein@open-xchange.com>

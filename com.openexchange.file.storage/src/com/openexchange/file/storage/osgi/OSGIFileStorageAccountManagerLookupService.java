@@ -146,9 +146,10 @@ public class OSGIFileStorageAccountManagerLookupService implements FileStorageAc
             }
             if (null == accountManager) {
                 final Log logger = com.openexchange.log.Log.loggerFor(OSGIFileStorageAccountManagerLookupService.class);
-                logger.warn("\n\tThere is no file storage service available that provides account \"" + accountId + "\".\n" +
-                            "\tPlease ensure the appropriate " + FileStorageService.class.getSimpleName() + " is up and running.\n" +
-                            "\tRefer to /opt/open-xchange/sbin/listservices");
+                final String ls = System.getProperty("line.separator");
+                logger.warn(ls + "    There is no file storage service available that provides account \"" + accountId + "\"." + ls +
+                            "    Please ensure the appropriate " + FileStorageService.class.getSimpleName() + " is up and running." + ls +
+                            "    Refer to /opt/open-xchange/sbin/listservices");
                 return null;
             }
             session.setParameter(paramName, accountManager);

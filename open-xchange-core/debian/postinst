@@ -118,6 +118,27 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1330
+pfile=/opt/open-xchange/etc/mime.types
+if ! grep docm $pfile > /dev/null; then
+   ptmp=${pfile}.$$
+   cp $pfile $ptmp
+   cat<<EOF >> $ptmp
+application/vnd.ms-word.document.macroEnabled.12 docm
+application/vnd.ms-word.template dotm
+application/vnd.openxmlformats-officedocument.wordprocessingml.template dotx
+application/vnd.ms-powerpoint.presentation.macroEnabled.12 potm
+application/vnd.openxmlformats-officedocument.presentationml.template potx
+application/vnd.ms-excel.sheet.binary.macroEnabled.12 xlsb
+application/vnd.ms-excel.sheet.macroEnabled.12 xlsm
+application/vnd.openxmlformats-officedocument.spreadsheetml.sheet xlsx
+EOF
+   if [ -s $ptmp ]; then
+      cp $ptmp $pfile
+   fi
+   rm -f $ptmp
+fi
+
 # SoftwareChange_Request-1324
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/hazelcast.properties

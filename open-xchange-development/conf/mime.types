@@ -230,14 +230,22 @@ application/vnd.ms-artgalry cil
 application/vnd.ms-asf asf
 application/vnd.ms-cab-compressed cab
 application/vnd.ms-excel xls xlm xla xlc xlt xlw
+application/vnd.ms-excel.sheet.binary.macroEnabled.12 xlsb
+application/vnd.ms-excel.sheet.macroEnabled.12 xlsm
 application/vnd.ms-fontobject eot
 application/vnd.ms-htmlhelp chm
 application/vnd.ms-ims ims
 application/vnd.ms-lrm lrm
 application/vnd.ms-playready.initiator+xml
 application/vnd.ms-powerpoint ppt pps pot
+application/vnd.ms-powerpoint.presentation.macroEnabled.12 potm
 application/vnd.ms-project mpp mpt
 application/vnd.ms-works wps wks wcm wdb
+application/vnd.ms-word.document.macroEnabled.12 docm
+application/vnd.ms-word.template dotm
+application/vnd.openxmlformats-officedocument.wordprocessingml.template dotx
+application/vnd.openxmlformats-officedocument.presentationml.template potx
+application/vnd.openxmlformats-officedocument.spreadsheetml.sheet xlsx
 application/vnd.ms-wpl wpl
 application/vnd.ms-xpsdocument xps
 application/vnd.mseq mseq

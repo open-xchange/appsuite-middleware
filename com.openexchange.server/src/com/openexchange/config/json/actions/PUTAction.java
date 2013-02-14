@@ -179,7 +179,8 @@ public final class PUTAction extends AbstractConfigAction {
      */
     private void saveSettingWithSubs(final SettingStorage storage, final Setting setting) throws OXException, JSONException {
         if (setting.isLeaf()) {
-            if (!ignorees.contains(setting.getPath())) {
+            final String path = setting.getPath();
+            if (!ignorees.contains(path) && !path.startsWith("/io.ox/core")) {
                 final String value = (String) setting.getSingleValue();
                 if (!isEmpty(value)) {
                     if ('[' == value.charAt(0)) {
@@ -209,7 +210,8 @@ public final class PUTAction extends AbstractConfigAction {
                 if (sb.length() > reset) {
                     sb.setLength(reset);
                 }
-                if (!ignorees.contains(sb.append(key).toString())) {
+                final String path = sb.append(key).toString();
+                if (!ignorees.contains(path) && !path.startsWith("/io.ox/core")) {
                     final Setting sub = ConfigTree.getSettingByPath(setting, new String[] { key });
                     sub.setSingleValue(json.getString(key));
                     try {

@@ -50,6 +50,7 @@
 package com.openexchange.service.indexing.impl.internal;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import javax.management.MBeanException;
@@ -59,6 +60,9 @@ import org.apache.commons.logging.Log;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
+import org.quartz.Trigger;
+import org.quartz.Trigger.TriggerState;
+import org.quartz.TriggerKey;
 import org.quartz.impl.matchers.GroupMatcher;
 import com.openexchange.service.indexing.IndexingServiceMBean;
 
@@ -165,6 +169,28 @@ public class IndexingServiceMBeanImpl extends StandardMBean implements IndexingS
             throw new MBeanException(e);
         } finally {
             Thread.currentThread().setContextClassLoader(tmp);
+        }
+    }
+    
+    @Override
+    public List<String> getTriggerStatesForJob(String jobGroup, String jobName) throws MBeanException {
+        try {
+            List<String> states = new ArrayList<String>();
+            Scheduler scheduler = indexingService.getScheduler();
+            List<? extends Trigger> triggersOfJob = scheduler.getTriggersOfJob(new JobKey(jobName, jobGroup));
+            for (Trigger t : triggersOfJob) {
+                TriggerKey key = t.getKey();
+                Date nextFireTime = t.getNextFireTime();
+                Date previousFireTime = t.getPreviousFireTime();
+                Date startTime = t.getStartTime();
+                TriggerState triggerState = scheduler.getTriggerState(key);
+                states.add(key + " (start: " + startTime + ", previous: " + previousFireTime + ", next: " + nextFireTime + "): " + triggerState.toString());
+            }
+
+            return states;
+        } catch (Exception e) {
+            LOG.info(e.getMessage(), e);
+            throw new MBeanException(e);
         }
     }
 
