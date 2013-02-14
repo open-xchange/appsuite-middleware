@@ -1,3 +1,7 @@
+* 2013-02-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24962: Disabled XING OAuth bundle (as its API is still beta)
+
 * 2013-02-13 - martin.herfurth@open-xchange.com
 
  - Fix for bug 24870: Proper removing of series end.
