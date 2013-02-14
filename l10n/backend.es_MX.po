@@ -23,7 +23,7 @@ msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-08-04 14:10+0100\n"
-"PO-Revision-Date: 2013-02-10 14:06+0100\n"
+"PO-Revision-Date: 2013-02-13 22:07+0100\n"
 "Last-Translator: Andres Herrera <andres@bureau-cornavin.com>\n"
 "Language-Team: Spanish <es@bureau-cornavin.com>\n"
 "MIME-Version: 1.0\n"
@@ -4373,6 +4373,11 @@ msgstr "La cuenta no es válida; por favor, vuelva a crearla."
 msgid "Please provide a display name."
 msgstr "Por favor, proporcione un nombre para mostrar."
 
+#. The associated OAuth provider denied the request: %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:147
+msgid "The associated OAuth provider denied the request: %1$s."
+msgstr "El proveedor de OAuth asociado ha denegado la petición: %1$s."
+
 #. *
 #. * Cannot change password for any reason.
 #.
@@ -4679,14 +4684,18 @@ msgstr "La carpeta de correo %1$s no se debe mover a la carpeta siguiente %2$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:182
 msgid ""
 "This message could not be moved to trash folder, possibly because your "
-"mailbox is nearly full.\n"
+"mailbox is nearly full."
+msgstr ""
+"Este mensaje no se pudo mover a la papelera, posiblemente porque su buzón de "
+"correo está casi lleno."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:182
+msgid ""
 "In that case, please try to empty your deleted items first, or delete "
 "smaller messages first."
 msgstr ""
-"Este mensaje no se pudo mover a la papelera, posiblemente porque su buzón de "
-"correo está casi lleno.\n"
-"En tal caso, por favor vacíela antes de mensajes borrados o borre los "
-"mensajes más pequeños."
+"En tal caso, por favor intente antes vaciar los elementos eliminados, o "
+"borre los mensajes más pequeños."
 
 #. *
 #. * Missing %1$s folder in mail move operation
@@ -4927,12 +4936,14 @@ msgstr "Operación de traslado no permitida."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s).\n"
-"Error message from server: %5$s"
+"context=%4$s)."
 msgstr ""
-"El retraso en la conexión no permite conectar el servidor %1$s con nombre de "
-"usuario %2$s (usuario=%3$s, contexto=%4$s).\n"
-"  Mensaje de error del servidor: %5$s "
+"El retraso en la conexión no permite conectar el servidor %1$s con conexión "
+"%2$s (usuario=%3$s, contexto=%4$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
+msgid "Error message from server: %5$s"
+msgstr "Mensaje de error del servidor: %5$s"
 
 #. *
 #. * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
@@ -4941,12 +4952,14 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:312
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s). Try again in %5$s seconds.\n"
-"Error message from server: %6$s"
+"context=%4$s). Try again in %5$s seconds."
 msgstr ""
-"El retraso en la conexión no permite conectar el servidor %1$s con conexión %"
-"2$s (usuario=%3$s, contexto=%4$s). Inténtelo de nuevo en %5$s segundos.\n"
-"Mensaje de error del servidor: %6$s"
+"El retraso en la conexión no permite conectar el servidor %1$s con conexión "
+"%2$s (usuario=%3$s, contexto=%4$s). Inténtelo de nuevo en %5$s segundos."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:312
+msgid "Error message from server: %6$s"
+msgstr "Mensaje de error del servidor: %6$s"
 
 #. *
 #. * Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
@@ -6258,8 +6271,7 @@ msgid ""
 "appointment"
 msgstr ""
 "No puede utilizar distintas etiquetas de privado para un sólo elemento de "
-"una "
-"cita recurrente"
+"una cita recurrente"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:224
 msgid "You can not use the private flag in a non private folder"
@@ -8365,9 +8377,9 @@ msgid ""
 "Files attached to InfoStore items must have unique names. File name: %s. The "
 "other document with this file name is %s."
 msgstr ""
-"Los archivos adjuntados a elementos del portadocumentos deben tener "
-"nombres diferenciados. Nombre de archivo: %s. El otro documento que tiene el "
-"mismo nombre de archivo es %s."
+"Los archivos adjuntados a elementos del portadocumentos deben tener nombres "
+"diferenciados. Nombre de archivo: %s. El otro documento que tiene el mismo "
+"nombre de archivo es %s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:103
 msgid ""
@@ -9287,8 +9299,8 @@ msgstr ""
 msgid ""
 "Request rejected because its size exceeds the maximum configured size of %1$s"
 msgstr ""
-"Petición rechazada porque su tamaño excede el tamaño máximo configurado de "
-"%1$s"
+"Petición rechazada porque su tamaño excede el tamaño máximo configurado de %1"
+"$s"
 
 #. *
 #. * A DBPooling error occurred
@@ -9608,13 +9620,17 @@ msgstr "Tipo MIME no admitido %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:271
 msgid ""
 "This message could not be moved to trash folder as your mailbox is nearly "
-"full.\n"
+"full."
+msgstr ""
+"Este mensaje no se pudo mover a la papelera ya que su buzón de correo está "
+"casi lleno."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:271
+msgid ""
 "Please try to empty your deleted items first, or delete smaller messages "
 "first."
 msgstr ""
-"El mensaje no se pudo mover a la papelera ya que su buzón de correo está "
-"casi lleno.\n"
-"Por favor, antes intente vaciar sus elementos eliminados o borre los "
+"Por favor, intente antes vaciar los elementos eliminados o borre los "
 "mensajes más pequeños."
 
 #. *
@@ -10106,12 +10122,13 @@ msgstr ""
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:104
-msgid ""
-"Folder \"%1$s\" has been closed.\n"
-"Probably your request took too long."
-msgstr ""
-"La carpeta \"%1$s\" se ha cerrado.\n"
-"Es probable que su petición tardase demasiado."
+msgid "Folder \"%1$s\" has been closed."
+msgstr "La carpeta \"%1$s\" no puede borrarse."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
+msgid "Probably your request took too long."
+msgstr "Es probable que su petición se demorase demasiado."
 
 #. *
 #. * Folder "%1$s" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.<br>
@@ -10120,12 +10137,10 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
 msgid ""
 "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user=%4"
-"$s, context=%5$s) .\n"
-"Probably your request took too long."
+"$s, context=%5$s) ."
 msgstr ""
 "La carpeta \"%1$s\" ha sido cerrada en el servidor de correo %2$s con "
-"conexión %3$s (usuario=%4$s, contexto=%5$s).\n"
-"Es probable que su petición tardase demasiado."
+"conexión %3$s (usuario=%4$s, contexto=%5$s)"
 
 #. *
 #. * Illegal write attempt: %1$s
@@ -11536,9 +11551,8 @@ msgid ""
 "An infostore folder named %1$s already exists below folder %2$s (%3$s) in "
 "context %4$s. Please choose another display name."
 msgstr ""
-"Ya existe una carpeta para portadocumentos denominada %1$s bajo la "
-"carpeta %2$s (%3$s) en el contexto %4$s. Por favor, elija otro nombre a "
-"mostrar."
+"Ya existe una carpeta para portadocumentos denominada %1$s bajo la carpeta %2"
+"$s (%3$s) en el contexto %4$s. Por favor, elija otro nombre a mostrar."
 
 #. *
 #. * Folder contains invalid data: "%1$s"
@@ -14969,6 +14983,15 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulú"
 
+#~ msgid ""
+#~ "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s) .\n"
+#~ "Probably your request took too long."
+#~ msgstr ""
+#~ "La carpeta \"%1$s\" ha sido cerrada en el servidor de correo %2$s con "
+#~ "conexión %3$s (usuario=%4$s, contexto=%5$s).\n"
+#~ "Es probable que su petición tardase demasiado."
+
 #~ msgid "Could not find encryption key."
 #~ msgstr "No se ha podido encontrar la clave de cifrado."
 
@@ -14977,9 +15000,6 @@ msgstr "Zulú"
 
 #~ msgid "Connection to pool %1$d can not be returned"
 #~ msgstr "No se puede devolver la conexión a pool %1$d"
-
-#~ msgid "Message could not be moved to trash folder"
-#~ msgstr "No se pudo mover el mensaje a la papelera"
 
 #~ msgid "Mail could not be moved to trash folder. Quota exceeded."
 #~ msgstr "No se pudo mover el correo a la papelera. Ha superado la cuota."
@@ -15181,13 +15201,6 @@ msgstr "Zulú"
 #~ msgstr ""
 #~ "La marca %1$s no se puede cambiar por la siguiente razón \"%2$s\" en el "
 #~ "servidor %3$s con conexión %4$s (usuario=%5$s, contexto=%6$s)"
-
-#~ msgid ""
-#~ "Folder %1$s cannot be deleted on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "La carpeta %1$s no se puede borrar en el servidor %2$s con conexión %3$s "
-#~ "(usuario=%4$s, contexto=%5$s)"
 
 #~ msgid ""
 #~ "Folder %1$s does not allow subfolders on server %2$s with login %3$s "

@@ -1,18 +1,19 @@
+# , 2013.
 msgid ""
 msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-02-09 20:22+0000\n"
-"Last-Translator: Adriana Martiniuc <adriana@bureau-cornavin.com>\n"
-"Language-Team: Romanian <ro@bureau-cornavin.com>\n"
+"PO-Revision-Date: 2013-02-12 23:51+0000\n"
+"Last-Translator: \n"
+"Language-Team: Romanian <kde-i18n-doc@kde.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: ro\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2;\n"
-"X-Generator: Virtaal 0.7.1\n"
+"X-Generator: Lokalize 1.4\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #. %1$s will be replaced with a detailed exception message.
@@ -4326,6 +4327,11 @@ msgstr "Copntul este incorect, creați-l din nou."
 msgid "Please provide a display name."
 msgstr "Introduceți un nume de afișare."
 
+#. The associated OAuth provider denied the request: %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:147
+msgid "The associated OAuth provider denied the request: %1$s."
+msgstr "Furnizorul OAuth asociat a respins cererea: %1$s."
+
 #. *
 #. * Cannot change password for any reason.
 #.
@@ -4630,14 +4636,17 @@ msgstr "Dosarul de mail %1$s nu poate fi mutat în dosarul următor %2$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:182
 msgid ""
 "This message could not be moved to trash folder, possibly because your "
-"mailbox is nearly full.\n"
+"mailbox is nearly full."
+msgstr ""
+"Nu s-a putut muta mesajul în dosarul de coș de gunoi, probabil deoarece "
+"căsuța dumneavoastră poștală este aproape plină."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:182
+msgid ""
 "In that case, please try to empty your deleted items first, or delete smaller "
 "messages first."
 msgstr ""
-"Nu s-a putut muta mesajul în dosarul de coș de gunoi, probabil deoarece "
-"căsuța dumneavoastră poștală este aproape plină.\n"
-"În acest caz, goliți mai întâi dosarul de elemente șterse sau ștergeți "
-"mesajele mai mici. "
+"Goliți mai întâi dosarul de elemente șterse sau ștergeți mesajele mai mici. "
 
 #. *
 #. * Missing %1$s folder in mail move operation
@@ -4876,12 +4885,14 @@ msgstr "Operație de mutare nepermisă."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s).\n"
-"Error message from server: %5$s"
+"context=%4$s)."
 msgstr ""
 "Conexiune refuzată din cauza întârzierii autentificării la serverul %1$s cu "
-"autentificarea %2$s (utilizator=%3$s, context=%4$s).\n"
-"Mesaj de eroare de la server: %5$s"
+"autentificarea %2$s (utilizator=%3$s, context=%4$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
+msgid "Error message from server: %5$s"
+msgstr "Mesaj de eroare de la server: %5$s"
 
 #. *
 #. * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
@@ -4890,13 +4901,15 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:312
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s). Try again in %5$s seconds.\n"
-"Error message from server: %6$s"
+"context=%4$s). Try again in %5$s seconds."
 msgstr ""
 "Conexiune refuzată din cauza întârzierii autentificării la serverul %1$s cu "
 "autentificarea %2$s (utilizator=%3$s, context=%4$s). Încercați din nou peste %"
-"5$s secunde.\n"
-"Mesaj de eroare de la server: %6$s"
+"5$s secunde."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:312
+msgid "Error message from server: %6$s"
+msgstr "Mesaj de eroare de la server: %6$s"
 
 #. *
 #. * Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
@@ -9518,13 +9531,17 @@ msgstr "Tip MIME nesuportat %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:271
 msgid ""
 "This message could not be moved to trash folder as your mailbox is nearly "
-"full.\n"
+"full."
+msgstr ""
+"Mesajul nu a putut fi mutat în coșul de gunoi, deoarece căsuța dumneavoastră "
+"poștală este aproape plină."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:271
+msgid ""
 "Please try to empty your deleted items first, or delete smaller messages "
 "first."
 msgstr ""
-"Nu s-a putut muta mesajul în dosarul de coș de gunoi, deoarece căsuța "
-"dumneavoastră poștală este aproape plină.\n"
-"Goliți mai întâi dosarul de elemente șterse sau ștergeţi mesajele mai mici. "
+"Goliți mai întâi dosarul de elemente șterse sau ștergeți mesajele mai mici. "
 
 #. *
 #. * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s
@@ -10011,12 +10028,13 @@ msgstr ""
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:104
-msgid ""
-"Folder \"%1$s\" has been closed.\n"
-"Probably your request took too long."
-msgstr ""
-"Dosarul \"%1$s\" a fost închis.\n"
-"Probabil cererea dumneavoastră a durat prea mult."
+msgid "Folder \"%1$s\" has been closed."
+msgstr "Dosarul  \"%1$s\" a fost închis."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
+msgid "Probably your request took too long."
+msgstr "Probabil cererea dumneavoastră a durat prea mult."
 
 #. *
 #. * Folder "%1$s" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.<br>
@@ -10025,12 +10043,10 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
 msgid ""
 "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user=%"
-"4$s, context=%5$s) .\n"
-"Probably your request took too long."
+"4$s, context=%5$s) ."
 msgstr ""
 "Dosarul \"%1$s\" a fost închis pe serverul de mail %2$s cu autentificarea %"
-"3$s (utilizator=%4$s, context=%5$s).\n"
-"Probabil cererea dumneavoastră a durat prea mult."
+"3$s (utilizator=%4$s, context=%5$s) ."
 
 #. *
 #. * Illegal write attempt: %1$s
@@ -14830,6 +14846,15 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid ""
+#~ "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s) .\n"
+#~ "Probably your request took too long."
+#~ msgstr ""
+#~ "Dosarul \"%1$s\" a fost închis pe serverul de mail %2$s cu autentificarea "
+#~ "%3$s (utilizator=%4$s, context=%5$s).\n"
+#~ "Probabil cererea dumneavoastră a durat prea mult."
+
 #~ msgid "Could not find encryption key."
 #~ msgstr "Nu s-a găsit cheia de criptare."
 
@@ -14838,9 +14863,6 @@ msgstr "Zulu"
 
 #~ msgid "Connection to pool %1$d can not be returned"
 #~ msgstr "Conexiunea la rezerva %1$s nu a putut fi returnată"
-
-#~ msgid "Message could not be moved to trash folder"
-#~ msgstr "Mesajul nu a putut fi mutat în coșul de gunoi."
 
 #~ msgid "Mail could not be moved to trash folder. Quota exceeded."
 #~ msgstr ""
@@ -15042,13 +15064,6 @@ msgstr "Zulu"
 #~ msgstr ""
 #~ "Marcajul %1$s nu a putut fi modificat din următorul motiv \"%2$s\" pe "
 #~ "serverul %3$s cu autentificarea %4$s (utilizator=%5$s, context=%6$s)"
-
-#~ msgid ""
-#~ "Folder %1$s cannot be deleted on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Dosarul %1$s nu a putut fi șters de pe serverul %2$s cu autentificarea %3"
-#~ "$s (utilizator=%4$s, context=%5$s)"
 
 #~ msgid ""
 #~ "Folder %1$s does not allow subfolders on server %2$s with login %3$s "

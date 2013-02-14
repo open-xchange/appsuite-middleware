@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: errors.zh_CN.po\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: DATE\n"
-"PO-Revision-Date: 2013-02-09 02:53+1000\n"
+"PO-Revision-Date: 2013-02-12 13:01+1000\n"
 "Last-Translator: \n"
 "Language-Team: Simplified Chinese <LL@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -4144,6 +4144,11 @@ msgstr "无效户口，请重新创建。"
 msgid "Please provide a display name."
 msgstr "请提供一个显示名称。"
 
+#. The associated OAuth provider denied the request: %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:147
+msgid "The associated OAuth provider denied the request: %1$s."
+msgstr "关联 OAuth 提供者拒绝了请求 %1$s。"
+
 #. *
 #. * Cannot change password for any reason.
 #.
@@ -4437,12 +4442,14 @@ msgstr "文件夹 %1$s 不得移到其子文件夹 %2$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:182
 msgid ""
 "This message could not be moved to trash folder, possibly because your "
-"mailbox is nearly full.\n"
+"mailbox is nearly full."
+msgstr "可能因为您的邮箱差不多已满，所以此消息不能移动到垃圾筒。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:182
+msgid ""
 "In that case, please try to empty your deleted items first, or delete "
 "smaller messages first."
-msgstr ""
-"可能因为您的邮箱差不多已满，所以此消息不能移动到垃圾筒。\n"
-"如此请先把您的已删除项目清空，或者先删除比较小的消息。"
+msgstr "如此请先把您的已删除项目清空，或者先删除比较小的消息。"
 
 #. *
 #. * Missing %1$s folder in mail move operation
@@ -4669,11 +4676,12 @@ msgstr "不合法的移动操作。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s).\n"
-"Error message from server: %5$s"
-msgstr ""
-"到邮件服务器 %1$s 的连接登入延迟，登录 %2$s（用户=%3$s，环境=%4$s）。来自服务"
-"器的错误消息：%5$s"
+"context=%4$s)."
+msgstr "到邮件服务器 %1$s 的连接登入延迟，登录 %2$s（用户=%3$s，环境=%4$s）。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
+msgid "Error message from server: %5$s"
+msgstr "来自服务器的错误消息：%5$s"
 
 #. *
 #. * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
@@ -4682,11 +4690,14 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:312
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s). Try again in %5$s seconds.\n"
-"Error message from server: %6$s"
+"context=%4$s). Try again in %5$s seconds."
 msgstr ""
 "到邮件服务器 %1$s 的连接登入延迟，登录 %2$s（用户=%3$s，环境=%4$s）。请在 "
-"%5$s 秒后重试。来自服务器的错误消息：%6$s"
+"%5$s 秒后重试。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:312
+msgid "Error message from server: %6$s"
+msgstr "来自服务器的消息：%6$s"
 
 #. *
 #. * Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
@@ -9078,12 +9089,14 @@ msgstr "不支持的 MIME 类型 %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:271
 msgid ""
 "This message could not be moved to trash folder as your mailbox is nearly "
-"full.\n"
+"full."
+msgstr "因为您的收件箱差不多已满，所以消息无法移到垃圾筒文件夹。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:271
+msgid ""
 "Please try to empty your deleted items first, or delete smaller messages "
 "first."
-msgstr ""
-"此消息因为您的邮箱差不多已满，而不能移动到垃圾筒。\n"
-"请先把您的已删除项目清空，或者先删除比较小的消息。"
+msgstr "请先把您的已删除项目清空，或者先删除比较小的消息。"
 
 #. *
 #. * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s
@@ -9531,10 +9544,13 @@ msgstr ""
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:104
-msgid ""
-"Folder \"%1$s\" has been closed.\n"
-"Probably your request took too long."
-msgstr "文件夹 \"%1$s\" 已关闭。大概您的请求花费太长时间。"
+msgid "Folder \"%1$s\" has been closed."
+msgstr "文件夹 \"%1$s\" 已关闭。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
+msgid "Probably your request took too long."
+msgstr "大概您的请求花费太长时间。"
 
 #. *
 #. * Folder "%1$s" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.<br>
@@ -9543,11 +9559,9 @@ msgstr "文件夹 \"%1$s\" 已关闭。大概您的请求花费太长时间。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
 msgid ""
 "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
-"%4$s, context=%5$s) .\n"
-"Probably your request took too long."
+"%4$s, context=%5$s) ."
 msgstr ""
-"在邮件服务器 %2$s 上关闭文件夹 \"%1$s\"，登录 %3$s（用户=%4$s，环境=%5$s）。"
-"大概您的请求花费太长时间。"
+"不能使用登录名 %3$s 删除服务器 %2$s 上的文件夹 %1$s（用户=%4$s，环境=%5$s）。"
 
 #. *
 #. * Illegal write attempt: %1$s
@@ -14169,6 +14183,14 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "祖鲁"
 
+#~ msgid ""
+#~ "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s) .\n"
+#~ "Probably your request took too long."
+#~ msgstr ""
+#~ "在邮件服务器 %2$s 上关闭文件夹 \"%1$s\"，登录 %3$s（用户=%4$s，环境="
+#~ "%5$s）。大概您的请求花费太长时间。"
+
 #~ msgid "Could not find encryption key."
 #~ msgstr "找不到加密键。"
 
@@ -14177,9 +14199,6 @@ msgstr "祖鲁"
 
 #~ msgid "Connection to pool %1$d can not be returned"
 #~ msgstr "池的连接 %1$d 无法返回"
-
-#~ msgid "Message could not be moved to trash folder"
-#~ msgstr "邮件无法移到垃圾筒文件夹"
 
 #~ msgid "Mail could not be moved to trash folder. Quota exceeded."
 #~ msgstr "邮件无法移到垃圾筒文件夹超过限额。"
@@ -14361,13 +14380,6 @@ msgstr "祖鲁"
 #~ msgstr ""
 #~ "由于以下原因\"%2$s\"，服务器 %3$s 上的标志 %1$s 无法使用登录名 %4$s 更改"
 #~ "（用户=%5$s，环境=%6$s）"
-
-#~ msgid ""
-#~ "Folder %1$s cannot be deleted on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "不能使用登录名 %3$s 删除服务器 %2$s 上的文件夹 %1$s（用户=%4$s，环境="
-#~ "%5$s）"
 
 #~ msgid ""
 #~ "Folder %1$s does not allow subfolders on server %2$s with login %3$s "

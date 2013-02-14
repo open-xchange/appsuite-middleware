@@ -21,7 +21,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2013-02-06 22:04+0100\n"
+"PO-Revision-Date: 2013-02-11 21:36+0100\n"
 "Last-Translator: Éric Bischoff <eric@bureau-cornavin.com>\n"
 "Language-Team: French <fr@bureau-cornavin.com>\n"
 "MIME-Version: 1.0\n"
@@ -2043,8 +2043,8 @@ msgid ""
 "The process cannot access the file because it is being used by another "
 "process."
 msgstr ""
-"Le processus n'arrive pas à accéder au fichier car celui-ci est utilisé en ce "
-"moment par un autre processus."
+"Le processus n'arrive pas à accéder au fichier car celui-ci est utilisé en "
+"ce moment par un autre processus."
 
 #. There are currently no logon servers available to service the logon request.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:159
@@ -2089,7 +2089,8 @@ msgstr "Échec de connexion : heures de connexion autorisée restreintes."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:180
 msgid "Logon failure: user not allowed to log on to this computer."
 msgstr ""
-"Échec de connexion : utilisateur non autorisé à se connecter à cet ordinateur."
+"Échec de connexion : utilisateur non autorisé à se connecter à cet "
+"ordinateur."
 
 #. Logon failure: the specified account password has expired.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:183
@@ -2178,8 +2179,8 @@ msgid ""
 "retrieved."
 msgstr ""
 "Indique qu'un serveur Windows NT n'a pas pu être contacté, ou que des objets "
-"dans le domaine sont protégés de telle sorte que les informations nécessaires "
-"n'ont pas pu être récupérées."
+"dans le domaine sont protégés de telle sorte que les informations "
+"nécessaires n'ont pas pu être récupérées."
 
 #. The specified domain did not exist.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:237
@@ -2263,10 +2264,10 @@ msgid ""
 "Please contact your system administrator or hoster in case you can no longer "
 "log in."
 msgstr ""
-"Votre compte a été bloqué. Cela peut être pour plusieurs raisons, "
-"comme d'avoir saisi de travers le mot de passe à plusieurs reprises.\n"
-"Veuillez contacter votre administrateur système ou votre hébergeur "
-"si jamais vous n'arrivez plus à vous connecter."
+"Votre compte a été bloqué. Cela peut être pour plusieurs raisons, comme "
+"d'avoir saisi de travers le mot de passe à plusieurs reprises.\n"
+"Veuillez contacter votre administrateur système ou votre hébergeur si jamais "
+"vous n'arrivez plus à vous connecter."
 
 #. The remote system is not reachable by the transport.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:277
@@ -3959,8 +3960,8 @@ msgid ""
 "Missing Facebook configuration parameter \"%1$s\". Please re-create Facebook "
 "account."
 msgstr ""
-"Réglage de configuration Facebook « %1$s » manquant. Veuillez créer à "
-"nouveau le compte Facebook."
+"Réglage de configuration Facebook « %1$s » manquant. Veuillez créer à nouveau "
+"le compte Facebook."
 
 #. A Facebook API error occurred. Error code: %1$s. Error message: "%2$s". Please refer to http://fbdevwiki.com/wiki/Error_codes to look-up error code.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:125
@@ -4429,6 +4430,11 @@ msgstr "Le compte est invalide, veuillez le recréer."
 msgid "Please provide a display name."
 msgstr "Veuillez fournir un nom d'affichage."
 
+#. The associated OAuth provider denied the request: %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:147
+msgid "The associated OAuth provider denied the request: %1$s."
+msgstr "Le fournisseur OAuth associé a refusé la demande : %1$s."
+
 #. *
 #. * Cannot change password for any reason.
 #.
@@ -4737,12 +4743,16 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:182
 msgid ""
 "This message could not be moved to trash folder, possibly because your "
-"mailbox is nearly full.\n"
+"mailbox is nearly full."
+msgstr ""
+"Ce message n'a pas pu être déplacé dans la corbeille, peut-être parce que "
+"votre boîte aux lettres est presque pleine."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:182
+msgid ""
 "In that case, please try to empty your deleted items first, or delete "
 "smaller messages first."
 msgstr ""
-"Ce message n'a pas pu être déplacé dans la corbeille, peut-être parce que "
-"votre boîte aux lettres est presque pleine.\n"
 "Si c'est le cas, veuillez essayer de vider d'abord vos éléments supprimés, "
 "ou de supprimer de plus petits messages en premier."
 
@@ -4991,12 +5001,14 @@ msgstr "Opération de déplacement non autorisée."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s).\n"
-"Error message from server: %5$s"
+"context=%4$s)."
 msgstr ""
 "Le délai de connexion empêche de se connecter au serveur %1$s avec "
-"l'identifiant de connexion %2$s (utilisateur=%3$s, contexte=%4$s).\n"
-"Message d'erreur du serveur : %5$s"
+"l'identifiant de connexion %2$s (utilisateur=%3$s, contexte=%4$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
+msgid "Error message from server: %5$s"
+msgstr "Message d'erreur du serveur : %5$s"
 
 #. *
 #. * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
@@ -5005,13 +5017,15 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:312
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s). Try again in %5$s seconds.\n"
-"Error message from server: %6$s"
+"context=%4$s). Try again in %5$s seconds."
 msgstr ""
 "Le délai de connexion empêche de se connecter au serveur %1$s avec "
-"l'identifiant de connexion %2$s (utilisateur=%3$s, contexte=%4$s). Nouvel "
-"essai dans %5$s secondes.\n"
-"Message d'erreur du serveur : %6$s"
+"l'identifiant de connexion %2$s (utilisateur=%3$s, contexte=%4$s). "
+"Réessayez dans %5$s secondes."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:312
+msgid "Error message from server: %6$s"
+msgstr "Message d'erreur du serveur : %6$s"
 
 #. *
 #. * Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
@@ -9400,8 +9414,8 @@ msgstr ""
 msgid ""
 "Request rejected because its size exceeds the maximum configured size of %1$s"
 msgstr ""
-"La requête a été rejetée car sa taille dépasse la taille maximale "
-"configurée qui est %1$s"
+"La requête a été rejetée car sa taille dépasse la taille maximale configurée "
+"qui est %1$s"
 
 #. *
 #. * A DBPooling error occurred
@@ -9722,12 +9736,16 @@ msgstr "Type MIME %1$s non pris en charge"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:271
 msgid ""
 "This message could not be moved to trash folder as your mailbox is nearly "
-"full.\n"
+"full."
+msgstr ""
+"Le message n'a pas pu être déplacé vers le dossier Corbeille "
+"car votre boîte aux lettres est presque pleine."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:271
+msgid ""
 "Please try to empty your deleted items first, or delete smaller messages "
 "first."
 msgstr ""
-"Ce message n'a pas pu être déplacé dans la corbeille, car votre boîte aux "
-"lettres est presque pleine.\n"
 "Veuillez essayer de vider d'abord vos éléments supprimés, ou de supprimer de "
 "plus petits messages en premier."
 
@@ -10229,12 +10247,13 @@ msgstr ""
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:104
-msgid ""
-"Folder \"%1$s\" has been closed.\n"
-"Probably your request took too long."
-msgstr ""
-"Le dossier « %1$s » a été fermé.\n"
-"Il est probable que votre requête a pris trop de temps."
+msgid "Folder \"%1$s\" has been closed."
+msgstr "Le dossier « %1$s » a été fermé."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
+msgid "Probably your request took too long."
+msgstr "Il est probable que votre requête a pris trop de temps."
 
 #. *
 #. * Folder "%1$s" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.<br>
@@ -10243,12 +10262,10 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
 msgid ""
 "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user=%4"
-"$s, context=%5$s) .\n"
-"Probably your request took too long."
+"$s, context=%5$s) ."
 msgstr ""
-"Le dossier « %1$s » a été fermé sur le serveur de courrier %2$s avec le nom "
-"de connexion %3$s (utilisateur=%4$s, contexte=%5$s).\n"
-"Il est probable que votre requête a pris trop de temps."
+"Le dossier %1$s a été fermé sur le serveur %2$s avec "
+"l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)."
 
 #. *
 #. * Illegal write attempt: %1$s
@@ -12849,8 +12866,8 @@ msgid ""
 "The request is understood, but it has been refused or access is not allowed: "
 "%1$s"
 msgstr ""
-"La requête a été comprise, mais elle a été refusée ou l'accès est interdit : %"
-"1$s"
+"La requête a été comprise, mais elle a été refusée ou l'accès est interdit : "
+"%1$s"
 
 #. Invalid format in search query.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:88
@@ -15134,6 +15151,15 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zoulou"
 
+#~ msgid ""
+#~ "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s) .\n"
+#~ "Probably your request took too long."
+#~ msgstr ""
+#~ "Le dossier « %1$s » a été fermé sur le serveur de courrier %2$s avec le "
+#~ "nom de connexion %3$s (utilisateur=%4$s, contexte=%5$s).\n"
+#~ "Il est probable que votre requête a pris trop de temps."
+
 #~ msgid "Could not find encryption key."
 #~ msgstr "Impossible de trouver la clé de chiffrement."
 
@@ -15142,9 +15168,6 @@ msgstr "Zoulou"
 
 #~ msgid "Connection to pool %1$d can not be returned"
 #~ msgstr "La connexion au pool %1$d ne peut pas être renvoyée"
-
-#~ msgid "Message could not be moved to trash folder"
-#~ msgstr "Le message n'a pas pu être déplacé vers le dossier Corbeille"
 
 #~ msgid "Mail could not be moved to trash folder. Quota exceeded."
 #~ msgstr ""
@@ -15353,13 +15376,6 @@ msgstr "Zoulou"
 #~ "Le drapeau %1$s n'a pas pu être modifié pour la raison suivante : « %2$s » "
 #~ "sur le serveur %3$s avec l'identifiant de connexion %4$s (utilisateur=%5"
 #~ "$s, contexte=%6$s)"
-
-#~ msgid ""
-#~ "Folder %1$s cannot be deleted on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Le dossier %1$s ne peut pas être supprimé sur le serveur %2$s avec "
-#~ "l'identifiant de connexion %3$s (utilisateur=%4$s, contexte=%5$s)"
 
 #~ msgid ""
 #~ "Folder %1$s does not allow subfolders on server %2$s with login %3$s "

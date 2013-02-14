@@ -27,7 +27,7 @@ msgstr ""
 "Project-Id-Version: errors.nl_NL\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-08-04 14:10+0100\n"
-"PO-Revision-Date: 2013-02-10 12:25+0100\n"
+"PO-Revision-Date: 2013-02-12 23:09+0100\n"
 "Last-Translator: Ivar Snaaijer <Ivar@bureau-cornavin.com >\n"
 "Language-Team: Dutch <kde-i18n-doc@kde.org>\n"
 "MIME-Version: 1.0\n"
@@ -2017,8 +2017,8 @@ msgid ""
 "The process cannot access the file because it is being used by another "
 "process."
 msgstr ""
-"Het systeem kan het opgegeven bestand niet benaderen omdat deze in gebruik is "
-"bij een ander process."
+"Het systeem kan het opgegeven bestand niet benaderen omdat deze in gebruik "
+"is bij een ander process."
 
 #. There are currently no logon servers available to service the logon request.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:159
@@ -2139,8 +2139,7 @@ msgid ""
 "there are already as many connections as the computer can accept."
 msgstr ""
 "Het is op dit moment niet mogelijk meer verbindingen te maken met deze "
-"externe computer omdat"
-"alle verbindingen van deze computer vol zijn."
+"externe computer omdatalle verbindingen van deze computer vol zijn."
 
 #. Indicates a Windows NT Server could not be contacted or that objects within the domain are protected such that necessary information could not be retrieved.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:234
@@ -2150,9 +2149,8 @@ msgid ""
 "retrieved."
 msgstr ""
 "Dit betekend dat een Windows NT Server niet kon worden worden gecontacteerd "
-"of dat objecten binnen"
-"het domein zodanig worden beschermd dat noodzakelijke informatie niet kan "
-"worden opgehaald."
+"of dat objecten binnenhet domein zodanig worden beschermd dat noodzakelijke "
+"informatie niet kan worden opgehaald."
 
 #. The specified domain did not exist.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:237
@@ -3808,7 +3806,8 @@ msgid ""
 msgstr ""
 "Ontbrekende permissie \"%1$s\" in Facebook login %2$s. Kopieer a.u.b. de "
 "volgende URL in uw browser, login as %2$s (als dat al niet gebeurd is) en "
-"verleen toegang:\n%3$s"
+"verleen toegang:\n"
+"%3$s"
 
 #. An error occurred during the processing of a script.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:92
@@ -4344,6 +4343,12 @@ msgstr "Het account is ongeldig, maak het opnieuw aan."
 msgid "Please provide a display name."
 msgstr "Geef alstublieft een weergavenaam ."
 
+#. The associated OAuth provider denied the request: %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:147
+msgid "The associated OAuth provider denied the request: %1$s."
+msgstr ""
+"De bijbehorende OAuth dienstverlener heeft het verzoek afgewezen: %1$s."
+
 #. *
 #. * Cannot change password for any reason.
 #.
@@ -4646,12 +4651,16 @@ msgstr "E-mail map %1$s mag niet verplaatst worden de volgende map %2$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:182
 msgid ""
 "This message could not be moved to trash folder, possibly because your "
-"mailbox is nearly full.\n"
+"mailbox is nearly full."
+msgstr ""
+"Dit bericht kan niet naar de prullenbakmap worden verplaatst, waarschijnlijk "
+"omdat uw mailbox bijna vol is."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:182
+msgid ""
 "In that case, please try to empty your deleted items first, or delete "
 "smaller messages first."
 msgstr ""
-"Dit bericht kan niet naar de prullenbakmap worden verplaatst, waarschijnlijk "
-"omdat uw mailbox bijna vol is.\n"
 "Als dit correct is, probeer dan eerst de verwijderde items te verwijderen, of "
 "verwijder eerst kleine berichten."
 
@@ -4887,12 +4896,14 @@ msgstr "Ongeldige verplaats actie."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s).\n"
-"Error message from server: %5$s"
+"context=%4$s)."
 msgstr ""
 "Langzame aanmelding maakt het onmogelijk te verbinden naar server %1$s met "
-"aanmeldingsnaam %2$s (gebruiker=%3$s, context=%4$s). Foutmelding van de "
-"server: %5$s"
+"aanmeldingsnaam %2$s (gebruiker=%3$s, context=%4$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
+msgid "Error message from server: %5$s"
+msgstr "Foutmelding van de server: %5$s"
 
 #. *
 #. * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
@@ -4901,12 +4912,15 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:312
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s). Try again in %5$s seconds.\n"
-"Error message from server: %6$s"
+"context=%4$s). Try again in %5$s seconds."
 msgstr ""
 "Langzame aanmelding maakt het onmogelijk te verbinden naar server %1$s met "
 "aanmeldingsnaam %2$s (gebruiker=%3$s, context=%4$s). Probeer het opnieuw na %"
-"5$s seconden. Foutmelding van de server: %6$s"
+"5$s seconden."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:312
+msgid "Error message from server: %6$s"
+msgstr "Foutmelding van de server: %6$s"
 
 #. *
 #. * Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
@@ -9264,8 +9278,8 @@ msgstr ""
 msgid ""
 "Request rejected because its size exceeds the maximum configured size of %1$s"
 msgstr ""
-"Aanvraag geweigerd omdat de grootte de maximum geconfigureerde grootte van %"
-"1$s overschrijdt"
+"Aanvraag geweigerd omdat de grootte de maximum geconfigureerde grootte van %1"
+"$s overschrijdt"
 
 #. *
 #. * A DBPooling error occurred
@@ -9578,12 +9592,16 @@ msgstr "Het MIME-type %1$s is niet ondersteund"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:271
 msgid ""
 "This message could not be moved to trash folder as your mailbox is nearly "
-"full.\n"
+"full."
+msgstr ""
+"Dit bericht kan niet naar de prullenbakmap worden verplaatst omdat uw mailbox "
+"bijna vol is."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:271
+msgid ""
 "Please try to empty your deleted items first, or delete smaller messages "
 "first."
 msgstr ""
-"Dit bericht kan niet naar de prullenbakmap worden verplaatst, omdat uw "
-"mailbox bijna vol is.\n"
 "Probeer alstublieft eerst de verwijderde items te verwijderen, of verwijder "
 "eerst kleine berichten."
 
@@ -10069,12 +10087,13 @@ msgstr ""
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:104
-msgid ""
-"Folder \"%1$s\" has been closed.\n"
-"Probably your request took too long."
-msgstr ""
-"Map \"%1$s\" is gesloten.\n"
-"Mogelijk duurde de aanvraag te lang."
+msgid "Folder \"%1$s\" has been closed."
+msgstr "De map \"%1$s\" is gesloten."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
+msgid "Probably your request took too long."
+msgstr "Mogelijk duurde de aanvraag te lang."
 
 #. *
 #. * Folder "%1$s" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.<br>
@@ -10083,12 +10102,10 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
 msgid ""
 "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user=%4"
-"$s, context=%5$s) .\n"
-"Probably your request took too long."
+"$s, context=%5$s) ."
 msgstr ""
-"Map \"%1$s\" is gesloten op de mailsever %2$s voor aanmeldingsnaam %3$s "
-"(gebruiker=%4$s, context=%5$s).\n"
-"Mogelijk duurde de aanvraag te lang."
+"Map \"%1$s\" is gesloten op de mailserver %2$s met aanmeldingsnaam %3$s "
+"(gebruiker=%4$s, context=%5$s)."
 
 #. *
 #. * Illegal write attempt: %1$s
@@ -12570,8 +12587,8 @@ msgstr "Een onderliggend systeem heeft een SQL-foutmelding gegeven"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:84
 msgid "File access is denied due to operating system's permissions."
 msgstr ""
-"Bestandstoegang wordt geweigerd door de rechteninstellingen van het Operating "
-"Systeem."
+"Bestandstoegang wordt geweigerd door de rechteninstellingen van het "
+"Operating Systeem."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:86
 msgid "File access denied."
@@ -14872,14 +14889,20 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zoeloe"
 
+#~ msgid ""
+#~ "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s) .\n"
+#~ "Probably your request took too long."
+#~ msgstr ""
+#~ "Map \"%1$s\" is gesloten op de mailsever %2$s voor aanmeldingsnaam %3$s "
+#~ "(gebruiker=%4$s, context=%5$s).\n"
+#~ "Mogelijk duurde de aanvraag te lang."
+
 #~ msgid "All my contacts"
 #~ msgstr "Al mijn contacten"
 
 #~ msgid "Connection to pool %1$d can not be returned"
 #~ msgstr "Verbinding naar dienst %1$d kan niet teruggegeven worden"
-
-#~ msgid "Message could not be moved to trash folder"
-#~ msgstr "E-mail bericht kan niet naar de prullenbakmap verplaatst worden."
 
 #~ msgid "Mail could not be moved to trash folder. Quota exceeded."
 #~ msgstr ""
@@ -15082,13 +15105,6 @@ msgstr "Zoeloe"
 #~ msgstr ""
 #~ "Vlag %1$s kan niet worden veranderd door de reden \"%2$s\" op de server %3"
 #~ "$s met aanmeldingsnaam %4$s (gebruiker=%5$s, context=%6$s)."
-
-#~ msgid ""
-#~ "Folder %1$s cannot be deleted on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Map %1$s kan niet worden verwijderd van de server %2$s met "
-#~ "aanmeldingsnaam %3$s (gebruiker=%4$s, context=%5$s)."
 
 #~ msgid ""
 #~ "Folder %1$s does not allow subfolders on server %2$s with login %3$s "
@@ -16073,9 +16089,6 @@ msgstr "Zoeloe"
 
 #~ msgid "Exception while writing JSON object."
 #~ msgstr "Er is een fout opgetreden bij het schrijven van een JSON-object."
-
-#~ msgid "Folder \"%1$s\" is closed."
-#~ msgstr "De map \"%1$s\" is gesloten."
 
 #~ msgid "Incorrect SQL Query: %s"
 #~ msgstr "Incorrecte SQL-zoekopdracht: %s"

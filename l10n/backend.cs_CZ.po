@@ -23,7 +23,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.cs_CZ.po\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2013-02-05 19:15+0100\n"
+"PO-Revision-Date: 2013-02-11 21:30+0100\n"
 "Last-Translator: Robert Krátký <kratky@rob.cz>\n"
 "Language-Team: Czech <cs@bureau-cornavin.com>\n"
 "MIME-Version: 1.0\n"
@@ -2158,8 +2158,8 @@ msgid ""
 "The SAM database on the Windows NT Server does not have a computer account "
 "for this workstation trust relationship."
 msgstr ""
-"Databáze SAM na Windows NT Serveru nemá počítačový účet pro důvěryhodný vztah "
-"s touto pracovní stanicí."
+"Databáze SAM na Windows NT Serveru nemá počítačový účet pro důvěryhodný "
+"vztah s touto pracovní stanicí."
 
 #. The trust relationship between the primary domain and the trusted domain failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:261
@@ -2196,8 +2196,8 @@ msgid ""
 "Please contact your system administrator or hoster in case you can no longer "
 "log in."
 msgstr ""
-"Váš účet byl zablokován. To může mít různé důvody, například opakované chybné "
-"zadání hesla.\n"
+"Váš účet byl zablokován. To může mít různé důvody, například opakované "
+"chybné zadání hesla.\n"
 "Kontaktujte, prosím svého administrátora nebo správce hostingu, pokud se již "
 "nemůžete přihlásit."
 
@@ -3746,8 +3746,8 @@ msgid ""
 "%3$s"
 msgstr ""
 "Chybí oprávnění „%1$s“ k přihlášení na Facebook s přihlašovacím jménem %2$s. "
-"Zkopírujte, prosím, následující URL do svého prohlížeče, přihlaste se jako %"
-"2$s (pokud už nejste přihlášení) a povolte přístup:\n"
+"Zkopírujte, prosím, následující URL do svého prohlížeče, přihlaste se jako %2"
+"$s (pokud už nejste přihlášení) a povolte přístup:\n"
 "%3$s"
 
 #. An error occurred during the processing of a script.
@@ -4278,6 +4278,11 @@ msgstr "Účet není platný, vytvořte ho, prosím, znovu."
 msgid "Please provide a display name."
 msgstr "Zadejte, prosím, jméno k zobrazení."
 
+#. The associated OAuth provider denied the request: %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:147
+msgid "The associated OAuth provider denied the request: %1$s."
+msgstr "Přiřazený poskytovatel OAuth požadavek zamítl: %1$s."
+
 #. *
 #. * Cannot change password for any reason.
 #.
@@ -4577,13 +4582,17 @@ msgstr "Poštovní složku %1$s nelze přesunout do složky %2$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:182
 msgid ""
 "This message could not be moved to trash folder, possibly because your "
-"mailbox is nearly full.\n"
+"mailbox is nearly full."
+msgstr ""
+"Zprávu se nepodařilo přesunout do koše - nejspíš proto, že je vaše poštovní "
+"schránka téměř plná."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:182
+msgid ""
 "In that case, please try to empty your deleted items first, or delete "
 "smaller messages first."
 msgstr ""
-"Zprávu se nepodařilo přesunout do koše - nejspíš proto, že je vaše poštovní "
-"schránka téměř plná.\n"
-"V takovém případě nejprve odstraňte vymazané položky nebo menší zprávy."
+"Je-li to tak, odstraňte, prosím, nejprve vymazané položky nebo menší zprávy."
 
 #. *
 #. * Missing %1$s folder in mail move operation
@@ -4814,12 +4823,14 @@ msgstr "Nepovolený přesun."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s).\n"
-"Error message from server: %5$s"
+"context=%4$s)."
 msgstr ""
 "Prodleva při přihlašování způsobuje odmítnutí připojení k serveru %1$s s "
-"přihlašovacím jménem %2$s (uživatel=%3$s, kontext=%4$s).\n"
-" Chybová zpráva serveru: %5$s"
+"přihlašovacím jménem %2$s (uživatel=%3$s, kontext=%4$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
+msgid "Error message from server: %5$s"
+msgstr "Chybová zpráva ze serveru: %5$s"
 
 #. *
 #. * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
@@ -4828,13 +4839,15 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:312
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s). Try again in %5$s seconds.\n"
-"Error message from server: %6$s"
+"context=%4$s). Try again in %5$s seconds."
 msgstr ""
 "Prodleva při přihlašování způsobuje odmítnutí připojení k serveru %1$s s "
 "přihlašovacím jménem %2$s (uživatel=%3$s, kontext=%4$s). Zkuste to, prosím, "
-"za %5$s sekund.\n"
-"Chybová zpráva serveru: %6$s"
+"za %5$s sekund."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:312
+msgid "Error message from server: %6$s"
+msgstr "Chybová zpráva ze serveru: %6$s"
 
 #. *
 #. * Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
@@ -9073,8 +9086,8 @@ msgstr ""
 msgid ""
 "Request rejected because its size exceeds the maximum configured size of %1$s"
 msgstr ""
-"Požadavek zamítnut, protože velikost přesahuje maximální nastavenou velikost %"
-"2$s"
+"Požadavek zamítnut, protože velikost přesahuje maximální nastavenou velikost "
+"%2$s"
 
 #. *
 #. * A DBPooling error occurred
@@ -9383,13 +9396,16 @@ msgstr "Nepodporovaný MIME typ %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:271
 msgid ""
 "This message could not be moved to trash folder as your mailbox is nearly "
-"full.\n"
+"full."
+msgstr ""
+"Zprávu se nepodařilo přesunout do koše, protože je vaše schránka již téměř "
+"plná."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:271
+msgid ""
 "Please try to empty your deleted items first, or delete smaller messages "
 "first."
-msgstr ""
-"Zprávu se nepodařilo přesunout do koše, protože vaše poštovní schránka je "
-"téměř plná.\n"
-"Odstraňte, prosím, vymazané položky nebo menší zprávy."
+msgstr "Odstraňte, prosím, nejprve vymazané položky nebo menší zprávy."
 
 #. *
 #. * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s
@@ -9867,12 +9883,13 @@ msgstr ""
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:104
-msgid ""
-"Folder \"%1$s\" has been closed.\n"
-"Probably your request took too long."
-msgstr ""
-"Složka „%1$s“ byla zavřena.\n"
-"Váš požadavek pravděpodobně trval příliš dlouho."
+msgid "Folder \"%1$s\" has been closed."
+msgstr "Složka „%1$s“ byla zavřena."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
+msgid "Probably your request took too long."
+msgstr "Váš požadavek pravděpodobně trval příliš dlouho."
 
 #. *
 #. * Folder "%1$s" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.<br>
@@ -9881,12 +9898,10 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
 msgid ""
 "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user=%4"
-"$s, context=%5$s) .\n"
-"Probably your request took too long."
+"$s, context=%5$s) ."
 msgstr ""
-"Složka „%1$s“ byla na poštovním serveru %2$s s přihlašovacím jménem %3$s "
-"(uživatel=%4 $s, kontext=%5$s) zavřena.\n"
-"Váš požadavek pravděpodobně trval příliš dlouho."
+"Složka „%1$s“ na poštovním serveru %2$s s přihlašovacím jménem %3$s "
+"(uživatel=%4$s, kontext=%5$s) byla zavřena."
 
 #. *
 #. * Illegal write attempt: %1$s
@@ -14634,6 +14649,15 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid ""
+#~ "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s) .\n"
+#~ "Probably your request took too long."
+#~ msgstr ""
+#~ "Složka „%1$s“ byla na poštovním serveru %2$s s přihlašovacím jménem %3$s "
+#~ "(uživatel=%4 $s, kontext=%5$s) zavřena.\n"
+#~ "Váš požadavek pravděpodobně trval příliš dlouho."
+
 #~ msgid "Could not find encryption key."
 #~ msgstr "Nepodařilo se najít šifrovací klíč."
 
@@ -14642,9 +14666,6 @@ msgstr "Zulu"
 
 #~ msgid "Connection to pool %1$d can not be returned"
 #~ msgstr "Spojení nelze vrátit do zásobníku spojení %1$d"
-
-#~ msgid "Message could not be moved to trash folder"
-#~ msgstr "Zprávu se nepodařilo přesunout do složky koš"
 
 #~ msgid "Mail could not be moved to trash folder. Quota exceeded."
 #~ msgstr "Zprávu se nepodařilo přesunout do složky koš. Překročena kvóta."
@@ -14840,13 +14861,6 @@ msgstr "Zulu"
 #~ msgstr ""
 #~ "Příznak %1$s na serveru %3$s s přihlašovacím jménem %4$s (uživatel=%5$s, "
 #~ "kontext=%6$s) nemohl být změněn z tohoto důvodu: „%2$“"
-
-#~ msgid ""
-#~ "Folder %1$s cannot be deleted on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Složku %1$s nelze na serveru %2$s s přihlašovacím jménem %3$s (uživatel=%4"
-#~ "$s, kontext=%5$s) smazat"
 
 #~ msgid ""
 #~ "Folder %1$s does not allow subfolders on server %2$s with login %3$s "
