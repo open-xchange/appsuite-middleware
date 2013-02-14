@@ -37,7 +37,29 @@ import com.openexchange.utils.propertyhandling.PropertyInterface;
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
  */
-public class OSGiAbstractor implements ServiceLookup {
+public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
+
+    private class Entry<T> extends SimpleEntry<T> {
+
+        private final AvailabilityActivationClosure<T> closure;
+
+        private final boolean required;
+
+        public Entry(final Class<T> clazz, final boolean required, final AvailabilityActivationClosure<T> closure) {
+            super(clazz);
+            this.required = required;
+            this.closure = closure;
+        }
+
+        public AvailabilityActivationClosure<T> getClosure() {
+            return closure;
+        }
+
+        public boolean isRequired() {
+            return required;
+        }
+
+    }
 
     private class Logger implements Log {
 
@@ -48,6 +70,38 @@ public class OSGiAbstractor implements ServiceLookup {
         public Logger(final Log log, final Class<?> clazz) {
             this.delegate = log;
             this.prefixString = "Logged for " + clazz.getCanonicalName() + ": ";
+        }
+
+        public void debug(Object message) {
+            this.delegate.debug(prefixString + message);
+        }
+
+        public void debug(Object message, Throwable t) {
+            this.delegate.debug(prefixString + message, t);
+        }
+
+        public void error(Object message) {
+            this.delegate.error(prefixString + message);
+        }
+
+        public void error(Object message, Throwable t) {
+            this.delegate.error(prefixString + message, t);
+        }
+
+        public void fatal(Object message) {
+            this.delegate.fatal(prefixString + message);
+        }
+
+        public void fatal(Object message, Throwable t) {
+            this.delegate.fatal(prefixString + message, t);
+        }
+
+        public void info(Object message) {
+            this.delegate.info(prefixString + message);
+        }
+
+        public void info(Object message, Throwable t) {
+            this.delegate.info(prefixString + message, t);
         }
 
         public boolean isDebugEnabled() {
@@ -82,22 +136,6 @@ public class OSGiAbstractor implements ServiceLookup {
             this.delegate.trace(prefixString + message, t);
         }
 
-        public void debug(Object message) {
-            this.delegate.debug(prefixString + message);
-        }
-
-        public void debug(Object message, Throwable t) {
-            this.delegate.debug(prefixString + message, t);
-        }
-
-        public void info(Object message) {
-            this.delegate.info(prefixString + message);
-        }
-
-        public void info(Object message, Throwable t) {
-            this.delegate.info(prefixString + message, t);
-        }
-
         public void warn(Object message) {
             this.delegate.warn(prefixString + message);
         }
@@ -106,51 +144,8 @@ public class OSGiAbstractor implements ServiceLookup {
             this.delegate.warn(prefixString + message, t);
         }
 
-        public void error(Object message) {
-            this.delegate.error(prefixString + message);
-        }
-
-        public void error(Object message, Throwable t) {
-            this.delegate.error(prefixString + message, t);
-        }
-
-        public void fatal(Object message) {
-            this.delegate.fatal(prefixString + message);
-        }
-
-        public void fatal(Object message, Throwable t) {
-            this.delegate.fatal(prefixString + message, t);
-        }
-
     }
 
-    private class Entry<T> extends SimpleEntry<T> {
-
-        private AvailabilityActivationClosure<T> closure;
-
-        private final boolean required;
-
-        public Entry(final Class<T> clazz, final boolean required) {
-            super(clazz);
-            this.required = required;
-        }
-
-        public Entry(final Class<T> clazz, final boolean required, final AvailabilityActivationClosure<T> closure) {
-            super(clazz);
-            this.required = required;
-            this.closure = closure;
-        }
-
-        public AvailabilityActivationClosure<T> getClosure() {
-            return closure;
-        }
-
-        public boolean isRequired() {
-            return required;
-        }
-
-    }
-    
     private class ServiceEntry {
 
         private final Class<?> clazz;
@@ -197,7 +192,7 @@ public class OSGiAbstractor implements ServiceLookup {
         }
 
     }
-    
+
     private class SimpleEntry<T> {
 
         private final Class<T> clazz;
@@ -219,115 +214,41 @@ public class OSGiAbstractor implements ServiceLookup {
 
     private static AtomicBoolean started = new AtomicBoolean(false);
 
-    /**
-     * @param clazz
-     * @return
+    /*
+     * Keeps all the needed services
      */
-    public static <S> S getServiceStatic(final Class<? extends S> clazz) {
-        if (started.get()) {
-            return registry.getService(clazz);
-        } else {
-            return null;
-        }
-    }
-    
     private final List<Entry<?>> bundleMap = new ArrayList<Entry<?>>();
 
-    private final BundleContext context;
+    private int requiredService = 0;
+    
+    private int registeredServiceImplementations = 0;
 
+    private BundleContext context;
+
+    /*
+     * Keeps all the service implementation which should be registered
+     */
     private final List<ServiceEntry> registrations = new ArrayList<ServiceEntry>();
 
     private final AtomicBoolean shutdownActivated = new AtomicBoolean(false);
 
-    /**
-     * Initializes the helper class with a {@link BundleContext} object
-     * @param context The {@link BundleContext} given in the {@link BundleActivator}
-     * @param clazz TODO
-     */
-    public OSGiAbstractor(final BundleContext context, final Class<?> clazz) {
-        if (null == clazz) {
-            throw new RuntimeException("No class given to OSGiAbstractor constructor");
-        }
-        if (null == context) {
-            throw new RuntimeException("No BundleContext given to OSGiAbstractor constructor");
-        }
-        
+    public OSGiAbstractor() {
         // Change LOG to the correct class for distinguishing in the logs
-        LOG = new Logger(LOG, clazz);
-        this.context = context;
-    }
-
-    public <T> boolean add(final Class<T> clazz, final boolean required) {
-        return bundleMap.add(new Entry<T>(clazz, required));
-    }
-
-    public <T> boolean add(final Class<T> clazz, final boolean required, final AvailabilityActivationClosure<T> closure) {
-        return bundleMap.add(new Entry<T>(clazz, required, closure));
-    }
-
-    /**
-     * A convenience method which calls {@link #addService(Class, AbstractInitializer, Dictionary, Class[], PropertyInterface[])} with no depending services and
-     * no {@link Dictionary} object
-     */
-    public boolean addService(final Class<?> clazz, final AbstractInitializer service) {
-        return addService(clazz, service, null, null, null);
-    }
-
-    /**
-     * A convenience method which calls {@link #addService(Class, AbstractInitializer, Dictionary, Class[], PropertyInterface[])} with no
-     * {@link Dictionary} and no {@link PropertyInterface} object
-     */
-    public boolean addService(final Class<?> clazz, final AbstractInitializer service, final Class<?>[] dependingServices) {
-        return addService(clazz, service, null, dependingServices, null);
-    }
-
-    /**
-     * A convenience method which calls {@link #addService(Class, AbstractInitializer, Dictionary, Class[], PropertyInterface[])} with no
-     * {@link Dictionary} object
-     */
-    public boolean addService(final Class<?> clazz, final AbstractInitializer service, final Class<?>[] dependingServices, final PropertyInterface[] properties) {
-        return addService(clazz, service, null, dependingServices, properties);
-    }
-
-    /**
-     * A convenience method which calls {@link #addService(Class, AbstractInitializer, Dictionary, Class[], PropertyInterface[])} with no depending services
-     */
-    public boolean addService(final Class<?> clazz, final AbstractInitializer service, final Dictionary<String, ?> dictionary) {
-        return addService(clazz, service, dictionary, null, null);
-    }
-
-    /**
-     * Adds a service to the framework
-     * 
-     * @param clazz The class or interface the service you want to add is implementing
-     * @param service An instance of your implementing class, note that this class must implement the interface {@link AbstractInitializer}
-     * @param dictionary A dictionary which can contain object, which will be attached to the service in OSGi
-     * @param dependingServices A number of services (class names) which must be present so that you service implementation is activated,
-     *            the order you give the classes here will be the same like in the {@link AbstractInitializer#setObjects(Object[])} you have
-     *            to implement
-     * @param properties Properties as an array of type {@link PropertyInterface} if properties should be checked
-     * @return
-     */
-    public boolean addService(final Class<?> clazz, final AbstractInitializer service, final Dictionary<String, ?> dictionary, final Class<?>[] dependingServices, PropertyInterface[] properties) {
-        return registrations.add(new ServiceEntry(clazz, service, dictionary, dependingServices, properties));
+        LOG = new Logger(LOG, this.getClass());
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.server.ServiceLookup#getOptionalService(java.lang.Class)
      */
-    public <S> S getOptionalService(Class<? extends S> clazz) {
+    public final <S> S getOptionalService(Class<? extends S> clazz) {
         return getService(clazz);
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.server.ServiceLookup#getService(java.lang.Class)
      */
-    public <S> S getService(final Class<? extends S> clazz) {
-        if (started.get()) {
-            return registry.getService(clazz);
-        } else {
-            return null;
-        }
+    public final <S> S getService(final Class<? extends S> clazz) {
+        return getServiceStatic(clazz);
     }
 
     /**
@@ -368,70 +289,18 @@ public class OSGiAbstractor implements ServiceLookup {
         }
     }
 
-    public void start() throws Exception {
-        try {
-            if (bundleMap.size() != 0) {
-                // First fire up the registry with the correct capacity...
-                registry = new ServiceRegistry(bundleMap.size());
-                final Filter filter = createFilter(bundleMap);
-                ServiceTracker<Object, Object> serviceTracker = new ServiceTracker<Object, Object>(context, filter, new ServiceTrackerCustomizer<Object, Object>() {
-
-                    @SuppressWarnings("unchecked")
-                    public Object addingService(final ServiceReference<Object> reference) {
-                        final Object addedService = context.getService(reference);
-                        for (final Entry<?> entry : bundleMap) {
-                            final Class<?> clazz = entry.getClazz();
-                            if (clazz.isInstance(addedService)) {
-                                final Object cast = clazz.cast(addedService);
-                                @SuppressWarnings("rawtypes")
-                                final AvailabilityActivationClosure closure = entry.getClosure();
-                                if (null != closure) {
-                                    closure.serviceAvailable(cast);
-                                }
-                                registry.addService(clazz, cast);
-                            }
-                        }
-                        return addedService;
-                    }
-
-                    public void modifiedService(final ServiceReference<Object> arg0, final Object arg1) {
-                        // Nothing to do here
-                    }
-
-                    public void removedService(final ServiceReference<Object> arg0, final Object arg1) {
-                        for (final Entry<?> entry : bundleMap) {
-                            if (entry.getClazz().isInstance(arg1)) {
-                                if (entry.isRequired()) {
-                                    final Bundle bundle = context.getBundle();
-                                    LOG.error("The required service \"" + entry.getClazz().getName() +"\" was removed from OSGi system, shutting down " + bundle.getSymbolicName());
-                                    shutdownBundle();
-                                }
-                                registry.removeService(entry.getClazz());
-                            }
-                        }
-                    }
-                });
-                serviceTracker.open();
-                serviceTrackers.add(serviceTracker);
-            }
-            registerServices();
-            started.set(true);
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
+    @Override
+    public final void start(BundleContext context) throws Exception {
+        this.context = context;
+        startBundle(context);
+        start();
     }
 
-    /**
-     * Stops the OSGi abstraction service. This method must be called so that all resources needed for OSGi service tracking etc. will be
-     * cleaned
-     */
-    public void stop() {
-        started.set(false);
-        for (final ServiceTracker<Object, Object> serviceTracker : serviceTrackers) {
-            serviceTracker.close();
-        }
-        serviceTrackers.clear();
-        registry = null;
+    @Override
+    public final void stop(BundleContext context) throws Exception {
+        stopBundle(context);
+        stop();
+        this.context = null;
     }
 
     private boolean checkConfigService(SimpleEntry<?>[] dependingServices) {
@@ -441,6 +310,16 @@ public class OSGiAbstractor implements ServiceLookup {
             }
         }
         return false;
+    }
+
+    private void checkStarted() {
+        if (registry.size() == requiredService && registrations.size() == registeredServiceImplementations) {
+            started.set(true);
+            System.out.println("!!!!!!!!!!!!!!!!!!!Started");
+        } else {
+            started.set(false);
+            System.out.println("!!!!!!!!!!!!!!!!!!!Stopped");
+        }
     }
 
     private Filter createFilter(final List<? extends SimpleEntry<?>> list) throws Exception {
@@ -539,6 +418,8 @@ public class OSGiAbstractor implements ServiceLookup {
                     try {
                         service.setObjects(objects);
                         registration = context.registerService(className, service, null);
+                        registeredServiceImplementations++;
+                        checkStarted();
                     } catch (final OXException e) {
                         LOG.error("Error while setting required services in \"" + service.getClass().getCanonicalName() + "\": " + e.getMessage(), e);
                         shutdownBundle();
@@ -566,6 +447,8 @@ public class OSGiAbstractor implements ServiceLookup {
                     if (registration != null && found != objects.length) {
                         unregister = registration;
                         registration = null;
+                        registeredServiceImplementations--;
+                        checkStarted();
                     }
                 } finally {
                     lock.unlock();
@@ -599,6 +482,166 @@ public class OSGiAbstractor implements ServiceLookup {
                 context.registerService(entry.getClassName(), entry.getService(), entry.getDictionary());
             }
         }
+    }
+
+    private void start() throws Exception {
+        try {
+            if (bundleMap.size() != 0) {
+                // First fire up the registry with the correct capacity...
+                registry = new ServiceRegistry(bundleMap.size());
+                final Filter filter = createFilter(bundleMap);
+                ServiceTracker<Object, Object> serviceTracker = new ServiceTracker<Object, Object>(context, filter, new ServiceTrackerCustomizer<Object, Object>() {
+
+                    @SuppressWarnings("unchecked")
+                    public Object addingService(final ServiceReference<Object> reference) {
+                        final Object addedService = context.getService(reference);
+                        for (final Entry<?> entry : bundleMap) {
+                            final Class<?> clazz = entry.getClazz();
+                            if (clazz.isInstance(addedService)) {
+                                final Object cast = clazz.cast(addedService);
+                                @SuppressWarnings("rawtypes")
+                                final AvailabilityActivationClosure closure = entry.getClosure();
+                                if (null != closure) {
+                                    closure.serviceAvailable(cast);
+                                }
+                                registry.addService(clazz, cast);
+                                checkStarted();
+                            }
+                        }
+                        return addedService;
+                    }
+
+                    public void modifiedService(final ServiceReference<Object> arg0, final Object arg1) {
+                        // Nothing to do here
+                    }
+
+                    public void removedService(final ServiceReference<Object> arg0, final Object arg1) {
+                        for (final Entry<?> entry : bundleMap) {
+                            if (entry.getClazz().isInstance(arg1)) {
+                                if (entry.isRequired()) {
+                                    final Bundle bundle = context.getBundle();
+                                    LOG.error("The required service \"" + entry.getClazz().getName() +"\" was removed from OSGi system, shutting down " + bundle.getSymbolicName());
+                                    shutdownBundle();
+                                }
+                                registry.removeService(entry.getClazz());
+                            }
+                        }
+                    }
+                });
+                serviceTracker.open();
+                serviceTrackers.add(serviceTracker);
+            }
+            registerServices();
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Stops the OSGi abstraction service. This method must be called so that all resources needed for OSGi service tracking etc. will be
+     * cleaned
+     */
+    private void stop() {
+        started.set(false);
+        for (final ServiceTracker<Object, Object> serviceTracker : serviceTrackers) {
+            serviceTracker.close();
+        }
+        serviceTrackers.clear();
+        registry = null;
+    }
+
+    /**
+     * A convenience method which calls {@link #addServiceImplementation(Class, AbstractInitializer, Dictionary, Class[], PropertyInterface[])}
+     */
+    protected final void addServiceImplementation(final Class<?> clazz, final AbstractInitializer implementation) {
+        addServiceImplementation(clazz, implementation, null, null, null);
+    }
+    
+    /**
+     * A convenience method which calls {@link #addServiceImplementation(Class, AbstractInitializer, Dictionary, Class[], PropertyInterface[])}
+     */
+    protected final void addServiceImplementation(final Class<?> clazz, final AbstractInitializer implementation, final Class<?>[] dependingServices) {
+        addServiceImplementation(clazz, implementation, null, dependingServices, null);
+    }
+
+    /**
+     * A convenience method which calls {@link #addServiceImplementation(Class, AbstractInitializer, Dictionary, Class[], PropertyInterface[])}
+     */
+    protected final void addServiceImplementation(final Class<?> clazz, final AbstractInitializer implementation, final Class<?>[] dependingServices, final PropertyInterface[] properties) {
+        addServiceImplementation(clazz, implementation, null, dependingServices, properties);
+    }
+
+    /**
+     * A convenience method which calls {@link #addServiceImplementation(Class, AbstractInitializer, Dictionary, Class[], PropertyInterface[])}
+     */
+    protected final void addServiceImplementation(final Class<?> clazz, final AbstractInitializer implementation, final Dictionary<String, ?> dictionary) {
+        addServiceImplementation(clazz, implementation, dictionary, null, null);
+    }
+
+    /**
+     * Adds a service implementation to the framework
+     * 
+     * @param clazz The class or interface the service you want to add is implementing
+     * @param implementation An instance of your implementing class, note that this class must implement the interface {@link AbstractInitializer}
+     * @param dictionary A dictionary which can contain object, which will be attached to the service in OSGi
+     * @param dependingServices A number of services (class names) which must be present so that you service implementation is activated,
+     *            the order you give the classes here will be the same like in the {@link AbstractInitializer#setObjects(Object[])} you have
+     *            to implement
+     * @param properties Properties as an array of type {@link PropertyInterface} if properties should be checked
+     * @return
+     */
+    protected final void addServiceImplementation(final Class<?> clazz, final AbstractInitializer implementation, final Dictionary<String, ?> dictionary, final Class<?>[] dependingServices, PropertyInterface[] properties) {
+        registrations.add(new ServiceEntry(clazz, implementation, dictionary, dependingServices, properties));
+    }
+
+    /**
+     * A convenience method which calls {@link #addServiceToRegistry(Class, boolean, AvailabilityActivationClosure)}
+     */
+    protected final <T> void addServiceToRegistry(final Class<T> service, final boolean required) {
+        if (required) {
+            requiredService++;
+        }
+        addServiceToRegistry(service, required, null);
+    }
+
+    /**
+     * Adds a service to the registry of this bundle. The service can be fetched later by calling one of the methods provided by the
+     * {@link ServiceLookup} interface. Or by calling {@link #getServiceStatic(Class)} if you don't have the instance of this class
+     * available
+     * 
+     * @param service the name of the service class you want to add
+     * @param required if this service is required for your bundle or not, if it's required your bundle will shutdown if the service is not
+     *            available any more
+     * @param closure an object of type {@link AvailabilityActivationClosure}. With that object you can define if something should be done
+     *            if a specific service gets available
+     */
+    protected final <T> void addServiceToRegistry(final Class<T> service, final boolean required, final AvailabilityActivationClosure<T> closure) {
+        bundleMap.add(new Entry<T>(service, required, closure));
+    }
+
+    protected abstract void startBundle(final BundleContext context) throws Exception;
+
+    protected abstract void stopBundle(final BundleContext context) throws Exception;
+
+    /**
+     * @param clazz
+     * @return
+     */
+    public final static <S> S getServiceStatic(final Class<? extends S> clazz) {
+        if (started.get()) {
+            return registry.getService(clazz);
+        } else {
+            throw new RuntimeException("The bundle is not fully started");
+        }
+    }
+
+    /**
+     * If this bundle is already correctly started (all Required Services are available)
+     * 
+     * @return
+     */
+    public final static boolean isStarted() {
+        return started.get();
     }
 
 }
