@@ -260,7 +260,7 @@ public final class IMAPException extends OXException {
          */
         UNKNOWN_FOLDER_MODE(IMAPCode.UNKNOWN_FOLDER_MODE),
         /**
-         * Message(IMAPCode.Message) %1$s in folder %2$s could not be deleted due to error "%3$s"
+         * Message %1$s in folder %2$s could not be deleted due to error "%3$s"
          */
         UID_EXPUNGE_FAILED(IMAPCode.UID_EXPUNGE_FAILED),
         /**
