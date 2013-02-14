@@ -89,6 +89,8 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
      * @param contextId The context ID
      * @param users The user IDs as an array
      * @param isRemote <code>true</code> to mark this push object as remotely received; otherwise <code>false</code>
+     * @param timestamp last modified time of the groupware data object
+     * @param topicName the topic on which the data object was received
      */
     public PushMsObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isRemote, final long timestamp, final String topicName) {
         super(contextId, isRemote);
@@ -108,6 +110,18 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
         this.hostname = hostname;
     }
 
+    /**
+     * Initializes a new {@link PushMsObject}.
+     * 
+     * @param folderId The folder ID
+     * @param module The module
+     * @param contextId The context ID
+     * @param users The user IDs as an array
+     * @param isRemote <code>true</code> to mark this push object as remotely received; otherwise <code>false</code>
+     * @param timestamp last modified time of the groupware data object
+     * @param topicName the topic on which the data object was received
+     * @param hostname the hostname to use for this PushMsObject
+     */
     public PushMsObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isRemote, final long timestamp, final String topicName, String hostname) {
         super(contextId, isRemote);
         this.folderId = folderId;

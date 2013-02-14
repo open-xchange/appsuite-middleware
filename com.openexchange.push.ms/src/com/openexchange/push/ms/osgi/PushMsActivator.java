@@ -49,6 +49,7 @@
 
 package com.openexchange.push.ms.osgi;
 
+import java.io.PushbackInputStream;
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
@@ -96,6 +97,7 @@ public class PushMsActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final Log LOG = com.openexchange.log.Log.loggerFor(PushMsActivator.class);
+        
         {
             final ConfigurationService service = getService(ConfigurationService.class);
             if (service.getBoolProperty("com.openexchange.push.udp.pushEnabled", false)) {
@@ -121,7 +123,7 @@ public class PushMsActivator extends HousekeepingActivator {
             final String[] topics = new String[] { EventConstants.EVENT_TOPIC, "com/openexchange/*" };
             final Hashtable<String, Object> ht = new Hashtable<String, Object>(1);
             ht.put(EventConstants.EVENT_TOPIC, topics);
-            registerService(EventHandler.class, new PushMsHandler(init.getPublisher()), ht);
+            registerService(EventHandler.class, new PushMsHandler(init.getPublisher(), init.getDelayPushQueue()), ht);
             INIT_REF.set(init);
             /*
              * Service trackers

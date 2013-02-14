@@ -79,15 +79,20 @@ import com.openexchange.ms.Topic;
 public class PushMsHandler implements EventHandler {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMsHandler.class));
-
+    
+    private DelayPushQueue delayPushQueue;
+    
     private final Topic<PushMsObject> publisher;
-
+    
     /**
      * Initializes a new {@link PushMsHandler}.
+     * @param publisher
+     * @param delayPushQueue the delayQueue that is used for pushin PIM objects except E-Mails
      */
-    public PushMsHandler(final Topic<PushMsObject> publisher) {
+    public PushMsHandler(final Topic<PushMsObject> publisher, DelayPushQueue delayPushQueue) {
         super();
         this.publisher = publisher;
+        this.delayPushQueue = delayPushQueue;
     }
 
     @Override
@@ -135,7 +140,7 @@ public class PushMsHandler implements EventHandler {
         case Types.CONTACT:
         case Types.FOLDER:
             for (final Entry<Integer, Set<Integer>> entry : transform(event.getAffectedUsersWithFolder()).entrySet()) {
-                publish(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp((DataObject) event.getActionObj()), e);
+                publishDelayed(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp((DataObject) event.getActionObj()), e);
             }
             break;
         case Types.EMAIL:
@@ -166,6 +171,13 @@ public class PushMsHandler implements EventHandler {
         } catch (final RuntimeException ex) {
             LOG.error(ex.getMessage(), ex);
         }
+    }
+    
+    private void publishDelayed(final int folderId, final int[] users, final int module, final Context ctx, final long timestamp, final Event e) {
+        if (users == null) {
+            return;
+        }
+        delayPushQueue.add(new PushMsObject(folderId, module, ctx.getContextId(), users, false, timestamp, e.getTopic()));
     }
 
     private static long getTimestamp(final Date lastModified) {

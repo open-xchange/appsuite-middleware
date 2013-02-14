@@ -48,6 +48,7 @@
  */
 
 package com.openexchange.push.ms;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.ms.MessageListener;
 import com.openexchange.ms.MsExceptionCodes;
@@ -63,6 +64,7 @@ public class PushMsInit {
 
     private volatile Topic<PushMsObject> publisher;
     private volatile MessageListener<PushMsObject> subscriber;
+    private DelayPushQueue delayPushQueue;
 
     /**
      * Initializes a new {@link PushMsInit}.
@@ -87,6 +89,14 @@ public class PushMsInit {
      */
     public MessageListener<PushMsObject> getSubscriber() {
         return subscriber;
+    }
+    
+    /**
+     * Get the delaying push queue.
+     * @return the delaying push queue.
+     */
+    public DelayPushQueue getDelayPushQueue() {
+        return delayPushQueue;
     }
 
     /**
@@ -116,6 +126,14 @@ public class PushMsInit {
                 }
             }
         }
+        ConfigurationService configService = Services.getService(ConfigurationService.class);
+        if (null == configService) {
+            throw MsExceptionCodes.ILLEGAL_STATE.create("Missing service: " + ConfigurationService.class.getName());
+        }
+        int delayDuration = configService.getIntProperty("com.openexchange.push.ms.delayDuration", 120000);
+        int maxDelays = configService.getIntProperty("com.openexchange.push.ms.maxDelayDuration", 600000);
+        delayPushQueue = new DelayPushQueue(publisher, delayDuration, maxDelays);
+        delayPushQueue.run();
     }
 
     /**
@@ -135,6 +153,9 @@ public class PushMsInit {
                     this.publisher = null;
                 }
             }
+        }
+        if(delayPushQueue != null) {
+            delayPushQueue.close();
         }
     }
 
