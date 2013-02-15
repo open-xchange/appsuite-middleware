@@ -1,3 +1,7 @@
+* 2013-02-15 - marc.arens@open-xchange.com
+
+ - Fix for bug 23904: Cannot open eMails from OX Appsuite
+
 * 2013-02-14 - marc.arens@open-xchange.com
 
  - Fix for bug 24980: There is no file storage service available that provides account "0"
