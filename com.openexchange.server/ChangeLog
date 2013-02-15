@@ -1,6 +1,7 @@
 * 2013-02-15 - marc.arens@open-xchange.com
 
  - Fix for bug 23904: Cannot open eMails from OX Appsuite
+ - Fix for bug 25006: org.glassfish.grizzly logs to open-xchange log even if log4j is installed
 
 * 2013-02-14 - marc.arens@open-xchange.com
 
