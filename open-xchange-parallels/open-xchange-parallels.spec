@@ -8,7 +8,7 @@ BuildRequires:  open-xchange-admin
 BuildRequires:  open-xchange-spamhandler-spamassassin
 BuildRequires:  java-devel >= 1.6.0
 Version:	@OXVERSION@
-%define		ox_release 10
+%define		ox_release 11
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -61,6 +61,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc settin
 %doc com.openexchange.custom.parallels/ChangeLog
 
 %changelog
+* Fri Feb 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-02-13
 * Tue Jan 29 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-01-28
 * Fri Dec 28 2012 Marcus Klein <marcus.klein@open-xchange.com>
@@ -85,10 +87,6 @@ First release candidate for 6.22.1
 prepare for 6.22.1
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 6.22.1
-* Tue Sep 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
-First release candidate for 6.23.0
-* Mon Sep 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
-prepare for next EDP drop
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Marcus Klein <marcus.klein@open-xchange.com>
