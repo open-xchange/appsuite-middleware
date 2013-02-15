@@ -200,6 +200,8 @@ public final class MailAccountWriter implements MailAccountFields {
                     final JSlob jSlob = jSlobStorage.opt(jSlobId);
                     if (null != jSlob) {
                         row.put(jSlob.getJsonObject());
+                    } else {
+                        row.put(JSONObject.NULL);
                     }
                 } else {
                     final Object value  = attribute.doSwitch(getter);
