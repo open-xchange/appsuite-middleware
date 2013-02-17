@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.groupware.upload.UploadFile;
@@ -156,10 +157,29 @@ public class UploadEvent {
      * Gets the upload file associated with specified field name.
      *
      * @param fieldName The field name.
-     * @return The upload file associated with specified field name.
+     * @return The upload file associated with specified field name or <code>null</code>
      */
     public final UploadFile getUploadFileByFieldName(final String fieldName) {
         return uploadFilesByFieldName.get(fieldName);
+    }
+
+    /**
+     * Gets the upload files associated with specified file name.
+     *
+     * @param fileName The file name.
+     * @return The upload files associated with specified file name.
+     */
+    public final List<UploadFile> getUploadFileByFileName(final String fileName) {
+        if (null == fileName) {
+            return Collections.emptyList();
+        }
+        final List<UploadFile> ret = new LinkedList<UploadFile>();
+        for (final UploadFile uf : uploadFilesByFieldName.values()) {
+            if (fileName.equals(uf.getFileName())) {
+                ret.add(uf);
+            }
+        }
+        return ret;
     }
 
     /**
