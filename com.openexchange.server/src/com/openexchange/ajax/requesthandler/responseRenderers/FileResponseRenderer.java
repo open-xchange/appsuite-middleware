@@ -240,7 +240,13 @@ public class FileResponseRenderer implements ResponseRenderer {
         /*
          * build transformations
          */
-        ImageTransformations transformations = scaler.transfom(file.getStream());
+        InputStream stream = file.getStream();
+        if (null == stream) {
+            LOG.warn("(Possible) Image file misses stream data");
+            return file;
+        }
+        // start transformations: scale, rotate, ...
+        ImageTransformations transformations = scaler.transfom(stream);
         // rotate by default when not delivering as download
         Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
         if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
