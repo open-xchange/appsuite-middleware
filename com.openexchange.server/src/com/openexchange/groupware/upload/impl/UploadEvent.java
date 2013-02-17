@@ -51,6 +51,7 @@ package com.openexchange.groupware.upload.impl;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -101,7 +102,7 @@ public class UploadEvent {
 
     private int affiliationId = -1;
 
-    private final Map<String, UploadFile> uploadFiles;
+    private final Map<String, UploadFile> uploadFilesByFieldName;
 
     private final Map<String, String> formFields;
 
@@ -109,14 +110,12 @@ public class UploadEvent {
 
     private final Map<String, Object> parameters;
 
-    private List<UploadFile> sequentialList;
-
     /**
      * Initializes a new {@link UploadEvent}.
      */
     public UploadEvent() {
         super();
-        uploadFiles = new HashMap<String, UploadFile>();
+        uploadFilesByFieldName = new HashMap<String, UploadFile>();
         formFields = new HashMap<String, String>();
         parameters = new HashMap<String, Object>();
     }
@@ -145,58 +144,12 @@ public class UploadEvent {
      * @param uploadFile The upload file to add.
      */
     public final void addUploadFile(final UploadFile uploadFile) {
-        if (sequentialList != null) {
-            /*
-             * Discard cached sequential list
-             */
-            sequentialList = null;
-        }
-        if (uploadFiles.containsKey(uploadFile.getFileName())) {
-            UploadFile current = uploadFiles.get(uploadFile.getFileName());
-            while (current.getHomonymous() != null) {
-                current = current.getHomonymous();
+        if (null != uploadFile) {
+            final String fieldName = uploadFile.getFieldName();
+            if (!uploadFilesByFieldName.containsKey(fieldName)) {
+                uploadFilesByFieldName.put(fieldName, uploadFile);
             }
-            current.setHomonymous(uploadFile);
-        } else {
-            uploadFiles.put(uploadFile.getFileName(), uploadFile);
         }
-    }
-
-    /**
-     * Removes the upload file associated with specified file name.
-     *
-     * @param fileName The file name.
-     */
-    public final void removeUploadFile(final String fileName) {
-        if (sequentialList != null) {
-            /*
-             * Discard cached sequential list
-             */
-            sequentialList = null;
-        }
-        UploadFile uploadFile = uploadFiles.remove(fileName);
-        while (uploadFile != null) {
-            if (uploadFile.getTmpFile().exists()) {
-                try {
-                    if (!uploadFile.getTmpFile().delete()) {
-                        LOG.error(new StringBuilder(ERR_PREFIX).append(uploadFile.getTmpFile().getName()));
-                    }
-                } catch (final SecurityException e) {
-                    LOG.error(new StringBuilder(ERR_PREFIX).append(uploadFile.getTmpFile().getName()), e);
-                }
-            }
-            uploadFile = uploadFile.getHomonymous();
-        }
-    }
-
-    /**
-     * Gets the upload file associated with specified file name.
-     *
-     * @param fileName The file name.
-     * @return The upload file associated with specified file name.
-     */
-    public final UploadFile getUploadFile(final String fileName) {
-        return uploadFiles.get(fileName);
     }
 
     /**
@@ -206,18 +159,7 @@ public class UploadEvent {
      * @return The upload file associated with specified field name.
      */
     public final UploadFile getUploadFileByFieldName(final String fieldName) {
-        final int size = uploadFiles.size();
-        final Iterator<Map.Entry<String, UploadFile>> iter = uploadFiles.entrySet().iterator();
-        for (int i = 0; i < size; i++) {
-            UploadFile uf = iter.next().getValue();
-            while (uf != null) {
-                if (uf.getFieldName().equalsIgnoreCase(fieldName)) {
-                    return uf;
-                }
-                uf = uf.getHomonymous();
-            }
-        }
-        return null;
+        return uploadFilesByFieldName.get(fieldName);
     }
 
     /**
@@ -255,26 +197,10 @@ public class UploadEvent {
     }
 
     private final List<UploadFile> createList() {
-        if (sequentialList != null) {
-            /*
-             * Return cached sequential list
-             */
-            return sequentialList;
+        if (uploadFilesByFieldName.isEmpty()) {
+            return Collections.emptyList();
         }
-        final int size = uploadFiles.size();
-        if (size == 0) {
-            return new ArrayList<UploadFile>(0);
-        }
-        sequentialList = new ArrayList<UploadFile>(size);
-        final Iterator<Map.Entry<String, UploadFile>> iter = uploadFiles.entrySet().iterator();
-        for (int i = 0; i < size; i++) {
-            UploadFile uf = iter.next().getValue();
-            while (uf != null) {
-                sequentialList.add(uf);
-                uf = uf.getHomonymous();
-            }
-        }
-        return sequentialList;
+        return new ArrayList<UploadFile>(uploadFilesByFieldName.values());
     }
 
     /**
@@ -374,29 +300,23 @@ public class UploadEvent {
         }
     }
 
-    private static final String ERR_PREFIX = "Temporary upload file could not be deleted: ";
-
     /**
-     * Deletes all created temporary files created through this <code>DeleteEvent</code> instance and clears upload files.
+     * Deletes all created temporary files created through this <code>UploadEvent</code> instance and clears upload files.
      */
     public final void cleanUp() {
-        final List<UploadFile> l = createList();
-        final int size = l.size();
-        final Iterator<UploadFile> iter = l.iterator();
-        for (int i = 0; i < size; i++) {
-            final UploadFile uploadFile = iter.next();
+        for (final UploadFile uploadFile : uploadFilesByFieldName.values()) {
             final File tmpFile = uploadFile.getTmpFile();
-            if (tmpFile.exists()) {
+            if (null != tmpFile && tmpFile.exists()) {
                 try {
                     if (!tmpFile.delete()) {
-                        LOG.error(new StringBuilder(ERR_PREFIX).append(tmpFile.getName()));
+                        LOG.error(new StringBuilder("Temporary upload file could not be deleted: ").append(tmpFile.getName()));
                     }
-                } catch (final SecurityException e) {
-                    LOG.error(new StringBuilder(ERR_PREFIX).append(tmpFile.getName()), e);
+                } catch (final Exception e) {
+                    LOG.error(new StringBuilder("Temporary upload file could not be deleted: ").append(tmpFile.getName()), e);
                 }
             }
         }
-        uploadFiles.clear();
+        uploadFilesByFieldName.clear();
         if (LOG.isDebugEnabled()) {
             LOG.debug("Upload event cleaned-up. All temporary stored files deleted.");
         }
