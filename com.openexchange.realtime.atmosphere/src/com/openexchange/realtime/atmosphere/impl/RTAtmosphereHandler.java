@@ -75,6 +75,7 @@ import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.MessageDispatcher;
+import com.openexchange.realtime.ResourceRegistry;
 import com.openexchange.realtime.StanzaSender;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
@@ -161,11 +162,15 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     // Create new broadcaster for AtmosphereResource (if none already exists) Id will be formed like /context/user/resource
                     String broadcasterId = generateBroadcasterId(atmosphereState.id);
                     Broadcaster broadcaster = BroadcasterFactory.getDefault().lookup(broadcasterId, true);
-                    atmosphereState.atmosphereResource.addEventListener(new AtmosphereResourceCleanupListener(resource, broadcaster));
+                    atmosphereState.atmosphereResource.addEventListener(new AtmosphereResourceCleanupListener(this, atmosphereState, broadcaster));
                     broadcaster.addAtmosphereResource(atmosphereState.atmosphereResource);
 
                     // keep track of connected users
                     trackConnectedUsers(atmosphereState.id.toGeneralForm().toString(), broadcasterId);
+
+                    // register the resource
+                    ResourceRegistry resourceRegistry = AtmosphereServiceRegistry.getInstance().getService(ResourceRegistry.class);
+                    resourceRegistry.register(atmosphereState.id);
 
                     // finally suspend the resource
                     resource.suspend();
@@ -284,6 +289,27 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             broadcasterIds.add(broadcasterId);
             userToBroadcasterIDs.put(generalId, broadcasterIds);
         }
+    }
+    
+    /**
+     * CleanUp callback used by AtmosphereResourceCleanupListener instances.
+     */
+    public void onDisconnect(RTAtmosphereState atmosphereState) {
+        ResourceRegistry resourceRegistry = AtmosphereServiceRegistry.getInstance().getService(ResourceRegistry.class);
+        try {
+            resourceRegistry.unregister(atmosphereState.id);
+        } catch (OXException e) {
+            LOG.error("Could not unregister resource " + atmosphereState.id.toString() + ".", e);
+        }
+        
+        String generalId = atmosphereState.id.toGeneralForm().toString();
+        String broadcasterId = generateBroadcasterId(atmosphereState.id);
+        Set<String> broadcasterIds = userToBroadcasterIDs.get(generalId);
+        if (broadcasterIds != null) {
+            broadcasterIds.remove(broadcasterId);
+        }
+        
+        sessionIdToState.remove(atmosphereState.session.getSessionID());
     }
 
     @Override
