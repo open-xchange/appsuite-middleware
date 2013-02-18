@@ -47,31 +47,83 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.impl;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.HashSet;
+import java.util.Set;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.RealtimeExceptionCodes;
+import com.openexchange.realtime.ResourceRegistry;
+import com.openexchange.realtime.packet.ID;
+
 
 /**
- * {@link RealtimeExceptionMessages} - Translatable error messages.
+ * {@link ResourceRegistryImpl}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class RealtimeExceptionMessages implements LocalizableStrings {
+public class ResourceRegistryImpl implements ResourceRegistry {
+    
+    private final Set<ID> ids;
+    
+    public ResourceRegistryImpl() {
+        super();
+        ids = new HashSet<ID>();
+    }
 
-    /** Unknown channel %1$s */
-    public static final String UNKNOWN_CHANNEL = "Unknown channel %1$s";
+    @Override
+    public synchronized boolean register(ID id) throws OXException {
+        if (id == null) {
+            throw new IllegalArgumentException("id was null.");
+        }
+        
+        String resource = id.getResource();
+        if (isInvalid(resource)) {
+            throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(); // TODO
+        }
+        
+        if (ids.contains(id)) {
+            return false;
+        }
+        
+        ids.add(id);
+        return true;
+    }
 
-    /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
-    public static final String NO_APPROPRIATE_CHANNEL = "No appropriate channel found for recipient %1$s with payload namespace %2$s";
+    @Override
+    public synchronized boolean unregister(ID id) throws OXException {
+        if (id == null) {
+            throw new IllegalArgumentException("id was null.");
+        }
+        
+        String resource = id.getResource();
+        if (isInvalid(resource)) {
+            throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(); // TODO
+        }
+        
+        return ids.remove(id);
+    }
 
-    /** The following needed service is missing: \"%1$s\" */
-    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
+    @Override
+    public synchronized boolean contains(ID id) {
+        if (id == null) {
+            throw new IllegalArgumentException("id was null.");
+        }
 
-    // Unexpected error: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
+        return ids.contains(id);
+    }
 
-    /** Invalid ID. Resource identifier is missing. */
-    public static final String INVALID_ID = "Invalid ID. Resource identifier is missing.";
+    @Override
+    public synchronized void clear() {
+        ids.clear();
+    }
+    
+    private static boolean isInvalid(String resource) {
+        if (resource == null || resource.isEmpty()) {
+            return true;
+        }
+        
+        return false;
+    }
 
 }

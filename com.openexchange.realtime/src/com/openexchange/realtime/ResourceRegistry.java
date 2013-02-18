@@ -49,29 +49,52 @@
 
 package com.openexchange.realtime;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.packet.ID;
+
 
 /**
- * {@link RealtimeExceptionMessages} - Translatable error messages.
+ * {@link ResourceRegistry}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class RealtimeExceptionMessages implements LocalizableStrings {
-
-    /** Unknown channel %1$s */
-    public static final String UNKNOWN_CHANNEL = "Unknown channel %1$s";
-
-    /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
-    public static final String NO_APPROPRIATE_CHANNEL = "No appropriate channel found for recipient %1$s with payload namespace %2$s";
-
-    /** The following needed service is missing: \"%1$s\" */
-    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
-
-    // Unexpected error: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
-
-    /** Invalid ID. Resource identifier is missing. */
-    public static final String INVALID_ID = "Invalid ID. Resource identifier is missing.";
+public interface ResourceRegistry {
+    
+    /**
+     * Registers a resource at the registry, so that the result of 
+     * {@link #contains(ID)} returns <code>true</code>.<br>
+     * <br>
+     * The given {@link ID} must contain a valid resource identifier.
+     *
+     * @return <code>false</code> if the id was already registered, otherwise <code>true</code>.
+     * @param id The {@link ID} that identifies the resource.
+     * @throws OXException
+     */
+    boolean register(ID id) throws OXException;
+    
+    /**
+     * Removes a resource from the registry. A subsequent call of 
+     * {@link #contains(ID)} will return <code>false</code>.<br>
+     * <br>
+     * The given {@link ID} must contain a valid resource identifier.
+     *
+     * @return <code>false</code> if the registry did not contain the given id. Otherwise <code>true</code>.
+     * @param id The {@link ID} that identifies the resource.
+     * @throws OXException
+     */
+    boolean unregister(ID id) throws OXException;
+    
+    /**
+     * Returns <code>true</code> if the given ID was registered at this registry.
+     * Otherwise <code>false</code> is returned.
+     *
+     * @param id The {@link ID} that identifies the resource.
+     */
+    boolean contains(ID id);
+    
+    /**
+     * Clears the whole registry.
+     */
+    void clear();
 
 }
