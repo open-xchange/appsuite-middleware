@@ -47,35 +47,51 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.admin.rmi.exceptions;
 
-import java.util.Collection;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * Is thrown if a publication doesn't exist in an operation
+ *
+ * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
+ *
  */
-public interface PublicationService {
+public class NoSuchPublicationException extends Exception {
 
-    public void create(Publication publication) throws OXException;
-    public void update(Publication publication) throws OXException;
-    public Collection<Publication> getAllPublications(Context ctx, int userId, String module) throws OXException;
-    public Collection<Publication> getAllPublications(Context ctx) throws OXException;
-    public Collection<Publication> getAllPublications(Context ctx, String entityId) throws OXException;
-    public boolean knows(Context ctx, int publicationId) throws OXException;
-    public Publication load(Context ctx, int publicationId) throws OXException;
-    public void delete(Publication publication) throws OXException;
-    public PublicationTarget getTarget() throws OXException;
     /**
-     * This Method should only be used by the admin daemon to get a Publication by its URL
-     * @param service needs to be provided, as publications do not provide a way to determine the context
-     * @param URL the URL for a Publication
-     * @return the Publication if found, else null
-     * @throws OXException
+     *
      */
-    public Publication resolveUrl(final ContextService service, String URL) throws OXException;
-    public String getInformation(Publication publication);
+    private static final long serialVersionUID = -934683536798925225L;
+
+    /**
+     *
+     */
+    public NoSuchPublicationException() {
+        super("Publication does not exist");
+    }
+
+    /**
+     * @param message
+     */
+    public NoSuchPublicationException(String message) {
+        super(message);
+
+    }
+
+    /**
+     * @param cause
+     */
+    public NoSuchPublicationException(Throwable cause) {
+        super(cause);
+
+    }
+
+    /**
+     * @param message
+     * @param cause
+     */
+    public NoSuchPublicationException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
 }

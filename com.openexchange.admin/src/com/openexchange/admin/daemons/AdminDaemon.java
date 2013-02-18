@@ -69,6 +69,7 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.OXAdminCoreImpl;
+import com.openexchange.admin.rmi.impl.OXPublication;
 import com.openexchange.admin.rmi.impl.OXTaskMgmtImpl;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
@@ -213,6 +214,8 @@ public class AdminDaemon {
 
     private static OXTaskMgmtImpl oxtaskmgmt = null;
 
+    private static OXPublication oxpublication = null;
+
     /**
      * Checks if a simple check shall be performed in order to determine if a bundle is needed for admin to work:
      * <p>
@@ -335,6 +338,7 @@ public class AdminDaemon {
             oxlogin_v2 = new com.openexchange.admin.rmi.impl.OXLogin(context);
             oxadmincore = new OXAdminCoreImpl(context);
             oxtaskmgmt = new OXTaskMgmtImpl();
+            oxpublication = new OXPublication(null, null);
 
             services.add(context.registerService(Remote.class, oxuser_v2, null));
             services.add(context.registerService(Remote.class, oxgrp_v2, null));
@@ -342,6 +346,7 @@ public class AdminDaemon {
             services.add(context.registerService(Remote.class, oxlogin_v2, null));
             services.add(context.registerService(Remote.class, oxadmincore, null));
             services.add(context.registerService(Remote.class, oxtaskmgmt, null));
+            services.add(context.registerService(Remote.class, oxpublication, null));
         } catch (final RemoteException e) {
             LOG.fatal("Error creating RMI registry!", e);
         } catch (final StorageException e) {
