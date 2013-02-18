@@ -5055,6 +5055,11 @@ msgstr ""
 msgid "Unexpected error: %1$s"
 msgstr ""
 
+#. * Invalid ID. Resource identifier is missing.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:75
+msgid "Invalid ID. Resource identifier is missing."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rmi/src/com/openexchange/rmi/exceptions/OXRMIExceptionMessage.java:62
 msgid "Start of RMI service failed."
 msgstr ""
