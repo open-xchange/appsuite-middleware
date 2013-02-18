@@ -382,12 +382,12 @@ public class ConsistencyCheck {
         }
 
         private void disconnect() {
-            try {
-                if(jmxConnector != null) {
+            if (null != jmxConnector) {
+                try {
                     jmxConnector.close();
+                } catch (final Exception e) {
+                    // Ignore
                 }
-            } catch (final IOException e) {
-                //IGNORE
             }
         }
 
