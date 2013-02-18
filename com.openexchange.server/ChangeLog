@@ -2,6 +2,7 @@
 
  - Fix for bug 25029: Removed 'sessioncache.ccf' from consistency check
  - Fix for bug 21908: Pass text to SMS as-is and deny multipart/alternative
+ - Fix for bug 25036: Dropped dependency to com.openexchange.java.Streams
 
 * 2013-02-18 - marcus.klein@open-xchange.com
 
