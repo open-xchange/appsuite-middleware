@@ -212,7 +212,7 @@ public class ConsistencyCheck {
 
     private static int noaction() {
         final String ls = System.getProperty("line.separator");
-        System.err.println("Please specify an action, either"+ls+"\"list missing\", \"list unassigned\", \"repair\", \"checkconfigdb\" or \"checkconfigdb\"" + ls +
+        System.err.println("Please specify an action, either"+ls+"\"list missing\", \"list unassigned\", \"repair\", \"checkconfigdb\" or \"repairconfigdb\"" + ls +
         		"You can also specify the hostname of the open-xchange server, optionally."+ls +
         		"Example:" + ls +
         		"checkconsistency in host 10.10.10.10 list missing [...]");
