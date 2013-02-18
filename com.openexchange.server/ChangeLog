@@ -1,3 +1,7 @@
+* 2013-02-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25029: Removed 'sessioncache.ccf' from consistency check 
+
 * 2013-02-18 - marcus.klein@open-xchange.com
 
  - Fix for bug 25011: Fixed extension of CLTs by autocontextid and reseller plugins.
