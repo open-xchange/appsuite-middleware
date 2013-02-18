@@ -366,7 +366,13 @@ public class ConsistencyCheck {
         }
 
         private void disconnect() {
-            Streams.close(jmxConnector);
+            if (null != jmxConnector) {
+                try {
+                    jmxConnector.close();
+                } catch (final Exception e) {
+                    // Ignore
+                }
+            }
         }
 
         private void connect() throws IOException, MalformedObjectNameException, NullPointerException {
