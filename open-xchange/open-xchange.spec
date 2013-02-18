@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -50,31 +50,29 @@ mkdir -p %{buildroot}/sbin
 install -m 755 %{SOURCE1} %{buildroot}/etc/init.d/open-xchange
 ln -sf ../etc/init.d/open-xchange %{buildroot}/sbin/rcopen-xchange
 
-mkdir -p %{buildroot}/var/log/open-xchange
-mkdir -m 750 -p %{buildroot}/var/spool/open-xchange/uploads
-
 %post
-. /opt/open-xchange/lib/oxfunctions.sh
-ox_update_permissions "/var/spool/open-xchange/uploads" open-xchange:root 750
-ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
 
 %clean
 %{__rm} -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
-%dir %attr(750,open-xchange,root) /var/log/open-xchange
-%dir %attr(750,open-xchange,root) /var/spool/open-xchange/uploads
 /etc/init.d/open-xchange
 /sbin/rcopen-xchange
 
 %changelog
+* Thu Feb 14 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.0.1
+* Fri Feb 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.0.1
 * Tue Jan 29 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-01-28
 * Mon Jan 21 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-01-24
 * Tue Jan 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-01-23
+* Thu Jan 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.0.1
 * Thu Jan 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for public patch 2013-01-15
 * Fri Dec 28 2012 Marcus Klein <marcus.klein@open-xchange.com>
@@ -141,5 +139,3 @@ Internal release build for EDP drop #2
 Internal release build for EDP drop #1
 * Wed Apr 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Internal release build for EDP drop #0
-* Wed Feb 01 2012 Marcus Klein <marcus.klein@open-xchange.com>
-Initial release

@@ -316,4 +316,10 @@ public class SessionObject implements PutIfAbsent {
     public void setClient(final String client) {
         this.client = client;
     }
+
+    @Override
+    public boolean isTransient() {
+        return false;
+    }
+
 }

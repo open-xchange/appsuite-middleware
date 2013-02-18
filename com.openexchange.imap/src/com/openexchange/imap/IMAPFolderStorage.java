@@ -2357,10 +2357,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     @Override
     public com.openexchange.mail.Quota[] getQuotas(final String folder, final com.openexchange.mail.Quota.Type[] types) throws OXException {
         try {
-            final IMAPFolder f;
             final String fullName = folder == null ? STR_INBOX : folder;
             final boolean isDefaultFolder = fullName.equals(DEFAULT_FOLDER_ID);
-            f = (IMAPFolder) (isDefaultFolder ? imapStore.getDefaultFolder() : imapStore.getFolder(fullName));
+            final IMAPFolder f = (IMAPFolder) (isDefaultFolder ? imapStore.getDefaultFolder() : imapStore.getFolder(fullName));
             /*
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
@@ -2388,7 +2387,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 } catch (final MessagingException e) {
                     throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, fullName);
                 }
-                f.open(Folder.READ_ONLY);
+                // f.open(Folder.READ_ONLY);
                 if (!imapConfig.getImapCapabilities().hasQuota()) {
                     return com.openexchange.mail.Quota.getUnlimitedQuotas(types);
                 }

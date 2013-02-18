@@ -49,6 +49,7 @@
 
 package com.openexchange.carddav.mapping;
 
+import java.util.Date;
 import java.util.EnumMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -831,31 +832,59 @@ public class CardDAVMapper extends DefaultMapper<Contact, ContactField> {
 
         mappings.put(ContactField.IMAGE1, new DefaultMapping<byte[], Contact>() {
 
-			@Override
-			public boolean isSet(Contact contact) {
-				return contact.containsImage1();
-			}
+            @Override
+            public boolean isSet(Contact contact) {
+                return contact.containsImage1();
+            }
 
-			@Override
-			public void set(Contact contact, byte[] value) throws OXException {
-				contact.setImage1(value);
-			}
+            @Override
+            public void set(Contact contact, byte[] value) throws OXException {
+                contact.setImage1(value);
+            }
 
-			@Override
-			public byte[] get(Contact contact) {
-				return contact.getImage1();
-			}
+            @Override
+            public byte[] get(Contact contact) {
+                return contact.getImage1();
+            }
 
-			@Override
-			public void remove(Contact contact) {
-				contact.removeImage1();
-			}
+            @Override
+            public void remove(Contact contact) {
+                contact.removeImage1();
+            }
 
-			@Override
-			public boolean truncate(Contact contact, int length) throws OXException {
-				return false;
-			}
-		});
+            @Override
+            public boolean truncate(Contact contact, int length) throws OXException {
+                return false;
+            }
+        });
+
+        mappings.put(ContactField.BIRTHDAY, new DefaultMapping<Date, Contact>() {
+
+            @Override
+            public boolean isSet(Contact contact) {
+                return contact.containsBirthday();
+            }
+
+            @Override
+            public void set(Contact contact, Date value) throws OXException {
+                contact.setBirthday(value);
+            }
+
+            @Override
+            public Date get(Contact contact) {
+                return contact.getBirthday();
+            }
+
+            @Override
+            public void remove(Contact contact) {
+                contact.removeBirthday();
+            }
+
+            @Override
+            public boolean truncate(Contact contact, int length) throws OXException {
+                return false;
+            }
+        });
 
 	}
 }

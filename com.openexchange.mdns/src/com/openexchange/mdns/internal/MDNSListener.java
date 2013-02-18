@@ -141,7 +141,7 @@ public final class MDNSListener implements javax.jmdns.ServiceListener {
          * Add newly detected service
          */
         final MDNSServiceEntryImpl entry =
-            new MDNSServiceEntryImpl(new InetAddress[] { info.getInetAddress() } /*info.getInetAddresses()*/, info.getPort(), id, serviceId, info.toString(), Constants.SERVICE_TYPE);
+            new MDNSServiceEntryImpl(getAddresses(info), info.getPort(), id, serviceId, info.toString(), Constants.SERVICE_TYPE);
         ConcurrentMap<UUID, MDNSServiceEntry> inner = map.get(serviceId);
         if (null == inner) {
             final ConcurrentMap<UUID, MDNSServiceEntry> newInner = new NonBlockingHashMap<UUID, MDNSServiceEntry>();
@@ -190,4 +190,25 @@ public final class MDNSListener implements javax.jmdns.ServiceListener {
             mdnsReregisterer.serviceAdded(serviceId, entry);
         }
     }
+
+    private static InetAddress[] getAddresses(javax.jmdns.ServiceInfo info) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Possible IPv4 addresses from service info: " + info.getInet4Addresses());
+            LOG.debug("Possible IPv6 addresses from service info: " + info.getInet6Addresses());
+            LOG.debug("java.net.preferIPv4Stack=" + Boolean.getBoolean("java.net.preferIPv4Stack"));
+        }
+        if (Boolean.getBoolean("java.net.preferIPv4Stack")) {
+            InetAddress[] inet4Addresses = info.getInet4Addresses();
+            if (null != inet4Addresses && 0 < inet4Addresses.length) {
+                return inet4Addresses;
+            }
+        } else {
+            InetAddress[] inet6Addresses = info.getInet4Addresses();
+            if (null != inet6Addresses && 0 < inet6Addresses.length) {
+                return inet6Addresses;
+            }
+        }
+        return info.getInetAddresses();
+    }
+
 }

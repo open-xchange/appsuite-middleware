@@ -60,6 +60,10 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.impl.BasicAuthenticator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.solr.SolrCoreConfigService;
@@ -171,7 +175,15 @@ public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
     }
 
     @Override
-    public List<SolrCoreStore> getAllStores() throws MBeanException {
+    public List<SolrCoreStore> getAllStores(Credentials credentials) throws MBeanException {
+        try {
+            new BasicAuthenticator().doAuthentication(credentials);
+        } catch (InvalidCredentialsException e) {
+            throw new MBeanException(e, e.getMessage());
+        } catch (StorageException e) {
+            throw new MBeanException(e, e.getMessage());
+        }
+        
         try {
             return coreService.getAllStores();
         } catch (OXException e) {
@@ -180,7 +192,15 @@ public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
     }
 
     @Override
-    public int registerCoreStore(URI uri, int maxCores) throws MBeanException {
+    public int registerCoreStore(Credentials credentials, URI uri, int maxCores) throws MBeanException {
+        try {
+            new BasicAuthenticator().doAuthentication(credentials);
+        } catch (InvalidCredentialsException e) {
+            throw new MBeanException(e, e.getMessage());
+        } catch (StorageException e) {
+            throw new MBeanException(e, e.getMessage());
+        }
+        
         SolrCoreStore store = new SolrCoreStore();
         store.setUri(uri);
         store.setMaxCores(maxCores);
@@ -192,7 +212,15 @@ public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
     }
 
     @Override
-    public void modifyCoreStore(int id, URI uri, int maxCores) throws MBeanException {
+    public void modifyCoreStore(Credentials credentials, int id, URI uri, int maxCores) throws MBeanException {
+        try {
+            new BasicAuthenticator().doAuthentication(credentials);
+        } catch (InvalidCredentialsException e) {
+            throw new MBeanException(e, e.getMessage());
+        } catch (StorageException e) {
+            throw new MBeanException(e, e.getMessage());
+        }
+        
         SolrCoreStore store = new SolrCoreStore();
         store.setId(id);
         store.setUri(uri);
@@ -205,7 +233,15 @@ public class SolrMBeanImpl extends StandardMBean implements SolrMBean {
     }
 
     @Override
-    public void unregisterCoreStore(int id) throws MBeanException {
+    public void unregisterCoreStore(Credentials credentials, int id) throws MBeanException {
+        try {
+            new BasicAuthenticator().doAuthentication(credentials);
+        } catch (InvalidCredentialsException e) {
+            throw new MBeanException(e, e.getMessage());
+        } catch (StorageException e) {
+            throw new MBeanException(e, e.getMessage());
+        }
+        
         try {
             coreService.unregisterCoreStore(id);
         } catch (OXException e) {

@@ -12,7 +12,12 @@ Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
 Replaces: open-xchange-unifiedinbox (<< 6.21.0-0)
 Conflicts: open-xchange-unifiedinbox (<< 6.21.0-0)
-Description: The Open-Xchange backend extension for Unified Mail
+Description: Extension to combine all mail storage accounts into a virtual single one
+ This installs the backend extension for Unified Mail. It combines the standard folders of every mail storage account - or mostly every
+ IMAP account - into a single mail box. E.g. all mails of every INBOX folder of all your mail storage accounts are shown in the INBOX of the
+ Unified Mail box. Beside the Unified Mail account all your other mail accounts are still shown separately.
+ You can select which of your mail storage accounts should be combined into Unified Mail.
+ Within Unified Mail every email gets an additional tag showing you in which mail account this email is located.
 
 ###### http://wiki.debian.org/Renaming_a_Package #####
 Package: open-xchange-unifiedinbox
@@ -20,3 +25,5 @@ Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, open-xchange-unifiedmail
 Section: oldlibs
 Description: transitional dummy package
+ After upgrading to 6.22.0 this package can be removed from installation. It does not contain anything. It is only necessary to trick the
+ package manger to correctly do the upgrade from 6.20.7 to 6.22.0.

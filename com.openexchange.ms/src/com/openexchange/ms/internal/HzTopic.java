@@ -52,6 +52,7 @@ package com.openexchange.ms.internal;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.apache.commons.logging.Log;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ITopic;
 import com.openexchange.java.util.UUIDs;
@@ -65,6 +66,8 @@ import com.openexchange.ms.Topic;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HzTopic<E> implements Topic<E> {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(HzTopic.class);
 
     private final ITopic<MessageData<E>> hzTopic;
     private final String senderId;
@@ -103,7 +106,16 @@ public final class HzTopic<E> implements Topic<E> {
     public void removeMessageListener(final MessageListener<E> listener) {
         final com.hazelcast.core.MessageListener<MessageData<E>> hzListener = registeredListeners.remove(listener);
         if (null != hzListener) {
-            hzTopic.removeMessageListener(hzListener);
+            try {
+                hzTopic.removeMessageListener(hzListener);
+            } catch (final RuntimeException e) {
+                // Removing message listener failed
+                if (LOG.isDebugEnabled()) {
+                    LOG.warn("Couldn't remove message listener from Hazelcast topic \"" + name + "\".", e);
+                } else {
+                    LOG.warn("Couldn't remove message listener from Hazelcast topic \"" + name + "\".");
+                }
+            }
         }
     }
 

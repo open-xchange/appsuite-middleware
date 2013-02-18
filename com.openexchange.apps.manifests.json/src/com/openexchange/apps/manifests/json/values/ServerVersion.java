@@ -72,6 +72,10 @@ public class ServerVersion implements ComputedServerConfigValueService {
 		if (!serverConfig.has("serverVersion")) {
 			serverConfig.put("serverVersion", Version.getInstance().getVersionString());
 		}
+		
+		if (!serverConfig.has("buildDate")) {
+		    serverConfig.put("buildDate", Version.getInstance().getBuildDate());
+		}
 
 	}
 

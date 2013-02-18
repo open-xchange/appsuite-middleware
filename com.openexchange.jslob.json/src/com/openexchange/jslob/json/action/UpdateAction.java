@@ -61,6 +61,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSONUpdate;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobService;
@@ -157,7 +158,7 @@ public final class UpdateAction extends JSlobAction {
                      * Perform merge
                      */
                     final JSONObject merged = JSONUtil.merge(jslobService.get(id, jslobRequest.getSession()).getJsonObject(), jsonData);
-                    jslob = new JSlob(merged);
+                    jslob = new DefaultJSlob(merged);
                     jslobService.set(id, jslob, jslobRequest.getSession());
                     /*
                      * ... and write back

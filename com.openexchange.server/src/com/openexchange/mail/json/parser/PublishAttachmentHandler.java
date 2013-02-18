@@ -176,21 +176,20 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                         e);
                 }
                 exceeded = true;
-            } else {
-                /*
-                 * Add current file size
-                 */
-                consumed += size;
-                if (uploadQuota > 0 && consumed > uploadQuota) {
-                    if (LOG.isDebugEnabled()) {
-                        final OXException e = MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(Long.valueOf(uploadQuota));
-                        LOG.debug(
-                            new com.openexchange.java.StringAllocator(64).append("Overall quota (").append(getSize(uploadQuota, 2, false, true)).append(
-                                ") exceeded. Message is going to be sent with links to publishing infostore folder.").toString(),
-                            e);
-                    }
-                    exceeded = true;
+            }
+            /*
+             * Add current file size
+             */
+            consumed += size;
+            if (uploadQuota > 0 && consumed > uploadQuota) {
+                if (LOG.isDebugEnabled()) {
+                    final OXException e = MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(Long.valueOf(uploadQuota));
+                    LOG.debug(
+                        new com.openexchange.java.StringAllocator(64).append("Overall quota (").append(getSize(uploadQuota, 2, false, true)).append(
+                            ") exceeded. Message is going to be sent with links to publishing infostore folder.").toString(),
+                        e);
                 }
+                exceeded = true;
             }
         }
         attachments.add(attachment);

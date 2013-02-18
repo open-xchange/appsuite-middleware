@@ -57,12 +57,19 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
+import org.json.JSONException;
+import org.json.JSONValue;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.jslob.JSlobExceptionCodes;
+import com.openexchange.jslob.storage.JSlobStorage;
+import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -86,14 +93,21 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractMailAccountAction} - An abstract folder action.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractMailAccountAction implements AJAXActionService {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractMailAccountAction.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AbstractMailAccountAction.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    /** The service identifier for JSlob */
+    public static final String JSLOB_SERVICE_ID = "com.openexchange.mailaccount";
+
+    /** The reference to JSlobStorageRegistry */
+    private static final AtomicReference<JSlobStorageRegistry> STORAGE_REGISTRY = new AtomicReference<JSlobStorageRegistry>();
 
     /**
      * Initializes a new {@link AbstractMailAccountAction}.
@@ -102,9 +116,62 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         super();
     }
 
+    @Override
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        try {
+            final Object data = requestData.getData();
+            if (data instanceof JSONValue) {
+                final JSONValue jBody = (JSONValue) data;
+                return innerPerform(requestData, session, jBody);
+            }
+            return innerPerform(requestData, session, null);
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
+        }
+    }
+
+    /**
+     * Performs given request.
+     *
+     * @param requestData The request to perform
+     * @param session The session providing needed user data
+     * @param optBody The optional JSON body
+     * @return The result yielded from given request
+     * @throws OXException If an error occurs
+     * @throws JSONException If a JSON error occurs
+     */
+    protected abstract AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue optBody) throws OXException, JSONException;
+
+    /**
+     * Sets the JSlobStorageRegistry.
+     * 
+     * @param storageRegistry The JSlobStorageRegistry instance or <code>null</code>
+     */
+    public static void setJSlobStorageRegistry(final JSlobStorageRegistry storageRegistry) {
+        STORAGE_REGISTRY.set(storageRegistry);
+    }
+
+    /**
+     * Gets the JSON storage service.
+     * 
+     * @return The storage service
+     * @throws OXException If service cannot be returned
+     * @see #JSLOB_SERVICE_ID
+     */
+    public static JSlobStorage getStorage() throws OXException {
+        final JSlobStorageRegistry storageRegistry = STORAGE_REGISTRY.get();
+        // TODO: Make configurable
+        final String storageId = "io.ox.wd.jslob.storage.db";
+        final JSlobStorage storage = storageRegistry.getJSlobStorage(storageId);
+        if (null == storage) {
+            throw JSlobExceptionCodes.NOT_FOUND.create(storageId);
+        }
+        return storage;
+    }
+
     /**
      * Gets the default tree identifier to use if request does not provide any.
-     *
+     * 
      * @return The default tree identifier
      */
     protected static String getDefaultTreeIdentifier() {
@@ -113,7 +180,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Gets the default allowed modules.
-     *
+     * 
      * @return The default allowed modules
      */
     protected static List<ContentType> getDefaultAllowedModules() {
@@ -122,7 +189,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Parses specified parameter into <code>int</code>.
-     *
+     * 
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed <code>int</code>
@@ -131,7 +198,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
     protected static int parseIntParameter(final String parameterName, final AJAXRequestData request) throws OXException {
         final String tmp = request.getParameter(parameterName);
         if (null == tmp) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(parameterName);
         }
         return getUnsignedInteger(tmp);
     }
@@ -140,7 +207,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Parses specified parameter into an array of <code>int</code>.
-     *
+     * 
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed array of <code>int</code>
@@ -149,7 +216,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
     protected static int[] parseIntArrayParameter(final String parameterName, final AJAXRequestData request) throws OXException {
         final String tmp = request.getParameter(parameterName);
         if (null == tmp) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( parameterName);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(parameterName);
         }
         final String[] sa = PAT.split(tmp, 0);
         final int[] columns = new int[sa.length];
@@ -161,7 +228,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Parses specified optional parameter into an array of <code>int</code>.
-     *
+     * 
      * @param parameterName The parameter name
      * @param request The request
      * @return The parsed array of <code>int</code>; a zero length array is returned if parameter is missing
@@ -190,19 +257,19 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
     protected static void checkNeededFields(final MailAccountDescription accountDescription) throws OXException {
         // Check needed fields
         if (isEmpty(accountDescription.getMailServer())) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.MAIL_URL);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(MailAccountFields.MAIL_URL);
         }
         if (isEmpty(accountDescription.getLogin())) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.LOGIN);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(MailAccountFields.LOGIN);
         }
         if (isEmpty(accountDescription.getPassword())) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.PASSWORD);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(MailAccountFields.PASSWORD);
         }
     }
 
     /**
      * Gets the secret string for specified session.
-     *
+     * 
      * @param session The session
      * @return The secret string
      * @throws OXException If secret string cannot be returned
@@ -213,7 +280,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Checks if specified {@link MailAccount} is considered as default aka primary account.
-     *
+     * 
      * @param mailAccount The mail account to examine
      * @return <code>true</code> if specified {@link MailAccount} is considered as defaul account; otherwise <code>false</code>
      */
@@ -223,7 +290,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Checks if specified {@link MailAccountDescription} is considered as default aka primary account.
-     *
+     * 
      * @param mailAccount The mail account description to examine
      * @return <code>true</code> if specified {@link MailAccountDescription} is considered as defaul account; otherwise <code>false</code>
      */
@@ -233,7 +300,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Parses the attributes from passed comma-separated list.
-     *
+     * 
      * @param colString The comma-separated list
      * @return The parsed attributes
      */
@@ -255,7 +322,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Gets the appropriate {@link MailAccess} instance for specified mail account description and session.
-     *
+     * 
      * @param accountDescription The mail account description
      * @param session The session providing needed user information
      * @return The appropriate {@link MailAccess} instance
@@ -287,8 +354,10 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
             } catch (final URISyntaxException e) {
                 throw MailExceptionCode.URI_PARSE_FAILED.create(e, mailServerURL);
             }
-            mailConfig.setServer(uri.getHost());
-            mailConfig.setPort(uri.getPort());
+            if (null != uri) {
+                mailConfig.setServer(uri.getHost());
+                mailConfig.setPort(uri.getPort());
+            }
             mailConfig.setSecure(accountDescription.isMailSecure());
             mailAccess.setCacheable(false);
             return mailAccess;
@@ -300,7 +369,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Checks for presence of default folder full names and creates them if absent.
-     *
+     * 
      * @param account The corresponding account
      * @param storageService The storage service (needed for update)
      * @param session The session providing needed user information
@@ -313,7 +382,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
 
     /**
      * Checks for presence of default folder full names and creates them if absent.
-     *
+     * 
      * @param account The corresponding account
      * @param storageService The storage service (needed for update)
      * @param session The session providing needed user information

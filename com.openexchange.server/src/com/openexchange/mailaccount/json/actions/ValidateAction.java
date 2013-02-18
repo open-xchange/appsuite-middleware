@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -79,7 +80,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 import com.openexchange.tools.net.URITools;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -108,58 +108,52 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
-        final JSONObject jData = (JSONObject) requestData.getData();
-
-        try {
-            if (!session.getUserConfiguration().isMultipleMailAccounts()) {
-                throw
-                    MailAccountExceptionCodes.NOT_ENABLED.create(
-                    Integer.valueOf(session.getUserId()),
-                    Integer.valueOf(session.getContextId()));
-            }
-
-            final MailAccountDescription accountDescription = new MailAccountDescription();
-            new MailAccountParser().parse(accountDescription, jData);
-
-            if (accountDescription.getId() >= 0 && null == accountDescription.getPassword()) {
-                /*
-                 * ID is delivered, but password not set. Thus load from storage version.
-                 */
-                final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                    MailAccountStorageService.class,
-                    true);
-
-                final String password =
-                    storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId()).getPassword();
-                accountDescription.setPassword(MailPasswordUtil.decrypt(
-                    password,
-                    session,
-                    accountDescription.getId(),
-                    accountDescription.getLogin(),
-                    accountDescription.getMailServer()));
-            }
-
-            checkNeededFields(accountDescription);
-            if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
-                // Deny validation of Unified Mail account
-                throw MailAccountExceptionCodes.VALIDATION_FAILED.create();
-            }
-            // Check for tree parameter
-            final boolean tree;
-            {
-                final String tmp = requestData.getParameter("tree");
-                tree = Boolean.parseBoolean(tmp);
-            }
-            // List for possible warnings
-            final List<OXException> warnings = new ArrayList<OXException>(2);
-            if (tree) {
-                return new AJAXRequestResult(actionValidateTree(accountDescription, session, warnings)).addWarnings(warnings);
-            }
-            return new AJAXRequestResult(actionValidateBoolean(accountDescription, session, warnings)).addWarnings(warnings);
-        } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
+    protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jData) throws OXException, JSONException {
+        if (!session.getUserConfiguration().isMultipleMailAccounts()) {
+            throw
+                MailAccountExceptionCodes.NOT_ENABLED.create(
+                Integer.valueOf(session.getUserId()),
+                Integer.valueOf(session.getContextId()));
         }
+
+        final MailAccountDescription accountDescription = new MailAccountDescription();
+        MailAccountParser.getInstance().parse(accountDescription, jData.toObject());
+
+        if (accountDescription.getId() >= 0 && null == accountDescription.getPassword()) {
+            /*
+             * ID is delivered, but password not set. Thus load from storage version.
+             */
+            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+                MailAccountStorageService.class,
+                true);
+
+            final String password =
+                storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId()).getPassword();
+            accountDescription.setPassword(MailPasswordUtil.decrypt(
+                password,
+                session,
+                accountDescription.getId(),
+                accountDescription.getLogin(),
+                accountDescription.getMailServer()));
+        }
+
+        checkNeededFields(accountDescription);
+        if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
+            // Deny validation of Unified Mail account
+            throw MailAccountExceptionCodes.VALIDATION_FAILED.create();
+        }
+        // Check for tree parameter
+        final boolean tree;
+        {
+            final String tmp = requestData.getParameter("tree");
+            tree = Boolean.parseBoolean(tmp);
+        }
+        // List for possible warnings
+        final List<OXException> warnings = new ArrayList<OXException>(2);
+        if (tree) {
+            return new AJAXRequestResult(actionValidateTree(accountDescription, session, warnings)).addWarnings(warnings);
+        }
+        return new AJAXRequestResult(actionValidateBoolean(accountDescription, session, warnings)).addWarnings(warnings);
     }
 
     private static JSONObject actionValidateTree(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws JSONException, OXException {

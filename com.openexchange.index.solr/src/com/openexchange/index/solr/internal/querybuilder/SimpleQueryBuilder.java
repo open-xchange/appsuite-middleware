@@ -49,15 +49,17 @@
 
 package com.openexchange.index.solr.internal.querybuilder;
 
+import static com.openexchange.index.solr.internal.LuceneQueryTools.buildQueryString;
+import static com.openexchange.index.solr.internal.LuceneQueryTools.buildQueryStringWithOr;
+import static com.openexchange.index.solr.internal.LuceneQueryTools.catenateQueriesWithAnd;
+import static com.openexchange.index.solr.internal.LuceneQueryTools.catenateQueriesWithOr;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.index.AccountFolders;
 import com.openexchange.index.IndexField;
@@ -295,91 +297,6 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
                 solrQuery.addFilterQuery(moduleQuery);
             }
         }
-    }
-
-    protected String buildQueryString(String fieldName, Object value) {
-        if (fieldName == null || value == null) {
-            return null;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        sb.append('(').append(fieldName).append(":\"").append(value.toString()).append("\")");
-        return sb.toString();
-    }
-
-    protected String buildQueryStringWithOr(String fieldName, Set<String> values) {
-        if (fieldName == null || values == null || values.isEmpty()) {
-            return null;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        sb.append('(');
-        boolean first = true;
-        for (String value : values) {
-            if (first) {
-                sb.append('(').append(fieldName).append(":\"").append(value).append("\")");
-                first = false;
-            } else {
-                sb.append(" OR (").append(fieldName).append(":\"").append(value).append("\")");
-            }
-        }
-
-        sb.append(')');
-        return sb.toString();
-    }
-
-    protected String catenateQueriesWithAnd(String... queries) {
-        if (queries == null || queries.length == 0) {
-            return null;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        sb.append('(');
-        boolean first = true;
-        for (String query : queries) {
-            if (query != null) {
-                if (first) {
-                    sb.append(query);
-                    first = false;
-                } else {
-                    sb.append(" AND ").append(query);
-                }
-            }
-        }
-
-        if (sb.length() == 1) {
-            return null;
-        }
-
-        sb.append(')');
-        return sb.toString();
-    }
-
-    protected String catenateQueriesWithOr(Set<String> queries) {
-        if (queries == null || queries.size() == 0) {
-            return null;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        sb.append('(');
-        boolean first = true;
-        for (String query : queries) {
-            if (query != null) {
-                if (first) {
-                    sb.append(query);
-                    first = false;
-                } else {
-                    sb.append(" OR ").append(query);
-                }
-            }
-        }
-
-        if (sb.length() == 1) {
-            return null;
-        }
-
-        sb.append(')');
-        return sb.toString();
     }
 
     protected void addFilterQueryIfNotNull(SolrQuery solrQuery, String filterQuery) {

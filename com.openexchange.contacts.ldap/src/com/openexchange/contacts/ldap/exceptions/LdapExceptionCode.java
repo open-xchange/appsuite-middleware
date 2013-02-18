@@ -159,7 +159,7 @@ public enum LdapExceptionCode implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "PERMISSION";
+        return "LDAP";
     }
 
     @Override

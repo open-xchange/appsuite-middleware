@@ -105,7 +105,7 @@ public class ContactSearchtermLdapConverter implements ContactSearchTermConverte
         for (final Operand<?> o : operands) {
             String value = ContactField.class.isInstance(o.getValue()) ? ((ContactField)o.getValue()).getAjaxName() : (String)o.getValue();
             if (o.getType() == Operand.Type.COLUMN) {
-                nextIsFolder = FOLDER_AJAXNAME.equals(o.getValue());
+                nextIsFolder = FOLDER_AJAXNAME.equals(o.getValue()) || ContactField.FOLDER_ID.equals(o.getValue());
                 if (distributionlistActive) {
                     nextIsDisplayName = DISPLAYNAME_AJAXNAME.equals(value) || ContactField.GIVEN_NAME.getAjaxName().equals(value) ||
                         ContactField.SUR_NAME.getAjaxName().equals(value);
@@ -113,6 +113,9 @@ public class ContactSearchtermLdapConverter implements ContactSearchTermConverte
                 value = translateFromJSONtoLDAP(value);
                 if (nextIsFolder) {
                     continue;
+                } else if (null == value || 0 == value.length()) {
+                    LOG.debug("Skipping search term '" + term + "' referencing unmapped contact property '" + o.getValue() + "'.");
+                    return "";
                 }
             } else if (nextIsFolder) {
                 folders.add(value);

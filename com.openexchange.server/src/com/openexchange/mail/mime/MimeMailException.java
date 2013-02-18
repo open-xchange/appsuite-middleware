@@ -323,6 +323,13 @@ public class MimeMailException extends OXException {
                 /*
                  * Default case
                  */
+                final String message = toLowerCase(e.getMessage());
+                if ("failed to load imap envelope".equals(message)) {
+                    return MimeMailExceptionCode.MESSAGE_NOT_DISPLAYED.create(e);
+                }
+                if ("connection failure".equals(e.getMessage())) {
+                    return MimeMailExceptionCode.NO_ROUTE_TO_HOST.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer());
+                }
                 return MimeMailExceptionCode.MESSAGING_ERROR.create(e, appendInfo(e.getMessage(), folder));
             }
             /*
@@ -491,6 +498,20 @@ public class MimeMailException extends OXException {
             return clazz.cast(exception);
         }
         return exception instanceof MessagingException ? lookupNested((MessagingException) exception, clazz) : null;
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

@@ -51,6 +51,8 @@ package com.openexchange.mdns.internal;
 
 import static com.openexchange.java.util.UUIDs.getUnformattedString;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -62,6 +64,7 @@ import javax.jmdns.ServiceInfo;
 import javax.jmdns.ServiceListener;
 import javax.jmdns.impl.JmDNSImpl;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mdns.MDNSExceptionCodes;
 import com.openexchange.mdns.MDNSService;
@@ -100,7 +103,21 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
     public MDNSServiceImpl() throws OXException {
         super();
         try {
-            jmdns = JmDNS.create();
+            ConfigurationService configService = Services.getService(ConfigurationService.class);
+            InetAddress address = null;
+            if (null == configService) {
+                LOG.warn("Unable to access configuration service, falling back to default network interface discovery.");
+            } else {
+                String host = configService.getProperty("com.openexchange.mdns.interface");
+                if (null != host && 0 < host.length()) {
+                    try {
+                        address = InetAddress.getByName(host);
+                    } catch (UnknownHostException e) {
+                        LOG.warn("Unable to get address from " + host, e);
+                    }
+                }
+            }
+            jmdns = JmDNS.create(address);
             /*
              * Register the "_openexchange._tcp.local." service type
              */
@@ -117,6 +134,8 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
             listeners = new CopyOnWriteArrayList<MDNSServiceListener>();
         } catch (final IOException e) {
             throw MDNSExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw MDNSExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

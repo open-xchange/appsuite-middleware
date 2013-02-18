@@ -107,6 +107,8 @@ public enum Attribute {
     REPLY_TO_LITERAL(MailAccountFields.REPLY_TO, 1038),
     // Addresses
     ADDRESSES(MailAccountFields.ADDRESSES, 1039),
+    /** (Virtual attribute) Meta */
+    META(MailAccountFields.META, 1040),
 
     ;
 
@@ -211,6 +213,9 @@ public enum Attribute {
             return switcher.pop3Path();
         case ADDRESSES:
             return switcher.addresses();
+        case META:
+            // Ignore for virtual attribute
+            return null;
         default:
             throw new IllegalArgumentException(getName());
         }

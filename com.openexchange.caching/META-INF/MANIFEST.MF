@@ -19,6 +19,7 @@ Import-Package: com.openexchange.caching.events,
  javax.management,
  org.apache.commons.logging,
  org.osgi.framework,
+ org.osgi.service.event,
  org.osgi.util.tracker
 Bundle-Activator: com.openexchange.caching.osgi.CacheActivator
 Bundle-ClassPath: .,

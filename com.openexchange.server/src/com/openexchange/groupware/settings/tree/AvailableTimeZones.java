@@ -49,6 +49,10 @@
 
 package com.openexchange.groupware.settings.tree;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -86,24 +90,45 @@ public class AvailableTimeZones implements PreferencesItemService {
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
 
+            private final Set<String> SPECIAL = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList("UTC", "GMT")));
+
             @Override
-            public boolean isAvailable(UserConfiguration userConfig) {
+            public boolean isAvailable(final UserConfiguration userConfig) {
                 return true;
             }
 
             @Override
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                JSONObject json = new JSONObject();
-                I18nServices i18nServices = I18nServices.getInstance();
-                for (String timeZoneID : TimeZone.getAvailableIDs()) {
-                    try {
-                        json.put(timeZoneID, i18nServices.translate(user.getLocale(), timeZoneID.replace('_', ' '), false));
-                    } catch (JSONException e) {
-                        throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
+                try {
+                    final JSONObject json = new JSONObject();
+                    final I18nServices i18nServices = I18nServices.getInstance();
+                    for (final String timeZoneID : TimeZone.getAvailableIDs()) {
+                        final int len = timeZoneID.length();
+                        if (len >= 4 || SPECIAL.contains(toUpperCase(timeZoneID))) {
+                            json.put(timeZoneID, i18nServices.translate(user.getLocale(), timeZoneID.replace('_', ' '), false));                            
+                        }
                     }
+                    setting.setSingleValue(json);
+                } catch (final JSONException e) {
+                    throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
                 }
-                setting.setSingleValue(json);
             }
-        };
+
+            /** ASCII-wise to upper-case */
+            private String toUpperCase(final CharSequence chars) {
+                if (null == chars) {
+                    return null;
+                }
+                final int length = chars.length();
+                final StringBuilder builder = new StringBuilder(length);
+                for (int i = 0; i < length; i++) {
+                    final char c = chars.charAt(i);
+                    builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+                }
+                return builder.toString();
+            }
+
+        }; // End of ReadOnlyValue implementation
     }
+
 }

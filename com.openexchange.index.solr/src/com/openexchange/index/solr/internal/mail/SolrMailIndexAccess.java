@@ -49,6 +49,7 @@
 
 package com.openexchange.index.solr.internal.mail;
 
+import static com.openexchange.index.solr.internal.LuceneQueryTools.buildQueryStringWithOr;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -56,10 +57,8 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrInputDocument;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.FacetParameters;
@@ -77,6 +76,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.index.MailUUID;
 import com.openexchange.solr.SolrCoreIdentifier;
+
 
 /**
  * {@link SolrMailIndexAccess}

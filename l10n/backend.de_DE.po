@@ -2255,8 +2255,8 @@ msgid ""
 msgstr ""
 "Ihr Account wurde gesperrt. Dies kann mehrere Gründen haben, z.B. eine "
 "wiederholt falsche Passworteingabe.\n"
-"Sollten Sie sich weiterhin nicht anmelden können, wenden Sie sich bitte "
-"an Ihren Systemadmininstratoren oder Hoster."
+"Sollten Sie sich weiterhin nicht anmelden können, wenden Sie sich bitte an "
+"Ihren Systemadmininstratoren oder Hoster."
 
 #. The remote system is not reachable by the transport.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.cifs/src/com/openexchange/file/storage/cifs/CIFSExceptionMessages.java:277
@@ -4375,6 +4375,11 @@ msgstr "Der Account ist ungültig. Bitte erstellen Sie ihn erneut."
 msgid "Please provide a display name."
 msgstr "Bitte geben Sie einen Anzeigenamen an."
 
+#. The associated OAuth provider denied the request: %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:147
+msgid "The associated OAuth provider denied the request: %1$s."
+msgstr "Der zugehörige OAuth-Provider hat die Anfrage verweigert: %1$s."
+
 #. *
 #. * Cannot change password for any reason.
 #.
@@ -4683,12 +4688,16 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:182
 msgid ""
 "This message could not be moved to trash folder, possibly because your "
-"mailbox is nearly full.\n"
+"mailbox is nearly full."
+msgstr ""
+"Die Nachricht konnte nicht in den Papierkorb verschoben werden. "
+"Wahrscheinlich ist Ihre Mailbox fast voll."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:182
+msgid ""
 "In that case, please try to empty your deleted items first, or delete "
 "smaller messages first."
 msgstr ""
-"Die Nachricht konnte nicht in den Papierkorb verschoben werden. "
-"Wahrscheinlich ist Ihre Mailbox fast voll.\n"
 "Entfernen Sie in diesem Fall zunächst Ihre gelöschten Objekte oder löschen "
 "Sie zunächst kleinere Nachrichten."
 
@@ -4924,12 +4933,14 @@ msgstr "Verschieben nicht erlaubt"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s).\n"
-"Error message from server: %5$s"
+"context=%4$s)."
 msgstr ""
 "Anmeldeverzögerung verweigert die Verbindung zum Server %1$s mit dem Login %2"
-"$s (Benutzer=%3$s, Kontext=%4$s).\n"
-"Fehlermeldung vom Server: %5$s."
+"$s (Benutzer=%3$s, Kontext=%4$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
+msgid "Error message from server: %5$s"
+msgstr "Fehlermeldung vom Server: %5$s"
 
 #. *
 #. * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
@@ -4938,12 +4949,14 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:312
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s). Try again in %5$s seconds.\n"
-"Error message from server: %6$s"
+"context=%4$s). Try again in %5$s seconds."
 msgstr ""
 "Anmeldeverzögerung verweigert die Verbindung zum Server %1$s mit dem Login %2"
-"$s (Benutzer=%3$s, Kontext=%4$s). Versuchen Sie es in %5$s Sekunden erneut.\n"
-"\"Fehlermeldung vom Server: %6$s"
+"$s (Benutzer=%3$s, Kontext=%4$s). Versuchen Sie es in %5$s Sekunden erneut."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:312
+msgid "Error message from server: %6$s"
+msgstr "Fehlermeldung vom Server: %6$s"
 
 #. *
 #. * Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
@@ -9605,14 +9618,18 @@ msgstr "Nicht unterstützter MIME-Typ %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:271
 msgid ""
 "This message could not be moved to trash folder as your mailbox is nearly "
-"full.\n"
+"full."
+msgstr ""
+"Nachricht konnte nicht in den Papierkorb verschoben werden, da Ihre "
+"Mailbox nahezu voll ist. "
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:271
+msgid ""
 "Please try to empty your deleted items first, or delete smaller messages "
 "first."
 msgstr ""
-"Die Nachricht konnte nicht in den Papierkorb verschoben werden, da Ihre "
-"Mailbox fast voll ist.\n"
-"Entfernen Sie in diesem Fall zunächst Ihre gelöschten Objekte oder löschen "
-"Sie zunächst kleinere Nachrichten."
+"Entfernen Sie zunächst Ihre gelöschten Objekte oder löschen Sie "
+"zunächst kleinere Nachrichten."
 
 #. *
 #. * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s
@@ -9835,9 +9852,8 @@ msgid ""
 "A folder named %1$s already exists on server %2$s with login %3$s (user=%4"
 "$s, context=%5$s)."
 msgstr ""
-"Für das Login %3$s ist bereits ein Verzeichnis namens %1$s auf dem Server "
-"%2$s "
-"vorhanden (Benutzer=%4$s, Kontext=%5$s)."
+"Für das Login %3$s ist bereits ein Verzeichnis namens %1$s auf dem Server %2"
+"$s vorhanden (Benutzer=%4$s, Kontext=%5$s)."
 
 #. *
 #. * No create access on mail folder %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
@@ -10109,12 +10125,13 @@ msgstr ""
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:104
-msgid ""
-"Folder \"%1$s\" has been closed.\n"
-"Probably your request took too long."
-msgstr ""
-"Ordner \"%1$s\" wurde geschlossen.\n"
-"Wahrscheinlich dauerte Ihre Anfrage zu lang."
+msgid "Folder \"%1$s\" has been closed."
+msgstr "Der Ordner \"%1$s\" wurde geschlossen."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
+msgid "Probably your request took too long."
+msgstr "Wahrscheinlich dauerte Ihre Anfrage zu lang."
 
 #. *
 #. * Folder "%1$s" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.<br>
@@ -10123,12 +10140,10 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
 msgid ""
 "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user=%4"
-"$s, context=%5$s) .\n"
-"Probably your request took too long."
+"$s, context=%5$s) ."
 msgstr ""
-"Ordner \"%1$s\" wurde auf dem Mailserver %2$s mit dem Login %3$s (Benutzer=%4"
-"$s, Kontext=%5$s) geschlossen.\n"
-"Wahrscheinlich dauerte die Anfrage zu lang."
+"Der Ordner %1$s wurde auf dem Mailserver %2$s mit dem Login %3$s (Benutzer=%"
+"4$s, Kontext=%5$s) geschlossen."
 
 #. *
 #. * Illegal write attempt: %1$s
@@ -14943,6 +14958,15 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid ""
+#~ "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s) .\n"
+#~ "Probably your request took too long."
+#~ msgstr ""
+#~ "Ordner \"%1$s\" wurde auf dem Mailserver %2$s mit dem Login %3$s "
+#~ "(Benutzer=%4$s, Kontext=%5$s) geschlossen.\n"
+#~ "Wahrscheinlich dauerte die Anfrage zu lang."
+
 #, fuzzy
 #~ msgid ""
 #~ "The referenced account is currently locked out and may not be logged on "
@@ -14959,9 +14983,6 @@ msgstr "Zulu"
 
 #~ msgid "Connection to pool %1$d can not be returned"
 #~ msgstr "Verbindung kann nicht an Pool %1$d zurückgegeben werden."
-
-#~ msgid "Message could not be moved to trash folder"
-#~ msgstr "Nachricht konnte nicht in den Papierkorb verschoben werden. "
 
 #~ msgid "Mail could not be moved to trash folder. Quota exceeded."
 #~ msgstr ""
@@ -15102,13 +15123,6 @@ msgstr "Zulu"
 #~ msgstr ""
 #~ "Flag %1$s konnte aus folgendem Grund nicht geändert werden \"%2$s\" auf "
 #~ "Server %3$s mit Login %4$s (Benutzer=%5$s, Kontext=%6$s)"
-
-#~ msgid ""
-#~ "Folder %1$s cannot be deleted on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Der Ordner %1$s kann nicht auf dem Server %2$s mit dem Login %3$s "
-#~ "(Benutzer=%4$s, Kontext=%5$s) gelöscht werden."
 
 #~ msgid ""
 #~ "Folder %1$s does not allow subfolders on server %2$s with login %3$s "

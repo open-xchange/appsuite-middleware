@@ -110,7 +110,7 @@ public class CancelPerformer extends AbstrakterDingeMacher {
 
     private int determineRecurrencePosition(Appointment appointment, Appointment master) throws OXException {
         RecurringResultsInterface recurring = new CalendarCollection().calculateRecurring(master, startOfTheDay(appointment.getRecurrenceDatePosition()), endOfTheDay(appointment.getRecurrenceDatePosition()), 0);
-        if (recurring.size() > 0) {
+        if (null != recurring && recurring.size() > 0) {
             RecurringResultInterface recurringResult = recurring.getRecurringResult(0);
             return recurringResult.getPosition();
         }

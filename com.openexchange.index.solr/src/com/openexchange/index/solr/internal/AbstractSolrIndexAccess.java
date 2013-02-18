@@ -59,7 +59,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.apache.commons.logging.Log;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrResponse;
@@ -69,7 +68,6 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.index.FacetParameters;
 import com.openexchange.index.IndexAccess;
@@ -459,24 +457,4 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
     // return sb.toString();
     // }
     //
-    protected String buildQueryStringWithOr(String fieldName, Set<String> values) {
-        if (fieldName == null || values == null || values.isEmpty()) {
-            return null;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        sb.append('(');
-        boolean first = true;
-        for (String value : values) {
-            if (first) {
-                sb.append('(').append(fieldName).append(":\"").append(value).append("\")");
-                first = false;
-            } else {
-                sb.append(" OR (").append(fieldName).append(":\"").append(value).append("\")");
-            }
-        }
-
-        sb.append(')');
-        return sb.toString();
-    }
 }

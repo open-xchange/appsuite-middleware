@@ -78,12 +78,17 @@ for FILE in ${COMMONCONFFILES}; do
         /opt/open-xchange/etc/${FILE} 6.20.99 open-xchange -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange)
 done
 
-GWCONFFILES="attachment.properties cache.ccf calendar.properties configdb.properties contact.properties event.properties file-logging.properties HTMLEntities.properties importerExporter.xml import.properties infostore.properties javamail.properties ldap.properties login.properties mailcache.ccf mail.properties mime.types noipcheck.cnf notification.properties ox-scriptconf.sh participant.properties passwordchange.properties server.properties sessioncache.ccf sessiond.properties smtp.properties system.properties user.properties whitelist.properties folder-reserved-names"
+GWCONFFILES="attachment.properties cache.ccf calendar.properties configdb.properties contact.properties event.properties file-logging.properties HTMLEntities.properties importerExporter.xml import.properties infostore.properties javamail.properties ldap.properties login.properties mailcache.ccf mail.properties mime.types noipcheck.cnf notification.properties ox-scriptconf.sh participant.properties passwordchange.properties server.properties sessiond.properties smtp.properties system.properties user.properties whitelist.properties folder-reserved-names"
 
 for FILE in ${GWCONFFILES}; do
     dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/${FILE} \
         /opt/open-xchange/etc/${FILE} 6.20.99 open-xchange -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange)
 done
+
+# SoftwareChange_Request-1297
+if [ -e /opt/open-xchange/etc/sessioncache.ccf ]; then
+    dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/sessioncache.ccf -- "$@"
+fi
 
 # SoftwareChange_Request-1094
 dpkg-maintscript-helper rm_conffile \
@@ -111,6 +116,66 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
            fi
        done
     fi
+fi
+
+# SoftwareChange_Request-1330
+pfile=/opt/open-xchange/etc/mime.types
+if ! grep docm $pfile > /dev/null; then
+   ptmp=${pfile}.$$
+   cp $pfile $ptmp
+   cat<<EOF >> $ptmp
+application/vnd.ms-word.document.macroEnabled.12 docm
+application/vnd.ms-word.template dotm
+application/vnd.openxmlformats-officedocument.wordprocessingml.template dotx
+application/vnd.ms-powerpoint.presentation.macroEnabled.12 potm
+application/vnd.openxmlformats-officedocument.presentationml.template potx
+application/vnd.ms-excel.sheet.binary.macroEnabled.12 xlsb
+application/vnd.ms-excel.sheet.macroEnabled.12 xlsm
+application/vnd.openxmlformats-officedocument.spreadsheetml.sheet xlsx
+EOF
+   if [ -s $ptmp ]; then
+      cp $ptmp $pfile
+   fi
+   rm -f $ptmp
+fi
+
+# SoftwareChange_Request-1324
+# -----------------------------------------------------------------------
+pfile=/opt/open-xchange/etc/hazelcast.properties
+if ! ox_exists_property com.openexchange.hazelcast.enableIPv6Support $pfile; then
+    ox_set_property com.openexchange.hazelcast.enableIPv6Support false $pfile
+fi
+
+# SoftwareChange_Request-1308
+# -----------------------------------------------------------------------
+pfile=/opt/open-xchange/etc/hazelcast.properties
+if ! ox_exists_property com.openexchange.hazelcast.networkConfig.port $pfile; then
+    ox_set_property com.openexchange.hazelcast.networkConfig.port 5701 $pfile
+fi
+if ! ox_exists_property com.openexchange.hazelcast.networkConfig.portAutoIncrement $pfile; then
+    ox_set_property com.openexchange.hazelcast.networkConfig.portAutoIncrement true $pfile
+fi
+if ! ox_exists_property com.openexchange.hazelcast.networkConfig.outboundPortDefinitions $pfile; then
+    ox_set_property com.openexchange.hazelcast.networkConfig.outboundPortDefinitions '' $pfile
+fi
+
+# SoftwareChange_Request-1307
+pfile=/opt/open-xchange/etc/server.properties
+if ! ox_exists_property com.openexchange.server.considerXForwards $pfile; then
+    ox_set_property com.openexchange.server.considerXForwards false $pfile
+fi
+if ! ox_exists_property com.openexchange.server.forHeader $pfile; then
+    ox_set_property com.openexchange.server.forHeader X-Forwarded-For $pfile
+fi
+if ! ox_exists_property com.openexchange.server.knownProxies $pfile; then
+    ox_set_property com.openexchange.server.knownProxies '' $pfile
+fi
+
+# SoftwareChange_Request-1296
+# -----------------------------------------------------------------------
+pfile=/opt/open-xchange/etc/cache.properties
+if ! ox_exists_property com.openexchange.caching.jcs.eventInvalidation $pfile; then
+    ox_set_property com.openexchange.caching.jcs.eventInvalidation true $pfile
 fi
 
 # SoftwareChange_Request-1302
@@ -358,10 +423,15 @@ if ! ox_exists_property com.openexchange.contactcollector.folder.deleteDenied $p
 fi
 
 setConfigFilePermissions() {
-    ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
-    ox_update_permissions "/opt/open-xchange/etc/configdb.properties" root:open-xchange 640
-    ox_update_permissions "/opt/open-xchange/etc/mail.properties" root:open-xchange 640
+    PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
+    for FILE in $PROTECT
+    do
+        ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
+    done
     ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
+    ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
+    ox_update_permissions "/var/spool/open-xchange/uploads" open-xchange:root 750
+    ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
 }
 
 case "$1" in

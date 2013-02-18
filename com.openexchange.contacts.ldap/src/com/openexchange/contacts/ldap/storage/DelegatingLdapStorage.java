@@ -49,12 +49,15 @@
 
 package com.openexchange.contacts.ldap.storage;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.storage.DefaultContactStorage;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.contacts.ldap.contacts.LdapContactInterfaceProvider;
+import com.openexchange.contacts.ldap.property.Mappings;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -193,6 +196,30 @@ public class DelegatingLdapStorage extends DefaultContactStorage {
     @Override
     public void delete(Session session, String folderId, String id, Date lastRead) throws OXException {
         delegate(session).deleteContactObject(parse(id), parse(folderId), lastRead);
+    }
+
+    @Override
+    public SearchIterator<Contact> searchByBirthday(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        Mappings mappings = provider.getProperties().getMappings();
+        if (null != mappings && null != mappings.getBirthday() && 0 < mappings.getBirthday().length()) {
+            // use default implementation
+            return super.searchByBirthday(session, folderIDs, from, until, fields, sortOptions);
+        } else {
+            LOG.debug("No mapping found, unable to search contacts by birthday.");
+            return getSearchIterator(Collections.<Contact>emptyList());
+        }
+    }
+
+    @Override
+    public SearchIterator<Contact> searchByAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        Mappings mappings = provider.getProperties().getMappings();
+        if (null != mappings && null != mappings.getAnniversary() && 0 < mappings.getAnniversary().length()) {
+            // use default implementation
+            return super.searchByAnniversary(session, folderIDs, from, until, fields, sortOptions);
+        } else {
+            LOG.debug("No mapping found, unable to search contacts by anniversary.");
+            return getSearchIterator(Collections.<Contact>emptyList());
+        }
     }
 
     private ContactInterface delegate(Session session) throws OXException {

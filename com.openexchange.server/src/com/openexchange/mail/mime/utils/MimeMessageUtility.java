@@ -110,6 +110,7 @@ import com.openexchange.image.ImageActionFactory;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -177,16 +178,19 @@ public final class MimeMessageUtility {
      * @return <code>true</code> to retry; otherwise <code>false</code>
      */
     public static boolean shouldRetry(final OXException e) {
+        if (null == e) {
+            return false;
+        }
         if (MailExceptionCode.MAIL_NOT_FOUND.equals(e) || MimeMailExceptionCode.FOLDER_CLOSED.equals(e)) {
             return true;
         }
         if (MailExceptionCode.IO_ERROR.equals(e)) {
             final Throwable cause = e.getCause();
-            return (cause instanceof IOException) && "no content".equals(cause.getMessage().toLowerCase(Locale.ENGLISH));
+            return (cause instanceof IOException) && "no content".equals(toLowerCase(cause.getMessage()));
         }
         if (MimeMailExceptionCode.MESSAGING_ERROR.equals(e)) {
             final Throwable cause = e.getCause();
-            return (cause instanceof MessagingException) && "failed to fetch headers".equals(cause.getMessage().toLowerCase(Locale.ENGLISH));
+            return (cause instanceof MessagingException) && "failed to fetch headers".equals(toLowerCase(cause.getMessage()));
         }
         return false;
     }
@@ -1795,6 +1799,20 @@ public final class MimeMessageUtility {
         } finally {
             Streams.close(in, out);
         }
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

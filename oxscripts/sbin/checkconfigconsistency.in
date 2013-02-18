@@ -113,7 +113,6 @@ readProp() {
 }
 
 CACHECCF=$OXPREFIX/etc/cache.ccf
-SESSIONCACHECCF=$OXPREFIX/etc/sessioncache.ccf
 
 
 
@@ -126,38 +125,6 @@ SERVERUDPDISCENABLED=$(readProp jcs.auxiliary.LTCP.attributes.UdpDiscoveryEnable
 warnPortOrServer "$SERVERUDPDISCENABLED" "$SERVERTCPSERVER" "$CACHECCF"
 warnUdpIncomplete "$SERVERUDPDISCENABLED" "$SERVERUDPDISCADDR" "$SERVERUDPPORT" "$CACHECCF"
 
-SESSIONUDPPORT=$(readProp jcs.auxiliary.SessionLTCP.attributes.UdpDiscoveryPort $SESSIONCACHECCF)
-SESSIONUDPDISCADDR=$(readProp jcs.auxiliary.SessionLTCP.attributes.UdpDiscoveryAddr $SESSIONCACHECCF)
-SESSIONTCPSERVER=$(readProp jcs.auxiliary.SessionLTCP.attributes.TcpServers $SESSIONCACHECCF)
-SESSIONLPORT=$(readProp jcs.auxiliary.SessionLTCP.attributes.TcpListenerPort $SESSIONCACHECCF)
-SESSIONUDPDISCENABLED=$(readProp jcs.auxiliary.SessionLTCP.attributes.UdpDiscoveryEnabled $SESSIONCACHECCF)
-
-warnPortOrServer "$SESSIONUDPDISCENABLED" "$SESSIONTCPSERVER" "$SESSIONCACHECCF"
-warnUdpIncomplete "$SESSIONUDPDISCENABLED" "$SESSIONUDPDISCADDR" "$SESSIONUDPPORT" "$SESSIONCACHECCF"
-
-
-
-if [ -n "$SESSIONUDPPORT" ] && [ -n "$SERVERUDPPORT" ] && \
-    [ "$SESSIONUDPPORT" == "$SERVERUDPPORT" ]; then
-      warn "UdpDiscoveryPort in"
-      warn "$SESSIONCACHECCF is configured to use the same port as"
-      warn "UdpDiscoveryPort in"
-      warn "$CACHECCF"
-      warn "that will not work, please choose different ports"
-      echo
-      echo
-fi
-
-if [ -n "$SESSIONLPORT" ] && [ -n "$SERVERLPORT" ] && \
-    [ "$SESSIONLPORT" == "$SERVERLPORT" ]; then
-      warn "TcpListenerPort in"
-      warn "$SESSIONCACHECCF is configured to use the same port as"
-      warn "TcpListenerPort in"
-      warn "$CACHECCF"
-      warn "that will not work, please choose different ports"
-      echo
-      echo
-fi
 
 ADMINCACHECCF=$OXPREFIX/etc/cache.ccf
 ADMINSYSTEMPROPS=$OXPREFIX/etc/system.properties
@@ -179,29 +146,6 @@ if [ -s $ADMINCACHECCF ]; then
     ADMINTCPSERVER=$(readProp jcs.auxiliary.LTCP.attributes.TcpServers $ADMINCACHECCF)
     ADMINLPORT=$(readProp jcs.auxiliary.LTCP.attributes.TcpListenerPort $ADMINCACHECCF)
     ADMINUDPDISCENABLED=$(readProp jcs.auxiliary.LTCP.attributes.UdpDiscoveryEnabled $ADMINCACHECCF)
-    
-    if [ -n "$SESSIONUDPPORT" ] && [ -n "$ADMINUDPPORT" ] && \
-	[ "$SESSIONUDPPORT" == "$ADMINUDPPORT" ]; then
-	warn "UdpDiscoveryPort in"
-	warn "$SESSIONCACHECCF is configured to use the same port as"
-	warn "UdpDiscoveryPort in"
-	warn "$ADMINCACHECCF"
-	warn "that will not work, please choose different ports"
-	echo
-	echo
-    fi
-    
-    if [ -n "$SESSIONLPORT" ] && [ -n "$ADMINLPORT" ] && \
-	[ "$SESSIONLPORT" == "$ADMINLPORT" ]; then
-	warn "TcpListenerPort in"
-	warn "$SESSIONCACHECCF is configured to use the same port as"
-	warn "TcpListenerPort in"
-	warn "$ADMINCACHECCF"
-	warn "that will not work, please choose different ports"
-	echo
-	echo
-    fi
-
 
     warnPortOrServer "$ADMINUDPDISCENABLED" "$ADMINTCPSERVER" "$ADMINCACHECCF"
     warnUdpIncomplete "$ADMINUDPDISCENABLED" "$ADMINUDPDISCADDR" "$ADMINUDPPORT" "$ADMINCACHECCF"

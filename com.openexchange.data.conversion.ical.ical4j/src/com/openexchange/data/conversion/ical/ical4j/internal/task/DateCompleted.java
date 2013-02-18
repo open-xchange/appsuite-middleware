@@ -74,7 +74,7 @@ public class DateCompleted extends AbstractVerifyingAttributeConverter<VToDo, Ta
 
     @Override
     public boolean isSet(final Task task) {
-        return task.containsDateCompleted();
+        return task.containsDateCompleted() && Task.DONE == task.getStatus();
     }
 
     @Override

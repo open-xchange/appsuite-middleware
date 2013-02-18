@@ -224,4 +224,9 @@ public class SimServerSession implements ServerSession {
 		return false;
 	}
 
+    @Override
+    public boolean isTransient() {
+        return false;
+    }
+
 }

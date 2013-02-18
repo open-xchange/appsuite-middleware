@@ -127,6 +127,8 @@ public class ContactSearchObject extends SearchObject {
 
     private boolean orSearch = false;
 
+    private boolean exactMatch = false;
+
     public ContactSearchObject() {
         super();
     }
@@ -408,5 +410,23 @@ public class ContactSearchObject extends SearchObject {
 	public String getTo() {
 		return to;
 	}
+
+    /**
+     * Gets the exactMatch
+     *
+     * @return The exactMatch
+     */
+    public boolean isExactMatch() {
+        return exactMatch;
+    }
+
+    /**
+     * Sets the exactMatch
+     *
+     * @param exactMatch The exactMatch to set
+     */
+    public void setExactMatch(boolean exactMatch) {
+        this.exactMatch = exactMatch;
+    }
 
 }

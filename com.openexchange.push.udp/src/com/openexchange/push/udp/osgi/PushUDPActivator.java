@@ -54,6 +54,7 @@ import java.util.Hashtable;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.event.EventFactoryService;
@@ -83,7 +84,7 @@ public class PushUDPActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, EventAdmin.class, ContextService.class, FolderService.class, ThreadPoolService.class };
+        return new Class<?>[] { ConfigurationService.class, EventAdmin.class, EventFactoryService.class, ContextService.class, FolderService.class, ThreadPoolService.class };
     }
 
     @Override
@@ -126,12 +127,11 @@ public class PushUDPActivator extends HousekeepingActivator {
              * Start-up
              */
             PushInit.getInstance().start();
-            addRegisterService();
+            registerEventHandler();
             /*
              * Service trackers
              */
-            track(EventFactoryService.class);
-            track(TimerService.class);
+            rememberTracker(new ServiceTracker<TimerService,TimerService>(context, TimerService.class, new TimerCustomizer(context)));
             openTrackers();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
@@ -160,10 +160,9 @@ public class PushUDPActivator extends HousekeepingActivator {
         }
     }
 
-    protected void addRegisterService() {
-        final String[] topics = new String[] { EventConstants.EVENT_TOPIC, "com/openexchange/*" };
+    protected void registerEventHandler() {
         final Hashtable<String, Object> ht = new Hashtable<String, Object>(1);
-        ht.put(EventConstants.EVENT_TOPIC, topics);
+        ht.put(EventConstants.EVENT_TOPIC, new String[] { EventConstants.EVENT_TOPIC, "com/openexchange/*" });
         registerService(EventHandler.class, new PushHandler(), ht);
     }
 

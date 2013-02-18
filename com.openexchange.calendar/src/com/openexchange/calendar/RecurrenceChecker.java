@@ -50,9 +50,11 @@
 package com.openexchange.calendar;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.CalendarObject;
 
@@ -200,6 +202,25 @@ public class RecurrenceChecker {
         }
 
         if (cdao.getDayInMonth() < 1 || cdao.getDayInMonth() > 31) {
+            throw OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_INTERVAL.create(cdao.getDayInMonth());
+        }
+        
+        checkDayInMonthOnYearly1(cdao);
+    }
+
+    private static void checkDayInMonthOnYearly1(CalendarObject cdao) throws OXException {
+        boolean fail = false;
+        switch (cdao.getMonth()) {
+        case Calendar.FEBRUARY:
+            fail = cdao.getDayInMonth() > 29; break;
+        case Calendar.APRIL:
+        case Calendar.JUNE:
+        case Calendar.SEPTEMBER:
+        case Calendar.NOVEMBER:
+            fail = cdao.getDayInMonth() > 30; break;
+        }
+        
+        if (fail) {
             throw OXCalendarExceptionCodes.RECURRING_MISSING_YEARLY_INTERVAL.create(cdao.getDayInMonth());
         }
     }

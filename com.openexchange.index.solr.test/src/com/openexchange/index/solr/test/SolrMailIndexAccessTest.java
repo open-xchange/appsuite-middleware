@@ -245,7 +245,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
 
         MailMessage m2 = TestMails.toMailMessage(TestMails.MAIL1);
         m2.setMailId(String.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
-        m2.setFolder("INBOX/Somewhere");
+        m2.setFolder("Apstiprināts \"ham");
         m2.setAccountId(0);
         indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m2));
 

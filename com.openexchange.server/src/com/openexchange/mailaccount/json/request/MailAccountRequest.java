@@ -250,7 +250,7 @@ public final class MailAccountRequest {
         }
 
         final MailAccountDescription accountDescription = new MailAccountDescription();
-        new MailAccountParser().parse(accountDescription, jData);
+        MailAccountParser.getInstance().parse(accountDescription, jData);
 
         checkNeededFields(accountDescription);
 
@@ -287,7 +287,7 @@ public final class MailAccountRequest {
         }
 
         final MailAccountDescription accountDescription = new MailAccountDescription();
-        new MailAccountParser().parse(accountDescription, jData);
+        MailAccountParser.getInstance().parse(accountDescription, jData);
 
         if (accountDescription.getId() >= 0 && null == accountDescription.getPassword()) {
             /*
@@ -535,7 +535,7 @@ public final class MailAccountRequest {
         final JSONObject jData = DataParser.checkJSONObject(jsonObject, AJAXServlet.PARAMETER_DATA);
 
         final MailAccountDescription accountDescription = new MailAccountDescription();
-        final Set<Attribute> fieldsToUpdate = new MailAccountParser().parse(accountDescription, jData);
+        final Set<Attribute> fieldsToUpdate = MailAccountParser.getInstance().parse(accountDescription, jData);
 
         if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(accountDescription)) {
             throw MailAccountExceptionCodes.NOT_ENABLED.create(
@@ -622,7 +622,7 @@ public final class MailAccountRequest {
         }
         userMailAccounts = tmp.toArray(new MailAccount[tmp.size()]);
 
-        return MailAccountWriter.writeArray(userMailAccounts, attributes);
+        return MailAccountWriter.writeArray(userMailAccounts, attributes, session);
     }
 
     private List<Attribute> getColumns(final String colString) {
@@ -661,7 +661,7 @@ public final class MailAccountRequest {
             }
         }
 
-        return MailAccountWriter.writeArray(accounts.toArray(new MailAccount[accounts.size()]), attributes);
+        return MailAccountWriter.writeArray(accounts.toArray(new MailAccount[accounts.size()]), attributes, session);
     }
 
     private static boolean isUnifiedINBOXAccount(final MailAccount mailAccount) {

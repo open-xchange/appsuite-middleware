@@ -516,18 +516,6 @@ public final class Tools {
 			}
 		}
 	}
-	
-	/**
-	 * Sets the 'file as' attribute to the contact's display name if needed, i.e. the 'display name'-property is set, while the 
-	 * 'file as'-property isn't. 
-	 * 
-	 * @param contact The contact to set the 'file as' for
-	 */
-	public static void setFileAsIfNeeded(final Contact contact) {
-	    if (contact.containsDisplayName() && (false == contact.containsFileAs() || Tools.isEmpty(contact.getFileAs()))) {	        	        
-            contact.setFileAs(contact.getDisplayName());
-	    }
-	}
 
 	/**
      * Creates a new {@link ContactSearchObject} based on the supplied one, but using a specific set of folder IDs.
@@ -599,23 +587,24 @@ public final class Tools {
     private static ContactSearchObject prepareSearchContactsAlternative(ContactSearchObject contactSearch) {
         ContactSearchObject preparedSearchObject = new ContactSearchObject();
         boolean prependWildcard = false == contactSearch.isOrSearch() && false == contactSearch.isEmailAutoComplete();
+        boolean appendWildcard = false == contactSearch.isExactMatch();
         preparedSearchObject.setOrSearch(contactSearch.isOrSearch());
         preparedSearchObject.setEmailAutoComplete(contactSearch.isEmailAutoComplete());
         preparedSearchObject.setFolders(contactSearch.getFolders());
         preparedSearchObject.setCatgories(addWildcards(contactSearch.getCatgories(), true, true));
-        preparedSearchObject.setCityBusiness(addWildcards(contactSearch.getCityBusiness(), prependWildcard, true));
-        preparedSearchObject.setCompany(addWildcards(contactSearch.getCompany(), prependWildcard, true));
-        preparedSearchObject.setDepartment(addWildcards(contactSearch.getDepartment(), prependWildcard, true));
-        preparedSearchObject.setDisplayName(addWildcards(contactSearch.getDisplayName(), prependWildcard, true));
-        preparedSearchObject.setEmail1(addWildcards(contactSearch.getEmail1(), prependWildcard, true));
-        preparedSearchObject.setEmail2(addWildcards(contactSearch.getEmail2(), prependWildcard, true));
-        preparedSearchObject.setEmail3(addWildcards(contactSearch.getEmail3(), prependWildcard, true));
-        preparedSearchObject.setGivenName(addWildcards(contactSearch.getGivenName(), prependWildcard, true));
-        preparedSearchObject.setStreetBusiness(addWildcards(contactSearch.getStreetBusiness(), prependWildcard, true));
-        preparedSearchObject.setSurname(addWildcards(contactSearch.getSurname(), prependWildcard, true));
-        preparedSearchObject.setYomiCompany(addWildcards(contactSearch.getYomiCompany(), prependWildcard, true));
-        preparedSearchObject.setYomiFirstname(addWildcards(contactSearch.getYomiFirstName(), prependWildcard, true));
-        preparedSearchObject.setYomiLastName(addWildcards(contactSearch.getYomiLastName(), prependWildcard, true));
+        preparedSearchObject.setCityBusiness(addWildcards(contactSearch.getCityBusiness(), prependWildcard, appendWildcard));
+        preparedSearchObject.setCompany(addWildcards(contactSearch.getCompany(), prependWildcard, appendWildcard));
+        preparedSearchObject.setDepartment(addWildcards(contactSearch.getDepartment(), prependWildcard, appendWildcard));
+        preparedSearchObject.setDisplayName(addWildcards(contactSearch.getDisplayName(), prependWildcard, appendWildcard));
+        preparedSearchObject.setEmail1(addWildcards(contactSearch.getEmail1(), prependWildcard, appendWildcard));
+        preparedSearchObject.setEmail2(addWildcards(contactSearch.getEmail2(), prependWildcard, appendWildcard));
+        preparedSearchObject.setEmail3(addWildcards(contactSearch.getEmail3(), prependWildcard, appendWildcard));
+        preparedSearchObject.setGivenName(addWildcards(contactSearch.getGivenName(), prependWildcard, appendWildcard));
+        preparedSearchObject.setStreetBusiness(addWildcards(contactSearch.getStreetBusiness(), prependWildcard, appendWildcard));
+        preparedSearchObject.setSurname(addWildcards(contactSearch.getSurname(), prependWildcard, appendWildcard));
+        preparedSearchObject.setYomiCompany(addWildcards(contactSearch.getYomiCompany(), prependWildcard, appendWildcard));
+        preparedSearchObject.setYomiFirstname(addWildcards(contactSearch.getYomiFirstName(), prependWildcard, appendWildcard));
+        preparedSearchObject.setYomiLastName(addWildcards(contactSearch.getYomiLastName(), prependWildcard, appendWildcard));
         return preparedSearchObject;
     }
 

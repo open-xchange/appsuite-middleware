@@ -130,6 +130,9 @@ public class SearchAction extends ContactAction {
             if (json.has("orSearch") && json.getBoolean("orSearch")) {
                 searchObject.setOrSearch(true);
             }
+            if (json.has("exactMatch") && json.getBoolean("exactMatch")) {
+                searchObject.setExactMatch(true);
+            }
 
             searchObject.setSurname(DataParser.parseString(json, ContactFields.LAST_NAME));
             searchObject.setDisplayName(DataParser.parseString(json, ContactFields.DISPLAY_NAME));

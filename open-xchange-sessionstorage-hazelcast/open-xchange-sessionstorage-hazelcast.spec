@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -43,6 +43,12 @@ if [ ${1:-0} -eq 2 ]; then
 
     ox_move_config_file /opt/open-xchange/etc /opt/open-xchange/etc/hazelcast sessionstorage_hazelcast.properties sessions.properties
 
+    # SoftwareChange_Request-1291
+    pfile=/opt/open-xchange/etc/hazelcast/sessions.properties
+    if ox_exists_property com.openexchange.hazelcast.configuration.map.indexes.attributes $pfile; then
+       ox_remove_property com.openexchange.hazelcast.configuration.map.indexes.attributes $pfile
+    fi
+
     # SoftwareChange_Request-1286
     pfile=/opt/open-xchange/etc/hazelcast/sessions.properties
     if ox_exists_property com.openexchange.sessionstorage.hazelcast.map.backupcount $pfile; then
@@ -64,9 +70,11 @@ if [ ${1:-0} -eq 2 ]; then
     if ! ox_exists_property com.openexchange.hazelcast.configuration.map.name $pfile; then
        ox_set_property com.openexchange.hazelcast.configuration.map.name "sessions-2" $pfile
     fi
-    if ! ox_exists_property com.openexchange.hazelcast.configuration.map.indexes.attributes $pfile; then
-       ox_set_property com.openexchange.hazelcast.configuration.map.indexes.attributes "contextId,userId" $pfile
-    fi
+
+    # obsoleted by SoftwareChange_Request-1291
+    #if ! ox_exists_property com.openexchange.hazelcast.configuration.map.indexes.attributes $pfile; then
+    #   ox_set_property com.openexchange.hazelcast.configuration.map.indexes.attributes "contextId,userId" $pfile
+    #fi
 
 fi
 
@@ -83,8 +91,14 @@ fi
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
 
 %changelog
+* Thu Feb 14 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.0.1
+* Fri Feb 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.0.1
 * Tue Jan 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-01-23
+* Thu Jan 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.0.1
 * Fri Dec 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for public patch 2012-12-21
 * Tue Dec 18 2012 Marcus Klein <marcus.klein@open-xchange.com>

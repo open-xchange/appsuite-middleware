@@ -50,11 +50,9 @@
 package com.openexchange.carddav.servlet;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import com.openexchange.carddav.servlet.CarddavPerformer.Action;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -163,21 +161,21 @@ public class CardDAV extends OXServlet {
     }
 
     private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action) throws ServletException, IOException {
-        ServerSession session;
+        ServerSession session = null;
         try {
-            session = ServerSessionAdapter.valueOf(getSession(req));
-            if (!checkPermission(session)) {
-                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            try {
+                session = ServerSessionAdapter.valueOf(getSession(req));
+                if (!checkPermission(session)) {
+                    resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
+            } catch (final OXException exc) {
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 return;
             }
-        } catch (final OXException exc) {
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return;
-        }
-        try {
             CarddavPerformer.getInstance().doIt(req, resp, action, session);
         } finally {
-            if (mustLogOut(req)) {
+            if (null != session && mustLogOut(req)) {
                 logout(session, req, resp);
             }
         }

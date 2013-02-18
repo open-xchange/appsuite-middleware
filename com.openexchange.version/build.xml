@@ -13,4 +13,15 @@
         <replaceregexp file="META-INF/MANIFEST.MF" match="Bundle-Version: .*" replace="Bundle-Version: ${version}" byline="true"/>
     </target>
 
+    <target name="prepare">
+        <tstamp prefix="oxversion">
+            <format property="today" pattern="yyyy-MM-dd" />
+        </tstamp>
+        <replaceregexp file="META-INF/MANIFEST.MF" match="OXBuildDate: .*" replace="OXBuildDate: ${oxversion.today}" byline="true"/>
+    </target>
+
+    <target name="postclean">
+        <replaceregexp file="META-INF/MANIFEST.MF" match="OXBuildDate: .*" replace="OXBuildDate: develop" byline="true"/>
+    </target>
+
 </project>

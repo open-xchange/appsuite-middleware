@@ -50,10 +50,10 @@
 package com.openexchange.push.udp.osgi;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.log.LogFactory;
 import com.openexchange.push.udp.PushConfiguration;
 import com.openexchange.push.udp.PushDiscoverySender;
 import com.openexchange.push.udp.PushInit;
@@ -69,8 +69,7 @@ public final class TimerCustomizer implements ServiceTrackerCustomizer<TimerServ
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TimerCustomizer.class));
 
     private final BundleContext context;
-
-    private PushDiscoverySender sender;
+    private volatile PushDiscoverySender sender;
 
     /**
      * Initializes a new {@link TimerCustomizer}.
@@ -86,8 +85,9 @@ public final class TimerCustomizer implements ServiceTrackerCustomizer<TimerServ
         final PushConfiguration config = PushInit.getInstance().getConfig();
         if (config.isMultiCastEnabled()) {
             LOG.info("Starting push multicast discovery sender.");
-            sender = new PushDiscoverySender(config);
-            sender.startSender(timer);
+            final PushDiscoverySender tmp = new PushDiscoverySender(config);
+            tmp.startSender(timer);
+            this.sender = tmp;
         } else {
             LOG.info("Push multicast discovery is disabled.");
         }
@@ -101,10 +101,11 @@ public final class TimerCustomizer implements ServiceTrackerCustomizer<TimerServ
 
     @Override
     public void removedService(final ServiceReference<TimerService> reference, final TimerService service) {
-        if (null != sender) {
+        final PushDiscoverySender tmp = this.sender;
+        if (null != tmp) {
             LOG.info("Stopping push multicast discovery sender.");
-            sender.stopSender();
-            sender = null;
+            tmp.stopSender();
+            this.sender = null;
         }
         context.ungetService(reference);
     }

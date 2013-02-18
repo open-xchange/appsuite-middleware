@@ -4263,6 +4263,11 @@ msgstr "Konts nav derīgs. Lūdzu izveidojiet to no jauna."
 msgid "Please provide a display name."
 msgstr "Lūdzu norādiet uzrādes vārdu."
 
+#. The associated OAuth provider denied the request: %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:147
+msgid "The associated OAuth provider denied the request: %1$s."
+msgstr "Atbilstošais OAuth provaideris atteica pieprasījumu: %1$s."
+
 #. *
 #. * Cannot change password for any reason.
 #.
@@ -4564,14 +4569,18 @@ msgstr "Pasta mapi %1$s nevar pārvietot uz mapi %2$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:182
 msgid ""
 "This message could not be moved to trash folder, possibly because your "
-"mailbox is nearly full.\n"
+"mailbox is nearly full."
+msgstr ""
+"Šis e-pasts nevar tikt pārvietots uz atkritni. Iespējams ka jūsu pasta mapju "
+"vieta ir praktiski pilna."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:182
+msgid ""
 "In that case, please try to empty your deleted items first, or delete "
 "smaller messages first."
 msgstr ""
-"Šis e-pasts nevar tikt pārvietots uz atkritni. Iespējams ka jūsu pasta mapju "
-"vieta ir praktiski pilna.\n"
-"Tādā gadījumā vispirms iztīriet izdēsto vēstuļu vienumus, vai dzēšiet mazāka "
-"izmēra vēstules."
+"Šāda gadījumā lūdzu vispirms iztīriet izdēsto vēstuļu vienumus vai dzēšiet "
+"mazāka izmēra vēstules."
 
 #. *
 #. * Missing %1$s folder in mail move operation
@@ -4800,12 +4809,14 @@ msgstr "Neatļauta pārvietošanas operācija."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s).\n"
-"Error message from server: %5$s"
+"context=%4$s)."
 msgstr ""
 "Pieslēguma noilgums pieslēdzoties pie srvera %1$s ar pieslēgumu %2$s "
-"(lietotājs=%3$s, kontksts=%4$s).\n"
-"Servera kļūdas ziņojums: %5$s"
+"(lietotājs=%3$s, kontksts=%4$s)."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:307
+msgid "Error message from server: %5$s"
+msgstr "Servera kļūdas ziņojums: %5$s"
 
 #. *
 #. * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
@@ -4814,12 +4825,14 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:312
 msgid ""
 "Login delay denies connecting to server %1$s with login %2$s (user=%3$s, "
-"context=%4$s). Try again in %5$s seconds.\n"
-"Error message from server: %6$s"
+"context=%4$s). Try again in %5$s seconds."
 msgstr ""
 "Pieslēguma noilgums pieslēdzoties pie srvera %1$s ar pieslēgumu %2$s "
-"(lietotājs=%3$s, kontksts=%4$s). Mēģiniet vēlreiz pēc %5$s sekundēm.\n"
-"Servera kļūdas ziņojums: %6$s"
+"(lietotājs=%3$s, kontksts=%4$s). Mēģiniet vēlreiz pēc %5$s sekundēm."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:312
+msgid "Error message from server: %6$s"
+msgstr "Servera kļūdas ziņojums: %6$s"
 
 #. *
 #. * Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, context=%5$s).
@@ -9376,13 +9389,17 @@ msgstr "Neuzturēts MIME tips %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:271
 msgid ""
 "This message could not be moved to trash folder as your mailbox is nearly "
-"full.\n"
+"full."
+msgstr ""
+"Šis e-pasts nevar tikt pārvietots uz atkritni jo jūsu pasta mapju vieta ir "
+"praktiski pilna."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:271
+msgid ""
 "Please try to empty your deleted items first, or delete smaller messages "
 "first."
 msgstr ""
-"Šis e-pasts nevar tikt pārvietots uz atkritni, jo jūsu pasta mapju vieta ir "
-"praktiski pilna.\n"
-"Lūdzu vispirms iztīriet izdēsto vēstuļu vienumus, vai dzēšiet mazāka izmēra "
+"Lūdzu vispirms iztīriet izdēsto vēstuļu vienumus vai dzēšiet mazāka izmēra "
 "vēstules."
 
 #. *
@@ -9860,11 +9877,13 @@ msgstr ""
 #. * </p>
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:104
-msgid ""
-"Folder \"%1$s\" has been closed.\n"
-"Probably your request took too long."
+msgid "Folder \"%1$s\" has been closed."
+msgstr "Mape \"%1$s\" ir noslēgta."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
+msgid "Probably your request took too long."
 msgstr ""
-"Mape \"%1$s\" ir aizvērta.\n"
 "Iespējams, ka jūsu pieprasījuma apstrāde ir prasījusi pārāk ilgu laiku."
 
 #. *
@@ -9874,12 +9893,10 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
 msgid ""
 "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
-"%4$s, context=%5$s) .\n"
-"Probably your request took too long."
+"%4$s, context=%5$s) ."
 msgstr ""
-"Mape \"%1$s\" e-pasta serverī %2$s pieslēgumam %3$s ir aizvērta (lietotājs="
-"%4$s, konteksts=%5$s) .\n"
-"Iespējams, ka jūsu pieprasījuma apstrāde ir prasījusi pārāk ilgu laiku."
+"Mape \"%1$s\" pasta serverī %2$s pieslēgumam %3$s (lietotājs=%4$s, konteksts="
+"%5$s) ir noslēgta."
 
 #. *
 #. * Illegal write attempt: %1$s
@@ -14604,6 +14621,15 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#~ msgid ""
+#~ "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s) .\n"
+#~ "Probably your request took too long."
+#~ msgstr ""
+#~ "Mape \"%1$s\" e-pasta serverī %2$s pieslēgumam %3$s ir aizvērta "
+#~ "(lietotājs=%4$s, konteksts=%5$s) .\n"
+#~ "Iespējams, ka jūsu pieprasījuma apstrāde ir prasījusi pārāk ilgu laiku."
+
 #~ msgid "Could not find encryption key."
 #~ msgstr "Nevar atrast šifra atslēgu."
 
@@ -14612,9 +14638,6 @@ msgstr "Zulu"
 
 #~ msgid "Connection to pool %1$d can not be returned"
 #~ msgstr "Nevar iegūt pieslēgumu kopumam %1$d"
-
-#~ msgid "Message could not be moved to trash folder"
-#~ msgstr "Ziņojumu nevar pārvietot uz atkritumkastes mapi."
 
 #~ msgid "Mail could not be moved to trash folder. Quota exceeded."
 #~ msgstr "Pastu nevar pārvietot uz atkritumkastes mapi. Pārsniegtas kvotas."
@@ -14809,13 +14832,6 @@ msgstr "Zulu"
 #~ msgstr ""
 #~ "Iezīme %1$s nevar tikt izmainīta sekojoša iemesla dēļ \"%2$s\". Serveris "
 #~ "%3$s, pieslēgums %4$s (lietotājs=%5$s, konteksts=%6$s)"
-
-#~ msgid ""
-#~ "Folder %1$s cannot be deleted on server %2$s with login %3$s (user=%4$s, "
-#~ "context=%5$s)"
-#~ msgstr ""
-#~ "Mape %1$s nevar tikt izdzēsta serverī %2$s ar pieslēgumu %3$s (lietotājs="
-#~ "%4$s, konteksts=%5$s)"
 
 #~ msgid ""
 #~ "Folder %1$s does not allow subfolders on server %2$s with login %3$s "

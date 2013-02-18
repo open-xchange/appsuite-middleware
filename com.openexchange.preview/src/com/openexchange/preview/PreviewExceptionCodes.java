@@ -68,19 +68,23 @@ public enum PreviewExceptionCodes implements OXExceptionCode {
     /**
      * An error occurred: %1$s
      */
-    ERROR(ERROR_MSG, Category.CATEGORY_ERROR, 1),
+    ERROR(ERROR_MSG, CATEGORY_ERROR, 1),
     /**
      * The following field(s) are too long: %1$s
      */
-    TRUNCATED(TRUNCATED_MSG, Category.CATEGORY_TRUNCATED, 2),
+    TRUNCATED(TRUNCATED_MSG, CATEGORY_TRUNCATED, 2),
     /**
      * Unable to change data. (%1$s)
      */
-    UNABLE_TO_CHANGE_DATA(UNABLE_TO_CHANGE_DATA_MSG, Category.CATEGORY_USER_INPUT, 3),
+    UNABLE_TO_CHANGE_DATA(UNABLE_TO_CHANGE_DATA_MSG, CATEGORY_USER_INPUT, 3),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(IO_ERROR_MSG, Category.CATEGORY_ERROR, 4),
+    IO_ERROR(IO_ERROR_MSG, CATEGORY_ERROR, 4),
+    /**
+     * Thumbnail image not available.
+     */
+    THUMBNAIL_NOT_AVAILABLE(PreviewExceptionMessages.THUMBNAIL_NOT_AVAILABLE, CATEGORY_USER_INPUT, 5)
 
     ;
 

@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: java-devel >= 1.6.0
 Version:	   @OXVERSION@
-%define        ox_release 5
+%define        ox_release 10
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GNU General Public License (GPL)
@@ -66,21 +66,23 @@ exit 0
 %config(noreplace) /etc/munin/plugin-conf.d/*
 
 %changelog
-* Tue Sep 20 2011 - holger.achtziger@open-xchange.com
- - Fixed cache statistics
-* Tue May 24 2011 - steffen.templin@open-xchange.com
- - Repaired autoconf function of most scripts.
- - Corrected wrong parameter for showruntimestats call in java heap scripts 
-* Fri Apr 29 2011 - wolfgang.rosenauer@open-xchange.com
- - RPM %post script calls munin-node-configure with explicit libdir path
- - Improved RPM requirements
-* Wed Jan 19 2011 - steffen.templin@open-xchange.com
- - Added munin plugin for all other threadpool stats.
-* Mon Jan 17 2011 - steffen.templin@open-xchange.com
- - Added munin plugin for threadpool task stats.
-* Tue Nov 23 2010 - marcus.klein@open-xchange.com
- - Bugfix #17525: Total number of database connections is monitored successfully again.
-* Fri Nov 19 2010 - marcus.klein@open-xchange.com
- - Bugfix #17548: AJP requests are monitored successfully again.
-* Fri Oct 08 2010 - holger.achtziger@open-xchange.com
- - initial version
+* Thu Feb 14 2013 Carsten Hoeger <choeger@open-xchange.com>
+Second release candidate for 7.0.1
+* Fri Feb 01 2013 Carsten Hoeger <choeger@open-xchange.com>
+First release candidate for 7.0.1
+* Mon Nov 19 2012 Carsten Hoeger <choeger@open-xchange.com>
+bugfix release
+* Tue Sep 20 2011 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+bugfix release
+* Mon Jul 11 2011 Carsten Hoeger <choeger@open-xchange.com>
+bugfix release
+* Fri Apr 29 2011 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+New build
+* Mon Jan 17 2011 Carsten Hoeger <choeger@open-xchange.com>
+new build including latest changes
+* Fri Oct 08 2010 Carsten Hoeger <choeger@open-xchange.com>
+new build with fix for rpm packages
+* Wed Oct 06 2010 Holger Achtziger <holger.achtziger@open-xchange.com>
+initial public build
+* Wed Aug 04 2010 Holger Achtziger <holger.achtziger@open-xchange.com>
+initial packaging structure

@@ -52,10 +52,9 @@ package com.openexchange.index.solr.internal.mail.translators;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.index.IndexField;
+import com.openexchange.index.solr.internal.LuceneQueryTools;
 import com.openexchange.index.solr.internal.config.FieldConfiguration;
 import com.openexchange.index.solr.internal.querybuilder.Configuration;
 import com.openexchange.index.solr.internal.querybuilder.QueryTranslator;
@@ -83,7 +82,7 @@ import com.openexchange.mail.search.ToTerm;
 
 /**
  * {@link CustomTranslator}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class CustomTranslator implements QueryTranslator {
@@ -95,7 +94,6 @@ public class CustomTranslator implements QueryTranslator {
     private String name;
 
     private FieldConfiguration fieldConfig;
-
 
     @Override
     public void init(String name, Configuration config, FieldConfiguration fieldConfig) throws TranslationException {
@@ -115,7 +113,6 @@ public class CustomTranslator implements QueryTranslator {
         throw new TranslationException("The given object must be of type com.openexchange.mail.search.SearchTerm<?>.");
     }
 
-
     private static final class TranslatorVisitor implements SearchTermVisitor {
 
         private final Configuration config;
@@ -125,7 +122,6 @@ public class CustomTranslator implements QueryTranslator {
         private final String name;
 
         private final FieldConfiguration fieldConfig;
-
 
         public TranslatorVisitor(String name, Configuration config, FieldConfiguration fieldConfig) {
             super();
@@ -373,14 +369,37 @@ public class CustomTranslator implements QueryTranslator {
                 return;
             }
 
-            String pattern = term.getPattern();
+            String orig = term.getPattern();
+            if (orig == null) {
+                return;
+            }
+            
+            orig = orig.trim();
+            boolean isPhrase = false;
+            if (orig.length() > 1 && orig.startsWith("\"") && orig.endsWith("\"")) {
+                orig = orig.substring(1, orig.length() - 1);
+                isPhrase = true;
+            }
+            
+            if (orig.length() == 0) {
+                return;
+            }
+            
+            String pattern = LuceneQueryTools.escapeButWildcards(orig);
             Iterator<String> it = solrFields.iterator();
             queryBuilder.append('(');
-            queryBuilder.append(it.next()).append(':').append('"').append(pattern).append('"');
+            queryBuilder.append(it.next()).append(':').append(pattern);
             while (it.hasNext()) {
                 String solrField = it.next();
                 queryBuilder.append(" OR ");
-                queryBuilder.append(solrField).append(':').append('"').append(pattern).append('"');
+                queryBuilder.append(solrField).append(':');
+                if (isPhrase) {
+                    queryBuilder.append("\"");
+                    queryBuilder.append(pattern);
+                    queryBuilder.append("\"");
+                } else {
+                    queryBuilder.append(pattern);
+                }
             }
             queryBuilder.append(')');
         }

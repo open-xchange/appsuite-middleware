@@ -615,7 +615,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
             if (messageStorage instanceof ISimplifiedThreadStructure) {
                 try {
-                    return ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fullName, includeSent, false, indexRange, max, sortField, order, mailFields);
+                    return ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fa.getFullname(), includeSent, false, indexRange, max, sortField, order, mailFields);
                 } catch (final OXException e) {
                     if (!MailExceptionCode.UNSUPPORTED_OPERATION.equals(e)) {
                         throw e;

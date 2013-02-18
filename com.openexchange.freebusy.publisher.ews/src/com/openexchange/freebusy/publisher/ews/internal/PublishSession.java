@@ -184,4 +184,9 @@ public class PublishSession implements Session {
         // Nothing to do
     }
 
+    @Override
+    public boolean isTransient() {
+        return false;
+    }
+
 }

@@ -116,6 +116,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogFactory;
@@ -1110,14 +1111,13 @@ public class Login extends AJAXServlet {
         try {
             if (response.hasError() || null == result) {
                 final Locale locale;
-                if (null == result) {
-                    locale = Tools.getLocaleByAcceptLanguage(req, null);
-                } else {
-                    final User user = result.getUser();
-                    if (null == user) {
-                        locale = Tools.getLocaleByAcceptLanguage(req, null);
+                {
+                    final String sLocale = req.getParameter("language");
+                    if (null == sLocale) {
+                        locale = bestGuessLocale(result, req);
                     } else {
-                        locale = user.getLocale();
+                        final Locale loc = LocaleTools.getLocale(sLocale);
+                        locale = null == loc ? bestGuessLocale(result, req) : loc;
                     }
                 }
                 ResponseWriter.write(response, resp.getWriter(), locale);
@@ -1144,6 +1144,21 @@ public class Login extends AJAXServlet {
             return false;
         }
         return false;
+    }
+
+    private static Locale bestGuessLocale(LoginResult result, final HttpServletRequest req) {
+        final Locale locale;
+        if (null == result) {
+            locale = Tools.getLocaleByAcceptLanguage(req, null);
+        } else {
+            final User user = result.getUser();
+            if (null == user) {
+                locale = Tools.getLocaleByAcceptLanguage(req, null);
+            } else {
+                locale = user.getLocale();
+            }
+        }
+        return locale;
     }
 
     private static void addHeadersAndCookies(final LoginResult result, final HttpServletResponse resp) {

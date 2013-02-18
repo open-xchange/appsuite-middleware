@@ -59,8 +59,8 @@ import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link PushChannels}
@@ -106,7 +106,7 @@ public class PushChannels {
 
             } else {
                 if (LOG.isInfoEnabled()) {
-                    LOG.info("Push Registeration is disabled");
+                    LOG.info("Push Registration is disabled");
                 }
             }
         } catch (SocketException e) {
