@@ -1,3 +1,7 @@
+* 2013-02-18 - marcus.klein@open-xchange.com
+
+ - Fix for bug 25011: Fixed extension of CLTs by autocontextid and reseller plugins.
+
 * 2013-02-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 25010: Simplified handling of upload files to avoid possible infinite loop on "by field name" look-up
