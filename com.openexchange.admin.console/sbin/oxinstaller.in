@@ -58,18 +58,6 @@ test -f $OXFUNCTIONS || {
 
 . $OXFUNCTIONS
 
-noLongerInUse() {
-    echo option $1 is deprected and not longer in use
-}
-
-handleIPv6() {
-    if [[ "$1" =~ .*:.* ]]; then
-	echo "[$1]"
-    else
-	echo $1
-    fi
-}
-
 OXHOST=$(hostname -f)
 if [ -z "$OXHOST" ]; then
     die "unable to determine hostname using 'hostname -f', giving up."
@@ -112,31 +100,20 @@ TMPDIR_PATH=/var/spool/open-xchange/uploads
 TMPDIR_PATH_LONG=tmpdir-path
 AJP_JVM_ROUTE=APP1
 AJP_JVM_ROUTE_LONG=jkroute
-AJP_BIND_ADDR_LONG=ajp-bind-port
 UDPDISCOVERYADDR=224.0.0.1
 UDPDISCOVERYADDR_LONG=cache-udp-disc-addr
 UDPDISCOVERYPORT=6780
 UDPDISCOVERYPORT_LONG=cache-udp-disc-port
-AMCACHEPORT=57461
-AMCACHEPORT_LONG=groupware-cache-port
 GWCACHEPORT=57462
 GWCACHEPORT_LONG=admin-cache-port
-SESSIONCONTAINERTIMEOUT="Deprecated"
-SESSIONCONTAINERTIMEOUT_LONG=SesssionContTimeout
-NUMBEROFSESSIONCONTAINERS="Deprecated"
-NUMBEROFSESSIONCONTAINERS_LONG=NRSessionContainers
 MAXSESSION=0
 MAXSESSION_LONG=maxSession
-ISDOUBLELOGINPERMITTED="Deprecated"
-ISDOUBLELOGINPERMITTED_LONG=DoubleLoginPerm
 SESSIONDEFAULTLIFETIME=3600000
 SESSIONDEFAULTLIFETIME_LONG=sessionDefLifeTime
 ADD_LICENSE=
 ADD_LICENSE_LONG=add-license
 NO_LICENSE=
 NO_LICENSE_LONG=no-license
-
-#
 CONFIGDB_USER=openexchange
 CONFIGDB_USER_LONG=configdb-user
 CONFIGDB_PASS=
@@ -161,19 +138,15 @@ URL="http://$OXHOST/"
 URL_LONG=extras-link
 OXOBJECT_LINK_HOSTNAME="$OXHOST"
 OXOBJECT_LINK_HOSTNAME_LONG=object-link-hostname
-OXCLUSTERIP="$OXIP"
-OXCLUSTERIP_LONG=ip-of-oxcluster
-PUSHMCPORT=9982
-PUSHMCPORT_LONG=push-udp-disc-port
-OLPORT=44335
-OLPORT_LONG=push-outlook-port
 OXCLUSTERNAME="$OXHOST"
 OXCLUSTERNAME_LONG=name-of-oxcluster
 NETWORK_LISTENER_HOST=localhost
 NETWORK_LISTENER_HOST_LONG=network-listener-host
+# AJP_BIND_ADDR_LONG kept for compatibility
+AJP_BIND_ADDR_LONG=ajp-bind-port
 
 MUSTOPTS="SERVER_NAME CONFIGDB_PASS OXOBJECT_LINK_HOSTNAME SERVER_MEMORY OXCLUSTERNAME"
-LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$SMTP_SERVER_LONG:,$LOGIN_SOURCE_LONG:,$MAIL_SERVER_SOURCE_LONG:,$TRANSPORT_SERVER_SOURCE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$SERVER_MEMORY_LONG:,$CLT_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:,$MASTER_PASS_LONG:,$MASTER_USER_LONG:,$AJP_JVM_ROUTE_LONG:,$OXOBJECT_LINK_HOSTNAME_LONG:,$URL_LONG:,$UDPDISCOVERYADDR_LONG:,$UDPDISCOVERYPORT_LONG:,$AMCACHEPORT_LONG:,$GWCACHEPORT_LONG:,$OXCLUSTERIP_LONG:,$PUSHMCPORT_LONG:,$OLPORT_LONG:,$SESSIONCONTAINERTIMEOUT_LONG:,$NUMBEROFSESSIONCONTAINERS_LONG:,$MAXSESSION_LONG:,$ISDOUBLELOGINPERMITTED_LONG:,$SESSIONDEFAULTLIFETIME_LONG:,$DISABLE_RMI_AUTH_LONG,$NO_LICENSE_LONG,$ADD_LICENSE_LONG:,$OXCLUSTERNAME_LONG:,$NETWORK_LISTENER_HOST_LONG:,$AJP_BIND_ADDR_LONG:'
+LONGOPTS='$SERVER_NAME_LONG:,$IMAP_SERVER_LONG:,$SMTP_SERVER_LONG:,$LOGIN_SOURCE_LONG:,$MAIL_SERVER_SOURCE_LONG:,$TRANSPORT_SERVER_SOURCE_LONG:,$CONFIGDB_USER_LONG:,$CONFIGDB_PASS_LONG:,$CONFIGDB_READ_LONG:,$CONFIGDB_WRITE_LONG:,$CONFIGDB_DBNAME_LONG:,$SERVER_MEMORY_LONG:,$CLT_MEMORY_LONG:,$CONFIGDB_READ_PORT_LONG:,$CONFIGDB_WRITE_PORT_LONG:,$TMPDIR_PATH_LONG:,$MASTER_PASS_LONG:,$MASTER_USER_LONG:,$AJP_JVM_ROUTE_LONG:,$OXOBJECT_LINK_HOSTNAME_LONG:,$URL_LONG:,$UDPDISCOVERYADDR_LONG:,$UDPDISCOVERYPORT_LONG:,$GWCACHEPORT_LONG:,$MAXSESSION_LONG:,$SESSIONDEFAULTLIFETIME_LONG:,$DISABLE_RMI_AUTH_LONG,$NO_LICENSE_LONG,$ADD_LICENSE_LONG:,$OXCLUSTERNAME_LONG:,$NETWORK_LISTENER_HOST_LONG:,$AJP_BIND_ADDR_LONG:'
 
 usage() {
     echo
@@ -196,7 +169,7 @@ usage() {
 
 Example:
 
-  $0 --servername=ox6 --configdb-pass=secret --master-pass=secret --add-license=f-o-o-b-a-r
+  $0 --servername=ox6 --configdb-pass=secret --master-pass=secret --add-license=f-o-o-b-a-r --servermemory 512 --name-of-oxcluster myoxcluster
 
 use -D for Debug mode
 
@@ -247,18 +220,128 @@ v_cache_hosting(){
     v_setprop jcs.auxiliary.${cachename}.attributes.UdpDiscoveryPort $cport $propfile
 }
 
-TEMP=$(POSIXLY_CORRECT=true getopt -o s:i:l:hD --long "$(eval echo $LONGOPTS),help" -- "$@") \
+handleIPv6() {
+    if [[ "$1" =~ .*:.* ]]; then
+	echo "[$1]"
+    else
+	echo $1
+    fi
+}
+
+setup() 
+{
+    #
+    # groupware configuration files
+    #
+
+    echo setting up open-xchange configuration ${CONFDIR}
+
+    CUROPTS=$(eval ox_read_property JAVA_XTRAOPTS ${CONFDIR}/ox-scriptconf.sh)
+    CUROPTS=$(echo $CUROPTS | sed -e 's/"//g' -e 's/-Xmx[0-9]\+[Mm]*[ ]*//')
+    SERVEROPTS="$CUROPTS -Xmx${SERVER_MEMORY}m"
+
+    v_setprop JAVA_XTRAOPTS "\"$SERVEROPTS\"" ${CONFDIR}/ox-scriptconf.sh
+
+    GLOBIGNORE='*'
+    v_setprop com.openexchange.server.backendRoute "$AJP_JVM_ROUTE" ${CONFDIR}/server.properties
+    v_setprop com.openexchange.connector.networkListenerHost "$NETWORK_LISTENER_HOST" ${CONFDIR}/server.properties
+    GLOBIGNORE=
+
+    v_setprop object_link "http://$OXOBJECT_LINK_HOSTNAME/#m=[module]&i=[object]&f=[folder]" ${CONFDIR}/notification.properties
+
+    v_setprop URL "$URL" ${CONFDIR}/configjump.properties
+
+
+
+    SQLHOST=$(handleIPv6 $CONFIGDB_READ)
+    SQLPORT=$CONFIGDB_READ_PORT
+    EVAL_SQL_URL=$(eval echo $SQL_URL)
+    v_setprop readUrl $EVAL_SQL_URL ${CONFDIR}/configdb.properties
+
+    SQLHOST=$(handleIPv6 $CONFIGDB_WRITE)
+    SQLPORT=$CONFIGDB_WRITE_PORT
+    EVAL_SQL_URL=$(eval echo $SQL_URL)
+    v_setprop writeUrl $EVAL_SQL_URL ${CONFDIR}/configdb.properties
+
+    if [ "$CONFIGDB_READ" != "$CONFIGDB_WRITE" ]; then
+	v_setprop useSeparateWrite "true" ${CONFDIR}/configdb.properties
+    fi
+
+    v_setprop readProperty.1 "user=$CONFIGDB_USER" ${CONFDIR}/configdb.properties
+    v_setprop readProperty.2 "password=$CONFIGDB_PASS" ${CONFDIR}/configdb.properties
+
+    v_setprop writeProperty.1 "user=$CONFIGDB_USER" ${CONFDIR}/configdb.properties
+    v_setprop writeProperty.2 "password=$CONFIGDB_PASS" ${CONFDIR}/configdb.properties
+
+    v_setprop SERVER_NAME $SERVER_NAME ${CONFDIR}/system.properties
+
+    v_setprop com.openexchange.mail.mailServer $IMAP_SERVER ${CONFDIR}/mail.properties
+    v_setprop com.openexchange.mail.transportServer $SMTP_SERVER ${CONFDIR}/mail.properties
+    v_setprop com.openexchange.mail.loginSource $LOGIN_SOURCE ${CONFDIR}/mail.properties
+    v_setprop com.openexchange.mail.passwordSource session ${CONFDIR}/mail.properties
+    v_setprop com.openexchange.mail.mailServerSource $MAIL_SERVER_SOURCE ${CONFDIR}/mail.properties
+    v_setprop com.openexchange.mail.transportServerSource $TRANSPORT_SERVER_SOURCE ${CONFDIR}/mail.properties
+
+    v_setprop UPLOAD_DIRECTORY "$TMPDIR_PATH" ${CONFDIR}/server.properties
+
+    v_setprop com.openexchange.sessiond.maxSession "$MAXSESSION" ${CONFDIR}/sessiond.properties
+    v_setprop com.openexchange.sessiond.sessionDefaultLifeTime "$SESSIONDEFAULTLIFETIME" ${CONFDIR}/sessiond.properties
+
+    v_cache_hosting ${CONFDIR}/cache.ccf LTCP $UDPDISCOVERYPORT
+    v_setprop jcs.auxiliary.LTCP.attributes.TcpListenerPort $GWCACHEPORT ${CONFDIR}/cache.ccf
+
+    v_setprop com.openexchange.cluster.name $OXCLUSTERNAME ${CONFDIR}/cluster.properties
+
+    #
+    # administration configuration files
+    #
+
+    CUROPTS=$(eval ox_read_property JAVA_OXCMD_OPTS ${CONFDIR}/ox-scriptconf.sh)
+    CUROPTS=$(echo $CUROPTS | sed -e 's/"//g' -e 's/-Xmx[0-9]\+[Mm]*[ ]*//')
+    CLTOPTS="$CUROPTS -Xmx${CLT_MEMORY}m"
+
+    v_setprop JAVA_OXCMD_OPTS "\"$CLTOPTS\"" ${CONFDIR}/ox-scriptconf.sh
+
+    if [ -z "$DISABLE_RMI_AUTH" ] ; then
+        v_setprop MASTER_AUTHENTICATION_DISABLED false ${CONFDIR}/AdminDaemon.properties
+        v_setprop CONTEXT_AUTHENTICATION_DISABLED false ${CONFDIR}/AdminDaemon.properties
+        echo
+        echo "*** RMI authentication is enabled"
+        if [ -z "$MASTER_PASS" ]; then
+            die "ERROR: master password cannot be null if authentication is enabled"
+        else
+            echo "using $MASTER_USER as master account"
+            /opt/open-xchange/sbin/generatempasswd -A $MASTER_USER \
+		-f /opt/open-xchange/etc/mpasswd -P "$MASTER_PASS" >/dev/null
+        fi
+    else
+        v_setprop MASTER_AUTHENTICATION_DISABLED true ${CONFDIR}/AdminDaemon.properties
+        v_setprop CONTEXT_AUTHENTICATION_DISABLED true ${CONFDIR}/AdminDaemon.properties
+        echo
+        echo "*** RMI authentication is disabled"
+    fi
+}
+
+addLicense() {
+    local lic=$1
+    local nr=$2
+    echo "adding $lic"
+    echo "com.openexchange.licensekey.${nr}=$lic" >> $LICENSEFILE
+}
+
+
+TEMP=$(POSIXLY_CORRECT=true getopt -o hD --long "$(eval echo $LONGOPTS),help" -- "$@") \
     || die "exiting"
 
 eval set -- "$TEMP"
 
 while true; do
     case "$1" in
-	-s|--$SERVER_NAME_LONG)
+	--$SERVER_NAME_LONG)
           SERVER_NAME=$2
           shift 2
           ;;
-	-i|--$IMAP_SERVER_LONG)
+	--$IMAP_SERVER_LONG)
           IMAP_SERVER=$2
           shift 2
           ;;
@@ -358,44 +441,16 @@ while true; do
           UDPDISCOVERYPORT=$2
           shift 2
           ;;
-	--$AMCACHEPORT_LONG)
-          AMCACHEPORT=$2
-          shift 2
-          ;;
 	--$GWCACHEPORT_LONG)
           GWCACHEPORT=$2
-          shift 2
-          ;;
-	--$OXCLUSTERIP_LONG)
-          OXCLUSTERIP=$2
-          shift 2
-          ;;
-	--$PUSHMCPORT_LONG)
-          PUSHMCPORT=$2
-          shift 2
-          ;;
-	--$SESSIONCONTAINERTIMEOUT_LONG)
-          noLongerInUse $SESSIONCONTAINERTIMEOUT_LONG
-          shift 2
-          ;;
-	--$NUMBEROFSESSIONCONTAINERS_LONG)
-          noLongerInUse $NUMBEROFSESSIONCONTAINERS_LONG
           shift 2
           ;;
 	--$MAXSESSION_LONG)
           MAXSESSION=$2
           shift 2
           ;;
-	--$ISDOUBLELOGINPERMITTED_LONG)
-          noLongerInUse $ISDOUBLELOGINPERMITTED_LONG
-          shift 2
-          ;;
 	--$SESSIONDEFAULTLIFETIME_LONG)
           SESSIONDEFAULTLIFETIME=$2
-          shift 2
-          ;;
-	--$OLPORT_LONG)
-          OLPORT=$2
           shift 2
           ;;
 	--$ADD_LICENSE_LONG)
@@ -479,116 +534,6 @@ SQLDB=$CONFIGDB_DBNAME
 SQLOPTS=$SQLOPTS
 LICENSEFILE="/opt/open-xchange/etc/licensekeys.properties"
 
-
-setup() 
-{
-    #
-    # groupware configuration files
-    #
-
-    echo setting up open-xchange configuration ${CONFDIR}
-
-    CUROPTS=$(eval ox_read_property JAVA_XTRAOPTS ${CONFDIR}/ox-scriptconf.sh)
-    CUROPTS=$(echo $CUROPTS | sed -e 's/"//g' -e 's/-Xmx[0-9]\+[Mm]*[ ]*//')
-    SERVEROPTS="$CUROPTS -Xmx${SERVER_MEMORY}m"
-
-    v_setprop JAVA_XTRAOPTS "\"$SERVEROPTS\"" ${CONFDIR}/ox-scriptconf.sh
-
-    GLOBIGNORE='*'
-    v_setprop com.openexchange.server.backendRoute "$AJP_JVM_ROUTE" ${CONFDIR}/server.properties
-    v_setprop com.openexchange.connector.networkListenerHost "$NETWORK_LISTENER_HOST" ${CONFDIR}/server.properties
-    GLOBIGNORE=
-
-    v_setprop object_link "http://$OXOBJECT_LINK_HOSTNAME/#m=[module]&i=[object]&f=[folder]" ${CONFDIR}/notification.properties
-
-    v_setprop URL "$URL" ${CONFDIR}/configjump.properties
-
-
-
-    SQLHOST=$(handleIPv6 $CONFIGDB_READ)
-    SQLPORT=$CONFIGDB_READ_PORT
-    EVAL_SQL_URL=$(eval echo $SQL_URL)
-    v_setprop readUrl $EVAL_SQL_URL ${CONFDIR}/configdb.properties
-
-    SQLHOST=$(handleIPv6 $CONFIGDB_WRITE)
-    SQLPORT=$CONFIGDB_WRITE_PORT
-    EVAL_SQL_URL=$(eval echo $SQL_URL)
-    v_setprop writeUrl $EVAL_SQL_URL ${CONFDIR}/configdb.properties
-
-    if [ "$CONFIGDB_READ" != "$CONFIGDB_WRITE" ]; then
-	v_setprop useSeparateWrite "true" ${CONFDIR}/configdb.properties
-    fi
-
-    v_setprop readProperty.1 "user=$CONFIGDB_USER" ${CONFDIR}/configdb.properties
-    v_setprop readProperty.2 "password=$CONFIGDB_PASS" ${CONFDIR}/configdb.properties
-
-    v_setprop writeProperty.1 "user=$CONFIGDB_USER" ${CONFDIR}/configdb.properties
-    v_setprop writeProperty.2 "password=$CONFIGDB_PASS" ${CONFDIR}/configdb.properties
-
-    v_setprop SERVER_NAME $SERVER_NAME ${CONFDIR}/system.properties
-
-    v_setprop com.openexchange.mail.mailServer $IMAP_SERVER ${CONFDIR}/mail.properties
-    v_setprop com.openexchange.mail.transportServer $SMTP_SERVER ${CONFDIR}/mail.properties
-    v_setprop com.openexchange.mail.loginSource $LOGIN_SOURCE ${CONFDIR}/mail.properties
-    v_setprop com.openexchange.mail.passwordSource session ${CONFDIR}/mail.properties
-    v_setprop com.openexchange.mail.mailServerSource $MAIL_SERVER_SOURCE ${CONFDIR}/mail.properties
-    v_setprop com.openexchange.mail.transportServerSource $TRANSPORT_SERVER_SOURCE ${CONFDIR}/mail.properties
-
-    v_setprop UPLOAD_DIRECTORY "$TMPDIR_PATH" ${CONFDIR}/server.properties
-
-    v_setprop com.openexchange.sessiond.maxSession "$MAXSESSION" ${CONFDIR}/sessiond.properties
-    v_setprop com.openexchange.sessiond.sessionDefaultLifeTime "$SESSIONDEFAULTLIFETIME" ${CONFDIR}/sessiond.properties
-
-    v_cache_hosting ${CONFDIR}/cache.ccf LTCP $UDPDISCOVERYPORT
-    v_setprop jcs.auxiliary.LTCP.attributes.TcpListenerPort $GWCACHEPORT ${CONFDIR}/cache.ccf
-
-    v_setprop com.openexchange.push.udp.senderAddress "$OXCLUSTERIP" ${CONFDIR}/push-udp.properties
-    v_setprop com.openexchange.push.udp.multicastAddress "$UDPDISCOVERYADDR" ${CONFDIR}/push-udp.properties
-    v_setprop com.openexchange.push.udp.multicastPort "$PUSHMCPORT" ${CONFDIR}/push-udp.properties
-    v_setprop com.openexchange.push.udp.multicastEnabled true ${CONFDIR}/push-udp.properties
-    v_setprop com.openexchange.push.udp.pushEnabled true ${CONFDIR}/push-udp.properties
-    v_setprop com.openexchange.push.udp.registerPort $OLPORT ${CONFDIR}/push-udp.properties
-    v_setprop com.openexchange.push.udp.registerDistributionEnabled false  ${CONFDIR}/push-udp.properties
-    v_setprop com.openexchange.push.udp.eventDistributionEnabled true ${CONFDIR}/push-udp.properties
-
-    v_setprop com.openexchange.cluster.name $OXCLUSTERNAME ${CONFDIR}/cluster.properties
-
-    #
-    # administration configuration files
-    #
-
-    CUROPTS=$(eval ox_read_property JAVA_OXCMD_OPTS ${CONFDIR}/ox-scriptconf.sh)
-    CUROPTS=$(echo $CUROPTS | sed -e 's/"//g' -e 's/-Xmx[0-9]\+[Mm]*[ ]*//')
-    CLTOPTS="$CUROPTS -Xmx${CLT_MEMORY}m"
-
-    v_setprop JAVA_OXCMD_OPTS "\"$CLTOPTS\"" ${CONFDIR}/ox-scriptconf.sh
-
-    if [ -z "$DISABLE_RMI_AUTH" ] ; then
-        v_setprop MASTER_AUTHENTICATION_DISABLED false ${CONFDIR}/AdminDaemon.properties
-        v_setprop CONTEXT_AUTHENTICATION_DISABLED false ${CONFDIR}/AdminDaemon.properties
-        echo
-        echo "*** RMI authentication is enabled"
-        if [ -z "$MASTER_PASS" ]; then
-            die "ERROR: master password cannot be null if authentication is enabled"
-        else
-            echo "using $MASTER_USER as master account"
-            /opt/open-xchange/sbin/generatempasswd -A $MASTER_USER \
-		-f /opt/open-xchange/etc/mpasswd -P "$MASTER_PASS" >/dev/null
-        fi
-    else
-        v_setprop MASTER_AUTHENTICATION_DISABLED true ${CONFDIR}/AdminDaemon.properties
-        v_setprop CONTEXT_AUTHENTICATION_DISABLED true ${CONFDIR}/AdminDaemon.properties
-        echo
-        echo "*** RMI authentication is disabled"
-    fi
-}
-
-addLicense() {
-    local lic=$1
-    local nr=$2
-    echo "adding $lic"
-    echo "com.openexchange.licensekey.${nr}=$lic" >> $LICENSEFILE
-}
 
 # license file ops
 if [ -n "$ADD_LICENSE" ]; then
