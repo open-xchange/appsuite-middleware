@@ -22,7 +22,6 @@ public class Activator extends HousekeepingActivator {
     }
 
     private void registerIIO() {
-        try {
         IIORegistry registry = IIORegistry.getDefaultInstance();
         registry.registerServiceProvider(new com.sun.media.imageioimpl.stream.ChannelImageInputStreamSpi());
         registry.registerServiceProvider(new com.sun.media.imageioimpl.stream.ChannelImageOutputStreamSpi());
@@ -46,9 +45,6 @@ public class Activator extends HousekeepingActivator {
         registry.registerServiceProvider(new com.sun.media.imageioimpl.plugins.raw.RawImageWriterSpi());
         registry.registerServiceProvider(new com.sun.media.imageioimpl.plugins.tiff.TIFFImageWriterSpi());
         registry.registerServiceProvider(new com.sun.media.jai.imageioimpl.ImageReadWriteSpi());
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
     }
 
 }
