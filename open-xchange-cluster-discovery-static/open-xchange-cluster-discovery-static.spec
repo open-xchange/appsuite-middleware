@@ -53,6 +53,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %changelog
 * Tue Feb 19 2013 Steffen Templin <steffen.templin@open-xchange.com>
 Third release candidate for 7.0.1
+* Fri Feb 15 2013 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2013-02-13
 * Thu Feb 14 2013 Steffen Templin <steffen.templin@open-xchange.com>
 Second release candidate for 7.0.1
 * Fri Feb 01 2013 Steffen Templin <steffen.templin@open-xchange.com>
@@ -93,5 +95,3 @@ Third release candidate for 6.22.1
 Second release candidate for 6.22.1
 * Fri Oct 26 2012 Steffen Templin <steffen.templin@open-xchange.com>
 prepare for 6.22.1
-* Wed Oct 24 2012 Steffen Templin <steffen.templin@open-xchange.com>
-Initial release

@@ -52,6 +52,8 @@ GLOBIGNORE='*'
 %changelog
 * Tue Feb 19 2013 Karsten Will <karsten.will@open-xchange.com>
 Third release candidate for 7.0.1
+* Fri Feb 15 2013 Karsten Will <karsten.will@open-xchange.com>
+Build for patch 2013-02-13
 * Thu Feb 14 2013 Karsten Will <karsten.will@open-xchange.com>
 Second release candidate for 7.0.1
 * Fri Feb 01 2013 Karsten Will <karsten.will@open-xchange.com>

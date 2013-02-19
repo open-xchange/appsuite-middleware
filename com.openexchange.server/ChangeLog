@@ -49,6 +49,10 @@
  - Fix for bug 24958: Fixed .yml file for XING crawler
  - Fix for bug 24916: Added needed field to accepted modifyable user contact fields
 
+* 2013-02-12 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 23962: Adjusted server response handling
+
 * 2013-02-12 - marc.arens@open-xchange.com
 
  - Fix for bug 24914: Exception at osgi log regarding push.mq

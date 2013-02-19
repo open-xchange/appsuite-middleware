@@ -64,6 +64,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %changelog
 * Tue Feb 19 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Third release candidate for 7.0.1
+* Fri Feb 15 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2013-02-13
 * Thu Feb 14 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Second release candidate for 7.0.1
 * Fri Feb 01 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
@@ -124,10 +126,6 @@ Fourth release candidate for 6.22.0
 Third release candidate for 6.22.0
 * Thu Oct 04 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Second release candidate for 6.22.0
-* Tue Sep 04 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
-First release candidate for 6.23.0
-* Mon Sep 03 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
-prepare for next EDP drop
 * Tue Aug 21 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>

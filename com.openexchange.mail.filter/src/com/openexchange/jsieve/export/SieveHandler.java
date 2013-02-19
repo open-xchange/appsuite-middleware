@@ -858,6 +858,16 @@ public class SieveHandler {
     }
 
     /**
+     * Old method for compatibility reasons
+     *
+     * @deprecated use {@link #parseSIEVEResponse(String, String)} instead
+     */
+   @Deprecated
+   protected SIEVEResponse.Code parseSIEVEResponse(final String resp) {
+       return parseSIEVEResponse(resp, null);
+   }
+
+    /**
      * Parse the https://tools.ietf.org/html/rfc5804#section-1.3 Response code of a SIEVE
      * response line.
      * @param multiline TODO
