@@ -68,13 +68,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.Utils;
 import com.openexchange.exception.OXException;
-import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileInputStream;
-import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
@@ -235,8 +230,6 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
     }
 
-    private static final int SIZE_LIMIT = 1048576; // 1MB
-
     private IFileHolder transformIfImage(AJAXRequestData request, IFileHolder file, String delivery) throws IOException, OXException {
         /*
          * check input
@@ -252,70 +245,40 @@ public class FileResponseRenderer implements ResponseRenderer {
             LOG.warn("(Possible) Image file misses stream data");
             return file;
         }
-        // Create stream backup
-        byte[] bytes = null;
-        ManagedFile managedFile = null;
-        try {
-            {
-                final long size = file.getLength();
-                if (size >= 0 && size <= SIZE_LIMIT) {
-                    bytes = Streams.stream2bytes(stream);
-                    stream = Streams.newByteArrayInputStream(bytes);
-                } else {
-                    managedFile = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class).createManagedFile(stream);
-                    stream = managedFile.getInputStream();
-                }
-            }
-            // start transformations: scale, rotate, ...
-            ImageTransformations transformations = scaler.transfom(stream);
-            // rotate by default when not delivering as download
-            Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
-            if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
-                transformations.rotate();
-            }
-            if (request.isSet("cropWidth") || request.isSet("cropHeight")) {
-                int cropX = request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0;
-                int cropY = request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0;
-                int cropWidth = request.getParameter("cropWidth", int.class).intValue();
-                int cropHeight = request.getParameter("cropHeight", int.class).intValue();
-                transformations.crop(cropX, cropY, cropWidth, cropHeight);
-            }
-            if (request.isSet("width") || request.isSet("height")) {
-                int maxWidth = request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0;
-                int maxHeight = request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0;
-                ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
-                transformations.scale(maxWidth, maxHeight, scaleType);
-            }
-            // compress by default when not delivering as download
-            Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
-            if (null == compress && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != compress && compress.booleanValue()) {
-                transformations.compress();
-            }
-            /*
-             * transform
-             */
-            InputStream transformed = transformations.getInputStream(file.getContentType());
-            if (null == transformed) {
-                LOG.warn("Got no resulting input stream from transformation, falling back to original input");
-                if (null == managedFile) {
-                    return new FileHolder(Streams.newByteArrayInputStream(bytes), -1, file.getContentType(), file.getName());
-                }
-                // ManagedFile is now invalidated by created ManagedFileInputStream
-                final FileHolder fileHolder = new FileHolder(new ManagedFileInputStream(managedFile), managedFile.getSize(), file.getContentType(), file.getName());
-                managedFile = null;
-                return fileHolder;
-            }
-            // Return transformed
-            return new FileHolder(transformed, -1, file.getContentType(), file.getName());
-        } finally {
-            if (managedFile != null) {
-                try {
-                    managedFile.delete();
-                } catch (final Exception x) {
-                    // Ignore
-                }
-            }
+        // start transformations: scale, rotate, ...
+        ImageTransformations transformations = scaler.transfom(stream);
+        // rotate by default when not delivering as download
+        Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
+        if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
+            transformations.rotate();
         }
+        if (request.isSet("cropWidth") || request.isSet("cropHeight")) {
+            int cropX = request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0;
+            int cropY = request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0;
+            int cropWidth = request.getParameter("cropWidth", int.class).intValue();
+            int cropHeight = request.getParameter("cropHeight", int.class).intValue();
+            transformations.crop(cropX, cropY, cropWidth, cropHeight);
+        }
+        if (request.isSet("width") || request.isSet("height")) {
+            int maxWidth = request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0;
+            int maxHeight = request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0;
+            ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
+            transformations.scale(maxWidth, maxHeight, scaleType);
+        }
+        // compress by default when not delivering as download
+        Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
+        if (null == compress && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != compress && compress.booleanValue()) {
+            transformations.compress();
+        }
+        /*
+         * transform
+         */
+        InputStream transformed = transformations.getInputStream(file.getContentType());
+        if (null == transformed) {
+            LOG.warn("Got no resulting input stream from transformation, falling back to original input");
+            return file;
+        }
+        return new FileHolder(transformed, -1, file.getContentType(), file.getName());
     }
 
     /**
