@@ -53,6 +53,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-pop3"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-publish"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-push-imapidle"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-parallels"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-spamhandler-parallels"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-push-mailnotify"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-push-malpoll"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-recaptcha"/>

@@ -49,6 +49,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Fri Feb 15 2013 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2013-02-13
 * Tue Jan 29 2013 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2013-01-28
 * Fri Dec 28 2012 Steffen Templin <steffen.templin@open-xchange.com>
@@ -81,5 +83,3 @@ Third release candidate for 6.22.1
 Second release candidate for 6.22.1
 * Fri Oct 26 2012 Steffen Templin <steffen.templin@open-xchange.com>
 prepare for 6.22.1
-* Wed Oct 24 2012 Steffen Templin <steffen.templin@open-xchange.com>
-Initial release

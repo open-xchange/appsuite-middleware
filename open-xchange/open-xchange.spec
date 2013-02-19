@@ -69,6 +69,8 @@ ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
 /sbin/rcopen-xchange
 
 %changelog
+* Fri Feb 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-02-13
 * Tue Jan 29 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-01-28
 * Mon Jan 21 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -121,10 +123,6 @@ Fourth release candidate for 6.22.0
 Third release candidate for 6.22.0
 * Thu Oct 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 6.22.0
-* Tue Sep 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
-First release candidate for 6.23.0
-* Mon Sep 03 2012 Marcus Klein <marcus.klein@open-xchange.com>
-prepare for next EDP drop
 * Tue Aug 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Marcus Klein <marcus.klein@open-xchange.com>
@@ -139,5 +137,3 @@ Internal release build for EDP drop #2
 Internal release build for EDP drop #1
 * Wed Apr 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Internal release build for EDP drop #0
-* Wed Feb 01 2012 Marcus Klein <marcus.klein@open-xchange.com>
-Initial release

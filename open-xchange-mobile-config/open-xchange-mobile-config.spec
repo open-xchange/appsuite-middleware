@@ -46,6 +46,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
+* Fri Feb 15 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2013-02-13
 * Tue Jan 29 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2013-01-28
 * Mon Jan 21 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
@@ -98,10 +100,6 @@ Fourth release candidate for 6.22.0
 Third release candidate for 6.22.0
 * Thu Oct 04 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Second release candidate for 6.22.0
-* Tue Sep 04 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-First release candidate for 6.23.0
-* Mon Sep 03 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
-prepare for next EDP drop
 * Tue Aug 21 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>

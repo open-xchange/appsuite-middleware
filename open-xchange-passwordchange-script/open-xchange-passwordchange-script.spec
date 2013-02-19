@@ -51,6 +51,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc change
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Fri Feb 15 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-02-13
 * Tue Jan 29 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-01-28
 * Mon Jan 21 2013 Carsten Hoeger <choeger@open-xchange.com>
@@ -103,10 +105,6 @@ Fourth release candidate for 6.22.0
 Third release candidate for 6.22.0
 * Thu Oct 04 2012 Carsten Hoeger <choeger@open-xchange.com>
 Second release candidate for 6.22.0
-* Tue Sep 04 2012 Carsten Hoeger <choeger@open-xchange.com>
-First release candidate for 6.23.0
-* Mon Sep 03 2012 Carsten Hoeger <choeger@open-xchange.com>
-prepare for next EDP drop
 * Tue Aug 21 2012 Carsten Hoeger <choeger@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Carsten Hoeger <choeger@open-xchange.com>
