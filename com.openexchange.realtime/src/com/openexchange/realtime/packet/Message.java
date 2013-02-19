@@ -61,6 +61,8 @@ import com.openexchange.realtime.util.ElementPath;
  */
 public class Message extends Stanza {
 
+    private static final long serialVersionUID = -1202062242510119782L;
+
     /**
      * An enumeration of message types describing a message's purpose.
      * <ol>
