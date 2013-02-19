@@ -55,7 +55,7 @@ public class Activator extends HousekeepingActivator {
 
     private void registerIIO(String provider) {
         try {
-            registry.registerServiceProvider(Class.forName(provider).newInstance());
+            registry.registerServiceProvider(this.getClass().getClassLoader().loadClass(provider).newInstance());
         } catch (Throwable t) {
             LOG.error("Unable to register provider: " + provider, t);
         }
