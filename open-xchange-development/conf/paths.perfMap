@@ -21,6 +21,8 @@ modules/mail/contactCollectOnMailTransport > io.ox/mail//contactCollectOnMailTra
 modules/mail/defaultseparator > io.ox/mail//defaultseparator
 modules/mail/defaultFolder > io.ox/mail//defaultFolder
 modules/mail/addresses > io.ox/mail//addresses
+modules/mail/defaultaddress > io.ox/mail//defaultaddress
+modules/mail/sendaddress > io.ox/mail//sendaddress
 mail/folder > io.ox/mail//folder
 mail/vcard > io.ox/mail//vcard
 
