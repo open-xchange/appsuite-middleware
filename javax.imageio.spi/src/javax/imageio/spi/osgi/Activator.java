@@ -44,7 +44,7 @@ public class Activator extends HousekeepingActivator {
         registry.registerServiceProvider(new com.sun.media.imageioimpl.plugins.pnm.PNMImageWriterSpi());
         registry.registerServiceProvider(new com.sun.media.imageioimpl.plugins.raw.RawImageWriterSpi());
         registry.registerServiceProvider(new com.sun.media.imageioimpl.plugins.tiff.TIFFImageWriterSpi());
-        registry.registerServiceProvider(new com.sun.media.jai.imageioimpl.ImageReadWriteSpi());
+        // registry.registerServiceProvider(new com.sun.media.jai.imageioimpl.ImageReadWriteSpi());
     }
 
 }
