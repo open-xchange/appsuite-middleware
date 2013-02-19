@@ -51,6 +51,8 @@ package com.openexchange.realtime.hazelcast.channel;
 
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
 import com.openexchange.realtime.ResourceRegistry;
 import com.openexchange.realtime.packet.ID;
@@ -66,20 +68,27 @@ public class ResourceDirectory implements EventHandler {
     private static final String RESOURCE_MAP = "realtime-resources-0";
     
     public Member lookupMember(ID id) {
-        return null;
+        HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
+        IMap<ID, Member> idMap = hazelcast.getMap(RESOURCE_MAP);
+        return idMap.get(id);
     }
 
     @Override
     public void handleEvent(Event event) {
         String topic = event.getTopic();
         Object idProp = event.getProperty(ResourceRegistry.ID_PROPERTY);
+        HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
         if (topic.equals(ResourceRegistry.TOPIC_REGISTERED)) {
             if (idProp != null) {
                 ID id = (ID) idProp;
+                IMap<ID, Member> idMap = hazelcast.getMap(RESOURCE_MAP);
+                idMap.put(id, hazelcast.getCluster().getLocalMember());
             }
         } else if (topic.equals(ResourceRegistry.TOPIC_UNREGISTERED)) {
             if (idProp != null) {
                 ID id = (ID) idProp;
+                IMap<ID, Member> idMap = hazelcast.getMap(RESOURCE_MAP);
+                idMap.remove(id);
             }
         }
     }
