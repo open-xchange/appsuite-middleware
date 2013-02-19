@@ -161,11 +161,12 @@
     <requestHandler name="mlt" class="solr.MoreLikeThisHandler">
         <lst name="defaults">
             <str name="df">uuid</str>
-            <str name="mlt.fl">subject_gen,subject_en,subject_de,subject_fr,subject_it,content_gen,content_en,content_de,content_fr,content_it</str>
+            <str name="mlt.mintf">1</str>
+            <str name="mlt.fl">subject_gen,subject_en,subject_de,subject_fr,subject_it</str>
             <str name="fl">uuid,account,full_name,id,from,to,cc,bcc,subject_gen,subject_en,subject_de,subject_fr,subject_it</str>
         </lst>
     </requestHandler>
-
+    
     <!-- <requestHandler name="personsAndTopics" class="solr.SearchHandler"> -->
     <!-- <lst name="invariants"> -->
     <!-- <str name="defType">edismax</str> -->
