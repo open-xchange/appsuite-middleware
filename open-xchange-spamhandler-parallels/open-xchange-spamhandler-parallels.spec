@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-spamhandler-spamassassin >= @OXVERSION@
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 10
+%define         ox_release 11
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -48,6 +48,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/bundles/*
 
 %changelog
+* Fri Feb 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-02-13
 * Tue Jan 29 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-01-28
 * Fri Dec 28 2012 Marcus Klein <marcus.klein@open-xchange.com>
@@ -70,5 +72,3 @@ Second release candidate for 6.22.1
 First release candidate for 6.22.1
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 6.22.1
-* Tue Oct 23 2012 Marcus Klein <marcus.klein@open-xchange.com>
-Initial release

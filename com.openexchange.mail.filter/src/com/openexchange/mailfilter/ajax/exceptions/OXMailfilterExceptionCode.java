@@ -103,6 +103,10 @@ public enum OXMailfilterExceptionCode implements OXExceptionCode {
      * Another vacation rule already exists. Please remove that first and try again.
      */
     DUPLICATE_VACATION_RULE("Another vacation rule already exists. Please remove that first and try again.", CATEGORY_TRY_AGAIN, 21),
+    /**
+     * No active sieve script found
+     */
+    NO_ACTIVE_SCRIPT("No active sieve script found.", CATEGORY_ERROR, 22),
     
     ;
 
