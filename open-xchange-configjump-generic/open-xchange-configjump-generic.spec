@@ -50,6 +50,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc config
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Fri Feb 15 2013 Carsten Hoeger <choegeropen-xchange.com>
+Build for patch 2013-02-13
 * Thu Feb 14 2013 Carsten Hoeger <choegeropen-xchange.com>
 Second release candidate for 7.0.1
 * Fri Feb 01 2013 Carsten Hoeger <choegeropen-xchange.com>
@@ -110,10 +112,6 @@ Fourth release candidate for 6.22.0
 Third release candidate for 6.22.0
 * Thu Oct 04 2012 Carsten Hoeger <choegeropen-xchange.com>
 Second release candidate for 6.22.0
-* Tue Sep 04 2012 Carsten Hoeger <choegeropen-xchange.com>
-First release candidate for 6.23.0
-* Mon Sep 03 2012 Carsten Hoeger <choegeropen-xchange.com>
-prepare for next EDP drop
 * Tue Aug 21 2012 Carsten Hoeger <choegeropen-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Carsten Hoeger <choegeropen-xchange.com>

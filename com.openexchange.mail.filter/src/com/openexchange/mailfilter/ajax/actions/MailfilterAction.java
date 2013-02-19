@@ -341,20 +341,29 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             try {
                 handlerConnect(sieveHandler);
                 final String activeScript = sieveHandler.getActiveScript();
-                final String script = null == activeScript ? "" : sieveHandler.getScript(activeScript);
+                final String script;
+                if (null != activeScript) {
+                    script = sieveHandler.getScript(activeScript);
+                } else {
+                    script = "";
+                }
                 if (log.isDebugEnabled()) {
-                    log.debug("The following sieve script will be parsed:\n" + script);
+                    log.debug("The following sieve script will be parsed:\n"
+                        + script);
                 }
                 final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
-                final RuleListAndNextUid readScriptFromString = sieveTextFilter.readScriptFromString(script);
-                final ClientRulesAndRequire clientrulesandrequire =
-                    sieveTextFilter.splitClientRulesAndRequire(
+                final RuleListAndNextUid readScriptFromString = sieveTextFilter
+                    .readScriptFromString(script);
+                final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter
+                    .splitClientRulesAndRequire(
                         readScriptFromString.getRulelist(),
                         parameters.getParameter(Parameter.FLAG),
                         readScriptFromString.isError());
-                final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
+                final ArrayList<Rule> clientrules = clientrulesandrequire
+                    .getRules();
                 changeOutgoingVacationRule(clientrules);
-                return CONVERTER.write(clientrules.toArray(new Rule[0]));
+                return CONVERTER.write(clientrules
+                    .toArray(new Rule[clientrules.size()]));
             } catch (final UnsupportedEncodingException e) {
                 throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
             } catch (final IOException e) {
@@ -693,7 +702,11 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             try {
                 handlerConnect(sieveHandler);
                 final String activeScript = sieveHandler.getActiveScript();
-                return null == activeScript ? "" : sieveHandler.getScript(activeScript);
+                if (null != activeScript) {
+                    return sieveHandler.getScript(activeScript);
+                } else {
+                    return "";
+                }
             } catch (final UnsupportedEncodingException e) {
                 throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
             } catch (final IOException e) {

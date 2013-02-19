@@ -107,7 +107,6 @@ public enum OXMailfilterExceptionCode implements OXExceptionCode {
      * No active sieve script found
      */
     NO_ACTIVE_SCRIPT("No active sieve script found.", CATEGORY_ERROR, 22),
-
     ;
 
 	public static final String ERR_PREFIX_INVALID_ADDRESS = "The parameter for redirect must be a valid Internet email address";

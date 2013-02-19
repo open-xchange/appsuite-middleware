@@ -70,12 +70,11 @@ import javax.security.sasl.Sasl;
 import javax.security.sasl.SaslClient;
 import javax.security.sasl.SaslException;
 import org.apache.commons.logging.Log;
+import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
 
@@ -87,11 +86,7 @@ import com.openexchange.mailfilter.internal.MailFilterProperties;
  */
 public class SieveHandler {
 
-    private static final Pattern LITERAL_S2C_PATTERN = Pattern.compile("^.*\\{([^\\}]*)\\}.*$");
-
-    private static final Pattern STRING_PATTERN = Pattern.compile("^.*\"([^\"]*)\".*$");
-
-	/**
+    /**
      * The logger.
      */
     private static Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(SieveHandler.class));
@@ -161,7 +156,7 @@ public class SieveHandler {
     protected final int sieve_host_port;
 
     private Capabilities capa = null;
-
+    
     private boolean punycode = false;
 
     private Socket s_sieve = null;
@@ -173,7 +168,7 @@ public class SieveHandler {
     private long mStart;
 
     private long mEnd;
-
+    
     private boolean useSIEVEResponseCodes = false;
 
     /**
@@ -250,7 +245,7 @@ public class SieveHandler {
          * Set timeout to the one specified in the config file
          */
         s_sieve.setSoTimeout(timeout);
-        bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), com.openexchange.java.Charsets.UTF_8));
+        bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), "UTF-8"));
         bos_sieve = new BufferedOutputStream(s_sieve.getOutputStream());
 
         if (!getServerWelcome()) {
@@ -268,6 +263,9 @@ public class SieveHandler {
         final boolean tlsenabled = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.TLS.property));
 
         final boolean issueTLS = tlsenabled && capa.getStarttls().booleanValue();
+        
+        punycode = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.PUNYCODE.property));
+
 
         punycode = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.PUNYCODE.property));
 
@@ -303,14 +301,14 @@ public class SieveHandler {
                 } else if (temp.startsWith(SIEVE_OK)) {
                     break;
                 } else if (temp.startsWith(SIEVE_AUTH_FAILED)) {
-                    throw new OXSieveHandlerException("can't auth to SIEVE ", sieve_host, sieve_host_port, parseSIEVEResponse(temp, null));
+                    throw new OXSieveHandlerException("can't auth to SIEVE ", sieve_host, sieve_host_port, parseSIEVEResponse(temp));
                 }
             }
             /*
              * Switch to TLS
              */
             s_sieve = SocketFetcher.startTLS(s_sieve, sieve_host);
-            bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), com.openexchange.java.Charsets.UTF_8));
+            bis_sieve = new BufferedReader(new InputStreamReader(s_sieve.getInputStream(), "UTF-8"));
             bos_sieve = new BufferedOutputStream(s_sieve.getOutputStream());
             /*
              * Fire CAPABILITY command but only for cyrus and NEMESIS that is not sieve draft conform to sent CAPABILITY response again
@@ -393,18 +391,36 @@ public class SieveHandler {
         bos_sieve.write(CRLF.getBytes(com.openexchange.java.Charsets.UTF_8));
         bos_sieve.flush();
 
+        final StringBuilder sb = new StringBuilder();
         final String actualline = bis_sieve.readLine();
         if (null != actualline && actualline.startsWith(SIEVE_OK)) {
             return;
         } else if (null != actualline && actualline.startsWith("NO ")) {
-            final String errorMessage = parseError(actualline).replaceAll(CRLF, "\n");
-            throw new OXSieveHandlerException(errorMessage, sieve_host, sieve_host_port, parseSIEVEResponse(actualline, errorMessage));
+            final String answer = actualline.substring(3);
+            final Pattern p = Pattern.compile("^\\{([^\\}]*)\\}.*$");
+            final Matcher matcher = p.matcher(answer);
+            if (matcher.matches()) {
+                final String group = matcher.group(1);
+                final int octetsToRead = Integer.parseInt(group);
+                final char[] buf = new char[octetsToRead];
+                final int octetsRead = bis_sieve.read(buf, 0, octetsToRead);
+                if (octetsRead == octetsToRead) {
+                    sb.append(buf);
+                } else {
+                    sb.append(buf, 0, octetsRead);
+                }
+                sb.append(CRLF);
+            } else {
+                sb.append(answer);
+                sb.append(CRLF);
+            }
+            throw new OXSieveHandlerException(sb.toString(), sieve_host, sieve_host_port, null);
         } else {
-            throw new OXSieveHandlerException("Unknown response code", sieve_host, sieve_host_port, parseSIEVEResponse(actualline, null));
+            throw new OXSieveHandlerException("Unknown error occured", sieve_host, sieve_host_port, parseSIEVEResponse(actualline));
         }
     }
 
-	/**
+    /**
      * Activate/Deactivate sieve script. Is status is true, activate this script.
      *
      * @param script_name
@@ -461,11 +477,11 @@ public class SieveHandler {
             }
             final int[] parsed = parseFirstLine(firstLine);
             final int respCode = parsed[0];
-            if (OK == respCode) {
+            if (NO == respCode || OK == respCode) {
+                /*
+                 * Either received a NO or an OK which indicates end of response. In both cases no script is availabe.
+                 */
                 return "";
-            } else if (NO == respCode) {
-                final String errorMessage = parseError(firstLine).replaceAll(CRLF, "\n");
-                throw new OXSieveHandlerException(errorMessage, sieve_host, sieve_host_port, parseSIEVEResponse(firstLine, errorMessage));
             }
             sb.ensureCapacity(parsed[1]);
         }
@@ -538,7 +554,7 @@ public class SieveHandler {
                 return list;
             }
             if (temp.startsWith(SIEVE_NO)) {
-                throw new OXSieveHandlerException("Sieve has no script list", sieve_host, sieve_host_port, parseSIEVEResponse(temp, null));
+                throw new OXSieveHandlerException("Sieve has no script list", sieve_host, sieve_host_port, parseSIEVEResponse(temp));
             }
             // Here we strip off the leading and trailing " and the ACTIVE at the
             // end if it occurs. We want a list of the script names only
@@ -551,7 +567,7 @@ public class SieveHandler {
     /**
      * Get the list of active sieve scripts
      *
-     * @return List of scripts, or null if no script is active
+     * @return List of scripts
      * @throws IOException
      * @throws UnsupportedEncodingException
      * @throws OXSieveHandlerException
@@ -575,7 +591,7 @@ public class SieveHandler {
                 return scriptname;
             }
             if (temp.startsWith(SIEVE_NO)) {
-                throw new OXSieveHandlerException("Sieve has no script list", sieve_host, sieve_host_port, parseSIEVEResponse(temp, null));
+                throw new OXSieveHandlerException("Sieve has no script list", sieve_host, sieve_host_port, parseSIEVEResponse(temp));
             }
 
             if (temp.matches(".*ACTIVE")) {
@@ -619,7 +635,7 @@ public class SieveHandler {
             if (temp.startsWith(SIEVE_OK)) {
                 return;
             } else if (temp.startsWith(SIEVE_NO)) {
-                throw new OXSieveHandlerException("Script can't be removed", sieve_host, sieve_host_port, parseSIEVEResponse(temp, null));
+                throw new OXSieveHandlerException("Script can't be removed", sieve_host, sieve_host_port, parseSIEVEResponse(temp));
             }
         }
     }
@@ -652,18 +668,18 @@ public class SieveHandler {
                 return true;
             } else if (test.startsWith(SIEVE_NO)) {
                 AUTH = false;
-                throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, parseSIEVEResponse(test, null));
+                throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, parseSIEVEResponse(test));
             } else {
                 parseCAPA(test);
             }
         }
     }
 
-
+    
     private boolean authGSSAPI(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
         final String user = getRightEncodedString(sieve_user, "username");
         final String authname = getRightEncodedString(sieve_auth, "authname");
-
+        
         final HashMap<String, String> saslProps = new HashMap<String, String>();
 
         // Mutual authentication
@@ -680,7 +696,7 @@ public class SieveHandler {
             sc = Sasl.createSaslClient(new String[]{"GSSAPI"}, authname, "sieve", sieve_host, saslProps, null);
             byte[] response = sc.evaluateChallenge(new byte[0]);
             String b64resp = com.openexchange.tools.encoding.Base64.encode(response);
-
+            
             bos_sieve.write(new String(SIEVE_AUTH + "\"GSSAPI\" {" + b64resp.length() + "+}").getBytes());
             bos_sieve.write(CRLF.getBytes());
             bos_sieve.flush();
@@ -749,7 +765,7 @@ public class SieveHandler {
             }
         }
     }
-
+    
     private boolean authPLAIN(final StringBuilder commandBuilder) throws IOException, UnsupportedEncodingException, OXSieveHandlerException {
         final String username = getRightEncodedString(sieve_user, "username");
         final String authname = getRightEncodedString(sieve_auth, "authname");
@@ -807,7 +823,7 @@ public class SieveHandler {
             if (temp.endsWith(SIEVE_AUTH_LOGIN_USERNAME)) {
                 break;
             } else if (temp.endsWith(SIEVE_AUTH_FAILED)) {
-                throw new OXSieveHandlerException("can't auth to SIEVE ", sieve_host, sieve_host_port, parseSIEVEResponse(temp, null));
+                throw new OXSieveHandlerException("can't auth to SIEVE ", sieve_host, sieve_host_port, parseSIEVEResponse(temp));
             }
         }
 
@@ -829,7 +845,7 @@ public class SieveHandler {
             if (temp.endsWith(SIEVE_AUTH_LOGIN_PASSWORD)) {
                 break;
             } else if (temp.endsWith(SIEVE_AUTH_FAILED)) {
-                throw new OXSieveHandlerException("can't auth to SIEVE ", sieve_host, sieve_host_port, parseSIEVEResponse(temp, null));
+                throw new OXSieveHandlerException("can't auth to SIEVE ", sieve_host, sieve_host_port, parseSIEVEResponse(temp));
             }
         }
 
@@ -852,53 +868,35 @@ public class SieveHandler {
                 AUTH = true;
                 return true;
             } else if (temp.startsWith(SIEVE_AUTH_FAILED)) {
-                throw new OXSieveHandlerException("can't auth to SIEVE ", sieve_host, sieve_host_port, parseSIEVEResponse(temp, null));
+                throw new OXSieveHandlerException("can't auth to SIEVE ", sieve_host, sieve_host_port, parseSIEVEResponse(temp));
             }
         }
     }
 
     /**
-     * Old method for compatibility reasons
-     * 
-     * @deprecated use {@link #parseSIEVEResponse(String, String)} instead
-     */
-    @Deprecated
-    protected SIEVEResponse.Code parseSIEVEResponse(final String resp) {
-        return parseSIEVEResponse(resp, null);
-    }
-
-    /**
      * Parse the https://tools.ietf.org/html/rfc5804#section-1.3 Response code of a SIEVE
      * response line.
-     * @param multiline TODO
      * @param response line
      * @return null, if no response code in line, the @{SIEVEResponse.Code} otherwise.
      */
-    protected SIEVEResponse.Code parseSIEVEResponse(final String resp, final String multiline) {
+    protected SIEVEResponse.Code parseSIEVEResponse(final String resp) {
         if( ! useSIEVEResponseCodes ) {
             return null;
         }
-
+        
         final Pattern p = Pattern.compile("^(?:NO|OK|BYE)\\s+\\((.*?)\\)\\s+(.*$)");
         final Matcher m = p.matcher(resp);
         if( m.matches() ) {
             final int gcount = m.groupCount();
             if( gcount > 1 ) {
                 final SIEVEResponse.Code ret = SIEVEResponse.Code.getCode(m.group(1));
-                final String group = m.group(2);
-                if (group.startsWith("{")) {
-                	// Multi line, use the multiline parsed before here
-                	ret.setMessage(multiline);
-                } else {
-                	// Single line
-                	ret.setMessage(group);
-                }
+                ret.setMessage(m.group(2));
                 return ret;
             }
         }
         return null;
     }
-
+    
     private void activate(final String sieve_script_name, final StringBuilder commandBuilder) throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
         if (!(AUTH)) {
             throw new OXSieveHandlerException("Activate a script not possible. Auth first.", sieve_host, sieve_host_port, null);
@@ -919,7 +917,7 @@ public class SieveHandler {
             if (temp.startsWith(SIEVE_OK)) {
                 return;
             } else if (temp.startsWith(SIEVE_NO)) {
-                throw new OXSieveHandlerException("Error while activating script: " + sieve_script_name, sieve_host, sieve_host_port, parseSIEVEResponse(temp, null));
+                throw new OXSieveHandlerException("Error while activating script: " + sieve_script_name, sieve_host, sieve_host_port, parseSIEVEResponse(temp));
             }
         }
     }
@@ -946,7 +944,7 @@ public class SieveHandler {
                 if (temp.startsWith(SIEVE_OK)) {
                     return;
                 } else if (temp.startsWith(SIEVE_NO)) {
-                    throw new OXSieveHandlerException("Error while deactivating script: " + sieve_script_name, sieve_host, sieve_host_port, parseSIEVEResponse(temp, null));
+                    throw new OXSieveHandlerException("Error while deactivating script: " + sieve_script_name, sieve_host, sieve_host_port, parseSIEVEResponse(temp));
                 }
             }
         }
@@ -1027,38 +1025,7 @@ public class SieveHandler {
     }
 
     /**
-     * Parses and gets the error text. Note this will be CRLF terminated.
-     *
-     * @param actualline
-     * @return
-     * @throws IOException
-     * @throws OXSieveHandlerException
-     */
-    private String parseError(final String actualline) throws IOException, OXSieveHandlerException {
-        final StringBuilder sb = new StringBuilder();
-        final String answer = actualline.substring(3);
-        final Matcher matcher = LITERAL_S2C_PATTERN.matcher(answer);
-        final Matcher stringMatcher = STRING_PATTERN.matcher(answer);
-        if (matcher.matches()) {
-            final String group = matcher.group(1);
-            final int octetsToRead = Integer.parseInt(group);
-            final char[] buf = new char[octetsToRead];
-            final int octetsRead = bis_sieve.read(buf, 0, octetsToRead);
-            if (octetsRead == octetsToRead) {
-                sb.append(buf);
-            } else {
-                sb.append(buf, 0, octetsRead);
-            }
-        } else if (stringMatcher.matches()) {
-            sb.append(stringMatcher.group(1));
-        } else {
-            throw new OXSieveHandlerException("Unable to parse server answer", sieve_host, sieve_host_port, null);
-        }
-        return sb.toString();
-    }
-
-    /**
-     * Converts given string to Base64 using given charset encoding.
+     * COnverts given string to Base64 using given charset encoding.
      *
      * @param toConvert The string to convert to Base64
      * @param charset The charset encoding to use when retrieving bytes from passed string
@@ -1090,24 +1057,24 @@ public class SieveHandler {
         retval[0] = UNDEFINED;
         retval[1] = UNDEFINED;
         // Check for starting "NO" or "OK"
-        final int length = firstLine.length();
+        final char[] chars = firstLine.toCharArray();
         int index = 0;
-        if ('N' == firstLine.charAt(index) && 'O' == firstLine.charAt(index + 1)) {
+        if ('N' == chars[index] && 'O' == chars[index + 1]) {
             retval[0] = NO;
             index += 2;
-        } else if ('O' == firstLine.charAt(index) && 'K' == firstLine.charAt(index + 1)) {
+        } else if ('O' == chars[index] && 'K' == chars[index + 1]) {
             retval[0] = OK;
             index += 2;
         }
         // Check for a literal
-        if (index < length) {
+        if (index < chars.length) {
             char c;
-            while ((index < length) && (((c = firstLine.charAt(index)) == ' ') || (c == '\t'))) {
+            while ((index < chars.length) && (((c = chars[index]) == ' ') || (c == '\t'))) {
                 index++;
             }
-            if (index < length && '{' == firstLine.charAt(index)) {
+            if (index < chars.length && '{' == chars[index]) {
                 // A literal
-                retval[1] = parseLiteralLength(readString(index, firstLine));
+                retval[1] = parseLiteralLength(readString(index, chars));
             }
         }
 
@@ -1129,8 +1096,8 @@ public class SieveHandler {
         return -1;
     }
 
-    private static String readString(final int index, final String chars) {
-        final int size = chars.length();
+    private static String readString(final int index, final char[] chars) {
+        final int size = chars.length;
         if (index >= size) {
             // already at end of response
             return null;
@@ -1139,7 +1106,7 @@ public class SieveHandler {
         final int start = index;
         int i = index;
         char c;
-        while ((i < size) && ((c = chars.charAt(i)) != ' ') && (c != '\r') && (c != '\n') && (c != '\t')) {
+        while ((i < size) && ((c = chars[i]) != ' ') && (c != '\r') && (c != '\n') && (c != '\t')) {
             i++;
         }
         return toString(chars, start, i);
@@ -1149,13 +1116,13 @@ public class SieveHandler {
      * Convert the chars within the specified range of the given byte array into a {@link String}. The range extends from <code>start</code>
      * till, but not including <code>end</code>.
      */
-    private static String toString(final String chars, final int start, final int end) {
+    private static String toString(final char[] chars, final int start, final int end) {
         final int size = end - start;
-        final StringAllocator theChars = new StringAllocator(size);
-        for (int i = 0, j = start; i < size; i++) {
-            theChars.append(chars.charAt(j++));
+        final char[] theChars = new char[size];
+        for (int i = 0, j = start; i < size;) {
+            theChars[i++] = (chars[j++]);
         }
-        return theChars.toString();
+        return new String(theChars);
     }
 
     /**
