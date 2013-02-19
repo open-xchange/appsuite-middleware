@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: ImageIO Service Provider
+Bundle-SymbolicName: javax.imageio.spi
+Bundle-Version: 7.0.1
+Bundle-Activator: javax.imageio.spi.osgi.Activator
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.osgi,
+ com.openexchange.server,
+ javax.imageio,
+ javax.imageio.metadata,
+ javax.imageio.spi,
+ javax.imageio.stream,
+ org.osgi.framework,
+ org.w3c.dom
+Bundle-ClassPath: .,
+ lib/jai_imageio.jar
