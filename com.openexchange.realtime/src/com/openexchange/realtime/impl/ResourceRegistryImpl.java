@@ -49,8 +49,11 @@
 
 package com.openexchange.realtime.impl;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.RealtimeExceptionCodes;
 import com.openexchange.realtime.ResourceRegistry;
@@ -64,48 +67,58 @@ import com.openexchange.realtime.packet.ID;
  */
 public class ResourceRegistryImpl implements ResourceRegistry {
     
+    private final EventAdmin eventAdmin;
+    
     private final Set<ID> ids;
     
-    public ResourceRegistryImpl() {
+    public ResourceRegistryImpl(EventAdmin eventAdmin) {
         super();
-        ids = new HashSet<ID>();
+        this.eventAdmin = eventAdmin;
+        ids = Collections.synchronizedSet(new HashSet<ID>());
     }
 
     @Override
-    public synchronized boolean register(ID id) throws OXException {
+    public boolean register(ID id) throws OXException {
         if (id == null) {
             throw new IllegalArgumentException("id was null.");
         }
         
         String resource = id.getResource();
         if (isInvalid(resource)) {
-            throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(); // TODO
+            throw RealtimeExceptionCodes.INVALID_ID.create();
         }
         
-        if (ids.contains(id)) {
-            return false;
+        if (ids.add(id)) {
+            Event event = new Event(TOPIC_REGISTERED, Collections.singletonMap(ID_PROPERTY, id));
+            eventAdmin.postEvent(event);
+            return true;
         }
         
-        ids.add(id);
-        return true;
+        return false;
     }
 
     @Override
-    public synchronized boolean unregister(ID id) throws OXException {
+    public boolean unregister(ID id) throws OXException {
         if (id == null) {
             throw new IllegalArgumentException("id was null.");
         }
         
         String resource = id.getResource();
         if (isInvalid(resource)) {
-            throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(); // TODO
+            throw RealtimeExceptionCodes.INVALID_ID.create();
         }
         
-        return ids.remove(id);
+        if (ids.remove(id)) {
+            Event event = new Event(TOPIC_UNREGISTERED, Collections.singletonMap(ID_PROPERTY, id));
+            eventAdmin.postEvent(event);
+            return true;
+        }
+        
+        return false;
     }
 
     @Override
-    public synchronized boolean contains(ID id) {
+    public boolean contains(ID id) {
         if (id == null) {
             throw new IllegalArgumentException("id was null.");
         }
@@ -114,8 +127,13 @@ public class ResourceRegistryImpl implements ResourceRegistry {
     }
 
     @Override
-    public synchronized void clear() {
+    public void clear() {
+        Set<ID> eventIDs = new HashSet<ID>(ids);
         ids.clear();
+        for (ID id : eventIDs) {
+            Event event = new Event(TOPIC_UNREGISTERED, Collections.singletonMap(ID_PROPERTY, id));
+            eventAdmin.postEvent(event);
+        }
     }
     
     private static boolean isInvalid(String resource) {
@@ -125,5 +143,4 @@ public class ResourceRegistryImpl implements ResourceRegistry {
         
         return false;
     }
-
 }

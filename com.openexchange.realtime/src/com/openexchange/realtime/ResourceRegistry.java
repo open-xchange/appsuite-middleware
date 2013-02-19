@@ -61,6 +61,21 @@ import com.openexchange.realtime.packet.ID;
 public interface ResourceRegistry {
     
     /**
+     * The topic for events that notify about resource registrations.
+     */
+    String TOPIC_REGISTERED = "com.openexchange.realtime.RESOURCE_REGISTERED";
+    
+    /**
+     * The topic for events that notify about resource unregistrations.
+     */
+    String TOPIC_UNREGISTERED = "com.openexchange.realtime.RESOURCE_UNREGISTERED";
+    
+    /**
+     * The key to receive the affected ID from an events properties.
+     */
+    String ID_PROPERTY = "com.openexchange.realtime.ID";
+    
+    /**
      * Registers a resource at the registry, so that the result of 
      * {@link #contains(ID)} returns <code>true</code>.<br>
      * <br>

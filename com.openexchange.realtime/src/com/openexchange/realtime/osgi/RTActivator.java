@@ -53,6 +53,7 @@ import org.apache.commons.logging.Log;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.framework.FrameworkListener;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -73,7 +74,7 @@ public class RTActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { SimpleConverter.class };
+        return new Class[] { SimpleConverter.class, EventAdmin.class };
     }
 
     /*
@@ -100,7 +101,7 @@ public class RTActivator extends HousekeepingActivator {
         final MessageDispatcherImpl dispatcher = new MessageDispatcherImpl();
 
         registerService(MessageDispatcher.class, dispatcher);
-        registerService(ResourceRegistry.class, new ResourceRegistryImpl());
+        registerService(ResourceRegistry.class, new ResourceRegistryImpl(getService(EventAdmin.class)));
 
         track(Channel.class, new SimpleRegistryListener<Channel>() {
 
