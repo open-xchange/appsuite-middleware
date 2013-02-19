@@ -215,6 +215,21 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1335
+pfile=/opt/open-xchange/etc/paths.perfMap
+if ! grep "modules/mail/defaultaddress" $pfile > /dev/null; then
+   ptmp=${pfile}.$$
+   cp $pfile $ptmp
+   cat<<EOF >> $ptmp
+modules/mail/defaultaddress > io.ox/mail//defaultaddress
+modules/mail/sendaddress > io.ox/mail//sendaddress
+EOF
+   if [ -s $ptmp ]; then
+      cp $ptmp $pfile
+   fi
+   rm -f $ptmp
+fi
+
 # SoftwareChange_Request-1330
 pfile=/opt/open-xchange/etc/mime.types
 if ! grep docm $pfile > /dev/null; then
