@@ -63,7 +63,7 @@ public enum TemplateErrorMessage implements OXExceptionCode {
     UnderlyingException(CATEGORY_ERROR, 2, TemplateExceptionMessage.UnderlyingException_HELP, TemplateExceptionMessage.UnderlyingException_MSG),
     TemplateNotFound(CATEGORY_ERROR, 3, TemplateExceptionMessage.TemplateNotFound_HELP, TemplateExceptionMessage.TemplateNotFound_MSG),
     SQLException(CATEGORY_ERROR, 4, TemplateExceptionMessage.SQLException_HELP, TemplateExceptionMessage.SQLException_MSG),
-    AccessDenied(CATEGORY_PERMISSION_DENIED, 4, TemplateExceptionMessage.AccessDenied_HELP, TemplateExceptionMessage.AccessDenied_MSG),
+    AccessDenied(CATEGORY_PERMISSION_DENIED, 5, TemplateExceptionMessage.AccessDenied_HELP, TemplateExceptionMessage.AccessDenied_MSG),
     ;
 
     /**
