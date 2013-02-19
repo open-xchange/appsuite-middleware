@@ -65,15 +65,10 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 public final class TmpFileFileHolder implements IFileHolder {
 
     private final File tmpFile;
-
     private long length;
-
     private String contentType;
-
     private String name;
-
     private String disposition;
-
     private String delivery;
 
     /**
@@ -85,6 +80,11 @@ public final class TmpFileFileHolder implements IFileHolder {
         super();
         tmpFile = newTempFile();
         length = -1L;
+    }
+
+    @Override
+    public boolean repetitive() {
+        return true;
     }
 
     @Override

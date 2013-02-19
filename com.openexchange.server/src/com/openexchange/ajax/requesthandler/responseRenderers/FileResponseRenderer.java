@@ -229,9 +229,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 outputStream.write(buf, 0, read);
             }
             outputStream.flush();
-        } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final OXException e) {
+        } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         } finally {
             close(file);
