@@ -49,14 +49,18 @@
 
 package com.openexchange.realtime.hazelcast.channel;
 
+import java.util.concurrent.TimeUnit;
+import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
+import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.ResourceRegistry;
 import com.openexchange.realtime.packet.ID;
-
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link ResourceDirectory}
@@ -64,33 +68,87 @@ import com.openexchange.realtime.packet.ID;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ResourceDirectory implements EventHandler {
-    
-    private static final String RESOURCE_MAP = "realtime-resources-0";
-    
-    public Member lookupMember(ID id) {
-        HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
-        IMap<ID, Member> idMap = hazelcast.getMap(RESOURCE_MAP);
-        return idMap.get(id);
+
+    private static Log LOG = LogFactory.getLog(ResourceDirectory.class);
+
+    private final String mapName;
+
+    /**
+     * Initializes a new {@link ResourceDirectory}.
+     */
+    public ResourceDirectory(String resourceDirectoryName) {
+        super();
+        this.mapName = resourceDirectoryName;
+    }
+
+    /**
+     * Looks up the member node hosting the supplied ID.
+     *
+     * @param id The ID to lookup
+     * @return The member, or <code>null</code> if not found
+     * @throws OXException
+     */
+    public Member lookupMember(ID id) throws OXException {
+        return getDirectory().get(id);
+    }
+
+    /**
+     * Gets a value indicating whether the directory contains an ID or not.
+     *
+     * @param id The ID
+     * @return <code>true</code> if there is an entry for the supplied ID, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    public boolean contains(ID id) throws OXException {
+        return getDirectory().containsKey(id);
     }
 
     @Override
     public void handleEvent(Event event) {
         String topic = event.getTopic();
         Object idProp = event.getProperty(ResourceRegistry.ID_PROPERTY);
-        HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
-        if (topic.equals(ResourceRegistry.TOPIC_REGISTERED)) {
-            if (idProp != null) {
-                ID id = (ID) idProp;
-                IMap<ID, Member> idMap = hazelcast.getMap(RESOURCE_MAP);
-                idMap.put(id, hazelcast.getCluster().getLocalMember());
-            }
-        } else if (topic.equals(ResourceRegistry.TOPIC_UNREGISTERED)) {
-            if (idProp != null) {
-                ID id = (ID) idProp;
-                IMap<ID, Member> idMap = hazelcast.getMap(RESOURCE_MAP);
-                idMap.remove(id);
-            }
+        if (null == idProp || false == ID.class.isInstance(idProp)) {
+            LOG.warn("Ignoring event without ID: " + event);
+            return;
         }
+        ID id = (ID) idProp;
+        try {
+            if (topic.equals(ResourceRegistry.TOPIC_REGISTERED)) {
+                put(id);
+            } else if (topic.equals(ResourceRegistry.TOPIC_UNREGISTERED)) {
+                remove(id);
+            }
+        } catch (OXException e) {
+            LOG.error("Error handling event", e);
+        }
+    }
+
+    private void put(ID id) throws OXException {
+        getDirectory().set(id, getLocalMember(), 0, TimeUnit.SECONDS);
+    }
+
+    private Member remove(ID id) throws OXException {
+        return getDirectory().remove(id);
+    }
+
+    private IMap<ID, Member> getDirectory() throws OXException {
+        try {
+            HazelcastInstance hazelcastInstance = HazelcastAccess.getHazelcastInstance();
+            if (null == hazelcastInstance || false == hazelcastInstance.getLifecycleService().isRunning()) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
+            }
+            return hazelcastInstance.getMap(mapName);
+        } catch (RuntimeException e) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName(), e);
+        }
+    }
+
+    private static Member getLocalMember() throws OXException {
+        HazelcastInstance hazelcastInstance = HazelcastAccess.getHazelcastInstance();
+        if (null == hazelcastInstance || false == hazelcastInstance.getLifecycleService().isRunning()) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
+        }
+        return hazelcastInstance.getCluster().getLocalMember();
     }
 
 }

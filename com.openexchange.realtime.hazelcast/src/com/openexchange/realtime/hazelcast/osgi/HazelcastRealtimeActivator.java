@@ -49,11 +49,19 @@
 
 package com.openexchange.realtime.hazelcast.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.hazelcast.config.Config;
+import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.log.LogFactory;
@@ -64,6 +72,7 @@ import com.openexchange.realtime.ResourceRegistry;
 import com.openexchange.realtime.hazelcast.Services;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.channel.HazelcastChannel;
+import com.openexchange.realtime.hazelcast.channel.ResourceDirectory;
 
 /**
  * {@link HazelcastRealtimeActivator}
@@ -92,15 +101,24 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
             track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
 
                 private volatile ServiceRegistration<Channel> channelRegistration;
+                private volatile ServiceRegistration<EventHandler> eventHandlerRegistration;
 
                 @Override
                 public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
+                    HazelcastInstance hazelcastInstance = context.getService(reference);
+                    HazelcastAccess.setHazelcastInstance(hazelcastInstance);
+                    /*
+                     * create & register event handler
+                     */
+                    Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+                    properties.put(EventConstants.EVENT_TOPIC,
+                        new String[] { ResourceRegistry.TOPIC_REGISTERED, ResourceRegistry.TOPIC_UNREGISTERED });
+                    ResourceDirectory directory = new ResourceDirectory(discoverResourceDirectoryName(hazelcastInstance.getConfig()));
+                    eventHandlerRegistration = context.registerService(EventHandler.class, directory, properties);
                     /*
                      * create & register channel
                      */
-                    HazelcastInstance hazelcastInstance = context.getService(reference);
-                    HazelcastAccess.setHazelcastInstance(hazelcastInstance);
-                    channelRegistration = context.registerService(Channel.class, new HazelcastChannel(), null);
+                    channelRegistration = context.registerService(Channel.class, new HazelcastChannel(directory), null);
                     return hazelcastInstance;
                 }
 
@@ -119,6 +137,14 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
                         channelRegistration.unregister();
                         this.channelRegistration = null;
                     }
+                    /*
+                     * remove event handler registration
+                     */
+                    ServiceRegistration<EventHandler> eventHandlerRegistration = this.eventHandlerRegistration;
+                    if (null != eventHandlerRegistration) {
+                        eventHandlerRegistration.unregister();
+                        this.eventHandlerRegistration = null;
+                    }
                     context.ungetService(reference);
                     HazelcastAccess.setHazelcastInstance(null);
                 }
@@ -132,6 +158,27 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         LOG.info("Stopping bundle: " + getClass().getCanonicalName());
         super.stopBundle();
         Services.setServiceLookup(null);
+    }
+
+    /**
+     * Discovers the resourceDirectory map name from the supplied hazelcast configuration.
+     *
+     * @param config The config object
+     * @return The resourceDirectory map name
+     * @throws IllegalStateException
+     */
+    private static String discoverResourceDirectoryName(Config config) throws IllegalStateException {
+        Map<String, MapConfig> mapConfigs = config.getMapConfigs();
+        if (null != mapConfigs && 0 < mapConfigs.size()) {
+            for (String mapName : mapConfigs.keySet()) {
+                if (mapName.startsWith("resourceDirectory-")) {
+                    LOG.info("Using distributed map '" + mapName + "'.");
+                    return mapName;
+                }
+            }
+        }
+        String msg = "No distributed resourceDirectory map found in hazelcast configuration";
+        throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR));
     }
 
 }

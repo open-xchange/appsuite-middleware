@@ -58,11 +58,11 @@ import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.ResourceRegistry;
-import com.openexchange.realtime.hazelcast.Services;
+import com.openexchange.realtime.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.ElementPath;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -73,11 +73,19 @@ import com.openexchange.tools.session.ServerSession;
 public class HazelcastChannel implements Channel {
 
     private static Log LOG = LogFactory.getLog(HazelcastChannel.class);
-    private static final int PRIORTIY = 120000000;
+    private static final int PRIORTIY = 12;
     private static final String PROTOCOL = "hz";
 
-    public HazelcastChannel() {
+    private final ResourceDirectory directory;
+
+    /**
+     * Initializes a new {@link HazelcastChannel}.
+     *
+     * @param directory The resource directory used for ID lookups
+     */
+    public HazelcastChannel(ResourceDirectory directory) {
         super();
+        this.directory = directory;
     }
 
     @Override
@@ -97,7 +105,7 @@ public class HazelcastChannel implements Channel {
 
     @Override
     public boolean isConnected(ID id, ServerSession session) throws OXException {
-        return Services.getService(ResourceRegistry.class).contains(id) || 1 == 1;
+        return directory.contains(id);
     }
 
     @Override
@@ -107,17 +115,15 @@ public class HazelcastChannel implements Channel {
         try {
             task.get();
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
+            throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e, "Execution interrupted");
         } catch (ExecutionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            ThreadPools.launderThrowable(e, OXException.class);
         }
     }
 
-    private Member getReceiver(ID id) {
-        //TODO: use resource registry
-        return HazelcastAccess.getHazelcastInstance().getCluster().getLocalMember();
+    private Member getReceiver(ID id) throws OXException {
+        return directory.lookupMember(id);
     }
 
 }
