@@ -18,3 +18,7 @@ mox/subscribedFolders/mail:
 
 mox/defaultContactStoreFolder:
     protected: true
+
+mox/config/appointmentDays:
+    protected: false
+
