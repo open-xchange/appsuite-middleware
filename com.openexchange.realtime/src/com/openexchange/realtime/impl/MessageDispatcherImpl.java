@@ -94,7 +94,7 @@ public class MessageDispatcherImpl implements MessageDispatcher {
     /**
      * Choose a channel based on the following properties:
      * <ol>
-     * <li><b>Protocol</b>: Check the full id of the recipient for the protcol used to address him and choose a channel able to handle that
+     * <li><b>Protocol</b>: Check the full id of the recipient for the protocol used to address him and choose a channel able to handle that
      * protocol</li>
      * <li><b>Priority and Capabilities</b>: Get the preferred channel that can handle the Stanza if no protocol is given</li>
      * </ol>
@@ -108,21 +108,23 @@ public class MessageDispatcherImpl implements MessageDispatcher {
         Channel channel = null;
         ID to = stanza.getTo();
         String protocol = to.getProtocol();
-
+        Set<ElementPath> namespaces = new HashSet<ElementPath>(stanza.getElementPaths());
+        
         if (protocol != null) { // Choose channel based on protocol
             channel = channels.get(protocol);
-            if (channel != null) {
+            if (channel != null && channel.canHandle(namespaces, to, session)) {
                 return channel;
             }
-        } else { // Choose channel based on priority and capabilities
-            Set<ElementPath> namespaces = new HashSet<ElementPath>(stanza.getElementPaths());
-            for (Channel c : channels.values()) {
-                // no channel chosen yet, or current channels priority is lower -> replace with better suited channel
-                if ((channel == null || channel.getPriority() < c.getPriority()) && c.canHandle(namespaces, to, session)) {
-                    channel = c;
-                }
+        }
+        
+        channel = null;
+        for (Channel c : channels.values()) { // Choose channel based on priority and capabilities
+            // no channel chosen yet, or current channels priority is lower -> replace with better suited channel
+            if ((channel == null || channel.getPriority() < c.getPriority()) && c.canHandle(namespaces, to, session)) {
+                channel = c;
             }
         }
+            
         return channel;
     }
 
