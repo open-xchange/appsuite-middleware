@@ -52,10 +52,8 @@ package com.openexchange.realtime.hazelcast.channel;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import com.hazelcast.core.DistributedTask;
-import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
@@ -75,18 +73,8 @@ import com.openexchange.tools.session.ServerSession;
 public class HazelcastChannel implements Channel {
 
     private static Log LOG = LogFactory.getLog(HazelcastChannel.class);
-    private static final AtomicReference<HazelcastInstance> REFERENCE = new AtomicReference<HazelcastInstance>();
     private static final int PRIORTIY = 120000000;
     private static final String PROTOCOL = "hz";
-
-    /**
-     * Sets specified {@link HazelcastInstance}.
-     *
-     * @param hazelcast The {@link HazelcastInstance}
-     */
-    public static void setHazelcastInstance(HazelcastInstance hazelcast) {
-        REFERENCE.set(hazelcast);
-    }
 
     public HazelcastChannel() {
         super();
@@ -115,7 +103,7 @@ public class HazelcastChannel implements Channel {
     @Override
     public void send(Stanza stanza, ServerSession session) throws OXException {
         FutureTask<Void> task = new DistributedTask<Void>(new StanzaDispatcher(stanza), getReceiver(stanza.getTo()));
-        REFERENCE.get().getExecutorService().execute(task);
+        HazelcastAccess.getHazelcastInstance().getExecutorService().execute(task);
         try {
             task.get();
         } catch (InterruptedException e) {
@@ -129,7 +117,7 @@ public class HazelcastChannel implements Channel {
 
     private Member getReceiver(ID id) {
         //TODO: use resource registry
-        return REFERENCE.get().getCluster().getLocalMember();
+        return HazelcastAccess.getHazelcastInstance().getCluster().getLocalMember();
     }
 
 }

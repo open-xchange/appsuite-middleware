@@ -62,6 +62,7 @@ import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.ResourceRegistry;
 import com.openexchange.realtime.hazelcast.Services;
+import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.channel.HazelcastChannel;
 
 /**
@@ -98,7 +99,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
                      * create & register channel
                      */
                     HazelcastInstance hazelcastInstance = context.getService(reference);
-                    HazelcastChannel.setHazelcastInstance(hazelcastInstance);
+                    HazelcastAccess.setHazelcastInstance(hazelcastInstance);
                     channelRegistration = context.registerService(Channel.class, new HazelcastChannel(), null);
                     return hazelcastInstance;
                 }
@@ -119,7 +120,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
                         this.channelRegistration = null;
                     }
                     context.ungetService(reference);
-                    HazelcastChannel.setHazelcastInstance(null);
+                    HazelcastAccess.setHazelcastInstance(null);
                 }
             });
             openTrackers();

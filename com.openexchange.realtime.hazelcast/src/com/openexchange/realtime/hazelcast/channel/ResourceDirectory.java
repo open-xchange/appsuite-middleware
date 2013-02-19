@@ -47,69 +47,41 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.hazelcast.channel;
 
-import com.openexchange.exception.OXException;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
+import com.hazelcast.core.Member;
+import com.openexchange.realtime.ResourceRegistry;
 import com.openexchange.realtime.packet.ID;
 
 
 /**
- * {@link ResourceRegistry}
+ * {@link ResourceDirectory}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface ResourceRegistry {
+public class ResourceDirectory implements EventHandler {
     
-    /**
-     * The topic for events that notify about resource registrations.
-     */
-    String TOPIC_REGISTERED = "com/openexchange/realtime/RESOURCE_REGISTERED";
+    private static final String RESOURCE_MAP = "realtime-resources-0";
     
-    /**
-     * The topic for events that notify about resource unregistrations.
-     */
-    String TOPIC_UNREGISTERED = "com/openexchange/realtime/RESOURCE_UNREGISTERED";
-    
-    /**
-     * The key to receive the affected ID from an events properties.
-     */
-    String ID_PROPERTY = "com.openexchange.realtime.ID";
-    
-    /**
-     * Registers a resource at the registry, so that the result of 
-     * {@link #contains(ID)} returns <code>true</code>.<br>
-     * <br>
-     * The given {@link ID} must contain a valid resource identifier.
-     *
-     * @return <code>false</code> if the id was already registered, otherwise <code>true</code>.
-     * @param id The {@link ID} that identifies the resource.
-     * @throws OXException
-     */
-    boolean register(ID id) throws OXException;
-    
-    /**
-     * Removes a resource from the registry. A subsequent call of 
-     * {@link #contains(ID)} will return <code>false</code>.<br>
-     * <br>
-     * The given {@link ID} must contain a valid resource identifier.
-     *
-     * @return <code>false</code> if the registry did not contain the given id. Otherwise <code>true</code>.
-     * @param id The {@link ID} that identifies the resource.
-     * @throws OXException
-     */
-    boolean unregister(ID id) throws OXException;
-    
-    /**
-     * Returns <code>true</code> if the given ID was registered at this registry.
-     * Otherwise <code>false</code> is returned.
-     *
-     * @param id The {@link ID} that identifies the resource.
-     */
-    boolean contains(ID id);
-    
-    /**
-     * Clears the whole registry.
-     */
-    void clear();
+    public Member lookupMember(ID id) {
+        return null;
+    }
+
+    @Override
+    public void handleEvent(Event event) {
+        String topic = event.getTopic();
+        Object idProp = event.getProperty(ResourceRegistry.ID_PROPERTY);
+        if (topic.equals(ResourceRegistry.TOPIC_REGISTERED)) {
+            if (idProp != null) {
+                ID id = (ID) idProp;
+            }
+        } else if (topic.equals(ResourceRegistry.TOPIC_UNREGISTERED)) {
+            if (idProp != null) {
+                ID id = (ID) idProp;
+            }
+        }
+    }
 
 }

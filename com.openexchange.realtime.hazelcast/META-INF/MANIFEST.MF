@@ -20,4 +20,5 @@ Import-Package: com.hazelcast.core,
  com.openexchange.tools.session,
  org.apache.commons.logging,
  org.osgi.framework,
+ org.osgi.service.event,
  org.osgi.util.tracker
