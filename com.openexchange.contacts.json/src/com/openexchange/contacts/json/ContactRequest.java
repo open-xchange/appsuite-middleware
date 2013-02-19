@@ -355,7 +355,7 @@ public class ContactRequest {
     }
 
     public int[] getColumns() throws OXException {
-        return checkOrInsertLastModified(removeVirtual(RequestTools.getColumnsAsIntArray(request, "columns")));
+        return checkOrInsertLastModified(removeVirtual(RequestTools.getColumnsAsIntArray(request)));
     }
 
     public int getSort() throws OXException {
