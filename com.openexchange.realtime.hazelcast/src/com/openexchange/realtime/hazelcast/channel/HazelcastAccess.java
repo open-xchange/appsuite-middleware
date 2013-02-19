@@ -47,69 +47,27 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.hazelcast.channel;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.ID;
+import java.util.concurrent.atomic.AtomicReference;
+import com.hazelcast.core.HazelcastInstance;
 
 
 /**
- * {@link ResourceRegistry}
+ * {@link HazelcastAccess}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface ResourceRegistry {
+public class HazelcastAccess {
     
-    /**
-     * The topic for events that notify about resource registrations.
-     */
-    String TOPIC_REGISTERED = "com/openexchange/realtime/RESOURCE_REGISTERED";
+    private static AtomicReference<HazelcastInstance> REFERENCE = new AtomicReference<HazelcastInstance>();
     
-    /**
-     * The topic for events that notify about resource unregistrations.
-     */
-    String TOPIC_UNREGISTERED = "com/openexchange/realtime/RESOURCE_UNREGISTERED";
-    
-    /**
-     * The key to receive the affected ID from an events properties.
-     */
-    String ID_PROPERTY = "com.openexchange.realtime.ID";
-    
-    /**
-     * Registers a resource at the registry, so that the result of 
-     * {@link #contains(ID)} returns <code>true</code>.<br>
-     * <br>
-     * The given {@link ID} must contain a valid resource identifier.
-     *
-     * @return <code>false</code> if the id was already registered, otherwise <code>true</code>.
-     * @param id The {@link ID} that identifies the resource.
-     * @throws OXException
-     */
-    boolean register(ID id) throws OXException;
-    
-    /**
-     * Removes a resource from the registry. A subsequent call of 
-     * {@link #contains(ID)} will return <code>false</code>.<br>
-     * <br>
-     * The given {@link ID} must contain a valid resource identifier.
-     *
-     * @return <code>false</code> if the registry did not contain the given id. Otherwise <code>true</code>.
-     * @param id The {@link ID} that identifies the resource.
-     * @throws OXException
-     */
-    boolean unregister(ID id) throws OXException;
-    
-    /**
-     * Returns <code>true</code> if the given ID was registered at this registry.
-     * Otherwise <code>false</code> is returned.
-     *
-     * @param id The {@link ID} that identifies the resource.
-     */
-    boolean contains(ID id);
-    
-    /**
-     * Clears the whole registry.
-     */
-    void clear();
+    public static void setHazelcastInstance(HazelcastInstance hazelcast) {
+        REFERENCE.set(hazelcast);
+    }
+
+    public static HazelcastInstance getHazelcastInstance() {
+        return REFERENCE.get();
+    }
 
 }

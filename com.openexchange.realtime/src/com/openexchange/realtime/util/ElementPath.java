@@ -49,13 +49,17 @@
 
 package com.openexchange.realtime.util;
 
+import java.io.Serializable;
+
 /**
  * {@link ElementPaths} - Identifies elements in a namespace.
  * Structured after Javas Package.Class namespace scheme <code>PathRoot.PathNode1.PathNode2.Element</code>.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class ElementPath {
+public class ElementPath implements Serializable {
+
+    private static final long serialVersionUID = -3227354270593651700L;
 
     private String namespace = "";
 

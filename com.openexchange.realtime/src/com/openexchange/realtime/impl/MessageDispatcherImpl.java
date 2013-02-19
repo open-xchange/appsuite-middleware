@@ -49,9 +49,12 @@
 
 package com.openexchange.realtime.impl;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
@@ -77,9 +80,8 @@ public class MessageDispatcherImpl implements MessageDispatcher {
 
     @Override
     public void send(final Stanza stanza, final ServerSession session) throws OXException {
-        Channel channel = chooseChannel(stanza, session);
-
-        if (channel == null) {
+        SortedSet<Channel> chosenChannels = chooseChannels(stanza, session);
+        if (chosenChannels.isEmpty()) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Couldn't find appropriate channel for sending stanza");
             }
@@ -88,13 +90,16 @@ public class MessageDispatcherImpl implements MessageDispatcher {
             // throw RealtimeExceptionCodes.NO_APPROPRIATE_CHANNEL.create(stanza.getTo().toString(), stanza);
         }
 
-        channel.send(stanza, session);
+        for (Channel channel : chosenChannels) {
+            // TODO: It might not be correct to send the message to all channels. Maybe we have to decide this by Stanza.
+            channel.send(stanza, session);
+        }
     }
 
     /**
      * Choose a channel based on the following properties:
      * <ol>
-     * <li><b>Protocol</b>: Check the full id of the recipient for the protcol used to address him and choose a channel able to handle that
+     * <li><b>Protocol</b>: Check the full id of the recipient for the protocol used to address him and choose a channel able to handle that
      * protocol</li>
      * <li><b>Priority and Capabilities</b>: Get the preferred channel that can handle the Stanza if no protocol is given</li>
      * </ol>
@@ -104,26 +109,56 @@ public class MessageDispatcherImpl implements MessageDispatcher {
      * @return Null or the chosen channel that is able to handle the stanza.
      * @throws OXException If the lookup of a channel fails for any reason
      */
-    private Channel chooseChannel(Stanza stanza, ServerSession session) throws OXException {
-        Channel channel = null;
+    protected SortedSet<Channel> chooseChannels(Stanza stanza, ServerSession session) throws OXException {
         ID to = stanza.getTo();
-        String protocol = to.getProtocol();
-
-        if (protocol != null) { // Choose channel based on protocol
-            channel = channels.get(protocol);
-            if (channel != null) {
-                return channel;
-            }
-        } else { // Choose channel based on priority and capabilities
-            Set<ElementPath> namespaces = new HashSet<ElementPath>(stanza.getElementPaths());
-            for (Channel c : channels.values()) {
-                // no channel chosen yet, or current channels priority is lower -> replace with better suited channel
-                if ((channel == null || channel.getPriority() < c.getPriority()) && c.canHandle(namespaces, to, session)) {
-                    channel = c;
+        Set<Channel> allChannels = new HashSet<Channel>(channels.values());
+        
+        final String protocol = to.getProtocol();
+        SortedSet<Channel> chosen = new TreeSet<Channel>(new Comparator<Channel>() {
+            @Override
+            public int compare(Channel c1, Channel c2) {
+                if (protocol == null) {
+                    return comparePriority(c1, c2);
+                } else if (c1.getProtocol().equals(protocol) && c2.getProtocol().equals(protocol)) {
+                    return comparePriority(c1, c2);
+                } else if (c1.getProtocol().equals(protocol)) {
+                    return -1;
+                } else if (c2.getProtocol().equals(protocol)) {
+                    return 1;
+                } else {
+                    return comparePriority(c1, c2);
                 }
             }
+            
+            private int comparePriority(Channel c1, Channel c2) {
+                int p1 = c1.getPriority();
+                int p2 = c2.getPriority();
+                if (p1 >= p2) {
+                    if (p1 == p2) {
+                        return 0;
+                    }
+                    return -1;
+                }
+                return 1;
+            }
+        });
+        
+        Set<ElementPath> namespaces = new HashSet<ElementPath>(stanza.getElementPaths());
+        if (protocol != null) { // Choose channel based on protocol
+            Channel channel = channels.get(protocol);
+            if (channel != null && channel.canHandle(namespaces, to, session)) {
+                chosen.add(channel);
+                allChannels.remove(channel);
+            }
         }
-        return channel;
+
+        for (Channel channel : allChannels) { // Choose channels based on priority
+            if (channel.canHandle(namespaces, to, session)) {
+                chosen.add(channel);
+            }
+        }
+            
+        return chosen;
     }
 
     public void addChannel(final Channel channel) {
@@ -136,7 +171,7 @@ public class MessageDispatcherImpl implements MessageDispatcher {
 
     @Override
     public boolean canDeliverInstantly(Stanza stanza, ServerSession session) throws OXException {
-        return chooseChannel(stanza, session) != null;
+        return !chooseChannels(stanza, session).isEmpty();
     }
 
 }

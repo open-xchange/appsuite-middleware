@@ -76,6 +76,8 @@ import com.openexchange.realtime.util.ElementPath;
 
 public class Presence extends Stanza {
 
+    private static final long serialVersionUID = -1947763158000197160L;
+
     /**
      * {@link Type} - Specifies the Presence Type
      * <ol>
@@ -107,22 +109,38 @@ public class Presence extends Stanza {
     private static final ArrayList<ElementPath> defaultElements = new ArrayList<ElementPath>();
 
     /** Predicate to filter extension elements from {@link Stanza#payloads} */
-    private final Predicate<PayloadTree> defaultsPredicate = new Predicate<PayloadTree>() {
-
-        @Override
-        public boolean apply(PayloadTree input) {
-            return defaultElements.contains(input.getElementPath());
-        }
-    };
+    private transient Predicate<PayloadTree> defaultsPredicate = null;
 
     /** Predicate to filter default elements from {@link Stanza#payloads} */
-    private final Predicate<PayloadTree> extensionsPredicate = new Predicate<PayloadTree>() {
+    private transient Predicate<PayloadTree> extensionsPredicate = null;
+    
+    private Predicate<PayloadTree> getDefaultsPredicate() {
+        if (defaultsPredicate == null) {
+            defaultsPredicate = new Predicate<PayloadTree>() {
 
-        @Override
-        public boolean apply(PayloadTree input) {
-            return !defaultElements.contains(input.getElementPath());
+                @Override
+                public boolean apply(PayloadTree input) {
+                    return defaultElements.contains(input.getElementPath());
+                }
+            };
         }
-    };
+        
+        return defaultsPredicate;
+    }
+    
+    private Predicate<PayloadTree> getExtensionsPredicate() {
+        if (extensionsPredicate == null) {
+            extensionsPredicate = new Predicate<PayloadTree>() {
+
+                @Override
+                public boolean apply(PayloadTree input) {
+                    return !defaultElements.contains(input.getElementPath());
+                }
+            };
+        }
+        
+        return extensionsPredicate;
+    }
 
     /**
      * Initializes a new {@link Presence}.
@@ -280,7 +298,7 @@ public class Presence extends Stanza {
      * @return The default payloads as defined in the Presence specification.
      */
     public Collection<PayloadTree> getDefaultPayloads() {
-        return filterPayloads(defaultsPredicate);
+        return filterPayloads(getDefaultsPredicate());
     }
 
     /**
@@ -289,7 +307,7 @@ public class Presence extends Stanza {
      * @return Extension payloads that aren't defined in the Presence specification and not accessible via getters and setters.
      */
     public Collection<PayloadTree> getExtensions() {
-        return filterPayloads(extensionsPredicate);
+        return filterPayloads(getExtensionsPredicate());
     }
 
     /**

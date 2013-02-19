@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.payload;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -61,7 +62,9 @@ import com.openexchange.realtime.util.ElementPath;
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class PayloadTreeNode implements VisitablePayload {
+public class PayloadTreeNode implements VisitablePayload, Serializable {
+
+    private static final long serialVersionUID = -4402820599792777503L;
 
     private PayloadTreeNode parent;
 

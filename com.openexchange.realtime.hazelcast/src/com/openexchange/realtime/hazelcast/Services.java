@@ -47,69 +47,73 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.hazelcast;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.ID;
-
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ResourceRegistry}
+ * {@link Services} - The static service lookup.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ResourceRegistry {
-    
+public final class Services {
+
     /**
-     * The topic for events that notify about resource registrations.
+     * Initializes a new {@link Services}.
      */
-    String TOPIC_REGISTERED = "com/openexchange/realtime/RESOURCE_REGISTERED";
-    
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
     /**
-     * The topic for events that notify about resource unregistrations.
-     */
-    String TOPIC_UNREGISTERED = "com/openexchange/realtime/RESOURCE_UNREGISTERED";
-    
-    /**
-     * The key to receive the affected ID from an events properties.
-     */
-    String ID_PROPERTY = "com.openexchange.realtime.ID";
-    
-    /**
-     * Registers a resource at the registry, so that the result of 
-     * {@link #contains(ID)} returns <code>true</code>.<br>
-     * <br>
-     * The given {@link ID} must contain a valid resource identifier.
+     * Sets the service lookup.
      *
-     * @return <code>false</code> if the id was already registered, otherwise <code>true</code>.
-     * @param id The {@link ID} that identifies the resource.
-     * @throws OXException
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    boolean register(ID id) throws OXException;
-    
+    public static void setServiceLookup(ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
+
     /**
-     * Removes a resource from the registry. A subsequent call of 
-     * {@link #contains(ID)} will return <code>false</code>.<br>
-     * <br>
-     * The given {@link ID} must contain a valid resource identifier.
+     * Gets the service lookup.
      *
-     * @return <code>false</code> if the registry did not contain the given id. Otherwise <code>true</code>.
-     * @param id The {@link ID} that identifies the resource.
-     * @throws OXException
+     * @return The service lookup or <code>null</code>
      */
-    boolean unregister(ID id) throws OXException;
-    
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
     /**
-     * Returns <code>true</code> if the given ID was registered at this registry.
-     * Otherwise <code>false</code> is returned.
+     * Gets the service of specified type
      *
-     * @param id The {@link ID} that identifies the resource.
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    boolean contains(ID id);
-    
+    public static <S extends Object> S getService(Class<? extends S> clazz) {
+        com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException(
+                "Missing ServiceLookup instance. Bundle \"com.openexchange.realtime.hazelcast\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
     /**
-     * Clears the whole registry.
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
      */
-    void clear();
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
+    }
 
 }

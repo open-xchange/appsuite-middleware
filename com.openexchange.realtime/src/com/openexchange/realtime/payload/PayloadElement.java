@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.payload;
 
+import java.io.Serializable;
 import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
 import com.openexchange.realtime.util.ElementPath;
 
@@ -61,7 +62,9 @@ import com.openexchange.realtime.util.ElementPath;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 //TODO: Make cloneable or offer immutable copy
-public class PayloadElement implements VisitablePayload {
+public class PayloadElement implements VisitablePayload, Serializable {
+
+    private static final long serialVersionUID = 2523897376910073662L;
 
     // Current format of the Payload e.g. json, xml or some Class.getSimpleName()
     private String format = "";

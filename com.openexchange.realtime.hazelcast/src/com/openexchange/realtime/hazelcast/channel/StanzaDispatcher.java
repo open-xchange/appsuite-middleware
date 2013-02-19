@@ -47,69 +47,44 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.hazelcast.channel;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.ID;
-
+import java.io.Serializable;
+import java.util.concurrent.Callable;
+import com.openexchange.realtime.MessageDispatcher;
+import com.openexchange.realtime.hazelcast.Services;
+import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link ResourceRegistry}
+ * {@link StanzaDispatcher}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ResourceRegistry {
-    
+public class StanzaDispatcher implements Callable<Void>, Serializable {
+
+    private final Stanza stanza;
+
     /**
-     * The topic for events that notify about resource registrations.
+     * Initializes a new {@link StanzaDispatcher}.
      */
-    String TOPIC_REGISTERED = "com/openexchange/realtime/RESOURCE_REGISTERED";
-    
+    public StanzaDispatcher() {
+        this(null);
+    }
+
     /**
-     * The topic for events that notify about resource unregistrations.
-     */
-    String TOPIC_UNREGISTERED = "com/openexchange/realtime/RESOURCE_UNREGISTERED";
-    
-    /**
-     * The key to receive the affected ID from an events properties.
-     */
-    String ID_PROPERTY = "com.openexchange.realtime.ID";
-    
-    /**
-     * Registers a resource at the registry, so that the result of 
-     * {@link #contains(ID)} returns <code>true</code>.<br>
-     * <br>
-     * The given {@link ID} must contain a valid resource identifier.
+     * Initializes a new {@link StanzaDispatcher}.
      *
-     * @return <code>false</code> if the id was already registered, otherwise <code>true</code>.
-     * @param id The {@link ID} that identifies the resource.
-     * @throws OXException
+     * @param stanza The stanza to dispatch
      */
-    boolean register(ID id) throws OXException;
-    
-    /**
-     * Removes a resource from the registry. A subsequent call of 
-     * {@link #contains(ID)} will return <code>false</code>.<br>
-     * <br>
-     * The given {@link ID} must contain a valid resource identifier.
-     *
-     * @return <code>false</code> if the registry did not contain the given id. Otherwise <code>true</code>.
-     * @param id The {@link ID} that identifies the resource.
-     * @throws OXException
-     */
-    boolean unregister(ID id) throws OXException;
-    
-    /**
-     * Returns <code>true</code> if the given ID was registered at this registry.
-     * Otherwise <code>false</code> is returned.
-     *
-     * @param id The {@link ID} that identifies the resource.
-     */
-    boolean contains(ID id);
-    
-    /**
-     * Clears the whole registry.
-     */
-    void clear();
+    public StanzaDispatcher(Stanza stanza) {
+        super();
+        this.stanza = stanza;
+    }
+
+    @Override
+    public Void call() throws Exception {
+        Services.getService(MessageDispatcher.class).send(stanza, null);
+        return null;
+    }
 
 }

@@ -20,6 +20,7 @@ Import-Package: com.google.common.base,
  org.apache.commons.logging,
  org.cliffc.high_scale_lib,
  org.osgi.framework,
+ org.osgi.service.event;version="1.3.0",
  sun.misc
 Export-Package: com.openexchange.realtime,
  com.openexchange.realtime.packet,

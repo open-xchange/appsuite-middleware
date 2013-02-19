@@ -47,100 +47,88 @@
  *
  */
 
-package com.openexchange.realtime.impl;
+package com.openexchange.realtime.hazelcast.channel;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import org.apache.commons.logging.Log;
+import com.hazelcast.core.DistributedTask;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
+import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.RealtimeExceptionCodes;
-import com.openexchange.realtime.ResourceRegistry;
 import com.openexchange.realtime.packet.ID;
-
+import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.ElementPath;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ResourceRegistryImpl}
+ * {@link HazelcastChannel}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ResourceRegistryImpl implements ResourceRegistry {
-    
-    private final EventAdmin eventAdmin;
-    
-    private final Set<ID> ids;
-    
-    public ResourceRegistryImpl(EventAdmin eventAdmin) {
+public class HazelcastChannel implements Channel {
+
+    private static Log LOG = LogFactory.getLog(HazelcastChannel.class);
+    private static final int PRIORTIY = 12;
+    private static final String PROTOCOL = "hz";
+
+    private final ResourceDirectory directory;
+
+    /**
+     * Initializes a new {@link HazelcastChannel}.
+     *
+     * @param directory The resource directory used for ID lookups
+     */
+    public HazelcastChannel(ResourceDirectory directory) {
         super();
-        this.eventAdmin = eventAdmin;
-        ids = Collections.synchronizedSet(new HashSet<ID>());
+        this.directory = directory;
     }
 
     @Override
-    public boolean register(ID id) throws OXException {
-        if (id == null) {
-            throw new IllegalArgumentException("id was null.");
-        }
-        
-        String resource = id.getResource();
-        if (isInvalid(resource)) {
-            throw RealtimeExceptionCodes.INVALID_ID.create();
-        }
-        
-        if (ids.add(id)) {
-            Event event = new Event(TOPIC_REGISTERED, Collections.singletonMap(ID_PROPERTY, id));
-            eventAdmin.postEvent(event);
-            return true;
-        }
-        
-        return false;
+    public String getProtocol() {
+        return PROTOCOL;
     }
 
     @Override
-    public boolean unregister(ID id) throws OXException {
-        if (id == null) {
-            throw new IllegalArgumentException("id was null.");
-        }
-        
-        String resource = id.getResource();
-        if (isInvalid(resource)) {
-            throw RealtimeExceptionCodes.INVALID_ID.create();
-        }
-        
-        if (ids.remove(id)) {
-            Event event = new Event(TOPIC_UNREGISTERED, Collections.singletonMap(ID_PROPERTY, id));
-            eventAdmin.postEvent(event);
-            return true;
-        }
-        
-        return false;
+    public boolean canHandle(Set<ElementPath> elementPaths, ID recipient, ServerSession session) throws OXException {
+        return isConnected(recipient, session);
     }
 
     @Override
-    public boolean contains(ID id) {
-        if (id == null) {
-            throw new IllegalArgumentException("id was null.");
-        }
-
-        return ids.contains(id);
+    public int getPriority() {
+        return PRIORTIY;
     }
 
     @Override
-    public void clear() {
-        Set<ID> eventIDs = new HashSet<ID>(ids);
-        ids.clear();
-        for (ID id : eventIDs) {
-            Event event = new Event(TOPIC_UNREGISTERED, Collections.singletonMap(ID_PROPERTY, id));
-            eventAdmin.postEvent(event);
+    public boolean isConnected(ID id, ServerSession session) throws OXException {
+        return directory.contains(id);
+    }
+
+    @Override
+    public void send(Stanza stanza, ServerSession session) throws OXException {
+        HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
+        Member receiver = getReceiver(stanza.getTo());
+        if (receiver != null && !receiver.equals(hazelcast.getCluster().getLocalMember())) {
+            FutureTask<Void> task = new DistributedTask<Void>(new StanzaDispatcher(stanza), receiver);
+            hazelcast.getExecutorService().execute(task);
+            try {
+                task.get();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e, "Execution interrupted");
+            } catch (ExecutionException e) {
+                ThreadPools.launderThrowable(e, OXException.class);
+            }
         }
     }
-    
-    private static boolean isInvalid(String resource) {
-        if (resource == null || resource.isEmpty()) {
-            return true;
-        }
-        
-        return false;
+
+    private Member getReceiver(ID id) throws OXException {
+        return directory.lookupMember(id);
     }
+
 }
