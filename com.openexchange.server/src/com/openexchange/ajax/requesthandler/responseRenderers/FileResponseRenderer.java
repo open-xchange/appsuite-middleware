@@ -220,9 +220,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 outputStream.write(buf, 0, read);
             }
             outputStream.flush();
-        } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final OXException e) {
+        } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         } finally {
             close(file);
@@ -246,7 +244,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             return file;
         }
         // mark stream if possible
-        final boolean markSupported = stream.markSupported();
+        final boolean markSupported = file.repetitive() ? false : stream.markSupported();
         if (markSupported) {
             stream.mark(131072); // 128KB
         }
@@ -285,12 +283,12 @@ public class FileResponseRenderer implements ResponseRenderer {
                 try {
                     stream.reset();
                     return file;
-                } catch (IOException e) {
+                } catch (Exception e) {
                     LOG.warn("Error resetting input stream", e);
                 }
             }
             LOG.error("Unable to transform image from " + file);
-            return null;
+            return file.repetitive() ? file : null;
         }
         return new FileHolder(transformed, -1, file.getContentType(), file.getName());
     }
