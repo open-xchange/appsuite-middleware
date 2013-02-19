@@ -148,9 +148,9 @@ public class FileResponseRenderer implements ResponseRenderer {
         InputStream documentData = null;
         try {
             file = transformIfImage(request, file, delivery);
-            InputStream stream = file.getStream();
+            InputStream stream = null == file ? null : file.getStream();
             if (null == stream) {
-                // React with 404
+                // Quit with 404
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found.");
                 return;
             }
@@ -240,10 +240,15 @@ public class FileResponseRenderer implements ResponseRenderer {
         /*
          * build transformations
          */
-        InputStream stream = file.getStream();
+        final InputStream stream = file.getStream();
         if (null == stream) {
             LOG.warn("(Possible) Image file misses stream data");
             return file;
+        }
+        // mark stream if possible
+        final boolean markSupported = stream.markSupported();
+        if (markSupported) {
+            stream.mark(131072); // 128KB
         }
         // start transformations: scale, rotate, ...
         ImageTransformations transformations = scaler.transfom(stream);
@@ -275,8 +280,17 @@ public class FileResponseRenderer implements ResponseRenderer {
          */
         InputStream transformed = transformations.getInputStream(file.getContentType());
         if (null == transformed) {
-            LOG.warn("Got no resulting input stream from transformation, falling back to original input");
-            return file;
+            LOG.warn("Got no resulting input stream from transformation, trying to recover original input");
+            if (markSupported) {
+                try {
+                    stream.reset();
+                    return file;
+                } catch (IOException e) {
+                    LOG.warn("Error resetting input stream", e);
+                }
+            }
+            LOG.error("Unable to transform image from " + file);
+            return null;
         }
         return new FileHolder(transformed, -1, file.getContentType(), file.getName());
     }
