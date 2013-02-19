@@ -18,3 +18,6 @@ mox/subscribedFolders/contacts:
 
 mox/subscribedFolders/mail:
     protected: false
+
+mox/config/appointmentDays:
+    protected: false
