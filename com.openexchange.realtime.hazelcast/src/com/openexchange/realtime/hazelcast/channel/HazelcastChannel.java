@@ -54,6 +54,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import org.apache.commons.logging.Log;
 import com.hazelcast.core.DistributedTask;
+import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
@@ -110,15 +111,19 @@ public class HazelcastChannel implements Channel {
 
     @Override
     public void send(Stanza stanza, ServerSession session) throws OXException {
-        FutureTask<Void> task = new DistributedTask<Void>(new StanzaDispatcher(stanza), getReceiver(stanza.getTo()));
-        HazelcastAccess.getHazelcastInstance().getExecutorService().execute(task);
-        try {
-            task.get();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e, "Execution interrupted");
-        } catch (ExecutionException e) {
-            ThreadPools.launderThrowable(e, OXException.class);
+        HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
+        Member receiver = getReceiver(stanza.getTo());
+        if (receiver != null && !receiver.equals(hazelcast.getCluster().getLocalMember())) {
+            FutureTask<Void> task = new DistributedTask<Void>(new StanzaDispatcher(stanza), receiver);
+            hazelcast.getExecutorService().execute(task);
+            try {
+                task.get();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e, "Execution interrupted");
+            } catch (ExecutionException e) {
+                ThreadPools.launderThrowable(e, OXException.class);
+            }
         }
     }
 
