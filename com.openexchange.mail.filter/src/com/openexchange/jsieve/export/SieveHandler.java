@@ -859,7 +859,7 @@ public class SieveHandler {
 
     /**
      * Old method for compatibility reasons
-     * 
+     *
      * @deprecated use {@link #parseSIEVEResponse(String, String)} instead
      */
     @Deprecated
