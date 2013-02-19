@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.hazelcast.channel;
 
+import java.io.Serializable;
 import java.util.concurrent.Callable;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.hazelcast.Services;
@@ -59,7 +60,7 @@ import com.openexchange.realtime.packet.Stanza;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class StanzaDispatcher implements Callable<Void> {
+public class StanzaDispatcher implements Callable<Void>, Serializable {
 
     private final Stanza stanza;
 
