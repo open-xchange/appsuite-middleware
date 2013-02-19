@@ -1,0 +1,31 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange message-based push bundle
+Bundle-SymbolicName: com.openexchange.push.ms
+Bundle-Version: 7.0.1
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.config,
+ com.openexchange.context,
+ com.openexchange.event,
+ com.openexchange.exception,
+ com.openexchange.folder,
+ com.openexchange.groupware,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.infostore,
+ com.openexchange.java,
+ com.openexchange.log,
+ com.openexchange.management,
+ com.openexchange.ms,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.timer,
+ com.openexchange.tools,
+ javax.management,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.service.event,
+ org.osgi.service.framework,
+ org.osgi.util.tracker
+Bundle-Activator: com.openexchange.push.ms.osgi.PushMsActivator

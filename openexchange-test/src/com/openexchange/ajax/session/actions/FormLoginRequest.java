@@ -57,6 +57,8 @@ import static com.openexchange.ajax.fields.LoginFields.CLIENT_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.LOGIN_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.PASSWORD_PARAM;
 import static com.openexchange.ajax.fields.LoginFields.VERSION_PARAM;
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.session.LoginTools;
 
@@ -68,19 +70,29 @@ import com.openexchange.ajax.session.LoginTools;
 public class FormLoginRequest extends AbstractRequest<FormLoginResponse> {
 
     public FormLoginRequest(String login, String password, String authId, String client, String version, boolean autologin) {
-        super(new Parameter[] {
-            new URLParameter(PARAMETER_ACTION, ACTION_FORMLOGIN),
-            new URLParameter(AUTHID_PARAM, authId),
-            new FieldParameter(LOGIN_PARAM, login),
-            new FieldParameter(PASSWORD_PARAM, password),
-            new FieldParameter(CLIENT_PARAM, client),
-            new FieldParameter(VERSION_PARAM, version),
-            new FieldParameter(AUTOLOGIN_PARAM, Boolean.toString(autologin))
-        });
+        super(createParameter(login, password, authId, client, version, autologin));
+    }
+
+    private static Parameter[] createParameter(String login, String password, String authId, String client, String version, boolean autologin) {
+        List<Parameter> retval = new ArrayList<Parameter>();
+        retval.add(new URLParameter(PARAMETER_ACTION, ACTION_FORMLOGIN));
+        if (null != authId) {
+            retval.add(new URLParameter(AUTHID_PARAM, authId));
+        }
+        retval.add(new FieldParameter(LOGIN_PARAM, login));
+        retval.add(new FieldParameter(PASSWORD_PARAM, password));
+        retval.add(new FieldParameter(CLIENT_PARAM, client));
+        retval.add(new FieldParameter(VERSION_PARAM, version));
+        retval.add(new FieldParameter(AUTOLOGIN_PARAM, Boolean.toString(autologin)));
+        return retval.toArray(new Parameter[retval.size()]);
+    }
+
+    public FormLoginRequest(String login, String password, String authId) {
+        this(login, password, authId, AJAXClient.class.getName(), AJAXClient.VERSION, true);
     }
 
     public FormLoginRequest(String login, String password) {
-        this(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), AJAXClient.VERSION, true);
+        this(login, password, LoginTools.generateAuthId());
     }
 
     @Override

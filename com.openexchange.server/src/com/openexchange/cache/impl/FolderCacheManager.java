@@ -50,8 +50,12 @@
 package com.openexchange.cache.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.io.Serializable;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -67,14 +71,17 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.caching.dynamic.Refresher;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FolderCacheManager} - Holds a cache for instances of {@link FolderObject}
@@ -242,6 +249,56 @@ public final class FolderCacheManager {
         @Override
         public FolderObject load() throws OXException {
             return loadFolderObjectInternal(folderId, ctx, null);
+        }
+    }
+
+    public void clearFor(final Context ctx, final boolean async) {
+        final Runnable task = new Runnable() {
+            
+            @Override
+            public void run() {
+                final int contextId = ctx.getContextId();
+                Connection con = null;
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    con = Database.get(contextId, false);
+                    stmt = con.prepareStatement("SELECT fuid FROM oxfolder_tree WHERE cid=?");
+                    stmt.setInt(1, contextId);
+                    rs = stmt.executeQuery();
+                    final TIntSet folderIds = new TIntHashSet(1024);
+                    while (rs.next()) {
+                        folderIds.add(rs.getInt(1));
+                    }
+                    DBUtils.closeSQLStuff(rs, stmt);
+                    stmt = con.prepareStatement("SELECT fuid FROM del_oxfolder_tree WHERE cid=?");
+                    stmt.setInt(1, contextId);
+                    rs = stmt.executeQuery();
+                    while (rs.next()) {
+                        folderIds.add(rs.getInt(1));
+                    }
+                    // Release resources
+                    DBUtils.closeSQLStuff(rs, stmt);
+                    rs = null;
+                    stmt = null;
+                    Database.back(contextId, false, con);
+                    con = null;
+                    // Continue
+                    removeFolderObjects(folderIds.toArray(), ctx);
+                } catch (final Exception x) {
+                    // Ignore
+                } finally {
+                    DBUtils.closeSQLStuff(rs, stmt);
+                    if (null != con) {
+                        Database.back(contextId, false, con);
+                    }
+                }
+            }
+        };
+        if (async && ThreadPools.getThreadPool() != null) {
+            ThreadPools.getThreadPool().submit(ThreadPools.task(task));
+        } else {
+            task.run();
         }
     }
 

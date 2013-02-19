@@ -286,4 +286,14 @@ public interface Session {
      */
     @Deprecated
     void setClient(String client);
+
+    /**
+     * Gets a value indicating whether the session is transient or not, i.e. the session is distributed to other nodes in the cluster
+     * or has been put into another persistent storage. Typically, very short living sessions like those created for CalDAV-/CardDAV-
+     * or InfoStore access via WebDAV are marked transient.
+     *
+     * @return <code>true</code> if the session is transient, <code>false</code>, otherwise
+     */
+    boolean isTransient();
+
 }

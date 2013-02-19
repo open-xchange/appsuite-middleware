@@ -78,6 +78,8 @@ package com.openexchange.realtime.packet;
  */
 public class IQ extends Stanza {
 
+    private static final long serialVersionUID = 7524944340523962661L;
+
     /**
      * Describes a command's type.
      */

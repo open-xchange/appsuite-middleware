@@ -175,8 +175,8 @@ public final class LoginTools {
         return parseParameter(req, LoginFields.USER_AGENT, req.getHeader(Header.USER_AGENT));
     }
 
-    public static LoginRequestImpl parseLogin(HttpServletRequest req, String login, String password, boolean strict, String defaultClient, boolean forceHTTPS) throws OXException {
-        final String authId = parseAuthId(req, strict);
+    public static LoginRequestImpl parseLogin(HttpServletRequest req, String login, String password, boolean strict, String defaultClient, boolean forceHTTPS, boolean requiredAuthId) throws OXException {
+        final String authId = parseAuthId(req, requiredAuthId);
         final String client = parseClient(req, strict, defaultClient);
         final String version;
         if (null == req.getParameter(VERSION_PARAM)) {
@@ -233,7 +233,7 @@ public final class LoginTools {
         return isWhitespace;
     }
 
-    public static LoginRequestImpl parseLogin(HttpServletRequest req, String loginParamName, boolean strict, String defaultClient, boolean forceHTTPS, boolean disableTrimLogin) throws OXException {
+    public static LoginRequestImpl parseLogin(HttpServletRequest req, String loginParamName, boolean strict, String defaultClient, boolean forceHTTPS, boolean disableTrimLogin, boolean requiredAuthId) throws OXException {
         String login = req.getParameter(loginParamName);
         if (null == login) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(loginParamName);
@@ -245,7 +245,7 @@ public final class LoginTools {
         if (null == password) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PASSWORD_PARAM);
         }
-        return parseLogin(req, login, password, strict, defaultClient, forceHTTPS);
+        return parseLogin(req, login, password, strict, defaultClient, forceHTTPS, requiredAuthId);
     }
 
     /**

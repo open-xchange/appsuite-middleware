@@ -89,6 +89,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthAccount;
@@ -284,7 +285,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 authURL,
                 callbackUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK);
         } catch (final org.scribe.exceptions.OAuthException e) {
-            throw OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+            throw handleScribeOAuthException(e);
         } catch (final Exception e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -711,7 +712,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 account.setSecret(oAuthToken.getSecret());
             }
         } catch (final org.scribe.exceptions.OAuthException e) {
-            throw OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+            throw handleScribeOAuthException(e);
         } catch (final Exception e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -1040,6 +1041,43 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static OXException handleScribeOAuthException(org.scribe.exceptions.OAuthException e) {
+        final String message = e.getMessage();
+        if (null != message) {
+            final String lcMsg = toLowerCase(message);
+            String str = "can't extract token and secret from this:";
+            int pos = lcMsg.indexOf(str);
+            if (pos > 0) {
+                return OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, message.substring(pos + str.length()));
+            }
+            str = "can't extract a token from an empty string";
+            pos = lcMsg.indexOf(str);
+            if (pos > 0) {
+                return OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, message.substring(pos));
+            }
+            str = "can't extract a token from this:";
+            pos = lcMsg.indexOf(str);
+            if (pos > 0) {
+                return OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, message.substring(pos + str.length()));
+            }
+        }
+        return OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

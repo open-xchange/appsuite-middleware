@@ -90,20 +90,6 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
     protected final DelayedExecutor.DelayQueue<Response> suspendedResponseQueue;
     private volatile HttpHandler httpHandler;
 
-    /**
-     * Web server probes
-     */
-    protected final AbstractJmxMonitoringConfig<HttpServerProbe> monitoringConfig =
-            new AbstractJmxMonitoringConfig<HttpServerProbe>(HttpServerProbe.class) {
-
-                @Override
-                public JmxObject createManagementObject() {
-                    return createJmxManagementObject();
-                }
-
-            };
-
-
     // ------------------------------------------------------------ Constructors
 
     public OXHttpServerFilter(final ServerFilterConfiguration config,
@@ -254,18 +240,6 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                 handler.onError(error);
             }
         }
-    }
-
-
-    // ---------------------------------------------------------- Public Methods
-
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JmxMonitoringConfig<HttpServerProbe> getMonitoringConfig() {
-        return monitoringConfig;
     }
 
 

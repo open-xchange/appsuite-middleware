@@ -49,17 +49,16 @@
 package com.openexchange.admin.console.context;
 
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.ServiceLoader;
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.CLIOption;
-import com.openexchange.admin.console.ServiceLoader;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleCommonInterface;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleCreateInterface;
 import com.openexchange.admin.console.exception.OXConsolePluginException;
@@ -229,21 +228,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
     }
 
     protected void setExtensionOptions(final AdminParser parser, final Class<? extends ContextConsoleCommonInterface> clazz) {
-        try {
-            this.subclasses = ServiceLoader.load(clazz);
-        } catch (final IllegalAccessException e) {
-            printError(null, null, "Error during initializing extensions: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
-            sysexit(1);
-        } catch (final InstantiationException e) {
-            printError(null, null, "Error during initializing extensions: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
-            sysexit(1);
-        } catch (final ClassNotFoundException e) {
-            printError(null, null, "Error during initializing extensions: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
-            sysexit(1);
-        } catch (final IOException e) {
-            printError(null, null, "Error during initializing extensions: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
-            sysexit(1);
-        }
+        this.subclasses = ServiceLoader.load(clazz);
 
         try {
             for (final ContextConsoleCommonInterface ctxconsole : this.subclasses) {

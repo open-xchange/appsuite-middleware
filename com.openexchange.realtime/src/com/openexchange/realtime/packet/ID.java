@@ -18,6 +18,8 @@ import java.util.regex.Pattern;
  */
 public class ID implements Serializable {
 
+    private static final long serialVersionUID = -5237507998711320109L;
+    
     private String protocol;
     private String user;
     private String context;

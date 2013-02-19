@@ -122,4 +122,9 @@ public class ITipSession implements Session {
 
 	}
 
+    @Override
+    public boolean isTransient() {
+        return false;
+    }
+
 }

@@ -456,7 +456,8 @@ public interface OXUtilInterface extends Remote {
     public void changeFilestore(final Filestore fstore, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
-     * List filestores.
+     * A method to list file stores matching some search pattern. Internally calls {@link #listFileStore(String, Credentials, boolean)} with
+     * parameter omitUsage set to <code>false</code>.
      *
      * @return Containing result objects.
      * @param search_pattern
@@ -473,6 +474,20 @@ public interface OXUtilInterface extends Remote {
      *             General RMI Exception
      */
     public Filestore[] listFilestore(final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+
+    /**
+     * A method to list file stores matching some search pattern.
+     * @param searchPattern The search pattern the file store should match to. The pattern "*" will list all file stores.
+     * @param credentials must be the master administration credentials to be allowed to list file stores.
+     * @param omitUsage <code>true</code> to not load the current file store usage from the database, which is an expensive operation
+     * because it has to load the usage of every context and summarize them up.
+     * @return an array with all configured file stores.
+     * @throws RemoteException if a general RMI problem occurs.
+     * @throws StorageException if a problem on the storage layer occurs.
+     * @throws InvalidCredentialsException if the supplied credentials do not match the master administration credentials.
+     * @throws InvalidDataException if the pattern is empty or invalid.
+     */
+    Filestore[] listFilestore(String searchPattern, Credentials credentials, boolean omitUsage) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
     /**
      * Convenience method for listing all filestores.

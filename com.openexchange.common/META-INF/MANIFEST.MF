@@ -14,6 +14,7 @@ Import-Package: javax.activation,
  javax.net,
  javax.net.ssl,
  javax.security.auth.callback,
+ javax.security.auth.x500,
  javax.security.sasl,
  javax.servlet,
  javax.servlet.http,
@@ -342,3 +343,4 @@ Export-Package: com.googlecode.concurrentlinkedhashmap,
  org.scribe.services;version="1.3.3",
  org.scribe.utils;version="1.3.3",
  org.xmlpull.v1
+Bundle-Activator: com.openexchange.common.osgi.CommonActivator

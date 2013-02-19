@@ -425,8 +425,7 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
             final UserizedFolder[] modified = new UserizedFolder[updatedList.size()];
             for (int i = 0; i < modified.length; i++) {
                 final Folder folder = updatedList.get(i);
-                modified[i] =
-                    getUserizedFolder(folder, getEffectivePermission(folder), treeId, true, true, storageParameters, realFolderStorages);
+                modified[i] = getUserizedFolder(folder, getEffectivePermission(folder), treeId, true, true, storageParameters, realFolderStorages);
             }
             /*
              * Generate array of deleted folders (if non-null)

@@ -74,8 +74,6 @@ public class UploadFileImpl implements UploadFile {
 
     private long size;
 
-    private UploadFile homonymous;
-
     /**
      * Initializes a new {@link UploadFileImpl}.
      */
@@ -224,26 +222,6 @@ public class UploadFileImpl implements UploadFile {
     @Override
     public void setTmpFile(final File tmpFile) {
         this.tmpFile = tmpFile;
-    }
-
-    /**
-     * Gets the next homonymous file.
-     *
-     * @return The next homonymous file.
-     */
-    @Override
-    public UploadFile getHomonymous() {
-        return homonymous;
-    }
-
-    /**
-     * Sets the next homonymous file.
-     *
-     * @param homonymous The next homonymous file.
-     */
-    @Override
-    public void setHomonymous(final UploadFile homonymous) {
-        this.homonymous = homonymous;
     }
 
 }

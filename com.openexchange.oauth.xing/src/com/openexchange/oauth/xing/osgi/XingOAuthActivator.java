@@ -74,6 +74,15 @@ public final class XingOAuthActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        final ConfigurationService service = getService(ConfigurationService.class);
+        if (service.getBoolProperty("com.openexchange.oauth.xing", false)) {
+            // Do nothing
+            final Log log = com.openexchange.log.Log.loggerFor(XingOAuthActivator.class);
+            final String ls = System.getProperty("line.separator");
+            log.info(ls + ls + "Bundle 'com.openexchange.oauth.xing' is disabled as per \"com.openexchange.oauth.xing\" property in file 'xingoauth.properties'." + ls);
+            return;
+        }
+        // Proceed
         try {
             registerService(OAuthServiceMetaData.class, new XingOAuthServiceMetaData(getService(ConfigurationService.class)));
         } catch (final IllegalStateException e) {

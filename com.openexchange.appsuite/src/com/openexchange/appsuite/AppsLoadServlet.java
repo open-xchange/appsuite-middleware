@@ -51,13 +51,9 @@ package com.openexchange.appsuite;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
+import java.io.UnsupportedEncodingException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
@@ -66,12 +62,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
 /**
  * {@link AppsLoadServlet} - Provides App Suite data for loading applciations.
- *
+ * 
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
 public class AppsLoadServlet extends HttpServlet {
@@ -82,21 +77,17 @@ public class AppsLoadServlet extends HttpServlet {
 
     private static String ZONEINFO = "io.ox/core/date/tz/zoneinfo/";
 
-    private final Map<String, byte[]> cache;
-
-    private final AtomicReference<String> version;
-
-    private final File root, zoneinfo;
+    private final FileCache appCache, tzCache;
 
     /**
      * Initializes a new {@link AppsLoadServlet}.
+     * 
+     * @throws IOException
      */
-    public AppsLoadServlet(final File root, final File zoneinfo) {
+    public AppsLoadServlet(final File root, final File zoneinfo) throws IOException {
         super();
-        version = new AtomicReference<String>();
-        cache = new ConcurrentHashMap<String, byte[]>();
-        this.root = root;
-        this.zoneinfo = zoneinfo;
+        appCache = new FileCache(root);
+        tzCache = new FileCache(zoneinfo);
     }
 
     private static Pattern moduleRE = Pattern.compile("(?:/(text|raw);)?([\\w/-]+(?:\\.[\\w/-]+)*)");
@@ -157,14 +148,6 @@ public class AppsLoadServlet extends HttpServlet {
         if (length < 2) {
             return; // no actual files requested
         }
-        // Set version if null or lower than given one
-        {
-            final String currentVersion = modules[0];
-            String version = this.version.get();
-            if ((version == null || currentVersion.compareTo(version) > 0) && this.version.compareAndSet(version, currentVersion)) {
-                cache.clear();
-            }
-        }
         resp.setContentType("text/javascript;charset=UTF-8");
         resp.setDateHeader("Expires", System.currentTimeMillis() + (long) 3e10); // + almost a year
         final OutputStream out = resp.getOutputStream();
@@ -182,64 +165,45 @@ public class AppsLoadServlet extends HttpServlet {
                 continue;
             }
 
-            byte[] data = cache.get(module);
-            if (data == null) {
-                try {
-                    data = readFile(module, m.group(1), m.group(2));
-                    cache.put(module, data);
-                } catch (final IllegalStateException e) {
-                    resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Illegal path specified.");
-                    return;
+            // Map module name to file name
+            final String format = m.group(1);
+            String name = m.group(2);
+            boolean isTZ = name.startsWith(ZONEINFO);
+            final String resolved = isTZ ? name.substring(ZONEINFO.length()) : name;
+
+            FileCache cache = isTZ ? tzCache : appCache;
+            byte[] data = cache.get(module, new FileCache.Filter() {
+
+                public String resolve(String path) {
+                    return resolved;
                 }
+
+                @SuppressWarnings("deprecation")
+                public byte[] filter(ByteArrayOutputStream baos) {
+                    if (format == null)
+                        return baos.toByteArray();
+
+                    // Special cases for JavaScript-friendly reading of raw files:
+                    // /text;* returns the file as a UTF-8 string
+                    // /raw;* maps every byte to [u+0000..u+00ff]
+                    final StringBuffer sb = new StringBuffer();
+                    sb.append("define('").append(module).append("','");
+                    try {
+                        escape("raw".equals(format) ? baos.toString(0) : baos.toString(Charsets.UTF_8_NAME), sb);
+                    } catch (UnsupportedEncodingException e) {
+                        // everybody should have UTF-8
+                    }
+                    sb.append("');\n");
+                    return sb.toString().getBytes(Charsets.UTF_8);
+                }
+            });
+
+            if (data == null) {
+                data = ("define('" + escapeName(module) + "', function () { throw new Error(\"Could not read '" + escapeName(name) + "'\"); });\n").getBytes(Charsets.UTF_8);
             }
+
             out.write(data);
             out.flush();
         }
     }
-
-    @SuppressWarnings("deprecation")
-    private byte[] readFile(final String module, final String format, final String name) throws IOException {
-        final File filename;
-        // Map module name to file name
-        if (name.startsWith(ZONEINFO)) {
-            filename = new File(zoneinfo, name.substring(ZONEINFO.length()));
-        } else {
-            filename = new File(root, name);
-        }
-        LOG.debug("Reading " + filename);
-
-        // Read the entire file's bytes
-        final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(8192);
-        {
-            InputStream in = null;
-            try {
-                in = new FileInputStream(filename);
-                final int buflen = 2048;
-                final byte[] buf = new byte[buflen];
-                for (int read = in.read(buf, 0, buflen); read > 0; read = in.read(buf, 0, buflen)) {
-                    baos.write(buf, 0, read);
-                }
-                baos.flush(); // no-op
-            } catch (final IOException e) {
-                LOG.debug("Could not read from '" + escapeName(filename.getPath()) + "'");
-                return ("define('" + escapeName(module) + "', function () { throw new Error(\"Could not read '" + escapeName(name) + "'\"); });\n").getBytes(Charsets.UTF_8);
-            } finally {
-                Streams.close(in);
-            }
-        }
-
-        // Special cases for JavaScript-friendly reading of raw files:
-        // /text;* returns the file as a UTF-8 string
-        // /raw;* maps every byte to [u+0000..u+00ff]
-        if (format != null) {
-            final StringBuffer sb = new StringBuffer();
-            sb.append("define('").append(module).append("','");
-            escape("raw".equals(format) ? baos.toString(0) : baos.toString(Charsets.UTF_8_NAME), sb);
-            sb.append("');\n");
-            return sb.toString().getBytes(Charsets.UTF_8);
-        }
-
-        return baos.toByteArray();
-    }
-
 }

@@ -1,11 +1,161 @@
+* 2013-02-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25029: Removed 'sessioncache.ccf' from consistency check 
+
+* 2013-02-18 - marcus.klein@open-xchange.com
+
+ - Fix for bug 25011: Fixed extension of CLTs by autocontextid and reseller plugins.
+
+* 2013-02-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25010: Simplified handling of upload files to avoid possible infinite loop on "by field name" look-up
+
+* 2013-02-15 - marc.arens@open-xchange.com
+
+ - Fix for bug 23904: Cannot open eMails from OX Appsuite
+ - Fix for bug 25006: org.glassfish.grizzly logs to open-xchange log even if log4j is installed
+
+* 2013-02-14 - marc.arens@open-xchange.com
+
+ - Fix for bug 24980: There is no file storage service available that provides account "0"
+
+* 2013-02-14 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24829: Removed user discovery by e-mail aliases in contact halo
+ - Fix for bug 24957: Preferring IPv4 / IPv6 addresses based on java.net.preferIPv4Stack in services advertised via mDNS  
+ - Fix for bug 24934: Don't try to search by birthday/anniversary without valid LDAP attribute mapping
+
+* 2013-02-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24962: Disabled XING OAuth bundle (as its API is still beta)
+ - Fix for bug 24975: Replace HTML entities
+ - Fix for bug 24973: Ignore io.ox/core path on OX6 save-back operation
+
+* 2013-02-13 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 24870: Proper removing of series end.
+ - Fix for bug 24961: Check for bad da_in_month values.
+
+* 2013-02-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24939: Added missing entries to paths.perfMap
+ - Fix for bug 24933: Orderly clean user-sensitive caches
+ - Fix for bug 24958: Fixed .yml file for XING crawler
+ - Fix for bug 24916: Added needed field to accepted modifyable user contact fields
+
+* 2013-02-12 - marcus.klein@open-xchange.com
+
+ - Story 43545331: Added a hidden configuration property to make the authId parameter optional for the form login.
+ - Story 43561133: Added an option to CLT listfilestore to not load the file store usage, which is an expensive operation.
+
+* 2013-02-12 - marc.arens@open-xchange.com
+
+ - Fix for bug 24914: Exception at osgi log regarding push.mq
+
+* 2013-02-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24923: Return proper JSlob object
+ - Fix for bug 24920: Fixed typo
+
+* 2013-02-12 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 24759: Resolve recurring Appointments for Contact Halo.
+
+* 2013-02-11 - marc.arens@open-xchange.com
+
+ - Fix for bug 24828: Showruntimestats for Grizzly's HttpCodecFilter always returns 0
+ 
+* 2013-02-11 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24885: Skip unmapped properties in advanced search filters 
+
+* 2013-02-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24896: Use interface class where possible
+ - Fix for bug 24893: Restored crawler-bases XING subscriber
+ - Fix for bug 24900: Fixed multiple request
+ - Fix for bug 24785: Fixed start-up with required services for push-udp
+
+* 2013-02-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24823: Keep text formatting when performing auto-save operation
+ - Fix for bug 24863: Added null guard
+ - Fix for bug 24864: Added null guard
+ - Fix for bug 24867: Added null guard
+ - Fix for bug 24874: Added null guard
+ - Fix for bug 24879: Added null guard
+
+* 2013-02-08 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 24128: Change Notifications for resources.
+
+* 2013-02-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24875: Fall back to default LDAP folder ID when no folders are defined in search term 
+
+* 2013-02-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24848: Adopted to other handling
+ - Fix for bug 24850: Added missing bundle to CLI's classpath
+ - Fix for bug 24851: Added null guard
+ - Fix for bug 24852: Added null guard
+ - Fix for bug 24854: Added null guard
+ - Fix for bug 24855: Added null guard
+ - Fix for bug 24881: Fixed logging
+
+* 2013-02-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24818: Determine locale with respect to "language" parameter
+
+* 2013-02-07 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24824: Only emit COMPLETED attribute if a task is 'done' 
+ - Fix for bug 24834: Remove birthday from contact if not present in updated vCard 
+
+* 2013-02-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24694: Setting file permissions for configuration files with sensitive content without read permission for all users in
+   system.
+ - Fix for bug 24795: Sending only the single version of the backend and its build date.
+
+* 2013-02-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24812: Treat non-existent PERCENT-COMPLETE property in VTODO as no change of existing percentage 
+
+* 2013-02-06 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24715: Do not use only attribute names if name is detected from the type of the generic attribute otherwise not typed generic
+   attributes fail.
+
+* 2013-02-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24770: Unregister HazelcastInstance prior to its shut-down
+ - Fix for bug 24794: Discard invalid time zone identifiers when responding list of available time zones (as per JVM)
+ - Fix for bug 24764: Sanitize Snippet content storing it
+ - Fix for bug 24786: Passing proper error message arguments
+ - Fix for bug 24799: Ignore posts from "FB_In_Feed" sender
+ - Fix for bug 24724: Use system property "line.separator" to print/output a line-feed
+
+* 2013-02-04 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24756: Correct handling of parameters map for stored sessions
+
+* 2013-02-04 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24740: Wrote detailed descriptions for packages open-xchange-unifiedmail and open-xchange-unifiedinbox.
+
+* 2013-02-01 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 24597: Added new options to showruntimestats
+
 * 2013-02-01 - martin.herfurth@open-xchange.com
 
  - Fix for bug 24682: Bad folder id in recurrence exceptions.
 
 * 2013-01-31 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 24685: Apply cache invalidation settings for default caches, too 
-  
+ - Fix for bug 24685: Apply cache invalidation settings for default caches, too
+
 * 2013-01-31 - thorben.betten@open-xchange.com
 
  - Fix for bug 24654: Don't fall-back to User-Agent header if client identifier is missing on login attempt

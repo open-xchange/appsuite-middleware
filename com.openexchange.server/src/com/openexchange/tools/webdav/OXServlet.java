@@ -122,12 +122,7 @@ public abstract class OXServlet extends WebDavServlet {
 
         @Override
         public String getUserAgent() {
-            /*-
-             * Former code allowed User-Agent header. Needs to be denied as of bug #24654.
-             * 
-             * return null == userAgent ? req.getHeader("user-agent") : userAgent;
-             */
-            return userAgent;
+            return null == userAgent ? req.getHeader("user-agent") : userAgent;
         }
 
         @Override
@@ -537,19 +532,23 @@ public abstract class OXServlet extends WebDavServlet {
     }
 
     /**
-     * Gets a value indicating whether to create a transient session or not, based on the supplied interface.   
-     * 
+     * Gets a value indicating whether to create a transient session or not, based on the supplied interface.
+     *
      * @param iface The interface
-     * @return <code>true</code> if the interface can use a transient session, <code>false</code>, otherwise  
+     * @return <code>true</code> if the interface can use a transient session, <code>false</code>, otherwise
      */
     protected static boolean isTransient(Interface iface) {
         switch (iface) {
         case CALDAV:
         case CARDDAV:
+        case WEBDAV_INFOSTORE:
+        case WEBDAV_ICAL:
+        case WEBDAV_VCARD:
+        case OUTLOOK_UPDATER:
             return true;
         default:
             return false;
         }
     }
-    
+
 }

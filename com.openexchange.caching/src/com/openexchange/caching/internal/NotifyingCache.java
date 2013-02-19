@@ -51,7 +51,12 @@ package com.openexchange.caching.internal;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheKey;
@@ -75,6 +80,17 @@ import com.openexchange.log.LogFactory;
 public class NotifyingCache implements Cache, CacheListener {
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(NotifyingCache.class));
+
+    private static final AtomicReference<EventAdmin> EVENT_ADMIN_REF = new AtomicReference<EventAdmin>();
+
+    /**
+     * Sets the event admin.
+     * 
+     * @param eventAdmin The event admin or <code>null</code>
+     */
+    public static void setEventAdmin(final EventAdmin eventAdmin) {
+        EVENT_ADMIN_REF.set(eventAdmin);
+    }
 
     private final Cache delegate;
     private final String region;
@@ -308,6 +324,7 @@ public class NotifyingCache implements Cache, CacheListener {
                 switch (cacheEvent.getOperation()) {
                 case INVALIDATE_GROUP:
                     delegate.invalidateGroup(cacheEvent.getGroupName());
+                    locallyPostInvalidateEvent(cacheEvent);
                     break;
                 case INVALIDATE:
                     if (null != cacheEvent.getGroupName()) {
@@ -315,6 +332,7 @@ public class NotifyingCache implements Cache, CacheListener {
                     } else {
                         delegate.remove(cacheEvent.getKey());
                     }
+                    locallyPostInvalidateEvent(cacheEvent);
                     break;
                 default:
                     LOG.warn("Unknown cache event operation: " + cacheEvent.getOperation());
@@ -322,6 +340,18 @@ public class NotifyingCache implements Cache, CacheListener {
             } catch (OXException e) {
                 LOG.error("Error handling cache event: " + cacheEvent, e);
             }
+        }
+    }
+
+    private void locallyPostInvalidateEvent(final CacheEvent cacheEvent) {
+        final EventAdmin eventAdmin = EVENT_ADMIN_REF.get();
+        if (null != eventAdmin && null != cacheEvent) {
+            final Map<String, Object> properties = new HashMap<String, Object>(4);
+            properties.put("region", cacheEvent.getRegion());
+            properties.put("operation", cacheEvent.getOperation().toString());
+            properties.put("group", cacheEvent.getGroupName());
+            properties.put("key", cacheEvent.getKey());
+            eventAdmin.postEvent(new Event("com/openexchange/cache/remote/invalidate", properties));
         }
     }
 

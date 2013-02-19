@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.facebook;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.logging.Log;
@@ -78,6 +79,7 @@ public class FacebookSubscribeService extends AbstractSubscribeService {
     private final FacebookService facebookService;
 
     public FacebookSubscribeService(final OAuthServiceMetaData facebookMetaData, final FacebookService facebookService) {
+        super();
         this.facebookMetaData = facebookMetaData;
         this.facebookService = facebookService;
 
@@ -97,6 +99,13 @@ public class FacebookSubscribeService extends AbstractSubscribeService {
 
     @Override
     public Collection<?> getContent(final Subscription subscription) throws OXException {
+        if (null == subscription) {
+            return Collections.emptyList();
+        }
+        final FacebookService facebookService = this.facebookService;
+        if (null == facebookService) {
+            return Collections.emptyList();
+        }
         return facebookService.getContacts(
             subscription.getSession(),
             subscription.getUserId(),

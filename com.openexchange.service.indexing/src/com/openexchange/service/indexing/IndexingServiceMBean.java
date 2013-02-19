@@ -106,5 +106,15 @@ public interface IndexingServiceMBean {
      * @throws MBeanException
      */
     List<String> getScheduledJobs(int contextId, int userId) throws MBeanException;
+    
+    /**
+     * Returns a human-readable list of all triggers and their states for the given job.
+     * 
+     * @param jobGroup The job group.
+     * @param jobName The job name.
+     * @return The list of triggers.
+     * @throws MBeanException
+     */
+    List<String> getTriggerStatesForJob(String jobGroup, String jobName) throws MBeanException;
 
 }

@@ -52,7 +52,6 @@ package com.openexchange.realtime.xmpp.converter;
 import org.joox.JOOX;
 import org.joox.Match;
 import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.chat.ChatMessage;
 import com.openexchange.tools.session.ServerSession;
@@ -62,21 +61,11 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class MessageBodyToXMPP implements SimplePayloadConverter {
+public class MessageBodyToXMPP extends AbstractPOJOConverter {
 
     @Override
     public String getInputFormat() {
         return "chatMessage";
-    }
-
-    @Override
-    public String getOutputFormat() {
-        return "xmpp";
-    }
-
-    @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
     }
 
     @Override

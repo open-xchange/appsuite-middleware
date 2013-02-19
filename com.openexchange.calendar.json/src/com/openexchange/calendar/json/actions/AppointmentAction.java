@@ -266,7 +266,7 @@ public abstract class AppointmentAction implements AJAXActionService {
                     }
                     participants[pos] = new UserParticipant(foundUser.getId());
                 } catch (final OXException e) {
-                    log.error(e); // ...and continue doing this for the remaining users
+                    log.debug("Couldn't resolve E-Mail address to an internal user: " + part.getEmailAddress(), e); // ...and continue doing this for the remaining users
                 }
             }
         }

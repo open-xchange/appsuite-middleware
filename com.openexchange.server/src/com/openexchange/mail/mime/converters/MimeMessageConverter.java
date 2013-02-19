@@ -1791,15 +1791,14 @@ public final class MimeMessageConverter {
             }
             {
                 final ContentType ct = mail.getContentType();
+                final Object content = msg.getContent();
                 try {
-                    mail.setHasAttachment(ct.startsWith(MULTI_PRIMTYPE) && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) || hasAttachments(
-                        (Multipart) msg.getContent(),
-                        ct.getSubType())));
+                    mail.setHasAttachment(ct.startsWith(MULTI_PRIMTYPE) && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) || hasAttachments((Multipart) content, ct.getSubType())));
                 } catch (final ClassCastException e) {
                     // Cast to javax.mail.Multipart failed
                     LOG.warn(new com.openexchange.java.StringAllocator(256).append(
                         "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
-                        e.getMessage()).append(
+                        content.getClass().getName()).append(
                         ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
                     mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                 } catch (final MessagingException e) {

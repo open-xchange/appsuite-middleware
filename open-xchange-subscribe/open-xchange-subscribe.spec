@@ -9,7 +9,7 @@ BuildRequires: open-xchange-oauth
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -65,6 +65,12 @@ if [ ${1:-0} -eq 2 ]; then
 	ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc "$FILE"
     done
 
+    #SoftwareChange_Request-1318
+    pfile=/opt/open-xchange/etc/microformatSubscription.properties
+    if ! ox_exists_property com.openexchange.subscribe.microformats.allowedHosts $pfile; then
+        ox_set_property com.openexchange.subscribe.microformats.allowedHosts '' $pfile
+    fi
+
     #SoftwareChange_Request-1284
     pfile=/opt/open-xchange/etc/crawler.properties
     for prop in com.openexchange.subscribe.crawler.yahoocom \
@@ -108,10 +114,18 @@ fi
 %doc docs/
 
 %changelog
+* Thu Feb 14 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.0.1
+* Fri Feb 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.0.1
+* Tue Jan 29 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-01-28
 * Mon Jan 21 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-01-24
 * Tue Jan 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-01-23
+* Thu Jan 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.0.1
 * Thu Jan 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for public patch 2013-01-15
 * Fri Dec 28 2012 Marcus Klein <marcus.klein@open-xchange.com>

@@ -49,12 +49,14 @@
 
 package com.openexchange.realtime.atmosphere.impl;
 
-import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereResourceEventListener;
 import org.atmosphere.cpr.Broadcaster;
+import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
+import com.openexchange.realtime.ResourceRegistry;
+import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
 
 
 /**
@@ -65,14 +67,16 @@ import com.openexchange.log.LogFactory;
 public class AtmosphereResourceCleanupListener implements AtmosphereResourceEventListener {
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(RTAtmosphereHandler.class));
     private final Broadcaster[] associatedBroadcasters;
-    private final AtmosphereResource resource;
+    private final RTAtmosphereState atmosphereState;
+    private final RTAtmosphereHandler handler;
     /**
      * Initializes a new {@link AtmosphereResourceCleanupListener}.
      * @param associatedBroadcasters the associated Broadcasters
      */
-    public AtmosphereResourceCleanupListener(AtmosphereResource resource, Broadcaster... associatedBroadcasters) {
+    public AtmosphereResourceCleanupListener(RTAtmosphereHandler handler, RTAtmosphereState atmosphereState, Broadcaster... associatedBroadcasters) {
+        this.handler = handler;
         this.associatedBroadcasters = associatedBroadcasters;
-        this.resource = resource;
+        this.atmosphereState = atmosphereState;
     }
 
     @Override
@@ -96,6 +100,8 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
               broadcaster.destroy();
             }
         }
+        
+        handler.onDisconnect(atmosphereState);
     }
 
     @Override

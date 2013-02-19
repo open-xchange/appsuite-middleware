@@ -7,20 +7,24 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/ 
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       The Open-Xchange backend extension for Unified Mail
+Summary:       Extension to combine all mail storage accounts into a virtual single one
 Requires:      open-xchange-core >= @OXVERSION@
 Obsoletes:     open-xchange-unifiedinbox <= @OXVERSION@
 Provides:      open-xchange-unifiedinbox = @OXVERSION@
 
 %description
-The Open-Xchange backend extension for Unified Mail.
+This installs the backend extension for Unified Mail. It combines the standard folders of every mail storage account - or mostly every IMAP
+account - into a single mail box. E.g. all mails of every INBOX folder of all your mail storage accounts are shown in the INBOX of the
+Unified Mail box. Beside the Unified Mail account all your other mail accounts are still shown separately.
+You can select which of your mail storage accounts should be combined into Unified Mail.
+Within Unified Mail every email gets an additional tag showing you in which mail account this email is located.
 
 Authors:
 --------
@@ -46,10 +50,18 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Thu Feb 14 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.0.1
+* Fri Feb 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.0.1
+* Tue Jan 29 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-01-28
 * Mon Jan 21 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-01-24
 * Tue Jan 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-01-23
+* Thu Jan 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.0.1
 * Thu Jan 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for public patch 2013-01-15
 * Fri Dec 28 2012 Marcus Klein <marcus.klein@open-xchange.com>

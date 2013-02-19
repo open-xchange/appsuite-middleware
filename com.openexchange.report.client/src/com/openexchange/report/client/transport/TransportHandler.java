@@ -206,8 +206,8 @@ public class TransportHandler {
             }
         }
 
-        version.put("admin", versions[0]);
-        version.put("groupware", versions[1]);
+        version.put("version", versions[0]);
+        version.put("buildDate", versions[1]);
 
         clientlogincount.put("usm-eas", clc.getUsmeas());
         clientlogincount.put("olox2", clc.getOlox2());

@@ -82,7 +82,6 @@ import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.AbstractTask;
@@ -421,14 +420,14 @@ public final class SessionHandler {
         final SessionIdGenerator sessionIdGenerator = SessionHandler.sessionIdGenerator;
         final String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
         final SessionImpl session = new SessionImpl(userId, loginName, password, contextId, sessionId, sessionIdGenerator.createSecretId(
-            loginName,
-            Long.toString(System.currentTimeMillis())), sessionIdGenerator.createRandomId(), clientHost, login, authId, hash, client);
+            loginName, Long.toString(System.currentTimeMillis())), sessionIdGenerator.createRandomId(), clientHost, login, authId, hash,
+            client, tranzient);
         // Add session
         final SessionImpl addedSession;
         if (null == clientToken) {
             addedSession = sessionData.addSession(session, noLimit).getSession();
             // store session if not marked as transient
-            if (false == tranzient) {
+            if (false == session.isTransient()) {
                 final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
                 if (sessionStorageService != null) {
                     storeSessionSync(addedSession, sessionStorageService, false);
@@ -485,7 +484,7 @@ public final class SessionHandler {
             return;
         }
         if (async) {
-            ThreadPools.getThreadPool().submit(new StoreSessionTask(session, sessionStorageService, addIfAbsent, latch));            
+            ThreadPools.getThreadPool().submit(new StoreSessionTask(session, sessionStorageService, addIfAbsent, latch));
         } else {
             new StoreSessionTask(session, sessionStorageService, addIfAbsent, latch).call();
         }
@@ -1068,32 +1067,34 @@ public final class SessionHandler {
         }
     }
 
-    static void postSessionRemoval(final Session session) {
-        // Asynchronous remove from session storage
-        final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-        if (sessionStorageService != null) {
-            ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
+    static void postSessionRemoval(final SessionImpl session) {
+        if (false == session.isTransient()) {
+            // Asynchronous remove from session storage
+            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (sessionStorageService != null) {
+                ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
 
-                @Override
-                public Void call() {
-                    try {
-                        sessionStorageService.removeSession(session.getSessionID());
-                    } catch (final OXException e) {
-                        if (DEBUG) {
-                            LOG.warn("Session could not be removed from session storage: " + session.getSessionID(), e);
-                        } else {
-                            LOG.warn("Session could not be removed from session storage: " + session.getSessionID());
+                    @Override
+                    public Void call() {
+                        try {
+                            sessionStorageService.removeSession(session.getSessionID());
+                        } catch (final OXException e) {
+                            if (DEBUG) {
+                                LOG.warn("Session could not be removed from session storage: " + session.getSessionID(), e);
+                            } else {
+                                LOG.warn("Session could not be removed from session storage: " + session.getSessionID());
+                            }
+                        } catch (final RuntimeException e) {
+                            if (DEBUG) {
+                                LOG.warn("Session could not be removed from session storage: " + session.getSessionID(), e);
+                            } else {
+                                LOG.warn("Session could not be removed from session storage: " + session.getSessionID());
+                            }
                         }
-                    } catch (final RuntimeException e) {
-                        if (DEBUG) {
-                            LOG.warn("Session could not be removed from session storage: " + session.getSessionID(), e);
-                        } else {
-                            LOG.warn("Session could not be removed from session storage: " + session.getSessionID());
-                        }
+                        return null;
                     }
-                    return null;
-                }
-            });
+                });
+            }
         }
         // Asynchronous post of event
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
@@ -1133,18 +1134,22 @@ public final class SessionHandler {
             // Asynchronous remove from session storage
             final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
             if (sessionStorageService != null) {
+                final List<SessionControl> tSessionControls = new ArrayList<SessionControl>(sessionControls);
                 ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
 
                     @Override
                     public Void call() {
                         try {
-                            for (final SessionControl sessionControl : sessionControls) {
-                                try {
-                                    sessionStorageService.removeSession(sessionControl.getSession().getSessionID());
-                                } catch (final OXException e) {
-                                    LOG.error(e.getMessage(), e);
-                                } catch (final RuntimeException e) {
-                                    LOG.error(e.getMessage(), e);
+                            for (final SessionControl sessionControl : tSessionControls) {
+                                SessionImpl session = sessionControl.getSession();
+                                if (null != session && false == session.isTransient()) {
+                                    try {
+                                        sessionStorageService.removeSession(session.getSessionID());
+                                    } catch (final OXException e) {
+                                        LOG.error(e.getMessage(), e);
+                                    } catch (final RuntimeException e) {
+                                        LOG.error(e.getMessage(), e);
+                                    }
                                 }
                             }
                         } catch (final RuntimeException e) {
@@ -1185,30 +1190,6 @@ public final class SessionHandler {
     }
 
     private static void postSessionDataRemoval(final List<SessionControl> controls) {
-        // Asynchronous remove from session storage
-        final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
-        if (sessionStorageService != null) {
-            ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
-
-                @Override
-                public Void call() {
-                    try {
-                        for (final SessionControl sessionControl : controls) {
-                            try {
-                                sessionStorageService.removeSession(sessionControl.getSession().getSessionID());
-                            } catch (final OXException e) {
-                                LOG.error(e.getMessage(), e);
-                            } catch (final RuntimeException e) {
-                                LOG.error(e.getMessage(), e);
-                            }
-                        }
-                    } catch (final RuntimeException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
-                    return null;
-                }
-            });
-        }
         // Post event
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
@@ -1253,9 +1234,9 @@ public final class SessionHandler {
     }
 
     /**
-     * Broadcasts the {@link SessiondEventConstants#TOPIC_TOUCH_SESSION} event, usually after the session has been moved to the first 
+     * Broadcasts the {@link SessiondEventConstants#TOPIC_TOUCH_SESSION} event, usually after the session has been moved to the first
      * container.
-     * 
+     *
      * @param session The session that was touched
      */
     static void postSessionTouched(final Session session) {
@@ -1428,8 +1409,9 @@ public final class SessionHandler {
             synchronized (SessionHandler.class) {
                 tmp = timeout;
                 if (null == tmp) {
-                    final ConfigurationService service = SessiondServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
-                    tmp = Integer.valueOf(null == service ? 250 : service.getIntProperty("com.openexchange.sessiond.sessionstorage.timeout", 250));
+                    final ConfigurationService service = getServiceRegistry().getService(ConfigurationService.class);
+                    final int defaultTimeout = 3000;
+                    tmp = Integer.valueOf(null == service ? defaultTimeout : service.getIntProperty("com.openexchange.sessiond.sessionstorage.timeout", defaultTimeout));
                     timeout = tmp;
                 }
             }

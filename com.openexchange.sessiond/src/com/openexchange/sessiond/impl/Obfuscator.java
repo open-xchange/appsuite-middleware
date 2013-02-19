@@ -116,7 +116,7 @@ public class Obfuscator {
         }
         SessionImpl sessionImpl = new SessionImpl(session.getUserId(), session.getLoginName(), unobfuscate(session.getPassword()), session.getContextId(),
             session.getSessionID(), session.getSecret(), session.getRandomToken(), session.getLocalIp(), session.getLogin(),
-            session.getAuthId(), session.getHash(), session.getClient());
+            session.getAuthId(), session.getHash(), session.getClient(), false);
         for (String param : WRAPPED_PARMETERS) {
             if (session.containsParameter(param)) {
                 sessionImpl.setParameter(param, session.getParameter(param));

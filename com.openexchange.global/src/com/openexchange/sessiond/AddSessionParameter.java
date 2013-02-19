@@ -125,13 +125,13 @@ public interface AddSessionParameter {
      * @return the client token from the token login. Otherwise <code>null</code>.
      */
     String getClientToken();
-    
+
     /**
      * Gets a value indicating whether the session should be created in a transient way or not, i.e. the session should not be distributed
      * to other nodes in the cluster or put into another persistent storage.
-     * 
-     * @return <code>true</code> if the session should be transient, <code>false</code>, otherwise  
+     *
+     * @return <code>true</code> if the session should be transient, <code>false</code>, otherwise.
      */
     boolean isTransient();
-    
+
 }

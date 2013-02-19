@@ -1,3 +1,15 @@
+open-xchange-report-client (7.0.1-2) unstable; urgency=low
+
+  * Second release candidate for 7.0.1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 14 Feb 2013 13:55:03 +0100
+
+open-xchange-report-client (7.0.1-1) unstable; urgency=low
+
+  * First release candidate for 7.0.1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 01 Feb 2013 14:56:43 +0100
+
 open-xchange-report-client (7.0.1-0) unstable; urgency=low
 
   * prepare for 7.0.1
@@ -75,6 +87,12 @@ open-xchange-report-client (6.23.0-0) unstable; urgency=low
   * prepare for next EDP drop
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 03 Sep 2012 13:46:55 +0200
+
+open-xchange-report-client (6.22.1-10) unstable; urgency=low
+
+  * Build for patch 2013-01-28
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 29 Jan 2013 12:09:28 +0100
 
 open-xchange-report-client (6.22.1-9) unstable; urgency=low
 

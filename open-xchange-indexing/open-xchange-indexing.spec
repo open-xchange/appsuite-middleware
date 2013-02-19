@@ -5,9 +5,10 @@ BuildArch:     noarch
 BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
+BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -16,6 +17,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Open-Xchange backend indexing extension
 Requires:      open-xchange-core >= @OXVERSION@
+Requires:      open-xchange-admin >= @OXVERSION@
 
 %description
 This package contains the extensions for the backend installations implementing the indexing feature.
@@ -55,6 +57,12 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/solr/*
 
 %changelog
+* Thu Feb 14 2013 Steffen Templin <steffen.templin@open-xchange.com>
+Second release candidate for 7.0.1
+* Fri Feb 01 2013 Steffen Templin <steffen.templin@open-xchange.com>
+First release candidate for 7.0.1
+* Thu Jan 10 2013 Steffen Templin <steffen.templin@open-xchange.com>
+prepare for 7.0.1
 * Tue Dec 04 2012 Steffen Templin <steffen.templin@open-xchange.com>
 First release candidate for 7.0.0
 * Tue Dec 04 2012 Steffen Templin <steffen.templin@open-xchange.com>
@@ -79,8 +87,6 @@ prepare for next EDP drop
 Release build for EDP drop #2
 * Mon Jun 04 2012 Steffen Templin <steffen.templin@open-xchange.com>
 Release build for EDP drop #2
-* Fri May 11 2012 Steffen Templin <steffen.templin@open-xchange.com>
-Build for Rev. 4
 * Tue May 08 2012 Steffen Templin <steffen.templin@open-xchange.com>
 Build for Rev. 3
 * Mon May 07 2012 Marcus Klein <marcus.klein@open-xchange.com>

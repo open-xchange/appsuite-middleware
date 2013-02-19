@@ -73,9 +73,10 @@ public interface JSlobStorage {
      *
      * @param id Identifier.
      * @param t Element.
+     * @return <code>true</code> if there was no such element before; other <code>false</code> if another one had been replaced
      * @throws OXException If storing fails
      */
-    void store(JSlobId id, JSlob t) throws OXException;
+    boolean store(JSlobId id, JSlob t) throws OXException;
 
     /**
      * Reads the element associated with the given identifier.
@@ -85,6 +86,13 @@ public interface JSlobStorage {
      * @throws OXException If loading fails or no element is associated with specified identifier
      */
     JSlob load(JSlobId id) throws OXException;
+
+    /**
+     * Invalidates denoted element.
+     *
+     * @param id The identifier
+     */
+    void invalidate(JSlobId id);
 
     /**
      * Reads the element associated with the given identifier.

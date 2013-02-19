@@ -292,6 +292,11 @@ public class LdapGlobalFolderCreator {
 
             }
 
+            @Override
+            public boolean isTransient() {
+                return false;
+            }
+
         };
     }
 

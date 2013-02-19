@@ -49,80 +49,56 @@
 
 package com.openexchange.admin.console.util;
 
-import static org.junit.Assert.assertTrue;
-
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-
 import com.openexchange.admin.console.AbstractTest;
 import com.openexchange.admin.console.BasicCommandlineOptions;
-import com.openexchange.admin.console.util.filestore.ListFilestore;
+import com.openexchange.tools.arrays.Arrays;
 
 /**
  * @author cutmasta
- *
  */
 public class ListFilestoreTest extends AbstractTest {
-    
+
     @Test
     public void testListFilestore() {
-        
         resetBuffers();
-        
-        new ListFilestore(getMasterCredentialsOptionData()){
-            @Override
-            protected void sysexit(int exitCode) {
-                ListFilestoreTest.this.returnCode = exitCode;
-            }
-        };
-        
-        assertTrue("Expected 0 as return code!",0==this.returnCode);
+        ListFilestoreTester tester = new ListFilestoreTester(this);
+        tester.execute(getMasterCredentialsOptionData());
+        assertEquals("Expected 0 as return code!", 0, returnCode);
     }
-    
+
     @Test
     public void testListFilestoreCSV() {
-        
         resetBuffers();
-        
-        new ListFilestore(getCSVMasterOptionData()){
-            @Override
-            protected void sysexit(int exitCode) {
-                ListFilestoreTest.this.returnCode = exitCode;
-            }
-        };
-        
-        assertTrue("Expected 0 as return code!",0==this.returnCode);
+        ListFilestoreTester tester = new ListFilestoreTester(this);
+        tester.execute(getCSVMasterOptionData());
+        assertEquals("Expected 0 as return code!", 0, returnCode);
     }
-    
+
     @Test
     public void testListFilestoreWithInvalidCredentials() {
-        
         resetBuffers();
-        
-        new ListFilestore(getWrongMasterCredentialsOptionData()){
-            @Override
-            protected void sysexit(int exitCode) {
-                ListFilestoreTest.this.returnCode = exitCode;
-            }
-        };
-        
-        assertTrue("Expected invalid credentials as return code!",BasicCommandlineOptions.SYSEXIT_INVALID_CREDENTIALS==this.returnCode);
+        ListFilestoreTester tester = new ListFilestoreTester(this);
+        tester.execute(getWrongMasterCredentialsOptionData());
+        assertEquals("Expected invalid credentials as return code!", BasicCommandlineOptions.SYSEXIT_INVALID_CREDENTIALS, returnCode);
     }
-    
+
     @Test
     public void testListFilestoreWithUnknownOption() {
-        
         resetBuffers();
-        
-        new ListFilestore(getUnknownOptionData()){
-            @Override
-            protected void sysexit(int exitCode) {
-                ListFilestoreTest.this.returnCode = exitCode;
-            }
-        };
-        
-        assertTrue("Expected unknown option as return code!",BasicCommandlineOptions.SYSEXIT_UNKNOWN_OPTION==this.returnCode);
+        ListFilestoreTester tester = new ListFilestoreTester(this);
+        tester.execute(getUnknownOptionData());
+        assertEquals("Expected unknown option as return code!", BasicCommandlineOptions.SYSEXIT_UNKNOWN_OPTION, 0, returnCode);
     }
-    
-    
 
+    @Test
+    public void testListFilestoreWithOmitUsage() {
+        resetBuffers();
+        ListFilestoreTester tester = new ListFilestoreTester(this);
+        String[] options = getMasterCredentialsOptionData();
+        options = Arrays.add(options, "--omitUsage");
+        tester.execute(options);
+        assertEquals("Expected 0 as return code!", 0, returnCode);
+    }
 }

@@ -516,7 +516,7 @@ public class JSONTokener {
                 }
             }
             try {
-                return new Integer(s);
+                return Integer.valueOf(s);
             } catch (Exception e) {
                 try {
                     return new Long(s);

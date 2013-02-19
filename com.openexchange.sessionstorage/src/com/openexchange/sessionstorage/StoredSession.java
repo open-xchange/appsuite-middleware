@@ -355,8 +355,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
 
     @Override
     public boolean containsParameter(final String name) {
-        final Object value = parameters.get(name);
-        return value == null;
+        return parameters.containsKey(name);
     }
 
     @Override
@@ -376,10 +375,12 @@ public class StoredSession implements PutIfAbsent, Serializable {
 
     @Override
     public void setParameter(final String name, final Object value) {
-        if (parameters.containsKey(name)) {
-            parameters.remove(name);
-        }
         parameters.put(name, value);
+    }
+
+    @Override
+    public boolean isTransient() {
+        return false;
     }
 
     @Override

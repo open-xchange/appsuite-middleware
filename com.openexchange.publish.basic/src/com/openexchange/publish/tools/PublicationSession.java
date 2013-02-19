@@ -172,4 +172,9 @@ public class PublicationSession implements Session {
         // Nothing to do.
     }
 
+    @Override
+    public boolean isTransient() {
+        return false;
+    }
+
 }

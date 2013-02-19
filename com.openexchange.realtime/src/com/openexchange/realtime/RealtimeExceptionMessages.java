@@ -71,4 +71,7 @@ public class RealtimeExceptionMessages implements LocalizableStrings {
     // Unexpected error: %1$s
     public static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
 
+    /** Invalid ID. Resource identifier is missing. */
+    public static final String INVALID_ID = "Invalid ID. Resource identifier is missing.";
+
 }

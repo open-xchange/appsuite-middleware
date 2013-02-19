@@ -124,7 +124,11 @@ public class XMPPChatDelivery extends SimpleChannelUpstreamHandler implements XM
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
-        String message = (String) e.getMessage();
+        Object msg = e.getMessage();
+        if (DEBUG) {
+            System.out.println("------> " + msg.getClass().getName());
+        }
+        String message = (String) msg;
         if (DEBUG) {
             System.out.println("<--- IN ---\n" + message);
         }
@@ -134,7 +138,7 @@ public class XMPPChatDelivery extends SimpleChannelUpstreamHandler implements XM
             negotiateStreamDetails(container);
             state = State.preLogin;
         } else if (state == State.preLogin) {
-            doLogin(container);
+            doLogin(container, e.getChannel().getRemoteAddress().toString());
             state = State.postLogin;
         } else if (state == State.postLogin) {
             negotiateStreamDetails(container);
@@ -211,7 +215,7 @@ public class XMPPChatDelivery extends SimpleChannelUpstreamHandler implements XM
         write(stanza.toXML(session));
     }
 
-    private void doLogin(XMPPContainer container) throws OXException {
+    private void doLogin(XMPPContainer container, String host) throws OXException {
         String xml = container.getXml();
         Match match = JOOX.$(xml);
 
@@ -228,7 +232,7 @@ public class XMPPChatDelivery extends SimpleChannelUpstreamHandler implements XM
         String user = userAndPassword[0] + "@" + domain;
         String password = userAndPassword[1];
 
-        LoginResult loginResult = LoginPerformer.getInstance().doLogin(new XMPPLoginRequest(user, password));
+        LoginResult loginResult = LoginPerformer.getInstance().doLogin(new XMPPLoginRequest(user, password, host, 5222));
 
         this.session = ServerSessionAdapter.valueOf(loginResult.getSession());
         this.id = new ID("xmpp", session.getLoginName(), session.getContext().getName(), null);

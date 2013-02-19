@@ -1237,12 +1237,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
              */
             throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL.create();
         }
-        if (!ignoreUntilAndOccurrence && !cdao.containsOccurrence() && !cdao.containsUntil()) {
-            /*
-             * Every recurrence type needs at least an until or occurrence information
-             */
-            throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_UNTIL_OR_OCCUR.create();
-        }
         if (CalendarObject.DAILY == recType) {
             /*
              * Interval and until or occurrence information is sufficient for daily

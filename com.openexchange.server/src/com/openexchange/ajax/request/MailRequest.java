@@ -51,6 +51,7 @@ package com.openexchange.ajax.request;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -70,7 +71,11 @@ import com.openexchange.tools.session.ServerSession;
 
 public final class MailRequest {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailRequest.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailRequest.class);
+
+    private static final String PARAMETER_ID = AJAXServlet.PARAMETER_ID;
+    private static final String DATA = ResponseFields.DATA;
+    static final String PARAMETER_FOLDERID = AJAXServlet.PARAMETER_FOLDERID;
 
     private static enum CollectableOperation {
         MOVE, COPY, STORE_FLAG, COLOR_LABEL;
@@ -118,7 +123,7 @@ public final class MailRequest {
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
             MAIL_SERVLET.actionGetUpdates(session, writer, jsonObject, mailInterface);
         } else if (action.regionMatches(true, 0, AJAXServlet.ACTION_REPLY, 0, 5)) {
-            if (jsonObject.has(ResponseFields.DATA) && !jsonObject.isNull(ResponseFields.DATA)) {
+            if (jsonObject.has(DATA) && !jsonObject.isNull(DATA)) {
                 MAIL_SERVLET.actionPutReply(
                     session,
                     (action.equalsIgnoreCase(AJAXServlet.ACTION_REPLYALL)),
@@ -134,7 +139,7 @@ public final class MailRequest {
                     mailInterface);
             }
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_FORWARD)) {
-            if (jsonObject.has(ResponseFields.DATA) && !jsonObject.isNull(ResponseFields.DATA)) {
+            if (jsonObject.has(DATA) && !jsonObject.isNull(DATA)) {
                 /*
                  * Perform forward with multiple mails
                  */
@@ -143,7 +148,7 @@ public final class MailRequest {
                 MAIL_SERVLET.actionGetForward(session, writer, jsonObject, mailInterface);
             }
         } else if (action.equalsIgnoreCase(AJAXServlet.ACTION_GET)) {
-            if (jsonObject.has(ResponseFields.DATA) && !jsonObject.isNull(ResponseFields.DATA)) {
+            if (jsonObject.has(DATA) && !jsonObject.isNull(DATA)) {
                 MAIL_SERVLET.actionPutGet(session, writer, jsonObject, mailInterface);
             } else {
                 MAIL_SERVLET.actionGetMessage(session, writer, jsonObject, mailInterface);
@@ -246,15 +251,15 @@ public final class MailRequest {
     }
 
     public static boolean isMove(final JSONObject jsonObject) throws JSONException {
-        return jsonObject.has(ResponseFields.DATA) && jsonObject.getJSONObject(ResponseFields.DATA).has(FolderChildFields.FOLDER_ID);
+        return jsonObject.has(DATA) && jsonObject.getJSONObject(DATA).has(FolderChildFields.FOLDER_ID);
     }
 
     public static boolean isStoreFlags(final JSONObject jsonObject) throws JSONException {
-        return jsonObject.has(ResponseFields.DATA) && jsonObject.getJSONObject(ResponseFields.DATA).has(MailJSONField.FLAGS.getKey());
+        return jsonObject.has(PARAMETER_ID) && jsonObject.has(DATA) && jsonObject.getJSONObject(DATA).has(MailJSONField.FLAGS.getKey());
     }
 
     public static boolean isColorLabel(final JSONObject jsonObject) throws JSONException {
-        return jsonObject.has(ResponseFields.DATA) && jsonObject.getJSONObject(ResponseFields.DATA).has(CommonFields.COLORLABEL);
+        return jsonObject.has(DATA) && jsonObject.getJSONObject(DATA).has(CommonFields.COLORLABEL);
     }
 
     private static abstract class CollectObject {
@@ -327,7 +332,7 @@ public final class MailRequest {
          * @throws JSONException If a JSON error occurs
          */
         public final void addCollectable(final JSONObject jsonObject) throws JSONException {
-            mailIDs.add(jsonObject.getString(AJAXServlet.PARAMETER_ID));
+            mailIDs.add(jsonObject.getString(PARAMETER_ID));
         }
 
         /**
@@ -343,19 +348,18 @@ public final class MailRequest {
     private static final class MoveCollectObject extends CollectObject {
 
         private final String srcFld;
-
         private final String destFld;
 
         public MoveCollectObject(final JSONObject dataObject, final Mail mailServlet) throws JSONException {
             super(mailServlet);
-            this.srcFld = dataObject.getString(AJAXServlet.PARAMETER_FOLDERID);
-            this.destFld = dataObject.getJSONObject(ResponseFields.DATA).getString(FolderChildFields.FOLDER_ID);
+            this.srcFld = dataObject.getString(PARAMETER_FOLDERID);
+            this.destFld = dataObject.getJSONObject(DATA).getString(FolderChildFields.FOLDER_ID);
         }
 
         @Override
         public boolean collectable(final JSONObject dataObject, final CollectableOperation op) throws JSONException {
-            return (CollectableOperation.MOVE.equals(op) && this.srcFld.equals(dataObject.getString(AJAXServlet.PARAMETER_FOLDERID)) && this.destFld.equals(dataObject.getJSONObject(
-                ResponseFields.DATA).getString(FolderChildFields.FOLDER_ID)));
+            return (CollectableOperation.MOVE.equals(op) && this.srcFld.equals(dataObject.getString(PARAMETER_FOLDERID)) && this.destFld.equals(dataObject.getJSONObject(
+                DATA).getString(FolderChildFields.FOLDER_ID)));
         }
 
         @Override
@@ -373,19 +377,18 @@ public final class MailRequest {
     private static final class CopyCollectObject extends CollectObject {
 
         private final String srcFld;
-
         private final String destFld;
 
         public CopyCollectObject(final JSONObject dataObject, final Mail mailServlet) throws JSONException {
             super(mailServlet);
-            this.srcFld = dataObject.getString(AJAXServlet.PARAMETER_FOLDERID);
-            this.destFld = dataObject.getJSONObject(ResponseFields.DATA).getString(FolderChildFields.FOLDER_ID);
+            this.srcFld = dataObject.getString(PARAMETER_FOLDERID);
+            this.destFld = dataObject.getJSONObject(DATA).getString(FolderChildFields.FOLDER_ID);
         }
 
         @Override
         public boolean collectable(final JSONObject dataObject, final CollectableOperation op) throws JSONException {
-            return (CollectableOperation.COPY.equals(op) && this.srcFld.equals(dataObject.getString(AJAXServlet.PARAMETER_FOLDERID)) && this.destFld.equals(dataObject.getJSONObject(
-                ResponseFields.DATA).getString(FolderChildFields.FOLDER_ID)));
+            return (CollectableOperation.COPY.equals(op) && this.srcFld.equals(dataObject.getString(PARAMETER_FOLDERID)) && this.destFld.equals(dataObject.getJSONObject(
+                DATA).getString(FolderChildFields.FOLDER_ID)));
         }
 
         @Override
@@ -403,23 +406,21 @@ public final class MailRequest {
     private static final class FlagsCollectObject extends CollectObject {
 
         private final String srcFld;
-
         private final int flagInt;
-
         private final boolean flagValue;
 
         public FlagsCollectObject(final JSONObject dataObject, final Mail mailServlet) throws JSONException {
             super(mailServlet);
-            this.srcFld = dataObject.getString(AJAXServlet.PARAMETER_FOLDERID);
-            final JSONObject bodyObj = dataObject.getJSONObject(ResponseFields.DATA);
+            this.srcFld = dataObject.getString(PARAMETER_FOLDERID);
+            final JSONObject bodyObj = dataObject.getJSONObject(DATA);
             flagInt = bodyObj.getInt(MailJSONField.FLAGS.getKey());
             flagValue = bodyObj.getBoolean(MailJSONField.VALUE.getKey());
         }
 
         @Override
         public boolean collectable(final JSONObject dataObject, final CollectableOperation op) throws JSONException {
-            final JSONObject bodyObj = dataObject.getJSONObject(ResponseFields.DATA);
-            return (CollectableOperation.STORE_FLAG.equals(op) && this.srcFld.equals(dataObject.getString(AJAXServlet.PARAMETER_FOLDERID)) && flagInt == bodyObj.getInt(MailJSONField.FLAGS.getKey()) && flagValue == bodyObj.getBoolean(MailJSONField.VALUE.getKey()));
+            final JSONObject bodyObj = dataObject.getJSONObject(DATA);
+            return (CollectableOperation.STORE_FLAG.equals(op) && this.srcFld.equals(dataObject.getString(PARAMETER_FOLDERID)) && flagInt == bodyObj.getInt(MailJSONField.FLAGS.getKey()) && flagValue == bodyObj.getBoolean(MailJSONField.VALUE.getKey()));
         }
 
         @Override
@@ -436,19 +437,18 @@ public final class MailRequest {
     private static final class ColorCollectObject extends CollectObject {
 
         private final String srcFld;
-
         private final int flagInt;
 
         public ColorCollectObject(final JSONObject dataObject, final Mail mailServlet) throws JSONException {
             super(mailServlet);
-            this.srcFld = dataObject.getString(AJAXServlet.PARAMETER_FOLDERID);
-            flagInt = dataObject.getJSONObject(ResponseFields.DATA).getInt(CommonFields.COLORLABEL);
+            this.srcFld = dataObject.getString(PARAMETER_FOLDERID);
+            flagInt = dataObject.getJSONObject(DATA).getInt(CommonFields.COLORLABEL);
         }
 
         @Override
         public boolean collectable(final JSONObject dataObject, final CollectableOperation op) throws JSONException {
-            return (CollectableOperation.COLOR_LABEL.equals(op) && srcFld.equals(dataObject.getString(AJAXServlet.PARAMETER_FOLDERID)) && flagInt == dataObject.getJSONObject(
-                ResponseFields.DATA).getInt(CommonFields.COLORLABEL));
+            return (CollectableOperation.COLOR_LABEL.equals(op) && srcFld.equals(dataObject.getString(PARAMETER_FOLDERID)) && flagInt == dataObject.getJSONObject(
+                DATA).getInt(CommonFields.COLORLABEL));
         }
 
         @Override
@@ -475,6 +475,5 @@ public final class MailRequest {
         default:
             throw new InternalError("Unknown collectable operation: " + op);
         }
-
     }
 }

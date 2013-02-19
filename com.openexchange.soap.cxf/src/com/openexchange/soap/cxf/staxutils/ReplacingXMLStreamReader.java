@@ -98,9 +98,9 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
             final XmlSchemaElement schema;
             if (isGeneric(name)) {
                 String typeName = findType();
-                schema = getChildSchema(stack.get(stack.size() - 2), typeName);
+                schema = getChildSchema(stack.get(stack.size() - 2), typeName, true);
             } else if (isEmptyURI(name)) {
-                schema = getChildSchema(stack.get(stack.size() - 2), name.getLocalPart());
+                schema = getChildSchema(stack.get(stack.size() - 2), name.getLocalPart(), false);
             } else {
                 schema = null;
             }
@@ -131,7 +131,7 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
         return null == current ? super.getNamespaceURI() : current.getExpected().getNamespaceURI();
     }
 
-    private static XmlSchemaElement getChildSchema(ReplacingElement parent, String name) {
+    private static XmlSchemaElement getChildSchema(ReplacingElement parent, String name, boolean isTypeName) {
         XmlSchemaElement schema = parent.getXmlSchema();
         if ((null != schema) && (schema.getSchemaType() instanceof XmlSchemaComplexType)) {
             XmlSchemaComplexType cplxType = (XmlSchemaComplexType) schema.getSchemaType();
@@ -141,14 +141,14 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
                 XmlSchemaContentModel contentModel = cplxType.getContentModel();
                 XmlSchemaComplexContentExtension extension = (XmlSchemaComplexContentExtension) contentModel.getContent();
                 seq = (XmlSchemaSequence) extension.getParticle();
-                XmlSchemaElement retval = findReplacer(parent, name, seq, true);
+                XmlSchemaElement retval = findReplacer(parent, name, seq, true, isTypeName);
                 if (null == retval) {
                     // Check for the attribute in the super type.
                     QName baseTypeName = extension.getBaseTypeName();
                     XmlSchemaType superType = cplxType.getParent().getParent().getTypeByQName(baseTypeName);
                     if (superType instanceof XmlSchemaComplexType) {
                         seq = (XmlSchemaSequence) ((XmlSchemaComplexType) superType).getParticle();
-                        retval = findReplacer(parent, name, seq, true);
+                        retval = findReplacer(parent, name, seq, true, isTypeName);
                     }
                     if (null != retval) {
                         return retval;
@@ -157,13 +157,13 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
                     return retval;
                 }
             } else {
-                return findReplacer(parent, name, seq, false);
+                return findReplacer(parent, name, seq, false, isTypeName);
             }
         }
         return null;
     }
 
-    private static XmlSchemaElement findReplacer(ReplacingElement parent, String name, XmlSchemaSequence seq, boolean strict) {
+    private static XmlSchemaElement findReplacer(ReplacingElement parent, String name, XmlSchemaSequence seq, boolean strict, boolean isTypeName) {
         int rememberPosition = parent.nextChildPosition();
         XmlSchemaElement retval = null;
         // First try to use the given type name. But with PHP this type name is "Struct".
@@ -173,7 +173,7 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
             // the sent XML SOAP request. This indicates, the client is able to sent correctly named elements and not only generic ones.
             // Force him to use correctly named elements here. Otherwise a wrong order causes the wrong attribute to be assigned with wrong
             // values using the byPosition() method. See bug 24484.
-            if (null != retval) {
+            if (null != retval && !isTypeName) {
                 parent.setOnlyWithName();
             }
         }

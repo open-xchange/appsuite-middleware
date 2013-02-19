@@ -111,7 +111,14 @@ public enum ConfigurationProperty {
      * This is useful if other systems in the infrastructure around OX want to create the session.
      */
     REDIRECT_IP_CHANGE_ALLOWED("com.openexchange.ajax.login.redirect.changeIPAllowed", Boolean.TRUE.toString()),
-    DISABLE_TRIM_LOGIN("com.openexchange.login.disableTrimLogin", Boolean.FALSE.toString());
+    DISABLE_TRIM_LOGIN("com.openexchange.login.disableTrimLogin", Boolean.FALSE.toString()),
+
+    /**
+     * This option should not be presented in some configuration file. It is a hidden option especially for the integration purposes where
+     * the integrating software is not capable doing secure login attempts.
+     * This option makes the authId parameter for the formLogin action optional if it is configured to <code>true</code>.
+     */
+    FORM_LOGIN_WITHOUT_AUTHID("com.openexchange.login.formLoginWithoutAuthId", Boolean.FALSE.toString());
 
     private final String propertyName;
 

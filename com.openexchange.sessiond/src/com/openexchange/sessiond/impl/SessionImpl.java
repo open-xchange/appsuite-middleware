@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
- * {@link SessionImpl} - Implements interface {@link Session}
+ * {@link SessionImpl} - Implements interface {@link Session} (and {@link PutIfAbsent}).
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -70,17 +70,18 @@ import com.openexchange.sessionstorage.SessionStorageService;
 public final class SessionImpl implements PutIfAbsent {
 
     private final String loginName;
-    private String password;
+    private volatile String password;
     private final int contextId;
     private final int userId;
     private final String sessionId;
     private final String secret;
     private final String login;
-    private String randomToken;
-    private String localIp;
+    private volatile String randomToken;
+    private volatile String localIp;
     private final String authId;
-    private String hash;
-    private String client;
+    private volatile String hash;
+    private volatile String client;
+    private boolean tranzient;
     private final ConcurrentMap<String, Object> parameters;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionImpl.class));
@@ -96,8 +97,15 @@ public final class SessionImpl implements PutIfAbsent {
      * @param secret The secret (cookie identifier)
      * @param randomToken The random token
      * @param localIp The local IP
+     * @param login The full user's login; e.g. <i>test@foo.bar</i>
+     * @param authId The authentication identifier that is used to trace the login request across different systems
+     * @param hash The hash identifier
+     * @param client The client type
+     * @param tranzient <code>true</code> if the session should be transient, <code>false</code>, otherwise
      */
-    public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login, final String authId, final String hash, final String client) {
+    public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId,
+        final String secret, final String randomToken, final String localIp, final String login, final String authId, final String hash,
+        final String client, final boolean tranzient) {
         super();
         this.userId = userId;
         this.loginName = loginName;
@@ -111,6 +119,7 @@ public final class SessionImpl implements PutIfAbsent {
         this.authId = authId;
         this.hash = hash;
         this.client = client;
+        this.tranzient = tranzient;
         parameters = new ConcurrentHashMap<String, Object>();
         parameters.put(PARAM_LOCK, new ReentrantLock());
         parameters.put(PARAM_COUNTER, new AtomicInteger());
@@ -136,6 +145,7 @@ public final class SessionImpl implements PutIfAbsent {
         this.authId = s.getAuthId();
         this.hash = s.getHash();
         this.client = s.getClient();
+        this.tranzient = false;
         parameters = new ConcurrentHashMap<String, Object>();
         parameters.put(PARAM_LOCK, new ReentrantLock());
         parameters.put(PARAM_COUNTER, new AtomicInteger());
@@ -461,4 +471,44 @@ public final class SessionImpl implements PutIfAbsent {
         }
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(128);
+        builder.append('{');
+        builder.append("contextId=").append(contextId).append(", userId=").append(userId).append(", ");
+        if (sessionId != null) {
+            builder.append("sessionId=").append(sessionId).append(", ");
+        }
+        if (login != null) {
+            builder.append("login=").append(login).append(", ");
+        }
+        if (localIp != null) {
+            builder.append("localIp=").append(localIp).append(", ");
+        }
+        if (authId != null) {
+            builder.append("authId=").append(authId).append(", ");
+        }
+        if (hash != null) {
+            builder.append("hash=").append(hash).append(", ");
+        }
+        if (client != null) {
+            builder.append("client=").append(client);
+        }
+        builder.append('}');
+        return builder.toString();
+    }
+
+    @Override
+    public boolean isTransient() {
+        return tranzient;
+    }
+
+    /**
+     * Sets if the session is transient or not.
+     *
+     * @param tranzient <code>true</code> if the session is transient, <code>false</code>, otherwise
+     */
+    public void setTransient(boolean tranzient) {
+        this.tranzient = tranzient;
+    }
 }

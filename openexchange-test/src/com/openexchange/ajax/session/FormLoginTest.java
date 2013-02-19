@@ -101,4 +101,25 @@ public class FormLoginTest extends AbstractAJAXSession {
             myClient.logout();
         }
     }
+
+    /**
+     * This test is disabled because it tests a hidden feature. Normally the formLogin request requires an authId. This test verifies that
+     * the formLogin request works without authId. To disable the required authId put
+     * <code>com.openexchange.login.formLoginWithoutAuthId=true</code> into the login.properties configuration file.
+     */
+    public void dontTestFormLoginWithoutAuthId() throws Exception {
+        final AJAXSession session = new AJAXSession();
+        final AJAXClient myClient = new AJAXClient(session);
+        try {
+            FormLoginResponse response = myClient.execute(new FormLoginRequest(login, password, null));
+            assertNotNull("Path of redirect response is not found.", response.getPath());
+            assertNotNull("Session identifier not found as fragment.", response.getSessionId());
+            assertNotNull("Login string was not found as fragment.", response.getLogin());
+            assertNotSame("", I(-1), I(response.getUserId()));
+            assertNotNull("Language string was not found as fragment.", response.getLanguage());
+            session.setId(response.getSessionId());
+        } finally {
+            myClient.logout();
+        }
+    }
 }

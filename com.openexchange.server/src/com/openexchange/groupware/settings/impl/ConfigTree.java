@@ -235,7 +235,11 @@ public final class ConfigTree {
         try {
             removeSharedValue(getSettingByPath(tree, item.getPath()));
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+            if (LOG.isDebugEnabled()) {
+                LOG.warn(e.getMessage(), e);
+            } else {
+                LOG.warn(e.getMessage());
+            }
         }
     }
 

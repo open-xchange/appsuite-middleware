@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -55,6 +55,14 @@ for FILE in ${CONFFILES}; do
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
 done
 
+PROTECT="facebookoauth.properties linkedinoauth.properties msnoauth.properties yahoooauth.properties xingoauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
+for FILE in ${PROTECT}
+do
+    echo $FILE
+    ox_update_permissions /opt/open-xchange/etc/$FILE root:open-xchange 640
+    echo "done"
+done
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -65,15 +73,30 @@ done
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/facebookoauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/linkedinoauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/msnoauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/yahoooauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/xingoauth.properties
 %config(noreplace) /opt/open-xchange/etc/*
 %dir /opt/open-xchange/etc/settings/
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/flickroauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/tumblroauth.properties
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Thu Feb 14 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Second release candidate for 7.0.1
+* Fri Feb 01 2013 Steffen Templin <marcus.klein@open-xchange.com>
+First release candidate for 7.0.1
+* Tue Jan 29 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2013-01-28
 * Mon Jan 21 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2013-01-24
 * Tue Jan 15 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2013-01-23
+* Thu Jan 10 2013 Steffen Templin <marcus.klein@open-xchange.com>
+prepare for 7.0.1
 * Thu Jan 03 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Build for public patch 2013-01-15
 * Fri Dec 28 2012 Steffen Templin <marcus.klein@open-xchange.com>

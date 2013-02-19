@@ -52,6 +52,7 @@ package com.openexchange.mailaccount.json.actions;
 import java.util.Collections;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -86,11 +87,11 @@ public final class DeleteAction extends AbstractMailAccountAction {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+    protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jBody) throws OXException {
         /*
          * Compose JSON array with id
          */
-        final JSONArray jsonArray = (JSONArray) requestData.getData();
+        final JSONArray jsonArray = jBody.toArray();
         final int len = jsonArray.length();
         /*
          * Delete

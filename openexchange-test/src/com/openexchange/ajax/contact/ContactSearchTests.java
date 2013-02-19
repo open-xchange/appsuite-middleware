@@ -5,9 +5,11 @@ import com.openexchange.groupware.search.ContactSearchObject;
 
 public class ContactSearchTests extends AbstractManagedContactTest {
 
-	private static final String ALICE = "Alice";
+    private static final String ALICE = "Alice";
+    private static final String ALICE_MAIL1 = "alice@wonderland.invalid";
 	private static final String BOB_LASTNAME = "Bob";
 	private static final String BOB_DISPLAYNAME = "Carol19";
+    private static final String BOB_MAIL2 = "bob@thebuilder.invalid";
 
 	public ContactSearchTests(String name) {
 		super(name);
@@ -19,9 +21,11 @@ public class ContactSearchTests extends AbstractManagedContactTest {
 
 		Contact c1 = generateContact();
 		c1.setSurName(ALICE);
+		c1.setEmail1(ALICE_MAIL1);
 		Contact c2 = generateContact();
 		c2.setSurName(BOB_LASTNAME);
 		c2.setDisplayName(BOB_DISPLAYNAME);
+		c2.setEmail2(BOB_MAIL2);
 
 		manager.newAction(c1,c2);
 	}
@@ -69,4 +73,35 @@ public class ContactSearchTests extends AbstractManagedContactTest {
 		assertEquals("Should find one contact", 1, results.length);
 		assertEquals("Should find the right contact", BOB_LASTNAME, results[0].getSurName());
 	}
+
+	public void testExactMatch() {
+        ContactSearchObject search = new ContactSearchObject();
+        search.setFolder(folderID);
+        search.setOrSearch(true);
+        search.setEmail1(ALICE_MAIL1);
+        search.setEmail2(ALICE_MAIL1);
+        search.setEmail3(ALICE_MAIL1);
+        search.setExactMatch(true);
+        Contact[] results = manager.searchAction(search);
+        assertEquals("Should find one contact", 1, results.length);
+        assertEquals("Should find the right contact", ALICE_MAIL1, results[0].getEmail1());
+        search.setExactMatch(false);
+        results = manager.searchAction(search);
+        assertEquals("Should find one contact", 1, results.length);
+        assertEquals("Should find the right contact", ALICE_MAIL1, results[0].getEmail1());
+
+        String partialAddress = BOB_MAIL2.substring(0, BOB_MAIL2.lastIndexOf('.'));
+        search.setEmail1(partialAddress);
+        search.setEmail2(partialAddress);
+        search.setEmail3(partialAddress);
+        search.setExactMatch(true);
+        results = manager.searchAction(search);
+        assertEquals("Should find no contact", 0, results.length);
+        search.setExactMatch(false);
+        results = manager.searchAction(search);
+        assertEquals("Should find one contact", 1, results.length);
+        assertEquals("Should find the right contact", BOB_MAIL2, results[0].getEmail2());
+
+	}
+
 }

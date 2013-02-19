@@ -116,6 +116,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogFactory;
@@ -727,6 +728,7 @@ public class Login extends AJAXServlet {
             }
         }
         final boolean disableTrimLogin = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.DISABLE_TRIM_LOGIN.getPropertyName()));
+        final boolean formLoginWithoutAuthId = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.FORM_LOGIN_WITHOUT_AUTHID.getPropertyName()));
         LoginConfiguration conf = new LoginConfiguration(
             uiWebPath,
             sessiondAutoLogin,
@@ -742,7 +744,8 @@ public class Login extends AJAXServlet {
             ipCheckWhitelist,
             redirectIPChangeAllowed,
             ranges,
-            disableTrimLogin);
+            disableTrimLogin,
+            formLoginWithoutAuthId);
         confReference.set(conf);
         handlerMap.put(ACTION_FORMLOGIN, new FormLogin(conf));
         handlerMap.put(ACTION_TOKENLOGIN, new TokenLogin(conf));
@@ -975,7 +978,8 @@ public class Login extends AJAXServlet {
                     false,
                     conf.getDefaultClient(),
                     conf.isCookieForceHTTPS(),
-                    conf.isDisableTrimLogin());
+                    conf.isDisableTrimLogin(),
+                    false);
                 return LoginPerformer.getInstance().doLogin(request);
             }
         });
@@ -994,7 +998,7 @@ public class Login extends AJAXServlet {
                     final String login = accessor.<String> getProperty(OAuthProviderConstants.PROP_LOGIN);
                     final String password = accessor.<String> getProperty(OAuthProviderConstants.PROP_PASSWORD);
                     LoginConfiguration conf = confReference.get();
-                    final LoginRequest request = LoginTools.parseLogin(req2, login, password, false, conf.getDefaultClient(), conf.isCookieForceHTTPS());
+                    final LoginRequest request = LoginTools.parseLogin(req2, login, password, false, conf.getDefaultClient(), conf.isCookieForceHTTPS(), false);
                     return LoginPerformer.getInstance().doLogin(request);
                 } catch (final OAuthProblemException e) {
                     try {
@@ -1107,14 +1111,13 @@ public class Login extends AJAXServlet {
         try {
             if (response.hasError() || null == result) {
                 final Locale locale;
-                if (null == result) {
-                    locale = Tools.getLocaleByAcceptLanguage(req, null);
-                } else {
-                    final User user = result.getUser();
-                    if (null == user) {
-                        locale = Tools.getLocaleByAcceptLanguage(req, null);
+                {
+                    final String sLocale = req.getParameter("language");
+                    if (null == sLocale) {
+                        locale = bestGuessLocale(result, req);
                     } else {
-                        locale = user.getLocale();
+                        final Locale loc = LocaleTools.getLocale(sLocale);
+                        locale = null == loc ? bestGuessLocale(result, req) : loc;
                     }
                 }
                 ResponseWriter.write(response, resp.getWriter(), locale);
@@ -1141,6 +1144,21 @@ public class Login extends AJAXServlet {
             return false;
         }
         return false;
+    }
+
+    private static Locale bestGuessLocale(LoginResult result, final HttpServletRequest req) {
+        final Locale locale;
+        if (null == result) {
+            locale = Tools.getLocaleByAcceptLanguage(req, null);
+        } else {
+            final User user = result.getUser();
+            if (null == user) {
+                locale = Tools.getLocaleByAcceptLanguage(req, null);
+            } else {
+                locale = user.getLocale();
+            }
+        }
+        return locale;
     }
 
     private static void addHeadersAndCookies(final LoginResult result, final HttpServletResponse resp) {

@@ -178,16 +178,19 @@ public final class MimeMessageUtility {
      * @return <code>true</code> to retry; otherwise <code>false</code>
      */
     public static boolean shouldRetry(final OXException e) {
+        if (null == e) {
+            return false;
+        }
         if (MailExceptionCode.MAIL_NOT_FOUND.equals(e) || MimeMailExceptionCode.FOLDER_CLOSED.equals(e)) {
             return true;
         }
         if (MailExceptionCode.IO_ERROR.equals(e)) {
             final Throwable cause = e.getCause();
-            return (cause instanceof IOException) && "no content".equals(cause.getMessage().toLowerCase(Locale.ENGLISH));
+            return (cause instanceof IOException) && "no content".equals(toLowerCase(cause.getMessage()));
         }
         if (MimeMailExceptionCode.MESSAGING_ERROR.equals(e)) {
             final Throwable cause = e.getCause();
-            return (cause instanceof MessagingException) && "failed to fetch headers".equals(cause.getMessage().toLowerCase(Locale.ENGLISH));
+            return (cause instanceof MessagingException) && "failed to fetch headers".equals(toLowerCase(cause.getMessage()));
         }
         return false;
     }
@@ -371,12 +374,11 @@ public final class MimeMessageUtility {
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
     public static boolean containsContentId(final String contentId, final Collection<String> contentIds) {
-        for (final String current : contentIds) {
-            if (equalsCID(contentId, current)) {
-                return true;
-            }
+        boolean contains = false;
+        for (Iterator<String> iterator = contentIds.iterator(); !contains && iterator.hasNext();) {
+            contains = equalsCID(contentId, iterator.next());
         }
-        return false;
+        return contains;
     }
 
     /**
@@ -1162,7 +1164,7 @@ public final class MimeMessageUtility {
             return s;
         }
         final int length = s.length();
-        final StringAllocator sb = new StringAllocator(length << 1);
+        final StringBuilder sb = new StringBuilder(length << 1);
         for (int i = 0; i < length; i++) {
             final char c = s.charAt(i);
             if (c == '\\') {
@@ -1241,7 +1243,7 @@ public final class MimeMessageUtility {
                 return encode ? MimeUtility.encodeWord(phrase) : phrase;
             }
             final String replaced = phrase.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\\\"");
-            return new com.openexchange.java.StringAllocator(len + 2).append('"').append(
+            return new StringBuilder(len + 2).append('"').append(
                 encode ? MimeUtility.encodeWord(replaced) : replaced).append('"').toString();
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
@@ -1797,6 +1799,20 @@ public final class MimeMessageUtility {
         } finally {
             Streams.close(in, out);
         }
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

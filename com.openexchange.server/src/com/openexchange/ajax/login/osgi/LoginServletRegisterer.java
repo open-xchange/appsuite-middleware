@@ -139,6 +139,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             addProperty(params, ConfigurationProperty.INSECURE);
             addProperty(params, ConfigurationProperty.REDIRECT_IP_CHANGE_ALLOWED);
             addProperty(params, ConfigurationProperty.DISABLE_TRIM_LOGIN);
+            addProperty(params, ConfigurationProperty.FORM_LOGIN_WITHOUT_AUTHID);
             try {
                 LOG.info("Registering login servlet.");
                 httpService.registerServlet(prefixService.getPrefix() + SERVLET_PATH_APPENDIX, new Login(), params, null);

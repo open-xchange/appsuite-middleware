@@ -49,6 +49,7 @@
 
 package com.openexchange.snippet.rdb;
 
+import static com.openexchange.snippet.SnippetUtils.sanitizeContent;
 import static com.openexchange.snippet.rdb.Services.getService;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import gnu.trove.list.TIntList;
@@ -459,7 +460,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
             updateAttachments(id, attachments, false, getContext(session), userId, contextId, con);
             // Store content
             {
-                final String content = snippet.getContent();
+                final String content = sanitizeContent(snippet.getContent());
                 if (null != content) {
                     stmt = con.prepareStatement("INSERT INTO snippetContent (cid, user, id, content) VALUES (?, ?, ?, ?)");
                     stmt.setInt(1, contextId);
@@ -590,7 +591,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 }
                 stmt = con.prepareStatement("UPDATE snippetContent SET content=? WHERE cid=? AND user=? AND id=?");
                 int pos = 0;
-                stmt.setString(++pos, content);
+                stmt.setString(++pos, sanitizeContent(content));
                 stmt.setLong(++pos, contextId);
                 stmt.setLong(++pos, userId);
                 stmt.setLong(++pos, id);

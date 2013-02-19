@@ -452,6 +452,9 @@ public final class SMTPTransport extends MailTransport {
 
     @Override
     public void sendReceiptAck(final MailMessage srcMail, final String fromAddr) throws OXException {
+        if (null == srcMail) {
+            return;
+        }
         SMTPConfig smtpConfig = null;
         try {
             final InternetAddress dispNotification = srcMail.getDispositionNotification();

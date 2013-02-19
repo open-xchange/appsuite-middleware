@@ -62,6 +62,8 @@ import com.openexchange.exception.OXException;
  */
 public interface ConsistencyMBean {
 
+    List<String> checkOrRepairConfigDB(final boolean repair) throws MBeanException;
+
     // List
 
     // Missing

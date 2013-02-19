@@ -55,16 +55,14 @@ import java.util.Collection;
 import java.util.Collections;
 
 /**
- * {@link ProxyRegistration} - A registration.
+ * {@link ProxyRegistration} - A registration providing URL, session identifier and list of restrictions bound to URL.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ProxyRegistration {
 
     private final URL url;
-
     private final String sessionId;
-
     private final Collection<Restriction> restrictions;
 
     /**

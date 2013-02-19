@@ -31,6 +31,7 @@ import com.openexchange.tools.strings.TimeSpanParser;
  * {@link HazelcastConfigurationServiceImpl}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class HazelcastConfigurationServiceImpl implements HazelcastConfigurationService {
 
@@ -51,7 +52,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
 
     @Override
     public boolean isEnabled() throws OXException {
-        return Services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.hazelcast.enabled", Boolean.TRUE);
+        return Services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.hazelcast.enabled", true);
     }
 
     @Override
@@ -64,7 +65,11 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         String groupName = configService.getProperty("com.openexchange.cluster.name");
         if (isEmpty(groupName)) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("com.openexchange.cluster.name");
-        } else if ("ox".equalsIgnoreCase(groupName)) {
+        }
+        /*
+         * Continue Hazelcast configuration
+         */
+        if ("ox".equalsIgnoreCase(groupName)) {
             LOG.warn("\n\tThe configuration value for \"com.openexchange.cluster.name\" has not been changed from it's default " +
                     "value \"ox\". Please do so to make this warning disappear.\n");
         }
@@ -75,6 +80,12 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         if (configService.getBoolProperty("com.openexchange.hazelcast.jmx", true)) {
             config.setProperty(GroupProperties.PROP_ENABLE_JMX, "true")
                 .setProperty(GroupProperties.PROP_ENABLE_JMX_DETAILED, "true");
+        }
+        /*
+         * IPv6 support
+         */
+        if (configService.getBoolProperty("com.openexchange.hazelcast.enableIPv6Support", false)) {
+            config.setProperty(GroupProperties.PROP_PREFER_IPv4_STACK, "false");
         }
         /*
          * limit number of redos
@@ -105,6 +116,21 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
         config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(false);
         config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(true).setConnectionTimeoutSeconds(10);
+        /*
+         * incoming / outgoing ports
+         */
+        config.getNetworkConfig().setPort(configService.getIntProperty("com.openexchange.hazelcast.networkConfig.port", 5701));
+        config.getNetworkConfig().setPortAutoIncrement(
+            configService.getBoolProperty("com.openexchange.hazelcast.networkConfig.portAutoIncrement", true));
+        String[] outboundPortDefinitions = Strings.splitByComma(
+            configService.getProperty("com.openexchange.hazelcast.networkConfig.outboundPortDefinitions", ""));
+        if (null != outboundPortDefinitions && 0 < outboundPortDefinitions.length) {
+            for (String portDefintion : outboundPortDefinitions) {
+                if (false == isEmpty(portDefintion)) {
+                    config.getNetworkConfig().addOutboundPortDefinition(portDefintion);
+                }
+            }
+        }
         /*
          * data structure configs
          */

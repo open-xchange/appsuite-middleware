@@ -1638,7 +1638,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      * @see setPasswordMech
      */
     final public void setPassword(final String passwd) {
-        if (null == password) {
+        if (null == passwd) {
             this.passwordset = true;
         }
         this.password = passwd;

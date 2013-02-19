@@ -69,6 +69,8 @@ import com.fasterxml.jackson.core.util.MinimalPrettyPrinter;
  */
 abstract class AbstractJSONValue implements JSONValue {
 
+    private static final long serialVersionUID = -1594307735237035381L;
+
     private static final Constructor<String> STRING_CONSTRUCTOR;
     static {
         try {

@@ -53,6 +53,7 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.xmpp.packet.XMPPStanza;
+import com.openexchange.realtime.xmpp.transformer.XMPPPayloadElementTransformer;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -104,5 +105,11 @@ public interface XMPPExtension {
      * @throws OXException
      */
     public Set<String> getComponents();
+    
+    /**
+     * Returns a Set of XMPPPayloadElementTransformers which are necessary to transform everything inside this Extension.
+     * @return
+     */
+    public Set<XMPPPayloadElementTransformer> getElementTransformers();
 
 }

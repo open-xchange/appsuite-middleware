@@ -49,6 +49,8 @@
 
 package com.openexchange.index.solr.internal.attachments;
 
+import static com.openexchange.index.solr.internal.LuceneQueryTools.buildQueryStringWithOr;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;

@@ -13,5 +13,4 @@ default:
 
     forgotPassword: false
 
-    copyright: '(C) 2012 Open-Xchange.'
-    buildDate: '2012-12-17'
+    copyright: '(c) 2013 Open-Xchange.'

@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.packet;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -68,7 +69,9 @@ import com.openexchange.realtime.util.ElementPath;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public abstract class Stanza {
+public abstract class Stanza implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     // recipient and sender
     private ID to, from;

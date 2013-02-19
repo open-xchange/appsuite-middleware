@@ -74,6 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.images.ImageTransformations;
@@ -153,14 +154,18 @@ public class ImageTransformationsImpl implements ImageTransformations {
     public BufferedImage getImage() throws IOException {
         if (false == needsTransformation(null) && null != sourceImage) {
             return sourceImage;
-        } else {
-            return getImage(null);
         }
+        // Get BufferedImage
+        return getImage(null);
     }
 
     @Override
     public byte[] getBytes(String formatName) throws IOException {
         String imageFormat = getImageFormat(formatName);
+        return innerGetBytes(imageFormat);
+    }
+
+    private byte[] innerGetBytes(final String imageFormat) throws IOException {
         return write(getImage(imageFormat), imageFormat);
     }
 
@@ -168,12 +173,12 @@ public class ImageTransformationsImpl implements ImageTransformations {
     public InputStream getInputStream(String formatName) throws IOException {
         String imageFormat = getImageFormat(formatName);
         if (false == needsTransformation(imageFormat) && null != sourceImageStream) {
-            // nothing to do at all
+            // Nothing to do
             return sourceImageStream;
-        } else {
-            byte[] bytes = getBytes(imageFormat);
-            return null != bytes ? Streams.newByteArrayInputStream(bytes) : null;
         }
+        // Perform transformations
+        byte[] bytes = innerGetBytes(imageFormat);
+        return null == bytes ? null : Streams.newByteArrayInputStream(bytes);
     }
 
     /**
@@ -377,7 +382,11 @@ public class ImageTransformationsImpl implements ImageTransformations {
             return null;
         } finally {
             if (managedFile != null) {
-                managedFile.delete();
+                try {
+                    managedFile.delete();
+                } catch (final Exception x) {
+                    // Ignore
+                }
             }
         }
     }
@@ -389,28 +398,27 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * @return The image information, or <code>null</code> if none could be extracted
      */
     private static ImageInformation getImageInformation(Metadata metadata) {
-        if (null != metadata) {
-            int orientation = 1;
-            int width = 0;
-            int height = 0;
-            try {
-                Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
-                if (null != directory) {
-                    orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
-                }
-                JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
-                if (null != jpegDirectory) {
-                    width = jpegDirectory.getImageWidth();
-                    height = jpegDirectory.getImageHeight();
-                }
-            } catch (MetadataException e) {
-                LOG.debug("Unable to retrieve image information.", e);
-                return null;
-            }
-            return new ImageInformation(orientation, width, height);
-        } else {
+        if (null == metadata) {
             return null;
         }
+        int orientation = 1;
+        int width = 0;
+        int height = 0;
+        try {
+            Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
+            if (null != directory) {
+                orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+            }
+            JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
+            if (null != jpegDirectory) {
+                width = jpegDirectory.getImageWidth();
+                height = jpegDirectory.getImageHeight();
+            }
+        } catch (MetadataException e) {
+            LOG.debug("Unable to retrieve image information.", e);
+            return null;
+        }
+        return new ImageInformation(orientation, width, height);
     }
 
     /**
@@ -418,30 +426,32 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * image formats passed as content type. Also implicitly converts "pjpeg"- and "x-png"-formats as used by Internet Explorer to their
      * common format names.
      *
-     * @param value The value
+     * @param value The sImage
      * @return The cleaned image format
      */
-    private static String getImageFormat(String value) {
-        if (null != value) {
-            if (value.toLowerCase().startsWith("image/")) {
-                value = value.substring(6);
-            }
-            int idx = value.indexOf(';');
-            if (0 < idx) {
-                value = value.substring(0, idx);
-            }
-            if ("pjpeg".equals(value)) {
-                LOG.debug("Assuming 'jpeg' for image format " + value);
-                return "jpeg";
-            } else if ("x-png".equals(value)) {
-                LOG.debug("Assuming 'png' for image format " + value);
-                return "png";
-            }
-            return value;
-        } else {
+    private static String getImageFormat(final String value) {
+        if (null == value) {
             LOG.debug("No format name specified, falling back to 'jpeg'.");
             return "jpeg";
         }
+        // Sanitize given image format
+        String val = value;
+        if (val.toLowerCase().startsWith("image/")) {
+            val = val.substring(6);
+        }
+        int idx = val.indexOf(';');
+        if (0 < idx) {
+            val = val.substring(0, idx);
+        }
+        if ("pjpeg".equals(val)) {
+            LOG.debug("Assuming 'jpeg' for image format " + val);
+            return "jpeg";
+        }
+        if ("x-png".equals(val)) {
+            LOG.debug("Assuming 'png' for image format " + val);
+            return "png";
+        }
+        return val;
     }
 
     /**
@@ -451,10 +461,21 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * @return <code>true</code> if the image format can be read, <code>false</code>, otherwise
      */
     private static boolean canRead(String formatName) {
-        if ("vnd.microsoft.icon".equalsIgnoreCase(formatName) || "x-icon".equalsIgnoreCase(formatName)) {
-            // ImageIO has problems reading icons: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6633448
-            return false;
+        final String tmp = toLowerCase(formatName);
+        return (!"vnd.microsoft.icon".equals(tmp) && !"x-icon".equals(tmp));
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
         }
-        return true;
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 }
