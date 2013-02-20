@@ -205,6 +205,18 @@ public interface UserService {
      * @see #getContext(int)
      */
     User searchUser(String email, Context context) throws OXException;
+    
+    /**
+     * Searches a user by its email address. This is used for converting iCal to appointments.
+     *
+     * @param email The email address of the user.
+     * @param context The context.
+     * @return A {@link User} instance if the user was found by its email address or <code>null</code> if no user could be found.
+     * @return considerAliases
+     * @throws OXException If an error occurs.
+     * @see #getContext(int)
+     */
+    User searchUser(String email, Context context, boolean considerAliases) throws OXException;
 
     /**
      * Search for matching login name.

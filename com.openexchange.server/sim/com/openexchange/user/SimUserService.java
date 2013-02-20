@@ -213,4 +213,9 @@ public class SimUserService implements UserService {
         return 0;
     }
 
+    @Override
+    public User searchUser(String email, Context context, boolean considerAliases) throws OXException {
+        return null;
+    }
+
 }
