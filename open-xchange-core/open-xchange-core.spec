@@ -368,11 +368,13 @@ if ! ox_exists_property com.openexchange.contactcollector.folder.deleteDenied $p
    ox_set_property com.openexchange.contactcollector.folder.deleteDenied false $pfile
 fi
 
+PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
-ox_update_permissions "/opt/open-xchange/etc/configdb.properties" root:open-xchange 640
-ox_update_permissions "/opt/open-xchange/etc/mail.properties" root:open-xchange 640
+for FILE in $PROTECT
+do
+    ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
+done
 ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
-
 
 %clean
 %{__rm} -rf %{buildroot}

@@ -1,3 +1,8 @@
+* 2013-02-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24694: Setting file permissions for configuration files with sensitive content without read permission for all users in
+   system.
+
 * 2013-02-12 - dennis.sieben@open-xchange.com
 
  - Fix for bug 23962: Adjusted server response handling
