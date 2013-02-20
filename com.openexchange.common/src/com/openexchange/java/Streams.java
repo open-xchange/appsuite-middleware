@@ -55,6 +55,8 @@ import java.io.Closeable;
 import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
+import java.io.Writer;
 
 /**
  * {@link Streams} - A utility class for streams.
@@ -65,6 +67,92 @@ import java.io.InputStream;
 public class Streams {
 
     /**
+     * No initialization.
+     */
+    private Streams() {
+        super();
+    }
+
+    /**
+     * Reads the content from given reader.
+     *
+     * @param reader The reader
+     * @return The reader's content
+     * @throws IOException If an I/O error occurs
+     */
+    public static String reader2string(final Reader reader) throws IOException {
+        if (null == reader) {
+            return null;
+        }
+        final int buflen = 2048;
+        final char[] cbuf = new char[buflen];
+        final StringBuilder builder = new StringBuilder(8192);
+        for (int read = reader.read(cbuf, 0, buflen); read > 0; read = reader.read(cbuf, 0, buflen)) {
+            builder.append(cbuf, 0, read);
+        }
+        if (0 == builder.length()) {
+            return null;
+        }
+        return builder.toString();
+    }
+
+    /**
+     * Creates an appropriate <tt>ByteArrayInputStream</tt> carrying given <tt>ByteArrayOutputStream</tt>'s valid bytes.
+     * <p>
+     * <b>Note</b>: The byte array from specified <tt>ByteArrayOutputStream</tt> is possibly shared to <tt>ByteArrayInputStream</tt>.
+     *
+     * @param baos The <tt>ByteArrayOutputStream</tt> instance
+     * @return The associated <tt>ByteArrayInputStream</tt> instance
+     */
+    public static ByteArrayInputStream asInputStream(final ByteArrayOutputStream baos) {
+        if (null == baos) {
+            return null;
+        }
+        if (baos instanceof UnsynchronizedByteArrayOutputStream) {
+            return ((UnsynchronizedByteArrayOutputStream) baos).toByteArrayInputStream();
+        }
+        return new UnsynchronizedByteArrayInputStream(baos.toByteArray());
+    }
+
+    /**
+     * Creates an appropriate <tt>ByteArrayInputStream</tt> carrying given <tt>InputStream</tt>'s bytes.
+     *
+     * @param in The <tt>InputStream</tt> instance
+     * @return The associated <tt>ByteArrayInputStream</tt> instance
+     * @throws IOException If an I/O error occurs
+     */
+    public static ByteArrayInputStream asInputStream(final InputStream in) throws IOException {
+        if (null == in) {
+            return null;
+        }
+        return newByteArrayInputStream(in);
+    }
+
+    /**
+     * Writes specified input stream's content to a <code>ByteArrayOutputStream</code> array.
+     *
+     * @param is The input stream to read from
+     * @return A newly created <code>byte</code> array carrying input stream's bytes.
+     * @throws IOException If an I/O error occurs
+     */
+    public static ByteArrayOutputStream stream2ByteArrayOutputStream(final InputStream is) throws IOException {
+        if (null == is) {
+            return null;
+        }
+        try {
+            final ByteArrayOutputStream bos = newByteArrayOutputStream(4096);
+            final int buflen = 2048;
+            final byte[] buf = new byte[buflen];
+            for (int read; (read = is.read(buf, 0, buflen)) > 0;) {
+                bos.write(buf, 0, read);
+            }
+            return bos;
+        } finally {
+            close(is);
+        }
+    }
+
+    /**
      * Converts specified input stream to a <code>byte</code> array.
      *
      * @param is The input stream to read from
@@ -72,6 +160,9 @@ public class Streams {
      * @throws IOException If an I/O error occurs
      */
     public static byte[] stream2bytes(final InputStream is) throws IOException {
+        if (null == is) {
+            return new byte[0];
+        }
         try {
             final ByteArrayOutputStream bos = newByteArrayOutputStream(4096);
             final int buflen = 2048;
@@ -83,6 +174,38 @@ public class Streams {
         } finally {
             close(is);
         }
+    }
+
+    /**
+     * Creates a new non-thread-safe {@link Reader} whose source is the specified string.
+     *
+     * @param s The string to read from
+     * @return The reader
+     */
+    @SuppressWarnings("resource")
+    public static Reader newStringReader(final String s) {
+        return null == s ? null : new UnsynchronizedStringReader(s);
+    }
+
+    /**
+     * Creates a new non-thread-safe {@link Writer} that collects its output in a string allocator, which can then be used to construct a
+     * string.
+     *
+     * @return A new writer
+     */
+    public static Writer newStringWriter() {
+        return new UnsynchronizedStringWriter(32);
+    }
+
+    /**
+     * Creates a new non-thread-safe {@link Writer} that collects its output in a string allocator, which can then be used to construct a
+     * string.
+     *
+     * @param initial The initial capacity
+     * @return A new writer
+     */
+    public static Writer newStringWriter(final int initial) {
+        return new UnsynchronizedStringWriter(initial);
     }
 
     /**
@@ -112,7 +235,18 @@ public class Streams {
      * @throws IOException If an I/O error occurs
      */
     public static ByteArrayInputStream newByteArrayInputStream(final InputStream inputStream) throws IOException {
-        return new UnsynchronizedByteArrayInputStream(stream2bytes(inputStream));
+        try {
+            @SuppressWarnings("resource")
+            final UnsynchronizedByteArrayOutputStream bos = new UnsynchronizedByteArrayOutputStream(4096);
+            final int buflen = 2048;
+            final byte[] buf = new byte[buflen];
+            for (int read; (read = inputStream.read(buf, 0, buflen)) > 0;) {
+                bos.write(buf, 0, read);
+            }
+            return bos.toByteArrayInputStream();
+        } finally {
+            close(inputStream);
+        }
     }
 
     /**

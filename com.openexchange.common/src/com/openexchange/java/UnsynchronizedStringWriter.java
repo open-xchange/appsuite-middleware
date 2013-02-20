@@ -84,20 +84,6 @@ public class UnsynchronizedStringWriter extends StringWriter {
     }
 
     /**
-     * Create a new string writer, using the specified string builder.
-     *
-     * @param buf The string builder to use
-     * @throws IllegalArgumentException If given string builder is <code>null</code>
-     */
-    public UnsynchronizedStringWriter(final StringBuilder buf) {
-        if (null == buf) {
-            throw new IllegalArgumentException("Buffer is null");
-        }
-        this.buf = buf;
-        lock = this.buf;
-    }
-
-    /**
      * Write a single character.
      */
     @Override
@@ -222,15 +208,6 @@ public class UnsynchronizedStringWriter extends StringWriter {
     @Override
     public String toString() {
         return buf.toString();
-    }
-
-    /**
-     * Returns the string builder itself.
-     *
-     * @return The {@link StringBuilder} holding the current buffer value.
-     */
-    public StringBuilder getBuilder() {
-        return buf;
     }
 
     /**
