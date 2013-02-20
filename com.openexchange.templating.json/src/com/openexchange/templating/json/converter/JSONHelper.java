@@ -47,35 +47,19 @@
  *
  */
 
-package com.openexchange.templating.json.osgi;
+package com.openexchange.templating.json.converter;
 
-<<<<<<< HEAD
-import com.openexchange.ajax.requesthandler.Dispatcher;
-=======
->>>>>>> added basic converter
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
-import com.openexchange.templating.TemplateService;
-import com.openexchange.templating.json.TemplatingActionFactory;
-import com.openexchange.templating.json.converter.TemplatedResultConverter;
+import org.json.JSONException;
+import com.openexchange.ajax.tools.JSONCoercion;
+
 
 /**
- * {@link TemplatingJSONActivator}
+ * {@link JSONHelper}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class TemplatingJSONActivator extends AJAXModuleActivator {
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { TemplateService.class, Dispatcher.class };
+public class JSONHelper {
+    public String serialize(Object o) throws JSONException {
+        return JSONCoercion.coerceToJSON(o).toString();
     }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerModule(new TemplatingActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "templating");
-        registerService(ResultConverter.class, new TemplatedResultConverter(this));
-    }
-
 }

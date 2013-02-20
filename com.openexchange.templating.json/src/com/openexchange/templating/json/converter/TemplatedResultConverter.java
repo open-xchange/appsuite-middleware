@@ -47,35 +47,76 @@
  *
  */
 
-package com.openexchange.templating.json.osgi;
+package com.openexchange.templating.json.converter;
 
-<<<<<<< HEAD
-import com.openexchange.ajax.requesthandler.Dispatcher;
-=======
->>>>>>> added basic converter
+import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
-import com.openexchange.templating.json.TemplatingActionFactory;
-import com.openexchange.templating.json.converter.TemplatedResultConverter;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link TemplatingJSONActivator}
+ * {@link TemplatedResultConverter}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class TemplatingJSONActivator extends AJAXModuleActivator {
+public class TemplatedResultConverter implements ResultConverter {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { TemplateService.class, Dispatcher.class };
+    private ServiceLookup services;
+
+    public TemplatedResultConverter(ServiceLookup services) {
+        super();
+        this.services = services;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerModule(new TemplatingActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "templating");
-        registerService(ResultConverter.class, new TemplatedResultConverter(this));
+    public String getInputFormat() {
+        return "native";
+    }
+
+    @Override
+    public String getOutputFormat() {
+        return "template";
+    }
+
+    @Override
+    public Quality getQuality() {
+        return Quality.BAD;
+    }
+
+    @Override
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        
+        TemplateService templates = services.getService(TemplateService.class);
+        OXTemplate template = templates.loadTemplate(requestData.getParameter("template"), requestData.getParameter("template"), session, false);
+        
+        Map<String, Object> rootObject = new HashMap<String, Object>();
+        
+        rootObject.put("templates", templates.createHelper(rootObject, session, false));
+        rootObject.put("data", result.getResultObject());
+        // TODO: Add Helpers for formatting dates and i18n stuff
+        
+        rootObject.put("JSON", new JSONHelper());
+        
+        // TODO: Asset Helper
+        // TODO: Whitelisted Dispatcher
+        // TODO: Other Helpers
+        
+        rootObject.put("req", requestData);
+        
+        StringWriter writer = new StringWriter();
+        
+        template.process(rootObject, writer);
+    
+        result.setResultObject(writer.toString(), "template");
     }
 
 }
