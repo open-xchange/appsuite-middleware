@@ -117,6 +117,7 @@ public class TemplatedResultConverter implements ResultConverter {
         template.process(rootObject, writer);
     
         result.setResultObject(writer.toString(), "template");
+        result.setHeader("Content-Type", "text/html"); // FIXME
     }
 
 }

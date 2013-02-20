@@ -52,9 +52,11 @@ package com.openexchange.templating.osgi;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.templating.OXTemplateImpl;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.templating.impl.OXIntegration;
 import com.openexchange.templating.impl.TemplateServiceImpl;
+import com.openexchange.tools.strings.StringParser;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -72,6 +74,8 @@ public class Activator extends HousekeepingActivator {
         templates.setOXFolderHelper(integration);
         templates.setInfostoreHelper(integration);
         registerService(TemplateService.class, templates);
+        
+        OXTemplateImpl.services = this;
 
         final boolean hasProperty = config.getProperty(TemplateServiceImpl.PATH_PROPERTY) != null;
         if (!hasProperty) {
@@ -84,7 +88,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, InfostoreFacade.class };
+        return new Class[] { ConfigurationService.class, InfostoreFacade.class, StringParser.class };
     }
 
 }
