@@ -299,7 +299,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
     }
 
     private static final gnu.trove.set.TIntSet SPECIALS = new gnu.trove.set.hash.TIntHashSet(new int[] {
-        '+', '(', ')', '[', ']', '$', '^', '.', '{', '}', '|', '\\' });
+        '.', '+', '(', ')', '[', ']', '$', '^', '.', '{', '}', '|', '\\' });
 
     /**
      * Converts specified wild-card string to a regular expression
