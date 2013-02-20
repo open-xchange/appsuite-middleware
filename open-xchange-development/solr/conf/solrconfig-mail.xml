@@ -162,6 +162,8 @@
         <lst name="defaults">
             <str name="df">uuid</str>
             <str name="mlt.mintf">1</str>
+            <str name="mlt.minwl">3</str>
+            <str name="mlt.boost">true</str>
             <str name="mlt.fl">subject_gen,subject_en,subject_de,subject_fr,subject_it</str>
             <str name="fl">uuid,account,full_name,id,from,to,cc,bcc,subject_gen,subject_en,subject_de,subject_fr,subject_it</str>
         </lst>
