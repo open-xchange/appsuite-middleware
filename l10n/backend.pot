@@ -3423,6 +3423,11 @@ msgstr ""
 msgid "Index-based search is not supported for module: %1$s"
 msgstr ""
 
+#. There is no search handler for field %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:71
+msgid "There is no search handler for field %1$s."
+msgstr ""
+
 #. The Internet proxy is not enabled.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:75
 msgid "The Internet proxy is not enabled."
