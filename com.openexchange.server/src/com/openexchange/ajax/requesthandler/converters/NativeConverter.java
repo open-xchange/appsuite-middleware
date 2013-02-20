@@ -47,31 +47,49 @@
  *
  */
 
-package com.openexchange.templating.json.osgi;
+package com.openexchange.ajax.requesthandler.converters;
 
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
-import com.openexchange.templating.TemplateService;
-import com.openexchange.templating.json.TemplatingActionFactory;
-import com.openexchange.templating.json.converter.TemplatedResultConverter;
+import com.openexchange.ajax.requesthandler.ResultConverter.Quality;
+import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link TemplatingJSONActivator}
+ * {@link NativeConverter}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class TemplatingJSONActivator extends AJAXModuleActivator {
+public class NativeConverter implements ResultConverter {
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { TemplateService.class };
+    public String getInputFormat() {
+        return "json";
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerModule(new TemplatingActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "templating");
-        registerService(ResultConverter.class, new TemplatedResultConverter(this));
+    public String getOutputFormat() {
+        return "native";
+    }
+
+    @Override
+    public Quality getQuality() {
+        return Quality.BAD;
+    }
+
+    @Override
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        try {
+            result.setResultObject(JSONCoercion.coerceToNative(result.getResultObject()), "native");
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.toString(), e);
+        }
     }
 
 }
