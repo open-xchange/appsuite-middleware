@@ -123,6 +123,10 @@ TOKEN : /* LITERALS */
       "\""
   >
 |
+  <#ESCAPED_CHAR:
+      ("\\" ("\\"|"\""))
+  >
+|
 // multi-line = "text:" *(SP / HTAB) (hash-comment / CRLF)
 //               *(multi-line-literal / multi-line-dotstuff)
 //               "." CRLF
