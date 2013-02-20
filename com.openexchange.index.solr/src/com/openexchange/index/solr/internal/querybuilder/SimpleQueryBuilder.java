@@ -66,6 +66,7 @@ import com.openexchange.index.IndexField;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.SearchHandler;
+import com.openexchange.index.SearchHandlers;
 import com.openexchange.index.solr.internal.config.FieldConfiguration;
 
 /**
@@ -119,76 +120,63 @@ public class SimpleQueryBuilder implements SolrQueryBuilder {
             }
             log.debug("[buildQuery]: Handler is \'" + searchHandler.toString() + "\'");
 
-            String handlerId = searchHandler.toString().toLowerCase();
+            String handlerId = searchHandler.getHandlerName();
             String handlerName = config.getRawMapping().get(Configuration.HANDLER + '.' + handlerId);
             QueryTranslator translator = translators.get(handlerId);
             Object searchTerm = parameters.getSearchTerm();
             SolrQuery solrQuery = new SolrQuery();
             if (handlerName == null) {
+                // TODO: also check handler existence in solrconfig
                 throw new IllegalArgumentException("No solr search handler is configured for '" + handlerId + "'");
             }
-            switch (searchHandler) {
-                case SIMPLE: {
-                    if (searchTerm == null || !(searchTerm instanceof String)) {
-                        throw new IllegalArgumentException("Parameter 'search term' must not be null and of type java.lang.String!");
-                    }
-                    solrQuery.setQuery((String) searchTerm);
-                    solrQuery.setQueryType(handlerName);
-                    break;
+            
+            if (SearchHandlers.SIMPLE.equals(searchHandler)) {
+                if (searchTerm == null || !(searchTerm instanceof String)) {
+                    throw new IllegalArgumentException("Parameter 'search term' must not be null and of type java.lang.String!");
+                }
+                solrQuery.setQuery((String) searchTerm);
+                solrQuery.setQueryType(handlerName);
+            } else if (SearchHandlers.CUSTOM.equals(searchHandler)) {
+                if (searchTerm == null) {
+                    throw new IllegalArgumentException("Parameter 'search term' must not be null!");
+                }
+                if (translator == null) {
+                    throw new IllegalStateException(
+                        "Could not find a translator for search handler '" + searchHandler.toString() + "'.");
+                }
+                solrQuery.setQuery(translator.translate(searchTerm));
+                solrQuery.setQueryType(handlerName);
+            } else if (SearchHandlers.ALL_REQUEST.equals(searchHandler)) {
+                solrQuery.setQuery(translator.translate(searchTerm));
+                solrQuery.setQueryType(handlerName);
+            } else if (SearchHandlers.GET_REQUEST.equals(searchHandler)) {
+                Set<String> indexIds = parameters.getIndexIds();
+                if (indexIds == null) {
+                    throw new IllegalArgumentException("Parameter 'index ids' must not be null!");
+                }
+                if (translator == null) {
+                    throw new IllegalStateException(
+                        "Could not find a translator for search handler '" + searchHandler.toString() + "'.");
+                }
+                solrQuery.setQuery(translator.translate(indexIds));
+                solrQuery.setQueryType(handlerName);
+            } else {
+                if (searchTerm == null) {
+                    throw new IllegalArgumentException("Parameter 'search term' must not be null!");
                 }
 
-                case CUSTOM: {
-                    if (searchTerm == null) {
-                        throw new IllegalArgumentException("Parameter 'search term' must not be null!");
+                String finalTerm;
+                if (translator == null) {
+                    if (!(searchTerm instanceof String)) {
+                        throw new IllegalArgumentException("Parameter 'search term' must be of type java.lang.String!");
                     }
-                    if (translator == null) {
-                        throw new IllegalStateException(
-                            "Could not find a translator for search handler '" + searchHandler.toString() + "'.");
-                    }
-                    solrQuery.setQuery(translator.translate(searchTerm));
-                    solrQuery.setQueryType(handlerName);
-                    break;
+                    finalTerm = (String) searchTerm;
+                } else {
+                    finalTerm = translator.translate(searchTerm);
                 }
 
-                case ALL_REQUEST: {
-                    solrQuery.setQuery(translator.translate(searchTerm));
-                    solrQuery.setQueryType(handlerName);
-                    break;
-                }
-
-                case GET_REQUEST: {
-                    Set<String> indexIds = parameters.getIndexIds();
-                    if (indexIds == null) {
-                        throw new IllegalArgumentException("Parameter 'index ids' must not be null!");
-                    }
-                    if (translator == null) {
-                        throw new IllegalStateException(
-                            "Could not find a translator for search handler '" + searchHandler.toString() + "'.");
-                    }
-                    solrQuery.setQuery(translator.translate(indexIds));
-                    solrQuery.setQueryType(handlerName);
-                    break;
-                }
-
-                default: {
-                    if (searchTerm == null) {
-                        throw new IllegalArgumentException("Parameter 'search term' must not be null!");
-                    }
-
-                    String finalTerm;
-                    if (translator == null) {
-                        if (!(searchTerm instanceof String)) {
-                            throw new IllegalArgumentException("Parameter 'search term' must be of type java.lang.String!");
-                        }
-                        finalTerm = (String) searchTerm;
-                    } else {
-                        finalTerm = translator.translate(searchTerm);
-                    }
-
-                    solrQuery.setQuery(finalTerm);
-                    solrQuery.setQueryType(handlerName);
-                    break;
-                }
+                solrQuery.setQuery(finalTerm);
+                solrQuery.setQueryType(handlerName);
             }
 
             log.debug("[buildQuery]: Search term is \'" + solrQuery.getQuery() + "\'");

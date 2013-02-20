@@ -68,7 +68,7 @@ import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.QueryParameters;
-import com.openexchange.index.SearchHandler;
+import com.openexchange.index.SearchHandlers;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -204,7 +204,7 @@ public abstract class AbstractMailJob implements IndexingJob {
                 }
 
                 QueryParameters deleteMailsQuery = new QueryParameters.Builder()
-                    .setHandler(SearchHandler.GET_REQUEST)
+                    .setHandler(SearchHandlers.GET_REQUEST)
                     .setIndexIds(mailUuids)
                     .build();
                 mailIndex.deleteByQuery(deleteMailsQuery);
@@ -212,7 +212,7 @@ public abstract class AbstractMailJob implements IndexingJob {
                 SearchTerm<?> orTerm = new ORTerm(idTerms);
                 AccountFolders accountFolders = new AccountFolders(String.valueOf(info.accountId), Collections.singleton(String.valueOf(info.folder)));
                 QueryParameters deleteAttachmentsQuery = new QueryParameters.Builder()
-                    .setHandler(SearchHandler.CUSTOM)
+                    .setHandler(SearchHandlers.CUSTOM)
                     .setSearchTerm(orTerm)
                     .setModule(Types.EMAIL)
                     .setAccountFolders(Collections.singleton(accountFolders))

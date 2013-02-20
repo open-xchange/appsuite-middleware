@@ -64,7 +64,7 @@ import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Order;
-import com.openexchange.index.SearchHandler;
+import com.openexchange.index.SearchHandlers;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
@@ -133,7 +133,7 @@ public final class IndexAccessAdapter {
         final QueryParameters qp = new QueryParameters.Builder()
                             .setLength(1)
                             .setOffset(0)
-                            .setHandler(SearchHandler.ALL_REQUEST)
+                            .setHandler(SearchHandlers.ALL_REQUEST)
                             .setAccountFolders(Collections.singleton(accountFolders))
                             .build();
 
@@ -173,7 +173,7 @@ public final class IndexAccessAdapter {
             }
             final AccountFolders accountFolders = new AccountFolders(String.valueOf(accountId), Collections.singleton(folder));
             final QueryParameters.Builder builder = new QueryParameters.Builder()
-                                            .setHandler(SearchHandler.ALL_REQUEST)
+                                            .setHandler(SearchHandlers.ALL_REQUEST)
                                             .setAccountFolders(Collections.singleton(accountFolders))
                                             .setSortField(indexSortField)
                                             .setOrder(indexOrder);

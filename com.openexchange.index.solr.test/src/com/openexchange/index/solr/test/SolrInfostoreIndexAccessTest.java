@@ -67,7 +67,7 @@ import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
-import com.openexchange.index.SearchHandler;
+import com.openexchange.index.SearchHandlers;
 import com.openexchange.index.StandardIndexDocument;
 
 
@@ -83,7 +83,7 @@ public class SolrInfostoreIndexAccessTest extends AbstractSolrIndexAccessTest {
         assertNotNull("IndexFacadeService was null.", indexFacade);
         IndexAccess<DocumentMetadata> indexAccess = indexFacade.acquireIndexAccess(Types.INFOSTORE, user.getId(), context.getId());
         QueryParameters params = new QueryParameters.Builder()
-                                    .setHandler(SearchHandler.ALL_REQUEST)
+                                    .setHandler(SearchHandlers.ALL_REQUEST)
                                     .build();
         indexAccess.deleteByQuery(params);
     }
@@ -103,7 +103,7 @@ public class SolrInfostoreIndexAccessTest extends AbstractSolrIndexAccessTest {
         indexAccess.addDocument(new StandardIndexDocument<DocumentMetadata>(d3));
 
         QueryParameters q1 = new QueryParameters.Builder()
-            .setHandler(SearchHandler.SIMPLE)
+            .setHandler(SearchHandlers.SIMPLE)
             .setSearchTerm("First")
             .build();
         IndexResult<DocumentMetadata> r1 = indexAccess.query(q1, null);
@@ -112,7 +112,7 @@ public class SolrInfostoreIndexAccessTest extends AbstractSolrIndexAccessTest {
 
         AccountFolders af1 = new AccountFolders(IndexConstants.DEFAULT_ACCOUNT, Collections.singleton("1"));
         QueryParameters q2 = new QueryParameters.Builder()
-            .setHandler(SearchHandler.SIMPLE)
+            .setHandler(SearchHandlers.SIMPLE)
             .setSearchTerm("Document")
             .setAccountFolders(Collections.singleton(af1))
             .build();
@@ -139,7 +139,7 @@ public class SolrInfostoreIndexAccessTest extends AbstractSolrIndexAccessTest {
         allIds.add(InfostoreUUID.newUUID(context.getId(), user.getId(), d2).toString());
         allIds.add(InfostoreUUID.newUUID(context.getId(), user.getId(), d3).toString());
         QueryParameters q1 = new QueryParameters.Builder()
-            .setHandler(SearchHandler.GET_REQUEST)
+            .setHandler(SearchHandlers.GET_REQUEST)
             .setIndexIds(allIds)
             .build();
         IndexResult<DocumentMetadata> r1 = indexAccess.query(q1, null);
@@ -147,7 +147,7 @@ public class SolrInfostoreIndexAccessTest extends AbstractSolrIndexAccessTest {
 
         AccountFolders af1 = new AccountFolders(IndexConstants.DEFAULT_ACCOUNT, Collections.singleton("1"));
         QueryParameters q2 = new QueryParameters.Builder()
-            .setHandler(SearchHandler.GET_REQUEST)
+            .setHandler(SearchHandlers.GET_REQUEST)
             .setAccountFolders(Collections.singleton(af1))
             .setIndexIds(allIds)
             .build();
@@ -170,14 +170,14 @@ public class SolrInfostoreIndexAccessTest extends AbstractSolrIndexAccessTest {
         indexAccess.addDocument(new StandardIndexDocument<DocumentMetadata>(d3));
 
         QueryParameters q1 = new QueryParameters.Builder()
-            .setHandler(SearchHandler.ALL_REQUEST)
+            .setHandler(SearchHandlers.ALL_REQUEST)
             .build();
         IndexResult<DocumentMetadata> r1 = indexAccess.query(q1, null);
         assertTrue("Wrong result size.", r1.getNumFound() == 3);
 
         AccountFolders af1 = new AccountFolders(IndexConstants.DEFAULT_ACCOUNT, Collections.singleton("1"));
         QueryParameters q2 = new QueryParameters.Builder()
-            .setHandler(SearchHandler.ALL_REQUEST)
+            .setHandler(SearchHandlers.ALL_REQUEST)
             .setAccountFolders(Collections.singleton(af1))
             .build();
         IndexResult<DocumentMetadata> r2 = indexAccess.query(q2, null);
@@ -190,7 +190,7 @@ public class SolrInfostoreIndexAccessTest extends AbstractSolrIndexAccessTest {
         IndexAccess<DocumentMetadata> indexAccess = indexFacade.acquireIndexAccess(Types.INFOSTORE, user.getId(), context.getId());
 
         QueryParameters q1 = new QueryParameters.Builder()
-            .setHandler(SearchHandler.CUSTOM)
+            .setHandler(SearchHandlers.CUSTOM)
             .setSearchTerm(new Object())
             .build();
         try {

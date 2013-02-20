@@ -68,7 +68,7 @@ import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
-import com.openexchange.index.SearchHandler;
+import com.openexchange.index.SearchHandlers;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailUUID;
@@ -96,7 +96,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
         managementService.unlockIndex(context.getId(), user.getId(), Types.EMAIL);
         IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, user.getId(), context.getId());
         QueryParameters params = new QueryParameters.Builder()
-                                    .setHandler(SearchHandler.ALL_REQUEST)
+                                    .setHandler(SearchHandlers.ALL_REQUEST)
                                     .build();
         indexAccess.deleteByQuery(params);
     }
@@ -178,7 +178,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
         checkResult(m3, r3.getResults().get(0).getObject());
 
         QueryParameters params = new QueryParameters.Builder()
-                                    .setHandler(SearchHandler.SIMPLE)
+                                    .setHandler(SearchHandlers.SIMPLE)
                                     .setSearchTerm(m1.getSubject())
                                     .build();
         IndexResult<MailMessage> result = indexAccess.query(params, null);
@@ -256,7 +256,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
         indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m3));
 
         QueryParameters allQuery = new QueryParameters.Builder()
-                                    .setHandler(SearchHandler.ALL_REQUEST)
+                                    .setHandler(SearchHandlers.ALL_REQUEST)
                                     .build();
         IndexResult<MailMessage> result = indexAccess.query(allQuery, null);
         assertTrue("Wrong result size.", result.getNumFound() == 3);
@@ -278,7 +278,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
 
         AccountFolders accountFolders = new AccountFolders(String.valueOf(m1.getAccountId()));
         QueryParameters secondAllQuery = new QueryParameters.Builder()
-                                            .setHandler(SearchHandler.ALL_REQUEST)
+                                            .setHandler(SearchHandlers.ALL_REQUEST)
                                             .setAccountFolders(Collections.singleton(accountFolders))
                                             .build();
         IndexResult<MailMessage> result2 = indexAccess.query(secondAllQuery, null);
@@ -312,7 +312,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
         SearchTerm<?> subjectTerm = new SubjectTerm(m1.getSubject());
         SearchTerm<?> finalTerm = new ANDTerm(fromAndTo, subjectTerm);
         QueryParameters query = new QueryParameters.Builder()
-                                    .setHandler(SearchHandler.CUSTOM)
+                                    .setHandler(SearchHandlers.CUSTOM)
                                     .setSearchTerm(finalTerm)
                                     .build();
 
@@ -322,7 +322,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
 
         SearchTerm<?> notTerm = new NOTTerm(new SubjectTerm(m1.getSubject()));
         QueryParameters query2 = new QueryParameters.Builder()
-                                    .setHandler(SearchHandler.CUSTOM)
+                                    .setHandler(SearchHandlers.CUSTOM)
                                     .setSearchTerm(notTerm)
                                     .build();
         IndexResult<MailMessage> result2 = indexAccess.query(query2, null);
@@ -339,7 +339,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
     private QueryParameters buildAllQuery(int account, String folder) {
         AccountFolders accountFolders = new AccountFolders(String.valueOf(account), Collections.singleton(folder));
         QueryParameters params = new QueryParameters.Builder()
-                                    .setHandler(SearchHandler.ALL_REQUEST)
+                                    .setHandler(SearchHandlers.ALL_REQUEST)
                                     .setAccountFolders(Collections.singleton(accountFolders))
                                     .build();
         return params;
@@ -347,7 +347,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
 
     private QueryParameters buildGetQuery(Set<String> uuids) {
         QueryParameters params = new QueryParameters.Builder()
-                                    .setHandler(SearchHandler.GET_REQUEST)
+                                    .setHandler(SearchHandlers.GET_REQUEST)
                                     .setIndexIds(uuids)
                                     .build();
         return params;
@@ -356,7 +356,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
     private QueryParameters buildSimpleQuery(int account, String folder, String searchTerm) {
         AccountFolders accountFolders = new AccountFolders(String.valueOf(account), Collections.singleton(folder));
         QueryParameters params = new QueryParameters.Builder()
-                                    .setHandler(SearchHandler.SIMPLE)
+                                    .setHandler(SearchHandlers.SIMPLE)
                                     .setSearchTerm(searchTerm)
                                     .setAccountFolders(Collections.singleton(accountFolders))
                                     .build();

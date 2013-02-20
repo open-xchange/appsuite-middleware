@@ -70,7 +70,7 @@ import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Builder;
 import com.openexchange.index.QueryParameters.Order;
-import com.openexchange.index.SearchHandler;
+import com.openexchange.index.SearchHandlers;
 import com.openexchange.index.solr.IndexFolderManager;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
@@ -126,7 +126,7 @@ public class MailFolderJob extends AbstractMailJob {
                 mailAccess.connect();
                 AccountFolders accountFolders = new AccountFolders(String.valueOf(info.accountId), Collections.singleton(info.folder));
                 Builder queryBuilder = new Builder();
-                QueryParameters mailAllQuery = queryBuilder.setHandler(SearchHandler.ALL_REQUEST)
+                QueryParameters mailAllQuery = queryBuilder.setHandler(SearchHandlers.ALL_REQUEST)
                     .setAccountFolders(Collections.singleton(accountFolders))
                     .setSortField(MailIndexField.RECEIVED_DATE)
                     .setOrder(Order.DESC)
@@ -187,7 +187,7 @@ public class MailFolderJob extends AbstractMailJob {
                     IndexFolderManager.deleteFolderEntry(info.contextId, info.userId, Types.EMAIL, String.valueOf(info.accountId), info.folder);
                     mailIndex.deleteByQuery(mailAllQuery);
                     QueryParameters attachmentAllQuery = new Builder()
-                        .setHandler(SearchHandler.ALL_REQUEST)
+                        .setHandler(SearchHandlers.ALL_REQUEST)
                         .setAccountFolders(Collections.singleton(accountFolders))
                         .setModule(Types.EMAIL)
                         .build();

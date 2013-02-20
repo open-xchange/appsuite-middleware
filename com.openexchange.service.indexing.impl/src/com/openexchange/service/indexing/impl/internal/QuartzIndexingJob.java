@@ -73,7 +73,7 @@ import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexManagementService;
 import com.openexchange.index.IndexProperties;
 import com.openexchange.index.QueryParameters;
-import com.openexchange.index.SearchHandler;
+import com.openexchange.index.SearchHandlers;
 import com.openexchange.index.solr.ModuleSet;
 import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.IndexingService;
@@ -209,7 +209,7 @@ public class QuartzIndexingJob implements Job {
     private void startUpIndex(JobInfo jobInfo) throws OXException {
         IndexFacadeService indexFacade = Services.getService(IndexFacadeService.class);
         IndexAccess<?> indexAccess = indexFacade.acquireIndexAccess(jobInfo.getModule(), jobInfo.userId, jobInfo.contextId);
-        QueryParameters queryParameters = new QueryParameters.Builder().setLength(0).setHandler(SearchHandler.SIMPLE).setSearchTerm("something").build();
+        QueryParameters queryParameters = new QueryParameters.Builder().setLength(0).setHandler(SearchHandlers.SIMPLE).setSearchTerm("something").build();
         indexAccess.query(queryParameters, null);
         indexFacade.releaseIndexAccess(indexAccess);
     }

@@ -72,7 +72,7 @@ import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Builder;
-import com.openexchange.index.SearchHandler;
+import com.openexchange.index.SearchHandlers;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.solr.IndexFolderManager;
 import com.openexchange.service.indexing.IndexingJob;
@@ -153,13 +153,13 @@ public class InfostoreFolderJob implements IndexingJob {
         IndexFolderManager.deleteFolderEntry(info.contextId, info.userId, Types.INFOSTORE, info.account, String.valueOf(info.folder));
         AccountFolders accountFolders = new AccountFolders(info.account, Collections.singleton(String.valueOf(info.folder)));
         Builder queryBuilder = new Builder();
-        QueryParameters infostoreAllQuery = queryBuilder.setHandler(SearchHandler.ALL_REQUEST)
+        QueryParameters infostoreAllQuery = queryBuilder.setHandler(SearchHandlers.ALL_REQUEST)
             .setAccountFolders(Collections.singleton(accountFolders))
             .build();
         infostoreIndex.deleteByQuery(infostoreAllQuery);
 
         QueryParameters attachmentAllQuery = new Builder()
-            .setHandler(SearchHandler.ALL_REQUEST)
+            .setHandler(SearchHandlers.ALL_REQUEST)
             .setAccountFolders(Collections.singleton(accountFolders))
             .setModule(Types.INFOSTORE)
             .build();

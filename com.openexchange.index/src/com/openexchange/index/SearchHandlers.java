@@ -49,14 +49,49 @@
 
 package com.openexchange.index;
 
+import com.openexchange.index.internal.NamedSearchHandler;
+
+
 
 /**
- * {@link SearchHandler}
+ * {@link SearchHandlers}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface SearchHandler {
-
-    String getHandlerName();
-
+public class SearchHandlers {
+    
+    /**
+     * This handler performs a simple search.
+     * Mandatory parameters: pattern
+     * Optional parameters: folder, sort, order
+     * Module dependent: module, account, service
+     */
+    public static final SearchHandler SIMPLE = new NamedSearchHandler("simple");
+    
+    /**
+     * The custom search handler allows to define the fields to search in.
+     * Mandatory parameters: search term
+     * Optional parameters: folder, sort, order
+     * Module dependent: module, account, service
+     */
+    public static final SearchHandler CUSTOM = new NamedSearchHandler("custom");
+    
+    /**
+     * This one searches for all items within a folder.
+     * Mandatory parameters: folder.
+     * Optional parameters: sort, order
+     * Module dependent: module, account, service
+     */
+    public static final SearchHandler ALL_REQUEST = new NamedSearchHandler("all_request");
+    
+    /**
+     * This one searches for a list of index uuids.
+     * Mandatory parameters: ids - A string-array of index uuids.
+     * Optional parameters: sort, order
+     */
+    public static final SearchHandler GET_REQUEST = new NamedSearchHandler("get_request");
+    
+    public static SearchHandler namedHandler(String name) {
+        return new NamedSearchHandler(name);
+    }
 }

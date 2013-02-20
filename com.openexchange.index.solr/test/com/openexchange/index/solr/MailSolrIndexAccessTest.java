@@ -56,7 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.index.IndexManagementService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
-import com.openexchange.index.SearchHandler;
+import com.openexchange.index.SearchHandlers;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.server.ServiceLookup;
@@ -151,7 +151,7 @@ public class MailSolrIndexAccessTest extends TestCase {
 
     private void searchAndCheckLength(MockMailSolrIndexAccess indexAccess, int off, int len, int expected) throws Exception {
         QueryParameters parameters = new QueryParameters.Builder()
-            .setHandler(SearchHandler.ALL_REQUEST)
+            .setHandler(SearchHandlers.ALL_REQUEST)
             .setOffset(off)
             .setLength(len)
             .build();

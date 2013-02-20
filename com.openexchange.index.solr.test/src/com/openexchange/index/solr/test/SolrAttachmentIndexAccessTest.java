@@ -70,7 +70,7 @@ import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexConstants;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
-import com.openexchange.index.SearchHandler;
+import com.openexchange.index.SearchHandlers;
 import com.openexchange.index.StandardIndexDocument;
 
 
@@ -86,7 +86,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
         assertNotNull("IndexFacadeService was null.", indexFacade);
         IndexAccess<Attachment> indexAccess = indexFacade.acquireIndexAccess(Types.ATTACHMENT, user.getId(), context.getId());
         QueryParameters params = new QueryParameters.Builder()
-                                    .setHandler(SearchHandler.ALL_REQUEST)
+                                    .setHandler(SearchHandlers.ALL_REQUEST)
                                     .build();
         indexAccess.deleteByQuery(params);
     }
@@ -124,14 +124,14 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
         indexAccess.addDocument(new StandardIndexDocument<Attachment>(a3));
 
         QueryParameters q1 = new QueryParameters.Builder()
-            .setHandler(SearchHandler.SIMPLE)
+            .setHandler(SearchHandlers.SIMPLE)
             .setSearchTerm("sample")
             .build();
         IndexResult<Attachment> r1 = indexAccess.query(q1, null);
         assertTrue("Wrong size.", r1.getNumFound() == 3);
 
         QueryParameters q2 = new QueryParameters.Builder()
-            .setHandler(SearchHandler.SIMPLE)
+            .setHandler(SearchHandlers.SIMPLE)
             .setSearchTerm("sample")
             .setModule(Types.EMAIL)
             .build();
@@ -144,7 +144,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
         folders.add("2");
         AccountFolders af1 = new AccountFolders(IndexConstants.DEFAULT_ACCOUNT, folders);
         QueryParameters q3 = new QueryParameters.Builder()
-            .setHandler(SearchHandler.SIMPLE)
+            .setHandler(SearchHandlers.SIMPLE)
             .setSearchTerm("sample")
             .setAccountFolders(Collections.singleton(af1))
             .build();
@@ -155,7 +155,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
         afSet.add(af1);
         afSet.add(new AccountFolders(a3.getAccount()));
         QueryParameters q4 = new QueryParameters.Builder()
-            .setHandler(SearchHandler.SIMPLE)
+            .setHandler(SearchHandlers.SIMPLE)
             .setSearchTerm("sample")
             .setAccountFolders(afSet)
             .build();
@@ -200,7 +200,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
         allIds.add(AttachmentUUID.newUUID(context.getId(), user.getId(), a2).toString());
         allIds.add(AttachmentUUID.newUUID(context.getId(), user.getId(), a3).toString());
         QueryParameters q1 = new QueryParameters.Builder()
-            .setHandler(SearchHandler.GET_REQUEST)
+            .setHandler(SearchHandlers.GET_REQUEST)
             .setIndexIds(allIds)
             .build();
         IndexResult<Attachment> r1 = indexAccess.query(q1, null);
@@ -211,7 +211,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
         folders.add("2");
         AccountFolders af1 = new AccountFolders(IndexConstants.DEFAULT_ACCOUNT, folders);
         QueryParameters q2 = new QueryParameters.Builder()
-            .setHandler(SearchHandler.GET_REQUEST)
+            .setHandler(SearchHandlers.GET_REQUEST)
             .setAccountFolders(Collections.singleton(af1))
             .setIndexIds(allIds)
             .build();
@@ -219,7 +219,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
         assertTrue("Wrong size.", r2.getNumFound() == 2);
 
         QueryParameters q3 = new QueryParameters.Builder()
-            .setHandler(SearchHandler.GET_REQUEST)
+            .setHandler(SearchHandlers.GET_REQUEST)
             .setIndexIds(allIds)
             .setModule(Types.EMAIL)
             .build();
@@ -261,21 +261,21 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
         indexAccess.addDocument(new StandardIndexDocument<Attachment>(a3));
 
         QueryParameters q1 = new QueryParameters.Builder()
-            .setHandler(SearchHandler.ALL_REQUEST)
+            .setHandler(SearchHandlers.ALL_REQUEST)
             .build();
         IndexResult<Attachment> r1 = indexAccess.query(q1, null);
         assertTrue("Wrong size.", r1.getNumFound() == 3);
 
         AccountFolders af1 = new AccountFolders(IndexConstants.DEFAULT_ACCOUNT);
         QueryParameters q2 = new QueryParameters.Builder()
-            .setHandler(SearchHandler.ALL_REQUEST)
+            .setHandler(SearchHandlers.ALL_REQUEST)
             .setAccountFolders(Collections.singleton(af1))
             .build();
         IndexResult<Attachment> r2 = indexAccess.query(q2, null);
         assertTrue("Wrong size.", r2.getNumFound() == 2);
 
         QueryParameters q3 = new QueryParameters.Builder()
-            .setHandler(SearchHandler.ALL_REQUEST)
+            .setHandler(SearchHandlers.ALL_REQUEST)
             .setModule(Types.EMAIL)
             .build();
         IndexResult<Attachment> r3 = indexAccess.query(q3, null);
@@ -317,14 +317,14 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
 
         SearchTerm<?> orTerm = new ORTerm(new SearchTerm<?>[] { new ObjectIdTerm("1"), new ObjectIdTerm("2"), new ObjectIdTerm("3") });
         QueryParameters q1 = new QueryParameters.Builder()
-            .setHandler(SearchHandler.CUSTOM)
+            .setHandler(SearchHandlers.CUSTOM)
             .setSearchTerm(orTerm)
             .build();
         IndexResult<Attachment> r1 = indexAccess.query(q1, null);
         assertTrue("Wrong size.", r1.getNumFound() == 3);
 
         QueryParameters q2 = new QueryParameters.Builder()
-            .setHandler(SearchHandler.CUSTOM)
+            .setHandler(SearchHandlers.CUSTOM)
             .setSearchTerm(orTerm)
             .setModule(Types.EMAIL)
             .build();
@@ -337,7 +337,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
         folders.add("2");
         AccountFolders af1 = new AccountFolders(IndexConstants.DEFAULT_ACCOUNT, folders);
         QueryParameters q3 = new QueryParameters.Builder()
-            .setHandler(SearchHandler.CUSTOM)
+            .setHandler(SearchHandlers.CUSTOM)
             .setAccountFolders(Collections.singleton(af1))
             .setSearchTerm(orTerm)
             .build();

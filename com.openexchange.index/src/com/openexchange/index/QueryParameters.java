@@ -69,25 +69,14 @@ public final class QueryParameters {
 
         int off;
         int len;
-//        Set<String> folders;
         IndexField sortField;
         Order order;
-//        Map<String, Object> parameters;
         SearchHandler handler;
         Object searchTerm;
         Set<AccountFolders> accountFolders;
         int module;
         Set<String> indexIds;
-
-        /**
-         * Initializes a new builder.
-         */
-//        public Builder(final Object searchTerm) {
-//            super();
-//            init();
-//            this.searchTerm = searchTerm;
-//        }
-
+        
         public Builder() {
             super();
             init();
@@ -96,7 +85,6 @@ public final class QueryParameters {
         private void init() {
             off = 0;
             len = Integer.MAX_VALUE;
-//            folders = null;
             sortField = null;
             order = null;
             handler = null;
@@ -105,16 +93,6 @@ public final class QueryParameters {
             module = -1;
             indexIds = null;
         }
-
-        /**
-         * Initializes a new builder.
-         */
-//        public Builder(final Map<String, Object> parameters) {
-//            super();
-//            off = 0;
-//            len = Integer.MAX_VALUE;
-//            this.parameters = parameters;
-//        }
 
         public Builder setSearchTerm(final Object searchTerm) {
             this.searchTerm = searchTerm;
@@ -141,20 +119,10 @@ public final class QueryParameters {
             return this;
         }
 
-//        public Builder setParameters(final Map<String, Object> parameters) {
-//            this.parameters = parameters;
-//            return this;
-//        }
-
         public Builder setHandler(final SearchHandler handler) {
             this.handler = handler;
             return this;
         }
-
-//        public Builder setFolders(final Set<String> folders) {
-//            this.folders = folders;
-//            return this;
-//        }
 
         public Builder setSortField(final IndexField sortField) {
             this.sortField = sortField;
@@ -184,13 +152,9 @@ public final class QueryParameters {
 
     private final int len;
 
-//    private final Map<String, Object> parameters;
-
     private final SearchHandler handler;
 
     private final Object searchTerm;
-
-//    private final Set<String> folders;
 
     private final IndexField sortField;
 
@@ -211,9 +175,7 @@ public final class QueryParameters {
         handler = builder.handler;
         len = builder.len;
         off = builder.off;
-//        parameters = builder.parameters;
         searchTerm = builder.searchTerm;
-//        folders = builder.folders;
         sortField = builder.sortField;
         order = builder.order;
         accountFolders = builder.accountFolders;
@@ -255,24 +217,6 @@ public final class QueryParameters {
     public Set<String> getIndexIds() {
         return indexIds;
     }
-
-//    /**
-//     * Gets the folder or <code>null</code> if not set.
-//     *
-//     * @return The folder
-//     */
-//    public Set<String> getFolders() {
-//        return folders;
-//    }
-
-//    /**
-//     * Gets the parameters.
-//     *
-//     * @return The parameters
-//     */
-//    public Map<String, Object> getParameters() {
-//        return parameters;
-//    }
 
     /**
      * Gets the handler.

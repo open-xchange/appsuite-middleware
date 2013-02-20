@@ -64,6 +64,7 @@ import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
+import com.openexchange.index.SearchHandlers;
 import com.openexchange.indexedSearch.json.IndexAJAXRequest;
 import com.openexchange.indexedSearch.json.IndexedSearchExceptionCodes;
 import com.openexchange.indexedSearch.json.ResultConverters;
@@ -101,11 +102,11 @@ public class SpotlightAction extends AbstractIndexAction {
         final IndexFacadeService indexFacade = getService(IndexFacadeService.class);
         final SearchHandler searchHandler;
         if ("from".equals(field)) {
-            searchHandler = SearchHandler.SPOTLIGHT_FROM;
+            searchHandler = SearchHandlers.namedHandler("spotlight_from");
         } else if ("to".equals(field)) {
-            searchHandler = SearchHandler.SPOTLIGHT_TO;
+            searchHandler = SearchHandlers.namedHandler("spotlight_to");
         } else if ("subject".equals(field)) {
-            searchHandler = SearchHandler.SPOTLIGHT_SUBJECT;
+            searchHandler = SearchHandlers.namedHandler("spotlight_subject");
         } else {
             throw IndexedSearchExceptionCodes.UNKNOWN_HANDLER.create(field);
         }

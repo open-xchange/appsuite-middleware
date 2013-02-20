@@ -73,7 +73,7 @@ import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
-import com.openexchange.index.SearchHandler;
+import com.openexchange.index.SearchHandlers;
 import com.openexchange.index.solr.IndexFolderManager;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -124,12 +124,12 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
                 AccountFolders accountFolders = new AccountFolders(String.valueOf(info.accountId), fullNames);
                 QueryParameters withFolders = new QueryParameters.Builder()
                     .setAccountFolders(Collections.singleton(accountFolders))
-                    .setHandler(SearchHandler.ALL_REQUEST)
+                    .setHandler(SearchHandlers.ALL_REQUEST)
                     .build();
 
                 QueryParameters withoutFolders = new QueryParameters.Builder()
                     .setAccountFolders(Collections.singleton(new AccountFolders(String.valueOf(info.accountId))))
-                    .setHandler(SearchHandler.ALL_REQUEST)
+                    .setHandler(SearchHandlers.ALL_REQUEST)
                     .build();
 
                 Set<MailIndexField> fields = EnumSet.noneOf(MailIndexField.class);
@@ -180,7 +180,7 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
                             }
 
                             QueryParameters deleteMailsQuery = new QueryParameters.Builder()
-                                .setHandler(SearchHandler.GET_REQUEST)
+                                .setHandler(SearchHandlers.GET_REQUEST)
                                 .setIndexIds(uuidStrings)
                                 .build();
                             mailIndex.deleteByQuery(deleteMailsQuery);
@@ -198,7 +198,7 @@ public class CheckForDeletedFoldersJob extends AbstractMailJob {
 
                                 SearchTerm<?> orTerm = new ORTerm(idTerms);
                                 QueryParameters deleteAttachmentsQuery = new QueryParameters.Builder()
-                                    .setHandler(SearchHandler.CUSTOM)
+                                    .setHandler(SearchHandlers.CUSTOM)
                                     .setSearchTerm(orTerm)
                                     .setAccountFolders(Collections.singleton(new AccountFolders(String.valueOf(info.accountId), Collections.singleton(folder))))
                                     .setModule(Types.EMAIL)

@@ -60,7 +60,7 @@ import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.QueryParameters.Order;
-import com.openexchange.index.SearchHandler;
+import com.openexchange.index.SearchHandlers;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -216,7 +216,7 @@ public final class SmalMessageStorage extends AbstractSMALStorage implements IMa
                     }
                 }
 
-                QueryParameters parameters = builder.setHandler(SearchHandler.CUSTOM).setSearchTerm(searchTerm).build();
+                QueryParameters parameters = builder.setHandler(SearchHandlers.CUSTOM).setSearchTerm(searchTerm).build();
                 long start = System.currentTimeMillis();
                 IndexResult<MailMessage> result = indexAccess.query(parameters, MailIndexField.getFor(fields));
                 if (LOG.isDebugEnabled()) {

@@ -133,7 +133,7 @@ public class MailSearchHandler implements SearchHandler {
                                                                 .setSortField(MailIndexField.RECEIVED_DATE)
                                                                 .setOrder(Order.DESC);
 
-                    QueryParameters parameters = builder.setHandler(com.openexchange.index.SearchHandler.CUSTOM).setSearchTerm(mailSearchTerm).build();
+                    QueryParameters parameters = builder.setHandler(com.openexchange.index.SearchHandlers.CUSTOM).setSearchTerm(mailSearchTerm).build();
                     MailField[] mailFields = MailField.getFields(fields);
                     Set<MailIndexField> indexFields = MailIndexField.getFor(mailFields);
                     IndexResult<MailMessage> indexResult = indexAccess.query(parameters, indexFields);

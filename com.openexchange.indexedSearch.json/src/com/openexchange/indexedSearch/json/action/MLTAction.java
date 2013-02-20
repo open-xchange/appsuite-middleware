@@ -63,7 +63,7 @@ import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
-import com.openexchange.index.SearchHandler;
+import com.openexchange.index.SearchHandlers;
 import com.openexchange.indexedSearch.json.IndexAJAXRequest;
 import com.openexchange.indexedSearch.json.ResultConverters;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -99,7 +99,7 @@ public class MLTAction extends AbstractIndexAction {
         IndexFacadeService indexFacade = getService(IndexFacadeService.class);
         IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, session);
         QueryParameters params = new QueryParameters.Builder()
-            .setHandler(SearchHandler.MLT)
+            .setHandler(SearchHandlers.namedHandler("mlt"))
             .setSearchTerm(id)
             .setLength(10)
             .build();

@@ -64,7 +64,7 @@ import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.IndexSearchEngine;
 import com.openexchange.index.QueryParameters;
-import com.openexchange.index.SearchHandler;
+import com.openexchange.index.SearchHandlers;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -131,7 +131,7 @@ public class SolrSearchEngine implements IndexSearchEngine {
         @Override
         public IndexResult<T> call() throws Exception {
             try {
-                QueryParameters parameters = new QueryParameters.Builder().setSearchTerm(searchTerm).setHandler(SearchHandler.SIMPLE).build();
+                QueryParameters parameters = new QueryParameters.Builder().setSearchTerm(searchTerm).setHandler(SearchHandlers.SIMPLE).build();
                 return indexAccess.query(parameters, null);
             } finally {
                 latch.countDown();
