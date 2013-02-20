@@ -57,7 +57,7 @@ import com.openexchange.inet.proxy.InetProxyService;
 
 
 /**
- * {@link ConfigInetProxyService}
+ * {@link ConfigInetProxyService} - A {@link InetProxyService} defined by configuration.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
