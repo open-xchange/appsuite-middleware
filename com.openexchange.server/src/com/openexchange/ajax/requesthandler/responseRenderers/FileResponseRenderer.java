@@ -153,13 +153,17 @@ public class FileResponseRenderer implements ResponseRenderer {
         InputStream documentData = null;
         try {
             file = transformIfImage(request, file, delivery);
-            InputStream stream = file.getStream();
-            if (null == stream) {
-                // React with 404
+            if (null == file) {
+                // Quit with 404
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found.");
                 return;
             }
-            documentData = new BufferedInputStream(stream);
+            documentData = null == file.getStream() ? null : new BufferedInputStream(file.getStream());
+            if (null == documentData) {
+                // Quit with 404
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found.");
+                return;
+            }
             final String userAgent = req.getHeader("user-agent");
             if (SAVE_AS_TYPE.equals(contentType) || DOWNLOAD.equalsIgnoreCase(delivery)) {
                 final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
