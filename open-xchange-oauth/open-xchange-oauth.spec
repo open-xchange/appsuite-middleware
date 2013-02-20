@@ -60,6 +60,7 @@ for FILE in $PROTECT
 do
     ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
 done
+exit 0
 
 %clean
 %{__rm} -rf %{buildroot}
