@@ -17,6 +17,8 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+. /opt/open-xchange/lib/oxfunctions.sh
+
 setConfigFilePermissions() {
     ox_update_permissions /opt/open-xchange/etc/reportclient.properties root:open-xchange 640
 }
