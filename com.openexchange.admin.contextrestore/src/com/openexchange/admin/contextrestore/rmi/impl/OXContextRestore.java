@@ -357,6 +357,9 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             StringBuilder insert = null;
             String line;
             {
+                while ((line = in.readLine()) != null && line.startsWith("--")) {
+                    // Nope
+                }
                 boolean eoi = false;
                 while (!eoi && (line = in.readLine()) != null && !line.startsWith("--")) {
                     if (null == insert) {
@@ -364,6 +367,9 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                             // Start collecting lines
                             insert = new StringBuilder(2048);
                             insert.append(line);
+                            if (line.endsWith(");")) {
+                                eoi = true;
+                            }
                         }
                     } else {
                         insert.append(line);
