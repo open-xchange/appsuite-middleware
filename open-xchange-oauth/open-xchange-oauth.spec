@@ -55,6 +55,12 @@ for FILE in ${CONFFILES}; do
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
 done
 
+PROTECT="facebookoauth.properties linkedinoauth.properties msnoauth.properties yahoooauth.properties"
+for FILE in $PROTECT
+do
+    ox_update_permissions /opt/open-xchange/etc/$FILE root:open-xchange 640
+done
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -65,6 +71,10 @@ done
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/facebookoauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/linkedinoauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/msnoauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/yahoooauth.properties
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
