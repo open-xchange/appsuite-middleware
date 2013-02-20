@@ -63,8 +63,8 @@ import com.openexchange.realtime.packet.Message;
  */
 public class MessageBuilder extends StanzaBuilder<Message> {
     /**
-     * Create a new MessageBuilder
      * Initializes a new {@link MessageBuilder}.
+     *
      * @param from the sender's ID, must not be null
      * @param json the sender's message, must not be null
      * @throws IllegalArgumentException if from or json are null
@@ -80,24 +80,13 @@ public class MessageBuilder extends StanzaBuilder<Message> {
 
     @Override
     public Message build() throws OXException {
-        throw new UnsupportedOperationException("Not implemented yet!");
-//        Message message = new Message();
-//        basics(message, object);
-//
-//        String type = object.optString("type");
-//
-//        if (type == null || type.equals("")) {
-//            message.setType(Message.Type.normal);
-//        } else {
-//            for (Message.Type t : Message.Type.values()) {
-//                if (t.name().equalsIgnoreCase(type)) {
-//                    message.setType(t);
-//                    break;
-//                }
-//            }
-//        }
-//
-//        return message;
+        basics();
+        type();
+        return this.stanza;
+    }
+
+    private void type() {
+        stanza.setType(parse(Message.Type.class, json.optString("type"), Message.Type.normal));
     }
 
 }

@@ -250,4 +250,37 @@ public abstract class StanzaBuilder<T extends Stanza> {
      */
     public abstract T build() throws OXException;
 
+    /**
+     * Parses the supplied value into an enumeration constant, ignoring case.
+     *
+     * @param enumType The Class object of the enum type from which to return a constant
+     * @param name The name of the constant to return
+     * @return The enum constant
+     * @throws IllegalArgumentException If there's no suitable enum constant for the supplied name
+     */
+    protected static <T extends Enum<T>> T parse(Class<T> enumeration, String name) {
+        T value = parse(enumeration, name, null);
+        if (null != value) {
+            return value;
+        }
+        throw new IllegalArgumentException("No enum value '" + name + " in Enum " + enumeration.getClass().getName());
+    }
+
+    /**
+     * Parses the supplied value into an enumeration constant, ignoring case.
+     *
+     * @param enumType The Class object of the enum type from which to return a constant
+     * @param name The name of the constant to return
+     * @param defaultValue The enumeration constant to return if parsing fails
+     * @return The enum constant
+     */
+    protected static <T extends Enum<T>> T parse(Class<T> enumeration, String name, T defaultValue) {
+        for (T value : enumeration.getEnumConstants()) {
+            if (value.name().equalsIgnoreCase(name)) {
+                return value;
+            }
+        }
+        return defaultValue;
+    }
+
 }
