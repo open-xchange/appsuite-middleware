@@ -65,9 +65,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.java.UnsynchronizedStringReader;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -305,7 +303,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
     }
 
     private static final gnu.trove.set.TIntSet SPECIALS = new gnu.trove.set.hash.TIntHashSet(new int[] {
-        '+', '(', ')', '[', ']', '$', '^', '.', '{', '}', '|', '\\' });
+        '.', '+', '(', ')', '[', ']', '$', '^', '.', '{', '}', '|', '\\' });
 
     /**
      * Converts specified wild-card string to a regular expression
