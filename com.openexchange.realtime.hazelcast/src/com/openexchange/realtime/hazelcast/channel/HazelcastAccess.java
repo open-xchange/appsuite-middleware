@@ -51,6 +51,8 @@ package com.openexchange.realtime.hazelcast.channel;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
 
 
 /**
@@ -59,15 +61,35 @@ import com.hazelcast.core.HazelcastInstance;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class HazelcastAccess {
-    
+
     private static AtomicReference<HazelcastInstance> REFERENCE = new AtomicReference<HazelcastInstance>();
-    
+
     public static void setHazelcastInstance(HazelcastInstance hazelcast) {
         REFERENCE.set(hazelcast);
     }
 
-    public static HazelcastInstance getHazelcastInstance() {
+    /**
+     * Gets the hazelcast instance, throwing appropriate exceptions if it is not accessible.
+     *
+     * @return The hazelcast instance
+     */
+    public static HazelcastInstance getHazelcastInstance() throws OXException {
+        HazelcastInstance hazelcastInstance = optHazelcastInstance();
+        if (null == hazelcastInstance || false == hazelcastInstance.getLifecycleService().isRunning()) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
+        }
+        return hazelcastInstance;
+    }
+
+    /**
+     * Gets the (possibly <code>null</code> or not running) hazelcast instance.
+     * @return The hazelcast instance
+     */
+    public static HazelcastInstance optHazelcastInstance() {
         return REFERENCE.get();
     }
 
+    private HazelcastAccess() {
+        // prevent instantiation
+    }
 }

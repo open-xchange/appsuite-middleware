@@ -49,12 +49,15 @@
 
 package com.openexchange.realtime.hazelcast.channel;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 import org.apache.commons.logging.Log;
 import com.hazelcast.core.DistributedTask;
-import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
@@ -106,29 +109,67 @@ public class HazelcastChannel implements Channel {
 
     @Override
     public boolean isConnected(ID id, ServerSession session) throws OXException {
-        return directory.contains(id);
+        //TODO: maybe too expensive, since it's repeated shortly afterwards in send
+        Set<Member> receivers = getReceivers(id);
+        return null != receivers && 0 < receivers.size();
     }
 
     @Override
     public void send(Stanza stanza, ServerSession session) throws OXException {
-        HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
-        Member receiver = getReceiver(stanza.getTo());
-        if (receiver != null && !receiver.equals(hazelcast.getCluster().getLocalMember())) {
-            FutureTask<Void> task = new DistributedTask<Void>(new StanzaDispatcher(stanza), receiver);
-            hazelcast.getExecutorService().execute(task);
+        List<FutureTask<Void>> futures = initiateSend(stanza);
+        for (FutureTask<Void> future : futures) {
             try {
-                task.get();
+                future.get();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e, "Execution interrupted");
             } catch (ExecutionException e) {
-                ThreadPools.launderThrowable(e, OXException.class);
+                throw ThreadPools.launderThrowable(e, OXException.class);
             }
         }
     }
 
-    private Member getReceiver(ID id) throws OXException {
-        return directory.lookupMember(id);
+    private List<FutureTask<Void>> initiateSend(Stanza stanza) throws OXException {
+        Set<Member> receivers = getReceivers(stanza.getTo());
+        if (null == receivers || 0 == receivers.size()) {
+            //TODO: check exception parameter usage
+            throw RealtimeExceptionCodes.NO_APPROPRIATE_CHANNEL.create(stanza.getTo(), stanza.getId());
+        }
+        ExecutorService executorService = HazelcastAccess.getHazelcastInstance().getExecutorService();
+        List<FutureTask<Void>> futures = new ArrayList<FutureTask<Void>>();
+        for (Member receiver : receivers) {
+            LOG.debug("Sending to '" + stanza.getTo() + "' @ " + receiver);
+            FutureTask<Void> task = new DistributedTask<Void>(new StanzaDispatcher(stanza), receiver);
+            executorService.execute(task);
+            futures.add(task);
+        }
+        return futures;
+    }
+
+    /**
+     * Gets all possible receivers for the supplied ID. If the ID is in general form, all matching members are looked up. The returned
+     * collection will never contain the local member.
+     *
+     * @param id The ID to lookup
+     * @return All possible receivers, or an empty set if none were found
+     * @throws OXException
+     */
+    private Set<Member> getReceivers(ID id) throws OXException {
+        Set<Member> members = new HashSet<Member>();
+        Member localMember = HazelcastAccess.getHazelcastInstance().getCluster().getLocalMember();
+        if (id.isGeneralForm()) {
+            for (Member member : directory.getAll(id)) {
+                if (null != member && false == member.equals(localMember)) {
+                    members.add(member);
+                }
+            }
+        } else {
+            Member member = directory.get(id);
+            if (null != member && false == member.equals(localMember)) {
+                members.add(member);
+            }
+        }
+        return members;
     }
 
 }

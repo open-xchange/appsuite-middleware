@@ -81,6 +81,11 @@ import com.openexchange.realtime.hazelcast.channel.ResourceDirectory;
  */
 public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
+    /**
+     * Name for the rtDirectory multi-map - no further configuration via config file needed
+     */
+    private static final String RT_DIRECTORY = "rtDirectory-0";
+
     private static Log LOG = LogFactory.getLog(HazelcastRealtimeActivator.class);
 
     @Override
@@ -113,7 +118,8 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
                     Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
                     properties.put(EventConstants.EVENT_TOPIC,
                         new String[] { ResourceRegistry.TOPIC_REGISTERED, ResourceRegistry.TOPIC_UNREGISTERED });
-                    ResourceDirectory directory = new ResourceDirectory(discoverResourceDirectoryName(hazelcastInstance.getConfig()));
+                    ResourceDirectory directory = new ResourceDirectory(
+                        RT_DIRECTORY, discoverResourceDirectoryName(hazelcastInstance.getConfig()));
                     eventHandlerRegistration = context.registerService(EventHandler.class, directory, properties);
                     /*
                      * create & register channel
@@ -161,7 +167,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
     }
 
     /**
-     * Discovers the resourceDirectory map name from the supplied hazelcast configuration.
+     * Discovers the rtResourceDirectory map name from the supplied hazelcast configuration.
      *
      * @param config The config object
      * @return The resourceDirectory map name
@@ -171,13 +177,13 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         Map<String, MapConfig> mapConfigs = config.getMapConfigs();
         if (null != mapConfigs && 0 < mapConfigs.size()) {
             for (String mapName : mapConfigs.keySet()) {
-                if (mapName.startsWith("resourceDirectory-")) {
+                if (mapName.startsWith("rtResourceDirectory-")) {
                     LOG.info("Using distributed map '" + mapName + "'.");
                     return mapName;
                 }
             }
         }
-        String msg = "No distributed resourceDirectory map found in hazelcast configuration";
+        String msg = "No distributed rtResourceDirectory map found in hazelcast configuration";
         throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR));
     }
 

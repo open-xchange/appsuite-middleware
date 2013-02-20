@@ -62,6 +62,7 @@ import com.openexchange.realtime.packet.Stanza;
  */
 public class StanzaDispatcher implements Callable<Void>, Serializable {
 
+    private static final long serialVersionUID = 7824598922472715144L;
     private final Stanza stanza;
 
     /**

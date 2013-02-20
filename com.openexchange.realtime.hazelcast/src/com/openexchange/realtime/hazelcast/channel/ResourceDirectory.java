@@ -49,15 +49,20 @@
 
 package com.openexchange.realtime.hazelcast.channel;
 
-import java.util.concurrent.TimeUnit;
+import java.util.Collection;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
+import com.hazelcast.core.MultiMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
+import com.openexchange.realtime.RealtimeExceptionCodes;
 import com.openexchange.realtime.ResourceRegistry;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.server.ServiceExceptionCode;
@@ -71,36 +76,19 @@ public class ResourceDirectory implements EventHandler {
 
     private static Log LOG = LogFactory.getLog(ResourceDirectory.class);
 
-    private final String mapName;
+    private final String directoryName;
+    private final String resourceDirectoryName;
 
     /**
      * Initializes a new {@link ResourceDirectory}.
+     *
+     * @param directoryName The name of the distributed multi-map that maps general IDs to members
+     * @param resourceDirectoryName The name of the map that maps concrete IDs a member
      */
-    public ResourceDirectory(String resourceDirectoryName) {
+    public ResourceDirectory(String directoryName, String resourceDirectoryName) {
         super();
-        this.mapName = resourceDirectoryName;
-    }
-
-    /**
-     * Looks up the member node hosting the supplied ID.
-     *
-     * @param id The ID to lookup
-     * @return The member, or <code>null</code> if not found
-     * @throws OXException
-     */
-    public Member lookupMember(ID id) throws OXException {
-        return getDirectory().get(id);
-    }
-
-    /**
-     * Gets a value indicating whether the directory contains an ID or not.
-     *
-     * @param id The ID
-     * @return <code>true</code> if there is an entry for the supplied ID, <code>false</code>, otherwise
-     * @throws OXException
-     */
-    public boolean contains(ID id) throws OXException {
-        return getDirectory().containsKey(id);
+        this.directoryName = directoryName;
+        this.resourceDirectoryName = resourceDirectoryName;
     }
 
     @Override
@@ -123,23 +111,104 @@ public class ResourceDirectory implements EventHandler {
         }
     }
 
+    /**
+     * Gets the member node where the supplied ID is registered at. If the ID is in general form and there are multiple nodes hosting
+     * a matching resource, the first matching member is returned.
+     *
+     * @param id The ID to lookup
+     * @return The member node, or <code>null</code> if no members was found
+     * @throws OXException
+     */
+    public Member get(ID id) throws OXException {
+        if (id.isGeneralForm()) {
+            /*
+             * get first matching member from multi-map
+             */
+            Collection<Member> possibleMembers = getDirectory().get(id);
+            if (null != possibleMembers && 0 < possibleMembers.size()) {
+                return possibleMembers.iterator().next();
+            }
+            return null; // not found
+        } else {
+            /*
+             * get member for concret ID
+             */
+            return getResourceDirectory().get(id);
+        }
+    }
+
+    /**
+     * Gets all member nodes where the supplied ID is registered. Note that only the general form of the ID is taken into account to
+     * resolve the members.
+     *
+     * @param id The ID to lookup
+     * @return All matching member nodes, or an empty collection if no members was found
+     * @throws OXException
+     */
+    public Collection<Member> getAll(ID id) throws OXException {
+        return getDirectory().get(id.isGeneralForm() ? id : id.toGeneralForm());
+    }
+
+    /**
+     * Gets a value indicating whether the directory contains an ID or not.
+     *
+     * @param id The ID
+     * @return <code>true</code> if there is an entry for the supplied ID, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    public boolean contains(ID id) throws OXException {
+        return id.isGeneralForm() ? getDirectory().containsKey(id) : getResourceDirectory().containsKey(id);
+    }
+
     private void put(ID id) throws OXException {
-        getDirectory().set(id, getLocalMember(), 0, TimeUnit.SECONDS);
+        if (null == id || id.isGeneralForm()) {
+            throw RealtimeExceptionCodes.INVALID_ID.create();
+        }
+        Member localMember = getLocalMember();
+        boolean addedID = false;
+        try {
+            Future<Member> future = getResourceDirectory().putAsync(id, localMember);
+            if (false == getDirectory().put(id.toGeneralForm(), localMember)) {
+                LOG.warn("ID '" + id.toGeneralForm() + "' not added to directory.");
+            }
+            future.get();
+            addedID = true;
+        } catch (HazelcastException e) {
+            throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (ExecutionException e) {
+            // (never thrown)
+            throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (false == addedID) {
+                // simple rollback
+                try {
+                    getDirectory().remove(id.toGeneralForm(), localMember);
+                } catch (RuntimeException e) {
+                    LOG.warn("Error rolling back adding user-session", e);
+                }
+            }
+        }
     }
 
     private Member remove(ID id) throws OXException {
-        return getDirectory().remove(id);
-    }
-
-    private IMap<ID, Member> getDirectory() throws OXException {
+        if (null == id || id.isGeneralForm()) {
+            throw RealtimeExceptionCodes.INVALID_ID.create();
+        }
         try {
-            HazelcastInstance hazelcastInstance = HazelcastAccess.getHazelcastInstance();
-            if (null == hazelcastInstance || false == hazelcastInstance.getLifecycleService().isRunning()) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
+            Member removedMember = getResourceDirectory().remove(id);
+            if (null != removedMember) {
+                if (false == getDirectory().remove(id.toGeneralForm(), removedMember)) {
+                    LOG.warn("Member '" + removedMember + "' not removed for ID '" + id.toGeneralForm() +"'.");
+                }
+            } else {
+                LOG.debug("ID '" + id + "' not found, unable to remove from directory.");
             }
-            return hazelcastInstance.getMap(mapName);
-        } catch (RuntimeException e) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName(), e);
+            return removedMember;
+        } catch (HazelcastException e) {
+            throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -149,6 +218,22 @@ public class ResourceDirectory implements EventHandler {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
         }
         return hazelcastInstance.getCluster().getLocalMember();
+    }
+
+    private IMap<ID, Member> getResourceDirectory() throws OXException {
+        try {
+            return HazelcastAccess.getHazelcastInstance().getMap(resourceDirectoryName);
+        } catch (RuntimeException e) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName(), e);
+        }
+    }
+
+    private MultiMap<ID, Member> getDirectory() throws OXException {
+        try {
+            return HazelcastAccess.getHazelcastInstance().getMultiMap(directoryName);
+        } catch (RuntimeException e) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName(), e);
+        }
     }
 
 }

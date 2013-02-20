@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 public class ID implements Serializable {
 
     private static final long serialVersionUID = -5237507998711320109L;
-    
+
     private String protocol;
     private String user;
     private String context;
@@ -211,4 +211,13 @@ public class ID implements Serializable {
         return new ID(null, user, context, null);
     }
 
+    /**
+     * Gets a value indicating whether this ID is in general form or not, i.e. if it only contains the mandatory parts and no protocol
+     * or concrete resource name.
+     *
+     * @return <code>true</code> if the ID is in general form, <code>false</code>, otherwise
+     */
+    public boolean isGeneralForm() {
+        return null == protocol && null == resource;
+    }
 }
