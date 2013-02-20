@@ -19,7 +19,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.global"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.http.deferrer"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.i18n"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.index.solr"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.filter"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.messaging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.messaging.generic"/>
