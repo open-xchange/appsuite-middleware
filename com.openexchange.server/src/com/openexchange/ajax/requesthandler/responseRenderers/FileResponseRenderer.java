@@ -274,7 +274,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
         // compress by default when not delivering as download
         Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
-        if (null == compress && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != compress && compress.booleanValue()) {
+        if ((null == compress && false == DOWNLOAD.equalsIgnoreCase(delivery)) || (null != compress && compress.booleanValue())) {
             transformations.compress();
         }
         /*
