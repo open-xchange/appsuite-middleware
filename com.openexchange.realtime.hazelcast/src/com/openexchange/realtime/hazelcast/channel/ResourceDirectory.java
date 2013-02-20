@@ -124,7 +124,7 @@ public class ResourceDirectory implements EventHandler {
             /*
              * get first matching member from multi-map
              */
-            Collection<Member> possibleMembers = getDirectory().get(id);
+            Collection<Member> possibleMembers = getDirectory().get(key(id));
             if (null != possibleMembers && 0 < possibleMembers.size()) {
                 return possibleMembers.iterator().next();
             }
@@ -133,7 +133,7 @@ public class ResourceDirectory implements EventHandler {
             /*
              * get member for concret ID
              */
-            return getResourceDirectory().get(id);
+            return getResourceDirectory().get(key(id));
         }
     }
 
@@ -146,7 +146,7 @@ public class ResourceDirectory implements EventHandler {
      * @throws OXException
      */
     public Collection<Member> getAll(ID id) throws OXException {
-        return getDirectory().get(id.isGeneralForm() ? id : id.toGeneralForm());
+        return getDirectory().get(key(id.isGeneralForm() ? id : id.toGeneralForm()));
     }
 
     /**
@@ -157,7 +157,7 @@ public class ResourceDirectory implements EventHandler {
      * @throws OXException
      */
     public boolean contains(ID id) throws OXException {
-        return id.isGeneralForm() ? getDirectory().containsKey(id) : getResourceDirectory().containsKey(id);
+        return id.isGeneralForm() ? getDirectory().containsKey(key(id)) : getResourceDirectory().containsKey(key(id));
     }
 
     private void put(ID id) throws OXException {
@@ -167,8 +167,8 @@ public class ResourceDirectory implements EventHandler {
         Member localMember = getLocalMember();
         boolean addedID = false;
         try {
-            Future<Member> future = getResourceDirectory().putAsync(id, localMember);
-            if (false == getDirectory().put(id.toGeneralForm(), localMember)) {
+            Future<Member> future = getResourceDirectory().putAsync(key(id), localMember);
+            if (false == getDirectory().put(key(id.toGeneralForm()), localMember)) {
                 LOG.warn("ID '" + id.toGeneralForm() + "' not added to directory.");
             }
             future.get();
@@ -198,9 +198,9 @@ public class ResourceDirectory implements EventHandler {
             throw RealtimeExceptionCodes.INVALID_ID.create();
         }
         try {
-            Member removedMember = getResourceDirectory().remove(id);
+            Member removedMember = getResourceDirectory().remove(key(id));
             if (null != removedMember) {
-                if (false == getDirectory().remove(id.toGeneralForm(), removedMember)) {
+                if (false == getDirectory().remove(key(id.toGeneralForm()), removedMember)) {
                     LOG.warn("Member '" + removedMember + "' not removed for ID '" + id.toGeneralForm() +"'.");
                 }
             } else {
@@ -220,7 +220,7 @@ public class ResourceDirectory implements EventHandler {
         return hazelcastInstance.getCluster().getLocalMember();
     }
 
-    private IMap<ID, Member> getResourceDirectory() throws OXException {
+    private IMap<String, Member> getResourceDirectory() throws OXException {
         try {
             return HazelcastAccess.getHazelcastInstance().getMap(resourceDirectoryName);
         } catch (RuntimeException e) {
@@ -228,12 +228,22 @@ public class ResourceDirectory implements EventHandler {
         }
     }
 
-    private MultiMap<ID, Member> getDirectory() throws OXException {
+    private MultiMap<String, Member> getDirectory() throws OXException {
         try {
             return HazelcastAccess.getHazelcastInstance().getMultiMap(directoryName);
         } catch (RuntimeException e) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName(), e);
         }
+    }
+
+    /**
+     * Creates a key for the supplied ID as used by the distributed maps.
+     *
+     * @param id The ID
+     * @return The key
+     */
+    private static String key(ID id) {
+        return id.toString();
     }
 
 }
