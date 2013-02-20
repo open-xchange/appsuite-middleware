@@ -65,6 +65,32 @@ public interface OXTemplate {
         SERVER, USER;
     }
 
+    /**
+     * Render the template
+     * @param rootObject
+     * @param writer
+     * @throws OXException
+     */
     public void process(Object rootObject, Writer writer) throws OXException;
+
+    /**
+     * On which level is this template defined?
+     * @return
+     */
     public TemplateLevel getLevel();
+    
+    
+    /**
+     * Is this template considered trusted?
+     */
+    public boolean isTrusted();
+    
+    public String getProperty(String name);
+    
+    public <T> T getProperty(String name, Class<T> klass);
+    
+    public String getProperty(String name, String defaultValue);
+    
+    public <T> T getProperty(String name, Class<T> klass, T defaultValue);
+    
 }

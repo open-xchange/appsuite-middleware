@@ -1,9 +1,13 @@
+BEGIN
+requires: datehelper
+END
 <html>
 	<head>
 	</head>
 	<body>
-		<pre>
-			${JSON.serialize(data)}
-		</pre>
+		<h1>${data.title}</h1>
+		<script>
+			var data = ${JSON.serialize(data)};
+		</script>
 	</body>
 </html>
