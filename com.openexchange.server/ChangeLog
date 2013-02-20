@@ -1,3 +1,7 @@
+* 2013-02-20 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 25065: No Appointments on HALO request.
+
 * 2013-02-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 25029: Removed 'sessioncache.ccf' from consistency check

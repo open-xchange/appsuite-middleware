@@ -1006,8 +1006,12 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    @Override
     public User searchUser(final String email, final Context context) throws OXException {
+        return searchUser(email, context, true);
+    }
+    
+    @Override
+    public User searchUser(final String email, final Context context, boolean considerAliases) throws OXException {
         String sql = "SELECT id FROM user WHERE cid=? AND mail LIKE ?";
         final Connection con = DBPool.pickup(context);
         try {
@@ -1029,7 +1033,7 @@ public class RdbUserStorage extends UserStorage {
                 closeSQLStuff(result, stmt);
             }
             try {
-                if (userId == -1) {
+                if (userId == -1 && considerAliases) {
                     sql = "SELECT id FROM user_attribute WHERE cid=? AND name=? AND value LIKE ?";
                     stmt = con.prepareStatement(sql);
                     int pos = 1;

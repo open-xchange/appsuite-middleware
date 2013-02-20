@@ -315,6 +315,12 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
     }
 
     @Override
+    public User searchUser(final String email, final Context context, boolean considerAliases) throws OXException {
+        // Caching doesn't make any sense here.
+        return delegate.searchUser(email, context, considerAliases);
+    }
+
+    @Override
     public User[] searchUserByMailLogin(final String login, final Context context) throws OXException {
         // Caching doesn't make any sense here.
         return delegate.searchUserByMailLogin(login, context);
