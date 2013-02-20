@@ -93,17 +93,17 @@ public class AddressComparatorTest extends TestCase {
     }
 
     public void testCompare() throws Exception {
-        IndexDocument<MailMessage> m1 = new StandardIndexDocument<MailMessage>(new MockMailMessage(new QuotedInternetAddress[] {
+        IndexDocument<MailMessage> m1 = new StandardIndexDocument<MailMessage>(null, new MockMailMessage(new QuotedInternetAddress[] {
         		new QuotedInternetAddress("aaa@abc.de", "Aa, Aa"),
         		new QuotedInternetAddress("bbb@abc.de", "Bb, Bb"),
         		new QuotedInternetAddress("iii@abc.de", "Ii, Ii")
         		}));
-        IndexDocument<MailMessage> m2 = new StandardIndexDocument<MailMessage>(new MockMailMessage(new QuotedInternetAddress[] {
+        IndexDocument<MailMessage> m2 = new StandardIndexDocument<MailMessage>(null, new MockMailMessage(new QuotedInternetAddress[] {
         		new QuotedInternetAddress("hhh@abc.de", "Hh, Hh"),
         		new QuotedInternetAddress("ccc@abc.de", "Cc, Cc"),
         		new QuotedInternetAddress("fff@abc.de", "Ff, Ff")
         		}));
-        IndexDocument<MailMessage> m3 = new StandardIndexDocument<MailMessage>(new MockMailMessage(new QuotedInternetAddress[] {
+        IndexDocument<MailMessage> m3 = new StandardIndexDocument<MailMessage>(null, new MockMailMessage(new QuotedInternetAddress[] {
         		new QuotedInternetAddress("ggg@abc.de", "Gg, Gg"),
         		new QuotedInternetAddress("eee@abc.de", "Ee, Ee"),
         		new QuotedInternetAddress("ddd@abc.de", "Dd, Dd")
@@ -128,13 +128,13 @@ public class AddressComparatorTest extends TestCase {
     }
 
     public void testNull() throws Exception {
-        IndexDocument<MailMessage> m1 = new StandardIndexDocument<MailMessage>(new MockMailMessage(new QuotedInternetAddress[] {
+        IndexDocument<MailMessage> m1 = new StandardIndexDocument<MailMessage>(null, new MockMailMessage(new QuotedInternetAddress[] {
             new QuotedInternetAddress("aaa@abc.de", "Aa, Aa"),
             new QuotedInternetAddress("bbb@abc.de", "Bb, Bb"),
             null
             }));
-        IndexDocument<MailMessage> m2 = new StandardIndexDocument<MailMessage>(new MockMailMessage(null));
-        IndexDocument<MailMessage> m3 = new StandardIndexDocument<MailMessage>(new MockMailMessage(new QuotedInternetAddress[] {
+        IndexDocument<MailMessage> m2 = new StandardIndexDocument<MailMessage>(null, new MockMailMessage(null));
+        IndexDocument<MailMessage> m3 = new StandardIndexDocument<MailMessage>(null, new MockMailMessage(new QuotedInternetAddress[] {
             new QuotedInternetAddress("ggg@abc.de", "Gg, Gg"),
             new QuotedInternetAddress("eee@abc.de", "Ee, Ee"),
             new QuotedInternetAddress("ddd@abc.de", "Dd, Dd")

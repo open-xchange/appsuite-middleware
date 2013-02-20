@@ -105,8 +105,8 @@ public class SolrMailDocumentConverter extends AbstractDocumentConverter<MailMes
     }
 
     @Override
-    public IndexResult<MailMessage> createIndexResult(List<IndexDocument<MailMessage>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException {
-        return new SolrIndexResult<MailMessage>(documents.size(), documents, facetCounts);
+    public IndexResult<MailMessage> createIndexResult(long numFound, List<IndexDocument<MailMessage>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException {
+        return new SolrIndexResult<MailMessage>(numFound, documents, facetCounts);
     }
 
     public SolrInputDocument convert(int contextId, int userId, IndexDocument<MailMessage> document) throws OXException {
@@ -255,7 +255,8 @@ public class SolrMailDocumentConverter extends AbstractDocumentConverter<MailMes
             mail.setSubject(subject);
         }
 
-        return new StandardIndexDocument<MailMessage>(mail);
+        String documentId = String.valueOf(document.getFieldValue(fieldConfig.getUUIDField()));
+        return new StandardIndexDocument<MailMessage>(documentId, mail);
     }
 
     private void setFlags(MailMessage mail, SolrDocument document) throws OXException {

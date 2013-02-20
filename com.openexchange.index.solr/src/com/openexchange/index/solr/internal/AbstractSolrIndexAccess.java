@@ -76,6 +76,7 @@ import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexManagementService;
 import com.openexchange.index.IndexResult;
+import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.solr.IndexFolderManager;
 import com.openexchange.index.solr.internal.config.FieldConfiguration;
@@ -315,13 +316,15 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
         }
     }
 
-    protected List<IndexDocument<V>> queryChunkWise(String uuidField, SolrDocumentConverter<V> converter, SolrQuery solrQuery, int off, int len, int chunkSize) throws OXException {
+    protected IndexResult<V> queryChunkWise(String uuidField, SolrDocumentConverter<V> converter, SolrQuery solrQuery, int off, int len, int chunkSize) throws OXException {
         List<IndexDocument<V>> indexDocuments = new ArrayList<IndexDocument<V>>();
         int fetched = 0;
         int maxRows = len;
         if (maxRows > chunkSize) {
             maxRows = chunkSize;
         }
+        
+        long numFound = -1L;
         do {
             solrQuery.setStart(off);
             if ((fetched + maxRows) > len) {
@@ -332,6 +335,14 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
             QueryResponse queryResponse = query(solrQuery);
             Map<String, Map<String, List<String>>> highlighting = queryResponse.getHighlighting();
             SolrDocumentList results = queryResponse.getResults();
+            if (results == null) {
+                return Indexes.emptyResult();
+            }
+            
+            if (numFound < 0) {
+                numFound = results.getNumFound();
+            }
+            
             for (SolrDocument document : results) {
                 if (highlighting != null && document.containsKey(uuidField)) {
                     String uuid = (String) document.getFieldValue(uuidField);
@@ -354,8 +365,12 @@ public abstract class AbstractSolrIndexAccess<V> implements IndexAccess<V> {
             fetched += maxRows;
             off += maxRows;
         } while (fetched < len);
+        
+        if (indexDocuments.isEmpty()) {
+            return Indexes.emptyResult();
+        }
 
-        return indexDocuments;
+        return converter.createIndexResult(numFound, indexDocuments, null);
     }
 
     protected Set<String> collectFields(Set<? extends IndexField> fields) {

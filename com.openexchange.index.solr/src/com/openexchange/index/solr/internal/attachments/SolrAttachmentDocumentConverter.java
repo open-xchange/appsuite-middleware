@@ -100,8 +100,8 @@ public class SolrAttachmentDocumentConverter extends AbstractDocumentConverter<A
     }
 
     @Override
-    public IndexResult<Attachment> createIndexResult(List<IndexDocument<Attachment>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException {
-        return new SolrIndexResult<Attachment>(documents.size(), documents, null);
+    public IndexResult<Attachment> createIndexResult(long numFound, List<IndexDocument<Attachment>> documents, Map<IndexField, Map<String, Long>> facetCounts) throws OXException {
+        return new SolrIndexResult<Attachment>(numFound, documents, facetCounts);
     }
 
     private StandardIndexDocument<Attachment> convertInternal(SolrDocument document) throws OXException {
@@ -143,7 +143,8 @@ public class SolrAttachmentDocumentConverter extends AbstractDocumentConverter<A
             attachment.setAttachmentId(attachmentId);
         }
 
-        return new StandardIndexDocument<Attachment>(attachment);
+        String documentId = String.valueOf(document.getFieldValue(fieldConfig.getUUIDField()));
+        return new StandardIndexDocument<Attachment>(documentId, attachment);
     }
 
     public SolrInputDocument convert(int contextId, int userId, IndexDocument<Attachment> document) throws OXException {

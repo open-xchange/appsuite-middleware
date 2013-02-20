@@ -63,7 +63,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
  */
 public final class MailIndexResult implements IndexResult<MailMessage> {
 
-    private int numFound;
+    private long numFound;
 
     private List<IndexDocument<MailMessage>> mails;
 
@@ -81,13 +81,13 @@ public final class MailIndexResult implements IndexResult<MailMessage> {
      *
      * @param numFound The <code>numFound</code> to set
      */
-    public MailIndexResult(final int numFound) {
+    public MailIndexResult(final long numFound) {
         super();
         this.numFound = numFound;
     }
 
     @Override
-    public int getNumFound() {
+    public long getNumFound() {
         return numFound;
     }
 

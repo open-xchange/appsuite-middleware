@@ -65,7 +65,6 @@ import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
 import com.openexchange.indexedSearch.json.IndexAJAXRequest;
-import com.openexchange.indexedSearch.json.IndexedSearchExceptionCodes;
 import com.openexchange.indexedSearch.json.ResultConverters;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.server.ServiceLookup;
@@ -73,50 +72,38 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link SpotlightAction}
+ * {@link MLTAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SpotlightAction extends AbstractIndexAction {
-
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(SpotlightAction.class);
+public class MLTAction extends AbstractIndexAction {
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MLTAction.class);
 
     /**
-     * Initializes a new {@link SpotlightAction}.
+     * Initializes a new {@link MLTAction}.
      * @param services
      * @param registry
      */
-    public SpotlightAction(ServiceLookup services, ResultConverters registry) {
+    public MLTAction(ServiceLookup services, ResultConverters registry) {
         super(services, registry);
     }
 
     @Override
     protected AJAXRequestResult perform(IndexAJAXRequest req) throws OXException, JSONException {
         long start = System.currentTimeMillis();
-        final ServerSession session = req.getSession();
-        final int maxPersons = req.optInt("maxPersons") == IndexAJAXRequest.NOT_FOUND ? 10 : req.optInt("maxPersons");
-        final int maxTopics = req.optInt("maxTopics") == IndexAJAXRequest.NOT_FOUND ? 10 : req.optInt("maxTopics");
-        final String q = req.checkParameter("q");
-        final String field = req.checkParameter("field");
-        final IndexFacadeService indexFacade = getService(IndexFacadeService.class);
-        final SearchHandler searchHandler;
-        if ("from".equals(field)) {
-            searchHandler = SearchHandler.SPOTLIGHT_FROM;
-        } else if ("to".equals(field)) {
-            searchHandler = SearchHandler.SPOTLIGHT_TO;
-        } else if ("subject".equals(field)) {
-            searchHandler = SearchHandler.SPOTLIGHT_SUBJECT;
-        } else {
-            throw IndexedSearchExceptionCodes.UNKNOWN_HANDLER.create(field);
-        }
-
+        ServerSession session = req.getSession();
+//        int module = req.checkInt("module");
+        String id = req.checkParameter("id");
+        
+        IndexFacadeService indexFacade = getService(IndexFacadeService.class);
         IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, session);
         QueryParameters params = new QueryParameters.Builder()
-            .setHandler(searchHandler)
-            .setSearchTerm(q)
-            .setLength(maxPersons + maxTopics)
+            .setHandler(SearchHandler.MLT)
+            .setSearchTerm(id)
+            .setLength(10)
             .build();
-
+        
         IndexResult<MailMessage> result = indexAccess.query(params, null);
         JSONObject responseObject = new JSONObject();
         responseObject.put("numFound", result.getNumFound());
@@ -202,7 +189,7 @@ public class SpotlightAction extends AbstractIndexAction {
 
     @Override
     public String getAction() {
-        return "spotlight";
+        return "mlt";
     }
 
 }

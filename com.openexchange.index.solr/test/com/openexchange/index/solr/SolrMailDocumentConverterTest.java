@@ -558,7 +558,7 @@ public class SolrMailDocumentConverterTest {
         mail.setSubject("This is the subject");
         ContentAwareMailMessage toConvert = new ContentAwareMailMessage("This is the body", mail);
 
-        SolrInputDocument document = converter.convert(1, 2, new StandardIndexDocument<MailMessage>(toConvert));
+        SolrInputDocument document = converter.convert(1, 2, new StandardIndexDocument<MailMessage>(null, toConvert));
         Assert.assertEquals("Wrong value uuid", MailUUID.newUUID(1, 2, mail.getAccountId(), mail.getFolder(), mail.getMailId()).toString(), document.getFieldValue("uuid"));
         Assert.assertEquals("Wrong value folder", mail.getFolder(), document.getFieldValue("full_name"));
         Assert.assertEquals("Wrong value id", mail.getMailId(), document.getFieldValue("id"));
@@ -635,7 +635,7 @@ public class SolrMailDocumentConverterTest {
 
         MailMessage mail = new IDMailMessage();
         ContentAwareMailMessage toConvert = new ContentAwareMailMessage("This is the body", mail);
-        SolrInputDocument inputDocument = converter.convert(1, 2, new StandardIndexDocument<MailMessage>(toConvert));
+        SolrInputDocument inputDocument = converter.convert(1, 2, new StandardIndexDocument<MailMessage>(null, toConvert));
         Assert.assertNotNull(inputDocument);
         Assert.assertNotNull(inputDocument.getFieldValue("uuid"));
     }

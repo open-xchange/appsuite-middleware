@@ -88,11 +88,13 @@ public enum SearchHandler {
      * Optional parameters: sort, order
      */
     GET_REQUEST,
-    /**
-     *
+
+    /*
+     * For Showcase Only! The SearchHandler abstraction needs some refactoring! 
      */
-    PERSONS_AND_TOPICS,
-    SEARCH_FOR_PERSON,
-    SEARCH_FOR_TOPIC
+    SPOTLIGHT_FROM,
+    SPOTLIGHT_TO,
+    SPOTLIGHT_SUBJECT,
+    MLT
 
 }

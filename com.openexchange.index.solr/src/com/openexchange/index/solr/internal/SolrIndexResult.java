@@ -63,7 +63,7 @@ import com.openexchange.index.IndexResult;
  */
 public class SolrIndexResult<T> implements IndexResult<T> {
 
-    private final int numFound;
+    private final long numFound;
 
     private final List<IndexDocument<T>> results;
 
@@ -73,7 +73,7 @@ public class SolrIndexResult<T> implements IndexResult<T> {
     /**
      * Initializes a new {@link SolrIndexResult}.
      */
-    public SolrIndexResult(int numFound, List<IndexDocument<T>> results, Map<IndexField, Map<String, Long>> facetCounts) {
+    public SolrIndexResult(long numFound, List<IndexDocument<T>> results, Map<IndexField, Map<String, Long>> facetCounts) {
         super();
         this.numFound = numFound;
         this.results = results;
@@ -81,7 +81,7 @@ public class SolrIndexResult<T> implements IndexResult<T> {
     }
 
     @Override
-    public int getNumFound() {
+    public long getNumFound() {
         return numFound;
     }
 

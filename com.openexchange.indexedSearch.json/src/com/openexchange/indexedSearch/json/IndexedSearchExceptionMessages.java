@@ -67,6 +67,9 @@ public final class IndexedSearchExceptionMessages implements LocalizableStrings 
     // Index-based search is not supported for module: %1$s
     public static final String MODULE_NOT_SUPPORTED = "Index-based search is not supported for module: %1$s";
 
+    // There is no search handler for field %1$s.
+    public static final String UNKNOWN_HANDLER = "There is no search handler for field %1$s.";
+
     /**
      * Initializes a new {@link IndexedSearchExceptionMessages}.
      */

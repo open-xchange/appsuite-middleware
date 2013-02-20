@@ -56,9 +56,8 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.indexedSearch.json.action.AbstractIndexAction;
 import com.openexchange.indexedSearch.json.action.IsIndexedAction;
-import com.openexchange.indexedSearch.json.action.PersonsAction;
+import com.openexchange.indexedSearch.json.action.MLTAction;
 import com.openexchange.indexedSearch.json.action.SpotlightAction;
-import com.openexchange.indexedSearch.json.action.TopicsAction;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -87,12 +86,9 @@ public class IndexActionFactory implements AJAXActionServiceFactory {
 
         final AbstractIndexAction action3 = new SpotlightAction(services, registry);
         actions.put(action3.getAction(), action3);
-
-        final AbstractIndexAction action4 = new PersonsAction(services, registry);
+        
+        final AbstractIndexAction action4 = new MLTAction(services, registry);
         actions.put(action4.getAction(), action4);
-
-        final AbstractIndexAction action5 = new TopicsAction(services, registry);
-        actions.put(action5.getAction(), action5);
     }
 
     @Override

@@ -68,10 +68,8 @@ import com.openexchange.index.FacetParameters;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
-import com.openexchange.index.Indexes;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
-import com.openexchange.index.solr.internal.SolrIndexResult;
 import com.openexchange.index.solr.internal.config.FieldConfiguration;
 import com.openexchange.index.solr.internal.querybuilder.SolrQueryBuilder;
 import com.openexchange.solr.SolrCoreIdentifier;
@@ -160,18 +158,13 @@ public class SolrAttachmentIndexAccess extends AbstractSolrIndexAccess<Attachmen
     public IndexResult<Attachment> query0(QueryParameters parameters, Set<? extends IndexField> fields) throws OXException {
         SolrQuery solrQuery = queryBuilder.buildQuery(parameters);
         setFieldList(solrQuery, fields);
-        List<IndexDocument<Attachment>> results = queryChunkWise(
+        return queryChunkWise(
             fieldConfig.getUUIDField(),
             converter,
             solrQuery,
             parameters.getOff(),
             parameters.getLen(),
             100);
-        if (results.isEmpty()) {
-            return Indexes.emptyResult();
-        }
-
-        return new SolrIndexResult<Attachment>(results.size(), results, null);
     }
 
     @Override
