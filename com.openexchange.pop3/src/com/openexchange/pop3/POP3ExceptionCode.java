@@ -334,7 +334,12 @@ public enum POP3ExceptionCode implements OXExceptionCode {
     /**
      * Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work.
      */
-    VALIDATE_DENIED(POP3ExceptionMessage.VALIDATE_DENIED_MSG, CATEGORY_WARNING, 2071);
+    VALIDATE_DENIED(POP3ExceptionMessage.VALIDATE_DENIED_MSG, CATEGORY_WARNING, 2071),
+    /**
+     * POP3 messages cannot be imported because of existing quota constraints on primary mail account. Please free some space.
+     */
+    QUOTA_CONSTRAINT(POP3ExceptionMessage.QUOTA_CONSTRAINT_MSG, CATEGORY_USER_INPUT, 2072),
+    ;
 
     private final String message;
 
