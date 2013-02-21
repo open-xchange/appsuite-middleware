@@ -184,7 +184,7 @@ ox_daemon_status() {
 
 # usage:
 # ox_set_property property value /path/to/file
-# 
+#
 ox_set_property() {
     local prop="$1"
     local val="$2"
@@ -310,7 +310,7 @@ EOF
 
 # usage:
 # ox_exists_property property /path/to/file
-# 
+#
 ox_exists_property() {
     local prop="$1"
     local propfile="$2"
@@ -358,7 +358,7 @@ close(FILE);
 
 # usage:
 # ox_read_property property /path/to/file
-# 
+#
 ox_read_property() {
     local prop="$1"
     local propfile="$2"
@@ -373,7 +373,7 @@ ox_read_property() {
 
 # usage:
 # ox_remove_property property /path/to/file
-# 
+#
 ox_remove_property() {
     local prop="$1"
     local propfile="$2"
@@ -544,4 +544,17 @@ ox_move_config_file() {
         fi
         mv "${srcdir}/${srcname}" "${dstdir}/${dstname}"
     fi
+}
+
+# kill all leftover readerengine instances from a previous start
+ox_kill_readerengine_instances() {
+    local programname="soffice.bin"
+
+    for PID in $(pidof ${programname}); do
+        if ! ps ${PID} > /dev/null; then
+            return 0
+        fi
+
+        kill -KILL ${PID}
+    done
 }
