@@ -1,3 +1,15 @@
+open-xchange-imap (7.0.1-4) unstable; urgency=low
+
+  * Fourth release candidate for 7.0.1
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 19 Feb 2013 16:52:37 +0100
+
+open-xchange-imap (7.0.1-3) unstable; urgency=low
+
+  * Third release candidate for 7.0.1
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 19 Feb 2013 09:21:41 +0100
+
 open-xchange-imap (7.0.1-2) unstable; urgency=low
 
   * Second release candidate for 7.0.1

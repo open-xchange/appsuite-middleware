@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 2
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -213,6 +213,21 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
            fi
        done
     fi
+fi
+
+# SoftwareChange_Request-1335
+pfile=/opt/open-xchange/etc/paths.perfMap
+if ! grep "modules/mail/defaultaddress" $pfile > /dev/null; then
+   ptmp=${pfile}.$$
+   cp $pfile $ptmp
+   cat<<EOF >> $ptmp
+modules/mail/defaultaddress > io.ox/mail//defaultaddress
+modules/mail/sendaddress > io.ox/mail//sendaddress
+EOF
+   if [ -s $ptmp ]; then
+      cp $ptmp $pfile
+   fi
+   rm -f $ptmp
 fi
 
 # SoftwareChange_Request-1330
@@ -569,6 +584,10 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/requestwatcher.properties
 
 %changelog
+* Tue Feb 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 7.0.1
+* Tue Feb 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.0.1
 * Fri Feb 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-02-13
 * Thu Feb 14 2013 Marcus Klein <marcus.klein@open-xchange.com>

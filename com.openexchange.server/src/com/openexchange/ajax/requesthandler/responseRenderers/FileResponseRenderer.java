@@ -233,8 +233,6 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
     }
 
-    private static final int SIZE_LIMIT = 1048576; // 1MB
-
     private IFileHolder transformIfImage(AJAXRequestData request, IFileHolder file, String delivery) throws IOException, OXException {
         /*
          * check input

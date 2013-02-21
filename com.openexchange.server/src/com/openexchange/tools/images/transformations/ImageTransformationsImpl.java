@@ -461,9 +461,37 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * @return <code>true</code> if the image format can be read, <code>false</code>, otherwise
      */
     private static boolean canRead(String formatName) {
-        final String tmp = toLowerCase(formatName);
-        return (!"vnd.microsoft.icon".equals(tmp) && !"x-icon".equals(tmp));
+        String tmp = toLowerCase(formatName);
+        if ("vnd.microsoft.icon".equals(tmp) || "x-icon".equals(tmp)) {
+            return false;
+        }
+        //TODO: cache reader format names
+        for (String readerFormatName : ImageIO.getReaderFormatNames()) {
+            if (toLowerCase(readerFormatName).equals(tmp)) {
+                return true;
+            }
+        }
+        return false;
     }
+
+    /**
+     * Gets a value indicating whether an image format can be written or not.
+     *
+     * @param formatName The image format name
+     * @return <code>true</code> if the image format can be written, <code>false</code>, otherwise
+     */
+//    private static boolean canWrite(String formatName) {
+//        String tmp = toLowerCase(formatName);
+//        if ("vnd.microsoft.icon".equals(tmp) || "x-icon".equals(tmp)) {
+//            return false;
+//        }
+//        for (String writerFormatName : ImageIO.getWriterFormatNames()) {
+//            if (toLowerCase(writerFormatName).equals(tmp)) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     /** ASCII-wise to lower-case */
     private static String toLowerCase(final CharSequence chars) {

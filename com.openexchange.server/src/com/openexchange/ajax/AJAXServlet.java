@@ -797,11 +797,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         }
         try {
             final String ascii;
-            if (!forAnchor) {
-                ascii = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL, s.getBytes(Charsets.ISO_8859_1)));
-            } else {
+            if (forAnchor) {
                 // Prepare for being used as anchor/link
                 ascii = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL_ANCHOR, s.getBytes(Charsets.ISO_8859_1)));
+            } else {
+                ascii = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL, s.getBytes(Charsets.ISO_8859_1)));
             }
             // Strip possible "\r?\n" and/or "%0A?%0D"
             if (ascii.indexOf('\n') < 0 && ascii.indexOf("%0") < 0) {
