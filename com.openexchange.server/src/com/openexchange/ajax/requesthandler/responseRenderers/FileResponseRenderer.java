@@ -165,7 +165,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 sb.append(isEmpty(contentDisposition) ? "attachment" : checkedContentDisposition(contentDisposition.trim(), file));
                 DownloadUtility.appendFilenameParameter(file.getName(), null, userAgent, sb);
                 resp.setHeader("Content-Disposition", sb.toString());
-                resp.setContentType(contentType);
+                resp.setContentType(null == contentType ? SAVE_AS_TYPE : contentType);
             } else {
                 final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileName, fileContentType, contentDisposition, userAgent);
                 if (delivery == null || !delivery.equalsIgnoreCase(VIEW)) {
