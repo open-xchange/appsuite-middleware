@@ -259,7 +259,7 @@ public final class MailRequest {
     }
 
     public static boolean isColorLabel(final JSONObject jsonObject) throws JSONException {
-        return jsonObject.has(DATA) && jsonObject.getJSONObject(DATA).has(CommonFields.COLORLABEL);
+        return jsonObject.has(PARAMETER_ID) && jsonObject.has(DATA) && jsonObject.getJSONObject(DATA).has(CommonFields.COLORLABEL);
     }
 
     private static abstract class CollectObject {

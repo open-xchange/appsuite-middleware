@@ -751,7 +751,14 @@ public class MimeMessageFiller {
      * @throws OXException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    public void fillMailBody(final ComposedMailMessage mail, final MimeMessage mimeMessage, final ComposeType type) throws MessagingException, OXException, IOException {
+    public void fillMailBody(final ComposedMailMessage mail, final MimeMessage mimeMessage, ComposeType type) throws MessagingException, OXException, IOException {
+        /*
+         * Adopt Content-Type to ComposeType if necessary
+         */
+        if (ComposeType.NEW_SMS.equals(type)) {
+            final ContentType contentType = mail.getContentType();
+            contentType.setPrimaryType("text").setSubType("plain");
+        }
         /*
          * Store some flags
          */
@@ -1064,9 +1071,9 @@ public class MimeMessageFiller {
                     if (text == null || text.length() == 0) {
                         mailText = "";
                     } else if (isHtml) {
-                        mailText = ComposeType.NEW_SMS.equals(type) ? text : performLineFolding(htmlService.html2text(text, true), usm.getAutoLinebreak());
+                        mailText = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(htmlService.html2text(text, true), usm.getAutoLinebreak());
                     } else {
-                        mailText = ComposeType.NEW_SMS.equals(type) ? text : performLineFolding(text, usm.getAutoLinebreak());
+                        mailText = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(text, usm.getAutoLinebreak());
                     }
                 } else {
                     mailText = htmlService.getConformHTML(content, contentType.getCharsetParameter());
