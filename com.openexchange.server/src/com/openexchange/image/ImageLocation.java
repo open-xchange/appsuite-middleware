@@ -88,8 +88,14 @@ public final class ImageLocation {
         public Builder folder(final String folder) {
             this.folder = folder; return this;
         }
+        public Builder folder(final Object folder) {
+            this.folder = folder.toString(); return this;
+        }
         public Builder id(final String id) {
             this.id = id; return this;
+        }
+        public Builder id(final Object id) {
+            this.id = id.toString(); return this;
         }
         public Builder timestamp(final String timestamp) {
             this.timestamp = timestamp; return this;
