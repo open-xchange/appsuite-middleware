@@ -49,6 +49,7 @@
 
 package com.openexchange.inet.proxy.config.osgi;
 
+import java.net.ProxySelector;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -56,6 +57,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.inet.proxy.DefaultInetProxyInformation;
 import com.openexchange.inet.proxy.InetProxyService;
 import com.openexchange.inet.proxy.config.ConfigInetProxyService;
+import com.openexchange.inet.proxy.config.CustomProxySelector;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -86,15 +88,29 @@ public final class ConfigInetProxyActivator extends HousekeepingActivator {
         // Read proxy information from configuration
         final String proxyHost = service.getProperty("com.openexchange.inet.proxy.config.proxyHost", "localhost");
         final int proxPort = service.getIntProperty("com.openexchange.inet.proxy.config.proxyPort", 80);
+        final boolean proxSecure = service.getBoolProperty("com.openexchange.inet.proxy.config.proxySecure", false);
         final List<String> nonProxyHosts = parseNonProxyHosts(service.getProperty("com.openexchange.inet.proxy.config.nonProxyHosts"));
 
         // http://docs.oracle.com/javase/6/docs/technotes/guides/net/proxies.html
         //http://www.rgagnon.com/javadetails/java-0085.html
 
         if (proxyEnabled) {
+            // Create proxy information
+            final DefaultInetProxyInformation proxyInformation = new DefaultInetProxyInformation();
+            proxyInformation.setHost(proxyHost);
+            proxyInformation.setNonProxyHosts(nonProxyHosts);
+            proxyInformation.setPort(proxPort);
+            proxyInformation.setSecure(proxSecure);
+            // Set ProxySelector
+            final CustomProxySelector ps = new CustomProxySelector(ProxySelector.getDefault(), proxyInformation);
+            ProxySelector.setDefault(ps);
             // Apply to System settings
+            System.setProperty("https.proxyHost", proxyHost);
+            System.setProperty("https.proxyPort", Integer.toString(proxPort));
             System.setProperty("http.proxyHost", proxyHost);
             System.setProperty("http.proxyPort", Integer.toString(proxPort));
+            System.setProperty("ftp.proxHost", proxyHost);
+            System.setProperty("ftp.proxyPort", Integer.toString(proxPort));
             if (null != nonProxyHosts && !nonProxyHosts.isEmpty()) {
                 final StringBuilder sb = new StringBuilder(256);
                 sb.append(nonProxyHosts.get(0));
@@ -103,13 +119,9 @@ public final class ConfigInetProxyActivator extends HousekeepingActivator {
                     sb.append('|').append(nonProxyHosts.get(i));
                 }
                 System.setProperty("http.noProxyHosts", sb.toString());
+                System.setProperty("ftp.noProxyHosts", sb.toString());
             }
             // Create service
-            final DefaultInetProxyInformation proxyInformation = new DefaultInetProxyInformation();
-            proxyInformation.setHost(proxyHost);
-            proxyInformation.setNonProxyHosts(nonProxyHosts);
-            proxyInformation.setPort(proxPort);
-            proxyInformation.setSecure(false);
             final ConfigInetProxyService inetProxyService = new ConfigInetProxyService(proxyEnabled, proxyInformation);
             registerService(InetProxyService.class, inetProxyService, null);
         }
