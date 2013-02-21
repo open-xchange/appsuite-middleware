@@ -55,6 +55,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -134,9 +135,9 @@ public class SubscriptionsSQL {
         Predicate p = new EQUALS(toCid, PLACEHOLDER).AND(new EQUALS(toUserId, PLACEHOLDER));
 
         INSERT insert = new INSERT().INTO(table).SET(toCid, PLACEHOLDER).SET(toUserId, PLACEHOLDER);
-        UPDATE update = new UPDATE(table).SET(toCid, PLACEHOLDER).SET(toUserId, PLACEHOLDER);
+        UPDATE update = new UPDATE(table);
 
-        List<Object> values = new ArrayList<Object>();
+        LinkedList<Object> values = new LinkedList<Object>();
         values.add(subscription.getTo().getCid());
         values.add(subscription.getTo().getUserId());
 
@@ -144,7 +145,7 @@ public class SubscriptionsSQL {
             p = p.AND(new ISNULL(fromCid));
         } else {
             p = p.AND(new EQUALS(fromCid, PLACEHOLDER));
-            update = update.SET(fromCid, PLACEHOLDER);
+            //update = update.SET(fromCid, PLACEHOLDER);
             insert = insert.SET(fromCid, PLACEHOLDER);
             values.add(subscription.getFrom().getCid());
         }
@@ -153,7 +154,7 @@ public class SubscriptionsSQL {
             p = p.AND(new ISNULL(fromUserId));
         } else {
             p = p.AND(new EQUALS(fromUserId, PLACEHOLDER));
-            update = update.SET(fromUserId, PLACEHOLDER);
+            //update = update.SET(fromUserId, PLACEHOLDER);
             insert = insert.SET(fromUserId, PLACEHOLDER);
             values.add(subscription.getFrom().getUserId());
         }
@@ -162,7 +163,7 @@ public class SubscriptionsSQL {
             p = p.AND(new ISNULL(fromId));
         } else {
             p = p.AND(new EQUALS(fromId, PLACEHOLDER));
-            update = update.SET(fromId, PLACEHOLDER);
+            //update = update.SET(fromId, PLACEHOLDER);
             insert = insert.SET(fromId, PLACEHOLDER);
             values.add(subscription.getFrom().getId());
         }
@@ -177,6 +178,8 @@ public class SubscriptionsSQL {
             insert = insert.SET(request, PLACEHOLDER);
             update = update.SET(request, PLACEHOLDER);
         }
+        
+        update.WHERE(p);
 
         Connection connection = dbService.getWritable(session.getContext());
         StatementBuilder sb = null;
@@ -190,10 +193,10 @@ public class SubscriptionsSQL {
                 if (subscription.getState() == Presence.Type.UNSUBSCRIBED) {
                     new StatementBuilder().executeStatement(connection, delete, values);
                 } else if (!rs.getString(status.getName()).equals(subscription.getState().name())) {
-                    values.add(subscription.getState().name());
                     if (subscription.getRequest() != null && !subscription.getRequest().trim().equals("")) {
-                        values.add(subscription.getRequest());
+                        values.addFirst(subscription.getRequest());
                     }
+                    values.addFirst(subscription.getState().name());
                     new StatementBuilder().executeStatement(connection, update, values);
                 }
             } else {
