@@ -89,6 +89,8 @@ public final class ConfigInetProxyActivator extends HousekeepingActivator {
         final List<String> nonProxyHosts = parseNonProxyHosts(service.getProperty("com.openexchange.inet.proxy.config.nonProxyHosts"));
 
         // http://docs.oracle.com/javase/6/docs/technotes/guides/net/proxies.html
+        //http://www.rgagnon.com/javadetails/java-0085.html
+
         if (proxyEnabled) {
             // Apply to System settings
             System.setProperty("http.proxyHost", proxyHost);
