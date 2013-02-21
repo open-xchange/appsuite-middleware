@@ -50,10 +50,15 @@
 package com.openexchange.realtime.presence.hazelcast.impl;
 
 import java.util.Collection;
-import java.util.concurrent.ConcurrentMap;
+import java.util.HashSet;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Presence.Type;
@@ -62,6 +67,7 @@ import com.openexchange.realtime.presence.PresenceChangeListener;
 import com.openexchange.realtime.presence.PresenceData;
 import com.openexchange.realtime.presence.PresenceStatusService;
 import com.openexchange.realtime.util.IDMap;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -73,22 +79,33 @@ import com.openexchange.tools.session.ServerSession;
 // TODO: PresenceService must honor priority
 public class HazelcastPresenceStatusServiceImpl implements PresenceStatusService {
 
-    private final ConcurrentMap<ID, PresenceData> statusMap;
+    private static final AtomicReference<HazelcastInstance> REFERENCE = new AtomicReference<HazelcastInstance>();
 
-    private final CopyOnWriteArrayList<PresenceChangeListener> presenceChangeListeners;
+    /**
+     * Sets specified {@link HazelcastInstance}.
+     *
+     * @param hazelcast The {@link HazelcastInstance}
+     */
+    public static void setHazelcastInstance(HazelcastInstance hazelcast) {
+        REFERENCE.set(hazelcast);
+    }
 
     private enum PresenceChangeType {
         COMING_ONLINE, ONLINE_CHANGE, GOING_OFFLINE
     }
 
+    private final CopyOnWriteArrayList<PresenceChangeListener> presenceChangeListeners;
+    private final String statusMapName;
+
     /**
      * Initializes a new {@link HazelcastPresenceStatusServiceImpl}.
      *
-     * @param hazelcastInstance The haszelcastInstance of this server which is used to get the presenceStatus Map distributed in the cluster
+     * @param statusMapName The name of the distributed map to use
      */
-    public HazelcastPresenceStatusServiceImpl(HazelcastInstance hazelcastInstance) {
-        this.statusMap = hazelcastInstance.getMap("com.openexchange.realtime.presence.hazelcast.statusMap");
+    public HazelcastPresenceStatusServiceImpl(String statusMapName) {
+        super();
         this.presenceChangeListeners = new CopyOnWriteArrayList<PresenceChangeListener>();
+        this.statusMapName = statusMapName;
     }
 
     @Override
@@ -102,17 +119,29 @@ public class HazelcastPresenceStatusServiceImpl implements PresenceStatusService
     }
 
     @Override
-    public void changePresenceStatus(Presence stanza, ServerSession serverSession) {
+    public void changePresenceStatus(Presence stanza, ServerSession serverSession) throws OXException {
         if (stanza == null || serverSession == null) {
             throw new IllegalStateException("Obligatory parameter missing.");
         }
-        // check type before setting new status
-        PresenceChangeType presenceChangeType = checkPresenceChangeType(stanza);
-
-        ID from = stanza.getFrom();
-        PresenceData presenceData = new PresenceData(stanza.getState(), stanza.getMessage());
-        statusMap.put(from, presenceData);
-
+        /*
+         * update presence status in map
+         */
+        PresenceData presence = new PresenceData(stanza.getState(), stanza.getMessage());
+        PresenceData previousPresence = statusMap().put(key(stanza.getFrom()), presence);
+        /*
+         * determine presence change type
+         */
+        PresenceChangeType presenceChangeType;
+        if (null == previousPresence || PresenceState.OFFLINE.equals(previousPresence.getState())) {
+            presenceChangeType = PresenceChangeType.COMING_ONLINE;
+        } else if (Type.UNAVAILABLE.equals(stanza.getType())) {
+            presenceChangeType = PresenceChangeType.GOING_OFFLINE;
+        } else {
+            presenceChangeType = PresenceChangeType.ONLINE_CHANGE;
+        }
+        /*
+         * notify listeners
+         */
         for (PresenceChangeListener listener : presenceChangeListeners) {
             switch (presenceChangeType) {
             case COMING_ONLINE:
@@ -126,15 +155,14 @@ public class HazelcastPresenceStatusServiceImpl implements PresenceStatusService
                 break;
             }
         }
-
     }
 
     @Override
-    public PresenceData getPresenceStatus(ID id) {
+    public PresenceData getPresenceStatus(ID id) throws OXException {
         if (id == null) {
             throw new IllegalStateException("Obligatory parameter missing.");
         }
-        PresenceData presenceData = statusMap.get(id);
+        PresenceData presenceData = statusMap().get(key(id));
         // id wasn't seen yet, no status saved, show as offline
         if (presenceData == null) {
             presenceData = PresenceData.OFFLINE;
@@ -143,53 +171,56 @@ public class HazelcastPresenceStatusServiceImpl implements PresenceStatusService
     }
 
     @Override
-    public IDMap<PresenceData> getPresenceStatus(Collection<ID> ids) {
+    public IDMap<PresenceData> getPresenceStatus(Collection<ID> ids) throws OXException {
         IDMap<PresenceData> results = new IDMap<PresenceData>();
-        for (ID id : ids) {
-            results.put(id, getPresenceStatus(id));
+        for (Entry<String, PresenceData> entry : statusMap().getAll(keys(ids)).entrySet()) {
+            results.put(new ID(entry.getKey()), entry.getValue());
         }
         return results;
     }
 
-    private PresenceChangeType checkPresenceChangeType(Presence stanza) {
-        if (isInitialPresence(stanza)) {
-            return PresenceChangeType.COMING_ONLINE;
-        } else if (isFinalPresence(stanza)) {
-            return PresenceChangeType.GOING_OFFLINE;
-        } else {
-            return PresenceChangeType.ONLINE_CHANGE;
+    /**
+     * Gets the 'rtPresence' map that maps IDs to their presence states, throwing appropriate exceptions if the map can't be accessed.
+     *
+     * @return The 'sessions' map
+     * @throws OXException
+     */
+    private IMap<String, PresenceData> statusMap() throws OXException {
+        try {
+            HazelcastInstance hazelcastInstance = REFERENCE.get();
+            if (null == hazelcastInstance || false == hazelcastInstance.getLifecycleService().isRunning()) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
+            }
+            return hazelcastInstance.getMap(statusMapName);
+        } catch (RuntimeException e) {
+            throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     /**
-     * Are we dealing with an initial Presence Stanza iow. was the client offline before?
+     * Creates a key for the supplied ID as used by the distributed maps.
      *
-     * @param stanza The incoming Presence Stanza that has to be insepcted
-     * @return true if the client is sending an initial Presence, false otherwise
-     * @throws OXException If the AtmospherePresenceService can't be queried
+     * @param id The ID
+     * @return The key
      */
-    private boolean isInitialPresence(Presence stanza) {
-        boolean isInitial = false;
-        PresenceData presenceData = getPresenceStatus(stanza.getFrom());
-        if (PresenceState.OFFLINE.equals(presenceData.getState())) {
-            isInitial = true;
-        }
-        return isInitial;
+    private static String key(ID id) {
+        return id.toString();
     }
 
     /**
-     * Are we dealing with a final Presence Stanza iow. is the client going offline?
+     * Creates a set of keys for the supplied IDs as used by the distributed maps.
      *
-     * @param stanza The incoming Presence Stanza that has to be inspected
-     * @return true if the client is sending a final Presence, false otherwise
+     * @param ids The IDs
+     * @return The keys
      */
-    private boolean isFinalPresence(Presence stanza) {
-        boolean isFinal = false;
-        Type type = stanza.getType();
-        if (Type.UNAVAILABLE.equals(type)) {
-            isFinal = true;
+    private static Set<String> keys(Collection<ID> ids) {
+        Set<String> keys = new HashSet<String>();
+        if (null != ids && 0 < ids.size()) {
+            for (ID id : ids) {
+                keys.add(key(id));
+            }
         }
-        return isFinal;
+        return keys;
     }
 
 }

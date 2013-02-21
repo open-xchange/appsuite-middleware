@@ -1,16 +1,18 @@
 Manifest-Version: 1.0
 Eclipse-RegisterBuddy: com.hazelcast
 Bundle-ManifestVersion: 2
-Bundle-Name: Realtime Presence Service
+Bundle-Name: Realtime Presence Service based on Hazelcast
 Bundle-SymbolicName: com.openexchange.realtime.presence.hazelcast
 Bundle-Version: 6.22.0.0
 Bundle-Activator: com.openexchange.realtime.presence.hazelcast.osgi.RealtimeHazelcastPresenceActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.hazelcast.core,
+Import-Package: com.hazelcast.config,
+ com.hazelcast.core,
  com.openexchange.conversion,
  com.openexchange.conversion.simple,
  com.openexchange.exception,
+ com.openexchange.hazelcast.configuration,
  com.openexchange.i18n,
  com.openexchange.log,
  com.openexchange.osgi,
@@ -22,4 +24,5 @@ Import-Package: com.hazelcast.core,
  com.openexchange.tools.session,
  org.apache.commons.logging,
  org.json,
- org.osgi.framework
+ org.osgi.framework,
+ org.osgi.util.tracker;version="1.5.1"

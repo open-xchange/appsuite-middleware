@@ -98,14 +98,16 @@ public interface PresenceStatusService {
      *
      * @param id The ID whose PresenceStatus should be queried
      * @return The current PresenceStatus of ID, Offline if no information can be found for the ID
+     * @throws OXException
      */
-    public PresenceData getPresenceStatus(ID id);
+    public PresenceData getPresenceStatus(ID id) throws OXException;
 
     /**
      * Get the current PresenceStatus of one or more IDs.
      *
      * @param ids The IDs whose PresenceStatus should be queried
      * @return The current PresenceStatus of IDs, Offline if no information can be found for the ID
+     * @throws OXException
      */
-    public IDMap<PresenceData> getPresenceStatus(Collection<ID> ids);
+    public IDMap<PresenceData> getPresenceStatus(Collection<ID> ids) throws OXException;
 }
