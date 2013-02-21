@@ -352,18 +352,14 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                         + script);
                 }
                 final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
-                final RuleListAndNextUid readScriptFromString = sieveTextFilter
-                    .readScriptFromString(script);
-                final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter
-                    .splitClientRulesAndRequire(
-                        readScriptFromString.getRulelist(),
-                        parameters.getParameter(Parameter.FLAG),
-                        readScriptFromString.isError());
-                final ArrayList<Rule> clientrules = clientrulesandrequire
-                    .getRules();
+                final RuleListAndNextUid readScriptFromString = sieveTextFilter.readScriptFromString(script);
+                final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(
+                    readScriptFromString.getRulelist(),
+                    parameters.getParameter(Parameter.FLAG),
+                    readScriptFromString.isError());
+                final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
                 changeOutgoingVacationRule(clientrules);
-                return CONVERTER.write(clientrules
-                    .toArray(new Rule[clientrules.size()]));
+                return CONVERTER.write(clientrules.toArray(new Rule[clientrules.size()]));
             } catch (final UnsupportedEncodingException e) {
                 throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
             } catch (final IOException e) {

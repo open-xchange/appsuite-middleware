@@ -148,13 +148,17 @@ public class FileResponseRenderer implements ResponseRenderer {
         InputStream documentData = null;
         try {
             file = transformIfImage(request, file, delivery);
-            InputStream stream = null == file ? null : file.getStream();
-            if (null == stream) {
+            if (null == file) {
                 // Quit with 404
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found.");
                 return;
             }
-            documentData = new BufferedInputStream(stream);
+            documentData = null == file.getStream() ? null : new BufferedInputStream(file.getStream());
+            if (null == documentData) {
+                // Quit with 404
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found.");
+                return;
+            }
             final String userAgent = req.getHeader("user-agent");
             if (SAVE_AS_TYPE.equals(contentType) || DOWNLOAD.equalsIgnoreCase(delivery)) {
                 final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32);
@@ -220,9 +224,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 outputStream.write(buf, 0, read);
             }
             outputStream.flush();
-        } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
-        } catch (final OXException e) {
+        } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         } finally {
             close(file);
@@ -246,7 +248,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             return file;
         }
         // mark stream if possible
-        final boolean markSupported = stream.markSupported();
+        final boolean markSupported = file.repetitive() ? false : stream.markSupported();
         if (markSupported) {
             stream.mark(131072); // 128KB
         }
@@ -272,7 +274,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
         // compress by default when not delivering as download
         Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
-        if (null == compress && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != compress && compress.booleanValue()) {
+        if ((null == compress && false == DOWNLOAD.equalsIgnoreCase(delivery)) || (null != compress && compress.booleanValue())) {
             transformations.compress();
         }
         /*
@@ -285,12 +287,12 @@ public class FileResponseRenderer implements ResponseRenderer {
                 try {
                     stream.reset();
                     return file;
-                } catch (IOException e) {
+                } catch (Exception e) {
                     LOG.warn("Error resetting input stream", e);
                 }
             }
             LOG.error("Unable to transform image from " + file);
-            return null;
+            return file.repetitive() ? file : null;
         }
         return new FileHolder(transformed, -1, file.getContentType(), file.getName());
     }

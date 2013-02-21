@@ -4,6 +4,18 @@ open-xchange-configjump-generic (7.0.2-0) unstable; urgency=low
 
  -- Carsten Hoeger <choegeropen-xchange.com>  Tue, 19 Feb 2013 08:54:29 +0100
 
+open-xchange-configjump-generic (7.0.1-4) unstable; urgency=low
+
+  * Fourth release candidate for 7.0.1
+
+ -- Carsten Hoeger <choegeropen-xchange.com>  Tue, 19 Feb 2013 16:52:23 +0100
+
+open-xchange-configjump-generic (7.0.1-3) unstable; urgency=low
+
+  * Third release candidate for 7.0.1
+
+ -- Carsten Hoeger <choegeropen-xchange.com>  Tue, 19 Feb 2013 09:21:27 +0100
+
 open-xchange-configjump-generic (7.0.1-2) unstable; urgency=low
 
   * Second release candidate for 7.0.1

@@ -292,12 +292,12 @@ public final class DownloadUtility {
          * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-8859-1
          */
         String foo = new String(fn.getBytes(Charsets.UTF_8), Charsets.ISO_8859_1);
-        final boolean isAndroid = (null != userAgent && userAgent.toLowerCase(Locale.ENGLISH).indexOf("android") >= 0);
+        final boolean isAndroid = (null != userAgent && toLowerCase(userAgent).indexOf("android") >= 0);
         if (isAndroid) {
             // myfile.dat => myfile.DAT
             final int pos = foo.lastIndexOf('.');
             if (pos >= 0) {
-                foo = foo.substring(0, pos) + foo.substring(pos).toUpperCase(Locale.ENGLISH);
+                foo = foo.substring(0, pos) + toUpperCase(foo.substring(pos));
             }
         } else {
             appendTo.append("; filename*=UTF-8''").append(URLCoder.encode(fn));
@@ -346,12 +346,12 @@ public final class DownloadUtility {
          * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-8859-1
          */
         String foo = new String(fn.getBytes(Charsets.UTF_8), Charsets.ISO_8859_1);
-        final boolean isAndroid = (null != userAgent && userAgent.toLowerCase(Locale.ENGLISH).indexOf("android") >= 0);
+        final boolean isAndroid = (null != userAgent && toLowerCase(userAgent).indexOf("android") >= 0);
         if (isAndroid) {
             // myfile.dat => myfile.DAT
             final int pos = foo.lastIndexOf('.');
             if (pos >= 0) {
-                foo = foo.substring(0, pos) + foo.substring(pos).toUpperCase(Locale.ENGLISH);
+                foo = foo.substring(0, pos) + toUpperCase(foo.substring(pos));
             }
         } else {
             appendTo.append("; filename*=UTF-8''").append(URLCoder.encode(fn));
@@ -494,6 +494,7 @@ public final class DownloadUtility {
         }
     }
 
+    /** ASCII-wise to lower-case */
     private static String toLowerCase(final CharSequence chars) {
         if (null == chars) {
             return null;
@@ -503,6 +504,20 @@ public final class DownloadUtility {
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
+    }
+
+    /** ASCII-wise to upper-case */
+    private static String toUpperCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
         }
         return builder.toString();
     }
