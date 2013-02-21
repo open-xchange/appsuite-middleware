@@ -64,12 +64,14 @@ import com.openexchange.inet.proxy.InetProxyService;
 public final class ConfigInetProxyService implements InetProxyService {
 
     private final boolean enabled;
+    private final InetProxyInformation proxyInformation;
 
     /**
      * Initializes a new {@link ConfigInetProxyService}.
      */
-    public ConfigInetProxyService(final boolean enabled) {
+    public ConfigInetProxyService(final boolean enabled, final InetProxyInformation proxyInformation) {
         super();
+        this.proxyInformation = proxyInformation;
         this.enabled = enabled;
     }
 
@@ -96,9 +98,7 @@ public final class ConfigInetProxyService implements InetProxyService {
             // This is a singleton Inet proxy
             throw InetProxyExceptionCodes.NO_SUCH_PROXY.create(uuid.toString());
         }
-        // TODO: Continue
-        
-        return null;
+        return proxyInformation;
     }
 
 }

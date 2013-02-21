@@ -49,6 +49,8 @@
 
 package com.openexchange.inet.proxy;
 
+import java.util.List;
+
 /**
  * {@link InetProxyInformation} - Provides the Inet proxy information.
  * 
@@ -90,5 +92,15 @@ public interface InetProxyInformation {
      * @return The password or <code>null</code>
      */
     String getPassword();
+
+    /**
+     * Gets a list of hosts that should be reached directly, bypassing the proxy.
+     * <p>
+     * The patterns may start or end with a '*' for wild-cards. Any host matching one of these patterns will be reached through a direct
+     * connection instead of through a proxy.
+     * 
+     * @return A list of hosts that should be reached directly
+     */
+    List<String> getNonProxyHosts();
 
 }

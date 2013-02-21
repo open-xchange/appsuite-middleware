@@ -49,6 +49,8 @@
 
 package com.openexchange.inet.proxy;
 
+import java.util.List;
+
 /**
  * {@link DefaultInetProxyInformation}
  * 
@@ -61,6 +63,7 @@ public class DefaultInetProxyInformation implements InetProxyInformation {
     private int port;
     private String userName;
     private String password;
+    private List<String> nonProxyHosts;
 
     /**
      * Initializes a new {@link DefaultInetProxyInformation}.
@@ -92,6 +95,11 @@ public class DefaultInetProxyInformation implements InetProxyInformation {
     @Override
     public String getPassword() {
         return password;
+    }
+
+    @Override
+    public List<String> getNonProxyHosts() {
+        return nonProxyHosts;
     }
 
     /**
@@ -137,6 +145,15 @@ public class DefaultInetProxyInformation implements InetProxyInformation {
      */
     public void setPassword(final String password) {
         this.password = password;
+    }
+
+    /**
+     * Sets the non-proxy hosts
+     * 
+     * @param nonProxyHosts The non-proxy hosts to set
+     */
+    public void setNonProxyHosts(List<String> nonProxyHosts) {
+        this.nonProxyHosts = nonProxyHosts;
     }
 
 }
