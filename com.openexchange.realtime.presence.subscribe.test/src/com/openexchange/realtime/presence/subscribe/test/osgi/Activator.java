@@ -49,17 +49,13 @@
 
 package com.openexchange.realtime.presence.subscribe.test.osgi;
 
-import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestSuite;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.realtime.presence.subscribe.test.IntegrationTest;
-//import org.junit.runner.JUnitCore;
-//import org.junit.runner.Result;
-//import org.junit.runner.notification.Failure;
+import com.openexchange.test.osgi.OSGiTest;
 
 /**
  * {@link Activator}
@@ -87,26 +83,8 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
-//        this.context = context;
-
-        try {
-        regs = new ArrayList<ServiceRegistration<?>>();
-        TestSuite service = new TestSuite(IntegrationTest.class);
-        regs.add(context.registerService(TestSuite.class.getName(), service, null));
-
-        System.out.println(this.getClass().getName() + " added " + regs.size() + " suites for OSGi testing.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
+        registerService(OSGiTest.class, new IntegrationTest());
     }
-
-//    @Override
-//    public void start(BundleContext context) throws Exception {
-//        context.registerService(CommandProvider.class.getName(), new TestCommandProvider(), null);
-//        PresenceSubscriptionService subscriptionService = (PresenceSubscriptionService) context.getService(context.getServiceReference(PresenceSubscriptionService.class.getName()));
-//        IntegrationTest.subscriptionService = subscriptionService;
-//    }
 
     @Override
     public void stopBundle() throws Exception {
@@ -120,38 +98,4 @@ public class Activator extends HousekeepingActivator {
         return new Class<?>[] { PresenceSubscriptionService.class };
     }
 
-//    /**
-//     * {@link TestCommandProvider}
-//     *
-//     * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
-//     */
-//    public class TestCommandProvider implements CommandProvider {
-//
-//        @Override
-//        public String getHelp() {
-//            return "";
-//        }
-//
-//        public void _test(final CommandInterpreter commandInterpreter) {
-//            String testCase = commandInterpreter.nextArgument();
-//            if (testCase == null) {
-//                testCase = "IntegrationTest";
-//            }
-//
-//            String clazz = "com.openexchange.realtime.presence.subscribe.test." + testCase;
-//            try {
-//                Class<?> loaded = Class.forName(clazz);
-//                JUnitCore jUnit = new JUnitCore();
-//                Result run = jUnit.run(loaded);
-//                if (!run.wasSuccessful()) {
-//                    for (Failure failure : run.getFailures()) {
-//                        commandInterpreter.print(failure.toString());
-//                    }
-//                }
-//            } catch (ClassNotFoundException e) {
-//                commandInterpreter.print("Could not load class " + clazz);
-//            }
-//        }
-//
-//    }
 }

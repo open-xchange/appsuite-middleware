@@ -1,11 +1,14 @@
 
 package com.openexchange.realtime.presence.subscribe.test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import com.openexchange.authentication.Cookie;
 import com.openexchange.java.util.UUIDs;
@@ -18,6 +21,7 @@ import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Presence.Type;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.realtime.presence.subscribe.test.osgi.Activator;
+import com.openexchange.test.osgi.OSGiTest;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -72,10 +76,10 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link IntegrationTest}
- *
+ * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class IntegrationTest extends TestCase {
+public class IntegrationTest implements OSGiTest {
 
     private static final String user1 = "martin.herfurth";
 
@@ -87,8 +91,8 @@ public class IntegrationTest extends TestCase {
 
     public static PresenceSubscriptionService subscriptionService;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         BundleContext context = Activator.getDefault().getContext();
 
         assertNotNull(context);
@@ -96,10 +100,9 @@ public class IntegrationTest extends TestCase {
         subscriptionService = (PresenceSubscriptionService) context.getService(context.getServiceReference(PresenceSubscriptionService.class.getName()));
 
         assertNotNull(subscriptionService);
-
-        super.setUp();
     }
 
+    @Test
     public void testSubscribe() throws Exception {
         // marcus subscribes to martin
         Presence subscription = new Presence();
@@ -116,7 +119,7 @@ public class IntegrationTest extends TestCase {
         approval.setMessage("Sicher doch.");
         approval.setType(Type.SUBSCRIBED);
         try {
-            //subscribe
+            // subscribe
             subscriptionService.subscribe(subscription, "bitte bitte", getSessionOne());
             List<Presence> pendingRequests = subscriptionService.getPendingRequests(getSessionOne());
             assertEquals("Wrong amount of pending requests.", 1, pendingRequests.size());
@@ -127,7 +130,7 @@ public class IntegrationTest extends TestCase {
             List<ID> subscriptions = subscriptionService.getSubscriptions(getSessionTwo());
             assertEquals("No subscriptions expected.", 0, subscriptions.size());
 
-            //approve
+            // approve
             subscriptionService.approve(approval, getSessionOne());
             subscribers = subscriptionService.getSubscribers(getSessionOne());
             assertEquals("One subscriber expected.", 1, subscribers.size());
@@ -141,7 +144,7 @@ public class IntegrationTest extends TestCase {
             assertEquals("Subscribed user doesn't match initial subscription", to.getUser(), id.getUser());
             assertEquals(to.getContext(), id.getContext());
 
-            //revoke subscription again
+            // revoke subscription again
             approval.setMessage("Hau ab!");
             approval.setType(Type.UNSUBSCRIBED);
             subscriptionService.approve(approval, getSessionOne());
@@ -252,6 +255,15 @@ public class IntegrationTest extends TestCase {
         });
 
         return ServerSessionAdapter.valueOf(login.getSession());
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.test.osgi.OSGiTest#getTestClasses()
+     */
+    @Override
+    public Class<?>[] getTestClasses() {
+        return new Class<?>[] { IntegrationTest.class };
     }
 
 }
