@@ -23,7 +23,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.cs_CZ.po\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2013-02-11 21:30+0100\n"
+"PO-Revision-Date: 2013-02-21 13:39+0100\n"
 "Last-Translator: Robert Krátký <kratky@rob.cz>\n"
 "Language-Team: Czech <cs@bureau-cornavin.com>\n"
 "MIME-Version: 1.0\n"
@@ -638,7 +638,7 @@ msgid ""
 "have to be created in a user's private folder to which you do not have write "
 "permissions."
 msgstr ""
-"Tato pozvánka byla poslána někomu jinému, ne vám. Schůzku by bylo nutné "
+"Toto pozvání bylo posláno někomu jinému, ne vám. Schůzku by bylo nutné "
 "vytvořit v soukromé složce uživatele, ke které nemáte právo k zápisu."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:82
@@ -681,7 +681,7 @@ msgid ""
 "send another invitation."
 msgstr ""
 "%1$s si přeje aktuální informace o schůzce %2$s. Pošlete, prosím, další "
-"pozvánku."
+"pozvání."
 
 #. *
 #. * Example: "UserXY has accepted the invitation"
@@ -696,7 +696,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:118
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:133
 msgid "%1$s has %2$s the invitation:"
-msgstr "%1$s %2$s pozvánku:"
+msgstr "%1$s %2$s pozvání:"
 
 #. *
 #. * Example: "UserXY has accepted the invitation on behalf of UserAB"
@@ -711,7 +711,7 @@ msgstr "%1$s %2$s pozvánku:"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:123
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:138
 msgid "%1$s has %2$s the invitation on behalf of %3$s:"
-msgstr "%1$s jménem %3$s %2$s pozvánku:"
+msgstr "%1$s jménem %3$s %2$s pozvání:"
 
 #. *
 #. * Example: "UserXY has accepted the invitation on your behalf"
@@ -726,12 +726,12 @@ msgstr "%1$s jménem %3$s %2$s pozvánku:"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:128
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:143
 msgid "%1$s has %2$s the invitation on your behalf:"
-msgstr "%1$s vaším jménem %2$s pozvánku:"
+msgstr "%1$s vaším jménem %2$s pozvání:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:145
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:676
 msgid "tentatively accepted"
-msgstr "předběžně přijato"
+msgstr "předběžně přijal(a)"
 
 #. Used if a participant changed it status to either 'Accepted', 'Denied', or 'Tentatively accepted'
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:148
@@ -907,14 +907,14 @@ msgstr "%1$s schůzku %2$s."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:672
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:699
 msgid "accepted"
-msgstr "přijato"
+msgstr "přijal(a)"
 
 #. declined
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:237
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:674
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:702
 msgid "declined"
-msgstr "odmítnuto"
+msgstr "odmítl(a)"
 
 #. -
 #. * Confirmation statuses
@@ -1013,11 +1013,11 @@ msgstr "%1$s nastavil(a) stav ‚žádné‘ pro: %1$s"
 #. Example: Subject: Doe, Jane accepted the invitation: My Appointment with Jane
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:289
 msgid "%1$s %2$s the invitation: %3$s"
-msgstr "%1$s %2$s pozvánku: %3$s"
+msgstr "%1$s %2$s pozvání: %3$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:291
 msgid "Resend the invitation for: %1$s"
-msgstr "Pošlete, prosím, znovu pozvánku pro: %1$s"
+msgstr "Pošlete, prosím, znovu pozvání pro: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:293
 msgid "Change not accepted for: %1$s"
