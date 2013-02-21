@@ -2,7 +2,7 @@ open-xchange-upsell-multiple (6.22.1-12) unstable; urgency=low
 
   * Build for patch 2013-02-22
 
- -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 21 Feb 2013 10:30:49 +0100
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 21 Feb 2013 15:38:09 +0100
 
 open-xchange-upsell-multiple (6.22.1-11) unstable; urgency=low
 
