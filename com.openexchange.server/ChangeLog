@@ -1,3 +1,7 @@
+* 2013-02-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25094: Immediate abort on exceeded quota constraint
+
 * 2013-02-20 - martin.herfurth@open-xchange.com
 
  - Fix for bug 25065: No Appointments on HALO request.
