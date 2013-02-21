@@ -104,7 +104,7 @@ public class TestServlet extends HttpServlet {
         final StringBuilder page = new StringBuilder();
         page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
         page.append("<html>\n");
-        page.append("<head><title>TestServlet's doGet Page</title></head>\n");
+        page.append("<head><title>TestServlet's GET Page</title></head>\n");
         page.append("<body>\n");
         page.append("<h1>TestServlet's doGet Page</h1><hr/>\n");
         page.append("<p>This is a tiny paragraph with some text inside!</p>\n");
