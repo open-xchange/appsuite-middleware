@@ -17,12 +17,12 @@ import com.openexchange.groupware.contexts.Context;
 public class Attachments implements ChangeDescriptionGenerator {
 
 	private final AttachmentMemory memory;
-	
-	
+
+
 	public Attachments(AttachmentMemory memory) {
 		this.memory = memory;
 	}
-	
+
 	@Override
     public String[] getFields() {
 		return new String[] {};

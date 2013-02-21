@@ -61,6 +61,6 @@ import com.openexchange.session.Session;
  */
 public interface CalendarFeature {
     public String getId();
-    
+
     public AppointmentSQLInterface wrap(AppointmentSQLInterface delegate, Session session) throws OXException;
 }

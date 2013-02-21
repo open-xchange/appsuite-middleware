@@ -52,8 +52,8 @@ package com.openexchange.sessiond.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.sessiond.cache.SessionCacheTimer;
 import com.openexchange.sessiond.impl.SessionHandler;
+import com.openexchange.sessiond.impl.TokenSessionContainer;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -74,7 +74,7 @@ public class TimerServiceTracker implements ServiceTrackerCustomizer<TimerServic
     public TimerService addingService(final ServiceReference<TimerService> reference) {
         final TimerService service = context.getService(reference);
         SessionHandler.addTimerService(service);
-        SessionCacheTimer.addTimerService(service);
+        TokenSessionContainer.getInstance().addTimerService(service);
         return service;
     }
 
@@ -85,7 +85,7 @@ public class TimerServiceTracker implements ServiceTrackerCustomizer<TimerServic
 
     @Override
     public void removedService(final ServiceReference<TimerService> reference, final TimerService service) {
-        SessionCacheTimer.removeTimerService();
+        TokenSessionContainer.getInstance().removeTimerService();
         SessionHandler.removeTimerService();
         context.ungetService(reference);
     }

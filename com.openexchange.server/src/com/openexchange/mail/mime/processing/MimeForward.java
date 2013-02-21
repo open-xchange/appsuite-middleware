@@ -50,7 +50,6 @@
 package com.openexchange.mail.mime.processing;
 
 import static com.openexchange.mail.mime.filler.MimeMessageFiller.setReplyHeaders;
-import static java.util.regex.Matcher.quoteReplacement;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -111,7 +110,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MimeForward} - MIME message forward.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MimeForward {
@@ -132,7 +131,7 @@ public final class MimeForward {
      * Composes a forward message from specified original messages based on MIME objects from <code>JavaMail</code> API.
      * <p>
      * If multiple messages are given these messages are forwarded as attachments.
-     * 
+     *
      * @param originalMails The referenced original mails
      * @param session The session containing needed user data
      * @param accountID The account ID of the referenced original mails
@@ -147,7 +146,7 @@ public final class MimeForward {
      * Composes a forward message from specified original messages based on MIME objects from <code>JavaMail</code> API.
      * <p>
      * If multiple messages are given these messages are forwarded as attachments.
-     * 
+     *
      * @param originalMails The referenced original mails
      * @param session The session containing needed user data
      * @param accountID The account ID of the referenced original mails
@@ -173,7 +172,7 @@ public final class MimeForward {
      * <code>JavaMail</code> API.
      * <p>
      * If multiple messages are given these messages are forwarded as attachments.
-     * 
+     *
      * @param originalMails The referenced original mails
      * @param session The session containing needed user data
      * @param accountIDs The account IDs of the referenced original mails
@@ -198,7 +197,7 @@ public final class MimeForward {
      * Composes a forward message from specified original messages based on MIME objects from <code>JavaMail</code> API.
      * <p>
      * If multiple messages are given these messages are forwarded as attachments.
-     * 
+     *
      * @param originalMsgs The referenced original messages
      * @param session The session containing needed user data
      * @param userSettingMail The user mail settings to use; leave to <code>null</code> to obtain from specified session
@@ -282,9 +281,10 @@ public final class MimeForward {
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 
@@ -528,7 +528,7 @@ public final class MimeForward {
 
     /**
      * Determines the first seen text in given multipart content with recursive iteration over enclosed multipart contents.
-     * 
+     *
      * @param mp The multipart object
      * @param retvalContentType The return value's content type (gets filled during processing and should therefore be empty)
      * @return The first seen text content
@@ -600,7 +600,7 @@ public final class MimeForward {
 
     /**
      * Generates the forward text on an inline-forward operation.
-     * 
+     *
      * @param firstSeenText The first seen text from original message
      * @param ltz The locale that determines format of date and time strings and time zone as well
      * @param msg The original message
@@ -614,19 +614,19 @@ public final class MimeForward {
             final InternetAddress[] from = msg.getFrom();
             forwardPrefix =
                 PATTERN_FROM.matcher(forwardPrefix).replaceFirst(
-                    from == null || from.length == 0 ? "" : quoteReplacement(from[0].toUnicodeString()));
+                    from == null || from.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(from[0].toUnicodeString()));
         }
         {
             final InternetAddress[] to = msg.getTo();
             forwardPrefix =
                 PATTERN_TO.matcher(forwardPrefix).replaceFirst(
-                    to == null || to.length == 0 ? "" : quoteReplacement(MimeProcessingUtility.addrs2String(to)));
+                    to == null || to.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.addrs2String(to)));
         }
         {
             final InternetAddress[] cc = msg.getCc();
             forwardPrefix =
                 PATTERN_CCLINE.matcher(forwardPrefix).replaceFirst(
-                    cc == null || cc.length == 0 ? "" : quoteReplacement(new com.openexchange.java.StringAllocator(64).append("\nCc: ").append(
+                    cc == null || cc.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(new com.openexchange.java.StringAllocator(64).append("\nCc: ").append(
                         MimeProcessingUtility.addrs2String(cc)).toString()));
         }
         {
@@ -634,7 +634,7 @@ public final class MimeForward {
             try {
                 forwardPrefix =
                     PATTERN_DATE.matcher(forwardPrefix).replaceFirst(
-                        date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedDate(
+                        date == null ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.getFormattedDate(
                             date,
                             DateFormat.LONG,
                             ltz.locale,
@@ -648,7 +648,7 @@ public final class MimeForward {
             try {
                 forwardPrefix =
                     PATTERN_TIME.matcher(forwardPrefix).replaceFirst(
-                        date == null ? "" : quoteReplacement(MimeProcessingUtility.getFormattedTime(
+                        date == null ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.getFormattedTime(
                             date,
                             DateFormat.SHORT,
                             ltz.locale,
@@ -664,7 +664,7 @@ public final class MimeForward {
         {
             final String decodedSubject = MimeMessageUtility.decodeMultiEncodedHeader(msg.getSubject());
             forwardPrefix =
-                PATTERN_SUBJECT.matcher(forwardPrefix).replaceFirst(decodedSubject == null ? "" : quoteReplacement(decodedSubject));
+                PATTERN_SUBJECT.matcher(forwardPrefix).replaceFirst(decodedSubject == null ? "" : com.openexchange.java.Strings.quoteReplacement(decodedSubject));
         }
         if (html) {
             forwardPrefix = HtmlProcessing.htmlFormat(forwardPrefix);
@@ -673,7 +673,7 @@ public final class MimeForward {
 
         /*-
          * Surround with quote
-         * 
+         *
          * Check whether forward text shall be surrounded with quotes or not
          */
         final boolean forwardUnquoted;

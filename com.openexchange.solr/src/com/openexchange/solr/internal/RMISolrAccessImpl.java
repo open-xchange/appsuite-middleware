@@ -64,13 +64,13 @@ import com.openexchange.solr.rmi.RMISolrException;
 
 /**
  * {@link RMISolrAccessImpl}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class RMISolrAccessImpl implements RMISolrAccessService {
 
     private final EmbeddedSolrAccessImpl solrService;
-    
+
     private final DelegationSolrAccessImpl delegate;
 
     public RMISolrAccessImpl(final DelegationSolrAccessImpl delegate) {

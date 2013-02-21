@@ -68,39 +68,39 @@ public class IDManglingFile implements File {
 
     private final String folder;
 
-    public IDManglingFile(File file, String service, String account) {
+    public IDManglingFile(final File file, final String service, final String account) {
         id = new FileID(service, account, file.getFolderId(), file.getId()).toUniqueID();
         folder = new FolderID(service, account, file.getFolderId()).toUniqueID();
         this.file = file;
     }
 
     @Override
-    public boolean matches(String pattern, Field... fields) {
+    public boolean matches(final String pattern, final Field... fields) {
         return file.matches(pattern, fields);
     }
 
     @Override
-    public void copyFrom(File other) {
+    public void copyFrom(final File other) {
         file.copyFrom(other);
     }
 
     @Override
-    public void copyInto(File other) {
+    public void copyInto(final File other) {
         file.copyInto(other);
     }
 
     @Override
-    public void copyFrom(File other, Field... fields) {
+    public void copyFrom(final File other, final Field... fields) {
         file.copyFrom(other, fields);
     }
 
     @Override
-    public void copyInto(File other, Field... fields) {
+    public void copyInto(final File other, final Field... fields) {
         file.copyInto(other, fields);
     }
 
     @Override
-    public Set<Field> differences(File other) {
+    public Set<Field> differences(final File other) {
         return file.differences(other);
     }
 
@@ -110,7 +110,7 @@ public class IDManglingFile implements File {
     }
 
     @Override
-    public boolean equals(File other, Field criterium, Field... criteria) {
+    public boolean equals(final File other, final Field criterium, final Field... criteria) {
         return file.equals(other, criterium, criteria);
     }
 
@@ -195,7 +195,7 @@ public class IDManglingFile implements File {
     }
 
     @Override
-    public String getProperty(String key) {
+    public String getProperty(final String key) {
         return file.getProperty(key);
     }
 
@@ -220,7 +220,7 @@ public class IDManglingFile implements File {
     }
 
     @Override
-    public int getVersion() {
+    public String getVersion() {
         return file.getVersion();
     }
 
@@ -235,102 +235,102 @@ public class IDManglingFile implements File {
     }
 
     @Override
-    public void setCategories(String categories) {
+    public void setCategories(final String categories) {
         file.setCategories(categories);
     }
 
     @Override
-    public void setColorLabel(int color) {
+    public void setColorLabel(final int color) {
         file.setColorLabel(color);
     }
 
     @Override
-    public void setCreated(Date creationDate) {
+    public void setCreated(final Date creationDate) {
         file.setCreated(creationDate);
     }
 
     @Override
-    public void setCreatedBy(int cretor) {
+    public void setCreatedBy(final int cretor) {
         file.setCreatedBy(cretor);
     }
 
     @Override
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         file.setDescription(description);
     }
 
     @Override
-    public void setFileMD5Sum(String sum) {
+    public void setFileMD5Sum(final String sum) {
         file.setFileMD5Sum(sum);
     }
 
     @Override
-    public void setFileMIMEType(String type) {
+    public void setFileMIMEType(final String type) {
         file.setFileMIMEType(type);
     }
 
     @Override
-    public void setFileName(String fileName) {
+    public void setFileName(final String fileName) {
         file.setFileName(fileName);
     }
 
     @Override
-    public void setFileSize(long length) {
+    public void setFileSize(final long length) {
         file.setFileSize(length);
     }
 
     @Override
-    public void setFolderId(String folderId) {
+    public void setFolderId(final String folderId) {
         throw new IllegalStateException("IDs are only read only with this class");
     }
 
     @Override
-    public void setId(String id) {
+    public void setId(final String id) {
         throw new IllegalStateException("IDs are only read only with this class");
     }
 
     @Override
-    public void setIsCurrentVersion(boolean bool) {
+    public void setIsCurrentVersion(final boolean bool) {
         file.setIsCurrentVersion(bool);
     }
 
     @Override
-    public void setLastModified(Date now) {
+    public void setLastModified(final Date now) {
         file.setLastModified(now);
     }
 
     @Override
-    public void setLockedUntil(Date lockedUntil) {
+    public void setLockedUntil(final Date lockedUntil) {
         file.setLockedUntil(lockedUntil);
     }
 
     @Override
-    public void setModifiedBy(int lastEditor) {
+    public void setModifiedBy(final int lastEditor) {
         file.setModifiedBy(lastEditor);
     }
 
     @Override
-    public void setNumberOfVersions(int numberOfVersions) {
+    public void setNumberOfVersions(final int numberOfVersions) {
         file.setNumberOfVersions(numberOfVersions);
     }
 
     @Override
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         file.setTitle(title);
     }
 
     @Override
-    public void setURL(String url) {
+    public void setURL(final String url) {
         file.setURL(url);
     }
 
     @Override
-    public void setVersion(int version) {
+    public void setVersion(final String version) {
         file.setVersion(version);
     }
 
     @Override
-    public void setVersionComment(String string) {
+    public void setVersionComment(final String string) {
         file.setVersionComment(string);
     }
 }

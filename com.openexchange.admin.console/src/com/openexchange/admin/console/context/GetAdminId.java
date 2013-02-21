@@ -81,7 +81,7 @@ public class GetAdminId extends ContextAbstraction {
         setContextOption(parser, NeededQuadState.eitheror);
         setContextNameOption(parser, NeededQuadState.eitheror);
     }
-    
+
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
         setOptions(parser);
 
@@ -91,15 +91,15 @@ public class GetAdminId extends ContextAbstraction {
             Credentials auth = null;
             try {
                 parser.ownparse(args);
-                
+
                 ctx = contextparsing(parser);
-                
+
                 auth = credentialsparsing(parser);
-                
+
                 parseAndSetContextName(parser, ctx);
-                
+
                 successtext = nameOrIdSetInt(this.ctxid, this.contextname, "context");
-                
+
             } catch (final RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
@@ -112,9 +112,9 @@ public class GetAdminId extends ContextAbstraction {
 
     private void maincall(Context ctx, Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, InvalidCredentialsException, StorageException, NoSuchContextException {
         final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
-        System.out.println(oxres.getAdminId(ctx, auth));        
+        System.out.println(oxres.getAdminId(ctx, auth));
     }
-    
+
     public static void main(String[] args) {
         new GetAdminId(args);
     }

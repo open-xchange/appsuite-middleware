@@ -67,7 +67,7 @@ public class OXResellerTools {
             return false;
         }
     }
-    
+
     public static HashSet<Restriction> array2HashSet(final Restriction[] rarr) {
         if( rarr != null ) {
             HashSet<Restriction> ret = new HashSet<Restriction>();

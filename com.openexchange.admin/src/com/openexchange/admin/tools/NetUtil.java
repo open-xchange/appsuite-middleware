@@ -52,13 +52,13 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 /**
  * @author choeger
- * 
+ *
  */
 public class NetUtil {
 
     /**
      * INTERNAL: check if address or mask is a valid dotted decimal notation
-     * 
+     *
      * @param qdot
      * @return
      */
@@ -84,7 +84,7 @@ public class NetUtil {
 
     /**
      * INTERNAL: convert ddn string representation to int array ddn
-     * 
+     *
      * @param ddn
      * @return
      */
@@ -99,7 +99,7 @@ public class NetUtil {
 
     /**
      * INTERNAL: convert ddn to long
-     * 
+     *
      * @param ddn
      * @return
      */
@@ -112,11 +112,11 @@ public class NetUtil {
         }
         return ret;
     }
-    
+
     /**
      * check if broadcast address matches with given network and netmask
      * network could also be an ip address fitting in the network
-     * 
+     *
      * @param broadcast
      * @param net
      * @param mask
@@ -133,92 +133,89 @@ public class NetUtil {
         long lmask  = stringDDN2Long(mask);
         long lnet   = stringDDN2Long(net);
         long lbcast = stringDDN2Long(broadcast);
-        
+
         long invlmask = 0x00000000ffffff & ~lmask;
-        
+
         if( (lnet & lmask | invlmask) == lbcast ) {
             return true;
         }
 
         return false;
     }
-    
+
     /**
      * check if mask is a valid netmask in dotted decimal notation.
-     * 
+     *
      * @param mask
      * @return
      */
     public final static boolean isValidNetmask(final String mask) {
         if (mask == null) {
             return false;
-        } else {
-            if( isValidDDN(mask) ) {
-                int []imask = stringDDN2Int(mask);
+        }
+        if( isValidDDN(mask) ) {
+            int []imask = stringDDN2Int(mask);
 
-                // do the real check:
-                // there must not follow a '1' after a '0' in a netmask
-                boolean foundZero=false;
-                for(int p=0; p<4; p++) {
-                    for(int bs=7; bs>=0; bs--) {
-                        final int bit = 1 << bs;
-                        final int erg = (imask[p] & bit);
-                        if( erg == 0) {
-                            foundZero = true;
-                        } else if( erg == bit && foundZero ) {
-                            return false;
-                        }
+            // do the real check:
+            // there must not follow a '1' after a '0' in a netmask
+            boolean foundZero=false;
+            for(int p=0; p<4; p++) {
+                for(int bs=7; bs>=0; bs--) {
+                    final int bit = 1 << bs;
+                    final int erg = (imask[p] & bit);
+                    if( erg == 0) {
+                        foundZero = true;
+                    } else if( erg == bit && foundZero ) {
+                        return false;
                     }
                 }
-
-                return true;
-            } else {
-                return false;
             }
+
+            return true;
         }
+        return false;
     }
 
     /**
      * check if address is a valid ip address in dotted decimal notation.
-     * 
+     *
      * @param address
      * @return
      */
     public final static boolean isValidIPAddress(final String address) {
         if (address == null) {
             return false;
-        } else {
-            return isValidDDN(address);
         }
+        return isValidDDN(address);
     }
 
     /**
      * check if ipmask is a valid network definition either in cidr or dotted
      * decimal notation.
-     * 
+     *
      * @param ipmask
      * @return
      */
     public final static boolean isValidIPNetmask(final String ipmask) {
         if (ipmask == null) {
             return false;
-        } else {
-            if (!ipmask.contains("/")) {
-                return false;
-            }
-            final String ip = ipmask.split("/")[0];
-            if (!isValidIPAddress(ip)) {
-                return false;
-            }
-            final String mask = ipmask.split("/")[1];
-            if (mask.contains(".")) {
-                return isValidNetmask(mask);
-            }
-            if (mask.replaceAll("[0-9]", "").length() > 0) {
-                return false;
-            }
-            return true;
         }
+        int pos;
+        if ((pos = ipmask.indexOf('/')) < 0) {
+            return false;
+        }
+        final String ip = ipmask.substring(0, pos);
+        if (!isValidIPAddress(ip)) {
+            return false;
+        }
+        final String mask = pos < ipmask.length()-1 ? ipmask.substring(pos + 1) : "";
+        if (mask.indexOf('.') >= 0) {
+            return isValidNetmask(mask);
+        }
+        if (mask.replaceAll("[0-9]", "").length() > 0) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -233,11 +230,11 @@ public class NetUtil {
             throw new InvalidDataException(ipmask+" is not a valid network definition");
         }
     }
-    
+
     /**
      * return dotted decimal notation representation as a String of the CIDR
      * representation of the netmask
-     * 
+     *
      * @param cidr
      * @return
      */

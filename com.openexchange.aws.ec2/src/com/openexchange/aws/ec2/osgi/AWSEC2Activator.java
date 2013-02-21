@@ -61,7 +61,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link AWSEC2Activator}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class AWSEC2Activator extends HousekeepingActivator {

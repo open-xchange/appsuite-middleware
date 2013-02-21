@@ -94,7 +94,7 @@ public final class ICal4jSession implements ICalSession {
         calendar = cal;
         index = 0;
     }
-    
+
     /**
      * Counts the number of elements already parsed for error messages
      * @return

@@ -9,7 +9,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.cassandra.config.ConfigurationException;
 import org.apache.cassandra.config.DatabaseDescriptor;
 import org.apache.cassandra.db.commitlog.CommitLog;
 import org.apache.cassandra.io.util.FileUtils;
@@ -49,7 +48,7 @@ public class EmbeddedServerHelper {
    * @throws InterruptedException
    */
   public void setup() throws TTransportException, IOException,
-      InterruptedException, ConfigurationException {
+      InterruptedException {
     // delete tmp dir first
     rmdir(TMP);
     // make a tmp dir and copy cassandra.yaml and log4j.properties to it
@@ -164,14 +163,12 @@ public class EmbeddedServerHelper {
 
   public static void mkdirs()
   {
-      try
-      {
-          DatabaseDescriptor.createAllDirectories();
-      }
-      catch (IOException e)
-      {
-          throw new RuntimeException(e);
-      }
+          try {
+            DatabaseDescriptor.createAllDirectories();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
   }  
   
   public static void loadSchemaFromYaml()  

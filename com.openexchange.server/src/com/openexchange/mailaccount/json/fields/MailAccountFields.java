@@ -54,7 +54,7 @@ package com.openexchange.mailaccount.json.fields;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailAccountFields {
+public interface MailAccountFields {
 
     public static final String ID = "id";
 
@@ -131,5 +131,9 @@ public final class MailAccountFields {
     public static final String POP3_STORAGE = "pop3_storage";
 
     public static final String POP3_PATH = "pop3_path";
+
+    public static final String ADDRESSES = "addresses";
+
+    public static final String META = "meta";
 
 }

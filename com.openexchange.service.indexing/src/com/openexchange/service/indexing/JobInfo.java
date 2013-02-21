@@ -56,7 +56,7 @@ import java.util.Map;
 
 /**
  * {@link JobInfo}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public abstract class JobInfo implements Serializable {
@@ -70,8 +70,8 @@ public abstract class JobInfo implements Serializable {
     public final Class<? extends IndexingJob> jobClass;
 
     private final Map<String, Object> properties;
-    
-    
+
+
     protected JobInfo(JobInfoBuilder<?> builder) {
         this(builder.jobClass, builder.contextId, builder.userId, builder.properties);
     }
@@ -91,11 +91,11 @@ public abstract class JobInfo implements Serializable {
     public Object getProperty(String key) {
         return properties.get(key);
     }
-    
+
     public abstract int getModule();
 
     public abstract String toUniqueId();
-    
+
 
     public static abstract class JobInfoBuilder<T extends JobInfoBuilder<T>> {
 
@@ -104,9 +104,9 @@ public abstract class JobInfo implements Serializable {
         public int userId;
 
         public Map<String, Object> properties = new HashMap<String, Object>();
-        
+
         public Class<? extends IndexingJob> jobClass;
-        
+
 
         /**
          * Initializes a new {@link JobInfoBuilder}.
@@ -126,7 +126,7 @@ public abstract class JobInfo implements Serializable {
             this.userId = userId;
             return (T) this;
         }
-        
+
         public T addProperty(String key, Object value) {
             properties.put(key, value);
             return (T) this;

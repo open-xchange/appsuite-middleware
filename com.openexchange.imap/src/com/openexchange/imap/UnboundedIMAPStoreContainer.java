@@ -105,7 +105,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
     /**
      * Gets the backing blocking queue.
-     * 
+     *
      * @return The queue
      */
     protected BlockingQueue<IMAPStoreWrapper> getQueue() {
@@ -239,7 +239,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         /**
          * Retrieves and removes the head of this queue if elapsed compared to given time stamp, or returns <code>null</code> if this queue
          * is empty or head is not elapsed.
-         * 
+         *
          * @param stamp The time stamp
          * @return The elapsed head of this queue
          */

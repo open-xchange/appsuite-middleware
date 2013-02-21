@@ -65,13 +65,13 @@ public class ConversionWarningMessage implements LocalizableStrings {
     private ConversionWarningMessage() {
         super();
     }
-    
+
     // Unable to convert task status "%1$s".
     public final static String INVALID_STATUS_MSG = "Unable to convert task status \"%1$s\".";
 
     // Unable to convert task priority %1$d.
     public final static String INVALID_PRIORITY_MSG = "Unable to convert task priority %d.";
-    
+
     // Can not create recurrence rule: %s
     public final static String CANT_CREATE_RRULE_MSG = "Can not create recurrence rule: %s";
 
@@ -113,7 +113,7 @@ public class ConversionWarningMessage implements LocalizableStrings {
 
     // This does not look like an iCal file. Please check the file.
     public final static String DOES_NOT_LOOK_LIKE_ICAL_FILE_MSG = "This does not look like an iCal file. Please check the file.";
-    
+
     // Empty "CLASS" element.
     public final static String EMPTY_CLASS_MSG = "Empty \"CLASS\" element.";
 
@@ -122,5 +122,7 @@ public class ConversionWarningMessage implements LocalizableStrings {
 
     // An error occurred: %1$s
     public final static String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
+
+    public final static String TRUNCATION_WARNING_MSG = "Element truncated: %s";
 
 }

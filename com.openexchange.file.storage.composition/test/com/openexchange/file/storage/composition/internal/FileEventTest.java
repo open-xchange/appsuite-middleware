@@ -81,26 +81,26 @@ import com.openexchange.session.SimSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class FileEventTest {
-    
+
     private static final String SERVICE = "http://inmemoryfilestorage.ox";
-    
+
     private static final String ACCOUNT = "5435656";
-    
+
     private InMemoryAccess fileAccess;
-    
-    
+
+
     @Before
     public void setUp() throws Exception {
         fileAccess = new InMemoryAccess();
     }
-    
+
     @Test
-    public void testSave() throws Exception {   
+    public void testSave() throws Exception {
         final File file = new DefaultFile();
         file.setTitle("Title...");
         final FolderID folder = new FolderID(SERVICE, ACCOUNT, "dasdb3424");
         file.setFolderId(folder.toUniqueID());
-        fileAccess.setEventVerifier(new EventVerifier() {            
+        fileAccess.setEventVerifier(new EventVerifier() {
             @Override
             public void verifyEvent(Event event) throws Exception {
                 assertTrue("Wrong topic.", event.getTopic().equals(FileStorageEventConstants.CREATE_TOPIC));
@@ -112,35 +112,35 @@ public class FileEventTest {
         });
         fileAccess.saveFileMetadata(file, 0);
     }
-    
+
     @Test
-    public void testRemove() throws Exception {   
+    public void testRemove() throws Exception {
         final File file = new DefaultFile();
         file.setTitle("Title...");
         final FolderID srcfolder = new FolderID(SERVICE, ACCOUNT, "dasdb3424");
         file.setFolderId(srcfolder.toUniqueID());
-        fileAccess.saveFileMetadata(file, 0);        
-        final File updated = new DefaultFile(file);        
+        fileAccess.saveFileMetadata(file, 0);
+        final File updated = new DefaultFile(file);
         fileAccess.saveFileMetadata(updated, 0);
-        
-        fileAccess.setEventVerifier(new EventVerifier() {            
+
+        fileAccess.setEventVerifier(new EventVerifier() {
             @Override
             public void verifyEvent(Event event) throws Exception {
                 assertTrue("Wrong topic.", event.getTopic().equals(FileStorageEventConstants.DELETE_TOPIC));
                 String folderId = FileStorageEventHelper.extractFolderId(event);
                 String objectId = FileStorageEventHelper.extractObjectId(event);
-                Set<Integer> versions = FileStorageEventHelper.extractVersions(event);
+                Set<String> versions = FileStorageEventHelper.extractVersions(event);
                 assertEquals("Wrong folder.", file.getFolderId(), folderId);
                 assertEquals("Wrong id.", file.getId(), objectId);
                 assertTrue("Too much versions.", versions.size() == 1);
-                Integer next = versions.iterator().next();
-                assertTrue("Wrong version.", next.intValue() == file.getVersion());
+                String next = versions.iterator().next();
+                assertTrue("Wrong version.", next == file.getVersion());
             }
         });
-        int[] notRemoved = fileAccess.removeVersion(file.getId(), new int[] { file.getVersion() });
-        assertTrue("Version not removed.", notRemoved.length == 0); 
-        
-        fileAccess.setEventVerifier(new EventVerifier() {            
+        String[] notRemoved = fileAccess.removeVersion(file.getId(), new String[] { file.getVersion() });
+        assertTrue("Version not removed.", notRemoved.length == 0);
+
+        fileAccess.setEventVerifier(new EventVerifier() {
             @Override
             public void verifyEvent(Event event) throws Exception {
                 assertTrue("Wrong topic.", event.getTopic().equals(FileStorageEventConstants.DELETE_TOPIC));
@@ -152,7 +152,7 @@ public class FileEventTest {
         });
         assertTrue("Deletion failed.", fileAccess.removeDocument(Collections.singletonList(updated.getId()), 0).size() == 0);
     }
-    
+
     @Test
     public void testMove() throws Exception {
         final File file = new DefaultFile();
@@ -160,26 +160,26 @@ public class FileEventTest {
         final FolderID srcfolder = new FolderID(SERVICE, ACCOUNT, "dasdb3424");
         file.setFolderId(srcfolder.toUniqueID());
         fileAccess.saveFileMetadata(file, 0);
-        
+
         final FolderID dstFolder = new FolderID(SERVICE, ACCOUNT, "xsdgd7234");
         final File moved = new DefaultFile(file);
         moved.setFolderId(dstFolder.toUniqueID());
-        
-        fileAccess.setEventVerifier(new EventVerifier() {            
+
+        fileAccess.setEventVerifier(new EventVerifier() {
             private int executionCount = 0;
-            
+
             private boolean deleted = false;
-            
+
             private boolean created = false;
-            
+
             @Override
             public void verifyEvent(Event event) throws Exception {
-                if (event.getTopic().equals(FileStorageEventConstants.DELETE_TOPIC)) {                    
+                if (event.getTopic().equals(FileStorageEventConstants.DELETE_TOPIC)) {
                     String folderId = FileStorageEventHelper.extractFolderId(event);
                     String objectId = FileStorageEventHelper.extractObjectId(event);
                     assertEquals("Wrong folder.", file.getFolderId(), folderId);
                     assertEquals("Wrong id.", file.getId(), objectId);
-                    
+
                     executionCount++;
                     deleted = true;
                 } else if (event.getTopic().equals(FileStorageEventConstants.CREATE_TOPIC)) {
@@ -187,20 +187,20 @@ public class FileEventTest {
                     String objectId = FileStorageEventHelper.extractObjectId(event);
                     assertEquals("Wrong folder.", moved.getFolderId(), folderId);
                     assertEquals("Wrong id.", moved.getId(), objectId);
-                    
+
                     executionCount++;
                     created = true;
                 }
-                
+
                 if (executionCount == 2) {
                     assertTrue("No delete event.", deleted);
                     assertTrue("No create event.", created);
-                }                
+                }
             }
         });
-        fileAccess.move(moved, null, 0, null);                
+        fileAccess.move(moved, null, 0, null);
     }
-    
+
     @Test
     public void testCopy() throws Exception {
         final File file = new DefaultFile();
@@ -208,9 +208,9 @@ public class FileEventTest {
         final FolderID srcfolder = new FolderID(SERVICE, ACCOUNT, "dasdb3424");
         file.setFolderId(srcfolder.toUniqueID());
         fileAccess.saveFileMetadata(file, 0);
-        
+
         final FolderID dstFolder = new FolderID(SERVICE, ACCOUNT, "xsdgd7234");
-        fileAccess.setEventVerifier(new EventVerifier() {            
+        fileAccess.setEventVerifier(new EventVerifier() {
             @Override
             public void verifyEvent(Event event) throws Exception {
                 assertTrue("Wrong topic.", event.getTopic().equals(FileStorageEventConstants.CREATE_TOPIC));
@@ -224,7 +224,7 @@ public class FileEventTest {
         File copy = fileAccess.getFileMetadata(copyId, FileStorageFileAccess.CURRENT_VERSION);
         assertNotNull("Copy was null.", copy);
     }
-    
+
     @Test
     public void testUpdate() throws Exception {
         final File file = new DefaultFile();
@@ -232,9 +232,9 @@ public class FileEventTest {
         final FolderID srcfolder = new FolderID(SERVICE, ACCOUNT, "dasdb3424");
         file.setFolderId(srcfolder.toUniqueID());
         fileAccess.saveFileMetadata(file, 0);
-        
-        file.setTitle("Another title...");        
-        fileAccess.setEventVerifier(new EventVerifier() {            
+
+        file.setTitle("Another title...");
+        fileAccess.setEventVerifier(new EventVerifier() {
             @Override
             public void verifyEvent(Event event) throws Exception {
                 assertTrue("Wrong topic.", event.getTopic().equals(FileStorageEventConstants.UPDATE_TOPIC));
@@ -246,18 +246,18 @@ public class FileEventTest {
         });
         fileAccess.saveFileMetadata(file, 0);
     }
-    
+
     @After
     public void tearDown() throws Exception {
         fileAccess = null;
     }
-    
+
     private static final class InMemoryAccess extends CompositingIDBasedFileAccess {
-        
+
         private final FileStorageFileAccess access = new InMemoryFileStorageFileAccess(SERVICE, ACCOUNT);
 
         private EventVerifier verifier;
-        
+
 
         /**
          * Initializes a new {@link InMemoryAccess}.
@@ -281,14 +281,14 @@ public class FileEventTest {
         protected EventAdmin getEventAdmin() {
             return null;
         }
-        
+
         @Override
         protected FileStorageFileAccess getFileAccess(String serviceId, String accountId) throws OXException {
             return access;
         }
-        
+
         @Override
-        protected void postEvent(Event event) {            
+        protected void postEvent(Event event) {
             try {
                 String serviceId = FileStorageEventHelper.extractService(event);
                 String accountId = FileStorageEventHelper.extractAccountId(event);
@@ -299,7 +299,7 @@ public class FileEventTest {
             } catch (OXException e) {
                 fail(e.getMessage());
             }
-            
+
             if (verifier != null) {
                 try {
                     verifier.verifyEvent(event);
@@ -308,12 +308,12 @@ public class FileEventTest {
                 }
             }
         }
-        
+
         public void setEventVerifier(EventVerifier verifier) {
             this.verifier = verifier;
         }
     }
-    
+
     private static interface EventVerifier {
         void verifyEvent(Event event) throws Exception;
     }

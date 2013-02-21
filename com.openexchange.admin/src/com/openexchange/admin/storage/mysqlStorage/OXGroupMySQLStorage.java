@@ -59,9 +59,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import org.osgi.framework.BundleContext;
+import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Group;
@@ -71,10 +73,14 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXGroupSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheKey;
+import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 
 /**
@@ -409,6 +415,23 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 OXFolderAdminHelper.propagateGroupModification(groupId, con, con, ctxId);
                 DeleteRegistry.getInstance().fireDeleteEvent(new DeleteEvent(this, groupId, DeleteEvent.TYPE_GROUP, ctxId), con, con);
 
+                final List<Integer> members = new LinkedList<Integer>();
+                {
+                    PreparedStatement stmt3 = null;
+                    ResultSet rs3 = null;
+                    try {
+                        stmt3 = con.prepareStatement("SELECT member FROM groups_member WHERE cid=? AND id=?");
+                        stmt3.setInt(1, ctxId);
+                        stmt3.setInt(2, groupId);
+                        rs3 = stmt3.executeQuery();
+                        while (rs3.next()) {
+                            members.add(Integer.valueOf(rs3.getInt(1)));
+                        }
+                    } finally {
+                        closeSQLStuff(rs3, stmt3);
+                    }
+                }
+
                 changeLastModifiedOfGroupMembers(ctx, con, getMembers(ctx, groupId, con));
                 stmt1 = con.prepareStatement("DELETE FROM groups_member WHERE cid=? AND id=?");
                 stmt1.setInt(1, ctxId);
@@ -423,8 +446,37 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 stmt2.setInt(2, groupId);
                 stmt2.executeUpdate();
                 stmt2.close();
+
+                // JCS
+                final String SYMBOLIC_NAME_CACHE = "com.openexchange.caching";
+                final String NAME_OXCACHE = "oxcache";
+                final BundleContext context = AdminCache.getBundleContext();
+                if (null != context) {
+                    final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
+                        CacheService.class);
+                    if (null != cacheService) {
+                        try {
+                            final int contextId = ctx.getId().intValue();
+                            for (final Integer userId : members) {
+                                final CacheKey key = cacheService.newCacheKey(contextId, userId.intValue());
+                                Cache cache = cacheService.getCache("User");
+                                cache.remove(key);
+                                cache = cacheService.getCache("UserConfiguration");
+                                cache.remove(key);
+                                cache = cacheService.getCache("UserSettingMail");
+                                cache.remove(key);
+                            }
+                        } catch (final OXException e) {
+                            log.error(e.getMessage(), e);
+                        } finally {
+                            AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+                        }
+                    }
+                }
+                // End of JCS
             }
             con.commit();
+
             for (Group group : groups) {
                 log.info("Group " + group.getId() + " deleted!");
             }

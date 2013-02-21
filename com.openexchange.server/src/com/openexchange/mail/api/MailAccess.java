@@ -53,12 +53,17 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Queue;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailInitialization;
@@ -98,23 +103,29 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * ############### MEMBERS ###############
      */
 
+    /**
+     * Line separator string. This is the value of the line.separator
+     * property at the moment that the MailAccess was created.
+     */
+    protected final String lineSeparator;
+
     protected final transient Session session;
 
     protected final int accountId;
 
     protected final Collection<OXException> warnings;
 
-    protected boolean cacheable;
+    protected volatile boolean cacheable;
 
     /**
      * Indicates if <tt>MailAccess</tt> is currently held in {@link SingletonMailAccessCache}.
      */
-    protected boolean cached;
+    protected volatile boolean cached;
 
     /**
      * A flag to check if this <tt>MailAccess</tt> is connected, but in IDLE mode, waiting for any server notifications.
      */
-    protected boolean waiting;
+    protected volatile boolean waiting;
 
     protected MailProvider provider;
 
@@ -143,6 +154,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      */
     protected MailAccess(final Session session, final int accountId) {
         super();
+        lineSeparator = System.getProperty("line.separator");
         warnings = new ArrayList<OXException>(2);
         this.session = session;
         this.accountId = accountId;
@@ -326,8 +338,8 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
-     * Gets a new, un-cached <tt>MailAccess</tt> instance that is initially not connected. 
-     * 
+     * Gets a new, un-cached <tt>MailAccess</tt> instance that is initially not connected.
+     *
      * @param session The associated session
      * @param accountId The account identifier
      * @return The new, un-cached <tt>MailAccess</tt> instance
@@ -354,7 +366,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Re-connects specified <tt>MailAccess</tt> instance.
-     * 
+     *
      * @param mailAccess The <tt>MailAccess</tt> instance to re-connect
      * @return The re-connected <tt>MailAccess</tt> instance.
      * @throws OXException If re-connect attempt fails
@@ -715,7 +727,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
 
     /**
      * Remembers specified {@link MimeCleanUp} instance.
-     * 
+     *
      * @param mimeCleanUp The {@link MimeCleanUp} instance
      */
     public static void rememberMimeCleanUp(final MimeCleanUp mimeCleanUp) {
@@ -741,25 +753,41 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return the trace of the thread that lastly obtained this access
      */
     public final String getTrace() {
-        final com.openexchange.java.StringAllocator sBuilder = new com.openexchange.java.StringAllocator(512);
+        final com.openexchange.java.StringAllocator sBuilder = new com.openexchange.java.StringAllocator(2048);
+        {
+            final Props taskProps = LogProperties.optLogProperties(usingThread);
+            final Map<String, String> sorted = new TreeMap<String, String>();
+            for (final Entry<String, Object> entry : taskProps.asMap().entrySet()) {
+                final String propertyName = entry.getKey();
+                final Object value = entry.getValue();
+                if (null != value) {
+                    sorted.put(propertyName, value.toString());
+                }
+            }
+            for (final Map.Entry<String, String> entry : sorted.entrySet()) {
+                sBuilder.append(entry.getKey()).append('=').append(entry.getValue()).append(lineSeparator);
+            }
+            sBuilder.append(lineSeparator);
+            
+        }
         sBuilder.append(toString());
-        sBuilder.append("\nMail connection established (or fetched from cache) at: ").append('\n');
+        sBuilder.append(lineSeparator).append("Mail connection established (or fetched from cache) at: ").append(lineSeparator);
         /*
          * Start at index 3
          */
         for (int i = 3; i < trace.length; i++) {
-            sBuilder.append("\tat ").append(trace[i]).append('\n');
+            sBuilder.append("    at ").append(trace[i]).append(lineSeparator);
         }
         if ((null != usingThread) && usingThread.isAlive()) {
-            sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append('\n');
+            sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append(lineSeparator);
             /*
              * Only possibility to get the current working position of a thread. This is only called if a thread is caught by
              * MailAccessWatcher.
              */
             final StackTraceElement[] trace = usingThread.getStackTrace();
-            sBuilder.append("\tat ").append(trace[0]);
+            sBuilder.append("    at ").append(trace[0]);
             for (int i = 1; i < trace.length; i++) {
-                sBuilder.append('\n').append("\tat ").append(trace[i]);
+                sBuilder.append(lineSeparator).append("    at ").append(trace[i]);
             }
         }
         return sBuilder.toString();

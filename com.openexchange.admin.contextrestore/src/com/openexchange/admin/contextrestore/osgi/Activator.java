@@ -67,13 +67,14 @@ import com.openexchange.osgi.HousekeepingActivator;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Activator extends HousekeepingActivator {
-    
+
     private static final AtomicReference<OXContextInterface> OXContextInterfaceReference = new AtomicReference<OXContextInterface>();
 
     @Override
     public void startBundle() throws Exception {
         final Log log = LogFactory.getLog(Activator.class);
         try {
+            AdminCache.compareAndSetBundleContext(null, context);
             final ConfigurationService service = getService(ConfigurationService.class);
             AdminCache.compareAndSetConfigurationService(null, service);
             OXContextInterfaceReference.set(new OXContext(context));

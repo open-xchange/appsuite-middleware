@@ -72,14 +72,12 @@ public interface SessiondService {
     /**
      * Creates a new session object in the SessionD storage with the given session parameters.
      * <p>
-     * If passed <tt>parameterObject</tt> implements {@link Parameterized} interface, then generated {@link Session session} is added to it
-     * with {@link Parameterized#PARAM_SESSION} name.
-     * 
+     *
      * @param parameterObject The parameter object describing the session to create
-     * @return The session identifier of the newly created session as a <code>String</code>
+     * @return The session object interface of the newly created session.
      * @throws OXException If creating the session fails
      */
-    public String addSession(AddSessionParameter parameterObject) throws OXException;
+    public Session addSession(AddSessionParameter parameterObject) throws OXException;
 
     /**
      * Replaces the currently stored password in session identified through given session identifier with specified <code>newPassword</code>.
@@ -173,6 +171,17 @@ public interface SessiondService {
     public Session getSessionByRandomToken(final String randomToken);
 
     /**
+     * Picks up the session associated with the given client and server token. If a session exists for the given tokens and both tokens
+     * match, the session object is put into the normal session container and into the session storage. It is removed from the session
+     * container with tokens so a second request with the same tokens will fail.
+     * @param clientToken Client side token passed within the {@link #addSession(AddSessionParameter)} call.
+     * @param serverToken Server side token returned inside the session from the {@link #addSession(AddSessionParameter)} call.
+     * @return the matching session
+     * @throws OXException if one of the tokens does not match.
+     */
+    Session getSessionWithTokens(String clientToken, String serverToken) throws OXException;
+
+    /**
      * Gets the number of active sessions.
      *
      * @return The number of active sessions
@@ -183,5 +192,32 @@ public interface SessiondService {
      * Gets the first session that matches the given userId and contextId.
      */
     public Session getAnyActiveSessionForUser(int userId, int contextId);
+
+    /**
+     * Sets the local IP address for denoted session.
+     *
+     * @param sessionId The session Id
+     * @param localIp The new local IP address
+     * @throws OXException If changing local IP address fails or any reason
+     */
+    public void setLocalIp(String sessionId, String localIp) throws OXException;
+
+    /**
+     * Sets the client identifier for denoted session.
+     *
+     * @param sessionId The session Id
+     * @param client The new client identifier
+     * @throws OXException If changing client identifier fails or any reason
+     */
+    public void setClient(String sessionId, String client) throws OXException;
+
+    /**
+     * Sets the hash identifier for denoted session.
+     *
+     * @param sessionId The session Id
+     * @param client The new hash identifier
+     * @throws OXException If changing hash identifier fails or any reason
+     */
+    public void setHash(String sessionId, String hash) throws OXException;
 
 }

@@ -51,7 +51,7 @@ package com.openexchange.realtime.presence.subscribe.impl;
 
 /**
  * {@link SubscriptionParticipant}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class SubscriptionParticipant {

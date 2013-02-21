@@ -55,9 +55,6 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.secret.SecretService;
-import com.openexchange.secret.recovery.SecretInconsistencyDetector;
-import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.secret.recovery.json.SecretRecoveryAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -70,12 +67,9 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractSecretRecoveryAction implements AJAXActionService {
 
-    public static volatile SecretService secretService;
-    public static volatile SecretInconsistencyDetector detector;
-    public static volatile SecretMigrator migrator;
-
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
+    /** The service look-up */
     protected final ServiceLookup services;
 
     /**

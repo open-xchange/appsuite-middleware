@@ -85,7 +85,7 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
             new BasicAuthenticator().doAuthentication(creds, ctx);
         }
     }
-    
+
     @Override
     public void deleteJob(final Context ctx, final Credentials cred, final int id) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException {
         try {
@@ -138,7 +138,7 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
             throw e;
         }
     }
-    
+
     @Override
     public String getJobList(final Context ctx, final Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException {
         try {
@@ -160,7 +160,7 @@ public class OXTaskMgmtImpl extends OXCommonImpl implements OXTaskMgmtInterface 
             throw e;
         }
     }
-    
+
     @Override
     public Object getTaskResults(final Context ctx, final Credentials cred, final int id) throws RemoteException, InvalidCredentialsException, StorageException, InterruptedException, ExecutionException, InvalidDataException {
         try {

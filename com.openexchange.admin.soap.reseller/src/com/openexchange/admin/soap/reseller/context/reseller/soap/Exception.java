@@ -22,9 +22,9 @@ import com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageExcept
 
 /**
  * <p>Java-Klasse f\u00fcr Exception complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType name="Exception">
  *   &lt;complexContent>
@@ -36,8 +36,8 @@ import com.openexchange.admin.soap.reseller.context.rmi.exceptions.StorageExcept
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Exception", propOrder = {
@@ -64,11 +64,11 @@ public class Exception {
 
     /**
      * Ruft den Wert der exception-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Object }
-     *     
+     *
      */
     public Object getException() {
         return exception;
@@ -76,11 +76,11 @@ public class Exception {
 
     /**
      * Legt den Wert der exception-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Object }
-     *     
+     *
      */
     public void setException(Object value) {
         this.exception = value;

@@ -61,56 +61,56 @@ import com.openexchange.freebusy.publisher.ews.internal.EWSFreeBusyPublisherLook
 
 /**
  * {@link Tools}
- * 
+ *
  * Utilities for the EWS free/busy provider
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class Tools {
-    
+
     public static String getConfigProperty(String name, String defaultValue) throws OXException {
         return EWSFreeBusyPublisherLookup.getService(ConfigurationService.class).getProperty(name, defaultValue);
     }
-    
+
     public static String getConfigProperty(String name) throws OXException {
         String value = EWSFreeBusyPublisherLookup.getService(ConfigurationService.class).getProperty(name);
         if (null == value || 0 == value.length()) {
             throw FreeBusyExceptionCodes.CONFIGURATION_ERROR.create(name);
-        } 
+        }
         return value;
     }
-    
+
     public static int getConfigPropertyInt(String name) throws OXException {
         int value = EWSFreeBusyPublisherLookup.getService(ConfigurationService.class).getIntProperty(name, Integer.MIN_VALUE);
         if (Integer.MIN_VALUE == value) {
             throw FreeBusyExceptionCodes.CONFIGURATION_ERROR.create(name);
-        } 
+        }
         return value;
     }
-    
+
     public static int getConfigPropertyInt(String name, int defaultValue) throws OXException {
         return EWSFreeBusyPublisherLookup.getService(ConfigurationService.class).getIntProperty(name, defaultValue);
     }
-    
+
     public static boolean getConfigPropertyBool(String name, boolean defaultValue) throws OXException {
         return EWSFreeBusyPublisherLookup.getService(ConfigurationService.class).getBoolProperty(name, defaultValue);
     }
-    
+
     public static BusyStatus getStatus(LegacyFreeBusyType type) {
         switch (type) {
         case FREE:
-            return BusyStatus.FREE;            
+            return BusyStatus.FREE;
         case OOF:
-            return BusyStatus.ABSENT;          
+            return BusyStatus.ABSENT;
         case TENTATIVE:
-            return BusyStatus.TEMPORARY;           
+            return BusyStatus.TEMPORARY;
         case BUSY:
-            return BusyStatus.RESERVED;            
+            return BusyStatus.RESERVED;
         default:
             return BusyStatus.UNKNOWN;
         }
     }
-        
+
     public static Date getStartOfNextMonth(Date date) {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTime(date);
@@ -122,7 +122,7 @@ public final class Tools {
         calendar.set(Calendar.MILLISECOND, 0);
         return calendar.getTime();
     }
-    
+
     public static Date getStartOfMonth(Date date) {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTime(date);
@@ -133,7 +133,7 @@ public final class Tools {
         calendar.set(Calendar.MILLISECOND, 0);
         return calendar.getTime();
     }
-    
+
     public static Date getEndOfMonth(Date date) {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTime(date);

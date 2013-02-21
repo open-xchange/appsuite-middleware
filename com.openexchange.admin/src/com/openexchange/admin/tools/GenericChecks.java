@@ -52,6 +52,7 @@ package com.openexchange.admin.tools;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import javax.mail.internet.AddressException;
+import com.damienmiller.BCrypt;
 import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -79,7 +80,7 @@ public class GenericChecks {
 //                                "~"
     /**
      * This method checks if an address contains invalid characters
-     * 
+     *
      * @param address The address string to check
      */
     public final static boolean isValidMailAddress(final String address)  {
@@ -97,7 +98,7 @@ public class GenericChecks {
 
     /**
      * This method throws an exception if the address is != null and contains invalid characters
-     * 
+     *
      * @param address The address string to check
      * @throws InvalidDataException If given address string is not a valid email address
      */
@@ -112,15 +113,15 @@ public class GenericChecks {
      * as specified in {@link PasswordMechObject}.
      *
      * Checks whether password is not an empty string.
-     * 
+     *
      * Checks checks whether mech has changed without supplying new
      * password string
-     * 
+     *
      * @param user
      * @throws InvalidDataException
      */
     public final static void checkChangeValidPasswordMech(final PasswordMechObject user) throws InvalidDataException {
-        checkCreateValidPasswordMech(user);        
+        checkCreateValidPasswordMech(user);
         if( user.getPasswordMech() != null && user.getPassword() == null ) {
             throw new InvalidDataException("When changing password mechanism, the password string must also be supplied");
         }
@@ -129,7 +130,7 @@ public class GenericChecks {
     /**
      * Checks whether supplied password mech is a valid password mech
      * as specified in {@link PasswordMechObject}.
-     * 
+     *
      * @param user
      * @throws InvalidDataException
      */
@@ -146,7 +147,7 @@ public class GenericChecks {
     /**
      * Authenticate the cleartext password against the crypted string using the
      * specified authmech
-     * 
+     *
      * @param crypted
      * @param clear
      * @param mech
@@ -159,6 +160,8 @@ public class GenericChecks {
             return UnixCrypt.matches(crypted, clear);
         } else if("{SHA}".equals(mech)) {
             return SHACrypt.makeSHAPasswd(clear).equals(crypted);
+        } else if("{BCRYPT}".equals(mech)) {
+            return BCrypt.checkpw(clear, crypted);
         } else {
             return false;
         }

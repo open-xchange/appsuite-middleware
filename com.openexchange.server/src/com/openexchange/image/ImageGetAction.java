@@ -52,7 +52,6 @@ package com.openexchange.image;
 import java.io.InputStream;
 import java.util.Map.Entry;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -70,19 +69,19 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ImageGetAction}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
 public class ImageGetAction implements AJAXActionService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ImageGetAction.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ImageGetAction.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
      * Initializes a new {@link ImageGetAction}.
-     * 
+     *
      * @param services
      */
     public ImageGetAction(ServiceLookup services) {
@@ -169,7 +168,7 @@ public class ImageGetAction implements AJAXActionService {
         DataProperties dataProperties = data.getDataProperties();
         ct = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
         fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
-        
+
         InputStream in = data.getData();
         FileHolder fileHolder = new FileHolder(in, -1, ct, fileName);
         fileHolder.setDelivery("view");

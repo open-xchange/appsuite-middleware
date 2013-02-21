@@ -51,7 +51,7 @@ package com.openexchange.contact.storage.rdb.fields;
 
 
 /**
- * {@link DistListMemberField} - 
+ * {@link DistListMemberField} -
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
@@ -73,7 +73,7 @@ public enum DistListMemberField {
 	 */
 	CONTACT_FOLDER_ID,
 	/**
-	 * Display name 
+	 * Display name
 	 */
 	DISPLAY_NAME,
 	/**

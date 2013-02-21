@@ -56,7 +56,7 @@ package com.openexchange.test.osgi;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public interface OSGiTest {
-    
+
     Class<?>[] getTestClasses();
 
 }

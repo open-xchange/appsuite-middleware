@@ -259,7 +259,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
             try {
                 if (cache.get(key) == null) {
                     final MailAccount mailAccount = delegate.getMailAccount(id, user, cid, con);
-                    cache.put(key, mailAccount);
+                    cache.put(key, mailAccount, false);
                 }
             } finally {
                 cacheLock.unlock();
@@ -437,6 +437,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     @Override
     public boolean hasAccounts(final Session session) throws OXException {
         return delegate.hasAccounts(session);
+    }
+
+    @Override
+    public void cleanUp(final String secret, final Session session) throws OXException {
+        delegate.cleanUp(secret, session);
     }
 
     private static volatile Integer maxWaitMillis;

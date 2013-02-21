@@ -105,6 +105,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -231,28 +232,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         super();
         warnings = new ArrayList<OXException>(2);
         mailImportResults = new ArrayList<MailImportResult>();
-        try {
-            if (session instanceof ServerSession) {
-                final ServerSession serverSession = (ServerSession) session;
-                ctx = serverSession.getContext();
-                usm = serverSession.getUserSettingMail();
-                if (!serverSession.getUserConfiguration().hasWebMail()) {
-                    throw MailExceptionCode.NO_MAIL_ACCESS.create();
-                }
-                user = serverSession.getUser();
-            } else {
-                ctx = ContextStorage.getInstance().getContext(session.getContextId());
-                usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
-                try {
-                    if (!UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx).hasWebMail()) {
-                        throw MailExceptionCode.NO_MAIL_ACCESS.create();
-                    }
-                } catch (final OXException e) {
-                    throw new OXException(e);
-                }
+        if (session instanceof ServerSession) {
+            final ServerSession serverSession = (ServerSession) session;
+            ctx = serverSession.getContext();
+            usm = serverSession.getUserSettingMail();
+            if (!serverSession.getUserConfiguration().hasWebMail()) {
+                throw MailExceptionCode.NO_MAIL_ACCESS.create();
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
+            user = serverSession.getUser();
+        } else {
+            ctx = ContextStorage.getInstance().getContext(session.getContextId());
+            usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
+            if (!UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ctx).hasWebMail()) {
+                throw MailExceptionCode.NO_MAIL_ACCESS.create();
+            }
         }
         this.session = session;
         contextId = session.getContextId();
@@ -745,13 +738,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final boolean retry = !capabilities.hasThreadReferences();
         /*-
          * 1. Send 'all' request with id, folder_id, level, and received_date - you need all that data.
-         * 
+         *
          * 2. Whenever level equals 0, a new thread starts (new array)
-         * 
+         *
          * 3. Add all objects (id, folder_id, received_date) to that list until level !== 0.
-         * 
+         *
          * 4. Order by received_date (ignore the internal level structure), so that the newest mails show up first.
-         * 
+         *
          * 5. Generate the real list of all threads. This must be again ordered by received_date, so that the most recent threads show up
          *    first. id and folder_id refer to the most recent mail.
          */
@@ -802,7 +795,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
             final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
             final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
-                
+
                 @Override
                 public int compare(final List<MailMessage> o1, final List<MailMessage> o2) {
                     return comparator.compare(o1.get(0), o2.get(0));
@@ -1273,6 +1266,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  */
                 return mfm.createManagedFile(tempFile);
             } catch (final IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
         } catch (final OXException e) {
@@ -1347,12 +1343,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Store them temporary to files
          */
-        final ManagedFileManagement mfm;
-        try {
-            mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class, true);
         final ManagedFile[] files = new ManagedFile[parts.length];
         try {
             for (int i = 0; i < files.length; i++) {
@@ -1424,31 +1415,24 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                  */
                                 zipOutput.closeArchiveEntry();
                             } finally {
-                                try {
-                                    in.close();
-                                } catch (final IOException e) {
-                                    LOG.error(e.getMessage(), e);
-                                }
+                                Streams.close(in);
                             }
                         }
                     }
                 } finally {
                     // Complete the ZIP file
-                    try {
-                        zipOutput.close();
-                    } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
+                    Streams.close(zipOutput);
                 }
                 /*
                  * Return managed file
                  */
                 return mfm.createManagedFile(tempFile);
             } catch (final IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             for (int i = 0; i < files.length; i++) {
                 final ManagedFile file = files[i];
@@ -2489,7 +2473,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 /*
                  * Get user's contact
                  */
-                final Contact contact = contactService.getUser(session, userId, new ContactField[] { 
+                final Contact contact = contactService.getUser(session, userId, new ContactField[] {
                 		ContactField.SUR_NAME, ContactField.GIVEN_NAME });
                 /*
                  * Determine locale

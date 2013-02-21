@@ -55,8 +55,6 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
@@ -74,8 +72,6 @@ import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.msn.osgi.MSNOAuthActivator;
 import com.openexchange.session.Session;
-import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * {@link MSNServiceImpl}
@@ -128,7 +124,7 @@ public class MSNServiceImpl implements MSNService {
             final int responseCode = client.executeMethod(getMethod);
             String response = getMethod.getResponseBodyAsString();
             wholeResponse = new JSONObject(response);
-            
+
         } catch (final HttpException e) {
             LOG.error(e);
         } catch (final IOException e) {
@@ -146,7 +142,7 @@ public class MSNServiceImpl implements MSNService {
             for(int i = 0, size = arr.length(); i < size; i++) {
             	JSONObject cObj = arr.getJSONObject(i);
             	Contact c = new Contact();
-            	
+
             	if (cObj.hasAndNotNull("first_name")) {
             		c.setGivenName(cObj.optString("first_name"));
             	}
@@ -154,13 +150,13 @@ public class MSNServiceImpl implements MSNService {
             	if (cObj.hasAndNotNull("last_name")) {
             		c.setSurName(cObj.optString("last_name"));
             	}
-            	
+
             	if (cObj.hasAndNotNull("name")) {
             		c.setDisplayName(cObj.optString("name"));
             	} else {
             		c.setDisplayName(c.getGivenName() + " " + c.getSurName());
             	}
-            	
+
             	if (cObj.has("emails")) {
             		List<String> mailAddresses = new ArrayList<String>();
             		JSONObject emails = cObj.getJSONObject("emails");
@@ -172,7 +168,7 @@ public class MSNServiceImpl implements MSNService {
             				}
             			}
             		}
-            		
+
             		int counter = 0;
             		for (String mailAddress : mailAddresses) {
 						switch(counter) {
@@ -191,7 +187,7 @@ public class MSNServiceImpl implements MSNService {
 						}
 					}
             	}
-            	
+
             	if (cObj.has("addresses")) {
             		JSONObject obj = cObj.getJSONObject("addresses");
             		if (obj.has("personal")) {
@@ -210,7 +206,7 @@ public class MSNServiceImpl implements MSNService {
             			}
 
             		}
-            		
+
             		if (obj.has("business")) {
             			JSONObject businessAddress = obj.getJSONObject("business");
             			if(businessAddress.hasAndNotNull("postal_code")) {
@@ -228,20 +224,20 @@ public class MSNServiceImpl implements MSNService {
             		}
             	}
             	// TODO: Picture?
-            	
+
             	contacts.add(c);
             }
         } catch (JSONException x) {
         	LOG.error(x);
         }
-        
+
         return contacts;
     }
 
     /**
-     * @param secret 
+     * @param secret
      * @param token
-     * @throws OXException 
+     * @throws OXException
      */
     private String useRefreshTokenToGetAccessToken(OAuthAccount account) throws OXException {
     	String callback = null;
@@ -252,7 +248,7 @@ public class MSNServiceImpl implements MSNService {
     		throw OAuthExceptionCodes.INVALID_ACCOUNT.create();
     	}
     	String accessToken = "";
-		
+
     	try {
     		final HttpClient client = new HttpClient();
     		final PostMethod postMethod = new PostMethod("https://login.live.com/oauth20_token.srf?client_id=" + account.getMetaData().getAPIKey() + "&redirect_uri=" + URLEncoder.encode(callback, "UTF-8") + "&client_secret=" + URLEncoder.encode(account.getMetaData().getAPISecret(), "UTF-8")+"&refresh_token=" + account.getToken() + "&grant_type=refresh_token");
@@ -262,7 +258,7 @@ public class MSNServiceImpl implements MSNService {
             postMethod.setRequestEntity(requestEntity);
             final int responseCode = client.executeMethod(postMethod);
             final String response = URLDecoder.decode(postMethod.getResponseBodyAsString(), "UTF-8");
-            return new JSONObject(response).getString("access_token");            
+            return new JSONObject(response).getString("access_token");
         } catch (final UnsupportedEncodingException e) {
             LOG.error(e);
         } catch (final HttpException e) {

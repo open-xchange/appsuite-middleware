@@ -124,7 +124,7 @@ public enum LdapExceptionCode implements OXExceptionCode {
      * The contact object with id "%s" could not be found in folder "%s"
      */
     CONTACT_NOT_FOUND(LdapConfigurationExceptionMessage.CONTACT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 23),
-    
+
     ;
 
 
@@ -159,7 +159,7 @@ public enum LdapExceptionCode implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "PERMISSION";
+        return "LDAP";
     }
 
     @Override

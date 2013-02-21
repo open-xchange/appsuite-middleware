@@ -85,7 +85,7 @@ public class CalendarDataObject extends Appointment {
     private boolean fill_folder_id;
     private boolean fillConfirmations;
     private boolean fillLastModifiedOfNewestAttachment;
-    
+
     private boolean externalOrganizer;
 
 
@@ -194,6 +194,11 @@ public class CalendarDataObject extends Appointment {
 
     public final boolean containsRecurrenceString() {
         return b_recurrencestring;
+    }
+
+    public void removeRecurrenceString() {
+        this.rec_string = null;
+        b_recurrencestring = false;
     }
 
     public final String getRecurrence() {
@@ -523,7 +528,7 @@ public class CalendarDataObject extends Appointment {
     }
 
     public static Set<Differ<? super CalendarDataObject>> differ = new HashSet<Differ<? super CalendarDataObject>>();
-    
+
     static {
         differ.addAll(Appointment.differ);
     }

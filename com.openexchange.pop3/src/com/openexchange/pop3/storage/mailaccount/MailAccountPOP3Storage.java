@@ -164,9 +164,10 @@ public class MailAccountPOP3Storage implements POP3Storage {
     }
 
     private String composeUniquePath(final int pop3AccountId, final int user, final int cid) throws OXException {
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess = getDefaultMailAccess();
-        defaultMailAccess.connect(false);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess = null;
         try {
+            defaultMailAccess = getDefaultMailAccess();
+            defaultMailAccess.connect(false);
             final String trashFullname = defaultMailAccess.getFolderStorage().getTrashFolder();
             final char sep = defaultMailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
             /*
@@ -209,7 +210,9 @@ public class MailAccountPOP3Storage implements POP3Storage {
              */
             return fullname;
         } finally {
-            defaultMailAccess.close(true);
+            if (null != defaultMailAccess) {
+                defaultMailAccess.close(true);
+            }
         }
     }
 
@@ -217,10 +220,10 @@ public class MailAccountPOP3Storage implements POP3Storage {
         if (null == src || src.length() == 0) {
             return Long.toString(System.currentTimeMillis());
         }
-        final char[] chars = src.toCharArray();
-        final StringBuilder sb = new StringBuilder(chars.length);
-        for (int i = 0; i < chars.length; i++) {
-            final char c = chars[i];
+        final int length = src.length();
+        final StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = src.charAt(i);
             if (Character.isLetterOrDigit(c)) {
                 sb.append(c);
             }
@@ -324,9 +327,10 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     @Override
     public void connect() throws OXException {
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess = getDefaultMailAccess();
-        defaultMailAccess.connect(false);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess = null;
         try {
+            defaultMailAccess = getDefaultMailAccess();
+            defaultMailAccess.connect(false);
             // Check path existence
             final IMailFolderStorage fs = defaultMailAccess.getFolderStorage();
             if (!fs.exists(path)) {
@@ -418,13 +422,17 @@ public class MailAccountPOP3Storage implements POP3Storage {
             /*
              * Close on error
              */
-            defaultMailAccess.close(true);
+            if (null != defaultMailAccess) {
+                defaultMailAccess.close(true);
+            }
             throw e;
         } catch (final Exception e) {
             /*
              * Close on error
              */
-            defaultMailAccess.close(true);
+            if (null != defaultMailAccess) {
+                defaultMailAccess.close(true);
+            }
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -517,7 +525,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                             // Another thread is already in process.
                             return;
                         }
-                    } catch (SQLException e) {
+                    } catch (final SQLException e) {
                         // INSERT failed. Another thread is already in process.
                         return;
                     }
@@ -535,7 +543,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
                         return;
                     }
                 }
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 // Concurrency check failed
                 throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
             } finally {
@@ -681,7 +689,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     /**
      * Checks if delete-write-through option is enabled.
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      * @throws OXException If option cannot be determined
      */
@@ -877,9 +885,9 @@ public class MailAccountPOP3Storage implements POP3Storage {
         try {
             f = POP3Folder.class.getDeclaredField("message_cache");
             f.setAccessible(true);
-        } catch (SecurityException e) {
+        } catch (final SecurityException e) {
             f = null;
-        } catch (NoSuchFieldException e) {
+        } catch (final NoSuchFieldException e) {
             f = null;
         }
         messageCacheField = f;
@@ -890,7 +898,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
         try {
             final Field messageCacheField = MailAccountPOP3Storage.messageCacheField;
             if (null != messageCacheField) {
-                return (Vector<POP3Message>) messageCacheField.get(inbox);                
+                return (Vector<POP3Message>) messageCacheField.get(inbox);
             }
             throw new NoSuchFieldException("message_cache");
         } catch (final SecurityException e) {

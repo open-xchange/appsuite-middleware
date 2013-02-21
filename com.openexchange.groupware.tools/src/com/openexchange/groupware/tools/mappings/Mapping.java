@@ -61,12 +61,12 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface Mapping<T, O> extends Comparator<O> {
-	
+
 	/**
-	 * Gets a value indicating whether the mapped property is set in the 
+	 * Gets a value indicating whether the mapped property is set in the
 	 * supplied object or not. This is usually done by passing the result
 	 * of the object's <code>containsXXX</code>-method.
-	 * 
+	 *
 	 * @param object the object
 	 * @return <code>true</code>, if the property is set, <code>false</code>,
 	 * otherwise.
@@ -75,16 +75,16 @@ public interface Mapping<T, O> extends Comparator<O> {
 
 	/**
 	 * Sets the mapped property in the object to the given value.
-	 * 
+	 *
 	 * @param object the object to set the property for
 	 * @param value the value to set
 	 * @throws OXException
 	 */
 	void set(O object, T value) throws OXException;
-	
+
 	/**
 	 * Gets the mapped property's value from a object.
-	 * 
+	 *
 	 * @param object the object to get the property value from
 	 * @return the value
 	 */
@@ -92,47 +92,47 @@ public interface Mapping<T, O> extends Comparator<O> {
 
 	/**
 	 * Removes the property's value from an object.
-	 * 
+	 *
 	 * @param object the object to remove the property for
 	 */
 	void remove(O object);
-	
+
 	/**
-	 * Truncates the current property value to the supplied length if it is 
+	 * Truncates the current property value to the supplied length if it is
 	 * longer.
-	 * 
+	 *
 	 * @param object the object to truncate the property's value for
 	 * @param length the maximum length the property's value should be
-	 * @return <code>true</code>, if the value was actually truncated, 
-	 * <code>false</code>, otherwise 
+	 * @return <code>true</code>, if the value was actually truncated,
+	 * <code>false</code>, otherwise
 	 */
 	boolean truncate(O object, int length) throws OXException;
 
 	/**
-	 * Gets a value indicating whether a property's value is equal in two 
+	 * Gets a value indicating whether a property's value is equal in two
 	 * objects or not.
-	 * 
+	 *
 	 * @param object1 the first object for comparison
 	 * @param object2 the second object for comparison
 	 * @return
 	 */
 	boolean equals(O object1, O object2);
-	
+
 	/**
 	 * Copies the value of a property in one object to another one.
-	 * 
+	 *
 	 * @param from the object to read the property value from
 	 * @param to the object to set the property
 	 * @throws OXException
 	 */
 	void copy(O from, O to) throws OXException;
-	
+
 	/**
      * Compares the supplied objects for order, respecting the given locale
-     * when defined. Returns a negative integer, zero, or a positive integer 
-     * as the first argument is less than, equal to, or greater than the 
+     * when defined. Returns a negative integer, zero, or a positive integer
+     * as the first argument is less than, equal to, or greater than the
      * second.
-	 * 
+	 *
 	 * @param o1 the first object for comparison
 	 * @param o2 the second object for comparison
 	 * @param locale the Java locale, or <code>null</code> if not defined

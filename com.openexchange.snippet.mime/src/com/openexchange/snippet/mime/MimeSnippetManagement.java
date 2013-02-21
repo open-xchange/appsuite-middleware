@@ -50,6 +50,7 @@
 package com.openexchange.snippet.mime;
 
 import static com.openexchange.mail.mime.MimeDefaultSession.getDefaultSession;
+import static com.openexchange.snippet.SnippetUtils.sanitizeContent;
 import static com.openexchange.snippet.mime.Services.getService;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import gnu.trove.ConcurrentTIntObjectHashMap;
@@ -421,7 +422,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 // Content part
                 {
                     final MimeBodyPart textPart = new MimeBodyPart();
-                    textPart.setText(snippet.getContent(), "UTF-8", "plain");
+                    textPart.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain");
                     multipart.addBodyPart(textPart);
                 }
                 // Misc
@@ -447,7 +448,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 // Apply multipart
                 mimeMessage.setContent(multipart);
             } else {
-                mimeMessage.setText(snippet.getContent(), "UTF-8", "plain");
+                mimeMessage.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain");
             }
             // Save
             mimeMessage.saveChanges();
@@ -677,7 +678,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 final Multipart primaryMultipart = new MimeMultipart();
                 // Add text part
                 final MimeBodyPart textPart = new MimeBodyPart();
-                textPart.setText(content, "UTF-8", "plain");
+                textPart.setText(sanitizeContent(content), "UTF-8", "plain");
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 primaryMultipart.addBodyPart(textPart);
                 // Add attachment parts
@@ -693,7 +694,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 // Apply to message
                 updateMessage.setContent(primaryMultipart);
             } else {
-                updateMessage.setText(content, "UTF-8", "plain");
+                updateMessage.setText(sanitizeContent(content), "UTF-8", "plain");
                 updateMessage.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             }
             // Save to MIME structure...
@@ -717,7 +718,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 try {
                     /*-
                      * Update DB, too
-                     * 
+                     *
                      * 1. Create dummy entry to check DB schema consistency
                      * 2. Delete existing
                      * 3. Make dummy entry the real entry

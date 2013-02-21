@@ -50,13 +50,10 @@
 package com.openexchange.caldav.servlet;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -72,7 +69,7 @@ import com.openexchange.tools.webdav.OXServlet;
 
 /**
  * The {@link CalDAV} servlet. It delegates all calls to the CaldavPerformer
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CalDAV extends OXServlet {
@@ -80,9 +77,9 @@ public class CalDAV extends OXServlet {
 	private static final long serialVersionUID = -7768308794451862636L;
 
 	private static final transient Log LOG = com.openexchange.log.Log.loggerFor(CalDAV.class);
-    
+
     private static volatile ServiceLookup services;
-    
+
     public static void setServiceLookup(final ServiceLookup serviceLookup) {
         services = serviceLookup;
     }
@@ -168,22 +165,27 @@ public class CalDAV extends OXServlet {
         doIt(req, resp, CaldavPerformer.Action.REPORT);
     }
 
+    @Override
+    protected void doMkCalendar(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, CaldavPerformer.Action.MKCALENDAR);
+    }
+
     private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final CaldavPerformer.Action action) throws ServletException, IOException {
-        ServerSession session;
+        ServerSession session = null;
         try {
-            session = ServerSessionAdapter.valueOf(getSession(req));
-            if (!checkPermission(session)) {
-                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            try {
+                session = ServerSessionAdapter.valueOf(getSession(req));
+                if (!checkPermission(session)) {
+                    resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
+            } catch (final OXException exc) {
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 return;
             }
-        } catch (final OXException exc) {
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return;
-        }
-        try {
             CaldavPerformer.getInstance().doIt(req, resp, action, session);
         } finally {
-            if (mustLogOut(req)) {
+            if (null != session && mustLogOut(req)) {
                 logout(session, req, resp);
             }
         }
@@ -232,13 +234,12 @@ public class CalDAV extends OXServlet {
     protected void incrementRequests() {
         // Nothing to do
     }
-    
+
     private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();
-    
+
     @Override
     protected LoginCustomizer getLoginCustomizer() {
         return ALLOW_ASTERISK;
     }
 
-   
 }

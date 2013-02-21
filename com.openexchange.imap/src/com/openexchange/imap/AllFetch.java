@@ -387,7 +387,7 @@ public final class AllFetch {
                         throw new BadCommandException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
-                            response.toString()));
+                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                     } else if (response.isNO()) {
                         /*
                          * Check number of messages
@@ -402,7 +402,7 @@ public final class AllFetch {
                         throw new CommandFailedException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
-                            response.toString()));
+                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                     } else {
                         protocol.handleResult(response);
                     }

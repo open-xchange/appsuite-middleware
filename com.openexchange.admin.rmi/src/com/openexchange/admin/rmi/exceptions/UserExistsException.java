@@ -55,12 +55,12 @@ package com.openexchange.admin.rmi.exceptions;
 public class UserExistsException extends Exception {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -1916412104283975774L;
 
     /**
-	 * 
+	 *
 	 */
     public UserExistsException() {
         super("User already exists");

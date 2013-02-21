@@ -1,5 +1,6 @@
 *.class
 .DS_Store
+.lint4jprefs
 bin
 bin/
 openexchange-test/conf/test.properties

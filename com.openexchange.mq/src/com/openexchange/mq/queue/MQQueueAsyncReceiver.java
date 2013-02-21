@@ -62,7 +62,7 @@ import com.openexchange.mq.queue.internal.WrappingMessageListener;
  * listener} to given topic.
  * <p>
  * Invoke {@link #close()} method when done.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MQQueueAsyncReceiver extends MQQueueResource {
@@ -73,7 +73,7 @@ public class MQQueueAsyncReceiver extends MQQueueResource {
 
     /**
      * Initializes a new {@link MQQueueAsyncReceiver}.
-     * 
+     *
      * @param queueName The name of queue to receive from
      * @throws OXException If initialization fails
      * @throws NullPointerException If listener is <code>null</code>

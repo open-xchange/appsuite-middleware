@@ -63,6 +63,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.exception.Category;
@@ -107,24 +108,16 @@ public abstract class OXServlet extends WebDavServlet {
         private final String client;
         private final Interface interfaze;
         private final String version;
-        private final boolean isVolatile;
 
         public LoginRequestImpl(final String login, final String pass, final Interface interfaze, final HttpServletRequest req) {
             super();
-            this.client = req.getParameter(LoginFields.CLIENT_PARAM);
-            version = req.getParameter(LoginFields.VERSION_PARAM);
-            userAgent = req.getParameter("agent");
-            String parameter = req.getParameter(LoginFields.VOLATILE);
-            this.isVolatile = null != parameter && Boolean.parseBoolean(parameter.trim());
+            this.client = AJAXServlet.sanitizeParam(req.getParameter(LoginFields.CLIENT_PARAM));
+            version = AJAXServlet.sanitizeParam(req.getParameter(LoginFields.VERSION_PARAM));
+            userAgent = AJAXServlet.sanitizeParam(req.getParameter("agent"));
             this.login = login;
             this.req = req;
             this.pass = pass;
             this.interfaze = interfaze;
-        }
-
-        @Override
-        public boolean isVolatile() {
-            return isVolatile;
         }
 
         @Override
@@ -180,6 +173,36 @@ public abstract class OXServlet extends WebDavServlet {
         @Override
         public com.openexchange.authentication.Cookie[] getCookies() {
             return Tools.getCookieFromHeader(req);
+        }
+
+        @Override
+        public boolean isSecure() {
+            return Tools.considerSecure(req);
+        }
+
+        @Override
+        public String getServerName() {
+            return req.getServerName();
+        }
+
+        @Override
+        public int getServerPort() {
+            return req.getServerPort();
+        }
+
+        @Override
+        public String getHttpSessionID() {
+            return req.getSession(true).getId();
+        }
+
+        @Override
+        public String getClientToken() {
+            return null;
+        }
+
+        @Override
+        public boolean isTransient() {
+            return OXServlet.isTransient(interfaze);
         }
     }
 
@@ -286,7 +309,6 @@ public abstract class OXServlet extends WebDavServlet {
             }
             try {
                 final Map<String, Object> properties = new HashMap<String, Object>(1);
-                properties.put("http.request", req);
                 session = addSession(loginRequest, properties);
             } catch (final OXException e) {
                 if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
@@ -306,7 +328,7 @@ public abstract class OXServlet extends WebDavServlet {
             final String address = req.getRemoteAddr();
             if (null == address || !address.equals(session.getLocalIp())) {
                 if (LOG.isInfoEnabled()) {
-                    LOG.info("Request to server denied for session: " + session.getSessionID() + ". in WebDAV XML interface. Client login IP changed from " + session.getLocalIp() + " to " + address + ".");
+                    LOG.info("Request to server denied for session: " + session.getSessionID() + ". in WebDAV XML interface. Client login IP changed from " + session.getLocalIp() + " to " + address + '.');
                 }
                 addUnauthorizedHeader(req, resp);
                 removeSession(session.getSessionID());
@@ -507,6 +529,26 @@ public abstract class OXServlet extends WebDavServlet {
             doc = ServerServiceRegistry.getInstance().getService(JDOMParser.class).parse(req.getInputStream());
         }
         return doc;
+    }
+
+    /**
+     * Gets a value indicating whether to create a transient session or not, based on the supplied interface.
+     *
+     * @param iface The interface
+     * @return <code>true</code> if the interface can use a transient session, <code>false</code>, otherwise
+     */
+    protected static boolean isTransient(Interface iface) {
+        switch (iface) {
+        case CALDAV:
+        case CARDDAV:
+        case WEBDAV_INFOSTORE:
+        case WEBDAV_ICAL:
+        case WEBDAV_VCARD:
+        case OUTLOOK_UPDATER:
+            return true;
+        default:
+            return false;
+        }
     }
 
 }

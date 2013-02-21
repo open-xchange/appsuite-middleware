@@ -64,22 +64,22 @@ import com.openexchange.solr.SolrCoreIdentifier;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class MockSolrFilestoreIndexAccess extends SolrInfostoreIndexAccess {
-    
+
     private final InMemoryIndex index;
 
     /**
      * Initializes a new {@link MockSolrFilestoreIndexAccess}.
      */
     public MockSolrFilestoreIndexAccess() {
-        super(new SolrCoreIdentifier(1, 1, 1), null);
+        super(new SolrCoreIdentifier(1, 1, 1), new MockQueryBuilder(), new MockFieldConfiguration());
         index = new InMemoryIndex();
     }
-    
+
     @Override
     protected QueryResponse query(SolrParams query) throws OXException {
         return index.query(query);
     }
-    
+
     @Override
     protected UpdateResponse addSolrDocument(SolrInputDocument document) throws OXException {
         return index.addDocument(document);

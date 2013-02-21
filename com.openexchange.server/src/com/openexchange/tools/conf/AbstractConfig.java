@@ -59,7 +59,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.io.IOUtils;
+import com.openexchange.java.Streams;
 
 /**
  * Class holding configuration options loaded from property files can extend this class to inherit usefull methods.
@@ -231,13 +231,7 @@ public abstract class AbstractConfig {
         } catch (final IOException e) {
             throw ConfigurationExceptionCodes.READ_ERROR.create(propFile.getAbsolutePath(), e);
         } finally {
-            if (null != fis) {
-                try {
-                    fis.close();
-                } catch (final IOException e) {
-                    IOUtils.closeStreamStuff(fis);
-                }
-            }
+            Streams.close(fis);
         }
     }
 

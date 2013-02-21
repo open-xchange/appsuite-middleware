@@ -66,7 +66,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link BasicTypeJsonConverter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class BasicTypeJsonConverter implements ResultConverter {
@@ -86,7 +86,7 @@ public final class BasicTypeJsonConverter implements ResultConverter {
 
     /**
      * Initializes a new {@link BasicTypeJsonConverter}.
-     * 
+     *
      * @param inputFormat The input format
      */
     protected BasicTypeJsonConverter(final String inputFormat) {

@@ -55,22 +55,23 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.autoconfig.Autoconfig;
 
 /**
- * {@link ConfigSource}
+ * {@link ConfigSource} - Generates an {@code Autoconfig} instance.
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public interface ConfigSource {
 
     /**
-     * Generates an Autoconfig Object with the given Mail information.
+     * Generates an {@code Autoconfig} instance for given arguments.
      *
-     * @param emailLocalPart
-     * @param emailDomain
-     * @param password
-     * @param user
-     * @param context
-     * @return An AtoConfig Object or null if generation fails.
-     * @throws OXException
+     * @param emailLocalPart The local part of the Email address; <code>"<b>someone</b>@somewhere.org"</code>
+     * @param emailDomain The domain part of the Email address; <code>"someone@<b>somewhere.org</b>"</code>
+     * @param password The associated password
+     * @param user The associated user
+     * @param context The associated context
+     * @return An {@code Autoconfig} instance or <code>null</code> if generation fails.
+     * @throws OXException If operation fails for any reason
      */
     public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException;
+
 }

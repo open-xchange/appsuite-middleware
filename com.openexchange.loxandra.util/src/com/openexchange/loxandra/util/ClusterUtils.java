@@ -64,19 +64,19 @@ import org.apache.commons.logging.LogFactory;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class ClusterUtils {
-    
+
     private static Log log = LogFactory.getLog(ClusterUtils.class);
-    
+
     /**
      * Re-Balance the cluster by assigning a new token to each node.
-     * 
+     *
      * @param nodes String array with ring's IP addresses
      */
     public static void rebalance(String[] nodes) {
         //BasicConfigurator.configure();
         BigInteger[] tokens = TokenUtils.calculateTokens(nodes.length);
         NodeProbe np;
-        
+
         for (int i = 0; i < tokens.length; i++) {
             try {
                 log.info("Moving node " + nodes[i] + " to token " + tokens[i]);
@@ -88,15 +88,16 @@ public class ClusterUtils {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ConfigurationException e) {
+                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
     }
-    
+
     public static void cleanup(String[] nodes) {
         BigInteger[] tokens = TokenUtils.calculateTokens(nodes.length);
         NodeProbe np;
-        
+
         for (int i = 0; i < tokens.length; i++) {
             try {
                 log.info("Cleaning up " + nodes[i]);
@@ -113,11 +114,11 @@ public class ClusterUtils {
             }
         }
     }
-    
+
     public static void flush(String[] nodes) {
         BigInteger[] tokens = TokenUtils.calculateTokens(nodes.length);
         NodeProbe np;
-        
+
         for (int i = 0; i < tokens.length; i++) {
             try {
                 log.info("Cleaning up " + nodes[i]);
@@ -134,27 +135,27 @@ public class ClusterUtils {
             }
         }
     }
-    
-    
+
+
     private enum Level {ONE, QUORUM, ALL};
-    
+
     public static void calculateConsistencies(int clusterSize, int replicationFactor, Level writeLevel, Level readLevel) {
         int r = realSize(replicationFactor, readLevel);
         int w = realSize(replicationFactor, writeLevel);
-        
+
         System.out.println("Reads are " + ((r + w > replicationFactor) ? "consistent." : "eventually consistent."));
         System.out.println("Reading from " + ((r > 1) ? r + " nodes" : 1 + " node"));
         System.out.println("Writing to " + ((w > 1) ? w + " nodes" : 1 + " node"));
-        
+
         int survival = replicationFactor - Math.max(r, w);
-        
-        System.out.println("The cluster can survive the loss of " + 
+
+        System.out.println("The cluster can survive the loss of " +
                 ((survival > 1) ? survival + " nodes" : survival == 1 ? "1 node" : "no nodes"));
         System.out.println("Every node holds "
                 + (((float) replicationFactor / (float) clusterSize) * 100)
                 + " % of data");
     }
-    
+
     private static int realSize(int n, Level l) {
         switch(l) {
         case ONE:

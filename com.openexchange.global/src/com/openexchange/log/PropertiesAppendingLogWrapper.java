@@ -50,7 +50,7 @@
 package com.openexchange.log;
 
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -61,20 +61,27 @@ import com.openexchange.log.LogPropertyName.LogLevel;
 
 /**
  * {@link PropertiesAppendingLogWrapper}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PropertiesAppendingLogWrapper implements Log {
 
+    /**
+     * Line separator string.  This is the value of the line.separator
+     * property at the moment that the PropertiesAppendingLogWrapper was created.
+     */
+    private final String lineSeparator;
     private final org.apache.commons.logging.Log delegate;
 
     /**
      * Initializes a new {@link PropertiesAppendingLogWrapper}.
-     * 
+     *
      * @param delegate The delegate logger
      */
     protected PropertiesAppendingLogWrapper(final org.apache.commons.logging.Log delegate) {
+        super();
+        lineSeparator = System.getProperty("line.separator");
         this.delegate = delegate;
     }
 
@@ -170,7 +177,7 @@ public class PropertiesAppendingLogWrapper implements Log {
 
     /**
      * Append properties to specified message (if available).
-     * 
+     *
      * @param message The message to append to
      * @param logLevel The log level
      * @return The message with properties appended
@@ -183,7 +190,7 @@ public class PropertiesAppendingLogWrapper implements Log {
         if (logProps == null) {
             return message;
         }
-        final Map<String, Object> properties = logProps.getMap();
+        final Map<LogProperties.Name, Object> properties = logProps.getMap();
         if (properties == null) {
             return message;
         }
@@ -194,29 +201,29 @@ public class PropertiesAppendingLogWrapper implements Log {
         boolean isEmpty = true;
         {
             final List<LogPropertyName> names = LogProperties.getPropertyNames();
-            final Set<String> alreadyLogged;
+            final Set<LogProperties.Name> alreadyLogged;
             if (names.isEmpty()) {
                 alreadyLogged = Collections.emptySet();
             } else {
-                alreadyLogged = new HashSet<String>(names.size());
+                alreadyLogged = EnumSet.noneOf(LogProperties.Name.class);
                 for (final LogPropertyName name : names) {
                     if (name.implies(logLevel)) {
-                        final String propertyName = name.getPropertyName();
+                        final LogProperties.Name propertyName = name.getPropertyName();
                         alreadyLogged.add(propertyName);
                         final Object value = properties.get(propertyName);
                         if (null != value) {
-                            sorted.put(propertyName, value.toString());
+                            sorted.put(propertyName.getName(), value.toString());
                             isEmpty = false;
                         }
                     }
                 }
             }
-            for (final Entry<String, Object> entry : properties.entrySet()) {
-                final String propertyName = entry.getKey();
+            for (final Entry<LogProperties.Name, Object> entry : properties.entrySet()) {
+                final LogProperties.Name propertyName = entry.getKey();
                 if (!alreadyLogged.contains(propertyName)) {
                     final Object value = entry.getValue();
                     if (value instanceof ForceLog) {
-                        sorted.put(propertyName, value.toString());
+                        sorted.put(propertyName.getName(), value.toString());
                         isEmpty = false;
                     }
                 }
@@ -224,10 +231,11 @@ public class PropertiesAppendingLogWrapper implements Log {
         }
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256);
         if (!isEmpty) {
+            final String lineSeparator = this.lineSeparator;
             for (final Entry<String, String> entry : sorted.entrySet()) {
-                sb.append('\n').append(entry.getKey()).append('=').append(entry.getValue());
+                sb.append(lineSeparator).append(entry.getKey()).append('=').append(entry.getValue());
             }
-            sb.deleteCharAt(0).append("\n\n");
+            sb.deleteCharAt(0).append(lineSeparator).append(lineSeparator);
         }
         sb.append(message);
         return sb.toString();

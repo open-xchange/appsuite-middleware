@@ -57,32 +57,32 @@ import com.openexchange.index.solr.internal.mail.SolrMailIndexAccess;
 import com.openexchange.solr.SolrCoreIdentifier;
 
 public class MockMailSolrIndexAccess extends SolrMailIndexAccess {
-    
+
     private final InMemoryIndex index;
-    
+
     /**
      * Initializes a new {@link MockMailSolrIndexAccess}.
      * @param identifier
      * @param triggerType
-     * @throws OXException 
+     * @throws OXException
      */
     public MockMailSolrIndexAccess(int docs) throws OXException {
-        super(new SolrCoreIdentifier(1, 1, 1), null);
+        super(new SolrCoreIdentifier(1, 1, 1), new MockQueryBuilder(), new MockFieldConfiguration());
         index = new InMemoryIndex();
-        for (int i = 0; i < docs; i++) {      
+        for (int i = 0; i < docs; i++) {
             SolrInputDocument doc = new SolrInputDocument();
             doc.addField("time_" + i, System.currentTimeMillis());
             index.addDocument(doc);
         }
     }
-    
+
     public static int getQueryRows() {
         return 100;
     }
-    
+
     @Override
     protected QueryResponse query(SolrParams query) throws OXException {
         return index.query(query);
     }
-    
+
 }

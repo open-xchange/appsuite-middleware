@@ -72,6 +72,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -848,11 +849,12 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
     }
 
     private static String toLowerCase(final String s) {
-        final char[] chars = s.toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            chars[i] = Character.toLowerCase(chars[i]);
+        final int length = s.length();
+        final StringAllocator sb = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            sb.append(Character.toLowerCase(s.charAt(i)));
         }
-        return new String(chars);
+        return sb.toString();
     }
 
     private static boolean startsWith(final String s, final String prefix) {
@@ -861,7 +863,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
 
     private void asRawContent(final String id, final String baseContentType, final String content, final String filename) throws OXException {
         try {
-            final JSONObject jsonObject = new JSONObject();
+            final JSONObject jsonObject = new JSONObject(8);
             jsonObject.put(MailListField.ID.getKey(), id);
             jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), baseContentType);
             jsonObject.put(MailJSONField.SIZE.getKey(), content.length());
@@ -876,7 +878,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
 
     private void asAttachment(final String id, final String baseContentType, final long size, final String fileName, final String optContent) throws OXException {
         try {
-            final JSONObject jsonObject = new JSONObject();
+            final JSONObject jsonObject = new JSONObject(8);
             /*
              * Sequence ID
              */

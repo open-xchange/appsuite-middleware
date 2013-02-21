@@ -53,7 +53,6 @@ import java.rmi.RemoteException;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -65,7 +64,7 @@ import com.openexchange.admin.soap.dataobjects.UserModuleAccess;
 
 /**
  * SOAP Service implementing RMI Interface OXUserInterface
- * 
+ *
  * @author choeger
  *
  */
@@ -81,7 +80,7 @@ public class OXUser extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXUserInterface#change(Context, User, Credentials)}
-     * 
+     *
      * @param ctx
      * @param usrdata
      * @param auth
@@ -105,7 +104,7 @@ public class OXUser extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXUserInterface#changeModuleAccess(Context, User, UserModuleAccess, Credentials)}
-     * 
+     *
      * @param ctx
      * @param user
      * @param moduleAccess
@@ -130,7 +129,7 @@ public class OXUser extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXUserInterface#changeModuleAccess(Context, User, String, Credentials)}
-     * 
+     *
      * @param ctx
      * @param user
      * @param access_combination_name
@@ -155,7 +154,7 @@ public class OXUser extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXUserInterface#create(Context, User, UserModuleAccess, Credentials)}
-     * 
+     *
      * @param ctx
      * @param usrdata
      * @param access
@@ -180,7 +179,7 @@ public class OXUser extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXUserInterface#create(Context, User, String, Credentials)}
-     * 
+     *
      * @param ctx
      * @param usrdata
      * @param access_combination_name
@@ -205,7 +204,7 @@ public class OXUser extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXUserInterface#create(Context, User, Credentials)}
-     * 
+     *
      * @param ctx
      * @param usrdata
      * @param auth
@@ -229,7 +228,7 @@ public class OXUser extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXUserInterface#delete(Context, User[], Credentials)}
-     * 
+     *
      * @param ctx
      * @param users
      * @param auth
@@ -253,7 +252,7 @@ public class OXUser extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXUserInterface#delete(Context, User, Credentials)}
-     * 
+     *
      * @param ctx
      * @param user
      * @param auth
@@ -277,7 +276,7 @@ public class OXUser extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXUserInterface#getAccessCombinationName(Context, User, Credentials)}
-     * 
+     *
      * @param ctx
      * @param user
      * @param auth
@@ -302,7 +301,7 @@ public class OXUser extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXUserInterface#getData(Context, User[], Credentials)}
-     * 
+     *
      * @param ctx
      * @param users
      * @param auth
@@ -327,7 +326,7 @@ public class OXUser extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXUserInterface#getData(Context, User, Credentials)}
-     * 
+     *
      * @param ctx
      * @param user
      * @param auth
@@ -352,7 +351,7 @@ public class OXUser extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXUserInterface#getModuleAccess(Context, User, Credentials)}
-     * 
+     *
      * @param ctx
      * @param user
      * @param auth
@@ -377,7 +376,7 @@ public class OXUser extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXUserInterface#list(Context, String, Credentials)}
-     * 
+     *
      * @param ctx
      * @param search_pattern
      * @param auth
@@ -402,7 +401,7 @@ public class OXUser extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXUserInterface#listAll(Context, Credentials)}
-     * 
+     *
      * @param ctx
      * @param auth
      * @return
@@ -427,7 +426,7 @@ public class OXUser extends OXSOAPRMIMapper {
     /**
      * This method changes module Permissions for all (!) users in all (!) contexts. This can be filtered by already existing access combinations.
      * If no filter is given, all users are changed.
-     * 
+     *
      * @param filter The call affects only users with exactly this access combination. This is either a String representing a defined module access combination or an Integer (masked as String) for direct definitions. null for no filter.
      * @param addAccess Access rights to be added
      * @param removeAccess Access rights to be removed
@@ -449,7 +448,7 @@ public class OXUser extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXUserInterface#getContextAdmin(Context, Credentials)}
-     * 
+     *
      * @param ctx
      * @param auth
      * @return

@@ -49,12 +49,15 @@
 
 package com.openexchange.contacts.ldap.storage;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.storage.DefaultContactStorage;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.contacts.ldap.contacts.LdapContactInterfaceProvider;
+import com.openexchange.contacts.ldap.property.Mappings;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -77,7 +80,7 @@ public class DelegatingLdapStorage extends DefaultContactStorage {
     private final int contextID;
     private final int priority;
     private final LdapContactInterfaceProvider provider;
-    
+
     /**
      * Initializes a new {@link DelegatingLdapStorage}.
      *
@@ -91,7 +94,7 @@ public class DelegatingLdapStorage extends DefaultContactStorage {
         this.provider = provider;
         this.priority = priority;
     }
-    
+
     @Override
     public boolean supports(Session session, String folderId) throws OXException {
         return Integer.toString(delegate(session).getFolderId()).equals(folderId) && session.getContextId() == this.contextID;
@@ -100,7 +103,7 @@ public class DelegatingLdapStorage extends DefaultContactStorage {
     @Override
     public int getPriority() {
         return this.priority;
-    }    
+    }
 
     @Override
     public Contact get(Session session, String folderId, String id, ContactField[] fields) throws OXException {
@@ -109,18 +112,18 @@ public class DelegatingLdapStorage extends DefaultContactStorage {
 
     @Override
     public SearchIterator<Contact> all(Session session, String folderId, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        Order order = Order.NO_ORDER;    
+        Order order = Order.NO_ORDER;
         int orderBy = 0;
         String collation = null;
         if (null != sortOptions) {
             collation = sortOptions.getCollation();
             if (null != sortOptions.getOrder() && 0 < sortOptions.getOrder().length) {
                 SortOrder sortOrder = sortOptions.getOrder()[0];
-                order = sortOrder.getOrder();            
+                order = sortOrder.getOrder();
                 orderBy = ContactMapper.getInstance().get(sortOrder.getBy()).getColumnID();
             }
         }
-        return delegate(session).getContactsInFolder(parse(folderId), 0, Integer.MAX_VALUE, orderBy, order, collation, getColumns(fields)); 
+        return delegate(session).getContactsInFolder(parse(folderId), 0, Integer.MAX_VALUE, orderBy, order, collation, getColumns(fields));
     }
 
     @Override
@@ -128,7 +131,7 @@ public class DelegatingLdapStorage extends DefaultContactStorage {
         int[][] objectIDandFolderID = new int[ids.length][];
         int folderID = parse(folderId);
         for (int i = 0; i < ids.length; i++) {
-            objectIDandFolderID[i] = new int[] { parse(ids[i]), folderID }; 
+            objectIDandFolderID[i] = new int[] { parse(ids[i]), folderID };
         }
         return delegate(session).getObjectsById(objectIDandFolderID, getColumns(fields));
     }
@@ -145,14 +148,14 @@ public class DelegatingLdapStorage extends DefaultContactStorage {
 
     @Override
     public <O> SearchIterator<Contact> search(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        Order order = Order.NO_ORDER;    
+        Order order = Order.NO_ORDER;
         int orderBy = 0;
         String collation = null;
         if (null != sortOptions) {
             collation = sortOptions.getCollation();
             if (null != sortOptions.getOrder() && 0 < sortOptions.getOrder().length) {
                 SortOrder sortOrder = sortOptions.getOrder()[0];
-                order = sortOrder.getOrder();            
+                order = sortOrder.getOrder();
                 orderBy = ContactMapper.getInstance().get(sortOrder.getBy()).getColumnID();
             }
         }
@@ -161,14 +164,14 @@ public class DelegatingLdapStorage extends DefaultContactStorage {
 
     @Override
     public SearchIterator<Contact> search(Session session, ContactSearchObject contactSearch, ContactField[] fields, SortOptions sortOptions) throws OXException {
-        Order order = Order.NO_ORDER;    
+        Order order = Order.NO_ORDER;
         int orderBy = 0;
         String collation = null;
         if (null != sortOptions) {
             collation = sortOptions.getCollation();
             if (null != sortOptions.getOrder() && 0 < sortOptions.getOrder().length) {
                 SortOrder sortOrder = sortOptions.getOrder()[0];
-                order = sortOrder.getOrder();            
+                order = sortOrder.getOrder();
                 orderBy = ContactMapper.getInstance().get(sortOrder.getBy()).getColumnID();
             }
         }
@@ -182,7 +185,7 @@ public class DelegatingLdapStorage extends DefaultContactStorage {
 
     @Override
     public void update(Session session, String folderId, String id, Contact contact, Date lastRead) throws OXException {
-        delegate(session).updateContactObject(contact, parse(folderId), lastRead);        
+        delegate(session).updateContactObject(contact, parse(folderId), lastRead);
     }
 
     @Override
@@ -192,16 +195,40 @@ public class DelegatingLdapStorage extends DefaultContactStorage {
 
     @Override
     public void delete(Session session, String folderId, String id, Date lastRead) throws OXException {
-        delegate(session).deleteContactObject(parse(id), parse(folderId), lastRead);    
+        delegate(session).deleteContactObject(parse(id), parse(folderId), lastRead);
+    }
+
+    @Override
+    public SearchIterator<Contact> searchByBirthday(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        Mappings mappings = provider.getProperties().getMappings();
+        if (null != mappings && null != mappings.getBirthday() && 0 < mappings.getBirthday().length()) {
+            // use default implementation
+            return super.searchByBirthday(session, folderIDs, from, until, fields, sortOptions);
+        } else {
+            LOG.debug("No mapping found, unable to search contacts by birthday.");
+            return getSearchIterator(Collections.<Contact>emptyList());
+        }
+    }
+
+    @Override
+    public SearchIterator<Contact> searchByAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
+        Mappings mappings = provider.getProperties().getMappings();
+        if (null != mappings && null != mappings.getAnniversary() && 0 < mappings.getAnniversary().length()) {
+            // use default implementation
+            return super.searchByAnniversary(session, folderIDs, from, until, fields, sortOptions);
+        } else {
+            LOG.debug("No mapping found, unable to search contacts by anniversary.");
+            return getSearchIterator(Collections.<Contact>emptyList());
+        }
     }
 
     private ContactInterface delegate(Session session) throws OXException {
         return provider.newContactInterface(session);
     }
-   
+
     /**
      * Gets the column IDs representing the supplied contact fields.
-     * 
+     *
      * @param fields
      * @return
      * @throws OXException

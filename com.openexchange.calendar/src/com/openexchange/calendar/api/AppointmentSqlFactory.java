@@ -56,8 +56,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.exception.OXException;
@@ -72,12 +70,12 @@ import com.openexchange.session.Session;
 public class AppointmentSqlFactory implements AppointmentSqlFactoryService {
 
 	private static final Log LOG = com.openexchange.log.Log.loggerFor(AppointmentSqlFactory.class);
-	
+
     private final List<CalendarFeature> features = new ArrayList<CalendarFeature>();
-    
+
     public AppointmentSQLInterface createAppointmentSqlOmittingFeatures(Session session, String...omitFeatures) {
         Set<String> skip = new HashSet<String>(Arrays.asList(omitFeatures));
-        AppointmentSQLInterface calendarSql = new TransactionallyCachingCalendar(new CalendarSql(session)); 
+        AppointmentSQLInterface calendarSql = new TransactionallyCachingCalendar(new CalendarSql(session));
 
         for (CalendarFeature feature : features) {
             if (!skip.contains(feature.getId())) {
@@ -88,10 +86,10 @@ public class AppointmentSqlFactory implements AppointmentSqlFactoryService {
 				}
             }
         }
-        
+
         return calendarSql;
     }
-    
+
     public void addCalendarFeature(CalendarFeature feature) {
         features.add(feature);
     }
@@ -106,5 +104,5 @@ public class AppointmentSqlFactory implements AppointmentSqlFactoryService {
     public AppointmentSQLInterface createAppointmentSql(Session session) {
         return createAppointmentSqlOmittingFeatures(session);
     }
-    
+
 }

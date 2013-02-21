@@ -53,7 +53,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link MailExceptionStrings}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailExceptionStrings implements LocalizableStrings {
@@ -236,6 +236,9 @@ public final class MailExceptionStrings implements LocalizableStrings {
      */
     public final static String MAIL_NOT_FOUND_MSG = "Mail(s) %1$s could not be found in folder %2$s";
 
+    // Mail could not be found
+    public final static String MAIL_NOT_FOUND_SIMPLE_MSG = "Mail could not be found";
+
     /**
      * Action %1$s is not supported by %2$s
      */
@@ -265,7 +268,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
      * This message could not be moved to trash folder as your mailbox is nearly full.<br>
      * Please try to empty your deleted items first, or delete smaller messages first.
      */
-    public final static String DELETE_FAILED_OVER_QUOTA_MSG = "This message could not be moved to trash folder as your mailbox is nearly full.\nPlease try to empty your deleted items first, or delete smaller messages first.";
+    public final static String DELETE_FAILED_OVER_QUOTA_MSG = "This message could not be moved to trash folder as your mailbox is nearly full."+LINE_SEPARATOR+"Please try to empty your deleted items first, or delete smaller messages first.";
 
     /**
      * The message part with sequence ID %1$s could not be found in message %2$s in folder %3$s
@@ -518,7 +521,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
      * was published and the link added to your email. Whoever receives the email can then download the attachment.
      */
     public final static String USED_PUBLISHING_FEATURE_MSG = "The attachments to this E-Mail exceeded the size limit for attachments. Instead of sending the attachment with the E-Mail, the attachment was published and the link added to your E-Mail. Whoever receives the E-Mail can then download the attachment.";
-    
+
     // Draft message could not be saved
     public static final String DRAFT_FAILED_UNKNOWN_MSG = "Draft message could not be saved";
 

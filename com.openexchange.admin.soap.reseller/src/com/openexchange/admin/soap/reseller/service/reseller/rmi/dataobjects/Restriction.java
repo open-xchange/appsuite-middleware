@@ -16,9 +16,9 @@ import com.openexchange.admin.soap.reseller.service.rmi.dataobjects.EnforceableD
 
 /**
  * <p>Java-Klasse f\u00fcr Restriction complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType name="Restriction">
  *   &lt;complexContent>
@@ -36,8 +36,8 @@ import com.openexchange.admin.soap.reseller.service.rmi.dataobjects.EnforceableD
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Restriction", propOrder = {
@@ -65,7 +65,7 @@ public class Restriction
     public void setId(final Integer value) {
         set("id", "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", value);
     }
-    
+
     public String getName() {
         return get("name");
     }
@@ -109,31 +109,31 @@ public class Restriction
     }
 
     /**
-     * Ruft das restliche Contentmodell ab. 
-     * 
+     * Ruft das restliche Contentmodell ab.
+     *
      * <p>
-     * Sie rufen diese "catch-all"-Eigenschaft aus folgendem Grund ab: 
-     * Der Feldname "MandatoryMembersChange" wird von zwei verschiedenen Teilen eines Schemas verwendet. Siehe: 
+     * Sie rufen diese "catch-all"-Eigenschaft aus folgendem Grund ab:
+     * Der Feldname "MandatoryMembersChange" wird von zwei verschiedenen Teilen eines Schemas verwendet. Siehe:
      * Zeile 0 von http://192.168.32.167/servlet/axis2/services/OXResellerService?wsdl#types3
      * Zeile 0 von http://192.168.32.167/servlet/axis2/services/OXResellerService?wsdl#types6
      * <p>
      * Um diese Eigenschaft zu entfernen, wenden Sie eine Eigenschaftenanpassung f\u00fcr eine
-     * der beiden folgenden Deklarationen an, um deren Namen zu \u00e4ndern: 
+     * der beiden folgenden Deklarationen an, um deren Namen zu \u00e4ndern:
      * Gets the value of the rest property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the rest property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getRest().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link JAXBElement }{@code <}{@link String }{@code >}
@@ -143,8 +143,8 @@ public class Restriction
      * {@link JAXBElement }{@code <}{@link Integer }{@code >}
      * {@link JAXBElement }{@code <}{@link String }{@code >}
      * {@link JAXBElement }{@code <}{@link String }{@code >}
-     * 
-     * 
+     *
+     *
      */
     public List<JAXBElement<? extends Serializable>> getRest() {
         if (rest == null) {

@@ -49,10 +49,22 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/bundles/*
 
 %changelog
+* Tue Feb 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 7.0.1
+* Tue Feb 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.0.1
 * Fri Feb 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-02-13
+* Thu Feb 14 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.0.1
+* Fri Feb 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.0.1
 * Tue Jan 29 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-01-28
+* Tue Jan 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-01-23
+* Thu Jan 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.0.1
 * Fri Dec 28 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for public patch 2012-12-31
 * Fri Dec 21 2012 Marcus Klein <marcus.klein@open-xchange.com>

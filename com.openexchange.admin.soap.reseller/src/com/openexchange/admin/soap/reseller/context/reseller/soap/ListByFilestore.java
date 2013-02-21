@@ -12,9 +12,9 @@ import com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Filestore;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -27,8 +27,8 @@ import com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Filestore;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -45,11 +45,11 @@ public class ListByFilestore {
 
     /**
      * Ruft den Wert der fs-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Filestore }
-     *     
+     *
      */
     public Filestore getFs() {
         return fs;
@@ -57,11 +57,11 @@ public class ListByFilestore {
 
     /**
      * Legt den Wert der fs-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Filestore }
-     *     
+     *
      */
     public void setFs(Filestore value) {
         this.fs = value;
@@ -69,11 +69,11 @@ public class ListByFilestore {
 
     /**
      * Ruft den Wert der auth-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Credentials }
-     *     
+     *
      */
     public Credentials getAuth() {
         return auth;
@@ -81,11 +81,11 @@ public class ListByFilestore {
 
     /**
      * Legt den Wert der auth-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Credentials }
-     *     
+     *
      */
     public void setAuth(Credentials value) {
         this.auth = value;

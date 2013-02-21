@@ -147,6 +147,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     @Override
     public void releaseResources() throws OXException {
         closeIMAPFolder();
+        closeOtherFolders();
     }
 
     /**
@@ -192,7 +193,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
 
     /**
      * Adds specified IMAP folder to set of maintained opened folders.
-     * 
+     *
      * @param folder The IMAP folder to add
      */
     protected void addOpenedFolder(final IMAPFolder folder) {
@@ -238,7 +239,6 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     protected void resetIMAPFolder() {
         holdsMessages = -1;
         imapFolder = null;
-        closeOtherFolders();
     }
 
     /**
@@ -287,9 +287,6 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         if (null == fullName) {
             throw MailExceptionCode.MISSING_FULLNAME.create();
         }
-        if (imapFolder == this.imapFolder) {
-            closeOtherFolders();
-        }
         final boolean isDefaultFolder = DEFAULT_FOLDER_ID.equals(fullName);
         final boolean isIdenticalFolder;
         if (isDefaultFolder) {
@@ -318,10 +315,14 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                         return imapFolder;
                     }
                     /*
-                     * Folder is open, so close folder
+                     * Folder is open, but not appropriate. Add to opened folders for possible later use if not identical full name
                      */
                     try {
-                        imapFolder.close(false/*Folder.READ_WRITE == mode*/);
+                        if (isIdenticalFolder) {
+                            imapFolder.close(false/*Folder.READ_WRITE == mode*/);
+                        } else {
+                            addOpenedFolder(imapFolder);
+                        }
                     } finally {
                         if (imapFolder == this.imapFolder) {
                             resetIMAPFolder();
@@ -465,7 +466,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         if (null == uidTableField) {
             return;
         }
-        
+
         try {
             final com.sun.mail.imap.MessageCache mc = (com.sun.mail.imap.MessageCache) messageCacheField.get(imapFolder);
             if (null != mc) {
@@ -474,7 +475,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                     Arrays.fill(messages, null);
                 }
             }
-            
+
             final Hashtable<?, ?> uidTable = (Hashtable<?, ?>) uidTableField.get(imapFolder);
             if (null != uidTable) {
                 uidTable.clear();

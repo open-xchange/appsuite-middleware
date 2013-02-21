@@ -60,7 +60,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.jslob.JSlob;
+import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.json.JSlobRequest;
 import com.openexchange.server.ServiceLookup;
@@ -68,13 +68,13 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link SetAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 @Action(
     name = "set"
-    , description = "Sets the JSlob associated with the current user and context. Performs a delete if the passed JSlob is null." 
+    , description = "Sets the JSlob associated with the current user and context. Performs a delete if the passed JSlob is null."
     , method = RequestMethod.PUT
     , parameters = {
         @Parameter(name = "serviceId", description = "Optional identifier for the JSlob. Default is <tt>com.openexchange.jslob.config</tt>", optional=true)
@@ -89,7 +89,7 @@ public final class SetAction extends JSlobAction {
 
     /**
      * Initializes a new {@link SetAction}.
-     * 
+     *
      * @param services The service look-up
      */
     public SetAction(final ServiceLookup services, final Map<String, JSlobAction> actions) {
@@ -110,7 +110,7 @@ public final class SetAction extends JSlobAction {
         /*
          * A null value is considered as a remove operation
          */
-        final JSlob jslob = null == data || JSONObject.NULL.equals(data) ? JSlob.EMPTY_JSLOB : new JSlob((JSONObject) data);
+        final DefaultJSlob jslob = null == data || JSONObject.NULL.equals(data) ? DefaultJSlob.EMPTY_JSLOB : new DefaultJSlob((JSONObject) data);
         jslobService.set(id, jslob, jslobRequest.getSession());
         return new AJAXRequestResult();
     }

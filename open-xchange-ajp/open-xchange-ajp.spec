@@ -52,6 +52,51 @@ if [ ${1:-0} -eq 2 ]; then
     ##
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc ajp.properties
 
+    # SoftwareChange_Request-1274
+    pfile=/opt/open-xchange/etc/ajp.properties
+    sfile=/opt/open-xchange/etc/server.properties
+    rfile=/opt/open-xchange/etc/requestwatcher.properties
+    if ox_exists_property AJP_PORT $pfile; then
+       oval=$(ox_read_property AJP_PORT $pfile)
+       ox_set_property com.openexchange.connector.networkListenerPort "$oval" $sfile
+       ox_remove_property AJP_PORT $pfile
+    fi
+    if ox_exists_property AJP_MAX_REQUEST_PARAMETER_COUNT $pfile; then
+       oval=$(ox_read_property AJP_MAX_REQUEST_PARAMETER_COUNT $pfile)
+       ox_set_property com.openexchange.connector.maxRequestParameters "$oval" $sfile
+       ox_remove_property AJP_MAX_REQUEST_PARAMETER_COUNT $pfile
+    fi
+    if ox_exists_property AJP_JVM_ROUTE $pfile; then
+       oval=$(ox_read_property AJP_JVM_ROUTE $pfile)
+       ox_set_property com.openexchange.server.backendRoute "$oval" $sfile
+       ox_remove_property AJP_JVM_ROUTE $pfile
+    fi
+    if ox_exists_property AJP_BIND_ADDR $pfile; then
+       oval=$(ox_read_property AJP_BIND_ADDR $pfile)
+       ox_set_property com.openexchange.connector.networkListenerHost "$oval" $sfile
+       ox_remove_property AJP_BIND_ADDR $pfile
+    fi
+    if ox_exists_property AJP_WATCHER_ENABLED $pfile; then
+       oval=$(ox_read_property AJP_WATCHER_ENABLED $pfile)
+       ox_set_property com.openexchange.requestwatcher.isEnabled "$oval" $rfile
+       ox_remove_property AJP_WATCHER_ENABLED $pfile
+    fi
+    if ox_exists_property AJP_WATCHER_PERMISSION $pfile; then
+       oval=$(ox_read_property AJP_WATCHER_PERMISSION $pfile)
+       ox_set_property com.openexchange.requestwatcher.restartPermission "$oval" $rfile
+       ox_remove_property AJP_WATCHER_PERMISSION $pfile
+    fi
+    if ox_exists_property AJP_WATCHER_MAX_RUNNING_TIME $pfile; then
+       oval=$(ox_read_property AJP_WATCHER_MAX_RUNNING_TIME $pfile)
+       ox_set_property com.openexchange.requestwatcher.maxRequestAge "$oval" $rfile
+       ox_remove_property AJP_WATCHER_MAX_RUNNING_TIME $pfile
+    fi
+    if ox_exists_property AJP_WATCHER_FREQUENCY $pfile; then
+       oval=$(ox_read_property AJP_WATCHER_FREQUENCY $pfile)
+       ox_set_property com.openexchange.requestwatcher.frequency "$oval" $rfile
+       ox_remove_property AJP_WATCHER_FREQUENCY $pfile
+    fi
+
     # SoftwareChange_Request-1120
     pfile=/opt/open-xchange/etc/ajp.properties
     if ! ox_exists_property AJP_BACKLOG $pfile; then
@@ -89,14 +134,26 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Feb 19 2013 Marc Arens <marc.arens@open-xchange.com>
+Fourth release candidate for 7.0.1
+* Tue Feb 19 2013 Marc Arens <marc.arens@open-xchange.com>
+Third release candidate for 7.0.1
 * Fri Feb 15 2013 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2013-02-13
+* Thu Feb 14 2013 Marc Arens <marc.arens@open-xchange.com>
+Second release candidate for 7.0.1
+* Fri Feb 01 2013 Marc Arens <marc.arens@open-xchange.com>
+First release candidate for 7.0.1
 * Tue Jan 29 2013 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2013-01-28
 * Mon Jan 21 2013 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2013-01-24
+* Tue Jan 15 2013 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2013-01-23
 * Thu Jan 10 2013 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2013-01-10
+* Thu Jan 10 2013 Marc Arens <marc.arens@open-xchange.com>
+prepare for 7.0.1
 * Thu Jan 03 2013 Marc Arens <marc.arens@open-xchange.com>
 Build for public patch 2013-01-15
 * Fri Dec 28 2012 Marc Arens <marc.arens@open-xchange.com>
@@ -145,6 +202,10 @@ Fourth release candidate for 6.22.0
 Third release candidate for 6.22.0
 * Thu Oct 04 2012 Marc Arens <marc.arens@open-xchange.com>
 Second release candidate for 6.22.0
+* Tue Sep 04 2012 Marc Arens <marc.arens@open-xchange.com>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Marc Arens <marc.arens@open-xchange.com>
+prepare for next EDP drop
 * Tue Aug 21 2012 Marc Arens <marc.arens@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Marc Arens <marc.arens@open-xchange.com>

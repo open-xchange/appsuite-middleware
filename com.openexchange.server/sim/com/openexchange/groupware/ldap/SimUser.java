@@ -74,5 +74,5 @@ public class SimUser extends MockUser {
     private final void init() {
         setTimeZone(TimeZones.UTC.getID());
     }
-	
+
 }

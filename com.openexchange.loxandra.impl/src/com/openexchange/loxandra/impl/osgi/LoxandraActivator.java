@@ -50,11 +50,9 @@ package com.openexchange.loxandra.impl.osgi;
 
 import java.io.File;
 
-import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.commons.logging.Log;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.log.LogFactory;
 import com.openexchange.loxandra.EAVContactFactoryService;
 import com.openexchange.loxandra.impl.cassandra.CassandraEAVContactFactoryServiceImpl;
 import com.openexchange.loxandra.impl.cassandra.transaction.TransactionManager;
@@ -66,11 +64,11 @@ import com.openexchange.osgi.HousekeepingActivator;
  *
  */
 public final class LoxandraActivator extends HousekeepingActivator {
-	
+
 	private static Log log = com.openexchange.log.Log.loggerFor(LoxandraActivator.class);
-	
+
 	/**
-	 * Default Constructor 
+	 * Default Constructor
 	 */
 	public LoxandraActivator() {
 		super();
@@ -78,43 +76,43 @@ public final class LoxandraActivator extends HousekeepingActivator {
 
 	@Override
 	protected Class<?>[] getNeededServices() {
-		
+
 		return new Class[]{ConfigurationService.class};
 	}
 
 	@Override
 	protected void startBundle() throws Exception {
 		log.info("starting bundle: com.openexchange.loxandra");
-		
+
 		LoxandraServiceLookUp.set(this);
-		
+
 		ConfigurationService config = LoxandraServiceLookUp.getService(ConfigurationService.class);
-		
+
 		final File file = config.getFileByName("loxandra.properties");
 		if (null != file) {
             System.setProperty("loxandra.config", file.getAbsolutePath().toString());
         }
-		
+
 		// Initialize and register the EAVContactService
 		EAVContactFactoryService eavService = new CassandraEAVContactFactoryServiceImpl();
 		registerService(EAVContactFactoryService.class, eavService);
-    	
-    	// The EAVContactFactoryService must be initialized BEFORE the TransactionManager, 
+
+    	// The EAVContactFactoryService must be initialized BEFORE the TransactionManager,
     	// since the later one uses the EAVContactFactoryService to get access to Cassandra.
     	TransactionManager txInstance = TransactionManager.getInstance();
     	txInstance.checkAndReplay();
-    	registerService(TransactionManager.class, txInstance); 
-        
+    	registerService(TransactionManager.class, txInstance);
+
     	openTrackers();
-        
+
         log.info("Loxandra Service started successfully.");
-        
+
 	}
 
 	@Override
 	protected void stopBundle() throws Exception {
 		log.info("stoping bundle: com.openexchange.loxandra");
-		
+
 		LoxandraServiceLookUp.set(null);
 		cleanUp();
 	}

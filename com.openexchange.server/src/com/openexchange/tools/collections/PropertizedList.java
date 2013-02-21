@@ -81,7 +81,7 @@ public class PropertizedList<E> implements List<E> {
      * Sets the specified property.
      * <p>
      * If value is <code>null</code> the property is removed.
-     * 
+     *
      * @param name The property name
      * @param value The property value
      * @return This list with property set
@@ -97,7 +97,7 @@ public class PropertizedList<E> implements List<E> {
 
     /**
      * Gets the property associated with given name.
-     * 
+     *
      * @param name The name
      * @return The property value or <code>null</code> if absent
      */
@@ -108,7 +108,7 @@ public class PropertizedList<E> implements List<E> {
 
     /**
      * Gets the property names.
-     * 
+     *
      * @return The property names
      */
     public Collection<String> getPropertyNames() {
@@ -117,7 +117,7 @@ public class PropertizedList<E> implements List<E> {
 
     /**
      * Gets the properties.
-     * 
+     *
      * @return The properties
      */
     public Map<String, Object> getProperties() {
@@ -249,6 +249,6 @@ public class PropertizedList<E> implements List<E> {
         return delegate.subList(fromIndex, toIndex);
     }
 
-    
+
 
 }

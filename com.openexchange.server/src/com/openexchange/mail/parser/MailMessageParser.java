@@ -94,7 +94,6 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -108,7 +107,7 @@ import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
-import com.openexchange.mail.utils.CharsetDetector;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -124,10 +123,6 @@ import com.openexchange.tools.tnef.TNEF2ICal;
 public final class MailMessageParser {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MailMessageParser.class));
-
-    private static final String LOG_PROPERTY_FULL_NAME = MailActionConstants.LOG_PROPERTY_FULL_NAME;
-    private static final String LOG_PROPERTY_MAIL_ID = MailActionConstants.LOG_PROPERTY_MAIL_ID;
-    private static final String LOG_PROPERTY_ACCOUNT_ID = MailActionConstants.LOG_PROPERTY_ACCOUNT_ID;
 
     private static final String APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
 
@@ -208,16 +203,13 @@ public final class MailMessageParser {
      */
 
     private boolean stop;
-
     private boolean multipartDetected;
-
     private InlineDetector inlineDetector;
-
     private String subject;
-
     private MimeFilter mimeFilter;
-
     private final List<OXException> warnings;
+    private String mailId;
+    private String folder;
 
     /**
      * Constructor
@@ -242,7 +234,7 @@ public final class MailMessageParser {
 
     /**
      * Adds specified MIME filter.
-     * 
+     *
      * @param mimeFilter The MIME filter
      * @return This parser with MIME filter applied
      */
@@ -305,21 +297,23 @@ public final class MailMessageParser {
                 final Props properties = LogProperties.getLogProperties();
                 final int accountId = mail.getAccountId();
                 if (accountId >= 0) {
-                    properties.put(LOG_PROPERTY_ACCOUNT_ID, ForceLog.valueOf(Integer.valueOf(accountId)));
+                    properties.put(LogProperties.Name.MAIL_ACCOUNT_ID, ForceLog.valueOf(Integer.valueOf(accountId)));
                 }
                 final String mailId = mail.getMailId();
                 if (null != mailId) {
-                    properties.put(LOG_PROPERTY_MAIL_ID, ForceLog.valueOf(mailId));
+                    properties.put(LogProperties.Name.MAIL_MAIL_ID, ForceLog.valueOf(mailId));
                 }
                 final String folder = mail.getFolder();
                 if (null != folder) {
-                    properties.put(LOG_PROPERTY_FULL_NAME, ForceLog.valueOf(folder));
+                    properties.put(LogProperties.Name.MAIL_FULL_NAME, ForceLog.valueOf(folder));
                 }
             }
             /*
              * Parse mail's envelope
              */
             parseEnvelope(mail, handler);
+            mailId = mail.getMailId();
+            folder = mail.getFolder();
             /*
              * Parse content
              */
@@ -335,9 +329,9 @@ public final class MailMessageParser {
         } finally {
             if (logPropsEnabled) {
                 final Props properties = LogProperties.getLogProperties();
-                properties.remove(LOG_PROPERTY_ACCOUNT_ID);
-                properties.remove(LOG_PROPERTY_MAIL_ID);
-                properties.remove(LOG_PROPERTY_FULL_NAME);
+                properties.remove(LogProperties.Name.MAIL_ACCOUNT_ID);
+                properties.remove(LogProperties.Name.MAIL_MAIL_ID);
+                properties.remove(LogProperties.Name.MAIL_FULL_NAME);
             }
         }
         handler.handleMessageEnd(mail);
@@ -419,7 +413,7 @@ public final class MailMessageParser {
             }
         } else if (isText(lcct)) {
             if (isInline) {
-                final String content = readContent(mailPart, contentType);
+                final String content = readContent(mailPart, contentType, mailId, folder);
                 final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
                 if (uuencodedMP.isUUEncoded()) {
                     /*
@@ -483,7 +477,7 @@ public final class MailMessageParser {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
             if (isInline) {
-                if (!handler.handleInlineHtml(readContent(mailPart, contentType), contentType, size, fileName, mailPart.getSequenceId())) {
+                if (!handler.handleInlineHtml(readContent(mailPart, contentType, mailId, folder), contentType, size, fileName, mailPart.getSequenceId())) {
                     stop = true;
                     return;
                 }
@@ -927,14 +921,16 @@ public final class MailMessageParser {
         return filename;
     }
 
-    private static boolean isEmptyString(final String str) {
-        final char[] chars = str.toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            if (!Character.isWhitespace(chars[i])) {
-                return false;
-            }
+    private static boolean isEmptyString(final String string) {
+        if (null == string) {
+            return true;
         }
-        return true;
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     /**
@@ -962,7 +958,7 @@ public final class MailMessageParser {
         return getFileName(null, sequenceId, baseMimeType);
     }
 
-    private static String readContent(final MailPart mailPart, final ContentType contentType) throws OXException, IOException {
+    private static String readContent(final MailPart mailPart, final ContentType contentType, final String mailId, final String folder) throws OXException, IOException {
         if (false && is7BitTransferEncoding(mailPart) && (mailPart instanceof MimeRawSource)) {
             try {
                 final byte[] bytes = MessageUtility.getBytesFrom(((MimeRawSource) mailPart).getRawInputStream());
@@ -1030,6 +1026,11 @@ public final class MailMessageParser {
                     e);
             }
             return MessageUtility.readMailPart(mailPart, fallback);
+        } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(e, mailId, folder);
+            }
+            throw e;
         }
     }
 

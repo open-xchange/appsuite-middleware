@@ -71,7 +71,6 @@ import com.openexchange.carddav.reports.Syncstatus;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
@@ -85,7 +84,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
 /**
  * {@link CardDAVCollection} - Abstract base class for CardDAV collections.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
@@ -100,7 +99,7 @@ public abstract class CardDAVCollection extends AbstractCollection {
 
     /**
      * Initializes a new {@link CardDAVCollection}.
-     * 
+     *
      * @param factory the factory
      * @param url the WebDAV path
      */
@@ -108,10 +107,10 @@ public abstract class CardDAVCollection extends AbstractCollection {
         super();
         this.factory = factory;
         this.url = url;
-        super.includeProperties(new SupportedReportSet(), new CTag(factory, this), new SyncToken(this)); 
+        super.includeProperties(new SupportedReportSet(), new CTag(factory, this), new SyncToken(this));
         LOG.debug(getUrl() + ": initialized.");
     }
-    
+
     protected WebdavProtocolException protocolException(Throwable t) {
     	return protocolException(t, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
@@ -120,12 +119,12 @@ public abstract class CardDAVCollection extends AbstractCollection {
         LOG.error(this.getUrl() + ": " + t.getMessage(), t);
         return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), statusCode, t);
     }
-    
+
     /**
-     * Gets all contacts that have been created or modified since the 
+     * Gets all contacts that have been created or modified since the
      * supplied time.
-     * 
-     * @param since the exclusive minimum modification time to consider  
+     *
+     * @param since the exclusive minimum modification time to consider
      * @return the contacts
      * @throws OXException
      */
@@ -133,8 +132,8 @@ public abstract class CardDAVCollection extends AbstractCollection {
 
     /**
      * Gets all contacts that have been deleted since the supplied time.
-     * 
-     * @param since the exclusive minimum modification time to consider  
+     *
+     * @param since the exclusive minimum modification time to consider
      * @return the contacts
      * @throws OXException
      */
@@ -142,35 +141,35 @@ public abstract class CardDAVCollection extends AbstractCollection {
 
     /**
      * Gets all contacts in the collection.
-     * 
+     *
      * @return the contacts
      * @throws OXException
      */
     protected abstract Collection<Contact> getContacts() throws OXException;
-    
+
     /**
-     * Gets the ID of the folder that is used to create new contacts for 
+     * Gets the ID of the folder that is used to create new contacts for
      * this collection.
-     * 
+     *
      * @return the folder ID
      */
     protected abstract String getFolderID() throws OXException;
-    
+
     /**
-     * Constructs a {@link WebdavPath} for a vCard child resource of this 
+     * Constructs a {@link WebdavPath} for a vCard child resource of this
      * collection with the supplied UID.
-     * 
+     *
      * @param uid the UID of the resource
      * @return the path
      */
     protected WebdavPath constructPathForChildResource(String uid) {
-    	return this.getUrl().dup().append(uid + ".vcf");    	
+    	return this.getUrl().dup().append(uid + ".vcf");
     }
 
     /**
-     * Constructs a {@link WebdavPath} for a vCard child resource of this 
+     * Constructs a {@link WebdavPath} for a vCard child resource of this
      * collection with UID found in the supplied contact.
-     * 
+     *
      * @param contact the contact represented by the resource
      * @return the path
      */
@@ -184,9 +183,9 @@ public abstract class CardDAVCollection extends AbstractCollection {
     }
 
     /**
-     * Extracts the folder ID from the supplied resource name, i.e. the 
+     * Extracts the folder ID from the supplied resource name, i.e. the
      * part of a ox folder resource name representing the folder's id.
-     *   
+     *
      * @param name the name of the resource
      * @return the folder ID, or <code>null</code> if none was found
      */
@@ -213,12 +212,12 @@ public abstract class CardDAVCollection extends AbstractCollection {
             throw protocolException(e);
 		}
 	}
-    
+
 	@Override
 	public WebdavPath getUrl() {
 		return this.url;
 	}
-	
+
 	@Override
 	protected WebdavFactory getFactory() {
 		return this.factory;
@@ -231,9 +230,9 @@ public abstract class CardDAVCollection extends AbstractCollection {
 	}
 
 	/**
-	 * Gets an updated {@link Syncstatus} based on the supplied sync token for 
+	 * Gets an updated {@link Syncstatus} based on the supplied sync token for
 	 * this collection.
-	 * 
+	 *
 	 * @param syncToken the sync token as supplied by the client
 	 * @return the sync status
 	 * @throws WebdavProtocolException
@@ -253,7 +252,7 @@ public abstract class CardDAVCollection extends AbstractCollection {
 			try {
 				since = Long.parseLong(token);
 			} catch (NumberFormatException e) {
-				LOG.warn("Invalid sync token: '" + token + "', falling back to '0'.");								
+				LOG.warn("Invalid sync token: '" + token + "', falling back to '0'.");
 			}
 		}
 		Syncstatus<WebdavResource> syncStatus = null;
@@ -264,7 +263,7 @@ public abstract class CardDAVCollection extends AbstractCollection {
 			syncStatus = this.getSyncStatus(new Date(since));
 			if (OVERRIDE_LEGACY_FOLDERS == since) {
 				/*
-				 * report legacy simulated folder groups as deleted 
+				 * report legacy simulated folder groups as deleted
 				 */
 				addLegacyGroupsAsDeleted(syncStatus);
 			}
@@ -275,9 +274,9 @@ public abstract class CardDAVCollection extends AbstractCollection {
     }
 
 	/**
-	 * Create a 'sync-status' multistatus report considering all changes since 
-	 * the supplied time. 
-	 * 
+	 * Create a 'sync-status' multistatus report considering all changes since
+	 * the supplied time.
+	 *
 	 * @param since the time
 	 * @return the sync status
 	 * @throws WebdavProtocolException
@@ -294,7 +293,7 @@ public abstract class CardDAVCollection extends AbstractCollection {
 			ContactResource resource = new ContactResource(contact, factory, constructPathForChildResource(contact));
 			int status = contact.getCreationDate().after(since) ? HttpServletResponse.SC_CREATED : HttpServletResponse.SC_OK;
 			multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(status, resource.getUrl(), resource));
-			// remember aggregated last modified for next sync token 
+			// remember aggregated last modified for next sync token
 			nextSyncToken = Tools.getLatestModified(nextSyncToken, contact.getLastModified());
 		}
 		/*
@@ -304,14 +303,14 @@ public abstract class CardDAVCollection extends AbstractCollection {
 		for (Contact contact : deletedContacts) {
 			// only include deleted contacts that were created before last synchronization,
 			// only include contacts that are not also modified (due to move operations)
-			if (null != contact.getCreationDate() && 
-					(contact.getCreationDate().before(since) || contact.getCreationDate().equals(since)) && 
+			if (null != contact.getCreationDate() &&
+					(contact.getCreationDate().before(since) || contact.getCreationDate().equals(since)) &&
 					false == contains(modifiedContacts, contact.getUid())) {
 				// add contact resource to multistatus
 				ContactResource resource = new ContactResource(contact, factory, constructPathForChildResource(contact));
 				multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(
 						HttpServletResponse.SC_NOT_FOUND, resource.getUrl(), resource));
-				// remember aggregated last modified for parent folder								
+				// remember aggregated last modified for parent folder
 				nextSyncToken = Tools.getLatestModified(nextSyncToken, contact.getLastModified());
 			}
 		}
@@ -321,27 +320,27 @@ public abstract class CardDAVCollection extends AbstractCollection {
 		multistatus.setToken(Long.toString(nextSyncToken.getTime()));
 		return multistatus;
 	}
-	
+
 	/**
-	 * Adds WebDAV status for the formerly simulated folder groups of the 
+	 * Adds WebDAV status for the formerly simulated folder groups of the
 	 * default contacts folder and the global addressbook with a status of
-	 * "Deleted" to the supplied sync status. 
-	 * 
+	 * "Deleted" to the supplied sync status.
+	 *
 	 * @param syncStatus the sync status to add the legacy groups
-	 * @throws OXException 
+	 * @throws OXException
 	 */
 	private void addLegacyGroupsAsDeleted(Syncstatus<WebdavResource> syncStatus) throws OXException {
-		String name = String.format("f%d_%s", factory.getSession().getContextId(), factory.getState().getDefaultFolder()); 
+		String name = String.format("f%d_%s", factory.getSession().getContextId(), factory.getState().getDefaultFolder());
 		ContactResource defaultFolderResource = new ContactResource(factory, constructPathForChildResource(name), null);
 		syncStatus.addStatus(new WebdavStatusImpl<WebdavResource>(
 				HttpServletResponse.SC_NOT_FOUND, defaultFolderResource.getUrl(), defaultFolderResource));
 		name = String.format("f%d_%s", factory.getSession().getContextId(), factory.getFolderService().getFolder(
-				FolderStorage.REAL_TREE_ID, FolderStorage.GLOBAL_ADDRESS_BOOK_ID, this.factory.getSession(), null)); 
+				FolderStorage.REAL_TREE_ID, FolderStorage.GLOBAL_ADDRESS_BOOK_ID, this.factory.getSession(), null));
 		ContactResource gabResource = new ContactResource(factory, constructPathForChildResource(name), null);
 		syncStatus.addStatus(new WebdavStatusImpl<WebdavResource>(
 				HttpServletResponse.SC_NOT_FOUND, gabResource.getUrl(), gabResource));
 	}
-	
+
 	private static boolean contains(Collection<Contact> contacts, String uid) {
 		for (Contact contact : contacts) {
 			if (contact.getUid().equals(uid)) {
@@ -352,16 +351,16 @@ public abstract class CardDAVCollection extends AbstractCollection {
 	}
 
     /**
-     * Gets a child resource from this collection by name. If the resource 
+     * Gets a child resource from this collection by name. If the resource
      * does not yet exists, a placeholder contact resource is created.
-     * 
+     *
      * @param name the name of the resource
      * @return the child resource
      * @throws WebdavProtocolException
      */
 	public CardDAVResource getChild(String name) throws WebdavProtocolException {
 		if (null != extractLegacyFolderID(name)) {
-			LOG.info(getUrl() + ": client requests legacy simulated group resource '" + name + 
+			LOG.info(getUrl() + ": client requests legacy simulated group resource '" + name +
 					"', overriding next sync token to '11' for recovery.");
 			this.factory.setOverrideNextSyncToken("11");
 			throw protocolException(new Throwable("child resource '" + name + "' not found"), HttpServletResponse.SC_NOT_FOUND);
@@ -380,7 +379,7 @@ public abstract class CardDAVCollection extends AbstractCollection {
     		throw protocolException(e);
 		}
 	}
-	
+
     @Override
     public String getResourceType() throws WebdavProtocolException {
         return super.getResourceType() + CarddavProtocol.ADDRESSBOOK;
@@ -440,5 +439,5 @@ public abstract class CardDAVCollection extends AbstractCollection {
 	protected WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException {
 		return null;
 	}
-    
+
 }

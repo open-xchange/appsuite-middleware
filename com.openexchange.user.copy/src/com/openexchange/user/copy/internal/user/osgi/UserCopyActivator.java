@@ -61,9 +61,9 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class UserCopyActivator implements BundleActivator {
-    
+
     private ServiceTracker<UserService, UserService> tracker;
-    
+
 
     /**
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)

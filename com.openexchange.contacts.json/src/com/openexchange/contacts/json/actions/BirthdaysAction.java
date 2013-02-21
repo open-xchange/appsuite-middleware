@@ -96,10 +96,10 @@ public class BirthdaysAction extends ContactAction {
         Date lastModified;
         if (null != folderID) {
             List<String> folderIDs = Arrays.asList(new String[] { folderID });
-            lastModified = addContacts(contacts, getContactService().searchContactsWithBirthday(request.getSession(), folderIDs, 
+            lastModified = addContacts(contacts, getContactService().searchContactsWithBirthday(request.getSession(), folderIDs,
                 request.getStart(), request.getEnd(), request.getFields(ContactField.BIRTHDAY), request.getSortOptions()));
         } else {
-            lastModified = addContacts(contacts, getContactService().searchContactsWithBirthday(request.getSession(), request.getStart(), 
+            lastModified = addContacts(contacts, getContactService().searchContactsWithBirthday(request.getSession(), request.getStart(),
                 request.getEnd(), request.getFields(ContactField.BIRTHDAY), request.getSortOptions()));
         }
         request.sortInternalIfNeeded(contacts, ContactField.BIRTHDAY, request.getStart());

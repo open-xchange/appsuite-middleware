@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -36,6 +36,21 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
+%post
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    # SoftwareChange_Request-1293
+    pfile=/opt/open-xchange/etc/grizzly.properties
+    if ! ox_exists_property com.openexchange.http.grizzly.hasAJPEnabled $pfile; then
+       ox_set_property com.openexchange.http.grizzly.hasAJPEnabled "false" $pfile
+    fi
+fi
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -49,6 +64,16 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Feb 19 2013 Marc Arens <marc.arens@open-xchange.com>
+Fourth release candidate for 7.0.1
+* Tue Feb 19 2013 Marc Arens <marc.arens@open-xchange.com>
+Third release candidate for 7.0.1
+* Thu Feb 14 2013 Marc Arens <marc.arens@open-xchange.com>
+Second release candidate for 7.0.1
+* Fri Feb 01 2013 Marc Arens <marc.arens@open-xchange.com>
+First release candidate for 7.0.1
+* Thu Jan 10 2013 Marc Arens <marc.arens@open-xchange.com>
+prepare for 7.0.1
 * Tue Dec 04 2012 Marc Arens <marc.arens@open-xchange.com>
 First release candidate for 7.0.0
 * Tue Dec 04 2012 Marc Arens <marc.arens@open-xchange.com>

@@ -103,8 +103,8 @@ final class ThreadContainer {
             tc = nextContainer;
         }
         /*-
-         * 
-         * 
+         *
+         *
 
         if (threadable != null) {
             threadable.setChild(child == null ? null : child.threadable);
@@ -125,13 +125,13 @@ final class ThreadContainer {
         }
 
         threadable = null;
-         * 
+         *
          */
     }
 
     /**
      * Returns <code>true</code> if child is under self's tree. This is used for detecting circularities in the references header.
-     * 
+     *
      * @param target The target container
      * @return <code>true</code> if child is under self's tree; otherwise <code>false</code>
      */

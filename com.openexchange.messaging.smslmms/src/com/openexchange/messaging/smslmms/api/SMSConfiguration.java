@@ -118,70 +118,70 @@ public interface SMSConfiguration {
 
     /**
      * Gets the list of allowed sender addresses.
-     * 
+     *
      * @return The list of allowed sender addresses
      */
     public List<String> getAddresses();
 
     /**
      * Gets the display string.
-     * 
+     *
      * @return The display string
      */
     public String getDisplayString();
 
     /**
      * Gets the maximum allowed length of the message.
-     * 
+     *
      * @return The maximum allowed length of the message
      */
     public int getLength();
-    
+
     /**
      * Indicates if the messaging service is enabled for the user or not.
-     * 
+     *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean isEnabled();
-    
+
     /**
      * Indicates if the message service uses captchas
-     * 
+     *
      * @return <code>true</code> if using captchas; otherwsie <code>false</code>
      */
     public boolean isCaptcha();
 
     /**
      * Indicates if the backend is allowed to send multiple SMS, if yes, the GUI shows a counter for the number of SMS messages to be sent
-     * 
+     *
      * @return <code>true</code> if multiple SMS are allowed; otherwise <code>false</code>
      */
     public boolean getMultiSMS();
 
     /**
      * Indicates if the backend is allowed to send MMS messages, if yes, the GUI allows to upload images.
-     * 
+     *
      * @return <code>true</code> if MMS is allowed; otherwise <code>false</code>
      */
     public boolean isMMS();
 
     /**
      * Indicates if folder storage access is supported.
-     * 
+     *
      * @return <code>true</code> if access to folder storage is supported; otherwise <code>false</code>
      */
     public boolean supportsFolderStorage();
 
     /**
      * Indicates if SMS/MMS (storage) access is supported.
-     * 
+     *
      * @return <code>true</code> SMS/MMS (storage) access is supported; otherwise <code>false</code>
      */
     public boolean supportsAccess();
-    
+
     /**
      * Gets an optional upsell link, if the user has no SMS enabled.
-     * 
+     *
      * @return The upsell link or <code>null</code>
      */
     public String getUpsellLink();

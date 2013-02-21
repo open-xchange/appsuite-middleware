@@ -63,12 +63,12 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class DynamicIDResolver extends DefaultLdapIDResolver {
-    
+
     private static final String PARAMETER_LDAP_IDS = "com.openexchange.contacts.ldap.storage.userids";
     private final BiMap<String, Integer> ids;
     private final LdapContactStorage storage;
     private final Session session;
-    
+
     public DynamicIDResolver(Session session, LdapContactStorage storage) throws OXException {
         super(session.getContextId(), storage.getFolderID());
         this.storage = storage;
@@ -90,7 +90,7 @@ public class DynamicIDResolver extends DefaultLdapIDResolver {
                 if (null == contactID) {
                     contactID = Integer.valueOf(1 + ids.size());
                     this.ids.put(ldapID, contactID);
-                }   
+                }
             }
         }
         return contactID;
@@ -105,17 +105,17 @@ public class DynamicIDResolver extends DefaultLdapIDResolver {
                 if (null == ldapID) {
                     this.triggerIDMappings();
                     ldapID = this.ids.inverse().get(Integer.valueOf(contactID));
-                }                
+                }
             }
             if (null == ldapID) {
                 throw LdapExceptionCodes.NO_MAPPED_LDAP_ID.create(contactID, folderID, contextID);
             }
-        } 
+        }
         return ldapID;
     }
-    
+
     private void triggerIDMappings() throws OXException {
-        this.storage.all(this.session, Integer.toString(storage.getFolderID()), 
+        this.storage.all(this.session, Integer.toString(storage.getFolderID()),
             new ContactField[] { ContactField.OBJECT_ID, ContactField.INTERNAL_USERID });
     }
 

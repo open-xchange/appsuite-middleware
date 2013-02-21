@@ -61,6 +61,7 @@ import net.oauth.OAuthAccessor;
 import net.oauth.OAuthMessage;
 import net.oauth.OAuthProblemException;
 import net.oauth.server.OAuthServlet;
+import com.openexchange.java.Streams;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.internal.DatabaseOAuthProviderService;
@@ -68,7 +69,7 @@ import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
 
 /**
  * Access Token request handler
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AccessTokenServlet extends HttpServlet {
@@ -86,7 +87,7 @@ public class AccessTokenServlet extends HttpServlet {
         req.getSession(true);
         super.service(req, resp);
     }
-    
+
     @Override
     public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
         processRequest(request, response);
@@ -98,6 +99,7 @@ public class AccessTokenServlet extends HttpServlet {
     }
 
     public void processRequest(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
+        OutputStream out = null;
         try {
             /*
              * Parse OAuth message
@@ -129,11 +131,12 @@ public class AccessTokenServlet extends HttpServlet {
              * Write back
              */
             response.setContentType("text/plain");
-            final OutputStream out = response.getOutputStream();
+            out = response.getOutputStream();
             OAuth.formEncode(OAuth.newList("oauth_token", accessor.accessToken, "oauth_token_secret", accessor.tokenSecret), out);
-            out.close();
         } catch (final Exception e) {
             DatabaseOAuthProviderService.handleException(e, request, response, true);
+        } finally {
+            Streams.close(out);
         }
     }
 

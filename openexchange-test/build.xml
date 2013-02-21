@@ -24,6 +24,7 @@
         <fileset dir="${bundlesDir}">
             <include name="**/*.jar"/>
             <exclude name="**/xerces.jar"/>
+            <exclude name="**/lib/json*.jar"/>
         </fileset>
         <fileset dir="${testBundlesDir}">
             <include name="*.jar"/>
@@ -44,6 +45,8 @@
 
     <target name="compile-common">
         <mkdir dir="${build}"/>
+        <property name="printablePath" refid="classpath"/>
+        <echo message="Classpath for compiling: ${printablePath}"/>
         <javac srcdir="${srcCommon}" destdir="${build}" optimize="no" debug="yes" encoding="US-ASCII" source="1.6" compiler="javac1.6" target="1.6">
             <classpath>
                 <path refid="classpath"/>

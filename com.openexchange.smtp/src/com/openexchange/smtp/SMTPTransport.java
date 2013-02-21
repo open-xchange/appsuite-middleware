@@ -50,10 +50,9 @@
 package com.openexchange.smtp;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import static com.openexchange.mail.mime.converters.MimeMessageConverter.saveChanges;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
-import static java.util.regex.Matcher.quoteReplacement;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -68,6 +67,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import javax.activation.DataHandler;
 import javax.mail.Address;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
@@ -77,6 +77,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
@@ -91,9 +92,12 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
+import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -104,6 +108,7 @@ import com.openexchange.mail.mime.MimeHeaderNameChecker;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.config.ITransportProperties;
@@ -255,11 +260,8 @@ public final class SMTPTransport extends MailTransport {
      * Executes all tasks queued for execution
      */
     private void doInvocations() {
-        while (!pendingInvocations.isEmpty()) {
-            final Runnable task = pendingInvocations.poll();
-            if (null != task) {
-                task.run();
-            }
+        for (Runnable task = pendingInvocations.poll(); task != null; task = pendingInvocations.poll()) {
+            task.run();
         }
     }
 
@@ -274,7 +276,7 @@ public final class SMTPTransport extends MailTransport {
 
     /**
      * Checks if Kerberos authentication is supposed to be performed.
-     * 
+     *
      * @return <code>true</code> for Kerberos authentication; otherwise <code>false</code>
      */
     private boolean isKerberosAuth() {
@@ -314,7 +316,7 @@ public final class SMTPTransport extends MailTransport {
                     this.kerberosSubject = (Subject) session.getParameter(KERBEROS_SESSION_SUBJECT);
                     final boolean kerberosAuth = isKerberosAuth();
                     if (kerberosAuth) {
-                        smtpProps.put("mail.smtp.auth", "true"); 
+                        smtpProps.put("mail.smtp.auth", "true");
                         smtpProps.put("mail.smtp.sasl.enable", "true");
                         smtpProps.put("mail.smtp.sasl.authorizationid", smtpConfig.getLogin());
                         smtpProps.put("mail.smtp.sasl.mechanisms", (kerberosAuth ? "GSSAPI" : "PLAIN"));
@@ -450,6 +452,9 @@ public final class SMTPTransport extends MailTransport {
 
     @Override
     public void sendReceiptAck(final MailMessage srcMail, final String fromAddr) throws OXException {
+        if (null == srcMail) {
+            return;
+        }
         SMTPConfig smtpConfig = null;
         try {
             final InternetAddress dispNotification = srcMail.getDispositionNotification();
@@ -575,7 +580,7 @@ public final class SMTPTransport extends MailTransport {
                     transport.connect(server, port, null, null);
                 }
                 saveChangesSafe(smtpMessage);
-                transport.sendMessage(smtpMessage, smtpMessage.getAllRecipients());
+                transport(smtpMessage, smtpMessage.getAllRecipients(), transport, smtpConfig);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
             } catch (final javax.mail.AuthenticationFailedException e) {
                 throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
@@ -623,7 +628,7 @@ public final class SMTPTransport extends MailTransport {
                         transport.connect(server, port, null, null);
                     }
                     saveChangesSafe(smtpMessage);
-                    transport.sendMessage(smtpMessage, recipients);
+                    transport(smtpMessage, recipients, transport, smtpConfig);
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 } catch (final javax.mail.AuthenticationFailedException e) {
                     throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
@@ -707,7 +712,7 @@ public final class SMTPTransport extends MailTransport {
                     /*
                      * TODO: Do encryption here
                      */
-                    transport.sendMessage(smtpMessage, recipients);
+                    transport(smtpMessage, recipients, transport, smtpConfig);
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 } catch (final javax.mail.AuthenticationFailedException e) {
                     throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
@@ -725,9 +730,37 @@ public final class SMTPTransport extends MailTransport {
         }
     }
 
+    private void transport(final SMTPMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
+        try {
+            transport.sendMessage(smtpMessage, recipients);
+        } catch (final MessagingException e) {
+            boolean throwIt = true;
+            if (e.getNextException() instanceof javax.activation.UnsupportedDataTypeException) {
+                try {
+                    final String cts = smtpMessage.getHeader("Content-Type", null);
+                    if ((null != cts) && cts.startsWith("multipart/")) {
+                            final Multipart multipart = (Multipart) smtpMessage.getContent();
+                            final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(8192);
+                            multipart.writeTo(baos);
+                            smtpMessage.setDataHandler(new DataHandler(new MessageDataSource(Streams.asInputStream(baos), multipart.getContentType())));
+                            saveChangesSafe(smtpMessage);
+                            transport.sendMessage(smtpMessage, recipients);
+                            throwIt = false;
+                    }
+                } catch (final Exception ignore) {
+                    // Ignore
+                    LOG.warn("Attempt to recover from \"" + e.getNextException().getMessage() + "\" failed.", ignore);
+                }
+            }
+            if (throwIt) {
+                throw MimeMailException.handleMessagingException(e, smtpConfig);
+            }
+        }
+    }
+
     private String encodePassword(final String password) throws OXException {
         String tmpPass = password;
-        if (password != null) {
+        if (tmpPass != null) {
             try {
                 tmpPass = new String(password.getBytes(Charsets.forName(getTransportConfig0().getSMTPProperties().getSmtpAuthEnc())), Charsets.ISO_8859_1);
             } catch (final UnsupportedCharsetException e) {
@@ -742,10 +775,12 @@ public final class SMTPTransport extends MailTransport {
     protected void shutdown() {
         SMTPSessionProperties.resetDefaultSessionProperties();
         SMTPCapabilityCache.tearDown();
+        MailInitialization.MailcapInitialization.getInstance().stop();
     }
 
     @Override
     protected void startup() {
+        MailInitialization.MailcapInitialization.getInstance().start();
         SMTPCapabilityCache.init();
     }
 
@@ -844,41 +879,18 @@ public final class SMTPTransport extends MailTransport {
         }
     }
 
-    private void saveChangesSafe(final SMTPMessage smtpMessage) throws OXException {
-        try {
-            saveChanges(smtpMessage);
-            /*
-             * Change Message-Id header appropriately
-             */
-            final String messageId = smtpMessage.getHeader("Message-ID", null);
-            if (null != messageId) {
-                /*
-                 * Somewhat of: <744810669.1.1314981157714.JavaMail.username@host.com>
-                 */
-                final HostnameService hostnameService = SMTPServiceRegistry.getServiceRegistry().getService(HostnameService.class);
-                String hostName;
-                if (null == hostnameService) {
-                    hostName = getHostName();
-                } else {
-                    hostName = hostnameService.getHostname(session.getUserId(), session.getContextId());
-                }
-                if (null == hostName) {
-                    hostName = getHostName();
-                }
-                final int pos = messageId.indexOf('@');
-                if (pos > 0 ) {
-                    final StringBuilder mid = new StringBuilder(messageId.substring(0, pos + 1)).append(hostName);
-                    if (messageId.charAt(0) == '<') {
-                        mid.append('>');
-                    }
-                    smtpMessage.setHeader("Message-ID", mid.toString());
-                } else {
-                    smtpMessage.setHeader("Message-ID", messageId + hostName);
-                }
-            }
-        } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
+    private void saveChangesSafe(final MimeMessage mimeMessage) throws OXException {
+        final HostnameService hostnameService = SMTPServiceRegistry.getServiceRegistry().getService(HostnameService.class);
+        String hostName;
+        if (null == hostnameService) {
+            hostName = getHostName();
+        } else {
+            hostName = hostnameService.getHostname(session.getUserId(), session.getContextId());
         }
+        if (null == hostName) {
+            hostName = getHostName();
+        }
+        MimeMessageConverter.saveChanges(mimeMessage, hostName);
     }
 
     private static String getHostName() {
@@ -886,7 +898,7 @@ public final class SMTPTransport extends MailTransport {
         if (null == logProperties) {
             return getStaticHostName();
         }
-        final String serverName = logProperties.get("com.openexchange.ajp13.serverName");
+        final String serverName = logProperties.get(LogProperties.Name.AJP_SERVER_NAME);
         if (null == serverName) {
             return getStaticHostName();
         }
@@ -899,6 +911,43 @@ public final class SMTPTransport extends MailTransport {
             LOG.error("Can't resolve my own hostname, using 'localhost' instead, which is certainly not what you want!", warning);
         }
         return staticHostName;
+    }
+
+    private static String quoteReplacement(final String str) {
+        return isEmpty(str) ? "" : quoteReplacement0(str);
+    }
+
+    private static String quoteReplacement0(final String s) {
+        if ((s.indexOf('\\') < 0) && (s.indexOf('$') < 0)) {
+            return s;
+        }
+        final int length = s.length();
+        final StringAllocator sb = new StringAllocator(length << 1);
+        for (int i = 0; i < length; i++) {
+            final char c = s.charAt(i);
+            if (c == '\\') {
+                sb.append('\\');
+                sb.append('\\');
+            } else if (c == '$') {
+                sb.append('\\');
+                sb.append('$');
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

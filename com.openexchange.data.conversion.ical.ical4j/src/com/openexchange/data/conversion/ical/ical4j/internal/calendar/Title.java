@@ -87,6 +87,12 @@ public final class Title<T extends CalendarComponent, U extends CalendarObject> 
 
     @Override
     public void parse(final int index, final T calendarComponent, final U calendarObject, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
-        calendarObject.setTitle(calendarComponent.getProperty(Property.SUMMARY).getValue());
+        int descMaxLength = 255; //hack for 20972
+        String desc = calendarComponent.getProperty(Property.SUMMARY).getValue();
+        if (desc.length() > descMaxLength) {
+            desc = desc.substring(0, descMaxLength);
+            warnings.add(new ConversionWarning(index, ConversionWarning.Code.TRUNCATION_WARNING, desc));
+        }
+        calendarObject.setTitle(desc);
     }
 }

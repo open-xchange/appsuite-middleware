@@ -161,7 +161,7 @@ public class RdbUserStorage extends UserStorage {
         }
         return userId;
     }
-    
+
     @Override
     public int createUser(final Connection con, final Context context, final User user) throws OXException {
         PreparedStatement stmt = null;
@@ -175,14 +175,14 @@ public class RdbUserStorage extends UserStorage {
             setStringOrNull(i++, stmt, user.getImapLogin());
             setStringOrNull(i++, stmt, user.getMail());
             setStringOrNull(i++, stmt, user.getMailDomain());
-            
+
             /*
              * Setting mailEnabled to true as it is not part of the user object.
              * Referring to com.openexchange.admin.rmi.dataobjects.User this value is not used anyway.
              * This may(!) cause a loss of data during a user move/copy.
-             */            
+             */
             stmt.setInt(i++, 1);
-            
+
             setStringOrNull(i++, stmt, user.getPreferredLanguage());
             stmt.setInt(i++, user.getShadowLastChange());
             setStringOrNull(i++, stmt, user.getSmtpServer());
@@ -190,7 +190,7 @@ public class RdbUserStorage extends UserStorage {
             setStringOrNull(i++, stmt, user.getUserPassword());
             stmt.setInt(i++, user.getContactId());
             setStringOrNull(i++, stmt, user.getPasswordMech());
-            
+
             /*
              * Now we fill uidNumber, gidNumber, homeDirectory and loginShell.
              * As this seems not to be used anymore we set this manually.
@@ -199,11 +199,11 @@ public class RdbUserStorage extends UserStorage {
             stmt.setInt(i++, 0);
             stmt.setInt(i++, 0);
             setStringOrNull(i++, stmt, "/home/" + user.getGivenName());
-            setStringOrNull(i++, stmt, "/bin/bash");        
+            setStringOrNull(i++, stmt, "/bin/bash");
             stmt.executeUpdate();
-            
-            writeLoginInfo(con, user, context, userId); 
-            writeUserAttributes(con, user, context, userId);                       
+
+            writeLoginInfo(con, user, context, userId);
+            writeUserAttributes(con, user, context, userId);
             return userId;
         } catch (final SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e);
@@ -211,7 +211,7 @@ public class RdbUserStorage extends UserStorage {
             closeSQLStuff(stmt);
         }
     }
-    
+
     private void writeLoginInfo(final Connection con, final User user, final Context context, final int userId) throws SQLException {
         PreparedStatement stmt = null;
         try {
@@ -219,7 +219,7 @@ public class RdbUserStorage extends UserStorage {
             stmt.setInt(1, context.getContextId());
             stmt.setInt(2, userId);
             stmt.setString(3, user.getLoginInfo());
-            
+
             stmt.executeUpdate();
         } finally {
             closeSQLStuff(stmt);
@@ -238,12 +238,12 @@ public class RdbUserStorage extends UserStorage {
                     stmt.setInt(2, userId);
                     stmt.setString(3, key);
                     stmt.setString(4, value);
-                    
+
                     stmt.addBatch();
-                }                
+                }
             }
-            
-            stmt.executeBatch();            
+
+            stmt.executeBatch();
         } finally {
             closeSQLStuff(stmt);
         }
@@ -259,7 +259,7 @@ public class RdbUserStorage extends UserStorage {
             DBPool.closeReaderSilent(context, con);
         }
     }
-    
+
     private void setStringOrNull(final int parameter, final PreparedStatement stmt, final String value) throws SQLException {
         if (value == null) {
             stmt.setNull(parameter, java.sql.Types.VARCHAR);
@@ -270,16 +270,9 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public User getUser(final int userId, final Context context) throws OXException {
-        final Connection con;
-        try {
-            con = DBPool.pickup(context);
-        } catch (final OXException e) {
-            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
-        }
+        final Connection con = DBPool.pickup(context);
         try {
             return getUser(context, con, new int[] { userId })[0];
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             DBPool.closeReaderSilent(context, con);
         }
@@ -355,12 +348,7 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public User[] getUser(final Context ctx) throws OXException {
-        final Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection con = DBPool.pickup(ctx);
         try {
             return getUser(ctx, con, listAllUser(ctx, con));
         } finally {
@@ -373,12 +361,7 @@ public class RdbUserStorage extends UserStorage {
         if (0 == userIds.length) {
             return new User[0];
         }
-        final Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection con = DBPool.pickup(ctx);
         try {
             return getUser(ctx, con, userIds);
         } finally {
@@ -616,7 +599,7 @@ public class RdbUserStorage extends UserStorage {
                     }
                 } catch (final OXException e) {
                     rollback(con);
-                    throw new OXException(e);
+                    throw e;
                 } finally {
                     autocommit(con);
                     DBPool.closeWriterSilent(context, con);
@@ -866,6 +849,13 @@ public class RdbUserStorage extends UserStorage {
                     if (!onlyLogins) {
                         final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
                         LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
+                        LOG.error("Expected lines: " + size + " Updated lines: " + lines);
+                        final Map<Integer, UserImpl> map = new HashMap<Integer, UserImpl>(1);
+                        map.put(I(userId), load);
+                        loadAttributes(ctx, con, map);
+                        for (int i : map.keySet()) {
+                            LOG.error("User " + i + ": " + map.get(i).getAttributes().toString());
+                        }
                         throw e;
                     }
                 }

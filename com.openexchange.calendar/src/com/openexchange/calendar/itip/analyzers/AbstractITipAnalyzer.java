@@ -61,7 +61,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
@@ -103,7 +102,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link AbstractITipAnalyzer}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
  *         Laguna</a>
  */
@@ -115,7 +114,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 			Appointment.SEQUENCE };
 	protected ITipIntegrationUtility util;
 	protected ServiceLookup services;
-	
+
 	@Override
     public ITipAnalysis analyze(final ITipMessage message, Map<String, String> header,
 			final String style, final Session session) throws OXException {
@@ -124,20 +123,20 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		}
 		header = lowercase(header);
 		if (services != null) {
-			
+
 			final ContextService contexts = services.getService(ContextService.class);
 			final UserService users = services.getService(UserService.class);
-		
+
 			final Context ctx = contexts.getContext(session.getContextId());
 			final User user = users.getUser(session.getUserId(), ctx);
-			
+
 			return analyze(message, header, wrapperFor(style), user.getLocale(), user, ctx, session);
-		
+
 		}
 
 		return analyze(message, header, wrapperFor(style), null, null, null, session);
 	}
-	
+
 	private Map<String, String> lowercase(final Map<String, String> header) {
 		final Map<String, String> copy = new HashMap<String, String>();
 		for(final Map.Entry<String, String> entry : header.entrySet()) {
@@ -161,7 +160,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		}
 		return w;
 	}
-	
+
 
 	public void describeDiff(final ITipChange change, final TypeWrapper wrapper,
 			final Session session) throws OXException {
@@ -199,14 +198,14 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 			return;
 		}
 
-		
+
 
 		String organizer = currentAppointment.getOrganizer();
 		if (organizer == null) {
 			organizer = newAppointment.getOrganizer();
 		}
 
-		
+
 		final ChangeDescriber cd = new ChangeDescriber(new Rescheduling(),
 				new Details(), new Participants(users, groups, resources,
 						true), new ShownAs());
@@ -249,7 +248,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 				.getOrganizer(), users, ctx);
 		if (onlyStateChanged(change.getDiff())) {
 			// External Participant
-			
+
 			ConfirmStatus newStatus = null;
 
 			final AppointmentDiff diff = change.getDiff();
@@ -533,7 +532,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		}
 		return false;
 	}
-	
+
 	protected void ensureParticipant(final CalendarDataObject appointment, final Session session, int owner) {
         final int confirm = CalendarObject.NONE;
         final Participant[] participants = appointment.getParticipants();
@@ -559,7 +558,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             participantList.add(up);
             appointment.setParticipants(participantList);
         }
-        
+
         found = false;
         final UserParticipant[] users = appointment.getUsers();
         if (users != null) {
@@ -569,7 +568,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
                 }
             }
         }
-        
+
         if (!found) {
             final UserParticipant up = new UserParticipant(owner);
             if (confirm != -1) {

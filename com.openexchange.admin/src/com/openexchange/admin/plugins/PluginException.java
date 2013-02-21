@@ -53,7 +53,7 @@ import java.io.Serializable;
 /**
  * The exception which is thrown by any bundle/plugin. So that the exception is known
  * in the admin core
- * 
+ *
  * @author d7
  *
  */
@@ -65,7 +65,7 @@ public class PluginException extends Exception implements Serializable {
     private static final long serialVersionUID = -1327700290913950494L;
 
     /**
-     * 
+     *
      */
     public PluginException() {
 

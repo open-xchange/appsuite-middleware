@@ -51,9 +51,9 @@ package com.openexchange.halo.mail;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -83,7 +83,7 @@ import com.openexchange.tools.session.ServerSession;
 public class EmailContactHalo extends AbstractContactHalo implements HaloContactDataSource {
 
 	private final ServiceLookup services;
-	
+
 	public EmailContactHalo(ServiceLookup services) {
 		this.services = services;
 	}
@@ -100,19 +100,19 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 		int[] params = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
 		int limit = req.getIntParameter(AJAXServlet.PARAMETER_LIMIT);
 		limit = limit < 0 ? 10 : limit;
-		
+
 		List<String> addresses = getEMailAddresses(query.getContact());
-		if(isUserThemselves(session.getUser(), addresses)){
-			return new AJAXRequestResult(new LinkedList<MailMessage>(), "mail");
+		if (isUserThemselves(session.getUser(), addresses)){
+			return new AJAXRequestResult(Collections.<MailMessage> emptyList(), "mail");
 		}
-		
+
 		MailField[] requestedFields = MailField.getFields(params);
-		
+
 		MailService mailService = services.getService(MailService.class);
 		MailAccountStorageService mailAccountService = services.getService(MailAccountStorageService.class);
-		
+
 		MailAccount[] userMailAccounts;
-		if(searchingExternalMailboxesIsFast()){
+		if (searchingExternalMailboxesIsFast()){
 			userMailAccounts = mailAccountService.getUserMailAccounts(session.getUserId(), session.getContextId());
 		} else {
 			userMailAccounts = new MailAccount[]{mailAccountService.getDefaultMailAccount(session.getUserId(), session.getContextId())};
@@ -127,20 +127,20 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 			mailAccess.connect();
 			List<MailMessage> moreMessages = Arrays.asList(mailAccess.getMessageStorage().searchMessages(
 				"INBOX",
-				IndexRange.NULL, 
-				MailSortField.RECEIVED_DATE, 
-				OrderDirection.DESC, 
-				generateSenderSearch(addresses), 
+				IndexRange.NULL,
+				MailSortField.RECEIVED_DATE,
+				OrderDirection.DESC,
+				generateSenderSearch(addresses),
 				requestedFields ));
 			messages.addAll(moreMessages);
-			
+
 			String sentFullName = mailAccess.getFolderStorage().getSentFolder();
 			moreMessages = Arrays.asList(mailAccess.getMessageStorage().searchMessages(
-					sentFullName, 
-					IndexRange.NULL, 
-					MailSortField.RECEIVED_DATE, 
-					OrderDirection.DESC, 
-					generateRecipientSearch(addresses), 
+					sentFullName,
+					IndexRange.NULL,
+					MailSortField.RECEIVED_DATE,
+					OrderDirection.DESC,
+					generateRecipientSearch(addresses),
 					requestedFields ));
 			messages.addAll(moreMessages);
 			} finally {
@@ -153,12 +153,16 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 		Collections.sort(messages, new Comparator<MailMessage>(){
 
 			@Override
-			public int compare(MailMessage arg0, MailMessage arg1) {
-				return arg1.getSentDate().compareTo(arg0.getSentDate());
+			public int compare(final MailMessage arg0, final MailMessage arg1) {
+				final Date sentDate1 = arg1.getSentDate();
+                final Date sentDate0 = arg0.getSentDate();
+                if (sentDate1 == null) {
+                    return null == sentDate0 ? 0 : -1;
+                }
+                return null == sentDate0 ? 1 : sentDate1.compareTo(sentDate0);
 			}});
-		
-		limit = limit > messages.size() ? messages.size() : limit;
-		messages = messages.subList(0, limit);
+
+		messages = messages.subList(0, Math.min(limit, messages.size()));
 		return new AJAXRequestResult(messages, "mail");
 	}
 
@@ -167,10 +171,11 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 		for (String addr : addresses) {
 			queries.add(new FromTerm(addr));
 		}
-		if (queries.size() == 3) {
+		final int size = queries.size();
+        if (size == 3) {
             return new ORTerm(new ORTerm(queries.get(0), queries.get(1)), queries.get(2));
         }
-		if (queries.size() == 2) {
+		if (size == 2) {
             return new ORTerm(queries.get(0), queries.get(1));
         }
 		return queries.get(0);
@@ -189,8 +194,8 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
         }
 		return queries.get(0);
 	}
-	
+
 	protected boolean searchingExternalMailboxesIsFast(){
-		return false; //TODO: once indexing is implemented, this should check whether it is turned on. 
+		return false; //TODO: once indexing is implemented, this should check whether it is turned on.
 	}
 }

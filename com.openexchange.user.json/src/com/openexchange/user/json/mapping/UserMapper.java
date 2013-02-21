@@ -49,17 +49,14 @@
 
 package com.openexchange.user.json.mapping;
 
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.mappings.json.ArrayMapping;
@@ -68,12 +65,13 @@ import com.openexchange.groupware.tools.mappings.json.DefaultJsonMapping;
 import com.openexchange.groupware.tools.mappings.json.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.groupware.tools.mappings.json.StringMapping;
+import com.openexchange.session.Session;
 import com.openexchange.user.json.field.UserField;
 import com.openexchange.user.json.parser.ParsedUser;
 
 /**
  * {@link UserMapper}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class UserMapper extends DefaultJsonMapper<User, UserField> {
@@ -129,9 +127,9 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 
 	@Override
 	protected EnumMap<UserField, JsonMapping<? extends Object, User>> createMappings() {
-		final EnumMap<UserField, JsonMapping<? extends Object, User>> mappings = new 
+		final EnumMap<UserField, JsonMapping<? extends Object, User>> mappings = new
 				EnumMap<UserField, JsonMapping<? extends Object, User>>(UserField.class);
-		
+
 		mappings.put(UserField.ID, new IntegerMapping<User>("id", 1) {
 
 			@Override
@@ -160,9 +158,9 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 				} else {
 					throw new UnsupportedOperationException();
 				}
-			}			
+			}
 		});
-		
+
 		mappings.put(UserField.ALIASES, new ArrayMapping<String, User>("aliases", 610) {
 
 			@Override
@@ -193,9 +191,9 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 			@Override
 			protected String deserialize(JSONArray array, int index) throws JSONException, OXException {
 				throw new UnsupportedOperationException();
-			}			
+			}
 		});
-		
+
 		mappings.put(UserField.TIME_ZONE, new StringMapping<User>("timezone", 611) {
 
 			@Override
@@ -224,9 +222,9 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 				} else {
 					throw new UnsupportedOperationException();
 				}
-			}			
+			}
 		});
-		
+
 		mappings.put(UserField.LOCALE, new DefaultJsonMapping<Locale, User>("locale", 612) {
 
 			@Override
@@ -268,21 +266,27 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 				}
 			}
 		});
-		
+
 		mappings.put(UserField.GROUPS, new DefaultJsonMapping<int[], User>("groups", 613) {
 
 			@Override
 			public void deserialize(JSONObject from, User to) throws JSONException, OXException {
 				throw new UnsupportedOperationException();
 			}
-			
+
 			@Override
-			public void serialize(User from, JSONObject to, TimeZone timeZone) throws JSONException {
-				if (this.isSet(from)) {
-					final int[] value = this.get(from);
-					to.put(getAjaxName(), null != value ? Arrays.asList(value) : JSONObject.NULL); 
-				}				
-			}
+			public Object serialize(User from, TimeZone timeZone, Session session) throws JSONException {
+		        int[] value = this.get(from);
+		        if (null == value) {
+		            return JSONObject.NULL;
+		        } else {
+		            JSONArray jsonArray = new JSONArray(value.length);
+		            for (int group : value) {
+                        jsonArray.put(group);
+                    }
+		            return jsonArray;
+		        }
+		    }
 
 			@Override
 			public boolean isSet(User object) {
@@ -304,7 +308,7 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 				throw new UnsupportedOperationException();
 			}
 		});
-		
+
 		mappings.put(UserField.CONTACT_ID, new IntegerMapping<User>("contact_id", 614) {
 
 			@Override
@@ -325,9 +329,9 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 			@Override
 			public void remove(User object) {
 				throw new UnsupportedOperationException();
-			}			
+			}
 		});
-		
+
 		mappings.put(UserField.LOGIN_INFO, new StringMapping<User>("login_info", 615) {
 
 			@Override
@@ -349,11 +353,11 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
 			public void remove(User object) {
 				throw new UnsupportedOperationException();
 			}
-		});		
-		
+		});
+
 		return mappings;
 	}
-	
+
     private static final Pattern identifierPattern = Pattern.compile("(\\p{Lower}{2})(?:_(\\p{Upper}{2}))?(?:_([a-zA-Z]{2}))?");
 
     /**
@@ -374,4 +378,4 @@ public class UserMapper extends DefaultJsonMapper<User, UserField> {
         return retval;
     }
 
-} 
+}

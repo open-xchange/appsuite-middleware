@@ -72,11 +72,11 @@ public final class FacebookMessagingExceptionMessages implements LocalizableStri
     // A JSON error occurred: %1$s
     public static final String JSON_ERROR_MSG = "A JSON error occurred: %1$s";
 
-    // Communication error with facebook service: %1$s
-    public static final String COMMUNICATION_ERROR_MSG = "Communication error with facebook service: %1$s";
+    // Communication error with Facebook service: %1$s
+    public static final String COMMUNICATION_ERROR_MSG = "Communication error with Facebook service: %1$s";
 
-    // Login to facebook failed for login %1$s.
-    public static final String FAILED_LOGIN_MSG = "Login to facebook failed for login %1$s.";
+    // Login to Facebook failed for login %1$s.
+    public static final String FAILED_LOGIN_MSG = "Login to Facebook failed for login %1$s.";
 
     // Login form not found on page: %1$s
     public static final String LOGIN_FORM_NOT_FOUND_MSG = "Login form not found on page: %1$s";
@@ -84,9 +84,9 @@ public final class FacebookMessagingExceptionMessages implements LocalizableStri
     // Element with attribute %1$s not found on page %2$s.
     public static final String ELEMENT_NOT_FOUND_MSG = "Element with attribute %1$s not found on page %2$s.";
 
-    // Missing permission "%1$s" in facebook login %2$s. Please copy following URL to your browser, login as %2$s (if not done yet) and grant access: %3$s
+    // Missing permission "%1$s" in Facebook login %2$s. Please copy following URL to your browser, login as %2$s (if not done yet) and grant access: %3$s
     public static final String MISSING_PERMISSION_MSG =
-        "Missing permission \"%1$s\" in facebook login %2$s. Please copy following URL to your browser, login as %2$s (if not done yet) and grant access:\n%3$s";
+        "Missing permission \"%1$s\" in Facebook login %2$s. Please copy following URL to your browser, login as %2$s (if not done yet) and grant access:\n%3$s";
 
     // An error occurred during the processing of a script.
     public static final String SCRIPT_ERROR_MSG = "An error occurred during the processing of a script.";
@@ -115,11 +115,11 @@ public final class FacebookMessagingExceptionMessages implements LocalizableStri
     // XML parse error: %1$s.
     public static final String XML_PARSE_ERROR_MSG = "XML parse error: %1$s.";
 
-    // Missing facebook configuration. Please re-create facebook account.
-    public static final String MISSING_CONFIG_MSG = "Missing facebook configuration. Please re-create facebook account.";
+    // Missing Facebook configuration. Please re-create Facebook account.
+    public static final String MISSING_CONFIG_MSG = "Missing Facebook configuration. Please re-create Facebook account.";
 
-    // Missing facebook configuration parameter "%1$s". Please re-create facebook account.
-    public static final String MISSING_CONFIG_PARAM_MSG = "Missing facebook configuration parameter \"%1$s\". Please re-create facebook account.";
+    // Missing Facebook configuration parameter "%1$s". Please re-create Facebook account.
+    public static final String MISSING_CONFIG_PARAM_MSG = "Missing Facebook configuration parameter \"%1$s\". Please re-create Facebook account.";
 
     // A Facebook API error occurred. Error code: %1$s. Error message: "%2$s". Please refer to http://fbdevwiki.com/wiki/Error_codes to look-up error code.
     public static final String FB_API_ERROR_MSG = "A Facebook API error occurred. Error code: %1$s. Error message: \"%2$s\". Please refer to http://fbdevwiki.com/wiki/Error_codes to look-up error code.";

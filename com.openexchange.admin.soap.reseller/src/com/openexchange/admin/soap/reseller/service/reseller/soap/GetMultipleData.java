@@ -14,9 +14,9 @@ import com.openexchange.admin.soap.reseller.service.rmi.dataobjects.Credentials;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -29,8 +29,8 @@ import com.openexchange.admin.soap.reseller.service.rmi.dataobjects.Credentials;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -47,25 +47,25 @@ public class GetMultipleData {
 
     /**
      * Gets the value of the admins property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the admins property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getAdmins().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link ResellerAdmin }
-     * 
-     * 
+     *
+     *
      */
     public List<ResellerAdmin> getAdmins() {
         if (admins == null) {
@@ -76,11 +76,11 @@ public class GetMultipleData {
 
     /**
      * Ruft den Wert der creds-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Credentials }
-     *     
+     *
      */
     public Credentials getCreds() {
         return creds;
@@ -88,11 +88,11 @@ public class GetMultipleData {
 
     /**
      * Legt den Wert der creds-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Credentials }
-     *     
+     *
      */
     public void setCreds(Credentials value) {
         this.creds = value;

@@ -102,7 +102,7 @@ public class LDAPHostnameCache {
                 if (null != cache.get(cid_int)) {
                     cache.remove(cid_int);
                 }
-                cache.put(cid_int, hostname);
+                cache.put(cid_int, hostname, false);
             } finally {
                 writeLock.unlock();
             }

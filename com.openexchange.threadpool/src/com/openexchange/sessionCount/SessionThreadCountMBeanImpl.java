@@ -61,7 +61,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link SessionThreadCountMBeanImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessionThreadCountMBeanImpl extends StandardMBean implements SessionThreadCountMBean {
@@ -71,7 +71,7 @@ public final class SessionThreadCountMBeanImpl extends StandardMBean implements 
 
     /**
      * Initializes a new {@link SessionThreadCountMBeanImpl}.
-     * 
+     *
      * @throws NotCompliantMBeanException If the MBean interface does not follow JMX design patterns for Management Interfaces, or if this
      *             does not implement the specified interface.
      */
@@ -113,10 +113,11 @@ public final class SessionThreadCountMBeanImpl extends StandardMBean implements 
             sb.append("<missing stack trace>\n");
             return;
         }
+        final String lineSeparator = System.getProperty("line.separator");
         for (final StackTraceElement ste : trace) {
             final String className = ste.getClassName();
             if (null != className) {
-                sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                sb.append("    at ").append(className).append('.').append(ste.getMethodName());
                 if (ste.isNativeMethod()) {
                     sb.append("(Native Method)");
                 } else {
@@ -132,7 +133,7 @@ public final class SessionThreadCountMBeanImpl extends StandardMBean implements 
                         sb.append(')');
                     }
                 }
-                sb.append('\n');
+                sb.append(lineSeparator);
             }
         }
     }

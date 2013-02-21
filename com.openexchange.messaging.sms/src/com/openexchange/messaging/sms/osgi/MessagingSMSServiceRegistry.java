@@ -52,7 +52,7 @@ package com.openexchange.messaging.sms.osgi;
 import com.openexchange.osgi.ServiceRegistry;
 
 /**
- * {@link MessagingSMSServiceRegistry} - A registry for services 
+ * {@link MessagingSMSServiceRegistry} - A registry for services
  */
 public final class MessagingSMSServiceRegistry {
 

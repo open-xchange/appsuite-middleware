@@ -57,10 +57,6 @@ import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.mappers.ContactFieldMapper;
-import com.openexchange.groupware.contact.mappers.EnglishOutlookMapper;
-import com.openexchange.groupware.contact.mappers.FrenchOutlookMapper;
-import com.openexchange.groupware.contact.mappers.GermanOutlookMapper;
 import com.openexchange.groupware.container.Contact;
 
 /**
@@ -213,9 +209,6 @@ public enum ContactField{
 
     private int columnNumber, sqlType;
     private String fieldName, readableName, dbName, ajaxName;
-    private static final ContactFieldMapper frenchOutlook = new FrenchOutlookMapper();
-    private static final ContactFieldMapper germanOutlook = new GermanOutlookMapper();
-    private static final ContactFieldMapper englishOutlook = new EnglishOutlookMapper();
 
     private ContactField(final int columnNumber, final String dbName, final String fieldName, final String readableName, final String ajaxString, final int sqlType){
         this.dbName = dbName;
@@ -233,7 +226,7 @@ public enum ContactField{
 
 	/**
 	 * Gets the field name
-	 * 
+	 *
 	 * @return the field name
 	 */
     @Deprecated
@@ -248,27 +241,12 @@ public enum ContactField{
 
 	/**
 	 * Gets the name of the corresponding database columns
-	 * 
+	 *
 	 * @return the database name, or <code>""</code> if there's no database column associated with this field
 	 */
     @Deprecated
 	public String getDbName(){
 		return dbName;
-	}
-
-    @Deprecated
-	public String getEnglishOutlookName(){
-		return englishOutlook.getNameOfField(this);
-	}
-
-    @Deprecated
-	public String getFrenchOutlookName(){
-		return frenchOutlook.getNameOfField(this);
-	}
-
-    @Deprecated
-	public String getGermanOutlookName(){
-		return germanOutlook.getNameOfField(this);
 	}
 
     @Deprecated
@@ -280,7 +258,7 @@ public enum ContactField{
 	public String getVCardElementName(){
 		return readableName; //TODO get real VCard element name
 	}
-	
+
     @Deprecated
 	public int getSQLType() {
         return sqlType;
@@ -345,21 +323,6 @@ public enum ContactField{
 			}
 		}
 		return null;
-	}
-
-    @Deprecated
-	public static ContactField getByEnglishOutlookName(final String outlook){
-		return englishOutlook.getFieldByName(outlook);
-	}
-
-    @Deprecated
-	public static ContactField getByFrenchOutlookName(final String outlook){
-		return frenchOutlook.getFieldByName(outlook);
-	}
-
-    @Deprecated
-	public static ContactField getByGermanOutlookName(final String outlook){
-		return germanOutlook.getFieldByName(outlook);
 	}
 
     @Deprecated
@@ -516,13 +479,13 @@ public enum ContactField{
         default: return null;
         }
     }
-    
+
     private static final EnumSet<ContactField> VIRTUAL_FIELDS = EnumSet.of(IMAGE1_URL);
     @Deprecated
     public boolean isVirtual() {
         return VIRTUAL_FIELDS.contains(this);
     }
-    
+
     private static final EnumSet<ContactField> NON_DB_FIELDS = EnumSet.of(IMAGE1_URL, IMAGE1_CONTENT_TYPE, IMAGE_LAST_MODIFIED, IMAGE1, DISTRIBUTIONLIST, LINKS);
     @Deprecated
     public boolean isDBField() {

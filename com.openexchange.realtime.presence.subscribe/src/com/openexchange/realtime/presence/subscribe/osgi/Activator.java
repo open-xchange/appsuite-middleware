@@ -3,7 +3,6 @@ package com.openexchange.realtime.presence.subscribe.osgi;
 
 import java.util.Arrays;
 import java.util.Collection;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
@@ -23,7 +22,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link Activator}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Activator extends HousekeepingActivator {

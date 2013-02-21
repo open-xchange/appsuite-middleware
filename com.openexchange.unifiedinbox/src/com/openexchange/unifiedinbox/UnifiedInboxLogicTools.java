@@ -67,7 +67,7 @@ public final class UnifiedInboxLogicTools extends MailLogicTools {
 
     /**
      * Initializes a new {@link UnifiedInboxLogicTools}.
-     * 
+     *
      * @param session
      * @param accountId
      */
@@ -96,7 +96,7 @@ public final class UnifiedInboxLogicTools extends MailLogicTools {
         }
         return mail;
     }
-    
+
     @Override
     public MailMessage getFowardMessage(final MailMessage[] originalMails, final UserSettingMail usm) throws OXException {
         final MailMessage mail = super.getFowardMessage(originalMails, usm);
@@ -118,7 +118,7 @@ public final class UnifiedInboxLogicTools extends MailLogicTools {
         }
         return mail;
     }
-    
+
     @Override
     public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll) throws OXException {
         final MailMessage mail = super.getReplyMessage(originalMail, replyAll);
@@ -130,7 +130,7 @@ public final class UnifiedInboxLogicTools extends MailLogicTools {
         }
         return mail;
     }
-    
+
     @Override
     public MailMessage getReplyMessage(final MailMessage originalMail, final boolean replyAll, final UserSettingMail usm) throws OXException {
         final MailMessage mail = super.getReplyMessage(originalMail, replyAll, usm);

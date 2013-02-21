@@ -68,16 +68,16 @@ public class MoveContextFilestore extends ContextAbstraction {
             parser.ownparse(args2);
             final Context ctx = contextparsing(parser);
             parseAndSetContextName(parser, ctx);
-            
+
             successtext = nameOrIdSetInt(this.ctxid, this.contextname, "context");
-            
+
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
             final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
 
             final Filestore fs = parseAndSetFilestoreId(parser);
-            
+
             /*final MaintenanceReason mr = new MaintenanceReason(Integer.parseInt((String) parser.getOptionValue(this.maintenanceReasonIDOption)));
 
             oxres.moveContextFilestore(ctx, fs, mr, auth);*/

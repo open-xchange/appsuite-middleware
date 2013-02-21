@@ -56,10 +56,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Enumeration;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -87,7 +90,7 @@ import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.java.Java7ConcurrentLinkedQueue;
+import com.openexchange.java.Strings;
 import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
@@ -106,7 +109,6 @@ import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import edu.emory.mathcs.backport.java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Overridden service method that checks if a valid session can be found for the request.
@@ -124,12 +126,12 @@ public abstract class SessionServlet extends AJAXServlet {
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
     public static final String SESSION_KEY = "sessionObject";
-    
+
     public static final String PUBLIC_SESSION_KEY = "publicSessionObject";
 
     public static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
 
-    private static final Queue<IPRange> RANGES = new Java7ConcurrentLinkedQueue<IPRange>();
+    private static final List<IPRange> RANGES = new LinkedList<IPRange>();
 
     private static final AtomicBoolean INITIALIZED = new AtomicBoolean();
 
@@ -145,6 +147,22 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private static volatile SubnetMask allowedSubnet;
 
+    /** The log properties for session-related information. */
+    protected static final Set<LogProperties.Name> LOG_PROPERTIES;
+
+    static {
+        final Set<LogProperties.Name> set = EnumSet.noneOf(LogProperties.Name.class);
+        set.add(LogProperties.Name.SESSION_SESSION_ID);
+        set.add(LogProperties.Name.SESSION_USER_ID);
+        set.add(LogProperties.Name.SESSION_CONTEXT_ID);
+        set.add(LogProperties.Name.SESSION_CLIENT_ID);
+        set.add(LogProperties.Name.SESSION_SESSION);
+        LOG_PROPERTIES = Collections.unmodifiableSet(set);
+    }
+
+    /**
+     * Initializes a new {@link SessionServlet}.
+     */
     protected SessionServlet() {
         super();
     }
@@ -188,7 +206,7 @@ public abstract class SessionServlet extends AJAXServlet {
                     // Serialize range parsing. This might happen more than once, but shouldn't matter, since the list
                     // is accessed exclusively, so it winds up correct.
                     RANGES.clear();
-                    final String[] lines = text.split("\n");
+                    final String[] lines = Strings.splitByCRLF(text);
                     for (String line : lines) {
                         line = line.replaceAll("\\s", "");
                         if (!line.equals("") && (line.length() == 0 || line.charAt(0) != '#')) {
@@ -214,54 +232,66 @@ public abstract class SessionServlet extends AJAXServlet {
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
-        if (req.getParameter("session") != null && !req.getParameter("session").equals("")) {
-            final String sessionId = getSessionId(req);
-            final ServerSession session = getSession(req, sessionId, sessiondService);
-            verifySession(req, sessiondService, sessionId, session);
-            rememberSession(req, session);
+        ServerSession session = null;
+        {
+            final String sSession = req.getParameter("session");
+            if (sSession != null && !sSession.equals("")) {
+                final String sessionId = getSessionId(req);
+                session = getSession(req, sessionId, sessiondService);
+                verifySession(req, sessiondService, sessionId, session);
+                rememberSession(req, session);
+            }
         }
-        
         // Try public session
         final Cookie[] cookies = req.getCookies();
-        
         if (cookies != null) {
-            Session simpleSession = null;
+            ServerSession simpleSession = null;
         	for (final Cookie cookie : cookies) {
                 if (Login.PUBLIC_SESSION_NAME.equals(cookie.getName())) {
-                    simpleSession = sessiondService.getSessionByAlternativeId(cookie.getValue());
+                    final String altId = cookie.getValue();
+                    if (null != altId && null != session && altId.equals(session.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
+                        // same session
+                        simpleSession = session;
+                    } else {
+                        // lookup session by alternative id
+                        simpleSession = ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(cookie.getValue()));
+                    }
                     break;
                 }
             }
-        	
         	if (simpleSession != null) {
-        		final ServerSession session = ServerSessionAdapter.valueOf(simpleSession);
-        		verifySession(req, sessiondService, session.getSessionID(), session);
-        		rememberPublicSession(req, session);
+        		verifySession(req, sessiondService, simpleSession.getSessionID(), simpleSession);
+        		rememberPublicSession(req, simpleSession);
         	}
-        	
         }
-
     }
 
-	private void verifySession(final HttpServletRequest req,
-			final SessiondService sessiondService, final String sessionId,
-			final ServerSession session) throws OXException {
-		if (!sessionId.equals(session.getSessionID())) {
-		    if (INFO) {
-		        LOG.info("Request's session identifier \"" + sessionId + "\" differs from the one indicated by SessionD service \"" + session.getSessionID() + "\".");
-		    }
-		    throw SessionExceptionCodes.WRONG_SESSION.create();
-		}
-		final Context ctx = session.getContext();
-		if (!ctx.isEnabled()) {
-		    sessiondService.removeSession(sessionId);
-		    if (INFO) {
-		        LOG.info("The context " + ctx.getContextId() + " associated with session is locked.");
-		    }
-		    throw SessionExceptionCodes.CONTEXT_LOCKED.create();
-		}
-		checkIP(session, req.getRemoteAddr());
-	}
+    /**
+     * Verifies given session.
+     *
+     * @param req The HTTP request
+     * @param sessiondService The service
+     * @param sessionId The session identifier
+     * @param session The session
+     * @throws OXException If verification fails
+     */
+    protected void verifySession(final HttpServletRequest req, final SessiondService sessiondService, final String sessionId, final ServerSession session) throws OXException {
+        if (!sessionId.equals(session.getSessionID())) {
+            if (INFO) {
+                LOG.info("Request's session identifier \"" + sessionId + "\" differs from the one indicated by SessionD service \"" + session.getSessionID() + "\".");
+            }
+            throw SessionExceptionCodes.WRONG_SESSION.create();
+        }
+        final Context ctx = session.getContext();
+        if (!ctx.isEnabled()) {
+            sessiondService.removeSession(sessionId);
+            if (INFO) {
+                LOG.info("The context " + ctx.getContextId() + " associated with session is locked.");
+            }
+            throw SessionExceptionCodes.CONTEXT_LOCKED.create();
+        }
+        checkIP(session, req.getRemoteAddr());
+    }
 
     /**
      * Checks the session ID supplied as a query parameter in the request URI.
@@ -332,16 +362,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 threadCounter.decrement(sessionId);
             }
             ThreadLocalSessionHolder.getInstance().setSession(null);
-            if (LogProperties.isEnabled()) {
-                final Props properties = LogProperties.optLogProperties();
-                if (null != properties) {
-                    properties.remove("com.openexchange.session.sessionId");
-                    properties.remove("com.openexchange.session.userId");
-                    properties.remove("com.openexchange.session.contextId");
-                    properties.remove("com.openexchange.session.clientId");
-                    properties.remove("com.openexchange.session.session");
-                }
-            }
+            LogProperties.removeLogProperties(LOG_PROPERTIES);
             if (null != counter) {
                 counter.getAndDecrement();
             }
@@ -394,7 +415,7 @@ public abstract class SessionServlet extends AJAXServlet {
         checkIP(checkIP, getRanges(), session, actual, clientWhitelist);
     }
 
-    private Queue<IPRange> getRanges() {
+    private List<IPRange> getRanges() {
         return RANGES;
     }
 
@@ -418,14 +439,7 @@ public abstract class SessionServlet extends AJAXServlet {
             } catch (final Exception e2) {
                 LOG.error("Cookies could not be removed.", e2);
             } finally {
-                if (LogProperties.isEnabled()) {
-                    final Props properties = LogProperties.getLogProperties();
-                    properties.remove("com.openexchange.session.sessionId");
-                    properties.remove("com.openexchange.session.userId");
-                    properties.remove("com.openexchange.session.contextId");
-                    properties.remove("com.openexchange.session.clientId");
-                    properties.remove("com.openexchange.session.session");
-                }
+                LogProperties.removeLogProperties(LOG_PROPERTIES);
             }
         }
     }
@@ -451,7 +465,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param whitelist The optional IP check whitelist (by client identifier)
      * @throws OXException if the IP addresses don't match.
      */
-    public static void checkIP(final boolean doCheck, final Queue<IPRange> ranges, final Session session, final String actual, final ClientWhitelist whitelist) throws OXException {
+    public static void checkIP(final boolean doCheck, final List<IPRange> ranges, final Session session, final String actual, final ClientWhitelist whitelist) throws OXException {
         if (null == actual || !actual.equals(session.getLocalIp())) {
             // IP is missing or changed
             if (doCheck && !isWhitelistedFromIPCheck(actual, ranges) && !isWhitelistedClient(session, whitelist) && !allowedSubnet.areInSameSubnet(actual, session.getLocalIp())) {
@@ -493,7 +507,7 @@ public abstract class SessionServlet extends AJAXServlet {
         return null != whitelist && !whitelist.isEmpty() && whitelist.isAllowed(session.getClient());
     }
 
-    public static boolean isWhitelistedFromIPCheck(final String actual, final Queue<IPRange> ranges) {
+    public static boolean isWhitelistedFromIPCheck(final String actual, final List<IPRange> ranges) {
         for (final IPRange range : ranges) {
             if (range.contains(actual)) {
                 return true;
@@ -565,14 +579,14 @@ public abstract class SessionServlet extends AJAXServlet {
             }
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
-        if (LogProperties.isEnabled()) {
+        {
             final Props properties = LogProperties.getLogProperties();
-            properties.put("com.openexchange.session.sessionId", sessionId);
-            properties.put("com.openexchange.session.userId", Integer.valueOf(session.getUserId()));
-            properties.put("com.openexchange.session.contextId", Integer.valueOf(session.getContextId()));
+            properties.put(LogProperties.Name.SESSION_SESSION_ID, sessionId);
+            properties.put(LogProperties.Name.SESSION_USER_ID, Integer.valueOf(session.getUserId()));
+            properties.put(LogProperties.Name.SESSION_CONTEXT_ID, Integer.valueOf(session.getContextId()));
             final String client  = session.getClient();
-            properties.put("com.openexchange.session.clientId", client == null ? "unknown" : client);
-            properties.put("com.openexchange.session.session", session);
+            properties.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : client);
+            properties.put(LogProperties.Name.SESSION_SESSION, session);
         }
         /*
          * Get session secret
@@ -660,7 +674,7 @@ public abstract class SessionServlet extends AJAXServlet {
             return hash;
         }
         // Default is calculate
-        return HashCalculator.getHash(req, client);
+        return HashCalculator.getInstance().getHash(req, client);
     }
 
     /**
@@ -673,10 +687,10 @@ public abstract class SessionServlet extends AJAXServlet {
         req.setAttribute(SESSION_KEY, session);
         session.setParameter("JSESSIONID", req.getSession().getId());
     }
-    
+
     public static void rememberPublicSession(final HttpServletRequest req, final ServerSession session) {
     	req.setAttribute(PUBLIC_SESSION_KEY, session);
-        session.setParameter("JSESSIONID", req.getSession().getId());	
+        session.setParameter("JSESSIONID", req.getSession().getId());
     }
 
     /**
@@ -718,7 +732,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Removes all JSESSIONID cookies found in given HTTP Servlet request.
-     * 
+     *
      * @param req The HTTP Servlet request
      * @param resp The HTTP Servlet response
      */
@@ -760,7 +774,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Returns the remembered session.
-     * 
+     *
      * @param req The Servlet request.
      * @param mayUseFallbackSession <code>true</code> to look-up fall-back session; otherwise <code>false</code>
      * @return The remembered session
@@ -777,14 +791,14 @@ public abstract class SessionServlet extends AJAXServlet {
         final Props props = LogProperties.optLogProperties();
         if (null != props) {
             final HttpServletRequest httpRequest = (HttpServletRequest) req;
-            props.put("javax.servlet.servletPath", ForceLog.valueOf(httpRequest.getServletPath()));
+            props.put(LogProperties.Name.SERVLET_SERVLET_PATH, ForceLog.valueOf(httpRequest.getServletPath()));
             final String pathInfo = httpRequest.getPathInfo();
             if (null != pathInfo) {
-                props.put("javax.servlet.pathInfo", ForceLog.valueOf(pathInfo));
+                props.put(LogProperties.Name.SERVLET_PATH_INFO, ForceLog.valueOf(pathInfo));
             }
             final String queryString = httpRequest.getQueryString();
             if (null != queryString) {
-                props.put("javax.servlet.queryString", ForceLog.valueOf(queryString));
+                props.put(LogProperties.Name.SERVLET_QUERY_STRING, ForceLog.valueOf(queryString));
             }
         }
         return null;

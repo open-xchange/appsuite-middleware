@@ -67,11 +67,6 @@ public class AllowAsteriskAsSeparatorCustomizer implements LoginCustomizer {
         return new LoginRequest() {
 
             @Override
-            public boolean isVolatile() {
-                return loginReq.isVolatile();
-            }
-
-            @Override
             public String getAuthId() {
                 return loginReq.getAuthId();
             }
@@ -124,6 +119,36 @@ public class AllowAsteriskAsSeparatorCustomizer implements LoginCustomizer {
             @Override
             public Cookie[] getCookies() {
                 return loginReq.getCookies();
+            }
+
+            @Override
+            public boolean isSecure() {
+                return loginReq.isSecure();
+            }
+
+            @Override
+            public String getServerName() {
+                return loginReq.getServerName();
+            }
+
+            @Override
+            public int getServerPort() {
+                return loginReq.getServerPort();
+            }
+
+            @Override
+            public String getHttpSessionID() {
+                return loginReq.getHttpSessionID();
+            }
+
+            @Override
+            public String getClientToken() {
+                return loginReq.getClientToken();
+            }
+
+            @Override
+            public boolean isTransient() {
+                return loginReq.isTransient();
             }
         };
     }

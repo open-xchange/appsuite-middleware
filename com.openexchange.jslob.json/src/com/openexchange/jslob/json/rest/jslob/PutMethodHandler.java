@@ -58,7 +58,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link PutMethodHandler} - Serves the REST-like <code>PUT</code> request.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PutMethodHandler extends AbstractMethodHandler {

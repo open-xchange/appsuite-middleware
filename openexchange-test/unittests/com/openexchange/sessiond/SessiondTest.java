@@ -60,6 +60,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.test.TestInit;
 
 public class SessiondTest extends TestCase {
@@ -183,6 +184,14 @@ public class SessiondTest extends TestCase {
             public String getClient() {
                 return "test";
             }
+            @Override
+            public String getClientToken() {
+                return "testToken";
+            }
+            @Override
+            public boolean isTransient() {
+                return false;
+            }
         });
     }
 
@@ -192,7 +201,7 @@ public class SessiondTest extends TestCase {
         final int userId = UserStorage.getInstance().getUserId(testUser1, context);
         final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
                 SessiondService.class);
-        final String sessionId = sessiondCon.addSession(new AddSessionParameter() {
+        final Session session = sessiondCon.addSession(new AddSessionParameter() {
             @Override
             public String getClientIP() {
                 return "localhost";
@@ -229,8 +238,16 @@ public class SessiondTest extends TestCase {
             public String getClient() {
                 return "test";
             }
+            @Override
+            public String getClientToken() {
+                return "testToken";
+            }
+            @Override
+            public boolean isTransient() {
+                return false;
+            }
         });
-        sessiondCon.getSession(sessionId);
+        sessiondCon.getSession(session.getSessionID());
     }
 
     public void testDeleteSession() throws Exception {
@@ -239,7 +256,7 @@ public class SessiondTest extends TestCase {
         final int userId = UserStorage.getInstance().getUserId(testUser1, context);
         final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
                 SessiondService.class);
-        final String sessionId = sessiondCon.addSession(new AddSessionParameter() {
+        final Session session = sessiondCon.addSession(new AddSessionParameter() {
             @Override
             public String getClientIP() {
                 return "localhost";
@@ -276,8 +293,16 @@ public class SessiondTest extends TestCase {
             public String getClient() {
                 return "test";
             }
+            @Override
+            public String getClientToken() {
+                return "testToken";
+            }
+            @Override
+            public boolean isTransient() {
+                return false;
+            }
         });
-        sessiondCon.removeSession(sessionId);
+        sessiondCon.removeSession(session.getSessionID());
     }
 
     public void testGetSession() throws Exception {
@@ -286,7 +311,7 @@ public class SessiondTest extends TestCase {
         final int userId = UserStorage.getInstance().getUserId(testUser1, context);
         final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
                 SessiondService.class);
-        final String sessionId = sessiondCon.addSession(new AddSessionParameter() {
+        final Session session = sessiondCon.addSession(new AddSessionParameter() {
             @Override
             public String getClientIP() {
                 return "localhost";
@@ -323,7 +348,15 @@ public class SessiondTest extends TestCase {
             public String getClient() {
                 return "test";
             }
+            @Override
+            public String getClientToken() {
+                return "testToken";
+            }
+            @Override
+            public boolean isTransient() {
+                return false;
+            }
         });
-        sessiondCon.getSession(sessionId);
+        sessiondCon.getSession(session.getSessionID());
     }
 }

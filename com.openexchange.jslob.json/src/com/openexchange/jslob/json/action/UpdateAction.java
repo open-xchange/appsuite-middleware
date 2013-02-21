@@ -61,6 +61,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSONUpdate;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobService;
@@ -70,7 +71,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link UpdateAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -82,11 +83,11 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
     		" If non-REST the request body is expected to be a JSON object containing of a \"path\" and \"value\" element with the same " +
     		"semantics. If the \"path\" element is missing in request's JSON object, that JSON object is completely <b>merged</b> with the" +
     		" current JSON object representing the user's configuration.<br><br>Examples:<br>" +
-    		"The fastes way of storing a configuration:<br>" + 
-    		"PUT /ajax/jslob/myKey?action=update&id=myId<br>" + 
-    		"\"MyValue\"\n" + 
-    		"<br>" + 
-    		"results in a jslob {myKey: \"MyValue\"}" 
+    		"The fastes way of storing a configuration:<br>" +
+    		"PUT /ajax/jslob/myKey?action=update&id=myId<br>" +
+    		"\"MyValue\"\n" +
+    		"<br>" +
+    		"results in a jslob {myKey: \"MyValue\"}"
     , method = RequestMethod.PUT
     , parameters = {
         @Parameter(name = "serviceId", description = "Optional identifier for the JSlob. Default is <tt>com.openexchange.jslob.config</tt>", optional=true)
@@ -101,7 +102,7 @@ public final class UpdateAction extends JSlobAction {
 
     /**
      * Initializes a new {@link UpdateAction}.
-     * 
+     *
      * @param services The service look-up
      */
     public UpdateAction(final ServiceLookup services, final Map<String, JSlobAction> actions) {
@@ -157,7 +158,7 @@ public final class UpdateAction extends JSlobAction {
                      * Perform merge
                      */
                     final JSONObject merged = JSONUtil.merge(jslobService.get(id, jslobRequest.getSession()).getJsonObject(), jsonData);
-                    jslob = new JSlob(merged);
+                    jslob = new DefaultJSlob(merged);
                     jslobService.set(id, jslob, jslobRequest.getSession());
                     /*
                      * ... and write back
@@ -206,7 +207,7 @@ public final class UpdateAction extends JSlobAction {
                 jObject.put("value", requestData.getData());
                 requestData.setData(jObject, "json");
             } catch (final JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage()); 
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }
         } else {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);

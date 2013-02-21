@@ -12,17 +12,17 @@ import javax.xml.ws.WebFault;
 
 @WebFault(name = "NoSuchDatabaseException", targetNamespace = "http://soap.admin.openexchange.com")
 public class NoSuchDatabaseException_Exception extends java.lang.Exception {
-    
+
     private com.openexchange.admin.soap.context.soap.NoSuchDatabaseException noSuchDatabaseException;
 
     public NoSuchDatabaseException_Exception() {
         super();
     }
-    
+
     public NoSuchDatabaseException_Exception(String message) {
         super(message);
     }
-    
+
     public NoSuchDatabaseException_Exception(String message, Throwable cause) {
         super(message, cause);
     }

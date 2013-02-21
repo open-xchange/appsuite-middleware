@@ -57,11 +57,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
-import com.openexchange.server.impl.Version;
+import com.openexchange.version.Version;
 
 /**
  * The WebDAV version servlet. OXtender needs this servlet to determine the version of the server that it communicates to.
- * 
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public final class version extends HttpServlet {
@@ -88,7 +88,7 @@ public final class version extends HttpServlet {
         try {
             resp.setContentType("text/plain; charset=UTF-8");
             final PrintWriter pw = resp.getWriter();
-            pw.println(Version.getVersionString());
+            pw.println(Version.getInstance().getVersionString());
             pw.flush();
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);

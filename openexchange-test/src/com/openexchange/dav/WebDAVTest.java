@@ -159,32 +159,58 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
     	this.foldersToCleanUp.add(folder);
     }
 	
-	/**
-	 * Gets a folder by its name.
-	 * 
-	 * @param folderName
-	 * @return
-	 * @throws OXException
-	 * @throws IOException
-	 * @throws JSONException
-	 */
-	protected FolderObject getFolder(String folderName) throws OXException, IOException, JSONException {
-		VisibleFoldersResponse response = client.execute(
-				new com.openexchange.ajax.folder.actions.VisibleFoldersRequest(EnumAPI.OX_NEW, "contacts", 
-						new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME }));
-		FolderObject folder = findByName(response.getPrivateFolders(), folderName);
-		if (null == folder) {
-			folder = findByName(response.getPublicFolders(), folderName);
-			if (null == folder) {
-				folder = findByName(response.getSharedFolders(), folderName);
-			}
-		}		
-		if (null != folder) {
-			folder = client.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder.getObjectID())).getFolder();
-		}
-		return folder;
-	}
-	
+    /**
+     * Gets a folder by its name.
+     * 
+     * @param folderName
+     * @return
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    protected FolderObject getFolder(String folderName) throws OXException, IOException, JSONException {
+        VisibleFoldersResponse response = client.execute(
+                new com.openexchange.ajax.folder.actions.VisibleFoldersRequest(EnumAPI.OX_NEW, "contacts", 
+                        new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME }));
+        FolderObject folder = findByName(response.getPrivateFolders(), folderName);
+        if (null == folder) {
+            folder = findByName(response.getPublicFolders(), folderName);
+            if (null == folder) {
+                folder = findByName(response.getSharedFolders(), folderName);
+            }
+        }       
+        if (null != folder) {
+            folder = client.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder.getObjectID())).getFolder();
+        }
+        return folder;
+    }
+    
+    /**
+     * Gets a folder by its name.
+     * 
+     * @param folderName
+     * @return
+     * @throws OXException
+     * @throws IOException
+     * @throws JSONException
+     */
+    protected FolderObject getCalendarFolder(String folderName) throws OXException, IOException, JSONException {
+        VisibleFoldersResponse response = client.execute(
+                new com.openexchange.ajax.folder.actions.VisibleFoldersRequest(EnumAPI.OX_NEW, "calendar", 
+                        new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME }));
+        FolderObject folder = findByName(response.getPrivateFolders(), folderName);
+        if (null == folder) {
+            folder = findByName(response.getPublicFolders(), folderName);
+            if (null == folder) {
+                folder = findByName(response.getSharedFolders(), folderName);
+            }
+        }       
+        if (null != folder) {
+            folder = client.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder.getObjectID())).getFolder();
+        }
+        return folder;
+    }
+    
 	private static FolderObject findByName(Iterator<FolderObject> iter, String folderName) {
 		while (iter.hasNext()) {
 			FolderObject folder = iter.next();

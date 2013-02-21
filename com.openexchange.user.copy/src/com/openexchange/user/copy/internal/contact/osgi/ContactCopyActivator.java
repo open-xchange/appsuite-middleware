@@ -62,7 +62,7 @@ import com.openexchange.user.copy.internal.contact.ContactCopyTask;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ContactCopyActivator implements BundleActivator {
-    
+
     private ServiceRegistration<CopyUserTaskService> serviceRegistration;
 
     public ContactCopyActivator() {

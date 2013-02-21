@@ -95,7 +95,7 @@ public final class MailRequest {
 
     /**
      * Gets the <code>max</code> parameter.
-     * 
+     *
      * @return The <code>max</code> parameter
      * @throws OXException If <code>max</code> is not a number
      */
@@ -114,10 +114,25 @@ public final class MailRequest {
         }
     }
 
+    /**
+     * Gets the value mapped to given parameter name.
+     *
+     * @param name The parameter name
+     * @return The value mapped to given parameter name
+     * @throws NullPointerException If name is <code>null</code>
+     * @throws OXException If no such parameter exists
+     */
     public String checkParameter(final String name) throws OXException {
-        return requestData.checkParameter(name);
+        return requestData.nonEmptyParameter(name);
     }
 
+    /**
+     * Gets the value mapped to given parameter name.
+     *
+     * @param name The parameter name
+     * @return The value mapped to given parameter name or <code>null</code> if not present
+     * @throws NullPointerException If name is <code>null</code>
+     */
     public String getParameter(final String name) {
         return requestData.getParameter(name);
     }

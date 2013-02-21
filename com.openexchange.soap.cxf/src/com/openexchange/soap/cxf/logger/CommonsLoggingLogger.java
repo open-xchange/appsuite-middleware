@@ -68,7 +68,7 @@ import org.apache.cxf.common.logging.AbstractDelegatingLogger;
  * <p>
  * Level mapping inspired by {@link org.slf4j.bridge.SLF4JBridgeHandler}:
  * </p>
- * 
+ *
  * <pre>
  * FINEST  -&gt; TRACE
  * FINER   -&gt; DEBUG
@@ -85,7 +85,7 @@ public class CommonsLoggingLogger extends AbstractDelegatingLogger {
 
     /**
      * Initializes a new {@link CommonsLoggingLogger}.
-     * 
+     *
      * @param name The class name
      * @param resourceBundleName The resource bundle name
      */

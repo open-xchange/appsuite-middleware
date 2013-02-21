@@ -272,7 +272,9 @@ public class SessionObject implements PutIfAbsent {
         return parameters.putIfAbsent(name, value);
     }
 
-    @Override
+    /**
+     * Removes the random token
+     */
     public void removeRandomToken() {
         randomToken = null;
     }
@@ -314,4 +316,10 @@ public class SessionObject implements PutIfAbsent {
     public void setClient(final String client) {
         this.client = client;
     }
+
+    @Override
+    public boolean isTransient() {
+        return false;
+    }
+
 }

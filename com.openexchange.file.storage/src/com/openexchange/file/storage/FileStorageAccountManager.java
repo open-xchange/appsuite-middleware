@@ -70,7 +70,7 @@ public interface FileStorageAccountManager extends FileStorageConstants {
      * @return The identifier of the newly created account
      * @throws OXException If insertion fails
      */
-    public String addAccount(FileStorageAccount account, Session session) throws OXException;
+    String addAccount(FileStorageAccount account, Session session) throws OXException;
 
     /**
      * Updates an existing account.
@@ -79,7 +79,7 @@ public interface FileStorageAccountManager extends FileStorageConstants {
      * @param session The session providing needed user data
      * @throws OXException If update fails
      */
-    public void updateAccount(FileStorageAccount account, Session session) throws OXException;
+    void updateAccount(FileStorageAccount account, Session session) throws OXException;
 
     /**
      * Deletes an existing account.
@@ -88,7 +88,7 @@ public interface FileStorageAccountManager extends FileStorageConstants {
      * @param session The session providing needed user data
      * @throws OXException If deletion fails
      */
-    public void deleteAccount(FileStorageAccount account, Session session) throws OXException;
+    void deleteAccount(FileStorageAccount account, Session session) throws OXException;
 
     /**
      * Gets all service's accounts associated with session user.
@@ -97,7 +97,7 @@ public interface FileStorageAccountManager extends FileStorageConstants {
      * @return All accounts associated with session user.
      * @throws OXException If listing fails
      */
-    public List<FileStorageAccount> getAccounts(Session session) throws OXException;
+    List<FileStorageAccount> getAccounts(Session session) throws OXException;
 
     /**
      * Gets an existing file storage account.
@@ -107,25 +107,34 @@ public interface FileStorageAccountManager extends FileStorageConstants {
      * @return The file storage account.
      * @throws OXException If retrieval fails
      */
-    public FileStorageAccount getAccount(String id, Session session) throws OXException;
+    FileStorageAccount getAccount(String id, Session session) throws OXException;
+
+    /**
+     * Cleans-up accounts that could no more be decrypted with given secret
+     *
+     * @param secret The current secret
+     * @param session The session providing user information
+     * @throws OXException If operation fails
+     */
+    void cleanUp(String secret, Session session) throws OXException;
 
     /**
      * Migrates all encrypted strings from an old secret to a new one.
-     * 
+     *
      * @param oldSecret The old secret for decrypting stored secret strings
      * @param newSecret The new secret used for encrypting the secret strings
      * @param session The session providing needed user data
      * @throws OXException If migrate operation fails for any reason
      */
-    public void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws OXException;
+    void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws OXException;
 
     /**
      * Tests for encrypted items.
-     * 
+     *
      * @param session The session providing needed user data
      * @return <code>true</code> if encrypted items are available; otherwise <code>false</code>
      * @throws OXException If test for encrypted items fails
      */
-    public boolean hasEncryptedItems(Session session) throws OXException;
+    boolean hasEncryptedItems(Session session) throws OXException;
 
 }

@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * {@link CMISEntityMapping} - Maps CMIS entities to Open-Xchange users and vice versa.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface CMISEntityMapping {
@@ -65,7 +65,7 @@ public interface CMISEntityMapping {
 
     /**
      * Gets the identifier of the associated CMIS user.
-     * 
+     *
      * @param userId The user identifier
      * @return The CMIS identifier or <code>null</code> if user cannot be resolved
      */
@@ -73,7 +73,7 @@ public interface CMISEntityMapping {
 
     /**
      * Gets the identifier of the associated user.
-     * 
+     *
      * @param cmisId The CMIS identifier
      * @return The user identifier or <code>-1</code> if user cannot be resolved
      */

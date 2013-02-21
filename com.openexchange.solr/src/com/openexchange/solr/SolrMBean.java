@@ -53,6 +53,7 @@ import java.net.URI;
 import java.util.List;
 import javax.management.MBeanException;
 import javax.management.ObjectName;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.exception.OXException;
 
 
@@ -65,44 +66,44 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public interface SolrMBean {
-    
+
     public static final String DOMAIN = "com.openexchange.solr";
-    
+
     public static final String KEY = "type";
-    
+
     public static final String VALUE = "solrControl";
-    
+
     /**
      * Lists all solr cores that are active on this server.
-     * 
+     *
      * @return The list of active cores.
      * @throws MBeanException If this is not a solr node.
      */
     public List<String> getActiveCores() throws MBeanException;
-    
+
     /**
      * This removes a whole solr core environment for a users module.
-     * 
+     *
      * @throws MBeanException If an error occurrs.
      */
     public void removeCoreEnvironment(int contextId, int userId, int module) throws MBeanException;
-    
+
     /**
      * Runs a query against an index.
-     * 
+     *
      * @param contextId The context id of the index.
      * @param userId The user id of the index.
      * @param module The module of the index.
      * @param queryString The query String.
-     * @param limit A positive number to limit the results. Or a negative one to use Integer.MAX_MAX_VALUE. 
+     * @param limit A positive number to limit the results. Or a negative one to use Integer.MAX_MAX_VALUE.
      * @return A printable String that lists the results.
      * @throws MBeanException
      */
     public String search(int contextId, int userId, int module, String queryString, int limit) throws MBeanException;
-    
+
     /**
      * Deletes documents by the given query.
-     * 
+     *
      * @param contextId The context id of the index.
      * @param userId The user id of the index.
      * @param module The module of the index.
@@ -114,7 +115,7 @@ public interface SolrMBean {
 
     /**
      * Counts the number of documents found by the given query.
-     * 
+     *
      * @param contextId The context id of the index.
      * @param userId The user id of the index.
      * @param module The module of the index.
@@ -122,49 +123,53 @@ public interface SolrMBean {
      * @throws MBeanException
      */
     public long count(int contextId, int userId, int module, String queryString) throws MBeanException;
-    
+
     /**
      * Gets a core store by its id.
-     * 
+     *
      * @param id The core store id.
      * @return The core store.
      * @throws MBeanException
      */
     public SolrCoreStore getCoreStore(int id) throws MBeanException;
-    
+
     /**
      * Gets a list of all available core stores.
-     * 
+     *
+     * @param credentials The credentials of the OX master admin
      * @return The store list.
      * @throws OXException
      */
-    public List<SolrCoreStore> getAllStores() throws MBeanException;
-    
+    public List<SolrCoreStore> getAllStores(Credentials credentials) throws MBeanException;
+
     /**
      * Registers a new solr core store.
-     * 
+     *
+     * @param credentials The credentials of the OX master admin
      * @param uri The uri that points to the stores mount point.
      * @param maxCores The maximal number of cores handled by this core store.
      * @return The stores id.
      * @throws OXException
      */
-    public int registerCoreStore(URI uri, int maxCores) throws MBeanException;
-    
+    public int registerCoreStore(Credentials credentials, URI uri, int maxCores) throws MBeanException;
+
     /**
      * Modifies an existing core.
-     * 
+     *
+     * @param credentials The credentials of the OX master admin
      * @param id The core stores id.
      * @param uri The uri that points to the stores mount point.
      * @param maxCores The maximal number of cores handled by this core store.
      * @throws OXException
      */
-    public void modifyCoreStore(int id, URI uri, int maxCores) throws MBeanException;
-    
+    public void modifyCoreStore(Credentials credentials, int id, URI uri, int maxCores) throws MBeanException;
+
     /**
      * Unregisters a core store.
-     * 
+     *
+     * @param credentials The credentials of the OX master admin
      * @param id The id of the store to unregister.
      * @throws OXException
      */
-    public void unregisterCoreStore(int id) throws MBeanException;
+    public void unregisterCoreStore(Credentials credentials, int id) throws MBeanException;
 }

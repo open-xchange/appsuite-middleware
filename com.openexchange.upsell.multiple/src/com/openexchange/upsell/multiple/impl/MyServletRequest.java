@@ -85,6 +85,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
@@ -99,9 +100,9 @@ import com.openexchange.upsell.multiple.api.UpsellURLParametersMap;
 import com.openexchange.upsell.multiple.api.UpsellURLService;
 
 /**
- * 
+ *
  * Servlet to trigger upsell actions like email or URL redirect.
- * 
+ *
  */
 public final class MyServletRequest  {
 
@@ -261,9 +262,9 @@ public final class MyServletRequest  {
 
 
     /**
-     * 
+     *
      * Send an upsell mail to configured email address with configured/parsed body and subject
-     * 
+     *
      * @param jsonObject
      * @param request_src_hostname
      * @return
@@ -376,9 +377,9 @@ public final class MyServletRequest  {
 
 
     /**
-     * 
+     *
      * Return the parsed URL to the UI to which it should redirect
-     * 
+     *
      * @param jsonObject
      * @return
      * @throws ServiceException
@@ -529,7 +530,7 @@ public final class MyServletRequest  {
 
     /**
      * Method for generating a map with all needed parameters
-     * 
+     *
      * @param jsondata - Data from UI to fill feature which was clicked and what upsell plan user wants to buy
      * @return
      * @throws JSONException
@@ -570,34 +571,31 @@ public final class MyServletRequest  {
 
     static public String getFileContents(final File file) {
         final StringBuilder stringBuilder = new StringBuilder();
+        BufferedReader input = null;
         try {
-            final BufferedReader input = new BufferedReader(new FileReader(file));
-            try {
-                String line = null;
-                while ((line = input.readLine()) != null) {
-                    stringBuilder.append(line);
-                    stringBuilder.append(System.getProperty("line.separator"));
-                }
-            } finally {
-                input.close();
+            input = new BufferedReader(new FileReader(file));
+            String line = null;
+            while ((line = input.readLine()) != null) {
+                stringBuilder.append(line);
+                stringBuilder.append(System.getProperty("line.separator"));
             }
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
+        } finally {
+            Streams.close(input);
         }
         return stringBuilder.toString();
     }
 
-
-
     /**
-     * 
+     *
      * Return configured method of upsell plugin to handle actions different in UI.
-     * 
+     *
      * @param jsonObject
      * @return
      * @throws ServiceException
      * @throws JSONException
-     * @throws OXException 
+     * @throws OXException
      */
     private Object actionGetUpsellMethod(final JSONObject jsonObject) throws JSONException, OXException {
         final JSONObject jsonResponseObject = new JSONObject();

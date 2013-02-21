@@ -234,7 +234,7 @@ public class MailAccountPOP3MessageStorage implements IMailMessageStorage {
     @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
         final MailMessage mail = delegatee.getMessage(getRealFullname(folder), mailId, markSeen);
-        if (mail.containsFolder() && null != mail.getFolder()) {
+        if (null != mail && mail.containsFolder() && null != mail.getFolder()) {
             mail.setFolder(folder);
             if (mail.containsAccountName()) {
                 setAccountInfo(mail);

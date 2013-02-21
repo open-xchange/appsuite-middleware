@@ -13,9 +13,9 @@ import com.openexchange.admin.soap.usercopy.dataobjects.User;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -30,8 +30,8 @@ import com.openexchange.admin.soap.usercopy.dataobjects.User;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -54,11 +54,11 @@ public class CopyUser {
 
     /**
      * Ruft den Wert der user-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link User }
-     *     
+     *
      */
     public User getUser() {
         return user;
@@ -66,11 +66,11 @@ public class CopyUser {
 
     /**
      * Legt den Wert der user-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link User }
-     *     
+     *
      */
     public void setUser(User value) {
         this.user = value;
@@ -78,11 +78,11 @@ public class CopyUser {
 
     /**
      * Ruft den Wert der src-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Context }
-     *     
+     *
      */
     public Context getSrc() {
         return src;
@@ -90,11 +90,11 @@ public class CopyUser {
 
     /**
      * Legt den Wert der src-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Context }
-     *     
+     *
      */
     public void setSrc(Context value) {
         this.src = value;
@@ -102,11 +102,11 @@ public class CopyUser {
 
     /**
      * Ruft den Wert der dest-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Context }
-     *     
+     *
      */
     public Context getDest() {
         return dest;
@@ -114,11 +114,11 @@ public class CopyUser {
 
     /**
      * Legt den Wert der dest-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Context }
-     *     
+     *
      */
     public void setDest(Context value) {
         this.dest = value;
@@ -126,11 +126,11 @@ public class CopyUser {
 
     /**
      * Ruft den Wert der auth-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Credentials }
-     *     
+     *
      */
     public Credentials getAuth() {
         return auth;
@@ -138,11 +138,11 @@ public class CopyUser {
 
     /**
      * Legt den Wert der auth-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Credentials }
-     *     
+     *
      */
     public void setAuth(Credentials value) {
         this.auth = value;

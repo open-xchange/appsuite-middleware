@@ -60,7 +60,7 @@ import com.openexchange.uuid.impl.UUIDServiceImpl;
  *
  */
 public class UUIDServiceActivator extends HousekeepingActivator {
-	
+
 	private static Log log = com.openexchange.log.Log.loggerFor(UUIDServiceActivator.class);
 
 	/*
@@ -81,8 +81,8 @@ public class UUIDServiceActivator extends HousekeepingActivator {
 		log.info("Starting bundle: com.openexchange.uuid.impl");
 		registerService(UUIDService.class, new UUIDServiceImpl());
 		openTrackers();
-		
+
 		log.info("UUIDService started successfully.");
-		
+
 	}
 }

@@ -12,17 +12,17 @@ import javax.xml.ws.WebFault;
 
 @WebFault(name = "InvalidCredentialsException", targetNamespace = "http://soap.reseller.admin.openexchange.com")
 public class InvalidCredentialsException_Exception extends java.lang.Exception {
-    
+
     private com.openexchange.admin.soap.reseller.user.reseller.soap.InvalidCredentialsException invalidCredentialsException;
 
     public InvalidCredentialsException_Exception() {
         super();
     }
-    
+
     public InvalidCredentialsException_Exception(String message) {
         super(message);
     }
-    
+
     public InvalidCredentialsException_Exception(String message, Throwable cause) {
         super(message, cause);
     }

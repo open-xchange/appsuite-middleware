@@ -52,6 +52,7 @@ package com.openexchange.login;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.authentication.Cookie;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * Data to process a login request.
@@ -76,11 +77,41 @@ public interface LoginRequest {
 
     String getHash();
 
-    boolean isVolatile();
+    /**
+     * The client token will only be present when the token login is used. This attribute does not apply to any other login mechanism.
+     * @return the client token from the token login. Otherwise <code>null</code>.
+     */
+    String getClientToken();
 
     Interface getInterface();
 
     Map<String, List<String>> getHeaders();
-    
+
     Cookie[] getCookies();
+
+    /**
+     * Every login mechanism defining this value must consider the following topics:
+     * <li>
+     * <ul>if com.openexchange.forceHTTPS is configured to true, then this must be true but not if the client comes through localhost</ul>
+     * <ul>the value told by the servlet container if the request was retrieved through HTTPS</ul>
+     * </li>
+     * @see Tools#considerSecure(javax.servlet.http.HttpServletRequest, boolean)
+     * @return <code>true</code> if URLs should be told to the client with HTTPS.
+     */
+    boolean isSecure();
+
+    String getServerName();
+
+    int getServerPort();
+
+    String getHttpSessionID();
+    
+    /**
+     * Gets a value indicating whether the session should be created in a transient way or not, i.e. the session should not be distributed
+     * to other nodes in the cluster or put into another persistent storage.
+     * 
+     * @return <code>true</code> if the session should be transient, <code>false</code>, otherwise  
+     */
+    boolean isTransient();
+
 }

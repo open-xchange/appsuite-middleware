@@ -164,9 +164,14 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
         return retval;
     }
 
-    protected String getStats(final MBeanServerConnection mbc, final String domain, final String key, final String name) throws JMException, NullPointerException, IOException {
+    protected String getStats(final MBeanServerConnection mbc, final String domain, final String key, final String name) throws JMException, NullPointerException, IOException, IllegalStateException {
         final ObjectName objectName = new ObjectName(domain, key, name);
-        final MBeanInfo info = mbc.getMBeanInfo(objectName);
+        final MBeanInfo info;
+        try {
+            info = mbc.getMBeanInfo(objectName);
+        } catch (final Exception e) {
+            throw new IllegalStateException("MBean not found: " + objectName.toString(), e);
+        }
         final MBeanAttributeInfo[] attrs = info.getAttributes();
         final StringBuilder retval = new StringBuilder();
         if (attrs.length > 0) {
@@ -274,7 +279,7 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
     protected HashMap<String, String[]> setCreds(final AdminParser parser, HashMap<String, String[]> env) throws CLIIllegalOptionValueException {
         final String jmxuser = (String)parser.getOptionValue(this.jmxuser);
         final String jmxpass = (String)parser.getOptionValue(this.jmxpass);
-        
+
         if( jmxuser != null && jmxuser.trim().length() > 0 ) {
             if( jmxpass == null ) {
                 throw new CLIIllegalOptionValueException(this.jmxpass,null);

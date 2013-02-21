@@ -59,7 +59,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link UserLockManagement} - The folder tree lock management.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UserLockManagement {
@@ -70,7 +70,7 @@ public final class UserLockManagement {
 
     /**
      * Gets the {@link UserLockManagement management} instance.
-     * 
+     *
      * @return The management instance
      */
     public static UserLockManagement getInstance() {
@@ -96,7 +96,7 @@ public final class UserLockManagement {
 
     /**
      * Drops locks for given session's user.
-     * 
+     *
      * @param session The session
      */
     public void dropFor(final Session session) {
@@ -112,7 +112,7 @@ public final class UserLockManagement {
 
     /**
      * Drops locks for given context.
-     * 
+     *
      * @param contextId The context identifier
      */
     public void dropFor(final int contextId) {
@@ -124,7 +124,7 @@ public final class UserLockManagement {
 
     /**
      * Gets the lock for specified tree and session.
-     * 
+     *
      * @param session The session
      * @return The read-write lock
      */
@@ -134,7 +134,7 @@ public final class UserLockManagement {
 
     /**
      * Gets the lock for specified tree and session.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The read-write lock
@@ -161,7 +161,7 @@ public final class UserLockManagement {
 
     /**
      * Optionally gets the lock for specified tree and session.
-     * 
+     *
      * @param session The session
      * @return The lock or <code>null</code> if absent
      */

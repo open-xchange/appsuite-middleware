@@ -63,16 +63,16 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ChunkPerformerTest {
-    
+
     private static final int CHUNK_SIZE = 3;
-    
+
     @Test
     public void testWithoutInitialOffset() throws OXException {
         final List<String> bunchOfStrings = prepareStrings();
-        final List<String> results = new ArrayList<String>();       
+        final List<String> results = new ArrayList<String>();
         final Incrementable i = new Incrementable();
-        
-        ChunkPerformer.perform(new Performable() {            
+
+        ChunkPerformer.perform(new Performable() {
             @Override
             public int perform(int off, int len) throws OXException {
                 List<String> subList = bunchOfStrings.subList(off, len);
@@ -83,25 +83,25 @@ public class ChunkPerformerTest {
                 i.inc();
                 return subList.size();
             }
-            
+
             @Override
             public int getLength() {
                 return bunchOfStrings.size();
             }
-            
+
             @Override
             public int getInitialOffset() {
                 return 0;
             }
-            
+
             @Override
             public int getChunkSize() {
                 return CHUNK_SIZE;
             }
         });
-        
+
         assertEquals(4, i.get());
-        assertEquals(bunchOfStrings.size(), results.size());        
+        assertEquals(bunchOfStrings.size(), results.size());
         int found = 0;
         for (String expected : bunchOfStrings) {
             for (String str : results) {
@@ -113,15 +113,15 @@ public class ChunkPerformerTest {
         }
         assertEquals(bunchOfStrings.size(), found);
     }
-    
+
     @Test
     public void testWithInitialOffset() throws OXException {
         final List<String> bunchOfStrings = prepareStrings();
-        final List<String> results = new ArrayList<String>();    
+        final List<String> results = new ArrayList<String>();
         List<String> toCompare = bunchOfStrings.subList(1, bunchOfStrings.size());
         final Incrementable i = new Incrementable();
-        
-        ChunkPerformer.perform(new Performable() {            
+
+        ChunkPerformer.perform(new Performable() {
             @Override
             public int perform(int off, int len) throws OXException {
                 List<String> subList = bunchOfStrings.subList(off, len);
@@ -132,25 +132,25 @@ public class ChunkPerformerTest {
                 i.inc();
                 return subList.size();
             }
-            
+
             @Override
             public int getLength() {
                 return bunchOfStrings.size() - 1;
             }
-            
+
             @Override
             public int getInitialOffset() {
                 return 1;
             }
-            
+
             @Override
             public int getChunkSize() {
                 return CHUNK_SIZE;
             }
         });
-        
+
         assertEquals(3, i.get());
-        assertEquals(toCompare.size() - 1, results.size());        
+        assertEquals(toCompare.size() - 1, results.size());
         int found = 0;
         for (String expected : toCompare) {
             for (String str : results) {
@@ -162,14 +162,14 @@ public class ChunkPerformerTest {
         }
         assertEquals(toCompare.size() - 1, found);
     }
-    
+
     @Test
     public void testWithChunkSize0() throws OXException {
         final List<String> bunchOfStrings = prepareStrings();
-        final List<String> results = new ArrayList<String>();       
+        final List<String> results = new ArrayList<String>();
         final Incrementable i = new Incrementable();
-        
-        ChunkPerformer.perform(new Performable() {            
+
+        ChunkPerformer.perform(new Performable() {
             @Override
             public int perform(int off, int len) throws OXException {
                 List<String> subList = bunchOfStrings.subList(off, len);
@@ -180,25 +180,25 @@ public class ChunkPerformerTest {
                 i.inc();
                 return subList.size();
             }
-            
+
             @Override
             public int getLength() {
                 return bunchOfStrings.size();
             }
-            
+
             @Override
             public int getInitialOffset() {
                 return 0;
             }
-            
+
             @Override
             public int getChunkSize() {
                 return 0;
             }
         });
-        
+
         assertEquals(1, i.get());
-        assertEquals(bunchOfStrings.size(), results.size());        
+        assertEquals(bunchOfStrings.size(), results.size());
         int found = 0;
         for (String expected : bunchOfStrings) {
             for (String str : results) {
@@ -210,29 +210,29 @@ public class ChunkPerformerTest {
         }
         assertEquals(bunchOfStrings.size(), found);
     }
-    
+
     private static List<String> prepareStrings() {
         final List<String> bunchOfStrings = new ArrayList<String>();
         for (int i = 0; i < 10; i++) {
             bunchOfStrings.add(UUID.randomUUID().toString());
         }
-        
+
         return bunchOfStrings;
     }
-    
+
     private static final class Incrementable {
-        
+
         private int i;
-        
+
         public Incrementable() {
             super();
             i = 0;
         }
-        
+
         public void inc() {
             i++;
         }
-        
+
         public int get() {
             return i;
         }

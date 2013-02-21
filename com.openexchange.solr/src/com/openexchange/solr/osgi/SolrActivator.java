@@ -7,10 +7,14 @@ import java.util.Hashtable;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
+import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
+import org.apache.solr.core.CoreContainer;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -50,12 +54,13 @@ import com.openexchange.solr.internal.SolrCoreConfigServiceImpl;
 import com.openexchange.solr.internal.SolrCoreTools;
 import com.openexchange.solr.internal.SolrMBeanImpl;
 import com.openexchange.solr.internal.SolrNodeListener;
+import com.openexchange.solr.internal.SolrServlet;
 import com.openexchange.solr.rmi.RMISolrAccessService;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link SolrActivator}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrActivator extends HousekeepingActivator {
@@ -72,18 +77,38 @@ public class SolrActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DatabaseService.class, ThreadPoolService.class, HazelcastInstance.class };
+        return new Class<?>[] { ConfigurationService.class, DatabaseService.class,
+            ThreadPoolService.class, HazelcastInstance.class, HttpService.class };
     }
 
     @Override
     protected void startBundle() throws OXException {
         Services.setServiceLookup(this);
+        ConfigurationService config = getService(ConfigurationService.class);
         new CheckConfigDBTables(getService(DatabaseService.class)).checkTables();
         EmbeddedSolrAccessImpl embeddedAccess = new EmbeddedSolrAccessImpl();
         embeddedAccess.startUp();
         DelegationSolrAccessImpl accessService = this.delegationAccess = new DelegationSolrAccessImpl(embeddedAccess);
         registerService(SolrAccessService.class, accessService);
         addService(SolrAccessService.class, accessService);
+
+        /*
+         * Servlet
+         */
+        boolean enableDebugServlet = config.getBoolProperty("com.openexchange.solr.enableDebugServlet", false);
+        if (enableDebugServlet) {
+            CoreContainer coreContainer = embeddedAccess.getCoreContainer();
+            SolrServlet solrServlet = new SolrServlet(coreContainer, "/ox-solr");
+            HttpService httpService = getService(HttpService.class);
+            try {
+                httpService.registerServlet("/ox-solr", solrServlet, null, null);
+            } catch (ServletException e) {
+                LOG.warn("Could not register SolrServlet.", e);
+            } catch (NamespaceException e) {
+                LOG.warn("Could not register SolrServlet.", e);
+            }
+        }
+
         SolrCoreConfigServiceImpl coreService = new SolrCoreConfigServiceImpl();
         registerService(SolrCoreConfigService.class, coreService);
         addService(SolrCoreConfigService.class, coreService);
@@ -99,18 +124,17 @@ public class SolrActivator extends HousekeepingActivator {
             createTableService)));
         registerService(LoginHandlerService.class, new SolrCoreLoginHandler(embeddedAccess));
         registerMBean(coreService);
-        
+
         /*
          * Consistency stuff
          */
         HazelcastInstance hazelcast = getService(HazelcastInstance.class);
-        ConfigurationService config = getService(ConfigurationService.class);
         boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
         if (isSolrNode) {
             IMap<String, Integer> solrNodes = hazelcast.getMap(SolrCoreTools.SOLR_NODE_MAP);
             String memberAddress = hazelcast.getCluster().getLocalMember().getInetSocketAddress().getAddress().getHostAddress();
             solrNodes.put(memberAddress, new Integer(0));
-            
+
             track(QuartzService.class, new SimpleRegistryListener<QuartzService>() {
                 @Override
                 public void added(ServiceReference<QuartzService> ref, QuartzService service) {
@@ -121,20 +145,20 @@ public class SolrActivator extends HousekeepingActivator {
                                 .newJob(SolrConsistencyJob.class)
                                 .withIdentity("com.openexchange.solr", "consistencyJob")
                                 .build();
-                            
+
                             SimpleScheduleBuilder scheduleBuilder = SimpleScheduleBuilder
                                 .simpleSchedule()
                                 .withIntervalInMinutes(15)
                                 .repeatForever()
                                 .withMisfireHandlingInstructionFireNow();
-                            
+
                             SimpleTrigger trigger = TriggerBuilder
                                 .newTrigger()
                                 .withIdentity("com.openexchange.solr", "consistencyJobTrigger")
                                 .forJob(jobDetail)
                                 .withSchedule(scheduleBuilder)
                                 .build();
-                            
+
                             scheduler.scheduleJob(jobDetail, trigger);
                         }
                     } catch (OXException e) {
@@ -150,7 +174,7 @@ public class SolrActivator extends HousekeepingActivator {
                 }
             });
         }
-        
+
         hazelcast.getCluster().addMembershipListener(new SolrNodeListener(hazelcast));
         openTrackers();
     }

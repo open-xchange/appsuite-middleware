@@ -19,7 +19,7 @@
 // SnappyNative.java
 // Since: 2011/03/30
 //
-// $URL$ 
+// $URL$
 // $Author$
 //--------------------------------------
 package org.xerial.snappy;
@@ -29,13 +29,13 @@ import java.nio.ByteBuffer;
 
 /**
  * <b>Internal only - Do not use this class.</b>
- * 
+ *
  * Interface to access the native code of Snappy. Although this class members
  * are public, do not use them directly. Use {@link Snappy} API instead.
- * 
- * 
+ *
+ *
  * @author leo
- * 
+ *
  */
 public interface SnappyNativeAPI
 {

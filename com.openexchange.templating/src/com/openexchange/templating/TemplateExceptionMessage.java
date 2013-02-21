@@ -53,7 +53,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link TemplateExceptionMessage}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class TemplateExceptionMessage implements LocalizableStrings {
@@ -80,5 +80,9 @@ public class TemplateExceptionMessage implements LocalizableStrings {
     public final static String SQLException_HELP = "An underlying system threw an SQL exception";
 
     public final static String SQLException_MSG = "Please try again later.";
+
+    public static final String AccessDenied_HELP = "File access is denied due to operating system's permissions.";
+
+    public static final String AccessDenied_MSG = "File access denied.";
 
 }

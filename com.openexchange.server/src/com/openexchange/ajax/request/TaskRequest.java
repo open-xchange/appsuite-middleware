@@ -54,6 +54,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import java.util.Date;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -213,7 +214,7 @@ public class TaskRequest extends CalendarRequest {
     }
 
     public JSONArray actionUpdates(final JSONObject jsonObj) throws JSONException, OXException {
-        final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
+        final String[] sColumns = Strings.splitByComma(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtualColumns(columns);
         final Date requestedTimestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -297,7 +298,7 @@ public class TaskRequest extends CalendarRequest {
 
         Date lastModified = null;
 
-        final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
+        final String[] sColumns = Strings.splitByComma(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtualColumns(columns);
         final JSONArray jData = DataParser.checkJSONArray(jsonObj, ResponseFields.DATA);
@@ -340,7 +341,7 @@ public class TaskRequest extends CalendarRequest {
     }
 
     public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, OXException {
-        final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
+        final String[] sColumns = Strings.splitByComma(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtualColumns(columns);
         final int folderId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_FOLDERID);
@@ -426,7 +427,7 @@ public class TaskRequest extends CalendarRequest {
     }
 
     public JSONArray actionSearch(final JSONObject jsonObj) throws JSONException, OXException {
-        final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
+        final String[] sColumns = Strings.splitByComma(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         final int[] columnsToLoad = removeVirtualColumns(columns);
         timestamp = new Date(0);

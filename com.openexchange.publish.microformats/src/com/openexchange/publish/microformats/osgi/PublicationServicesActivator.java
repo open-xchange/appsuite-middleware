@@ -65,20 +65,27 @@ import com.openexchange.templating.TemplateService;
 
 public class PublicationServicesActivator extends HousekeepingActivator {
 
-    private OXMFPublicationService contactPublisher;
+    private volatile OXMFPublicationService contactPublisher;
+    private volatile OXMFPublicationService infostorePublisher;
 
-    private OXMFPublicationService infostorePublisher;
+    /**
+     * Initializes a new {@link PublicationServicesActivator}.
+     */
+    public PublicationServicesActivator() {
+        super();
+    }
 
     @Override
     public void startBundle() throws Exception {
-        contactPublisher = new OXMFPublicationService();
+        final OXMFPublicationService contactPublisher = new OXMFPublicationService();
+        this.contactPublisher = contactPublisher;
         contactPublisher.setFolderType("contacts");
         contactPublisher.setRootURL("/publications/contacts");
         contactPublisher.setTargetDisplayName(FormStrings.TARGET_NAME_CONTACTS);
         contactPublisher.setTargetId("com.openexchange.publish.microformats.contacts.online");
         contactPublisher.setDefaultTemplateName("contacts.tmpl");
 
-        final Map<String, Object> additionalVars = new HashMap<String, Object>();
+        final Map<String, Object> additionalVars = new HashMap<String, Object>(1);
         additionalVars.put("utils", new ContactTemplateUtils());
 
         MicroformatServlet.registerType("contacts", contactPublisher,additionalVars);
@@ -86,7 +93,8 @@ public class PublicationServicesActivator extends HousekeepingActivator {
 
         registerService(PublicationService.class, contactPublisher, null);
 
-        infostorePublisher = new OXMFPublicationService();
+        final OXMFPublicationService infostorePublisher = new OXMFPublicationService();
+        this.infostorePublisher = infostorePublisher;
         infostorePublisher.setFolderType("infostore");
         infostorePublisher.setRootURL("/publications/infostore");
         infostorePublisher.setTargetDisplayName(FormStrings.TARGET_NAME_INFOSTORE);
@@ -108,6 +116,11 @@ public class PublicationServicesActivator extends HousekeepingActivator {
         unregisterServices();
     }
 
+    /**
+     * Applies given template service.
+     *
+     * @param templateService The template service
+     */
     public void setTemplateService(final TemplateService templateService) {
         infostorePublisher.setTemplateService(templateService);
         contactPublisher.setTemplateService(templateService);
@@ -115,7 +128,6 @@ public class PublicationServicesActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // Nothing to do
         return null;
     }
 

@@ -95,10 +95,10 @@ public final class CloudmarkSpamHandler extends SpamHandler {
         final ConfigurationService configuration = getServiceRegistry().getService(ConfigurationService.class);
         final String targetSpamEmailAddress = configuration.getProperty("com.openexchange.spamhandler.cloudmark.targetSpamEmailAddress", "").trim();
 
-        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
-        mailAccess.connect();
-
+        MailAccess<?, ?> mailAccess = null;
         try {
+            mailAccess = MailAccess.getInstance(session, accountId);
+            mailAccess.connect();
             final MailMessage[] mailMessage = mailAccess.getMessageStorage().getMessages(fullname, mailIDs, new MailField[]{MailField.FULL});
             for (int i = 0; i < mailMessage.length; i++) {
                 final MailTransport transport = MailTransport.getInstance(session);
@@ -129,7 +129,9 @@ public final class CloudmarkSpamHandler extends SpamHandler {
                 }
             }
         } finally {
-            mailAccess.close(true);
+            if (null != mailAccess) {
+                mailAccess.close(true);
+            }
         }
     }
 
@@ -148,13 +150,15 @@ public final class CloudmarkSpamHandler extends SpamHandler {
     @Override
     public void handleHam(final int accountId, final String spamFullname, final String[] mailIDs, final boolean move, final Session session) throws OXException {
     	if (move) {
-    		final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
-    		mailAccess.connect();
-
+    		MailAccess<?, ?> mailAccess = null;
     		try {
+    		    mailAccess = MailAccess.getInstance(session, accountId);
+                mailAccess.connect();
     			mailAccess.getMessageStorage().moveMessages(spamFullname, "INBOX", mailIDs, true);
     		} finally {
-                mailAccess.close(true);
+    		    if (null != mailAccess) {
+                    mailAccess.close(true);
+                }
             }
     	}
     }

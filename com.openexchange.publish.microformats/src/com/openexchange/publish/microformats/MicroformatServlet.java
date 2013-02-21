@@ -50,8 +50,8 @@
 package com.openexchange.publish.microformats;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -74,6 +74,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.microformats.osgi.StringTranslator;
@@ -85,7 +86,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link MicroformatServlet}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - HTML whitelisting, same-origin-policy stuff
  */
@@ -172,15 +173,18 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
             final OXMFPublicationService publisher = publishers.get(module);
             if (publisher == null) {
-                resp.getWriter().println("Don't know how to handle module " + module);
+                final PrintWriter writer = resp.getWriter();
+                writer.println("Don't know how to handle module " + module);
+                writer.flush();
                 return;
             }
             final Context ctx = contexts.getContext(Integer.parseInt(args.get(CONTEXTID)));
             final Publication publication = publisher.getPublication(ctx, args.get(SITE));
             if (publication == null || !publication.isEnabled()) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                resp.getWriter().println("Don't know site " + args.get(SITE));
-
+                final PrintWriter writer = resp.getWriter();
+                writer.println("Don't know site " + args.get(SITE));
+                writer.flush();
                 return;
             }
             if (!checkProtected(publication, args, resp)) {
@@ -220,18 +224,23 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             template.process(variables, htmlWriter);
             String html = htmlWriter.toString();
             if (isUsingWhitelisting(template.getLevel())) {
-                html = htmlService.getConformHTML(html, Charset.defaultCharset().toString());
-                html = htmlService.filterWhitelist(html, "microformatWhitelist");
+                //html = htmlService.getConformHTML(html, Charset.defaultCharset().toString());
+                html = htmlService.sanitize(html, "microformatWhitelist", false, null, null);
             }
-            resp.getWriter().write(html);
-
+            final PrintWriter writer = resp.getWriter();
+            writer.write(html);
+            writer.flush();
         } catch (final OXException x) {
             LOG.error(x.getMessage(), x);
-            resp.getWriter().println("Publishing failed. Please try again later. Exception ID: " + x.getExceptionId());
-
+            final PrintWriter writer = resp.getWriter();
+            writer.println("Publishing failed. Please try again later. Exception ID: " + x.getExceptionId());
+            writer.flush();
         } catch (final Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             LOG.error(t.getMessage(), t);
-            resp.getWriter().println("Publishing failed. Please try again later.");
+            final PrintWriter writer = resp.getWriter();
+            writer.println("Publishing failed. Please try again later.");
+            writer.flush();
         }
     }
 
@@ -242,8 +251,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             return true;
         }
 
-        final String[] strings = globalWhitelisting.split("\\s*,\\s*");
-        for (final String string : strings) {
+        for (final String string : Strings.splitByComma(globalWhitelisting)) {
             if (templateLevel.name().toLowerCase().equals(string.toLowerCase())) {
                 return true;
             }

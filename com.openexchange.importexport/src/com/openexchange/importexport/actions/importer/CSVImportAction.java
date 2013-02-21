@@ -6,9 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-
 import org.apache.commons.logging.Log;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.importexport.formats.Format;
@@ -16,6 +14,7 @@ import com.openexchange.importexport.formats.csv.PropertyDrivenMapper;
 import com.openexchange.importexport.importers.CSVContactImporter;
 import com.openexchange.importexport.importers.Importer;
 import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 
 public class CSVImportAction extends AbstractImportAction implements AJAXActionService {
@@ -56,7 +55,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
                 try {
                     props.load(in);
                 } finally {
-                    in.close();
+                    Streams.close(in);
                 }
                 final PropertyDrivenMapper mapper = new PropertyDrivenMapper(props);
                 imp.addFieldMapper(mapper);
@@ -70,7 +69,7 @@ public class CSVImportAction extends AbstractImportAction implements AJAXActionS
         }
         return imp;
     }
-    
+
 	@Override
 	public Importer getImporter() {
 		if(this.importer == null) {

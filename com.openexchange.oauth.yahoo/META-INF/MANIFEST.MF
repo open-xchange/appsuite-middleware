@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Social OX Plugin for Yahoo (oauth-part)
 Bundle-SymbolicName: com.openexchange.oauth.yahoo
-Bundle-Version: 7.0.0
+Bundle-Version: 7.0.1
 Bundle-Activator: com.openexchange.oauth.yahoo.osgi.YahooOAuthActivator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -11,10 +11,24 @@ Import-Package: com.openexchange.config,
  com.openexchange.groupware,
  com.openexchange.groupware.container,
  com.openexchange.http.deferrer,
+ com.openexchange.java,
  com.openexchange.log,
  com.openexchange.oauth,
  com.openexchange.osgi,
  com.openexchange.session,
+ com.openexchange.threadpool,
+ com.openexchange.threadpool.behavior,
+ gnu.trove,
+ gnu.trove.iterator,
+ gnu.trove.list,
+ gnu.trove.list.array,
+ gnu.trove.list.linked,
+ gnu.trove.map,
+ gnu.trove.map.hash,
+ gnu.trove.procedure,
+ gnu.trove.procedure.array,
+ gnu.trove.set,
+ gnu.trove.set.hash,
  javax.crypto,
  javax.crypto.spec,
  org.apache.commons.codec,

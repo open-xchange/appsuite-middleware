@@ -55,7 +55,7 @@ import javax.servlet.ServletInputStream;
 
 /**
  * {@link DelegateServletInputStream} - The delegating {@link ServletInputStream}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DelegateServletInputStream extends ServletInputStream {
@@ -64,7 +64,7 @@ public final class DelegateServletInputStream extends ServletInputStream {
 
     /**
      * Initializes a new {@link DelegateServletInputStream}.
-     * 
+     *
      * @param in The input stream to delegate to
      */
     public DelegateServletInputStream(final InputStream in) {

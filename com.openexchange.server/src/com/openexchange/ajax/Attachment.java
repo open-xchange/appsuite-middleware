@@ -91,6 +91,7 @@ import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.AllocatingStringWriter;
+import com.openexchange.java.Streams;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
@@ -313,7 +314,7 @@ public class Attachment extends PermissionServlet {
                             }
                         }
 
-                        final AttachmentMetadata attachment = PARSER.getAttachmentMetadata(json.toString());
+                        final AttachmentMetadata attachment = PARSER.getAttachmentMetadata(json);
                         assureSize(index, attachments, uploadFiles);
 
                         attachments.set(index, attachment);
@@ -420,23 +421,8 @@ public class Attachment extends PermissionServlet {
             rollback(t, res, ResponseFields.ERROR, session);
             return;
         } finally {
-            if (documentData != null) {
-                try {
-                    documentData.close();
-                } catch (final IOException e) {
-                    LOG.debug("", e);
-                }
-            }
-            if (os != null) {
-                try {
-                    os.flush();
-                } catch (final IOException e) {
-                    LOG.debug("", e);
-                }
-                /*
-                 * try { os.close(); } catch (IOException e) { }
-                 */
-            }
+            Streams.close(documentData);
+            Streams.flush(os);
             try {
                 ATTACHMENT_BASE.finish();
             } catch (final OXException e) {

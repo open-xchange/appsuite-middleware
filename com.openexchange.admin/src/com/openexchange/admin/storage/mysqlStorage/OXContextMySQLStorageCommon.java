@@ -102,7 +102,7 @@ public class OXContextMySQLStorageCommon {
     public OXContextMySQLStorageCommon() {
         oxutilcommon = new OXUtilMySQLStorageCommon();
     }
-    
+
     // TODO: The average size parameter can be removed if we have an new property handler which can
     // deal right with plugin properties
     public Context getData(final Context ctx, final Connection configdb_con, final long average_size) throws SQLException, PoolException, StorageException  {
@@ -155,20 +155,20 @@ public class OXContextMySQLStorageCommon {
                 //DO NOT RETURN THE CONTEXT ID AS A MAPPING!!
                 // THIS CAN CAUSE ERRORS IF CHANGING LOGINMAPPINGS AFTERWARDS!
                 // SEE #11094 FOR DETAILS!
-                final String login_mapping = rs.getString(10);   
+                final String login_mapping = rs.getString(10);
                 if(!ctx.getIdAsString().equals(login_mapping)){
                     cs.addLoginMapping(login_mapping);
                 }
             }
             // All other lines contain the same content except the mapping so we concentrate on the mapping here
             while (rs.next()) {
-                final String login_mapping = rs.getString(10);       
+                final String login_mapping = rs.getString(10);
                 // DO NOT RETURN THE CONTEXT ID AS A MAPPING!!
                 // THIS CAN CAUSE ERRORS IF CHANGING LOGINMAPPINGS AFTERWARDS!
                 // SEE #11094 FOR DETAILS!
                 if(!ctx.getIdAsString().equals(login_mapping)){
                     cs.addLoginMapping(login_mapping);
-                }                
+                }
             }
 
             // ######################
@@ -207,11 +207,11 @@ public class OXContextMySQLStorageCommon {
             }
         }
     }
-    
+
     /**
      * Parses a dynamic attribute from the user_attribute table
      * Returns a String[] with retval[0] being the namespace and retval[1] being the name
-     * @throws StorageException 
+     * @throws StorageException
      */
     public static String[] parseDynamicAttribute(final String name) throws StorageException {
         final int pos = name.indexOf('/');
@@ -228,7 +228,7 @@ public class OXContextMySQLStorageCommon {
         return name.indexOf('/') >= 0;
     }
 
-    
+
     private void loadDynamicAttributes(final Connection oxCon, final Context ctx) throws SQLException, PoolException, StorageException {
         ResultSet rs = null;
         PreparedStatement stmtuserattributes = null;
@@ -350,13 +350,13 @@ public class OXContextMySQLStorageCommon {
                     stmt2 = configCon.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE db_schema=?");
                     stmt2.setString(1, dbSchema);
                     rs = stmt2.executeQuery();
-    
+
                     if (!rs.next()) {
                         // get auth data from db_pool to delete schema
                         stmt3 = configCon.prepareStatement("SELECT url,driver,login,password FROM db_pool WHERE db_pool_id=?");
                         stmt3.setInt(1, poolId);
                         final ResultSet rs3 = stmt3.executeQuery();
-    
+
                         if (!rs3.next()) {
                             throw new StorageException("Unable to determine authentication data of pool_id " + poolId);
                         }
@@ -412,7 +412,7 @@ public class OXContextMySQLStorageCommon {
 
     public void fillContextAndServer2DBPool(final Context ctx, final Connection con, final Database db) throws StorageException {
         // dbid is the id in db_pool of database engine to use for next context
-    
+
         // if read id -1 (not set by client ) or 0 (there is no read db for this
         // cluster) then read id must be same as write id
         // else the db pool cannot resolve the database
@@ -533,7 +533,7 @@ public class OXContextMySQLStorageCommon {
             final int startnum = Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1"));
             if (startnum > 0) {
                 // we use the uid number feature
-                // set the start number in the sequence for uid_numbers 
+                // set the start number in the sequence for uid_numbers
                 retval = startnum;
             }
         }
@@ -542,7 +542,7 @@ public class OXContextMySQLStorageCommon {
             final int startnum = Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1"));
             if (startnum > 0) {
                 // we use the gid number feature
-                // set the start number in the sequence for gid_numbers 
+                // set the start number in the sequence for gid_numbers
                 retval = startnum;
             }
         }
@@ -619,7 +619,7 @@ public class OXContextMySQLStorageCommon {
             log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
         }
     }
-    
+
     private void closePreparedStatement(final PreparedStatement stmt) {
         try {
             if (stmt != null) {

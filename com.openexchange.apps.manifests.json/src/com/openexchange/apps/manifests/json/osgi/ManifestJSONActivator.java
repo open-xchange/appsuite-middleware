@@ -63,6 +63,7 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.apps.manifests.ServerConfigMatcherService;
 import com.openexchange.apps.manifests.json.ManifestActionFactory;
+import com.openexchange.apps.manifests.json.values.UIVersion;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.simple.SimpleConverter;
@@ -72,13 +73,13 @@ import com.openexchange.log.LogFactory;
 
 /**
  * {@link ManifestJSONActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ManifestJSONActivator extends AJAXModuleActivator {
     private static final Log LOG = LogFactory.getLog(ManifestJSONActivator.class);
 
-	
+
 	@Override
 	protected Class<?>[] getNeededServices() {
 		return new Class<?>[]{ConfigurationService.class, CapabilityService.class, SimpleConverter.class};
@@ -86,11 +87,14 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
 
 	@Override
 	protected void startBundle() throws Exception {
+
+	    UIVersion.UIVERSION = context.getBundle().getVersion().toString();
+
 		final ServiceTracker<ServerConfigMatcherService, ServerConfigMatcherService> matcherTracker = track(ServerConfigMatcherService.class);
 		final ServiceTracker<ComputedServerConfigValueService, ComputedServerConfigValueService> computedValueTracker = track(ComputedServerConfigValueService.class);
-		
+
 		registerModule(new ManifestActionFactory(this, readManifests(), new ServerConfigServicesLookup() {
-			
+
 			@Override
 			public List<ServerConfigMatcherService> getMatchers() {
 				List<ServerConfigMatcherService> services = new ArrayList<ServerConfigMatcherService>();
@@ -103,7 +107,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
 				}
 				return services;
 			}
-			
+
 			@Override
 			public List<ComputedServerConfigValueService> getComputed() {
 				List<ComputedServerConfigValueService> services = new ArrayList<ComputedServerConfigValueService>();
@@ -117,21 +121,28 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
 				return services;
 			}
 		}), "apps/manifests");
-		
+
 		openTrackers();
 	}
 
     private JSONArray readManifests() {
-        final String property = getService(ConfigurationService.class).getProperty("com.openexchange.apps.manifestPath");
+        ConfigurationService conf = getService(ConfigurationService.class);
+        String property = conf.getProperty("com.openexchange.apps.manifestPath");
         if (null == property) {
-            return new JSONArray(0);
+            property = conf.getProperty("com.openexchange.apps.path");
+            if (null == property) {
+                return new JSONArray(0);
+            }
+            property += "/manifests";
         }
 
-        File file = new File(property);
         JSONArray array = new JSONArray();
-        if (file.exists()) {
-            for (File f : file.listFiles()) {
-                read(f, array);
+        for(String path: property.split(":")) {
+            File file = new File(path);
+            if (file.exists()) {
+                for (File f : file.listFiles()) {
+                    read(f, array);
+                }
             }
         }
         return array;

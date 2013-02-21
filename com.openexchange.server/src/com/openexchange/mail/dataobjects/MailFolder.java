@@ -187,7 +187,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Checks presence of named property.
-     * 
+     *
      * @param name The name
      * @return <code>true</code> if present; otherwise <code>false</code>
      */
@@ -197,7 +197,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Gets specified property.
-     * 
+     *
      * @param name The name
      * @return The value or <code>null</code>
      */
@@ -209,7 +209,7 @@ public class MailFolder implements Serializable, Cloneable {
      * Sets given property
      * <p>
      * If value is <code>null</code>, a remove is performed.
-     * 
+     *
      * @param name The name
      * @param value The value
      */
@@ -223,7 +223,7 @@ public class MailFolder implements Serializable, Cloneable {
 
     /**
      * Sets the property if absent.
-     * 
+     *
      * @param name The name
      * @param value The value
      * @return The previous value or <code>null</code> for successful insertion
@@ -1190,7 +1190,7 @@ public class MailFolder implements Serializable, Cloneable {
      * Gets the shared owner or <code>null</code>.
      * <p>
      * <b>Note:</b> {@link #isShared()} needs to return <code>true</code>.
-     * 
+     *
      * @return The owner or <code>null</code>
      */
     public String getOwner() {
@@ -1218,7 +1218,7 @@ public class MailFolder implements Serializable, Cloneable {
      * Sets the shared owner or <code>null</code>.
      * <p>
      * <b>Note:</b> {@link #setShared(boolean)} needs to be invoked with <code>true</code>.
-     * 
+     *
      * @param owner The owner
      */
     public void setOwner(String owner) {

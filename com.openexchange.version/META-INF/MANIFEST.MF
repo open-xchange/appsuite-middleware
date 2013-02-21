@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Central version component
+Bundle-SymbolicName: com.openexchange.version
+Bundle-Version: 7.0.1
+OXVersion: 7.0.1
+OXRevision: 4
+OXBuildDate: develop
+Bundle-Activator: com.openexchange.version.osgi.VersionActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
+Import-Package: com.openexchange.log,
+ org.apache.commons.logging,
+ org.osgi.framework
+Export-Package: com.openexchange.version

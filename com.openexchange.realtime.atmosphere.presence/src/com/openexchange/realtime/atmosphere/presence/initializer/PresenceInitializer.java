@@ -58,7 +58,7 @@ import com.openexchange.realtime.util.ElementPath;
 
 /**
  * {@link PresenceInitializer}
- * 
+ *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public class PresenceInitializer implements StanzaInitializer<Presence> {

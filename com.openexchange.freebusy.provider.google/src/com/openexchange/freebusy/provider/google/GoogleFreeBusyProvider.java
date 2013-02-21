@@ -67,23 +67,23 @@ import com.openexchange.session.Session;
 
 /**
  * {@link GoogleFreeBusyProvider}
- * 
+ *
  * Provider of free/busy information.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class GoogleFreeBusyProvider implements FreeBusyProvider {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(GoogleFreeBusyProvider.class);
-    
+
     private final JsonClient client;
     private String[] emailSuffixes;
     private Boolean validEmailsOnly;
-        
+
     /**
      * Initializes a new {@link GoogleFreeBusyProvider}.
-     * 
-     * @throws OXException 
+     *
+     * @throws OXException
      */
     public GoogleFreeBusyProvider() throws OXException {
         super();
@@ -92,7 +92,7 @@ public class GoogleFreeBusyProvider implements FreeBusyProvider {
             configService.getProperty("com.openexchange.freebusy.provider.google.apiEndpoint", "https://www.googleapis.com/calendar/v3"),
             configService.getProperty("com.openexchange.freebusy.provider.google.apiKey", "{YOUR_API_KEY}"));
     }
-    
+
     @Override
     public Map<String, FreeBusyData> getFreeBusy(Session session, List<String> participants, Date from, Date until) {
         /*
@@ -104,7 +104,7 @@ public class GoogleFreeBusyProvider implements FreeBusyProvider {
             FreeBusyData freeBusyData = new FreeBusyData(participant, from, until);
             freeBusyInformation.put(participant, freeBusyData);
             if (hasAllowedEmailSuffix(participant) && isValidEmail(participant)) {
-                filteredParticipants.add(participant);                
+                filteredParticipants.add(participant);
             } else {
                 freeBusyData.addWarning(FreeBusyExceptionCodes.DATA_NOT_AVAILABLE.create(participant));
             }
@@ -124,7 +124,7 @@ public class GoogleFreeBusyProvider implements FreeBusyProvider {
                         continue;
                     }
                     freeBusyInformation.get(freeBusyData.getParticipant()).add(freeBusyData);
-                }            
+                }
             } catch (OXException e) {
                 // add exception for all participants
                 for (String participant : filteredParticipants) {
@@ -147,18 +147,18 @@ public class GoogleFreeBusyProvider implements FreeBusyProvider {
         }
         return true;
     }
-    
+
     private boolean isValidEmail(String participant) {
         if (isValidEmailsOnly()) {
             try {
                 new QuotedInternetAddress(participant).validate();
             } catch (AddressException e) {
                 return false;
-            }          
+            }
         }
         return true;
     }
-    
+
     private String[] getEmailSuffixes() {
         if (null == this.emailSuffixes) {
             String value = null;
@@ -169,10 +169,10 @@ public class GoogleFreeBusyProvider implements FreeBusyProvider {
                 LOG.warn("error reading 'com.openexchange.freebusy.provider.google.emailSuffixes'", e);
             }
             this.emailSuffixes = null == value || 0 == value.trim().length() ? new String[0] : value.trim().split(",");
-        }    
+        }
         return this.emailSuffixes;
     }
-    
+
     private boolean isValidEmailsOnly() {
         if (null == this.validEmailsOnly) {
             boolean value = true;
@@ -183,8 +183,8 @@ public class GoogleFreeBusyProvider implements FreeBusyProvider {
                 LOG.warn("error reading 'com.openexchange.freebusy.provider.google.validEmailsOnly'", e);
             }
             this.validEmailsOnly = Boolean.valueOf(value);
-        }    
+        }
         return this.validEmailsOnly.booleanValue();
     }
-    
+
 }

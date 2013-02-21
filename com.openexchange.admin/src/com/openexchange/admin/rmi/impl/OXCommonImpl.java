@@ -71,7 +71,7 @@ import com.openexchange.log.LogFactory;
 
 /**
  * General abstraction class used by all impl classes
- * 
+ *
  * @author d7
  */
 public abstract class OXCommonImpl {

@@ -147,11 +147,7 @@ public final class EventPool implements Runnable {
         map = new ConcurrentHashMap<PooledEvent, PooledEvent>(1024);
         queue = new DelayQueue<PooledEvent>();
         blocker = new ConcurrentBlocker();
-        try {
-            eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class, true);
     }
 
     /**

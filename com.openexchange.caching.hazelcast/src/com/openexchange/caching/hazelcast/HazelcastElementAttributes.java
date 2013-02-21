@@ -59,7 +59,7 @@ import com.openexchange.caching.ElementEventHandler;
 
 /**
  * {@link HazelcastElementAttributes}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HazelcastElementAttributes implements ElementAttributes {
@@ -74,7 +74,7 @@ public final class HazelcastElementAttributes implements ElementAttributes {
 
     /**
      * Initializes a new {@link HazelcastElementAttributes}.
-     * 
+     *
      */
     public HazelcastElementAttributes(final MapEntry<Serializable, Serializable> mapEntry, final MapConfig mapConfig, final IMap<Serializable, Serializable> map) {
         super();

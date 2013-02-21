@@ -149,20 +149,20 @@ public class OXResellerException extends Exception {
          * Subadmin %1$s does not belong to %2$s
          */
         SUBADMIN_DOES_NOT_BELONG_TO_SUBADMIN("Subadmin %1$s does not belong to %2$s");
-        
+
         private final String text;
-        
+
         private Code(final String text) {
             this.text = text;
         }
-        
+
         public final String getText() {
             return text;
         }
     }
-    
+
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -3749789561669512300L;
 
@@ -181,7 +181,7 @@ public class OXResellerException extends Exception {
     public OXResellerException(final Code code, final String... args) {
         super(String.format(code.getText(), (Object[])args));
     }
-    
+
     /**
      * Initializes a new {@link OXResellerException}.
      * @param arg0

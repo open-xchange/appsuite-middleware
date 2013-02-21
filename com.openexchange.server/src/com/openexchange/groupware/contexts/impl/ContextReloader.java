@@ -65,7 +65,7 @@ final class ContextReloader extends Refresher<ContextExtended> implements Contex
     private static final long serialVersionUID = -2022359916415524347L;
 
     private ContextExtended delegate;
-    
+
     /**
 	 * Initializes a new {@link ContextReloader}.
 	 */

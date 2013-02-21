@@ -9,9 +9,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java-Klasse f\u00fcr Database complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType name="Database">
  *   &lt;complexContent>
@@ -38,8 +38,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Database", propOrder = {
@@ -97,11 +97,11 @@ public class Database {
 
     /**
      * Ruft den Wert der clusterWeight-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getClusterWeight() {
         return clusterWeight;
@@ -109,11 +109,11 @@ public class Database {
 
     /**
      * Legt den Wert der clusterWeight-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setClusterWeight(Integer value) {
         this.clusterWeight = value;
@@ -121,11 +121,11 @@ public class Database {
 
     /**
      * Ruft den Wert der currentUnits-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getCurrentUnits() {
         return currentUnits;
@@ -133,11 +133,11 @@ public class Database {
 
     /**
      * Legt den Wert der currentUnits-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setCurrentUnits(Integer value) {
         this.currentUnits = value;
@@ -145,11 +145,11 @@ public class Database {
 
     /**
      * Ruft den Wert der driver-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDriver() {
         return driver;
@@ -157,11 +157,11 @@ public class Database {
 
     /**
      * Legt den Wert der driver-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDriver(String value) {
         this.driver = value;
@@ -169,11 +169,11 @@ public class Database {
 
     /**
      * Ruft den Wert der id-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getId() {
         return id;
@@ -181,11 +181,11 @@ public class Database {
 
     /**
      * Legt den Wert der id-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setId(Integer value) {
         this.id = value;
@@ -193,11 +193,11 @@ public class Database {
 
     /**
      * Ruft den Wert der login-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getLogin() {
         return login;
@@ -205,11 +205,11 @@ public class Database {
 
     /**
      * Legt den Wert der login-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setLogin(String value) {
         this.login = value;
@@ -217,11 +217,11 @@ public class Database {
 
     /**
      * Ruft den Wert der master-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isMaster() {
         return master;
@@ -229,11 +229,11 @@ public class Database {
 
     /**
      * Legt den Wert der master-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setMaster(Boolean value) {
         this.master = value;
@@ -241,11 +241,11 @@ public class Database {
 
     /**
      * Ruft den Wert der masterId-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getMasterId() {
         return masterId;
@@ -253,11 +253,11 @@ public class Database {
 
     /**
      * Legt den Wert der masterId-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setMasterId(Integer value) {
         this.masterId = value;
@@ -265,11 +265,11 @@ public class Database {
 
     /**
      * Ruft den Wert der maxUnits-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getMaxUnits() {
         return maxUnits;
@@ -277,11 +277,11 @@ public class Database {
 
     /**
      * Legt den Wert der maxUnits-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setMaxUnits(Integer value) {
         this.maxUnits = value;
@@ -289,11 +289,11 @@ public class Database {
 
     /**
      * Ruft den Wert der name-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -301,11 +301,11 @@ public class Database {
 
     /**
      * Legt den Wert der name-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
@@ -313,11 +313,11 @@ public class Database {
 
     /**
      * Ruft den Wert der password-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPassword() {
         return password;
@@ -325,11 +325,11 @@ public class Database {
 
     /**
      * Legt den Wert der password-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPassword(String value) {
         this.password = value;
@@ -337,11 +337,11 @@ public class Database {
 
     /**
      * Ruft den Wert der poolHardLimit-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getPoolHardLimit() {
         return poolHardLimit;
@@ -349,11 +349,11 @@ public class Database {
 
     /**
      * Legt den Wert der poolHardLimit-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setPoolHardLimit(Integer value) {
         this.poolHardLimit = value;
@@ -361,11 +361,11 @@ public class Database {
 
     /**
      * Ruft den Wert der poolInitial-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getPoolInitial() {
         return poolInitial;
@@ -373,11 +373,11 @@ public class Database {
 
     /**
      * Legt den Wert der poolInitial-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setPoolInitial(Integer value) {
         this.poolInitial = value;
@@ -385,11 +385,11 @@ public class Database {
 
     /**
      * Ruft den Wert der poolMax-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getPoolMax() {
         return poolMax;
@@ -397,11 +397,11 @@ public class Database {
 
     /**
      * Legt den Wert der poolMax-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setPoolMax(Integer value) {
         this.poolMax = value;
@@ -409,11 +409,11 @@ public class Database {
 
     /**
      * Ruft den Wert der readId-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getReadId() {
         return readId;
@@ -421,11 +421,11 @@ public class Database {
 
     /**
      * Legt den Wert der readId-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setReadId(Integer value) {
         this.readId = value;
@@ -433,11 +433,11 @@ public class Database {
 
     /**
      * Ruft den Wert der scheme-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getScheme() {
         return scheme;
@@ -445,11 +445,11 @@ public class Database {
 
     /**
      * Legt den Wert der scheme-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setScheme(String value) {
         this.scheme = value;
@@ -457,11 +457,11 @@ public class Database {
 
     /**
      * Ruft den Wert der url-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUrl() {
         return url;
@@ -469,11 +469,11 @@ public class Database {
 
     /**
      * Legt den Wert der url-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUrl(String value) {
         this.url = value;

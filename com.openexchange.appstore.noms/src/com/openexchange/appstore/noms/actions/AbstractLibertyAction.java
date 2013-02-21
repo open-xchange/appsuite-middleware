@@ -78,24 +78,24 @@ public abstract class AbstractLibertyAction implements AJAXActionService{
 		String storefront = view.property("com.openexchange.liberty.appstore.storefront", String.class).get();
 		String gateway = view.property("com.openexchange.liberty.appstore.gateway", String.class).get();
 		String gatewayQuery = view.property("com.openexchange.liberty.appstore.gatewayQuery", String.class).get();
-		
+
 		String user = null, password = null;
-		
+
 		ComposedConfigProperty<String> userProp = view.property("com.openexchange.liberty.appstore.user", String.class);
 		if (userProp.isDefined()) {
 			user = userProp.get();
 		} else {
 			user = session.getUserlogin();
 		}
-		
+
 		ComposedConfigProperty<String> passwordProp = view.property("com.openexchange.liberty.appstore.password", String.class);
 		if (passwordProp.isDefined()) {
 			password = passwordProp.get();
 		} else {
 			password = session.getPassword();
 		}
-		
-		
+
+
 		return new LibertyAppStoreConfig(url, storefront, gateway, gatewayQuery, user, password);
 	}
 }

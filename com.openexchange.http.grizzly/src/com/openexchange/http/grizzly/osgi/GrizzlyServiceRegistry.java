@@ -54,17 +54,17 @@ import com.openexchange.osgi.ServiceRegistry;
 /**
  * {@link GrizzlyServiceRegistry} Singleton that extends the existing {@link ServiceRegistry} to gain functionality and acts as central
  * accesspoint for classes of the grizzly bundle.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class GrizzlyServiceRegistry extends ServiceRegistry{
     private static final GrizzlyServiceRegistry INSTANCE = new GrizzlyServiceRegistry();
-    
+
     /**
      * Encapsulated constructor.
      */
     private GrizzlyServiceRegistry() {}
-    
+
     /**
      * Get the GrizzlyService Registry singleton.
      * @return the GrizzlyService Registry singleton

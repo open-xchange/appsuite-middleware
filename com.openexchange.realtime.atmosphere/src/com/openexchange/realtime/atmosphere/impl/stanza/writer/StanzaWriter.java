@@ -50,7 +50,6 @@
 package com.openexchange.realtime.atmosphere.impl.stanza.writer;
 
 import java.util.Collection;
-import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,7 +64,7 @@ import com.openexchange.realtime.payload.PayloadTreeNode;
 
 /**
  * {@link StanzaWriter} - Transforms Stanza objects into their JSON representation.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -74,7 +73,7 @@ public class StanzaWriter {
 
     /**
      * Writes specified stanza into its JSON representation.
-     * 
+     *
      * @param stanza The stanza to write
      * @return The appropriate JSON representation
      * @throws OXException If a JSON write error occurs
@@ -110,7 +109,7 @@ public class StanzaWriter {
 
     /**
      * Write the PayloadTrees contained in the Stanza into a given JSONObject.
-     * 
+     *
      * @param stanza The Stanza conaining the PayloadTrees that have to be written as JSON
      * @param jsonStanza The Stanza as JSONObject
      * @throws JSONException If writing the PayloadTrees fails
@@ -142,7 +141,7 @@ public class StanzaWriter {
      * their own PayloadElements PEj, PEk and so on. If a JSONObject contains a nested array container it is attached as seperate
      * PayloadTreeNode (PTNi) but the contained PayloadElement (PEi) doesn't contain any data. Instead the Elements of the array are
      * attached as children to the PayloadTreeNode.
-     * 
+     *
      * @param node The PayloadTreeNode that has be be written into a JSONObject
      * @param jsonObject The JSONObject to write the PayloadTreeNode into
      * @return the PayloadTreeNode written into a JSONObject
@@ -200,7 +199,7 @@ public class StanzaWriter {
      * Create a JSONObject from a PayloadElement.
      * @param payloadElement The PayloadElement to convert
      * @return  A JSONObject in the form <tt>{namespace: ... , element: ... , data: ...}</tt>
-     * @throws JSONException If the JSONObject couldn't be created 
+     * @throws JSONException If the JSONObject couldn't be created
      */
     private JSONObject createJSONPayload(PayloadElement payloadElement) throws JSONException {
         JSONObject jsonPayload = new JSONObject();

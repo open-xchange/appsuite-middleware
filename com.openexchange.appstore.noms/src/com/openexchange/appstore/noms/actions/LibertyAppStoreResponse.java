@@ -65,12 +65,12 @@ public class LibertyAppStoreResponse {
 	public enum Status {
 		SUCCESS, ERROR
 	};
-	
+
 	private Status status;
 	private JSONArray apps;
-	
-	
-	
+
+
+
 	public LibertyAppStoreResponse(Status status, JSONArray apps) {
 		super();
 		this.status = status;
@@ -89,15 +89,15 @@ public class LibertyAppStoreResponse {
 			} else {
 				status = Status.ERROR;
 			}
-			
+
 			JSONArray apps = new JSONArray(payload.substring(index+1));
-			
+
 			return new LibertyAppStoreResponse(status, apps);
-			
+
 		} catch (JSONException x) {
 			throw AjaxExceptionCodes.JSON_ERROR.create(x);
 		}
-		
+
 	}
 
 
@@ -123,8 +123,8 @@ public class LibertyAppStoreResponse {
 	public void setApps(JSONArray apps) {
 		this.apps = apps;
 	}
-	
-	
-	
-	
+
+
+
+
 }

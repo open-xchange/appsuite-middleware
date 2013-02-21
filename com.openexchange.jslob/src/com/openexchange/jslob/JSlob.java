@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,6 +49,7 @@
 
 package com.openexchange.jslob;
 
+import java.io.Serializable;
 import org.json.JSONObject;
 
 /**
@@ -56,72 +57,22 @@ import org.json.JSONObject;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JSlob {
-
-    private static final class EmptyJSlob extends JSlob {
-
-        protected EmptyJSlob() {
-            super(null);
-        }
-
-        @Override
-        public JSlob setJsonObject(final JSONObject jsonObject) {
-            throw new UnsupportedOperationException("EmptyJSlob.setJsonObject()");
-        }
-    }
+public interface JSlob extends Serializable {
 
     /**
-     * The unmodifiable, empty {@link JSlob} instance.
-     * <p>
-     * Invoking {@link #setJsonObject(JSONObject)} will throw an {@link UnsupportedOperationException}.
-     */
-    public static final JSlob EMPTY_JSLOB = new EmptyJSlob();
-
-    private JSONObject jsonObject;
-    private JSONObject metaObject;
-    
-    private JSlobId id;
-
-    /**
-     * Initializes a new empty {@link JSlob}.
-     */
-    public JSlob() {
-        super();
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder builder = new StringBuilder(128);
-        builder.append("JSlob {");
-        if (jsonObject != null) {
-            builder.append("jsonObject=").append(jsonObject).append(", ");
-        }
-        if (id != null) {
-            builder.append("id=").append(id);
-        }
-        builder.append('}');
-        return builder.toString();
-    }
-
-    /**
-     * Initializes a new {@link JSlob}.
+     * Creates and returns a copy of this object.
      * 
-     * @param jsonObject The JSON object initially applied to this JSlob
+     * @return A clone of this instance.
+     * @see java.lang.Cloneable
      */
-    public JSlob(final JSONObject jsonObject) {
-        super();
-        this.jsonObject = jsonObject;
-        this.metaObject = new JSONObject();
-    }
+    public Object clone();
 
     /**
      * Gets the identifier
      * 
      * @return The identifier
      */
-    public JSlobId getId() {
-        return id;
-    }
+    public JSlobId getId();
 
     /**
      * Sets the identifier
@@ -129,48 +80,20 @@ public class JSlob {
      * @param id The identifier to set
      * @return This JSlob with new identifier applied
      */
-    public JSlob setId(final JSlobId id) {
-        this.id = id;
-        return this;
-    }
+    public JSlob setId(JSlobId id);
 
     /**
      * Gets the JSON object stored in this JSlob.
      * 
      * @return The JSON object
      */
-    public JSONObject getJsonObject() {
-        return jsonObject;
-    }
+    public JSONObject getJsonObject();
 
     /**
-     * Sets the JSON object stored in this JSlob.
-     * 
-     * @param jsonObject The JSON object
-     * @return This JSlob with new JSON object applied
-     */
-    public JSlob setJsonObject(final JSONObject jsonObject) {
-        this.jsonObject = jsonObject;
-        return this;
-    }
-    
-    /**
      * Gets the json object with unmodifiable metadata describing the regular payload data
+     * 
      * @return The metadata object
      */
-    public JSONObject getMetaObject() {
-		return metaObject;
-	}
-    
-    /**
-     * Sets the json object with unmodifiable metadata describing the regular payload data
-     * @param The metadata object
-     * @return This JSlob with new metadata object applied
-     */
-    public JSlob setMetaObject(JSONObject metaObject) {
-		this.metaObject = metaObject;
-		return this;
-    }
-    
+    public JSONObject getMetaObject();
 
 }

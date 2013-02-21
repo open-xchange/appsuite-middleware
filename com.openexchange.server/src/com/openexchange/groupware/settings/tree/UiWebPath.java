@@ -62,7 +62,7 @@ import com.openexchange.session.Session;
 
 /**
  * Adds the configuration setting tree entry for the UI Web path.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UiWebPath implements PreferencesItemService {

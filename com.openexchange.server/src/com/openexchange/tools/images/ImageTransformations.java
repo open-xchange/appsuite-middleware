@@ -56,68 +56,68 @@ import java.io.InputStream;
 
 /**
  * {@link ImageTransformations}
- * 
+ *
  * Allows chaining of multiple transformations to an image.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface ImageTransformations {
 
     /**
      * Adds a 'rotate' transformation, leading to the image being rotated according to the contained EXIF information.
-     * 
+     *
      * @return A self reference
      */
     ImageTransformations rotate();
-    
+
     /**
      * Adds a 'scale' transformation, leading to the image being scaled according to the supplied parameters.
-     * 
+     *
      * @param maxWidth The maximum width of the target image
      * @param maxHeight The maximum height of the target image
      * @param scaleType The scale type to use
      * @return A self reference
      */
     ImageTransformations scale(int maxWidth, int maxHeight, ScaleType scaleType);
-    
+
     /**
      * Adds a 'crop' transformation, leading to the image being cropped according to the supplied parameters.
-     * 
+     *
      * @param x The X coordinate of the upper-left corner of the specified rectangular region
      * @param y The Y coordinate of the upper-left corner of the specified rectangular region
      * @param width The width of the specified rectangular region
-     * @param height The height of the specified rectangular region 
+     * @param height The height of the specified rectangular region
      * @return A self reference
      */
     ImageTransformations crop(int x, int y, int width, int height);
-    
+
     /**
      * Adds a compression transformation, leading to the image being written out compressed depending on the chosen output format.
-     * 
+     *
      * @return A self reference
      */
     ImageTransformations compress();
-    
+
     /**
      * Applies all transformations and returns the result as image.
-     * 
+     *
      * @return The resulting image
      */
     BufferedImage getImage() throws IOException;
-    
+
     /**
      * Applies all transformations and writes the result as raw image data in the given format.
-     * 
+     *
      * @return The resulting image data
      */
     byte[] getBytes(String formatName) throws IOException;
-    
+
     /**
      * Applies all transformations and provides an input stream on the resulting raw image data in the given format.
-     * 
+     *
      * @param formatName The image format to use, e.g. <code>jpeg</code> or <code>png</code>
      * @return A new input stream carrying the resulting image data
      */
     InputStream getInputStream(String formatName) throws IOException;
-    
+
 }

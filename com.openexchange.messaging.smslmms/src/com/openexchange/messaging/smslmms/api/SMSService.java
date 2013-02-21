@@ -78,7 +78,7 @@ public interface SMSService {
 
     /**
      * Gets the SMS/MMS configuration for the user associated with specified session.
-     * 
+     *
      * @param accountId The account identifier
      * @param session The session providing user data
      * @return The SMS/MMS configuration
@@ -112,5 +112,5 @@ public interface SMSService {
      * @throws OXException If account transport cannot be returned for given account identifier
      */
     SMSTransport getSMSTransport(int accountId, Session session) throws OXException;
-    
+
 }

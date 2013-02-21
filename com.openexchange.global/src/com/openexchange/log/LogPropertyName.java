@@ -69,7 +69,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
         /**
          * The TRACE log level
          */
-        TRACE, 
+        TRACE,
         /**
          * The DEBUG log level.
          */
@@ -85,17 +85,17 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
         /**
          * The ERROR log level.
          */
-        ERROR, 
+        ERROR,
         /**
          * The FATAL log level.
          */
-        FATAL, 
+        FATAL,
 
         /*
          * Don't log this
          */
         OFF, ;
-        
+
 
         /**
          * Gets the appropriate log level for specified naming.
@@ -122,7 +122,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
 			}
 			return other.ordinal() <= ordinal();
 		}
-		
+
 		public static Comparator<LogLevel> getComparator() {
 			return new Comparator<LogLevel>() {
 
@@ -130,13 +130,13 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
 				public int compare(LogLevel o1, LogLevel o2) {
 					return o1.ordinal() - o2.ordinal();
 				}
-				
+
 			};
 		}
-		
+
     }
 
-    private final String propertyName;
+    private final LogProperties.Name propertyName;
 
     private final LogLevel logLevel;
 
@@ -148,7 +148,7 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
      * @param propertyName The name
      * @param logLevel The log level when property shall be logged ("ALL","FINE","INFO","WARNING","ERROR")
      */
-    public LogPropertyName(final String propertyName, final LogLevel logLevel) {
+    public LogPropertyName(final LogProperties.Name propertyName, final LogLevel logLevel) {
         super();
         this.propertyName = propertyName;
         this.logLevel = null == logLevel ? LogLevel.ALL : logLevel;
@@ -251,13 +251,13 @@ public final class LogPropertyName implements Comparable<LogPropertyName> {
      *
      * @return The property name
      */
-    public String getPropertyName() {
+    public LogProperties.Name getPropertyName() {
         return propertyName;
     }
 
     @Override
     public int compareTo(final LogPropertyName o) {
-        return propertyName.compareToIgnoreCase(o.propertyName);
+        return propertyName.getName().compareToIgnoreCase(o.propertyName.getName());
     }
 
     @Override

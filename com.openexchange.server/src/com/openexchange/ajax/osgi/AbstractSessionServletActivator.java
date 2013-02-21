@@ -65,7 +65,7 @@ import com.openexchange.configuration.ServerConfig.Property;
 
 /**
  * {@link AbstractSessionServletActivator}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public abstract class AbstractSessionServletActivator extends AbstractServletActivator {
@@ -81,7 +81,7 @@ public abstract class AbstractSessionServletActivator extends AbstractServletAct
 
     /**
      * Registers given Servlet.
-     * 
+     *
      * @param alias The Servlet's alias
      * @param servlet The Servlet instance
      * @param configKeys The Servlet's initial parameters
@@ -157,7 +157,7 @@ public abstract class AbstractSessionServletActivator extends AbstractServletAct
 
     /**
      * Gets additionally needed services beside <tt>HttpService</tt> & <tt>ConfigurationService</tt>.
-     * 
+     *
      * @return The additionally needed services
      */
     protected abstract Class<?>[] getAdditionalNeededServices();

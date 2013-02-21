@@ -61,10 +61,15 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
+    ModuleSetTest.class,
+    SimpleConfigurationTest.class,
+    SolrAttachmentSearchTermVisitorTest.class,
     SimpleQueryBuilderTest.class,
     MailSolrIndexAccessTest.class,
     AddressComparatorTest.class,
-    SolrFilestoreIndexAccessTest.class
+    XMLBasedFieldConfigurationTest.class,
+    SolrMailDocumentConverterTest.class,
+    SolrAttachmentDocumentConverterTest.class
 })
 
 public class UnitTests {

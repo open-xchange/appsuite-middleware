@@ -59,13 +59,13 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
  * {@link CustomSslRMIClientSocketFactory}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CustomSslRMIClientSocketFactory extends SslRMIClientSocketFactory {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 7337209808828143732L;
 

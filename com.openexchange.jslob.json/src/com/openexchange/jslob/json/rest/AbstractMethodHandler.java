@@ -54,7 +54,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -62,11 +61,13 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractMethodHandler} - The abstract method handler.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractMethodHandler implements MethodHandler {
@@ -147,7 +148,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
 
     /**
      * Gets the module identifier.
-     * 
+     *
      * @return The module identifier
      */
     protected abstract String getModule();
@@ -155,7 +156,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
     /**
      * Parses by path info (extra path information follows the Servlet path but precedes the query string and will start with a "/"
      * character)
-     * 
+     *
      * @param requestData The AJAX request data
      * @param pathInfo The path info
      * @param req The HTTP request
@@ -164,7 +165,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
 
     /**
      * Whether to apply body data.
-     * 
+     *
      * @return <code>true</code> to apply body data; else <code>false</code>
      */
     protected abstract boolean shouldApplyBody();
@@ -173,53 +174,33 @@ public abstract class AbstractMethodHandler implements MethodHandler {
         /*
          * Guess an appropriate body object
          */
-        final String body = AJAXServlet.getBody(req);
-        if (startsWith('{', body)) {
-            /*
-             * Expect the body to be a JSON object
-             */
-            try {
-                request.setData(new JSONObject(body));
-            } catch (final JSONException e) {
-                request.setData(body);
+        UnsynchronizedPushbackReader reader = null;
+        try {
+            reader = new UnsynchronizedPushbackReader(AJAXServlet.getReaderFor(req));
+            final int read = reader.read();
+            if (read < 0) {
+                request.setData(null);
+            } else {
+                final char c = (char) read;
+                reader.unread(c);
+                if ('[' == c || '{' == c) {
+                    try {
+                        request.setData(JSONObject.parse(reader));
+                    } catch (final JSONException e) {
+                        request.setData(AJAXServlet.readFrom(reader));
+                    }
+                } else {
+                    request.setData(AJAXServlet.readFrom(reader));
+                }
             }
-        } else if (startsWith('[', body)) {
-            /*
-             * Expect the body to be a JSON array
-             */
-            try {
-                request.setData(new JSONArray(body));
-            } catch (final JSONException e) {
-                request.setData(body);
-            }
-        } else {
-            request.setData(0 == body.length() ? null : body);
+        } finally {
+            Streams.close(reader);
         }
-    }
-
-    private static boolean startsWith(final char startingChar, final String toCheck) {
-        if (null == toCheck) {
-            return false;
-        }
-        final int len = toCheck.length();
-        if (len <= 0) {
-            return false;
-        }
-        int i = 0;
-        if (Character.isWhitespace(toCheck.charAt(i))) {
-            do {
-                i++;
-            } while (i < len && Character.isWhitespace(toCheck.charAt(i)));
-        }
-        if (i >= len) {
-            return false;
-        }
-        return startingChar == toCheck.charAt(i);
     }
 
     /**
      * Checks if specified string is empty.
-     * 
+     *
      * @param string The string
      * @return <code>true</code> if empty; else <code>false</code>
      */

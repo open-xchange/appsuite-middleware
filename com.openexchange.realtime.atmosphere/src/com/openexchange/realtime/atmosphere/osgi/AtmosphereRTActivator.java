@@ -59,7 +59,7 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
 
         AtmosphereService atmosphereService = getService(AtmosphereService.class);
         RTAtmosphereHandler handler = new RTAtmosphereHandler();
-        atmosphereService.addAtmosphereHandler("rt", new RTAtmosphereHandler());
+        atmosphereService.addAtmosphereHandler("rt", handler);
         registerService(Channel.class, new RTAtmosphereChannel(handler));
 
     }

@@ -21,6 +21,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.cluster.discovery.ClusterDiscoveryService;
 import com.openexchange.cluster.discovery.ClusterListener;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.init.HazelcastInitializer;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -38,7 +39,7 @@ import com.openexchange.timer.TimerService;
  * 1. You reached the limits of your network. Your switch is not able to handle the amount of data passed around.<br>
  * 2. You reached the limits of the way application utilizing Hazelcast.<br>
  * Adding node is not increasing your total throughput and not reducing the latency.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -70,7 +71,7 @@ public class HazelcastActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, TimerService.class };
+        return new Class[] { ConfigurationService.class, TimerService.class, HazelcastConfigurationService.class };
     }
 
     /** Gets the ranking */
@@ -85,29 +86,29 @@ public class HazelcastActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final Log logger = com.openexchange.log.Log.loggerFor(HazelcastActivator.class);
-        final ConfigurationService service = getService(ConfigurationService.class);
-        if (null != service && !service.getBoolProperty("com.openexchange.hazelcast.enabled", true)) {
+        final HazelcastConfigurationService service = getService(HazelcastConfigurationService.class);
+        if (!service.isEnabled()) {
             logger.info("\nHazelcast\n\tStartup of Hazelcast clustering and data distribution platform denied per configuration.");
             return;
         }
         final boolean infoEnabled = logger.isInfoEnabled();
         /*-
          * Look-up discovery service & obtain its addresses of known nodes in a cluster
-         * 
+         *
          * Configure Hazelcast for full TCP/IP cluster
          * (see http://www.hazelcast.com/documentation.jsp#Config)
-         * 
+         *
          * If multicast is not preferred way of discovery for your environment, then you can configure Hazelcast for full TCP/IP cluster.
          * As configuration below shows, while enable attribute of multicast is set to false, TCP/IP has to be set to true.
          * For the none-multicast option, all or subset of cluster members' host names and/or IP addresses must be listed.
-         * 
+         *
          * Note that all of the cluster members don't have to be listed there but at least one of them has to be active in cluster when a
          * new member joins.
          */
         final BundleContext context = this.context;
         /*-
          * Wait for at least one via ClusterListener
-         * 
+         *
          * Add cluster listener to manage appearing/disappearing nodes
          */
         final ClusterListener clusterListener = new HazelcastClusterListener(initializer, System.currentTimeMillis(), logger);
@@ -118,7 +119,7 @@ public class HazelcastActivator extends HousekeepingActivator {
 
             private final boolean isSingleton = true;
 
-            private final LinkedList<ServiceContainer<ClusterDiscoveryService>> deactivated = 
+            private final LinkedList<ServiceContainer<ClusterDiscoveryService>> deactivated =
                 new LinkedList<ServiceContainer<ClusterDiscoveryService>>();
 
             private int clusterDiscoveryServiceRanking = 0;
@@ -168,7 +169,7 @@ public class HazelcastActivator extends HousekeepingActivator {
                 final List<InetAddress> nodes = discovery.getNodes();
                 if (infoEnabled) {
                     final long et = System.currentTimeMillis();
-                    logger.info("\nHazelcast\n\tAvailable cluster nodes received in " + (et - st) + "msec from " + 
+                    logger.info("\nHazelcast\n\tAvailable cluster nodes received in " + (et - st) + "msec from " +
                         ClusterDiscoveryService.class.getSimpleName() + ":\n\t" + nodes + "\n");
                 }
                 /*-
@@ -203,8 +204,8 @@ public class HazelcastActivator extends HousekeepingActivator {
                     return;
                 }
                 if (isSingleton) {
-                    shutdown();
                     context.ungetService(reference);
+                    shutdown();
                     clusterDiscoveryServiceReference.set(null);
                     return;
                 }
@@ -219,8 +220,8 @@ public class HazelcastActivator extends HousekeepingActivator {
                         }
                     }
                     if (service == clusterDiscoveryService) {
-                        shutdown();
                         context.ungetService(reference);
+                        shutdown();
                         clusterDiscoveryService = null;
                         clusterDiscoveryServiceRanking = 0;
                         if (!deactivated.isEmpty()) {

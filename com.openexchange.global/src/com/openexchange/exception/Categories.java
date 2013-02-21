@@ -121,7 +121,7 @@ public final class Categories implements OXExceptionConstants {
 
     /**
      * Gets the former category number.
-     * 
+     *
      * @param category The category
      * @return The associated number or <tt>-1</tt>
      */

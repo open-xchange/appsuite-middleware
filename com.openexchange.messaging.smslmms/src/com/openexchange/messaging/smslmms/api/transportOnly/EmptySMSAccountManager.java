@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link EmptySMSAccountManager} - The empty SMS/MMS {@link MessagingAccountManager}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class EmptySMSAccountManager implements MessagingAccountManager {
@@ -69,7 +69,7 @@ public final class EmptySMSAccountManager implements MessagingAccountManager {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static EmptySMSAccountManager getInstance() {
@@ -123,6 +123,11 @@ public final class EmptySMSAccountManager implements MessagingAccountManager {
 
     @Override
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws OXException {
+        // Nope
+    }
+
+    @Override
+    public void cleanUp(String secret, Session session) throws OXException {
         // Nope
     }
 

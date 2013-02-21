@@ -54,7 +54,7 @@ import com.openexchange.jslob.JSlob;
 
 /**
  * {@link SharedJSlobService} - Service for adding shared JSlobs to JSlobService
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public interface SharedJSlobService {
@@ -68,35 +68,35 @@ public interface SharedJSlobService {
 
     /**
      * Returns the jslob service id
-     * 
+     *
      * @return The jslob service id
      */
     String getServiceId();
 
     /**
      * Returns the shared jslob
-     * 
+     *
      * @return The shared jslob
      */
     JSlob getJSlob();
 
     /**
      * Returns the jslob's id
-     * 
+     *
      * @return The jslob's id
      */
     String getId();
 
     /**
      * Set the jslob's JSONObject
-     * 
+     *
      * @param jsonObject The JSONObject to set
      */
     void setJSONObject(JSONObject jsonObject);
 
     /**
      * Set the jslob's meta data JSONObject
-     * 
+     *
      * @param metaObject The JSONObject to set
      */
     void setMetaObject(JSONObject metaObject);

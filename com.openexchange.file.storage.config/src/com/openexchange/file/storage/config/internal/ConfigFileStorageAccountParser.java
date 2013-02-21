@@ -100,7 +100,7 @@ public final class ConfigFileStorageAccountParser {
 
     /**
      * Gets the authenticators' map.
-     * 
+     *
      * @return The authenticators' map
      */
     public ConcurrentMap<ConfigFileStorageAuthenticator, ConfigFileStorageAuthenticator> getAuthenticators() {
@@ -116,7 +116,7 @@ public final class ConfigFileStorageAccountParser {
 
     /**
      * Retrieves the first configured account matching given account identifier.
-     * 
+     *
      * @param accountId The account identifier
      * @return The first matching account or <code>null</code>
      */

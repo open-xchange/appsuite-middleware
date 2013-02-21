@@ -64,7 +64,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link TrackingProvider}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class TrackingProvider implements ConfigProviderService {

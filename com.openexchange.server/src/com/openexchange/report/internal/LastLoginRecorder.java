@@ -49,13 +49,16 @@
 
 package com.openexchange.report.internal;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
@@ -70,6 +73,25 @@ import com.openexchange.user.UserService;
  */
 public class LastLoginRecorder implements LoginHandlerService {
 
+    private static volatile Integer maxClientCount;
+    private static int maxClientCount() {
+        Integer tmp = maxClientCount;
+        if (null == tmp) {
+            synchronized (LastLoginRecorder.class) {
+                tmp = maxClientCount;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Integer.valueOf(null == service ? -1 : service.getIntProperty("com.openexchange.user.maxClientCount", -1));
+                    maxClientCount = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    /**
+     * Initializes a new {@link LastLoginRecorder}.
+     */
     public LastLoginRecorder() {
         super();
     }
@@ -77,6 +99,7 @@ public class LastLoginRecorder implements LoginHandlerService {
     @Override
     public void handleLogin(final LoginResult login) throws OXException {
         final LoginRequest request = login.getRequest();
+        // Determine key
         String key;
         if (null != request.getClient()) {
             key = request.getClient();
@@ -85,18 +108,32 @@ public class LastLoginRecorder implements LoginHandlerService {
         } else {
             return;
         }
-
+        // Set attribute
         key = "client:" + key;
         final Context ctx = login.getContext();
         if (ctx.isReadOnly()) {
             return;
         }
         final User origUser = login.getUser();
-        final Map<String, Set<String>> attributes = new HashMap<String, Set<String>>();
-        attributes.putAll(origUser.getAttributes());
-        final Set<String> value = new HashSet<String>();
-        value.add(Long.toString(System.currentTimeMillis()));
-        attributes.put(key, value);
+        // Retrieve existing ones
+        final Map<String, Set<String>> attributes;
+        {
+            final int maxClientCount = maxClientCount();
+            if (maxClientCount > 0) {
+                final Map<String, Set<String>> origAttributes = origUser.getAttributes();
+                int count = 0;
+                for (final String origKey : origAttributes.keySet()) {
+                    if (origKey.startsWith("client:") && ++count > maxClientCount) {
+                        throw UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(Integer.valueOf(ctx.getContextId()), Integer.valueOf(origUser.getId()));
+                    }
+                }
+                attributes = new HashMap<String, Set<String>>(origAttributes);
+            } else {
+                attributes = new HashMap<String, Set<String>>(origUser.getAttributes());
+            }
+        }
+        // Add current time stamp
+        attributes.put(key, new HashSet<String>(Arrays.asList(Long.toString(System.currentTimeMillis()))));
         final UserImpl newUser = new UserImpl();
         newUser.setId(origUser.getId());
         newUser.setAttributes(attributes);

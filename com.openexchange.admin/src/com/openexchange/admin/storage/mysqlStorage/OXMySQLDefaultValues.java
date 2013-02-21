@@ -51,7 +51,7 @@ package com.openexchange.admin.storage.mysqlStorage;
 
 /**
  * This interface is used for storing defaul values which are used only in the MySQL classes
- * 
+ *
  * @author d7
  *
  */

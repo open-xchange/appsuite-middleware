@@ -53,7 +53,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.ResultConverter.Quality;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
@@ -62,7 +61,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link PayloadConverterAdapter} that makes SimplePayloadConverters usable by
  * the Converter classes used for converting AJAXRequestResults.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -70,12 +69,12 @@ public class PayloadConverterAdapter implements ResultConverter{
 
 	private final SimplePayloadConverter converter;
 	private final SimpleConverter rtConverter;
-	
+
 	public PayloadConverterAdapter(SimplePayloadConverter converter, SimpleConverter rtConverter) {
 		this.converter = converter;
 		this.rtConverter = rtConverter;
 	}
-	
+
 	public String getInputFormat() {
 		return converter.getInputFormat();
 	}
@@ -94,11 +93,11 @@ public class PayloadConverterAdapter implements ResultConverter{
 
 	public void convert(AJAXRequestData requestData, AJAXRequestResult result,
 			ServerSession session, Converter converter) throws OXException {
-		
+
 		Object converted = this.converter.convert(result.getResultObject(), session, this.rtConverter);
-		
+
 		result.setResultObject(converted,  getOutputFormat());
-		
+
 	}
 
 }

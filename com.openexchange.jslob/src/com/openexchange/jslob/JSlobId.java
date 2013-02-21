@@ -49,22 +49,21 @@
 
 package com.openexchange.jslob;
 
+import java.io.Serializable;
 
 /**
  * {@link JSlobId} - The JSlob identifier.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class JSlobId {
+public final class JSlobId implements Serializable {
+
+    private static final long serialVersionUID = -1733920133244012391L;
 
     private final int user;
-
     private final int context;
-
     private final String serviceId;
-
     private final String id;
-
     private final int hashCode;
 
     /**

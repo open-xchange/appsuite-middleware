@@ -74,7 +74,7 @@ public class SessionStorageActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         // nothing to do
     }
-    
+
     @Override
     protected void stopBundle() throws Exception {
         // nothing to do

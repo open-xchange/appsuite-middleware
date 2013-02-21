@@ -223,10 +223,10 @@ public class CodecUtils {
      * @return <code>true</code> if less than 128; otherwise <code>false</code>
      */
     private static boolean isAscii(final String s) {
-        final char[] chars = s.toCharArray();
+        final int length = s.length();
         boolean isAscii = true;
-        for (int i = 0; i < chars.length && isAscii; i++) {
-            isAscii = (chars[i] < 128);
+        for (int i = 0; i < length && isAscii; i++) {
+            isAscii = (s.charAt(i) < 128);
         }
         return isAscii;
     }

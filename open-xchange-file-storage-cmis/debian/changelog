@@ -1,3 +1,9 @@
+open-xchange-file-storage-cmis (7.0.1-0) unstable; urgency=low
+
+  * prepare for 7.0.1
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 10 Jan 2013 10:09:23 +0100
+
 open-xchange-file-storage-cmis (7.0.0-0) unstable; urgency=low
 
   * prepare for 7.0.0 release

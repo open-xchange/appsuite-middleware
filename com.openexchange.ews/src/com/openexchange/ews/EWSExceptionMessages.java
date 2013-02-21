@@ -52,14 +52,14 @@ package com.openexchange.ews;
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link EWSExceptionMessages} 
- * 
+ * {@link EWSExceptionMessages}
+ *
  * Translatable messages for {@link EWSExceptionCodes}.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class EWSExceptionMessages implements LocalizableStrings {
-    
+
     public static final String UNEXPECTED_RESPONSE_COUNT_MSG = "Got %1$d instead of %2$d response messages";
     public static final String NO_RESPONSE_MSG = "Got no response messages";
     public static final String EWS_ERROR_MSG = "EWS error: %1$s (%2$s)";
@@ -67,9 +67,9 @@ public final class EWSExceptionMessages implements LocalizableStrings {
     public static final String NOT_FOUND_MSG = "Object \"%1$s\" not found";
     public static final String AMBIGUOUS_NAME_MSG = "The name \"%1$s\" is ambiguous";
     public static final String EXTERNAL_ERROR_MSG = "An external error occured: %1$s";
-    
+
     /**
-     * Prevent instantiation. Ambiguous 
+     * Prevent instantiation. Ambiguous
      */
     private EWSExceptionMessages() {
         super();

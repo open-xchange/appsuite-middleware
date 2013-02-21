@@ -72,7 +72,7 @@ import com.openexchange.tools.sql.DBUtils;
 /**
  * {@link DatabaseOAuthValidator} - A simple {@link OAuthValidator}, which checks the version, whether the time stamp is close to now, the
  * nonce hasn't been used before and the signature is valid. Each check may be overridden.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DatabaseOAuthValidator extends SimpleOAuthValidator {
@@ -89,7 +89,7 @@ public final class DatabaseOAuthValidator extends SimpleOAuthValidator {
 
     /**
      * Initializes a new {@link DatabaseOAuthValidator}.
-     * 
+     *
      * @param maxTimestampAgeMsec The range of valid time stamps, in milliseconds into the past or future. So the total range of valid time
      *            stamps is twice this value, rounded to the nearest second.
      * @param maxVersion The maximum valid oauth_version

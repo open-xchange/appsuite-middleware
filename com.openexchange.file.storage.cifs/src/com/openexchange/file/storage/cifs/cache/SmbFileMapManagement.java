@@ -52,6 +52,7 @@ package com.openexchange.file.storage.cifs.cache;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.logging.Log;
 import com.openexchange.file.storage.cifs.CIFSFileStorageService;
 import com.openexchange.file.storage.cifs.CIFSServices;
 import com.openexchange.session.Session;
@@ -65,7 +66,7 @@ import com.openexchange.timer.TimerService;
  */
 public final class SmbFileMapManagement {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SmbFileMapManagement.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(SmbFileMapManagement.class);
 
     private static final SmbFileMapManagement INSTANCE = new SmbFileMapManagement();
 
@@ -100,7 +101,7 @@ public final class SmbFileMapManagement {
                 if (null == tmp) {
                     final ConcurrentMap<Integer, ConcurrentMap<Integer, SmbFileMap>> map = this.map;
                     final Runnable task = new Runnable() {
-                        
+
                         @Override
                         public void run() {
                             try {
@@ -132,6 +133,7 @@ public final class SmbFileMapManagement {
             if (null != timerService) {
                 timerService.purge();
             }
+            this.timerTask = null;
         }
     }
 
@@ -209,13 +211,13 @@ public final class SmbFileMapManagement {
                 contextMap = newMap;
             }
         }
-        final Integer us = Integer.valueOf(session.getUserId());
-        SmbFileMap smbFileMap = contextMap.get(us);
+        final Integer user = Integer.valueOf(session.getUserId());
+        SmbFileMap smbFileMap = contextMap.get(user);
         if (null == smbFileMap) {
-            final SmbFileMap newFolderMap = new SmbFileMap(1024, CIFSFileStorageService.DEFAULT_ATTR_EXPIRATION_PERIOD - 1000, TimeUnit.MILLISECONDS);
-            smbFileMap = contextMap.putIfAbsent(us, newFolderMap);
+            final SmbFileMap newFileMap = new SmbFileMap(1024, CIFSFileStorageService.DEFAULT_ATTR_EXPIRATION_PERIOD - 1000, TimeUnit.MILLISECONDS);
+            smbFileMap = contextMap.putIfAbsent(user, newFileMap);
             if (null == smbFileMap) {
-                smbFileMap = newFolderMap;
+                smbFileMap = newFileMap;
             }
         }
         return smbFileMap;

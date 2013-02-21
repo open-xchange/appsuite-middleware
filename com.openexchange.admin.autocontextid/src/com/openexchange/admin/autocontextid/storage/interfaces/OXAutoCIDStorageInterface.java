@@ -71,7 +71,7 @@ public abstract class OXAutoCIDStorageInterface {
     private static Class<? extends OXAutoCIDStorageInterface> implementingClass;
 
     private static final Log log = LogFactory.getLog(OXAutoCIDStorageInterface.class);
-    
+
     protected static AdminCacheExtended cache = null;
 
     protected static PropertyHandler prop = null;

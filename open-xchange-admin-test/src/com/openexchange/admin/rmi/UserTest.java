@@ -67,7 +67,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.TimeZone;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -81,6 +80,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
+import com.openexchange.java.util.TimeZones;
 
 /**
  *
@@ -407,8 +407,9 @@ public class UserTest extends AbstractTest {
         // create new user
         final OXUserInterface oxu = getUserClient();
         final User usr = new User();
+        // Administrator gets always principal identifier 2. The group users gets principal identifier 1.
         usr.setId(Integer.valueOf(2));
-        
+
         // enable and test it.
         UserModuleAccess access = oxu.getModuleAccess(ctx, usr, cred);
         access.setPublicFolderEditable(true);
@@ -903,67 +904,50 @@ public class UserTest extends AbstractTest {
         MethodMapObject[] meth_objects = getSetableAttributeMethods(usr.getClass());
 
         for (MethodMapObject map_obj : meth_objects) {
-
-            if(!notallowed.contains(map_obj.getMethodName())){
-
+            if (!notallowed.contains(map_obj.getMethodName())) {
                 User tmp_usr  = new User(srv_loaded.getId());
-
-                if(map_obj.getMethodParameterType().equalsIgnoreCase("java.lang.String") && map_obj.getGetter().getParameterTypes().length == 0){
-
-                    String oldvalue = (String)map_obj.getGetter().invoke(srv_loaded);
-                    if( map_obj.getMethodName().equals("setLanguage") ) {
+                if (map_obj.getMethodParameterType().equalsIgnoreCase("java.lang.String") && map_obj.getGetter().getParameterTypes().length == 0) {
+                    String oldvalue = (String) map_obj.getGetter().invoke(srv_loaded);
+                    if (map_obj.getMethodName().equals("setLanguage")) {
                         map_obj.getSetter().invoke(tmp_usr, "fr_FR");
-                    } else if(map_obj.getMethodName().toLowerCase().contains("mail")) {
-                        map_obj.getSetter().invoke(tmp_usr,getChangedEmailAddress(oldvalue, "_singlechange"));
+                    } else if (map_obj.getMethodName().toLowerCase().contains("mail")) {
+                        map_obj.getSetter().invoke(tmp_usr, getChangedEmailAddress(oldvalue, "_singlechange"));
                     } else {
-                        map_obj.getSetter().invoke(tmp_usr, oldvalue+"-singlechange");
+                        map_obj.getSetter().invoke(tmp_usr, oldvalue + "-singlechange");
                     }
                     //System.out.println("Setting String via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
-
                 }
-
-                if(map_obj.getMethodParameterType().equalsIgnoreCase("java.lang.Integer")){
-
-                    Integer oldvalue = (Integer)map_obj.getGetter().invoke(srv_loaded);
-                    map_obj.getSetter().invoke(tmp_usr, oldvalue+1);
+                if (map_obj.getMethodParameterType().equalsIgnoreCase("java.lang.Integer")) {
+                    Integer oldvalue = (Integer) map_obj.getGetter().invoke(srv_loaded);
+                    map_obj.getSetter().invoke(tmp_usr, oldvalue + 1);
                     //System.out.println("Setting Integer via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
                 }
-
-
-                if(map_obj.getMethodParameterType().equalsIgnoreCase("java.lang.Boolean")){
-                    Boolean oldvalue = (Boolean)map_obj.getGetter().invoke(srv_loaded);
+                if (map_obj.getMethodParameterType().equalsIgnoreCase("java.lang.Boolean")) {
+                    Boolean oldvalue = (Boolean) map_obj.getGetter().invoke(srv_loaded);
                     map_obj.getSetter().invoke(tmp_usr, !oldvalue);
-
                     //System.out.println("Setting Boolean via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
-
                 }
-
-                if(map_obj.getMethodParameterType().equalsIgnoreCase("java.util.Date")){
-                    Date oldvalue = (Date)map_obj.getGetter().invoke(srv_loaded);
+                if (map_obj.getMethodParameterType().equalsIgnoreCase("java.util.Date")) {
+                    Date oldvalue = (Date) map_obj.getGetter().invoke(srv_loaded);
                     // set date to current +1 day
                     map_obj.getSetter().invoke(tmp_usr, new Date(oldvalue.getTime()+(24*60*60*1000)));
-
                     //System.out.println("Setting Date via "+map_obj.getMethodName() +" -> "+map_obj.getGetter().invoke(tmp_usr));
-
                 }
 
                 //  submit changes
                 oxu.change(ctx,tmp_usr,cred);
-
-
                 // load from server and compare the single changed value
                 final User user_single_change_loaded = oxu.getData(ctx, id( srv_loaded ), cred);
 
                 // compare both string values , server and local copy must be same, else, the change was unsuccessfull
-                if(map_obj.getGetter().getParameterTypes().length == 0) {
-                    assertEquals(map_obj.getGetter().getName().substring(3)+" not equal", map_obj.getGetter().invoke(tmp_usr), map_obj.getGetter().invoke(user_single_change_loaded));
+                if (map_obj.getGetter().getParameterTypes().length == 0) {
+                    Object expected = map_obj.getGetter().invoke(tmp_usr);
+                    Object actual = map_obj.getGetter().invoke(user_single_change_loaded);
+                    assertEquals(map_obj.getGetter().getName().substring(3) + " not equal " + expected.getClass().getName() + " " + actual.getClass().getName(), expected, actual);
                 }
-
             }
         }
-
     }
-
 
     public  MethodMapObject[] getSetableAttributeMethods(final Class clazz){
 
@@ -1360,8 +1344,7 @@ public class UserTest extends AbstractTest {
         aliase.add("primaryemail-" + ident + "@" + AbstractTest.TEST_DOMAIN);
         usr.setAliases(aliase);
 
-        final Calendar cal = Calendar.getInstance();
-        cal.setTimeZone(TimeZone.getTimeZone("UTC"));
+        final Calendar cal = Calendar.getInstance(TimeZones.UTC);
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
@@ -1518,17 +1501,15 @@ public class UserTest extends AbstractTest {
         compareNonCriticFields(a, b);
     }
 
-    private static void assertDatesAreEqualsAtYMD(String message, Date date1, Date date2){
-        Calendar cal1 = Calendar.getInstance();
-        Calendar cal2 = Calendar.getInstance();
-        if( date1 != null && date2 != null ) {
+    private static void assertDatesAreEqualsAtYMD(String message, Date date1, Date date2) {
+        Calendar cal1 = Calendar.getInstance(TimeZones.UTC);
+        Calendar cal2 = Calendar.getInstance(TimeZones.UTC);
+        if (date1 != null && date2 != null) {
             cal1.setTime(date1);
             cal2.setTime(date2);
-            assertEquals(message, new Integer(cal1.get(Calendar.YEAR)) , new Integer(cal2.get(Calendar.YEAR)));
-            assertEquals(message, new Integer(cal1.get(Calendar.MONTH)) , new Integer(cal2.get(Calendar.MONTH)));
-            assertEquals(message, new Integer(cal1.get(Calendar.DAY_OF_MONTH)) , new Integer(cal2.get(Calendar.DAY_OF_MONTH)));
-        } else {
-            assertTrue(message,true);
+            assertEquals(message, cal1.get(Calendar.YEAR), cal2.get(Calendar.YEAR));
+            assertEquals(message, cal1.get(Calendar.MONTH), cal2.get(Calendar.MONTH));
+            assertEquals(message, cal1.get(Calendar.DAY_OF_MONTH), cal2.get(Calendar.DAY_OF_MONTH));
         }
     }
 

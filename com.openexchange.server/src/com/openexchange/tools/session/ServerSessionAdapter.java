@@ -63,7 +63,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ServerSessionAdapter}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -74,7 +74,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
     /**
      * Gets the server session for specified session.
-     * 
+     *
      * @param session The session
      * @return The appropriate server session
      * @throws OXException If context cannot be resolved
@@ -88,7 +88,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
     /**
      * Gets the server session for specified session.
-     * 
+     *
      * @param session The session
      * @param context The associated context
      * @return The appropriate server session
@@ -102,7 +102,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
     /**
      * Gets the server session for specified session.
-     * 
+     *
      * @param session The session
      * @param context The associated context
      * @param user The user
@@ -117,7 +117,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
     /**
      * Gets the server session for specified session.
-     * 
+     *
      * @param session The session
      * @param context The associated context
      * @param user The user
@@ -145,7 +145,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
     /**
      * Initializes a new {@link ServerSessionAdapter}.
-     * 
+     *
      * @param session The delegate session
      * @throws OXException If initialization fails
      */
@@ -164,7 +164,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
     /**
      * Initializes a new {@link ServerSessionAdapter}.
-     * 
+     *
      * @param session The delegate session
      * @param ctx The session's context object
      * @throws IllegalArgumentException If session argument is <code>null</code>
@@ -184,7 +184,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
     /**
      * Initializes a new {@link ServerSessionAdapter}.
-     * 
+     *
      * @param session The delegate session
      * @param ctx The session's context object
      * @param user The session's user object
@@ -206,7 +206,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
     /**
      * Initializes a new {@link ServerSessionAdapter}.
-     * 
+     *
      * @param session The delegate session
      * @param ctx The session's context object
      * @param user The session's user object
@@ -304,11 +304,6 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
             return null;
         }
         return prev;
-    }
-
-    @Override
-    public void removeRandomToken() {
-        session().removeRandomToken();
     }
 
     @Override
@@ -410,10 +405,15 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
     public void setHash(final String hash) {
         session().setHash(hash);
     }
-    
+
     @Override
     public boolean isAnonymous() {
     	return session.getUserId() == 0;
+    }
+
+    @Override
+    public boolean isTransient() {
+        return session.isTransient();
     }
 
 }

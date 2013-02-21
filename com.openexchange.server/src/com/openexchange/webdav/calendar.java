@@ -105,7 +105,7 @@ public final class calendar extends XmlServlet<AppointmentSQLInterface> {
     protected Interface getInterface() {
         return Interface.WEBDAV_XML;
     }
-    
+
     @Override
     protected boolean isServletDisabled() {
         return true;

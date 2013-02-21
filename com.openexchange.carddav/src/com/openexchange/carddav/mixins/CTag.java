@@ -54,28 +54,27 @@ import org.apache.commons.logging.Log;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.resources.CardDAVCollection;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
  * {@link CTag}
- * 
- * Specifies a "synchronization" token used to indicate when the contents of 
+ *
+ * Specifies a "synchronization" token used to indicate when the contents of
  * a calendar or scheduling Inbox or Outbox collection have changed.
- * 
- * Used by the Apple Addressbook client in Mac OS 10.6 for CardDAV purposes, too. 
- * 
+ *
+ * Used by the Apple Addressbook client in Mac OS 10.6 for CardDAV purposes, too.
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class CTag extends SingleXMLPropertyMixin {
 
 	protected static final Log LOG = com.openexchange.log.Log.loggerFor(CTag.class);
-	
+
 	private final GroupwareCarddavFactory factory;
     private final CardDAVCollection collection;
     private long timestamp = -1;
-    
+
     public CTag(GroupwareCarddavFactory factory, CardDAVCollection collection) {
         super("http://calendarserver.org/ns/", "getctag");
         this.factory = factory;
@@ -86,7 +85,7 @@ public class CTag extends SingleXMLPropertyMixin {
     protected String getValue() {
         return "http://www.open-xchange.com/carddav/ctag/" + getTimestamp();
     }
-    
+
     private long getTimestamp() {
 		if (-1 == this.timestamp) {
 			try {
@@ -113,5 +112,5 @@ public class CTag extends SingleXMLPropertyMixin {
 			}
 		}
 		return this.timestamp;
-	}    
+	}
 }

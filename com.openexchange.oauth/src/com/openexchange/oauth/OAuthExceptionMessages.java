@@ -143,6 +143,9 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
 	// Please provide a display name.
     public static final String MISSING_DISPLAY_NAME_MSG = "Please provide a display name.";
 
+    // The associated OAuth provider denied the request: %1$s.
+    public static final String DENIED_BY_PROVIDER_MSG = "The associated OAuth provider denied the request: %1$s.";
+
     /**
      * Initializes a new {@link OAuthExceptionMessages}.
      */

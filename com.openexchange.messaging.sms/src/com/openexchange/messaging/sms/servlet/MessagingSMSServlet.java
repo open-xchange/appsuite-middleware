@@ -164,7 +164,7 @@ public final class MessagingSMSServlet extends PermissionServlet {
                 final MessagingNewService service = MessagingSMSServiceRegistry.getServiceRegistry().getService(MessagingNewService.class);
 
                 final MessagingAccountTransport accountTransport = service.getAccountTransport(0, session);
-                
+
                 if (null != accountTransport) {
                     SMSMessagingMessage smsMessagingMessage = new SMSMessagingMessage(from, to, smstext);
                     parseCaptchaParameter(req, jsonObject, smsMessagingMessage);
@@ -213,11 +213,11 @@ public final class MessagingSMSServlet extends PermissionServlet {
         if (!body.has("captcha")) {
             return;
         }
-        
+
         JSONObject captcha = body.getJSONObject("captcha");
-        
+
         SMSMessagingMessage.CaptchaParams params = new SMSMessagingMessage.CaptchaParams();
-        
+
         if (captcha.has("challenge")) {
             params.setChallenge(captcha.getString("challenge"));
         }
@@ -225,7 +225,7 @@ public final class MessagingSMSServlet extends PermissionServlet {
             params.setResponse(captcha.getString("response"));
         }
         params.setAddress(req.getRemoteAddr());
-        
+
         message.setCaptchaParameters(params);
     }
 

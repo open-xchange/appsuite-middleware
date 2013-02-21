@@ -54,7 +54,7 @@ import com.openexchange.mail.MailExceptionCode;
 
 /**
  * {@link MimeMailExceptionMessage}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class MimeMailExceptionMessage implements LocalizableStrings {
@@ -101,13 +101,13 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
      * reason. Following the exception, the Folder is reset to the "closed" state.
      * </p>
      */
-    public final static String FOLDER_CLOSED_MSG = "Folder \"%1$s\" has been closed.\nProbably your request took too long.";
+    public final static String FOLDER_CLOSED_MSG = "Folder \"%1$s\" has been closed."+LINE_SEPARATOR+"Probably your request took too long.";
 
     /**
      * Folder "%1$s" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.<br>
      * Probably your request took too long.
      */
-    public final static String FOLDER_CLOSED_EXT_MSG = "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) .\nProbably your request took too long.";
+    public final static String FOLDER_CLOSED_EXT_MSG = "Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) ."+LINE_SEPARATOR+"Probably your request took too long.";
 
     /**
      * Illegal write attempt: %1$s

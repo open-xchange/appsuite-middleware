@@ -93,12 +93,12 @@ import com.openexchange.user.json.services.ServiceRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@Action(method = RequestMethod.PUT, name = "search", description = "Search users.", parameters = { 
+@Action(method = RequestMethod.PUT, name = "search", description = "Search users.", parameters = {
 		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
 		@Parameter(name = "columns", description = "The requested fields."),
 		@Parameter(name = "sort", optional = true, type = Type.NUMBER, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified. In case of use of column 609 (use count depending order for collected users with global address book) the parameter \"order\" ist NOT necessary and will be ignored."),
 		@Parameter(name = "order", optional = true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.")
-}, requestBody = "An Object as described in Search users. Alternative request body: An Object as described in Search users alternative.", 
+}, requestBody = "An Object as described in Search users. Alternative request body: An Object as described in Search users alternative.",
 responseDescription = "An array with user data. Each array element describes one user and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class SearchAction extends AbstractUserAction {
 
@@ -167,25 +167,25 @@ public final class SearchAction extends AbstractUserAction {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
         /*
-         * Sort options 
+         * Sort options
          */
     	UserField orderField = UserMapper.getInstance().getMappedField(orderBy);
-    	SortOptions sortOptions = new SortOptions(collation); 
+    	SortOptions sortOptions = new SortOptions(collation);
     	if (null == orderField) {
     		// Sort field is a contact field: pass as it is
     		final ContactField sortField = ContactMapper.getInstance().getMappedField(orderBy);
-    		if (null != sortField) {        			
+    		if (null != sortField) {
     			sortOptions.setOrderBy(new SortOrder[] { SortOptions.Order(sortField, order) });
     		}
     	}
     	/*
     	 * Perform search
-    	 */        	
+    	 */
     	Date lastModified = new Date(0);
     	final List<UserContact> userContacts = new ArrayList<UserContact>();
         final ContactService contactService = ServiceRegistry.getInstance().getService(ContactService.class);
-        final ContactField[] contactFields = ContactMapper.getInstance().getFields(columns, 
-        		ContactField.INTERNAL_USERID, ContactField.LAST_MODIFIED);            
+        final ContactField[] contactFields = ContactMapper.getInstance().getFields(columns,
+        		ContactField.INTERNAL_USERID, ContactField.LAST_MODIFIED);
         final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
         SearchIterator<Contact> searchIterator = null;
         try {
@@ -200,7 +200,7 @@ public final class SearchAction extends AbstractUserAction {
             	 */
             	if (contact.getLastModified().after(lastModified)) {
             		lastModified = contact.getLastModified();
-            	}                	
+            	}
             	/*
             	 * Get corresponding user
             	 */

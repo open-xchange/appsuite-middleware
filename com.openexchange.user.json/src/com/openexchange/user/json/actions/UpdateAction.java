@@ -89,11 +89,11 @@ import com.openexchange.user.json.services.ServiceRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@Action(method = RequestMethod.PUT, name = "update", description = "Update a user.", parameters = { 
+@Action(method = RequestMethod.PUT, name = "update", description = "Update a user.", parameters = {
 		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
 		@Parameter(name = "id", description = "Object ID of the updated user."),
 		@Parameter(name = "timestamp", type = Type.NUMBER, description = "Timestamp of the updated user. If the user was modified after the specified timestamp, then the update must fail.")
-}, requestBody = "User object as described in Common object data, Detailed contact data and Detailed user data. Only modified fields are present. Note: \"timezone\" and \"locale\" are the only fields from Detailed user data which are allowed to be updated.", 
+}, requestBody = "User object as described in Common object data, Detailed contact data and Detailed user data. Only modified fields are present. Note: \"timezone\" and \"locale\" are the only fields from Detailed user data which are allowed to be updated.",
 responseDescription = "Response with timestamp: An empty object.")
 public final class UpdateAction extends AbstractUserAction {
 
@@ -116,7 +116,7 @@ public final class UpdateAction extends AbstractUserAction {
         ContactField.COMPANY, ContactField.CELLULAR_TELEPHONE1, ContactField.STREET_HOME, ContactField.STREET_BUSINESS, ContactField.TELEPHONE_HOME1,
         ContactField.STATE_BUSINESS, ContactField.DISPLAY_NAME, ContactField.SUR_NAME, ContactField.CITY_HOME, ContactField.MIDDLE_NAME,
         ContactField.BIRTHDAY, ContactField.FAX_BUSINESS, ContactField.GIVEN_NAME, ContactField.POSTAL_CODE_HOME, ContactField.POSTAL_CODE_BUSINESS,
-        ContactField.TELEPHONE_BUSINESS1, ContactField.CITY_BUSINESS };
+        ContactField.TELEPHONE_BUSINESS1, ContactField.CITY_BUSINESS, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE };
 
     private static UserField[] USER_FIELDS = { UserField.ID, UserField.LOCALE, UserField.TIME_ZONE };
 
@@ -127,7 +127,7 @@ public final class UpdateAction extends AbstractUserAction {
 	         * Parse parameters
 	         */
 	        boolean containsImage = request.hasUploads();
-	
+
 	        final int id = checkIntParameter(AJAXServlet.PARAMETER_ID, request);
 	        final Date clientLastModified = new Date(checkLongParameter(AJAXServlet.PARAMETER_TIMESTAMP, request));
 	        /*
@@ -150,12 +150,12 @@ public final class UpdateAction extends AbstractUserAction {
 	        parsedUserContact.setObjectID(contactId);
 			jData.put(UserField.ID.getName(), id);
 			parsedUser = UserMapper.getInstance().deserialize(jData, USER_FIELDS, timeZoneID);
-		
+
 	        if (containsImage) {
 	        	setImageData(request, parsedUserContact);
 	        }
-	
-			
+
+
 	        /*
 	         * Update contact
 	         */
@@ -174,7 +174,7 @@ public final class UpdateAction extends AbstractUserAction {
 	                }
 	            }
 	        }
-	        contactService.updateUser(session, Integer.toString(Constants.USER_ADDRESS_BOOK_FOLDER_ID), Integer.toString(contactId), 
+	        contactService.updateUser(session, Integer.toString(Constants.USER_ADDRESS_BOOK_FOLDER_ID), Integer.toString(contactId),
 	        		parsedUserContact, clientLastModified);
 	        /*
 	         * Update user if necessary, too
@@ -211,9 +211,9 @@ public final class UpdateAction extends AbstractUserAction {
         }
         return isWhitespace;
     }
-    
+
     // Copied from RequestTools in contact module
-    
+
     public static void setImageData(final AJAXRequestData request, final Contact contact) throws OXException {
 		UploadEvent uploadEvent = null;
 		try {
@@ -229,7 +229,7 @@ public final class UpdateAction extends AbstractUserAction {
 		    }
 		}
 	}
-    
+
     public static void setImageData(final Contact contact, final UploadFile file) throws OXException {
         checkIsImageFile(file);
         FileInputStream fis = null;
@@ -253,14 +253,14 @@ public final class UpdateAction extends AbstractUserAction {
             Streams.close(fis);
         }
     }
-    
+
     private static void checkIsImageFile(UploadFile file) throws OXException {
         if (null == file) {
             throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
         }
         String contentType = file.getContentType();
         if (isImageContentType(contentType)) {
-            return;            
+            return;
         }
         String mimeType = null;
         if (null != file.getPreparedFileName()) {
@@ -276,7 +276,7 @@ public final class UpdateAction extends AbstractUserAction {
 //        }
         throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), readableType);
     }
-    
+
 
     private static boolean isImageContentType(String contentType) {
         return null != contentType && contentType.toLowerCase().startsWith("image");

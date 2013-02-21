@@ -49,17 +49,16 @@
 package com.openexchange.admin.console.context;
 
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.ServiceLoader;
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.CLIOption;
-import com.openexchange.admin.console.ServiceLoader;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleCommonInterface;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleCreateInterface;
 import com.openexchange.admin.console.exception.OXConsolePluginException;
@@ -70,25 +69,25 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
-public abstract class ContextAbstraction extends UserAbstraction {   
+public abstract class ContextAbstraction extends UserAbstraction {
 
     private interface ClosureInterface {
         public ArrayList<String> getData(final Context ctx);
     }
 
     protected static int CONTEXT_INITIAL_CONSTANTS_VALUE = Constants.values().length + AccessCombinations.values().length;
-    
+
     protected enum ContextConstants implements CSVConstants {
         contextname(CONTEXT_INITIAL_CONSTANTS_VALUE, OPT_NAME_CONTEXT_NAME_LONG, false),
         quota(CONTEXT_INITIAL_CONSTANTS_VALUE + 1, OPT_QUOTA_LONG, true),
         lmapping(CONTEXT_INITIAL_CONSTANTS_VALUE + 2, OPT_CONTEXT_ADD_LOGIN_MAPPINGS_LONG, false);
-        
+
         private final String string;
-        
+
         private final int index;
-        
+
         private boolean required;
-        
+
         private ContextConstants(final int index, final String string, final boolean required) {
             this.index = index;
             this.string = string;
@@ -100,7 +99,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
             return string;
         }
 
-        
+
         @Override
         public int getIndex() {
             return index;
@@ -117,7 +116,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         }
 
     }
-    
+
     private final static char OPT_NAME_DATABASE_ID_SHORT = 'd';
     private final static String OPT_NAME_DATABASE_ID_LONG = "database";
 
@@ -127,42 +126,42 @@ public abstract class ContextAbstraction extends UserAbstraction {
 
     public final static char OPT_CONTEXT_ADD_LOGIN_MAPPINGS_SHORT = 'L';
     public final static String OPT_CONTEXT_ADD_LOGIN_MAPPINGS_LONG = "addmapping";
-    
+
     public final static char OPT_CONTEXT_DESTINATION_STORE_ID_SHORT = 'F';
     public final static String OPT_CONTEXT_DESTINATION_STORE_ID_LONG = "destination-store-id";
 
     public final static char OPT_CONTEXT_DESTINATION_DATABASE_ID_SHORT = 'D';
     public final static String OPT_CONTEXT_DESTINATION_DATABASE_ID_LONG = "destination-database-id";
-    
+
     public final static char OPT_CONTEXT_REMOVE_LOGIN_MAPPINGS_SHORT = 'R';
     public final static String OPT_CONTEXT_REMOVE_LOGIN_MAPPINGS_LONG = "removemapping";
     static final char OPT_FILESTORE_SHORT = 'f';
     static final String OPT_FILESTORE_LONG = "filestore";
-    
+
     private CLIOption databaseIdOption = null;
     private CLIOption databaseNameOption = null;
-    
+
     protected Integer dbid = null;
     protected String dbname = null;
-    
+
     protected Integer filestoreid = null;
-    
+
     protected CLIOption targetFilestoreIDOption = null;
 
-    
+
     private static final String OPT_NAME_CONTEXT_QUOTA_DESCRIPTION = "Context wide filestore quota in MB.";
     private final static char OPT_QUOTA_SHORT = 'q';
 
     private final static String OPT_QUOTA_LONG = "quota";
     protected static final String OPT_NAME_ADMINPASS_DESCRIPTION="master Admin password";
     protected static final String OPT_NAME_ADMINUSER_DESCRIPTION="master Admin user name";
-    
+
     protected CLIOption contextQuotaOption = null;
 
     protected String contextname = null;
-    
+
     private ServiceLoader<? extends ContextConsoleCommonInterface> subclasses = null;
-    
+
     @Override
     protected String getObjectName() {
         return "context";
@@ -192,7 +191,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
             ctx.setMaxQuota(Long.parseLong(contextQuota));
         }
     }
-    
+
     protected void parseAndSetExtensions(final AdminParser parser, final Context ctx, final Credentials auth) {
         // We don't check for subclasses being null here because if someone has forgotten
         // to set the options he will directly fix it and thus there no need for the
@@ -206,7 +205,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
             sysexit(1);
         }
     }
-    
+
     protected void extensionConstantProcessing(final HashMap<String, CSVConstants> constantsMap) {
         // We don't check for subclasses being null here because if someone has forgotten
         // to set the options he will directly fix it and thus there no need for the
@@ -222,28 +221,14 @@ public abstract class ContextAbstraction extends UserAbstraction {
     protected void setAdminPassOption(final AdminParser admp) {
         this.adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, NeededQuadState.possibly);
     }
-    
+
     @Override
     protected void setAdminUserOption(final AdminParser admp) {
         this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, NeededQuadState.possibly);
     }
-    
+
     protected void setExtensionOptions(final AdminParser parser, final Class<? extends ContextConsoleCommonInterface> clazz) {
-        try {
-            this.subclasses = ServiceLoader.load(clazz);
-        } catch (final IllegalAccessException e) {
-            printError(null, null, "Error during initializing extensions: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
-            sysexit(1);
-        } catch (final InstantiationException e) {
-            printError(null, null, "Error during initializing extensions: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
-            sysexit(1);
-        } catch (final ClassNotFoundException e) {
-            printError(null, null, "Error during initializing extensions: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
-            sysexit(1);
-        } catch (final IOException e) {
-            printError(null, null, "Error during initializing extensions: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
-            sysexit(1);
-        }
+        this.subclasses = ServiceLoader.load(clazz);
 
         try {
             for (final ContextConsoleCommonInterface ctxconsole : this.subclasses) {
@@ -254,7 +239,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
             sysexit(1);
         }
     }
-    
+
     protected void setContextQuotaOption(final AdminParser parser,final boolean required ){
         this.contextQuotaOption = setShortLongOpt(parser, OPT_QUOTA_SHORT,OPT_QUOTA_LONG,OPT_NAME_CONTEXT_QUOTA_DESCRIPTION,true, convertBooleantoTriState(required));
     }
@@ -269,7 +254,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
                 }
             }, false));
         }
-    
+
         final ArrayList<String> humanReadableColumnsOfAllExtensions = getHumanReadableColumnsOfAllExtensions(parser);
         final ArrayList<String> alignment = new ArrayList<String>();
         alignment.add("r");
@@ -293,7 +278,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         columnnames.add("name");
         columnnames.add("lmappings");
         columnnames.addAll(humanReadableColumnsOfAllExtensions);
-    
+
         doOutput(alignment.toArray(new String[alignment.size()]), columnnames.toArray(new String[columnnames.size()]), data);
     }
 
@@ -311,7 +296,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         columns.add("attributes");
         columns.addAll(getCSVColumnsOfAllExtensions(parser));
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-    
+
         for (final Context ctx_tmp : ctxs) {
             data.add(makeData(ctx_tmp, new ClosureInterface() {
                 @Override
@@ -321,7 +306,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
 
             }, true));
         }
-    
+
         doCSVOutput(columns, data);
     }
 
@@ -330,9 +315,9 @@ public abstract class ContextAbstraction extends UserAbstraction {
     }
 
     protected void setDatabaseNameOption(final AdminParser parser, final NeededQuadState required){
-        this.databaseNameOption = setShortLongOpt(parser, OPT_NAME_DBNAME_SHORT,OPT_NAME_DBNAME_LONG,"Name of the database",true, required); 
+        this.databaseNameOption = setShortLongOpt(parser, OPT_NAME_DBNAME_SHORT,OPT_NAME_DBNAME_LONG,"Name of the database",true, required);
     }
-    
+
     protected final void displayDisabledMessage(final String id, final Integer ctxid, final AdminParser parser) {
         createMessageForStdout(id, ctxid, "disabled", parser);
     }
@@ -348,7 +333,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
     protected final void displayMovedMessage(final String id, final Integer ctxid, final String text, final AdminParser parser) {
         createMessageForStdout(id, ctxid, text, parser);
     }
-    
+
     /**
      * The disable, enable and move* command line tools are extended from this class so we can override
      * this method in order to create proper error messages.
@@ -402,7 +387,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
             db.setName(dbname);
         }
     }
-    
+
     protected void setFilestoreIdOption(final AdminParser parser) {
         this.targetFilestoreIDOption = setShortLongOpt(parser, OPT_FILESTORE_SHORT, OPT_FILESTORE_LONG, "Target filestore id", true, NeededQuadState.needed);
     }
@@ -438,7 +423,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
                 }
             }
         });
-        
+
         return context;
     }
 
@@ -452,11 +437,11 @@ public abstract class ContextAbstraction extends UserAbstraction {
     protected ArrayList<String> getHumanReadableColumnsOfAllExtensions(final AdminParser parser) {
         return new ArrayList<String>();
     }
-    
+
     protected ArrayList<String> getHumanReableDataOfAllExtensions(final Context ctx, final AdminParser parser) {
         return new ArrayList<String>();
     }
-    
+
     protected Collection<? extends String> getCSVColumnsOfAllExtensions(final AdminParser parser) {
         return new ArrayList<String>();
     }
@@ -468,51 +453,51 @@ public abstract class ContextAbstraction extends UserAbstraction {
     private ArrayList<String> makeData(final Context ctx, final ClosureInterface iface, final boolean csv) {
         final ArrayList<String> srv_data = new ArrayList<String>();
         srv_data.add(String.valueOf(ctx.getId()));
-    
+
         final Integer filestoreId = ctx.getFilestoreId();
         if (filestoreId != null) {
             srv_data.add(String.valueOf(filestoreId));
         } else {
             srv_data.add(null);
         }
-    
+
         final String filestore_name = ctx.getFilestore_name();
         if (filestore_name != null) {
             srv_data.add(filestore_name);
         } else {
             srv_data.add(null);
         }
-    
+
         final Boolean enabled = ctx.isEnabled();
         if (enabled != null) {
             srv_data.add(String.valueOf(enabled));
         } else {
             srv_data.add(null);
         }
-    
+
         final Long maxQuota = ctx.getMaxQuota();
         if (maxQuota != null) {
             srv_data.add(String.valueOf(maxQuota));
         } else {
             srv_data.add(null);
         }
-    
+
         final Long usedQuota = ctx.getUsedQuota();
         if (usedQuota != null) {
             srv_data.add(String.valueOf(usedQuota));
         } else {
             srv_data.add(null);
         }
-    
+
         final String name = ctx.getName();
         if (name != null) {
             srv_data.add(name);
         } else {
             srv_data.add(null);
         }
-    
+
         // loginl mappings
-    
+
         final HashSet<String> loginMappings = ctx.getLoginMappings();
         if (loginMappings != null && loginMappings.size() > 0) {
             srv_data.add(getObjectsAsString(loginMappings.toArray()));
@@ -539,12 +524,12 @@ public abstract class ContextAbstraction extends UserAbstraction {
             }
             srv_data.add(attrs.toString());
         }
-    
+
         srv_data.addAll(iface.getData(ctx));
-    
+
         return srv_data;
     }
-    
+
     protected void applyDynamicOptionsToContext(final AdminParser parser, final Context ctx) {
         final Map<String, Map<String, String>> dynamicArguments = parser.getDynamicArguments();
         for(final Map.Entry<String, Map<String, String>> namespaced : dynamicArguments.entrySet()) {
@@ -552,7 +537,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
             for(final Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
                 final String name = pair.getKey();
                 final String value = pair.getValue();
-                
+
                 ctx.setUserAttribute(namespace, name, value);
             }
         }

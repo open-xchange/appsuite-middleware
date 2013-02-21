@@ -77,6 +77,7 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -139,42 +140,41 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 	                    ctx, con)).asQueue();
 	                for (final FolderObject folder : queue) {
                         final EffectivePermission perm = folder.getEffectiveUserPermission(userId, userConfig);
-                        if (perm.canReadOwnObjects() && !perm.canReadAllObjects()) {
-                            own.add(Integer.valueOf(folder.getObjectID()));
-                        } else if (perm.canReadAllObjects()) {
+                        if (perm.canReadAllObjects()) {
                             all.add(Integer.valueOf(folder.getObjectID()));
+                        } else if (perm.canReadOwnObjects()) {
+                            own.add(Integer.valueOf(folder.getObjectID()));
                         }
 	                }
 	            } else {
 	                final EffectivePermission perm = security.getFolderPermission(folderId, ctx, user, userConfig, con);
-	                if (perm.canReadOwnObjects() && !perm.canReadAllObjects()) {
-	                    own.add(Integer.valueOf(folderId));
-	                } else if (perm.canReadAllObjects()) {
-	                    all.add(Integer.valueOf(folderId));
-	                } else {
-	                    return SearchIteratorAdapter.emptyIterator();
-	                }
+	                if (perm.canReadAllObjects()) {
+                        all.add(Integer.valueOf(folderId));
+                    } else if (perm.canReadOwnObjects()) {
+                        own.add(Integer.valueOf(folderId));
+                    } else {
+                        return SearchIteratorAdapter.emptyIterator();
+                    }
+	            }
+	            if (all.isEmpty() && own.isEmpty()) {
+	                return SearchIteratorAdapter.emptyIterator();
 	            }
 	            all = Collections.unmodifiableList(all);
 	            own = Collections.unmodifiableList(own);
 	        }
-	
-	        if (all.isEmpty() && own.isEmpty()) {
-	            return SearchIteratorAdapter.emptyIterator();
-	        }
-	
-	        final StringBuilder SQL_QUERY = new StringBuilder();
+
+	        final StringAllocator SQL_QUERY = new StringAllocator(512);
 	        SQL_QUERY.append(getResultFieldsSelect(cols));
 	        SQL_QUERY.append(
 	            " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ").append(
 	            ctx.getContextId());
 	        boolean needOr = false;
-	
+
 	        if (!all.isEmpty()) {
 	            SQL_QUERY.append(" AND ((infostore.folder_id IN (").append(join(all)).append("))");
 	            needOr = true;
 	        }
-	
+
 	        if (!own.isEmpty()) {
 	            if (needOr) {
 	                SQL_QUERY.append(" OR ");
@@ -186,27 +186,27 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 	        } else {
 	            SQL_QUERY.append(')');
 	        }
-	        if (!query.equals("") && !query.equals("*")) {
+	        if (query.length() > 0 && !"*".equals(query)) {
 	            checkPatternLength(query);
-	            final boolean containsWildcard = query.contains("*");
+	            final boolean containsWildcard = query.indexOf('*') >= 0;
 	            addQuery = true;
-	
+
 	            query = query.replaceAll("\\\\", "\\\\\\\\");
 	            query = query.replaceAll("%", "\\\\%"); // Escape \ twice, due to regexp parser in replaceAll
 	            query = query.replace('*', '%');
 	            query = query.replace('?', '_');
 	            query = query.replaceAll("'", "\\\\'"); // Escape \ twice, due to regexp parser in replaceAll
-	
+
 	            if (!containsWildcard) {
 	                query = "%" + query + "%";
 	            }
-	
+
 	            final StringBuffer SQL_QUERY_OBJECTS = new StringBuffer();
 	            for (final String currentField : SEARCH_FIELDS) {
 	                if (SQL_QUERY_OBJECTS.length() > 0) {
 	                    SQL_QUERY_OBJECTS.append(" OR ");
 	                }
-	
+
 	                SQL_QUERY_OBJECTS.append(currentField);
 	                SQL_QUERY_OBJECTS.append(" LIKE (?)");
 	            }
@@ -216,7 +216,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 	                SQL_QUERY.append(") ");
 	            }
 	        }
-	
+
 	        if (sortedBy != null && dir != NOT_SET) {
 	            final String[] orderColumn = switchMetadata2DBColumns(new Metadata[] { sortedBy });
 	            if ((orderColumn != null) && (orderColumn[0] != null)) {
@@ -231,7 +231,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 	                }
 	            }
 	        }
-	
+
 	        if ((start != NOT_SET) && (end != NOT_SET)) {
 	            if (end >= start) {
 	                SQL_QUERY.append(" LIMIT ");
@@ -250,7 +250,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 	                SQL_QUERY.append(end + 1);
 	            }
 	        }
-	
+
 	        PreparedStatement stmt = null;
 	        try {
 	            stmt = con.prepareStatement(SQL_QUERY.toString());
@@ -268,7 +268,7 @@ public class SearchEngineImpl extends DBService implements InfostoreSearchEngine
 	            LOG.error(e.getMessage(), e);
 	            throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
 	        }
-        } finally { 
+        } finally {
         	if (con != null && !keepConnection) {
         		releaseReadConnection(ctx, con);
         	}

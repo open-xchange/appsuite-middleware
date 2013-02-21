@@ -77,6 +77,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleContext;
+import com.damienmiller.BCrypt;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -96,11 +98,42 @@ import com.openexchange.tools.sql.DBUtils;
 
 public class AdminCache {
 
+    private static final AtomicReference<BundleContext> BUNDLE_CONTEXT = new AtomicReference<BundleContext>();
+
+    /**
+     * Gets the <tt>BundleContext</tt>.
+     *
+     * @return The <tt>BundleContext</tt> or <code>null</code>
+     */
+    public static BundleContext getBundleContext() {
+        return BUNDLE_CONTEXT.get();
+    }
+
+    /**
+     * Atomically sets the <tt>BundleContext</tt> to the given updated <tt>BundleContext</tt> reference if the current value <tt>==</tt> the expected value.
+     *
+     * @param expect the expected <tt>BundleContext</tt>
+     * @param update the new <tt>BundleContext</tt>
+     * @return <code>true</code> if successful. <code>false</code> return indicates that the actual <tt>ConfigurationService</tt> was not equal to the expected <tt>ConfigurationService</tt>.
+     */
+    public static boolean compareAndSetBundleContext(final BundleContext expect, final BundleContext update) {
+        return BUNDLE_CONTEXT.compareAndSet(expect, update);
+    }
+
+    /**
+     * Sets the <tt>BundleContext</tt>.
+     *
+     * @param service The <tt>BundleContext</tt> to set
+     */
+    public static void setBundleContext(final BundleContext service) {
+        BUNDLE_CONTEXT.set(service);
+    }
+
     private static final AtomicReference<ConfigurationService> CONF_SERVICE = new AtomicReference<ConfigurationService>();
 
     /**
      * Gets the <tt>ConfigurationService</tt>.
-     * 
+     *
      * @return The <tt>ConfigurationService</tt> or <code>null</code>
      */
     public static ConfigurationService getConfigurationService() {
@@ -109,7 +142,7 @@ public class AdminCache {
 
     /**
      * Atomically sets the <tt>ConfigurationService</tt> to the given updated <tt>ConfigurationService</tt> reference if the current value <tt>==</tt> the expected value.
-     * 
+     *
      * @param expect the expected <tt>ConfigurationService</tt>
      * @param update the new <tt>ConfigurationService</tt>
      * @return <code>true</code> if successful. <code>false</code> return indicates that the actual <tt>ConfigurationService</tt> was not equal to the expected <tt>ConfigurationService</tt>.
@@ -120,7 +153,7 @@ public class AdminCache {
 
     /**
      * Sets the <tt>ConfigurationService</tt>.
-     * 
+     *
      * @param service The <tt>ConfigurationService</tt> to set
      */
     public static void setConfigurationService(final ConfigurationService service) {
@@ -169,8 +202,6 @@ public class AdminCache {
 
     public static final String PATTERN_REGEX_FUNCTION = "CREATE\\s+(FUNCTION|PROCEDURE) (.*?)END\\s*//";
 
-    private final Properties fallback_access_combinations = new Properties();
-
     private HashMap<String, UserModuleAccess> named_access_combinations = null;
 
     public AdminCache() {
@@ -193,7 +224,7 @@ public class AdminCache {
      *
      * @return
      */
-    public UserModuleAccess getDefaultUserModuleAccess() {
+    public static UserModuleAccess getDefaultUserModuleAccess() {
         final UserModuleAccess ret = new UserModuleAccess();
         ret.disableAll();
         ret.setWebmail(true);
@@ -322,7 +353,7 @@ public class AdminCache {
         }
     }
 
-    private Properties loadAccessCombinations() {
+    private static Properties loadAccessCombinations() {
         // Load properties from file , if does not exists use fallback
         // properties!
         final ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
@@ -330,15 +361,6 @@ public class AdminCache {
             throw new IllegalStateException("Absent service: " + ConfigurationService.class.getName());
         }
         return service.getFile("ModuleAccessDefinitions.properties");
-    }
-
-    private Properties getFallbackAccessCombinations() {
-        // here we init the fallback access combinations when the file is not
-        // present.
-        fallback_access_combinations.put("basic", "contacts,webmail");
-        fallback_access_combinations.put("premium", "contacts,webmail,calendar,publicfolder");
-        fallback_access_combinations.put("standard", "contacts,webmail,calendar");
-        return fallback_access_combinations;
     }
 
     protected void initPool() {
@@ -455,7 +477,7 @@ public class AdminCache {
         return ox_queries_initial;
     }
 
-    public Connection getSimpleSqlConnection(String url, String user, String password, String driver) throws SQLException, ClassNotFoundException {
+    public static Connection getSimpleSqlConnection(String url, String user, String password, String driver) throws SQLException, ClassNotFoundException {
         // System.err.println("-->"+driver+" ->"+url+" "+user+" "+password);
         Class.forName(driver);
         // give database some time to react (in seconds)
@@ -551,7 +573,7 @@ public class AdminCache {
         return al;
     }
 
-    private String[] getOrdered(String data) {
+    private static String[] getOrdered(String data) {
         String[] ret = new String[0];
         if (data != null) {
             StringTokenizer st = new StringTokenizer(data, ",");
@@ -597,26 +619,32 @@ public class AdminCache {
      * @throws UnsupportedEncodingException
      */
     public String encryptPassword(final PasswordMechObject user) throws StorageException, NoSuchAlgorithmException, UnsupportedEncodingException {
-        String passwd = null;
-        if (user.getPasswordMech() == null) {
+        String passwordMech = user.getPasswordMech();
+        if (passwordMech == null) {
             String pwmech = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
             pwmech = "{" + pwmech + "}";
             if (pwmech.equalsIgnoreCase(PasswordMechObject.CRYPT_MECH)) {
-                user.setPasswordMech(PasswordMechObject.CRYPT_MECH);
+                passwordMech = PasswordMechObject.CRYPT_MECH;
             } else if (pwmech.equalsIgnoreCase(PasswordMechObject.SHA_MECH)) {
-                user.setPasswordMech(PasswordMechObject.SHA_MECH);
+                passwordMech = PasswordMechObject.SHA_MECH;
+            } else if (pwmech.equalsIgnoreCase(PasswordMechObject.BCRYPT_MECH)) {
+                passwordMech = PasswordMechObject.BCRYPT_MECH;
             } else {
                 log.warn("WARNING: unknown password mechanism " + pwmech + " using SHA");
-                user.setPasswordMech(PasswordMechObject.SHA_MECH);
+                passwordMech = PasswordMechObject.SHA_MECH;
             }
         }
-        if (user.getPasswordMech().equals(PasswordMechObject.CRYPT_MECH)) {
+        user.setPasswordMech(passwordMech);
+        final String passwd;
+        if (PasswordMechObject.CRYPT_MECH.equals(passwordMech)) {
             passwd = UnixCrypt.crypt(user.getPassword());
-        } else if (user.getPasswordMech().equals(PasswordMechObject.SHA_MECH)) {
+        } else if (PasswordMechObject.SHA_MECH.equals(passwordMech)) {
             passwd = SHACrypt.makeSHAPasswd(user.getPassword());
+        } else if (PasswordMechObject.BCRYPT_MECH.equals(passwordMech)) {
+            passwd = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
         } else {
-            log.error("unsupported password mechanism: " + user.getPasswordMech());
-            throw new StorageException("unsupported password mechanism: " + user.getPasswordMech());
+            log.error("unsupported password mechanism: " + passwordMech);
+            throw new StorageException("unsupported password mechanism: " + passwordMech);
         }
         return passwd;
     }
@@ -722,5 +750,4 @@ public class AdminCache {
     public boolean isMasterAdmin(final Credentials auth) {
         return masterAuthenticationDisabled || (getMasterCredentials() != null && getMasterCredentials().getLogin().equals(auth.getLogin()));
     }
-
 }

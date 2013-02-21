@@ -11,9 +11,9 @@ import com.openexchange.admin.soap.resource.dataobjects.Resource;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -25,8 +25,8 @@ import com.openexchange.admin.soap.resource.dataobjects.Resource;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -40,11 +40,11 @@ public class CreateResponse {
 
     /**
      * Ruft den Wert der return-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Resource }
-     *     
+     *
      */
     public Resource getReturn() {
         return _return;
@@ -52,11 +52,11 @@ public class CreateResponse {
 
     /**
      * Legt den Wert der return-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Resource }
-     *     
+     *
      */
     public void setReturn(Resource value) {
         this._return = value;

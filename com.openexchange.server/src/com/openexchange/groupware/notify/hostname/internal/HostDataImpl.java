@@ -49,11 +49,7 @@
 
 package com.openexchange.groupware.notify.hostname.internal;
 
-import javax.servlet.http.HttpServletRequest;
 import com.openexchange.groupware.notify.hostname.HostData;
-import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link HostDataImpl} - The {@link HostData} implementation.
@@ -70,32 +66,12 @@ public final class HostDataImpl implements HostData {
 
     private boolean secure;
 
-    /**
-     * Initializes a new {@link HostDataImpl} from specified arguments.
-     *
-     * @param httpRequest The HTTP Servlet request
-     */
-    public HostDataImpl(final HttpServletRequest httpRequest, final int userId, final int contextId) {
-        this();
-        secure = Tools.considerSecure(httpRequest);
-        {
-            final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
-            if (null == hostnameService) {
-                host = httpRequest.getServerName();
-            } else {
-                final String hn = hostnameService.getHostname(userId, contextId);
-                host = null == hn ? httpRequest.getServerName() : hn;
-            }
-        }
-        port = httpRequest.getServerPort();
-        route = Tools.getRoute(httpRequest.getSession(true).getId());
-    }
-
-    /**
-     * Initializes a new empty {@link HostDataImpl}.
-     */
-    public HostDataImpl() {
+    public HostDataImpl(boolean secure, String host, int port, String route) {
         super();
+        this.secure = secure;
+        this.host = host;
+        this.port = port;
+        this.route = route;
     }
 
     @Override

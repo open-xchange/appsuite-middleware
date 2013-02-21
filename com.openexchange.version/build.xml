@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.version overrides" basedir=".">
+
+    <description>
+        This build file overrides the setVersion target to patch the version and build number into the bundle manifest file.
+    </description>
+
+    <import file="build-project.xml"/>
+
+    <target name="setVersion">
+        <replaceregexp file="META-INF/MANIFEST.MF" match="OXVersion: .*" replace="OXVersion: ${version}" byline="true"/>
+        <replaceregexp file="META-INF/MANIFEST.MF" match="OXRevision: .*" replace="OXRevision: ${revision}" byline="true"/>
+        <replaceregexp file="META-INF/MANIFEST.MF" match="Bundle-Version: .*" replace="Bundle-Version: ${version}" byline="true"/>
+    </target>
+
+    <target name="prepare">
+        <tstamp prefix="oxversion">
+            <format property="today" pattern="yyyy-MM-dd" />
+        </tstamp>
+        <replaceregexp file="META-INF/MANIFEST.MF" match="OXBuildDate: .*" replace="OXBuildDate: ${oxversion.today}" byline="true"/>
+    </target>
+
+    <target name="postclean">
+        <replaceregexp file="META-INF/MANIFEST.MF" match="OXBuildDate: .*" replace="OXBuildDate: develop" byline="true"/>
+    </target>
+
+</project>

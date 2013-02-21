@@ -51,6 +51,9 @@ package com.openexchange.index.solr;
 
 import java.util.Random;
 import junit.framework.TestCase;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexManagementService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
@@ -65,76 +68,106 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class MailSolrIndexAccessTest extends TestCase {
-    
+
     private static final int QUERY_ROWS = MockMailSolrIndexAccess.getQueryRows();
-    
+
     private static final int DOCS = QUERY_ROWS * 2;
     
-    
+    private static final Random RANDOM = new Random();
+
+
     public void testChunkLoading() throws Exception {
-        Services.setServiceLookup(new ServiceLookup() {            
+        Services.setServiceLookup(new ServiceLookup() {
             @Override
             public <S> S getService(Class<? extends S> clazz) {
-                return (S) new MockConfigurationService();
+                if (clazz.equals(ConfigurationService.class)) {
+                    return (S) new MockConfigurationService();
+                } else if (clazz.equals(IndexManagementService.class)) {
+                    return (S) new IndexManagementService() {
+
+                        @Override
+                        public void unlockIndex(int contextId, int userId, int module) throws OXException {}
+
+                        @Override
+                        public void lockIndex(int contextId, int userId, int module) throws OXException {}
+
+                        @Override
+                        public boolean isLocked(int contextId, int userId, int module) throws OXException {
+                            return false;
+                        }
+                    };
+                } else {
+                    return null;
+                }
             }
-            
+
             @Override
             public <S> S getOptionalService(Class<? extends S> clazz) {
                 return null;
             }
         });
-        
-              
+
+
         /*
          * Get less than one chunk size
-         */    
+         */
         MockMailSolrIndexAccess indexAccess = new MockMailSolrIndexAccess(DOCS);
-        Random random = new Random();
-        int len = random.nextInt(QUERY_ROWS);
+        int len = getRandomIntGreater0(QUERY_ROWS);
         searchAndCheckLength(indexAccess, 0, len, len);
-        
+
         /*
          * Get more than one chunk but less than index size
          */
-        len = QUERY_ROWS + 11;
+        len = QUERY_ROWS + (QUERY_ROWS / 2);
         searchAndCheckLength(indexAccess, 0, len, len);
-        
+
         /*
          * Search for more than index size
          */
         len = DOCS * 2;
-        searchAndCheckLength(indexAccess, 0, len, DOCS);       
-        
+        searchAndCheckLength(indexAccess, 0, len, DOCS);
+
         /*
          * Get less than one chunk size with offset > 0
          */
-        int off = random.nextInt(QUERY_ROWS);
-        len = random.nextInt(QUERY_ROWS);
+        int off = getRandomIntGreater0(QUERY_ROWS);
+        len = getRandomIntGreater0(QUERY_ROWS);
         searchAndCheckLength(indexAccess, off, len, len);
-        
+
         /*
          * Get more than one chunk but less than index size with offset > 0
          */
-        off = random.nextInt(QUERY_ROWS);
-        len = QUERY_ROWS + 11;
+        off = getRandomIntGreater0(QUERY_ROWS);
+        len = getRandomIntGreater0(DOCS - off);
         searchAndCheckLength(indexAccess, off, len, len);
-        
+
         /*
          * Search for more than index size with offset > 0
          */
-        off = random.nextInt(QUERY_ROWS);
+        off = getRandomIntGreater0(QUERY_ROWS);
         len = DOCS * 2;
-        searchAndCheckLength(indexAccess, off, len, DOCS - off);       
+        searchAndCheckLength(indexAccess, off, len, DOCS - off);
     }
-    
-    private void searchAndCheckLength(MockMailSolrIndexAccess indexAccess, int off, int len, int expected) throws Exception {        
+
+    private void searchAndCheckLength(MockMailSolrIndexAccess indexAccess, int off, int len, int expected) throws Exception {
         QueryParameters parameters = new QueryParameters.Builder()
             .setHandler(SearchHandler.ALL_REQUEST)
             .setOffset(off)
             .setLength(len)
             .build();
         IndexResult<MailMessage> result = indexAccess.query(parameters, null);
-        assertTrue(result.getNumFound() == expected);
+        assertEquals(expected, result.getNumFound());
+    }
+    
+    
+    
+    private int getRandomIntGreater0(int max) {
+        int retval = 0;
+        do {
+            retval = RANDOM.nextInt(max);
+        } while (retval == 0);
+        
+        return retval;
     }
 
 }

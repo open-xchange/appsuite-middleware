@@ -75,11 +75,7 @@ public final class OSGiOAuthService extends AbstractOSGiDelegateService<OAuthSer
     }
 
     private OAuthService getService0() throws OXException {
-        try {
-            return super.getService();
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return super.getService();
     }
 
     @Override

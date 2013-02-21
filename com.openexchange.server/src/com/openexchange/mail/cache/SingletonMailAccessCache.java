@@ -148,11 +148,7 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
         if (timeoutMap != null) {
             return;
         }
-        try {
-            timeoutMap = new TimeoutConcurrentMap<Key, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>>(MailProperties.getInstance().getMailAccessCacheShrinkerSeconds());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        timeoutMap = new TimeoutConcurrentMap<Key, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>>(MailProperties.getInstance().getMailAccessCacheShrinkerSeconds());
         timeoutMap.setDefaultTimeoutListener(new MailAccessTimeoutListener());
         defaultIdleSeconds = MailProperties.getInstance().getMailAccessCacheIdleSeconds();
     }

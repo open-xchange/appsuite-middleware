@@ -168,7 +168,7 @@ public final class Response {
 
     /**
      * Puts specified properties.
-     * 
+     *
      * @param properties The properties to add
      * @return This response with properties added
      */

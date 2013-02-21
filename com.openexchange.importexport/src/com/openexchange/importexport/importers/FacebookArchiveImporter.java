@@ -1,3 +1,4 @@
+
 package com.openexchange.importexport.importers;
 
 import java.io.BufferedInputStream;
@@ -11,54 +12,48 @@ import java.util.zip.ZipInputStream;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.importexport.formats.Format;
+import com.openexchange.java.Streams;
 import com.openexchange.tools.session.ServerSession;
 
 public class FacebookArchiveImporter extends AbstractImporter {
 
-	protected FacebookFriendsImporter delegate = new FacebookFriendsImporter();
+    protected FacebookFriendsImporter delegate = new FacebookFriendsImporter();
 
-	@Override
-	protected String getNameForFieldInTruncationError(final int id,
-			final OXException dataTruncation) {
-		// Nothing to do
-		return null;
-	}
+    @Override
+    protected String getNameForFieldInTruncationError(final int id, final OXException dataTruncation) {
+        // Nothing to do
+        return null;
+    }
 
-	@Override
-    public boolean canImport(final ServerSession sessObj, final Format format,
-			final List<String> folders, final Map<String, String[]> optionalParams)
-			throws OXException {
-		return format == Format.FacebookArchive;
-	}
+    @Override
+    public boolean canImport(final ServerSession sessObj, final Format format, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
+        return format == Format.FacebookArchive;
+    }
 
-	@Override
-    public List<ImportResult> importData(final ServerSession sessObj, final Format format,
-			final InputStream is, final List<String> folders,
-			final Map<String, String[]> optionalParams) throws OXException {
+    @Override
+    public List<ImportResult> importData(final ServerSession sessObj, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
+        List<ImportResult> results = new LinkedList<ImportResult>();
 
-
-		List<ImportResult> results = new LinkedList<ImportResult>();
+        ZipInputStream zis = null;
         try {
-            final ZipInputStream zis = new ZipInputStream(new BufferedInputStream(is));
+            zis = new ZipInputStream(new BufferedInputStream(is));
             ZipEntry entry;
 
-
             while ((entry = zis.getNextEntry()) != null) {
-            	if(! entry.getName().endsWith("/friends.html")){
-            		continue;
-            	}
+                if (!entry.getName().endsWith("/friends.html")) {
+                    continue;
+                }
 
                 results = delegate.importData(sessObj, format, zis, folders, optionalParams);
             }
-
-            zis.close();
-            is.close();
         } catch (final IOException e) {
             final org.apache.commons.logging.Log log = com.openexchange.log.LogFactory.getLog(FacebookArchiveImporter.class);
             log.error("Unexpected exception.", e);
+        } finally {
+            Streams.close(zis, is);
         }
 
-		return results;
-	}
+        return results;
+    }
 
 }

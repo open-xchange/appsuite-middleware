@@ -62,16 +62,16 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link Items}
- * 
+ *
  * Simplifies access to items using EWS.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface Items {
 
     /**
-     * Searches for items by their subject. 
-     * 
+     * Searches for items by their subject.
+     *
      * @param parentFolderID The parent folder ID
      * @param name The item's subject
      * @param traversal The traversal type
@@ -84,8 +84,8 @@ public interface Items {
     List<ItemType> findItemsBySubject(BaseFolderIdType parentFolderID, List<String> subjects, ItemQueryTraversalType traversal, DefaultShapeNamesType shape) throws OXException;
 
     /**
-     * Searches for an item by it's subject. 
-     * 
+     * Searches for an item by it's subject.
+     *
      * @param parentFolderID The parent folder ID
      * @param name The item's subject
      * @param traversal The traversal type
@@ -94,11 +94,11 @@ public interface Items {
      * @throws OXException
      */
     ItemType findItemBySubject(BaseFolderIdType parentFolderID, String subject, ItemQueryTraversalType traversal, DefaultShapeNamesType shape) throws OXException;
-    
+
     void deleteItems(List<ItemIdType> itemIds, DisposalType disposal) throws OXException;
 
     void deleteItem(ItemIdType itemId, DisposalType disposal) throws OXException;
-    
+
     void createItems(FolderIdType targetFolderID, List<? extends ItemType> items, MessageDispositionType messageDisposition) throws OXException;
 
     void createItem(FolderIdType targetFolderID, ItemType item, MessageDispositionType messageDisposition) throws OXException;

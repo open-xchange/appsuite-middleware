@@ -101,11 +101,7 @@ public final class ResourceUpdate {
 
     private Resource getOrig() throws OXException {
         if (null == orig) {
-            try {
-                orig = storage.getResource(resource.getIdentifier(), ctx);
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
+            orig = storage.getResource(resource.getIdentifier(), ctx);
         }
         return orig;
     }

@@ -1,8 +1,6 @@
 package com.openexchange.calendar.itip.sender;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.calendar.itip.AppointmentNotificationPoolService;
 import com.openexchange.calendar.itip.generators.NotificationMail;
 import com.openexchange.exception.OXException;
@@ -11,24 +9,24 @@ import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.session.Session;
 
 public class PoolingMailSenderService implements MailSenderService {
-	
+
 	private static final Log LOG = com.openexchange.log.Log.loggerFor(PoolingMailSenderService.class);
-	
-	private final AppointmentNotificationPoolService pool; 
+
+	private final AppointmentNotificationPoolService pool;
 	private final MailSenderService delegate;
-	
+
 	public PoolingMailSenderService(AppointmentNotificationPoolService pool, MailSenderService delegate) {
 		this.pool = pool;
 		this.delegate = delegate;
 	}
-	
+
 	@Override
     public void sendMail(NotificationMail mail, Session session) {
 		if (!mail.shouldBeSent()) {
 			return;
 		}
 		try {
-			
+
 			// Pool messages if this is a create mail or a modify mail
 			// Dump messages if the appointment is deleted
 			if (isDeleteMail(mail)) {
@@ -36,7 +34,7 @@ public class PoolingMailSenderService implements MailSenderService {
 				delegate.sendMail(mail, session);
 				return;
 			}
-			
+
 			if (shouldEnqueue(mail)) {
 				int sharedFolderOwner = -1;
 				if (mail.getSharedCalendarOwner() != null) {
@@ -45,7 +43,7 @@ public class PoolingMailSenderService implements MailSenderService {
 				pool.enqueue(mail.getOriginal(), mail.getAppointment(), session, sharedFolderOwner);
 				return;
 			}
-			
+
 			// Fasttrack messages prior to creating a change or delete exception
 			if (needsFastTrack(mail)) {
                 Appointment app = mail.getOriginal();
@@ -56,12 +54,22 @@ public class PoolingMailSenderService implements MailSenderService {
 				delegate.sendMail(mail, session);
 				return;
 			}
-			
-			delegate.sendMail(mail, session);
-			
+			poolAwareDirectSend(mail, session);
+			//delegate.sendMail(mail, session);
+
 		} catch (OXException x) {
 			LOG.error(x.getMessage(), x);
 		}
+	}
+
+	/**
+	 * Sends the mail directly, but makes the aware of this to avoid duplicate Mails.
+	 * @param mail
+	 * @param session
+	 */
+	private void poolAwareDirectSend(NotificationMail mail, Session session) {
+	    pool.aware(mail.getAppointment(), mail.getRecipient(), session);
+	    delegate.sendMail(mail, session);
 	}
 
 
@@ -72,7 +80,7 @@ public class PoolingMailSenderService implements MailSenderService {
 		}
 		return false;
 	}
-	
+
 	private boolean shouldEnqueue(NotificationMail mail) {
 	    if (!mail.getActor().equals(mail.getOnBehalfOf())) {
 	        return false;
@@ -84,10 +92,10 @@ public class PoolingMailSenderService implements MailSenderService {
 		if (stateType == Type.MODIFIED || isStateChange(mail)) {
 			return !needsFastTrack(mail);
 		}
-		
+
 		return false;
 	}
-	
+
 	private boolean needsFastTrack(NotificationMail mail) {
 		if (mail.getOriginal() == null || mail.getAppointment() == null) {
 			return true;
@@ -99,7 +107,7 @@ public class PoolingMailSenderService implements MailSenderService {
 		if (mail.getOriginal() != null && mail.getOriginal().isMaster() &&  ((mail.getAppointment().containsRecurrenceDatePosition() && mail.getAppointment().getRecurrenceDatePosition() != null) || (mail.getAppointment().containsRecurrencePosition() && mail.getAppointment().getRecurrencePosition() != 0))) {
 			return true;
 		}
-		
+
 		return false;
 	}
 

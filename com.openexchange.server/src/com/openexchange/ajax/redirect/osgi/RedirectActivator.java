@@ -21,7 +21,7 @@ public class RedirectActivator extends HousekeepingActivator{
 		this.alias = alias;
         service.registerServlet(alias, new RedirectServlet(), null, null);
 	}
-	
+
 	@Override
 	protected void stopBundle() throws Exception {
 		final HttpService service = getService(HttpService.class);

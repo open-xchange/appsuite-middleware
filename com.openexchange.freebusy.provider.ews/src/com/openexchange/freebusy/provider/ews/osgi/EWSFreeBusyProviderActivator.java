@@ -87,7 +87,7 @@ public class EWSFreeBusyProviderActivator extends HousekeepingActivator {
             registerService(FreeBusyProvider.class, new EWSFreeBusyProvider());
         } catch (Exception e) {
             LOG.error("error starting com.openexchange.freebusy.provider.ews", e);
-            throw e;            
+            throw e;
         }
     }
 

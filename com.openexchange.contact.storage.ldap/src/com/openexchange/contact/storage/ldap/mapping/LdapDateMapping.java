@@ -60,7 +60,7 @@ import com.openexchange.contact.storage.ldap.internal.LdapResult;
 import com.openexchange.exception.OXException;
 
 /**
- * 
+ *
  * {@link LdapDateMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
@@ -68,7 +68,7 @@ import com.openexchange.exception.OXException;
 public abstract class LdapDateMapping extends LdapMapping<Date> {
 
     private static final ThreadLocal<DateFormat> DATE_FORMAT_IN = new ThreadLocal<DateFormat>() {
-        
+
         @Override
         protected DateFormat initialValue() {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -78,7 +78,7 @@ public abstract class LdapDateMapping extends LdapMapping<Date> {
     };
 
     private static final ThreadLocal<DateFormat> DATE_FORMAT_OUT = new ThreadLocal<DateFormat>() {
-        
+
         @Override
         protected DateFormat initialValue() {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss'.0Z'");
@@ -98,11 +98,11 @@ public abstract class LdapDateMapping extends LdapMapping<Date> {
             }
         }
         return null;
-    }    
-    
+    }
+
     @Override
     public String encode(Date value, LdapIDResolver idResolver) throws OXException {
         return null != value ? DATE_FORMAT_OUT.get().format(value) : null;
     }
-    
+
 }

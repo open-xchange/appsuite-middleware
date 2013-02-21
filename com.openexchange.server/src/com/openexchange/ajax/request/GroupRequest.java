@@ -68,6 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.Group.Field;
 import com.openexchange.group.GroupStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -227,7 +228,7 @@ public class GroupRequest {
     public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, OXException {
         timestamp = new Date(0);
 
-        final String[] sColumns = DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS).split(",");
+        final String[] sColumns = Strings.splitByComma(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
         boolean loadMembers = false;
         final List<Field> fields = new LinkedList<Field>();

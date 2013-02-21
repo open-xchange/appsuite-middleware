@@ -91,7 +91,6 @@ public class Enabled implements PreferencesItemService {
              */
             @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                try {
                     final ConfigView view = configViews.getView(user.getId(), ctx.getContextId());
                     final ComposedConfigProperty<Boolean> property = view.property(ENABLED, boolean.class);
                     if (property.isDefined()) {
@@ -99,9 +98,6 @@ public class Enabled implements PreferencesItemService {
                     } else {
                         setting.setSingleValue(Boolean.TRUE);
                     }
-                } catch (final OXException e) {
-                    throw new OXException(e);
-                }
             }
 
             /**

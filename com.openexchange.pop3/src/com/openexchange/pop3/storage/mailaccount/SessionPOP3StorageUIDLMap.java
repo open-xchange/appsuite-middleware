@@ -84,11 +84,11 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
     public static SessionPOP3StorageUIDLMap getInstance(final POP3Access pop3Access) throws OXException {
         final Session session = pop3Access.getSession();
         final String key = SessionParameterNames.getUIDLMap(pop3Access.getAccountId());
-        SessionPOP3StorageUIDLMap cached;
         Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
         if (null == lock) {
             lock = Session.EMPTY_LOCK;
         }
+        SessionPOP3StorageUIDLMap cached;
         lock.lock();
         try {
             try {
@@ -148,15 +148,17 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
     }
 
     private void init() throws OXException {
-        final Map<String, FullnameUIDPair> all = delegatee.getAllUIDLs();
-        final int size = all.size();
-        final Iterator<Entry<String, FullnameUIDPair>> iter = all.entrySet().iterator();
-        for (int i = 0; i < size; i++) {
-            final Entry<String, FullnameUIDPair> entry = iter.next();
-            pair2uidl.put(entry.getValue(), entry.getKey());
-            uidl2pair.put(entry.getKey(), entry.getValue());
+        if (Mode.RE_INIT == mode.get()) {
+            final Map<String, FullnameUIDPair> all = delegatee.getAllUIDLs();
+            final int size = all.size();
+            final Iterator<Entry<String, FullnameUIDPair>> iter = all.entrySet().iterator();
+            for (int i = 0; i < size; i++) {
+                final Entry<String, FullnameUIDPair> entry = iter.next();
+                pair2uidl.put(entry.getValue(), entry.getKey());
+                uidl2pair.put(entry.getKey(), entry.getValue());
+            }
+            mode.set(Mode.NONE);            
         }
-        mode.set(Mode.NONE);
     }
 
     private void checkInit(final Lock obtainedReadLock) throws OXException {

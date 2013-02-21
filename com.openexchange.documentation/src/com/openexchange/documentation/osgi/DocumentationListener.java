@@ -55,11 +55,11 @@ import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
  * {@link DocumentationListener} - Recognizes services with documentation annotations.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class DocumentationListener implements SimpleRegistryListener<Object> {
-	
+
 	private final DocumentationProcessor processor;
 
     /**
@@ -78,7 +78,7 @@ public class DocumentationListener implements SimpleRegistryListener<Object> {
     @Override
     public void removed(ServiceReference<Object> ref, Object service) {
         this.processor.remove(service);
-        
+
     }
 
 }

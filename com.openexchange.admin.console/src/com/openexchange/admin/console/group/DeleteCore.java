@@ -59,7 +59,7 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 
 public abstract class DeleteCore extends GroupAbstraction {
-    
+
     protected final void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptions(parser);
 
@@ -76,12 +76,12 @@ public abstract class DeleteCore extends GroupAbstraction {
             parser.ownparse(args);
 
             final Group grp = new Group();
-            
+
             parseAndSetGroupId(parser, grp);
             parseAndSetGroupName(parser, grp);
 
             successtext = nameOrIdSet(this.groupid, this.groupName, "context");
-            
+
             final Context ctx = contextparsing(parser);
 
             final Credentials auth = credentialsparsing(parser);
@@ -91,7 +91,7 @@ public abstract class DeleteCore extends GroupAbstraction {
             maincall(parser, oxgrp, ctx, grp, auth);
 
             oxgrp.delete(ctx, new Group[] { grp }, auth);
-            
+
             displayDeletedMessage(successtext, ctxid, parser);
             sysexit(0);
         } catch (final Exception e) {

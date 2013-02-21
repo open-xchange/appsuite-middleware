@@ -77,7 +77,12 @@ public final class UserConfigurationServiceImpl implements UserConfigurationServ
 
     @Override
     public UserConfiguration getUserConfiguration(final int userId, final Context ctx) throws OXException {
-        return UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
+        return getUserConfiguration(userId, ctx, true);
+    }
+
+    @Override
+    public UserConfiguration getUserConfiguration(final int userId, final Context ctx, final boolean initExtendedPermissions) throws OXException {
+        return UserConfigurationStorage.getInstance().getUserConfiguration(userId, null, ctx, initExtendedPermissions);
     }
 
     @Override
@@ -86,7 +91,7 @@ public final class UserConfigurationServiceImpl implements UserConfigurationServ
     }
 
     @Override
-    public UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws OXException {
+    public UserConfiguration[] getUserConfiguration(final Context ctx, final User[] users) throws OXException {
         return UserConfigurationStorage.getInstance().getUserConfiguration(ctx, users);
     }
 

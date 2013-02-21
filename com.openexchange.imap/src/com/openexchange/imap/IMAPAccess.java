@@ -239,7 +239,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Drops the user-associated validity.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      */
@@ -249,7 +249,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Gets the current validity value.
-     * 
+     *
      * @param accountId The account identifier
      * @param session The associated session
      * @return The current validity or <code>0</code> if not initialized, yet
@@ -268,7 +268,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Gets the IMAP validity.
-     * 
+     *
      * @param imapAccess The IMAP access
      * @return The IMAP validity
      */
@@ -296,7 +296,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Increases current validity by one.
-     * 
+     *
      * @param accountId The account identifier
      * @param session The associated session
      * @return The increased validity value
@@ -374,7 +374,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * The IMAP session.
      */
     private transient javax.mail.Session imapSession;
-    
+
     /**
      * The Kerberos subject.
      */
@@ -480,7 +480,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Checks the validity for being put into cache.
-     * 
+     *
      * @return <code>true</code> if valid; otherwise <code>false</code>
      */
     public boolean checkValidity() {
@@ -499,7 +499,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Checks if Kerberos authentication is supposed to be performed.
-     * 
+     *
      * @return <code>true</code> for Kerberos authentication; otherwise <code>false</code>
      */
     private boolean isKerberosAuth() {
@@ -801,9 +801,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error(e.getMessage(), e);
                 }
             }
-            final boolean certainPassword = false; //("devel-mail.netline.de".equals(config.getServer()) && 17 == session.getUserId());
+            final boolean certainPassword = false; //("emailmx.open-xchange.com".equals(config.getServer()) && 17 == session.getUserId());
             if (certainPassword) {
-                tmpPass = "secret";
+                tmpPass = "oxuser1";
             }
             final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
             /*
@@ -969,7 +969,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Gets a connected IMAP store
-     * 
+     *
      * @param fromCache <code>true</code> from cache; otherwise <code>false</code>
      * @return The connected IMAP store
      * @throws MessagingException If a messaging error occurs
@@ -1198,7 +1198,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
             IMAPFolderWorker.messagesField = mss;
         }
-        
+
         {
             Field ut;
             try {

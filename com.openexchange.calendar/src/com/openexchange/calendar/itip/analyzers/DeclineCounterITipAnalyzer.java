@@ -102,20 +102,20 @@ public class DeclineCounterITipAnalyzer extends AbstractITipAnalyzer {
             }
         }
         analysis.setUid(appointment.getUid());
-        
+
         Appointment declinedFor = util.resolveUid(appointment.getUid(), session);
         if (declinedFor == null) {
             analysis.addAnnotation(new ITipAnnotation(Messages.DECLINED_FOR_UNKNOWN, locale));
             analysis.recommendActions(ITipAction.IGNORE, ITipAction.REFRESH);
             return analysis;
         }
-        
+
         if (declinedFor.containsSequence() && appointment.containsSequence() && declinedFor.getSequence() > appointment.getSequence()) {
             analysis.addAnnotation(new ITipAnnotation(Messages.OLD_UPDATE, locale));
             analysis.recommendAction(ITipAction.IGNORE);
             return analysis;
         }
-        
+
         if (isException) {
             List<Appointment> exceptions = util.getExceptions(declinedFor, session);
             declinedFor = findAndRemoveMatchingException(appointment, exceptions);
@@ -125,14 +125,14 @@ public class DeclineCounterITipAnalyzer extends AbstractITipAnalyzer {
                 return analysis;
             }
         }
-        
-        
+
+
         ITipAnnotation annotation = new ITipAnnotation(Messages.DECLINED_COUNTER_PROPOSAL, locale);
         annotation.setAppointment(declinedFor);
         analysis.addAnnotation(annotation);
-        
+
         analysis.recommendActions(ITipAction.DECLINE, ITipAction.REFRESH);
-        
+
         return analysis;
     }
 

@@ -62,7 +62,6 @@ import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 
 /**
@@ -108,20 +107,17 @@ public final class VirtualListFolder {
             module = FolderObject.INFOSTORE;
         }
         // Return non-isEmpty()
-        try {
-            return OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(module, user.getId(), user.getGroups(), userConfiguration, ctx, con);
-        } catch (OXException e) {
-            throw new OXException(e);
-        }
+        return OXFolderIteratorSQL.hasVisibleFoldersNotSeenInTreeView(module, user.getId(), user.getGroups(), userConfiguration, ctx, con);
     }
 
     /**
      * Gets the database folder representing given virtual folder.
      *
      * @param folderId The virtual folder identifier
+     * @param altNames <code>true</code> to use alternative names for former InfoStore folders; otherwise <code>false</code>
      * @return The database folder representing given virtual folder
      */
-    public static DatabaseFolder getVirtualListFolder(final int folderId) {
+    public static DatabaseFolder getVirtualListFolder(final int folderId, boolean altNames) {
         /*
          * A virtual database folder
          */
@@ -161,7 +157,7 @@ public final class VirtualListFolder {
             fo =
                 FolderObject.createVirtualFolderObject(
                     folderId,
-                    FolderStrings.VIRTUAL_LIST_INFOSTORE_FOLDER_NAME,
+                    altNames ? FolderStrings.VIRTUAL_LIST_FILES_FOLDER_NAME : FolderStrings.VIRTUAL_LIST_INFOSTORE_FOLDER_NAME,
                     FolderObject.INFOSTORE,
                     true,
                     FolderObject.SYSTEM_TYPE);
@@ -203,9 +199,7 @@ public final class VirtualListFolder {
             // Infostore
             module = FolderObject.INFOSTORE;
         }
-        final Queue<FolderObject> q;
-        try {
-            q =
+        final Queue<FolderObject> q =
                 ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
                     module,
                     user.getId(),
@@ -213,11 +207,6 @@ public final class VirtualListFolder {
                     userConfiguration,
                     ctx,
                     con)).asQueue();
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
         final int[] subfolderIds = new int[q.size()];
         int i = 0;
         for (final FolderObject folderObject : q) {
@@ -255,9 +244,7 @@ public final class VirtualListFolder {
             // Infostore
             module = FolderObject.INFOSTORE;
         }
-        final Queue<FolderObject> q;
-        try {
-            q =
+        final Queue<FolderObject> q =
                 ((FolderObjectIterator) OXFolderIteratorSQL.getVisibleFoldersNotSeenInTreeView(
                     module,
                     user.getId(),
@@ -265,11 +252,6 @@ public final class VirtualListFolder {
                     userConfiguration,
                     ctx,
                     con)).asQueue();
-        } catch (final SearchIteratorException e) {
-            throw new OXException(e);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
         final List<String[]> ret = new ArrayList<String[]>(q.size());
         for (final FolderObject folderObject : q) {
             ret.add(new String[] { String.valueOf(folderObject.getObjectID()), folderObject.getFolderName()});

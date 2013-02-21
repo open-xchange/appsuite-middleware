@@ -137,11 +137,6 @@ public class PublicationSession implements Session {
     }
 
     @Override
-    public void removeRandomToken() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void setParameter(final String name, final Object value) {
         // Nothing to remember.
     }
@@ -175,6 +170,11 @@ public class PublicationSession implements Session {
     @Override
     public void setClient(final String client) {
         // Nothing to do.
+    }
+
+    @Override
+    public boolean isTransient() {
+        return false;
     }
 
 }

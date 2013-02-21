@@ -15,9 +15,9 @@ import javax.xml.namespace.QName;
 
 /**
  * <p>Java-Klasse f\u00fcr Database complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType name="Database">
  *   &lt;complexContent>
@@ -64,8 +64,8 @@ import javax.xml.namespace.QName;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Database", propOrder = {
@@ -116,31 +116,31 @@ public class Database
     protected List<JAXBElement<? extends Serializable>> rest;
 
     /**
-     * Ruft das restliche Contentmodell ab. 
-     * 
+     * Ruft das restliche Contentmodell ab.
+     *
      * <p>
-     * Sie rufen diese "catch-all"-Eigenschaft aus folgendem Grund ab: 
-     * Der Feldname "MandatoryMembersChange" wird von zwei verschiedenen Teilen eines Schemas verwendet. Siehe: 
+     * Sie rufen diese "catch-all"-Eigenschaft aus folgendem Grund ab:
+     * Der Feldname "MandatoryMembersChange" wird von zwei verschiedenen Teilen eines Schemas verwendet. Siehe:
      * Zeile 0 von http://192.168.32.167/servlet/axis2/services/OXResellerContextService?wsdl#types4
      * Zeile 0 von http://192.168.32.167/servlet/axis2/services/OXResellerContextService?wsdl#types4
      * <p>
      * Um diese Eigenschaft zu entfernen, wenden Sie eine Eigenschaftenanpassung f\u00fcr eine
-     * der beiden folgenden Deklarationen an, um deren Namen zu \u00e4ndern: 
+     * der beiden folgenden Deklarationen an, um deren Namen zu \u00e4ndern:
      * Gets the value of the rest property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the rest property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getRest().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link JAXBElement }{@code <}{@link Boolean }{@code >}
@@ -179,8 +179,8 @@ public class Database
      * {@link JAXBElement }{@code <}{@link Boolean }{@code >}
      * {@link JAXBElement }{@code <}{@link Integer }{@code >}
      * {@link JAXBElement }{@code <}{@link Boolean }{@code >}
-     * 
-     * 
+     *
+     *
      */
     public List<JAXBElement<? extends Serializable>> getRest() {
         if (rest == null) {
@@ -210,386 +210,386 @@ public class Database
         final QName qname = new QName("http://dataobjects.rmi.admin.openexchange.com/xsd", name);
         rests.add(new JAXBElement<V>(qname, clazz, value));
     }
-    
+
     /**
      * Ruft den Wert der clusterWeight-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getClusterWeight() {
         return getByName("clusterWeight", null);
     }
-    
+
     /**
      * Legt den Wert der clusterWeight-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setClusterWeight(final Integer value) {
         setByName("clusterWeight", Integer.class, value);
     }
-    
+
     /**
      * Ruft den Wert der currentUnits-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getCurrentUnits() {
         return getByName("currentUnits", null);
     }
-    
+
     /**
      * Legt den Wert der currentUnits-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setCurrentUnits(final Integer value) {
         setByName("currentUnits", Integer.class, value);
     }
-    
+
     /**
      * Ruft den Wert der driver-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDriver() {
         return getByName("driver", null);
     }
-    
+
     /**
      * Legt den Wert der driver-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDriver(final String value) {
         setByName("drive", String.class, value);
     }
-    
+
     /**
      * Ruft den Wert der id-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getId() {
         return getByName("id", null);
     }
-    
+
     /**
      * Legt den Wert der id-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setId(final Integer value) {
         setByName("id", Integer.class, value);
     }
-    
+
     /**
      * Ruft den Wert der login-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getLogin() {
         return getByName("login", null);
     }
-    
+
     /**
      * Legt den Wert der login-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setLogin(final String value) {
         setByName("login", String.class, value);
     }
-    
+
     /**
      * Ruft den Wert der master-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Boolean }
-     *     
+     *
      */
     public Boolean isMaster() {
         return getByName("master", null);
     }
-    
+
     /**
      * Legt den Wert der master-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Boolean }
-     *     
+     *
      */
     public void setMaster(final Boolean value) {
         setByName("master", Boolean.class, value);
     }
-    
+
     /**
      * Ruft den Wert der masterId-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getMasterId() {
         return getByName("masterId", null);
     }
-    
+
     /**
      * Legt den Wert der masterId-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setMasterId(final Integer value) {
         setByName("masterId", Integer.class, value);
     }
-    
+
     /**
      * Ruft den Wert der maxUnits-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getMaxUnits() {
         return getByName("maxUnits", null);
     }
-    
+
     /**
      * Legt den Wert der maxUnits-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setMaxUnits(final Integer value) {
         setByName("maxUnits", Integer.class, value);
     }
-    
+
     /**
      * Ruft den Wert der name-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return getByName("name", null);
     }
-    
+
     /**
      * Legt den Wert der name-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(final String value) {
         setByName("name", String.class, value);
     }
-    
+
     /**
      * Ruft den Wert der password-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getPassword() {
         return getByName("password", null);
     }
-    
+
     /**
      * Legt den Wert der password-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setPassword(final String value) {
         setByName("password", String.class, value);
     }
-    
+
     /**
      * Ruft den Wert der poolHardLimit-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getPoolHardLimit() {
         return getByName("poolHardLimit", null);
     }
-    
+
     /**
      * Legt den Wert der poolHardLimit-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setPoolHardLimit(final Integer value) {
         setByName("poolHardLimit", Integer.class, value);
     }
-    
+
     /**
      * Ruft den Wert der poolInitial-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getPoolInitial() {
         return getByName("poolInitial", null);
     }
-    
+
     /**
      * Legt den Wert der poolInitial-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setPoolInitial(final Integer value) {
         setByName("poolInitial", Integer.class, value);
     }
-    
+
     /**
      * Ruft den Wert der poolMax-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getPoolMax() {
         return getByName("poolMax", null);
     }
-    
+
     /**
      * Legt den Wert der poolMax-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setPoolMax(final Integer value) {
         setByName("poolMax", Integer.class, value);
     }
-    
+
     /**
      * Ruft den Wert der readId-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Integer }
-     *     
+     *
      */
     public Integer getReadId() {
         return getByName("readId", null);
     }
-    
+
     /**
      * Legt den Wert der readId-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Integer }
-     *     
+     *
      */
     public void setReadId(final Integer value) {
         setByName("readId", Integer.class, value);
     }
-    
+
     /**
      * Ruft den Wert der scheme-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getScheme() {
         return getByName("scheme", null);
     }
-    
+
     /**
      * Legt den Wert der scheme-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setScheme(final String value) {
         setByName("scheme", String.class, value);
     }
-    
+
     /**
      * Ruft den Wert der url-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getUrl() {
         return getByName("url", null);
     }
-    
+
     /**
      * Legt den Wert der url-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setUrl(final String value) {
         setByName("url", String.class, value);

@@ -34,6 +34,49 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    ox_move_config_file /opt/open-xchange/etc /opt/open-xchange/etc/hazelcast sessionstorage_hazelcast.properties sessions.properties
+
+    # SoftwareChange_Request-1291
+    pfile=/opt/open-xchange/etc/hazelcast/sessions.properties
+    if ox_exists_property com.openexchange.hazelcast.configuration.map.indexes.attributes $pfile; then
+       ox_remove_property com.openexchange.hazelcast.configuration.map.indexes.attributes $pfile
+    fi
+
+    # SoftwareChange_Request-1286
+    pfile=/opt/open-xchange/etc/hazelcast/sessions.properties
+    if ox_exists_property com.openexchange.sessionstorage.hazelcast.map.backupcount $pfile; then
+       oval=$(ox_read_property com.openexchange.sessionstorage.hazelcast.map.backupcount $pfile)
+       ox_set_property com.openexchange.hazelcast.configuration.map.backupCount $oval $pfile
+       ox_remove_property com.openexchange.sessionstorage.hazelcast.map.backupcount $pfile
+    fi
+    if ox_exists_property com.openexchange.sessionstorage.hazelcast.map.asyncbackup $pfile; then
+       oval=$(ox_read_property com.openexchange.sessionstorage.hazelcast.map.asyncbackup $pfile)
+       ox_set_property com.openexchange.hazelcast.configuration.map.asyncBackupCount $oval $pfile
+       ox_remove_property com.openexchange.sessionstorage.hazelcast.map.asyncbackup $pfile
+    fi
+    if ox_exists_property com.openexchange.sessionstorage.hazelcast.enabled $pfile; then
+       ox_remove_property com.openexchange.sessionstorage.hazelcast.enabled $pfile
+    fi
+    if ! ox_exists_property com.openexchange.hazelcast.configuration.map.readBackupData $pfile; then
+       ox_set_property com.openexchange.hazelcast.configuration.map.readBackupData "true" $pfile
+    fi
+    if ! ox_exists_property com.openexchange.hazelcast.configuration.map.name $pfile; then
+       ox_set_property com.openexchange.hazelcast.configuration.map.name "sessions-2" $pfile
+    fi
+
+    # obsoleted by SoftwareChange_Request-1291
+    #if ! ox_exists_property com.openexchange.hazelcast.configuration.map.indexes.attributes $pfile; then
+    #   ox_set_property com.openexchange.hazelcast.configuration.map.indexes.attributes "contextId,userId" $pfile
+    #fi
+
+fi
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -44,21 +87,33 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
-%dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
+%dir /opt/open-xchange/etc/hazelcast/
+%config(noreplace) /opt/open-xchange/etc/hazelcast/*
 
 %changelog
-* Fri Dec 21 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Feb 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 7.0.1
+* Tue Feb 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.0.1
+* Thu Feb 14 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.0.1
+* Fri Feb 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.0.1
+* Tue Jan 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-01-23
+* Thu Jan 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.0.1
+* Fri Dec 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for public patch 2012-12-21
-* Tue Dec 18 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Dec 18 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Third release candidate for 7.0.0
-* Mon Dec 17 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Mon Dec 17 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 7.0.0
-* Tue Dec 04 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Dec 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.0.0
-* Tue Dec 04 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Dec 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.0.0 release
-* Tue Nov 20 2012 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Nov 20 2012 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for next EDP drop
 * Tue Nov 13 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 First release candidate for EDP drop #6

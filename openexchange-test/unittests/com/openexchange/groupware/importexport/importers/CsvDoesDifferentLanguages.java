@@ -49,19 +49,23 @@
 
 package com.openexchange.groupware.importexport.importers;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.util.List;
-import junit.framework.TestCase;
+import junit.framework.JUnit4TestAdapter;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contact.helpers.ContactSwitcher;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.Expectations;
+import com.openexchange.groupware.importexport.AbstractContactTest;
+import com.openexchange.groupware.importexport.CSVContactImportTest;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.groupware.importexport.csv.CSVParser;
-import com.openexchange.importexport.formats.csv.DutchOutlookMapper;
-import com.openexchange.importexport.formats.csv.EnglishOutlookMapper;
-import com.openexchange.importexport.formats.csv.FrenchOutlookMapper;
-import com.openexchange.importexport.formats.csv.GermanOutlookMapper;
 import com.openexchange.importexport.importers.CSVContactImporter;
+import com.openexchange.importexport.importers.TestCSVContactImporter;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 
@@ -69,7 +73,11 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * Part of bugfix 15231
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class CsvDoesDifferentLanguages extends TestCase {
+public class CsvDoesDifferentLanguages extends AbstractContactTest {
+
+    public static junit.framework.Test suite() {
+        return new JUnit4TestAdapter(CsvDoesDifferentLanguages.class);
+    }
 
     private final String dutch =
         "Voornaam,Achternaam,Weergavenaam,Bijnaam," +
@@ -119,27 +127,27 @@ public class CsvDoesDifferentLanguages extends TestCase {
         expectations.verify(message, c);
     }
 
+    @Test
     public void testBug15231WithDutch() throws Throwable{
         Contact c = makeContact(dutch);
         assertBasicFields("Dutch", c);
     }
 
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
+        AbstractContactTest.initialize();
         Class<CalendarCollectionService> myClass = CalendarCollectionService.class;
 
         this.oldInstance = ServerServiceRegistry.getInstance().getService(myClass);
         ServerServiceRegistry.getInstance().addService(myClass, new MockCalendarCollectionService());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if(oldInstance != null) {
             ServerServiceRegistry.getInstance().addService(CalendarCollectionService.class, oldInstance);
         }
-        super.tearDown();
     }
 
     private Contact makeContact(String csv) throws Throwable {
@@ -150,11 +158,7 @@ public class CsvDoesDifferentLanguages extends TestCase {
         List<String> header = list.get(0);
         List<String> data = list.get(1);
 
-        CSVContactImporter importer = new CSVContactImporter();
-        importer.addFieldMapper(new EnglishOutlookMapper());
-        importer.addFieldMapper(new GermanOutlookMapper());
-        importer.addFieldMapper(new FrenchOutlookMapper());
-        importer.addFieldMapper(new DutchOutlookMapper());
+        CSVContactImporter importer = new TestCSVContactImporter();
 		
         boolean[] atLeastOneFieldInserted = new boolean[]{false};
         ContactSwitcher conSet = importer.getContactSwitcher();

@@ -60,7 +60,7 @@ import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 public class GetModuleAccess extends ContextAbstraction {
-   
+
     public GetModuleAccess(final String[] args2) {
 
         final AdminParser parser = new AdminParser("getmoduleaccessforcontext");
@@ -68,15 +68,15 @@ public class GetModuleAccess extends ContextAbstraction {
         setOptions(parser);
 
         String successtext = null;
-        
+
         try {
             parser.ownparse(args2);
             final Context ctx = contextparsing(parser);
-            
+
             parseAndSetContextName(parser, ctx);
-            
+
             successtext = nameOrIdSetInt(this.ctxid, this.contextname, "context");
-            
+
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
@@ -84,10 +84,10 @@ public class GetModuleAccess extends ContextAbstraction {
 
             // Fetch access object
             final UserModuleAccess access = oxres.getModuleAccess(ctx, auth);
-            
+
             // output access object
-            doCsvOutput(access);   
-            
+            doCsvOutput(access);
+
             // exit application
             sysexit(0);
         } catch (final Exception e) {
@@ -130,7 +130,7 @@ public class GetModuleAccess extends ContextAbstraction {
         datarow.add(String.valueOf(access.isGlobalAddressBookDisabled()));
         datarow.add(String.valueOf(access.isPublicFolderEditable()));
         data.add(datarow);
-        doCSVOutput(getAccessColums(),data);        
+        doCSVOutput(getAccessColums(),data);
     }
 
     private static ArrayList<String> getAccessColums() {
@@ -175,7 +175,7 @@ public class GetModuleAccess extends ContextAbstraction {
 
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
-        setContextOption(parser, NeededQuadState.eitheror);        
+        setContextOption(parser, NeededQuadState.eitheror);
         setContextNameOption(parser, NeededQuadState.eitheror);
     }
 }

@@ -50,20 +50,21 @@
 package com.openexchange.jslob.test;
 
 import org.json.JSONObject;
+import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobId;
 import com.openexchange.jslob.shared.SharedJSlobService;
 
 /**
  * {@link SimSharedJSlobService}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class SimSharedJSlobService implements SharedJSlobService {
 
     private final String serviceId;
 
-    private final JSlob jslob;
+    private final DefaultJSlob jslob;
 
     /**
      * Initializes a new {@link SimSharedJSlobService}.
@@ -71,7 +72,7 @@ public class SimSharedJSlobService implements SharedJSlobService {
     public SimSharedJSlobService(JSONObject jsonObject) {
         super();
         serviceId = "com.openexchange.jslob.config";
-        jslob = new JSlob(jsonObject);
+        jslob = new DefaultJSlob(jsonObject);
         jslob.setId(new JSlobId(serviceId, "sharedjslob", 0, 0));
     }
 

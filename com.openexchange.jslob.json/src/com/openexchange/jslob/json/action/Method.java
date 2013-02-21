@@ -56,7 +56,7 @@ import java.util.Map;
 
 /**
  * An enumeration for HTTP methods.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum Method {
@@ -75,7 +75,7 @@ public enum Method {
 
     /**
      * Gets the appropriate method.
-     * 
+     *
      * @param method The method identifier
      * @return The appropriate method or <code>null</code>
      */

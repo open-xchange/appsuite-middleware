@@ -57,9 +57,9 @@ import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 /**
- * 
+ *
  * @author d7
- * 
+ *
  */
 public class ListServer extends ServerAbstraction {
 
@@ -111,7 +111,7 @@ public class ListServer extends ServerAbstraction {
         for (final Server server : servers) {
             data.add(makeCSVData(server));
         }
-        
+
         //doOutput(new String[] { "3r", "35l" }, new String[] { "Id", "Name" }, data);
         doOutput(new String[] { "r", "l" }, new String[] { "Id", "Name" }, data);
     }
@@ -121,13 +121,13 @@ public class ListServer extends ServerAbstraction {
         final ArrayList<String> columns = new ArrayList<String>();
         columns.add("id");
         columns.add("name");
-    
+
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
-    
+
         for (final Server server : servers) {
             data.add(makeCSVData(server));
         }
-    
+
         doCSVOutput(columns, data);
     }
 

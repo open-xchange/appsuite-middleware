@@ -66,29 +66,29 @@ import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 
 /**
- * {@link LdapContactStorageFactory} 
- * 
+ * {@link LdapContactStorageFactory}
+ *
  * Factory for LDAP contact storages based on property files.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class LdapContactStorageFactory {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LdapContactStorageFactory.class));
 
     private LdapContactStorageFactory() {
         super();
         // prevent instantiation
     }
-    
+
     public static ContactStorage create(File propertyFile) throws OXException {
         Properties properties = Tools.loadProperties(propertyFile);
         if (null != properties && properties.containsKey("com.openexchange.contact.storage.ldap.contextID")) {
             return create(properties);
         } else {
-            LOG.debug("File " + propertyFile + " contains no contact-storage-ldap settings, skipping."); 
+            LOG.debug("File " + propertyFile + " contains no contact-storage-ldap settings, skipping.");
             return null;
-        }        
+        }
     }
 
     public static ContactStorage create(Properties properties) throws OXException {
@@ -96,9 +96,9 @@ public final class LdapContactStorageFactory {
         if (null == config.getFolderID()) {
             if (null == config.getFoldername()) {
                 throw LdapExceptionCodes.MISSING_CONFIG_VALUE.create("foldername");
-            }            
+            }
             config.setFolderID(Integer.toString(getFolderID(config.getContextID(), config.getFoldername())));
-        }        
+        }
         ContactStorage storage = null;
         if (0 < config.getRefreshinterval()) {
             if (IDMapping.DYNAMIC.equals(config.getIDMapping())) {
@@ -114,7 +114,7 @@ public final class LdapContactStorageFactory {
         }
         return storage;
     }
-    
+
     public static List<ContactStorage> createAll() throws OXException {
         List<ContactStorage> storages = new ArrayList<ContactStorage>();
         for (File propertyFile : Tools.listPropertyFiles()) {

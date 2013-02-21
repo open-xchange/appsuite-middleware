@@ -77,13 +77,13 @@ public interface ITipIntegrationUtility {
     void createAppointment(CalendarDataObject appointment, Session session) throws OXException;
 
     void updateAppointment(CalendarDataObject update, Session session, Date clientLastModified) throws OXException;
-    
+
     void changeConfirmationForExternalParticipant(Appointment update, ConfirmationChange change, Session session) throws OXException;
 
     void deleteAppointment(Appointment appointment, Session session,  Date clientLastModified) throws OXException;
 
     Appointment reloadAppointment(Appointment appointment, Session session) throws OXException;
-    
+
     Appointment loadAppointment(Appointment appointment, Session session) throws OXException;
 
     int getFolderIdForUser(int appId, int userId, int contextId) throws OXException;

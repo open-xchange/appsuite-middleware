@@ -54,14 +54,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link PutIfAbsent}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface PutIfAbsent {
 
     /**
      * If the specified key is not already associated with a value, associate it with the given value. The action is performed atomically.
-     * 
+     *
      * @param key The key with which the specified value is to be associated
      * @param value The value to be associated with the specified key
      * @return The previous value associated with the specified key, or <tt>null</tt> if there was no mapping for the key.

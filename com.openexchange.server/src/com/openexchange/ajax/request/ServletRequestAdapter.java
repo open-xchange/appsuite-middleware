@@ -62,6 +62,7 @@ import org.json.JSONObject;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 public class ServletRequestAdapter implements SimpleRequest {
@@ -91,8 +92,7 @@ public class ServletRequestAdapter implements SimpleRequest {
 
 	@Override
     public String[] getParameterValues(final String param) {
-		final String commaSeparated =  req.getParameter(param);
-		return commaSeparated.split("\\s*,\\s*");
+		return Strings.splitByComma(req.getParameter(param));
 	}
 
 	@Override
@@ -111,7 +111,7 @@ public class ServletRequestAdapter implements SimpleRequest {
 	        }
 	        String characterEncoding = req.getCharacterEncoding();
 	        if (null == characterEncoding) {
-				characterEncoding=ServerConfig.getProperty(Property.DefaultEncoding);//"UTF-8";
+				characterEncoding=ServerConfig.getProperty(Property.DefaultEncoding); // "UTF-8"
 			}
 			final String body =  new String(baos.toByteArray(), Charsets.forName(characterEncoding));
 
@@ -126,7 +126,7 @@ public class ServletRequestAdapter implements SimpleRequest {
 	@Override
 	public String toString(){
 		final StringBuilder b = new StringBuilder();
-		final Enumeration e = req.getParameterNames();
+		final Enumeration<?> e = req.getParameterNames();
 		while(e.hasMoreElements()) {
 			final String name = e.nextElement().toString();
 			b.append(" | ");

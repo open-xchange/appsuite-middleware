@@ -61,16 +61,16 @@ import com.openexchange.time.TimeTools;
 
 /**
  * {@link NormalizeTest}
- * 
+ *
  * Tests normaliziation of free/busy data.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class NormalizeTest extends TestCase {
-    
+
     private FreeBusyData originalData;
     private FreeBusyData normalizedData;
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -89,7 +89,7 @@ public class NormalizeTest extends TestCase {
         }
         normalizedData.normalize();
     }
-    
+
     /**
      * Tests that each interval is within the data's boundaries.
      */
@@ -101,7 +101,7 @@ public class NormalizeTest extends TestCase {
             assertFalse("Interval end-time outside data range", interval.getEndTime().after(until));
         }
     }
-    
+
     /**
      * Tests that the intervals are sorted correctly.
      */
@@ -115,10 +115,10 @@ public class NormalizeTest extends TestCase {
                 if (first.getEndTime().equals(second.getEndTime())) {
                     assertTrue("Intervals not sorted correctly", first.getStatus().isMoreConflicting(second.getStatus()));
                 }
-            }            
+            }
         }
     }
-    
+
     /**
      * Tests that each original interval is also present in the normalized data with an equal or more conflicting busy status.
      */
@@ -126,19 +126,19 @@ public class NormalizeTest extends TestCase {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
         for (FreeBusyInterval originalInterval : originalData.getIntervals()) {
-            calendar.setTime(originalInterval.getStartTime().before(normalizedData.getFrom()) ? 
+            calendar.setTime(originalInterval.getStartTime().before(normalizedData.getFrom()) ?
                 normalizedData.getFrom() : originalInterval.getStartTime());
             calendar.add(Calendar.MINUTE, 1);
             while (calendar.getTime().before(originalInterval.getEndTime()) && calendar.getTime().before(normalizedData.getUntil())) {
                 BusyStatus status = getStatusAt(calendar.getTime(), normalizedData);
                 assertNotNull("No busy status for original interval", status);
-                assertFalse("Busy status is less conflicting than original status", 
+                assertFalse("Busy status is less conflicting than original status",
                     originalInterval.getStatus().isMoreConflicting(status));
                 calendar.add(Calendar.MINUTE, 1);
             }
         }
     }
-    
+
     /**
      * Tests that no interval overlaps another one in the normalized data
      */
@@ -149,16 +149,16 @@ public class NormalizeTest extends TestCase {
             assertFalse("Interval overlaps another", first.getEndTime().after(second.getStartTime()));
         }
     }
-    
+
     private static BusyStatus getStatusAt(Date when, FreeBusyData data) {
         for (FreeBusyInterval interval : data.getIntervals()) {
             if (false == interval.getEndTime().before(when) && false == interval.getStartTime().after(when)) {
                 return interval.getStatus();
-            }            
-        }                
+            }
+        }
         return null;
     }
-    
+
     private static FreeBusyData generateData(Date from, Date until, int intervals, int minIntervalMinutes, int maxIntervalMinutes) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -180,7 +180,7 @@ public class NormalizeTest extends TestCase {
         }
         return freeBusyData;
     }
-    
+
     private static int getDaysBetween(Date date1, Date date2) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -192,5 +192,5 @@ public class NormalizeTest extends TestCase {
         }
         return days;
     }
-    
+
 }

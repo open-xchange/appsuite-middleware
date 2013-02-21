@@ -56,14 +56,14 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link BlackWhiteListInterface}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public interface BlackWhiteListInterface {
 
     /**
      * Replaces a whole list with the given entries.
-     * 
+     *
      * @param session The Session.
      * @param type The list type (black/white).
      * @param list The list entries.
@@ -72,7 +72,7 @@ public interface BlackWhiteListInterface {
 
     /**
      * Adds list entries.
-     * 
+     *
      * @param session The Session.
      * @param type The list type (black/white).
      * @param entries The entries to add.
@@ -81,7 +81,7 @@ public interface BlackWhiteListInterface {
 
     /**
      * Removes list entries.
-     * 
+     *
      * @param session The Session.
      * @param type The list type (black/white).
      * @param entries The entries to remove.
@@ -90,7 +90,7 @@ public interface BlackWhiteListInterface {
 
     /**
      * Returns all entries of the given list type.
-     * 
+     *
      * @param session The Session.
      * @param type The list type (black/white).
      * @return A List of entries.

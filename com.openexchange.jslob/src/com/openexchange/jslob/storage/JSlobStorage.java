@@ -56,30 +56,31 @@ import com.openexchange.jslob.JSlobId;
 
 /**
  * {@link JSlobStorage} - The JSlob storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface JSlobStorage {
 
     /**
      * Gets the identifier of this JSlob storage.
-     * 
+     *
      * @return The identifier of this JSlob storage.
      */
     String getIdentifier();
 
     /**
      * Stores an element with the given identifier.
-     * 
+     *
      * @param id Identifier.
      * @param t Element.
+     * @return <code>true</code> if there was no such element before; other <code>false</code> if another one had been replaced
      * @throws OXException If storing fails
      */
-    void store(JSlobId id, JSlob t) throws OXException;
+    boolean store(JSlobId id, JSlob t) throws OXException;
 
     /**
      * Reads the element associated with the given identifier.
-     * 
+     *
      * @param id The identifier
      * @return The element.
      * @throws OXException If loading fails or no element is associated with specified identifier
@@ -87,8 +88,15 @@ public interface JSlobStorage {
     JSlob load(JSlobId id) throws OXException;
 
     /**
+     * Invalidates denoted element.
+     *
+     * @param id The identifier
+     */
+    void invalidate(JSlobId id);
+
+    /**
      * Reads the element associated with the given identifier.
-     * 
+     *
      * @param id The identifier.
      * @return The element or <code>null</code>
      * @throws OXException If loading fails
@@ -97,7 +105,7 @@ public interface JSlobStorage {
 
     /**
      * Reads the elements associated with the given identifier.
-     * 
+     *
      * @param id The identifier.
      * @return The elements
      * @throws OXException If loading fails
@@ -106,7 +114,7 @@ public interface JSlobStorage {
 
     /**
      * Deletes the element associated with the given identifier.
-     * 
+     *
      * @param id Identifier.
      * @return The deleted Element.
      * @throws OXException If removal fails
@@ -115,7 +123,7 @@ public interface JSlobStorage {
 
     /**
      * Marks the entry associated with given identifier as locked.
-     * 
+     *
      * @param jslobId The JSlob identifier
      * @return <code>true</code> if this call successfully set the lock; otherwise <code>false</code> if already locked
      * @throws OXException If setting the lock fails
@@ -124,7 +132,7 @@ public interface JSlobStorage {
 
     /**
      * Marks the entry associated with given identifier as unlocked.
-     * 
+     *
      * @param jslobId The JSlob identifier
      * @throws OXException If setting the unlock fails
      */

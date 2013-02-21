@@ -56,7 +56,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link OXNoSQLSessionStorageExceptionCodes}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public enum OXNoSQLSessionStorageExceptionCodes implements OXExceptionCode {
@@ -65,7 +65,6 @@ public enum OXNoSQLSessionStorageExceptionCodes implements OXExceptionCode {
     NOSQL_SESSIONSTORAGE_SAVE_FAILED(OXNoSQLSessionStorageExceptionMessages.NOSQL_SESSIONSTORAGE_SAVE_FAILED_MSG, 2, Category.CATEGORY_ERROR),
     NOSQL_SESSIONSTORAGE_LOOKUP_FAILED(OXNoSQLSessionStorageExceptionMessages.NOSQL_SESSIONSTORAGE_LOOKUP_FAILED_MSG, 3, Category.CATEGORY_ERROR),
     NOSQL_SESSIONSTORAGE_REMOVE_FAILED(OXNoSQLSessionStorageExceptionMessages.NOSQL_SESSIONSTORAGE_REMOVE_FAILED_MSG, 4, Category.CATEGORY_ERROR),
-    NOSQL_SESSIONSTORAGE_NO_ENCRYPTION_KEY(OXNoSQLSessionStorageExceptionMessages.NOSQL_SESSIONSTORAGE_NO_ENCRYPTION_KEY_MSG, 6, Category.CATEGORY_ERROR),
     NOSQL_SESSIONSTORAGE_DUPLICATE_AUTHID(OXNoSQLSessionStorageExceptionMessages.NOSQL_SESSIONSTORAGE_DUPLICATE_AUTHID_MSG, 7, Category.CATEGORY_ERROR),
     NOSQL_SESSIONSTORAGE_UNSUPPORTED_OPERATION(OXNoSQLSessionStorageExceptionMessages.NOSQL_SESSIONSTORAGE_UNSUPPORTED_OPERATION_MSG, 8, Category.CATEGORY_ERROR),
     NOSQL_SESSIONSTORAGE_ALTID_NOT_FOUND(OXNoSQLSessionStorageExceptionMessages.NOSQL_SESSIONSTORAGE_ALTID_NOT_FOUND_MSG, 9, Category.CATEGORY_ERROR),
@@ -125,7 +124,7 @@ public enum OXNoSQLSessionStorageExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -134,7 +133,7 @@ public enum OXNoSQLSessionStorageExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -144,7 +143,7 @@ public enum OXNoSQLSessionStorageExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

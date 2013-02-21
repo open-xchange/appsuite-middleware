@@ -56,9 +56,9 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Server;
 
 /**
- * 
+ *
  * @author d7,cutmasta
- * 
+ *
  */
 public class RegisterServer extends ServerAbstraction {
 

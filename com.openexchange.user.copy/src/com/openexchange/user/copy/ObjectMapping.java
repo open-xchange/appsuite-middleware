@@ -61,7 +61,7 @@ public interface ObjectMapping<T> {
     T getSource(int id);
 
     T getDestination(T source);
-    
+
     Set<Integer> getSourceKeys();
 
 }

@@ -65,14 +65,16 @@ import com.openexchange.mail.dataobjects.MailPart;
 
 /**
  * {@link MimeFilter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MimeFilter {
 
+    private static final String MESSAGE_ID = MessageHeaders.HDR_MESSAGE_ID;
+
     /**
      * Gets the MIME filter for specified alias.
-     * 
+     *
      * @param alias The alias
      * @return The appropriate MIME filter or <code>null</code> if alias is unknown
      */
@@ -85,7 +87,7 @@ public class MimeFilter {
 
     /**
      * Gets the MIME filter for specified ignorable <code>Content-Type</code>s
-     * 
+     *
      * @param ignorableContentTypes The ignorable <code>Content-Type</code>s
      * @return The appropriate MIME filter
      */
@@ -95,7 +97,7 @@ public class MimeFilter {
 
     /**
      * Gets the MIME filter for specified ignorable <code>Content-Type</code>s
-     * 
+     *
      * @param ignorableContentTypes The ignorable <code>Content-Type</code>s
      * @return The appropriate MIME filter
      */
@@ -119,7 +121,7 @@ public class MimeFilter {
 
     /**
      * Gets the ignorable <code>Content-Type</code>s
-     * 
+     *
      * @return The ignorable <code>Content-Type</code>s
      */
     public List<String> getIgnorableContentTypes() {
@@ -128,13 +130,17 @@ public class MimeFilter {
 
     /**
      * Filters matching parts from specified MIME message.
-     * 
+     *
      * @param mimeMessage The MIME message to filter
      * @return The filtered MIME message
      * @throws OXException If filter operation fails
      */
     public MimeMessage filter(final MimeMessage mimeMessage) throws OXException {
+        if (null == mimeMessage) {
+            return null;
+        }
         try {
+            final String messageId = mimeMessage.getHeader(MESSAGE_ID, null);
             final String contentType = LocaleTools.toLowerCase(mimeMessage.getContentType());
             if (!contentType.startsWith("multipart/")) {
                 // Nothing to filter
@@ -144,10 +150,19 @@ public class MimeFilter {
             handlePart((Multipart) mimeMessage.getContent(), newMultipart);
             mimeMessage.setContent(newMultipart);
             mimeMessage.saveChanges();
+            // Restore original Message-Id header
+            if (null == messageId) {
+                mimeMessage.removeHeader(MESSAGE_ID);
+            } else {
+                mimeMessage.setHeader(MESSAGE_ID, messageId);
+            }
             return mimeMessage;
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -156,7 +171,7 @@ public class MimeFilter {
 
     /**
      * Invoked to detect if passed body part should be ignored.
-     * 
+     *
      * @param contentType The part's Content-Type
      * @param bodyPart The body part
      * @return <code>true</code> to ignore; otherwise <code>false</code>
@@ -172,7 +187,7 @@ public class MimeFilter {
 
     /**
      * Invoked to detect if passed body part should be ignored.
-     * 
+     *
      * @param contentType The part's Content-Type
      * @param bodyPart The body part
      * @return <code>true</code> to ignore; otherwise <code>false</code>

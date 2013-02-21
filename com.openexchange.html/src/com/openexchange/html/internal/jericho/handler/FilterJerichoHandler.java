@@ -56,13 +56,11 @@ import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -83,12 +81,14 @@ import com.openexchange.html.internal.jericho.JerichoHandler;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
-import com.openexchange.java.Charsets;
+import com.openexchange.java.AsciiReader;
+import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 
 /**
  * {@link FilterJerichoHandler}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FilterJerichoHandler implements JerichoHandler {
@@ -245,7 +245,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     /**
      * Sets whether to replace URLs.
-     * 
+     *
      * @param replaceUrls <code>true</code> to replace URLs; otherwise <code>false</code>
      * @return This handler with new behavior applied
      */
@@ -256,7 +256,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     /**
      * Sets whether to replace image URLs.
-     * 
+     *
      * @param dropExternalImages <code>true</code> to replace image URLs; otherwise <code>false</code>
      * @return This handler with new behavior applied
      */
@@ -267,7 +267,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     /**
      * Checks whether an image URL was replaced.
-     * 
+     *
      * @return <code>true</code> if an image URL was replaced; otherwise <code>false</code>
      */
     public boolean isImageURLFound() {
@@ -363,7 +363,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     /*-
                      * Should we re-encode prior to appending?
                      * E.g. "<" ==> "&lt;"
-                     * 
+                     *
                      * htmlBuilder.append(CharacterReference.reencode(content));
                      */
                     htmlBuilder.append(content);
@@ -542,7 +542,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                             attrBuilder.append(' ').append(attr);
                         } else {
                             final Set<String> allowedValues = allowedAttributes.get(attr);
-                            if (null == allowedValues || allowedValues.contains(val.toLowerCase(Locale.US))) {
+                            if (null == allowedValues || allowedValues.contains(toLowerCase(val))) {
                                 if (isNonJavaScriptURL(val)) {
                                     if (dropExternalImages && "background".equals(attr) && PATTERN_URL.matcher(val).matches()) {
                                         attrBuilder.append(' ').append(attr).append("=\"\"");
@@ -669,7 +669,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     }
 
     private static boolean isNonJavaScriptURL(final String val) {
-        return (null != val && !val.trim().toLowerCase(Locale.US).startsWith("javascript:"));
+        return (null != val && !toLowerCase(val.trim()).startsWith("javascript:"));
     }
 
     @Override
@@ -939,7 +939,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     /**
      * Parses specified HTML map.
-     * 
+     *
      * @param htmlMapStr The HTML map string
      * @return The parsed map
      */
@@ -948,7 +948,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
         final Map<String, Map<String, Set<String>>> tagMap = new HashMap<String, Map<String, Set<String>>>();
         while (m.find()) {
             final String attributes = m.group(2);
-            final String tagName = m.group(1).toLowerCase(Locale.US);
+            final String tagName = toLowerCase(m.group(1));
             if (null == attributes) {
                 tagMap.put(tagName, null);
             } else {
@@ -956,7 +956,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 final Map<String, Set<String>> attribMap = new HashMap<String, Set<String>>();
                 while (attribMatcher.find()) {
                     final String values = attribMatcher.group(2);
-                    final String attributeName = attribMatcher.group(1).toLowerCase(Locale.US);
+                    final String attributeName = toLowerCase(attribMatcher.group(1));
                     if (null == values) {
                         attribMap.put(attributeName, null);
                     } else if (values.length() == 0) {
@@ -966,7 +966,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                         final String[] valArr = values.charAt(0) == ':' ? values.substring(1).split("\\s*:\\s*") : values
                                 .split("\\s*:\\s*");
                         for (final String value : valArr) {
-                            valueSet.add(value.toLowerCase(Locale.US));
+                            valueSet.add(toLowerCase(value));
                         }
                         attribMap.put(attributeName, valueSet);
                     }
@@ -998,7 +998,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 /*
                  * Fetch from combination map
                  */
-                final String cssElement = m.group(1).toLowerCase(Locale.US);
+                final String cssElement = toLowerCase(m.group(1));
                 styleMap.put(cssElement, combiMap.get(cssElement));
             } else {
                 /*
@@ -1009,7 +1009,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 while (valueMatcher.find()) {
                     valueSet.add(valueMatcher.group());
                 }
-                styleMap.put(m.group(1).toLowerCase(Locale.US), valueSet);
+                styleMap.put(toLowerCase(m.group(1)), valueSet);
             }
         }
         return styleMap;
@@ -1020,7 +1020,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     /**
      * Parses specified combination map for CSS elements.
-     * 
+     *
      * @param combiMapStr The string representation for combination map
      * @return The parsed map
      */
@@ -1033,7 +1033,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             while (valueMatcher.find()) {
                 valueSet.add(valueMatcher.group());
             }
-            combiMap.put(m.group(1).toLowerCase(Locale.US), valueSet);
+            combiMap.put(toLowerCase(m.group(1)), valueSet);
         }
         return combiMap;
     }
@@ -1057,7 +1057,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     } else {
                         BufferedReader reader = null;
                         try {
-                            reader = new BufferedReader(new InputStreamReader(new FileInputStream(whitelist), Charsets.US_ASCII));
+                            reader = new BufferedReader(new AsciiReader(new FileInputStream(whitelist)));
                             final StringBuilder sb = new StringBuilder();
                             String line = null;
                             while ((line = reader.readLine()) != null) {
@@ -1075,13 +1075,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                             }
                             mapStr = new String(DEFAULT_WHITELIST);
                         } finally {
-                            if (null != reader) {
-                                try {
-                                    reader.close();
-                                } catch (final Exception e) {
-                                    LOG.error(e.getMessage(), e);
-                                }
-                            }
+                            Streams.close(reader);
                         }
                     }
                 }
@@ -1114,6 +1108,20 @@ public final class FilterJerichoHandler implements JerichoHandler {
             staticHTMLMap = null;
             staticStyleMap = null;
         }
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

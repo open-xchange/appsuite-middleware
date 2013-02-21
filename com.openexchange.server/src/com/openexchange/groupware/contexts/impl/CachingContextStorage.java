@@ -97,7 +97,7 @@ public class CachingContextStorage extends ContextStorage {
             contextId = I(persistantImpl.getContextId(loginInfo));
             if (NOT_FOUND != contextId.intValue()) {
                 try {
-                    cache.put(loginInfo, contextId);
+                    cache.put(loginInfo, contextId, false);
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
                 }

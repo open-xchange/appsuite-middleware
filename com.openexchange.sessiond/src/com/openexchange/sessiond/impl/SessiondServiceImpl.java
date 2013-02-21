@@ -63,7 +63,6 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
-import com.openexchange.sessiond.Parameterized;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
@@ -75,10 +74,6 @@ import com.openexchange.sessiond.SessiondServiceExtended;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SessiondServiceImpl implements SessiondServiceExtended {
-
-    private static final String PARAM_SESSION = Parameterized.PARAM_SESSION;
-
-    private static final String PARAM_VOLATILE = Parameterized.PARAM_VOLATILE;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessiondServiceImpl.class));
 
@@ -98,28 +93,43 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
-    public String addSession(final AddSessionParameter param) throws OXException {
-        final Parameterized parameterized = (param instanceof Parameterized) ? (Parameterized) param : null;
-        final boolean isVolatile;
-        if (null == parameterized) {
-            isVolatile = false;
-        } else {
-            final Boolean parameter = parameterized.<Boolean> getParameter(PARAM_VOLATILE);
-            isVolatile = null == parameter ? false : parameter.booleanValue();
-        }
-        final SessionImpl session = SessionHandler.addSession(param.getUserId(), param.getUserLoginInfo(), param.getPassword(), param.getContext().getContextId(), param.getClientIP(), param.getFullLogin(), param.getAuthId(), param.getHash(), param.getClient(), isVolatile ? new VolatileParams(parameterized) : null);
+    public Session addSession(final AddSessionParameter param) throws OXException {
+        final SessionImpl session = SessionHandler.addSession(
+            param.getUserId(),
+            param.getUserLoginInfo(),
+            param.getPassword(),
+            param.getContext().getContextId(),
+            param.getClientIP(),
+            param.getFullLogin(),
+            param.getAuthId(),
+            param.getHash(),
+            param.getClient(),
+            param.getClientToken(),
+            param.isTransient());
         if (null == session) {
             return null;
         }
-        if (null != parameterized) {
-            parameterized.setParameter(PARAM_SESSION, session);
-        }
-        return session.getSessionID();
+        return session;
     }
 
     @Override
     public void changeSessionPassword(final String sessionId, final String newPassword) throws OXException {
         SessionHandler.changeSessionPassword(sessionId, newPassword);
+    }
+
+    @Override
+    public void setClient(final String sessionId, final String client) throws OXException {
+        SessionHandler.setClient(getSession(sessionId), client);
+    }
+
+    @Override
+    public void setHash(final String sessionId, final String hash) throws OXException {
+        SessionHandler.setHash(getSession(sessionId), hash);
+    }
+
+    @Override
+    public void setLocalIp(final String sessionId, final String localIp) throws OXException {
+        SessionHandler.setLocalIp(getSession(sessionId), localIp);
     }
 
     @Override
@@ -129,12 +139,12 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public int removeUserSessions(final int userId, final Context ctx) {
-        return SessionHandler.removeUserSessions(userId, ctx.getContextId(), true).length;
+        return SessionHandler.removeUserSessions(userId, ctx.getContextId()).length;
     }
 
     @Override
     public void removeContextSessions(final int contextId) {
-        SessionHandler.removeContextSessions(contextId, true);
+        SessionHandler.removeContextSessions(contextId);
     }
 
     @Override
@@ -157,7 +167,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
-    public Session getSession(final String sessionId) {
+    public SessionImpl getSession(final String sessionId) {
         SessionControl sessionControl = SessionHandler.getSession(sessionId);
         if (null == sessionControl) {
             // No local session found. Maybe it should be migrated.
@@ -203,6 +213,11 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
+    public Session getSessionWithTokens(final String clientToken, final String serverToken) throws OXException {
+        return SessionHandler.getSessionWithTokens(clientToken, serverToken);
+    }
+
+    @Override
     public int getNumberOfActiveSessions() {
         return SessionHandler.getNumberOfActiveSessions();
     }
@@ -211,7 +226,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     public Session getAnyActiveSessionForUser(final int userId, final int contextId) {
         final Props logProperties = LogProperties.optLogProperties();
         if (null != logProperties) {
-            final Session session = logProperties.get("com.openexchange.session.session");
+            final Session session = logProperties.get(LogProperties.Name.SESSION_SESSION);
             if (null != session && userId == session.getUserId() && contextId == session.getContextId()) {
                 return session;
             }

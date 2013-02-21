@@ -66,7 +66,7 @@ import com.openexchange.messaging.MessagingService;
 import com.openexchange.session.Session;
 
 /**
- * {@link FacebookMessagingService} - The facebook messaging service.
+ * {@link FacebookMessagingService} - The Facebook messaging service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
@@ -78,7 +78,7 @@ public final class FacebookMessagingService implements MessagingService {
     private static final String DISPLAY_NAME = "Facebook";
 
     /**
-     * Gets the service identifier for facebook messaging service.
+     * Gets the service identifier for Facebook messaging service.
      *
      * @return The service identifier
      */

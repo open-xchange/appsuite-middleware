@@ -57,7 +57,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import org.junit.Test;
-import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.itip.ITipAction;
@@ -77,7 +76,7 @@ import static com.openexchange.time.TimeTools.D;
 
 /**
  * {@link UpdateITipAnalyzerTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
@@ -117,9 +116,9 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
         assertEquals(ITipChange.Type.CREATE, change.getType());
         assertEquals("123-123-123-123", change.getNewAppointment().getUid());
-        
+
         assertActions(analysis, ITipAction.ACCEPT, ITipAction.DECLINE,  ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
-        
+
         integrationBuilder.assertAllWereCalled();
 
     }
@@ -152,7 +151,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals("1", conflicts.get(0).getUid());
         assertEquals("2", conflicts.get(1).getUid());
         assertEquals("3", conflicts.get(2).getUid());
-        
+
         assertActions(analysis, ITipAction.ACCEPT_AND_IGNORE_CONFLICTS, ITipAction.DECLINE, ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
 
 
@@ -214,7 +213,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertTrue(changes.get(2).isException());
         assertTrue(changes.get(3).isException());
         assertTrue(changes.get(4).isException());
-        
+
         assertEquals(appointment, changes.get(1).getMasterAppointment());
         assertEquals(appointment, changes.get(2).getMasterAppointment());
         assertEquals(appointment, changes.get(3).getMasterAppointment());
@@ -224,7 +223,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals(ex2, changes.get(2).getNewAppointment());
         assertEquals(ex3, changes.get(3).getNewAppointment());
         assertEquals(ex4, changes.get(4).getNewAppointment());
-        
+
         assertActions(analysis, ITipAction.ACCEPT, ITipAction.DECLINE,  ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
 
         integrationBuilder.assertAllWereCalled();
@@ -263,9 +262,9 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals(ITipChange.Type.UPDATE, change.getType());
         assertEquals("123-123-123-123", change.getNewAppointment().getUid());
         assertEquals(12, change.getCurrentAppointment().getObjectID());
-        
+
         assertActions(analysis, ITipAction.ACCEPT, ITipAction.DECLINE,  ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
-        
+
 
         integrationBuilder.assertAllWereCalled();
     }
@@ -303,13 +302,13 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals(ITipChange.Type.UPDATE, change.getType());
         assertEquals("123-123-123-123", change.getNewAppointment().getUid());
         assertEquals(12, change.getCurrentAppointment().getObjectID());
-        
+
         assertActions(analysis, ITipAction.ACCEPT_AND_IGNORE_CONFLICTS, ITipAction.DECLINE, ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
-        
+
 
         integrationBuilder.assertAllWereCalled();
     }
-    
+
     public void testUpdateButNotReschedule() throws OXException {
         // Simulate ITipIntegration with a matching appointment
         SimBuilder integrationBuilder = new SimBuilder();
@@ -341,9 +340,9 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals(ITipChange.Type.UPDATE, change.getType());
         assertEquals("123-123-123-123", change.getNewAppointment().getUid());
         assertEquals(12, change.getCurrentAppointment().getObjectID());
-        
+
         assertActions(analysis, ITipAction.UPDATE);
-        
+
 
         integrationBuilder.assertAllWereCalled();
     }
@@ -381,13 +380,13 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         AppointmentDiff diff = change.getDiff();
         assertNotNull(diff);
         Set<String> differingFieldNames = diff.getDifferingFieldNames();
-        
+
         assertEquals(2, differingFieldNames.size());
         assertTrue(differingFieldNames.contains(CalendarFields.START_DATE));
         assertTrue(differingFieldNames.contains(CalendarFields.END_DATE));
-        
+
         assertActions(analysis, ITipAction.ACCEPT, ITipAction.DECLINE,  ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
- 
+
         integrationBuilder.assertAllWereCalled();
     }
 
@@ -437,7 +436,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
         integrationBuilder.assertAllWereCalled();
     }
-    
+
     @Test
     public void testUpdateWithNewExceptionThatIsntARescheduling() throws OXException {
         SimBuilder integrationBuilder = new SimBuilder();
@@ -483,7 +482,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
         integrationBuilder.assertAllWereCalled();
     }
-    
+
     @Test
     public void testUpdateWithNewExceptionAndConflicts() throws OXException {
         SimBuilder integrationBuilder = new SimBuilder();
@@ -496,7 +495,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         newException.setTitle("Exception title");
         newException.setStartDate(D("Tomorrow at 09:00"));
         newException.setRecurrenceDatePosition(new Date(0));
-        
+
         CalendarDataObject original = appointment.clone();
         original.setObjectID(12);
 
@@ -582,13 +581,13 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals(changedException, change.getNewAppointment());
         assertEquals(13, change.getCurrentAppointment().getObjectID());
         assertEquals(12, change.getMasterAppointment().getObjectID());
-        
+
         assertActions(analysis, ITipAction.ACCEPT, ITipAction.DECLINE,  ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
 
 
         integrationBuilder.assertAllWereCalled();
     }
-    
+
     @Test
     public void testUpdateChangingExceptionWithoutRescheduling() throws OXException {
         SimBuilder integrationBuilder = new SimBuilder();
@@ -638,13 +637,13 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals(changedException, change.getNewAppointment());
         assertEquals(13, change.getCurrentAppointment().getObjectID());
         assertEquals(12, change.getMasterAppointment().getObjectID());
-        
+
         assertActions(analysis, ITipAction.ACCEPT, ITipAction.DECLINE, ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER, ITipAction.UPDATE);
 
 
         integrationBuilder.assertAllWereCalled();
     }
-    
+
     @Test
     public void testUpdateChangingExceptionWithConflicts() throws OXException {
         SimBuilder integrationBuilder = new SimBuilder();
@@ -695,7 +694,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals(changedException, change.getNewAppointment());
         assertEquals(13, change.getCurrentAppointment().getObjectID());
         assertEquals(12, change.getMasterAppointment().getObjectID());
-        
+
         assertActions(analysis, ITipAction.ACCEPT_AND_IGNORE_CONFLICTS, ITipAction.DECLINE, ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
 
 
@@ -750,11 +749,11 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
         assertEquals(ITipChange.Type.DELETE, change.getType());
         assertTrue(change.isException());
-        
+
         assertEquals(deletedException, change.getDeletedAppointment());
-        
+
         assertActions(analysis, ITipAction.DELETE);
-        
+
         integrationBuilder.assertAllWereCalled();
     }
 
@@ -767,9 +766,9 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
     public void testDelegation() {
         // TODO
     }
-    
-    
-    
+
+
+
     // Irrelevant Conflicts
 
     @Test
@@ -793,7 +792,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertTrue("An appointment should never conflict with itself", change.getConflicts().isEmpty());
 
     }
-    
+
     @Test
     public void testAnAppointmentDoesntConflictWithItsMaster() throws OXException {
         ITipAnalysis analysis = new ITipAnalysis();
@@ -885,7 +884,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         change.setDeleted(conflict);
         change.setType(ITipChange.Type.DELETE);
         change.setException(true);
-        
+
         analysis.addChange(change);
 
         new UpdateITipAnalyzer(null, null).purgeConflicts(analysis);
@@ -921,7 +920,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         CalendarDataObject updateToConflict = conflict.clone();
         updateToConflict.setStartDate((new Date(1)));
         updateToConflict.setEndDate(appointment.getEndDate()); // Still conflicts with the "appointment", since the enddate still matches.
-        
+
         change = new ITipChange();
         change.setNewAppointment(updateToConflict);
         change.setCurrentAppointment(conflict);
@@ -934,7 +933,7 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
             "An appointment should still conflict if it still overlaps",
             analysis.getChanges().get(0).getConflicts().isEmpty());
     }
-    
+
     @Test
     public void testCounterSuggestsChangingOrDeclining() throws OXException {
      // Simulate ITipIntegration with a matching appointment
@@ -968,17 +967,17 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals(ITipChange.Type.UPDATE, change.getType());
         assertEquals("123-123-123-123", change.getNewAppointment().getUid());
         assertEquals(12, change.getCurrentAppointment().getObjectID());
-        
+
         assertActions(analysis, ITipAction.UPDATE, ITipAction.DECLINECOUNTER);
-        
+
 
         integrationBuilder.assertAllWereCalled();
     }
-    
+
     public void testPartyCrasherViaCounter() {
         // TODO: Participant Differ
     }
-    
+
     public void testMultipleUpdatesWithConflictingActions() {
         // TODO
     }
@@ -1016,10 +1015,10 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
         List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
-        
+
         ITipAnnotation error = annotations.get(0);
         assertEquals("This is an update to an appointment that has been changed in the meantime. Best ignore it.", error.getMessage());
-        
+
         assertActions(analysis, ITipAction.IGNORE);
     }
 
@@ -1047,13 +1046,13 @@ public class UpdateITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
         List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
-        
+
         ITipAnnotation error = annotations.get(0);
         assertEquals("An attendee wants to change an appointment that could not be found. Probably the appointment was deleted. Best ignore it.", error.getMessage());
 
         assertActions(analysis, ITipAction.IGNORE);
-        
+
         integrationBuilder.assertAllWereCalled();
     }
-    
+
 }

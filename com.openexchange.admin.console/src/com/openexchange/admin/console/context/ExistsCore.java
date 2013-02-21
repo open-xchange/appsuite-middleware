@@ -63,29 +63,29 @@ public abstract class ExistsCore extends ContextAbstraction {
 
     protected void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
-        
+
         setContextOption(parser, NeededQuadState.eitheror);
         setContextNameOption(parser, NeededQuadState.eitheror);
     }
-    
+
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
         setOptions(parser);
 
         String successtext = null;
         try {
             Context ctx = null;
-            Credentials auth = null; 
+            Credentials auth = null;
             try {
                 parser.ownparse(args);
                 ctx = contextparsing(parser);
-                
+
                 // context name
                 parseAndSetContextName(parser, ctx);
-                
+
                 auth = credentialsparsing(parser);
-                
+
                 successtext = nameOrIdSetInt(this.ctxid, this.contextname, "context");
-                
+
             } catch (final RuntimeException e) {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);

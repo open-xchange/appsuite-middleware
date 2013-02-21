@@ -58,7 +58,7 @@ public class DynamicClassLoaderManagerImpl extends ServiceTracker<DynamicClassLo
 
     /**
      * Create a new service instance
-     * 
+     *
      * @param ctx The bundle context of the class loader bundle
      * @param pckAdmin The package admin.
      * @param parent The parent class loader.
@@ -147,7 +147,7 @@ public class DynamicClassLoaderManagerImpl extends ServiceTracker<DynamicClassLo
     /**
      * This list contains the current list of class loaders. The first class loader is always the package admin class loader, therefore this
      * list is never null and has always a size greater than zero.
-     * 
+     *
      * @return The list of class loaders.
      */
     public ClassLoader[] getDynamicClassLoaders() {

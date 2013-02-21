@@ -71,7 +71,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link RequestWatcherServiceImpl}
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class RequestWatcherServiceImpl implements RequestWatcherService {
@@ -97,9 +97,9 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
         serviceRegistry = RequestWatcherServiceRegistry.getInstance();
         // Get Configuration
         final ConfigurationService configService = serviceRegistry.getService(ConfigurationService.class);
-        final boolean isWatcherEnabled = configService.getBoolProperty("com.openexchange.http.requestwatcher.isEnabled", true);
-        final int watcherFrequency = configService.getIntProperty("com.openexchange.http.requestwatcher.frequency", 30000);
-        final int requestMaxAge = configService.getIntProperty("com.openexchange.http.requestwatcher.maxRequestAge", 60000);
+        final boolean isWatcherEnabled = configService.getBoolProperty("com.openexchange.requestwatcher.isEnabled", true);
+        final int watcherFrequency = configService.getIntProperty("com.openexchange.requestwatcher.frequency", 30000);
+        final int requestMaxAge = configService.getIntProperty("com.openexchange.requestwatcher.maxRequestAge", 60000);
         if (isWatcherEnabled) {
             // Create ScheduledTimerTask to watch requests
             final TimerService timerService = serviceRegistry.getService(TimerService.class);
@@ -134,7 +134,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                             logRequestRegistryEntry(requestRegistryEntry, sb);
                             try {
                                 requestRegistry.remove(requestRegistryEntry);
-                                requestRegistryEntry.stopProcessing();
+                                requestRegistryEntry.sendError();
                             } catch (final IOException e) {
                                 LOG.error(RequestWatcherExceptionMessage.ERROR_WHILE_SENDING_SERVLET_STATUS_CODE_MSG, e.getCause());
                             }
@@ -149,10 +149,10 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                     trace.setStackTrace(entry.getStackTrace());
                     Props logProperties = LogProperties.optLogProperties(entry.getThread());
                     logBuilder.append("Request\n");
-                    
+
                     // If we have additional log properties from the ThreadLocal add it to the logBuilder
                     if (logProperties != null) {
-                        Map<String, Object> propertyMap = logProperties.getMap();
+                        Map<String, Object> propertyMap = logProperties.asMap();
                         // Sort the properties for readability
                         Map<String, String> sorted = new TreeMap<String, String>();
                         for (Entry<String, Object> propertyEntry : propertyMap.entrySet()) {
@@ -169,13 +169,14 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                         }
                     }
 
-                    String requestParameters = entry.getRequestParameters();
-                    if(!requestParameters.isEmpty()) {
-                        logBuilder
-                        .append("with parameters:\n")
-                        .append(requestParameters).append("\n");
-                    }
-                    
+                      // Make sure not to log any client specific parameters as security consideration
+//                    String requestParameters = entry.getRequestParameters();
+//                    if(!requestParameters.isEmpty()) {
+//                        logBuilder
+//                        .append("with parameters:\n")
+//                        .append(requestParameters).append("\n");
+//                    }
+
                     RequestWatcherServiceImpl.LOG.info(
                         logBuilder
                         .append("with age: ").append(entry.getAge()).append(" ms").append("\n")

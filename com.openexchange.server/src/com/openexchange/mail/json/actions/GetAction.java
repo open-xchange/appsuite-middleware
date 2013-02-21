@@ -70,8 +70,11 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.log.Log;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -80,7 +83,6 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -150,6 +152,7 @@ public final class GetAction extends AbstractMailAction {
     private static final Pattern SPLIT = Pattern.compile(" *, *");
 
     private AJAXRequestResult performGet(final MailRequest req) throws OXException {
+        final Props logProperties = LogProperties.getLogProperties();
         try {
             final ServerSession session = req.getSession();
             /*
@@ -214,6 +217,8 @@ public final class GetAction extends AbstractMailAction {
                     uid = tmp2;
                 }
             }
+            logProperties.put(LogProperties.Name.MAIL_MAIL_ID, uid);
+            logProperties.put(LogProperties.Name.MAIL_FULL_NAME, folderPath);
             AJAXRequestResult data = getJSONNullResult();
             if (showMessageSource) {
                 /*
@@ -277,7 +282,9 @@ public final class GetAction extends AbstractMailAction {
                     req.getRequest().setFormat("file");
                     final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(baos.toByteArray());
                     fileHolder.setContentType("application/octet-stream");
-                    fileHolder.setName(new com.openexchange.java.StringAllocator(mail.getSubject()).append(".eml").toString());
+                    // Set file name
+                    final String subject = mail.getSubject();
+                    fileHolder.setName(new com.openexchange.java.StringAllocator(isEmpty(subject) ? "mail" : saneForFileName(subject)).append(".eml").toString());
                     return new AJAXRequestResult(fileHolder, "file");
                 }
                 final ContentType ct = mail.getContentType();
@@ -392,9 +399,15 @@ public final class GetAction extends AbstractMailAction {
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            logProperties.remove(LogProperties.Name.MAIL_MAIL_ID);
+            logProperties.remove(LogProperties.Name.MAIL_FULL_NAME);
         }
     }
 
@@ -405,6 +418,38 @@ public final class GetAction extends AbstractMailAction {
         while (iter.hasNext()) {
             final Map.Entry<String, String> entry = iter.next();
             sb.append(entry.getKey()).append(delim).append(entry.getValue()).append(crlf);
+        }
+        return sb.toString();
+    }
+
+    private static String saneForFileName(final String fileName) {
+        if (isEmpty(fileName)) {
+            return fileName;
+        }
+        final int len = fileName.length();
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(len);
+        char prev = '\0';
+        for (int i = 0; i < len; i++) {
+            final char c = fileName.charAt(i);
+            if (Character.isWhitespace(c)) {
+                if (prev != '_') {
+                    prev = '_';
+                    sb.append(prev);
+                }
+            } else if ('/' == c) {
+                if (prev != '_') {
+                    prev = '_';
+                    sb.append(prev);
+                }
+            } else if ('\\' == c) {
+                if (prev != '_') {
+                    prev = '_';
+                    sb.append(prev);
+                }
+            } else {
+                prev = '\0';
+                sb.append(c);
+            }
         }
         return sb.toString();
     }

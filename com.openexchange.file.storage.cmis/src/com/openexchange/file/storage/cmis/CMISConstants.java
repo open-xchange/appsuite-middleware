@@ -53,7 +53,7 @@ import com.openexchange.file.storage.FileStorageConstants;
 
 /**
  * {@link CMISConstants} - Provides useful constants for CMIS file storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CMISConstants implements FileStorageConstants {

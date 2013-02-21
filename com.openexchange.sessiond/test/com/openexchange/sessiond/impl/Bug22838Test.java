@@ -55,7 +55,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link Bug22838Test}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class Bug22838Test extends TestCase {
@@ -64,7 +64,7 @@ public class Bug22838Test extends TestCase {
 
     /**
      * Initializes a new {@link Bug22838Test}.
-     * 
+     *
      * @param name
      */
     public Bug22838Test(String name) {
@@ -84,7 +84,7 @@ public class Bug22838Test extends TestCase {
     }
 
     public void testMergeEmptyArrayWithNull() throws Exception {
-        Session[] retval = SessionHandler.removeUserSessions(0, 0, true);
+        Session[] retval = SessionHandler.removeUserSessions(0, 0);
         assertEquals("Array length not 0", 0, retval.length);
     }
 

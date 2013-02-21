@@ -52,13 +52,10 @@ package com.openexchange.admin.rmi.impl;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXResourcePluginInterface;
@@ -80,23 +77,24 @@ import com.openexchange.admin.storage.interfaces.OXResourceStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.log.LogFactory;
 
 public class OXResource extends OXCommonImpl implements OXResourceInterface{
-    
+
     private static final long serialVersionUID = -7012370962672596682L;
 
-    private static final Log log = LogFactory.getLog(OXResource.class);    
-    
+    private static final Log log = LogFactory.getLog(OXResource.class);
+
     private final BasicAuthenticator basicauth;
-    
+
     private final OXResourceStorageInterface oxRes;
-    
+
     private AdminCache cache = null;
 
     private BundleContext context = null;
-    
+
     private PropertyHandler prop = null;
-    
+
     public OXResource(final BundleContext context) throws RemoteException, StorageException {
         super();
         try {
@@ -107,7 +105,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         }
         this.context = context;
         cache = ClientAdminThread.cache;
-        prop = cache.getProperties();     
+        prop = cache.getProperties();
         if (log.isInfoEnabled()) {
             log.info("Class loaded: " + this.getClass().getName());
         }
@@ -123,19 +121,19 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for change is null");
             log.error(invalidDataException.getMessage(), invalidDataException);
             throw invalidDataException;
-        }        
-        
-        try {           
+        }
+
+        try {
             basicauth.doAuthentication(auth,ctx);
         } catch (final InvalidDataException e1) {
             log.error(e1.getMessage(), e1);
             throw e1;
         }
-        
+
         if (log.isDebugEnabled()) {
             log.debug(ctx + " - " + res + " - " + auth);
         }
-        
+
         try {
             try {
                 setIdOrGetIDFromNameAndIdObject(ctx, res);
@@ -144,22 +142,24 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             }
 
             res.testMandatoryCreateFieldsNull();
-            
-            final int resource_ID = res.getId();        
-            
+
+            final int resource_ID = res.getId();
+
             checkContextAndSchema(ctx);
-            
+
             if (!tool.existsResource(ctx, resource_ID)) {
                 throw new NoSuchResourceException("Resource with this id does not exists");
             }
-            
+
             if(res.getName()!=null && tool.existsResourceName(ctx, res)){
                 throw new InvalidDataException("Resource " + res.getName() + " already exists in this context");
             }
-            
+
             if (res.getEmail() != null && tool.existsResourceAddress(ctx, res.getEmail(), res.getId())) {
                 throw new InvalidDataException("Resource with this email address already exists");
             }
+
+            tool.primaryMailExists(ctx, res.getEmail());
 
             if ((null != res.getName()) && prop.getResourceProp(AdminProperties.Resource.AUTO_LOWERCASE, true)) {
                 final String rid = res.getName().toLowerCase();
@@ -192,7 +192,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         }
 
         oxRes.change(ctx, res);
-        
+
         final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
@@ -218,9 +218,9 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             }
         }
     }
-    
+
     @Override
-    public Resource create(final Context ctx, final Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {        
+    public Resource create(final Context ctx, final Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
        auth = auth == null ? new Credentials("","") : auth;
        try {
            doNullCheck(res);
@@ -228,23 +228,23 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
        } catch (final InvalidDataException e3) {
            log.error("One of the given arguments for create is null", e3);
            throw e3;
-       }        
-       
+       }
+
        try {
            basicauth.doAuthentication(auth,ctx);
        } catch( final InvalidDataException e) {
            log.error(e.getMessage(), e);
            throw e;
        }
-      
+
        if (log.isDebugEnabled()) {
-           log.debug(ctx + " - " + res + " - " + auth); 
+           log.debug(ctx + " - " + res + " - " + auth);
        }
 
        checkContextAndSchema(ctx);
 
        try {
-           
+
            if (tool.existsResourceName(ctx, res.getName())) {
                throw new InvalidDataException("Resource " + res.getName() + " already exists in this context");
             }
@@ -252,6 +252,8 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             if (res.getEmail() != null && tool.existsResourceAddress(ctx, res.getEmail())) {
                 throw new InvalidDataException("Resource with this email address already exists");
             }
+
+            tool.primaryMailExists(ctx, res.getEmail());
 
             if (!res.mandatoryCreateMembersSet()) {
                 throw new InvalidDataException("Mandatory fields not set: " + res.getUnsetMembers());
@@ -277,7 +279,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         } catch (EnforceableDataObjectException e) {
             throw new InvalidDataException(e.getMessage());
         }
-       
+
        final int retval = oxRes.create(ctx, res);
        res.setId(retval);
        final ArrayList<OXResourcePluginInterface> interfacelist = new ArrayList<OXResourcePluginInterface>();
@@ -323,7 +325,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
 
        return res;
     }
-    
+
     @Override
     public void delete(final Context ctx, final Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         auth = auth == null ? new Credentials("","") : auth;
@@ -332,11 +334,11 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         } catch (final InvalidDataException e3) {
             log.error("One of the given arguments for delete is null", e3);
             throw e3;
-        }        
-        
+        }
+
         try {
             basicauth.doAuthentication(auth,ctx);
-            
+
             try {
                 setIdOrGetIDFromNameAndIdObject(ctx, res);
             } catch (NoSuchObjectException e) {
@@ -402,7 +404,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
 
         oxRes.delete(ctx, res);
     }
-    
+
     @Override
     public Resource getData(final Context ctx, final Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         auth = auth == null ? new Credentials("","") : auth;
@@ -411,14 +413,14 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         } catch (final InvalidDataException e3) {
             log.error("One of the given arguments for get is null", e3);
             throw e3;
-        }        
-        
+        }
+
         try {
             basicauth.doAuthentication(auth,ctx);
         } catch (final InvalidDataException e) {
             log.error(e.getMessage(), e);
             throw e;
-        }        
+        }
 
         try {
             setIdOrGetIDFromNameAndIdObject(ctx, res);
@@ -427,17 +429,17 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         }
 
         final int resource_id = res.getId().intValue();
-        
+
         if (log.isDebugEnabled()) {
             log.debug(ctx + " - " + resource_id + " - " + auth);
         }
-        
+
         checkContextAndSchema(ctx);
-        
+
         if (!tool.existsResource(ctx, resource_id)) {
-            throw new NoSuchResourceException("resource with with this id does not exist");           
+            throw new NoSuchResourceException("resource with with this id does not exist");
         }
-        
+
         Resource retres = oxRes.getData(ctx, res);
 
         final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
@@ -462,7 +464,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
 
         return retres;
     }
-    
+
     @Override
     public Resource[] getData(final Context ctx, final Resource[] resources, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException {
         auth = auth == null ? new Credentials("","") : auth;
@@ -471,11 +473,11 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         } catch (final InvalidDataException e3) {
             log.error("One of the given arguments for getData is null", e3);
             throw e3;
-        }        
-        
+        }
+
         try {
             basicauth.doAuthentication(auth,ctx);
-        
+
             if (log.isDebugEnabled()) {
                 log.debug(ctx + " - " + Arrays.toString(resources) + " - " + auth);
             }
@@ -506,15 +508,15 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
             log.error(e.getMessage(), e);
             throw e;
         }
-        
+
         final ArrayList<Resource> retval = new ArrayList<Resource>();
-        
+
         for (final Resource resource : resources) {
             // not nice, but works ;)
             final Resource tmp = oxRes.getData(ctx, resource);
             retval.add(tmp);
-        }        
-            
+        }
+
         final java.util.List<Bundle> bundles = AdminDaemon.getBundlelist();
         for (final Bundle bundle : bundles) {
             final String bundlename = bundle.getSymbolicName();
@@ -538,7 +540,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         }
         return retval.toArray(new Resource[retval.size()]);
     }
-    
+
     @Override
     public Resource[] list(final Context ctx, final String pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
         auth = auth == null ? new Credentials("","") : auth;
@@ -547,28 +549,28 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         } catch (final InvalidDataException e3) {
             log.error("One of the given arguments for list is null", e3);
             throw e3;
-        }        
-        
+        }
+
         try {
             if(pattern.length()==0){
                 throw new InvalidDataException("Invalid pattern!");
-            }        
-            
+            }
+
             basicauth.doAuthentication(auth,ctx);
         } catch (final InvalidDataException e) {
             log.error(e.getMessage(), e);
             throw e;
         }
-        
+
         if (log.isDebugEnabled()) {
             log.debug(ctx + " - " + pattern + " - " + auth);
         }
-        
+
         checkContextAndSchema(ctx);
 
         return oxRes.list(ctx,pattern);
     }
-    
+
     @Override
     public Resource[] listAll(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
         return list(ctx, "*", auth);
@@ -580,7 +582,7 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
         }
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-+.%$@
-        final String resource_check_regexp = prop.getResourceProp("CHECK_RES_UID_REGEXP", "[ $@%\\.+a-zA-Z0-9_-]");        
+        final String resource_check_regexp = prop.getResourceProp("CHECK_RES_UID_REGEXP", "[ $@%\\.+a-zA-Z0-9_-]");
         final String illegal = resName.replaceAll(resource_check_regexp, "");
         if( illegal.length() > 0 ) {
             throw new InvalidDataException( "Illegal chars: \""+illegal+"\"");

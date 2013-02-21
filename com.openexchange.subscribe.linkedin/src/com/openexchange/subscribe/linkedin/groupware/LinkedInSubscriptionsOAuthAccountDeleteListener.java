@@ -76,23 +76,13 @@ public class LinkedInSubscriptionsOAuthAccountDeleteListener implements OAuthAcc
 
     @Override
     public void onAfterOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
-        try {
-            liService.deleteAllUsingOAuthAccount(getContext(cid), id);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        liService.deleteAllUsingOAuthAccount(getContext(cid), id);
     }
 
     private Context getContext(final int cid) throws OXException {
-        try {
-            return contexts.getContext(cid);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return contexts.getContext(cid);
     }
-    /* (non-Javadoc)
-     * @see com.openexchange.oauth.OAuthAccountDeleteListener#onBeforeOAuthAccountDeletion(int, java.util.Map, int, int, java.sql.Connection)
-     */
+
     @Override
     public void onBeforeOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
         // Nothing to do

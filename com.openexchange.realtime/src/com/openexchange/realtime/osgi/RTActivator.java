@@ -62,7 +62,7 @@ import com.openexchange.realtime.impl.MessageDispatcherImpl;
 
 /**
  * {@link RTActivator} - The activator for realtime bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class RTActivator extends HousekeepingActivator {
@@ -81,7 +81,7 @@ public class RTActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         context.addFrameworkListener(new FrameworkListener() {
-            
+
             @Override
             public void frameworkEvent(FrameworkEvent event) {
                 if(event.getBundle().getSymbolicName().toLowerCase().startsWith("com.openexchange.realtime")) {

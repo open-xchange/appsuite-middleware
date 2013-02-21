@@ -196,7 +196,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                     if (null != cache.get(key)) {
                         cache.remove(key);
                     }
-                    cache.put(key, (Serializable) usm.clone());
+                    cache.put(key, (Serializable) usm.clone(), false);
                 } catch (final OXException e) {
                     LOG.error("UserSettingMail could not be put into cache", e);
                 } finally {
@@ -245,7 +245,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                     if (null != cache.get(key)) {
                         cache.remove(key);
                     }
-                    cache.put(key, (Serializable) usm.clone());
+                    cache.put(key, (Serializable) usm.clone(), false);
                 } catch (final OXException e) {
                     LOG.error("UserSettingMail could not be put into cache", e);
                 } finally {
@@ -387,7 +387,7 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
                              */
                             usm.setNoSave(false);
                             try {
-                                cache.put(cache.newCacheKey(ctx.getContextId(), user), usm);
+                                cache.put(cache.newCacheKey(ctx.getContextId(), user), usm, false);
                             } catch (final OXException e) {
                                 LOG.error("UserSettingMail could not be put into cache", e);
                             }

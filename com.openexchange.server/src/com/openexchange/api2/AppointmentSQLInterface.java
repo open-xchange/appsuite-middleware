@@ -240,7 +240,7 @@ public interface AppointmentSQLInterface {
 
     /**
      * update the AppointmentObject
-     * @param checkPermissions 
+     * @param checkPermissions
      * @param Appointment
      * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
      */
@@ -248,7 +248,7 @@ public interface AppointmentSQLInterface {
 
     /**
      * update the AppointmentObject
-     * @param checkPermissions 
+     * @param checkPermissions
      * @param Appointment
      * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
      */

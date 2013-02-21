@@ -665,7 +665,7 @@ public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
     public Object image1contenttype(Object[] objects) throws OXException {
         return delegate.image1contenttype(objects);
     }
-    
+
     @Override
     public Object homeaddress(Object[] objects) throws OXException {
         return delegate.homeaddress(objects);

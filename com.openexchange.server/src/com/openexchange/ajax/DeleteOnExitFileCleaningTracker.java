@@ -62,7 +62,7 @@ import org.apache.commons.io.FileDeleteStrategy;
 /**
  * {@link DeleteOnExitFileCleaningTracker} - Overrides {@code FileCleaningTracker#track(File, Object, FileDeleteStrategy)} and invokes
  * {@code File#deleteOnExit()} on each tracked file.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class DeleteOnExitFileCleaningTracker extends FileCleaningTracker {
@@ -112,7 +112,7 @@ final class DeleteOnExitFileCleaningTracker extends FileCleaningTracker {
         this.deleteOnExit = deleteOnExit;
 
         final Thread shutdownHookThread = new Thread(new Runnable() {
-            
+
             @Override
             public void run() {
                 deleteAllTracked0();
@@ -182,7 +182,7 @@ final class DeleteOnExitFileCleaningTracker extends FileCleaningTracker {
 
     /**
      * Adds a tracker to the list of trackers.
-     * 
+     *
      * @param path  the full path to the file to be tracked, not null
      * @param marker  the marker object used to track the file, not null
      * @param deleteStrategy  the strategy to delete the file, null means normal

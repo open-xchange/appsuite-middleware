@@ -69,7 +69,7 @@ public abstract class DateMapping<O> extends DefaultJsonMapping<Date, O> {
 
 	/**
 	 * Initializes a new {@link DateMapping}.
-	 * 
+	 *
 	 * @param ajaxName The AJAX name
 	 * @param columnID The column identifier
 	 */

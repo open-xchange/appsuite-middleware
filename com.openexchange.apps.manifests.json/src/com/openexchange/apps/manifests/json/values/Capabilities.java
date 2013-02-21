@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class Capabilities implements ComputedServerConfigValueService {
 
-	private ServiceLookup services;
+	private final ServiceLookup services;
 
 
 	public Capabilities(ServiceLookup services) {

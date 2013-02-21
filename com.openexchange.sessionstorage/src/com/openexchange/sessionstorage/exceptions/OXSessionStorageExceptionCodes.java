@@ -56,7 +56,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link OXSessionStorageExceptionCodes}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public enum OXSessionStorageExceptionCodes implements OXExceptionCode {
@@ -65,7 +65,6 @@ public enum OXSessionStorageExceptionCodes implements OXExceptionCode {
     SESSIONSTORAGE_SAVE_FAILED(OXSessionStorageExceptionMessages.SESSIONSTORAGE_SAVE_FAILED_MSG, 2, Category.CATEGORY_ERROR),
     SESSIONSTORAGE_REMOVE_FAILED(OXSessionStorageExceptionMessages.SESSIONSTORAGE_REMOVE_FAILED_MSG, 3, Category.CATEGORY_ERROR),
     SESSIONSTORAGE_SESSION_NOT_FOUND(OXSessionStorageExceptionMessages.SESSIONSTORAGE_SESSION_NOT_FOUND_MSG, 4, Category.CATEGORY_ERROR),
-    SESSIONSTORAGE_NO_ENCRYPTION_KEY(OXSessionStorageExceptionMessages.SESSIONSTORAGE_NO_ENCRYPTION_KEY_MSG, 5, Category.CATEGORY_ERROR),
     SESSIONSTORAGE_DUPLICATE_AUTHID(OXSessionStorageExceptionMessages.SESSIONSTORAGE_DUPLICATE_AUTHID_MSG, 6, Category.CATEGORY_ERROR),
     SESSIONSTORAGE_UNSUPPORTED_OPERATION(OXSessionStorageExceptionMessages.SESSIONSTORAGE_UNSUPPORTED_OPERATION_MSG, 7, Category.CATEGORY_ERROR),
     SESSIONSTORAGE_ALTID_NOT_FOUND(OXSessionStorageExceptionMessages.SESSIONSTORAGE_ALTID_NOT_FOUND_MSG, 8, Category.CATEGORY_ERROR),
@@ -127,7 +126,7 @@ public enum OXSessionStorageExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -136,7 +135,7 @@ public enum OXSessionStorageExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -146,7 +145,7 @@ public enum OXSessionStorageExceptionCodes implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

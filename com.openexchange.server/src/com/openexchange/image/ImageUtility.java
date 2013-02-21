@@ -50,7 +50,6 @@
 package com.openexchange.image;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
@@ -141,7 +140,7 @@ public final class ImageUtility {
         il.setRegistrationName(registrationName);
         return il;
     }
-    
+
     public static ImageLocation parseImageLocationFrom(final AJAXRequestData requestData) {
         if (requestData == null) {
             return null;
@@ -167,8 +166,8 @@ public final class ImageUtility {
 
     private static String decodeQueryStringValue(final String queryStringValue) {
         try {
-            return URLDecoder.decode(queryStringValue, UTF_8);
-        } catch (final UnsupportedEncodingException e) {
+            return AJAXServlet.decodeUrl(queryStringValue, UTF_8);
+        } catch (final RuntimeException e) {
             return queryStringValue;
         }
     }
@@ -207,7 +206,7 @@ public final class ImageUtility {
                  */
                 prefix = "";
                 final Props properties = LogProperties.optLogProperties();
-                route = null == properties ? null : properties.<String> get("com.openexchange.ajp13.httpSession");
+                route = null == properties ? null : properties.<String> get(LogProperties.Name.AJP_HTTP_SESSION);
             } else {
                 /*
                  * Compose absolute URL if a relative one is not preferred

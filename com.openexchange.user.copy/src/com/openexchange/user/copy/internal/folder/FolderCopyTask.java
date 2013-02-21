@@ -86,32 +86,32 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
 
 /**
  * {@link FolderCopyTask} - Copies all private folders, the users private infostore folder and, if necessary, the mail attachment folder.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class FolderCopyTask implements CopyUserTaskService {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderCopyTask.class));
 
-    private static final String SELECT_FOLDERS = 
-        "SELECT "+ 
-            "fuid, parent, fname, module, type, creating_date, " + 
-            "changing_date, changed_from, permission_flag, " + 
-            "subfolder_flag, default_flag " + 
-        "FROM " + 
-            "oxfolder_tree " + 
-        "WHERE " + 
+    private static final String SELECT_FOLDERS =
+        "SELECT "+
+            "fuid, parent, fname, module, type, creating_date, " +
+            "changing_date, changed_from, permission_flag, " +
+            "subfolder_flag, default_flag " +
+        "FROM " +
+            "oxfolder_tree " +
+        "WHERE " +
             "cid = ? AND created_from = ? AND (module = 8 OR type = 1)";
 
-    private static final String INSERT_FOLDERS = 
-        "INSERT INTO " + 
-            "oxfolder_tree " + 
-            "(fuid, cid, parent, fname, module, type, creating_date, " + 
-            "created_from, changing_date, changed_from, permission_flag, " + 
-            "subfolder_flag, default_flag) " + 
-        "VALUES " + 
+    private static final String INSERT_FOLDERS =
+        "INSERT INTO " +
+            "oxfolder_tree " +
+            "(fuid, cid, parent, fname, module, type, creating_date, " +
+            "created_from, changing_date, changed_from, permission_flag, " +
+            "subfolder_flag, default_flag) " +
+        "VALUES " +
             "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    
+
     private static final String SELECT_VIRTUAL_FOLDERS =
         "SELECT " +
             "tree, folderId, parentId, " +
@@ -122,31 +122,31 @@ public class FolderCopyTask implements CopyUserTaskService {
             "cid = ? " +
         "AND " +
             "user = ?";
-    
+
     private static final String INSERT_VIRTUAL_FOLDERS =
         "INSERT INTO " +
             "virtualTree " +
             "(cid, tree, user, folderId, parentId, name, lastModified, modifiedBy, shadow, sortNum) " +
         "VALUES " +
             "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    
+
     private static final String INSERT_PERMISSIONS =
         "INSERT INTO " +
             "oxfolder_permissions " +
             "(cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag, system) " +
         "VALUES " +
             "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    
-    private static final String SELECT_ATTACHMENT_FOLDER = 
-        "SELECT "+ 
-            "fuid, parent, fname, module, type, creating_date, " + 
-            "changing_date, changed_from, permission_flag, " + 
-            "subfolder_flag, default_flag " + 
-        "FROM " + 
-            "oxfolder_tree " + 
-        "WHERE " + 
+
+    private static final String SELECT_ATTACHMENT_FOLDER =
+        "SELECT "+
+            "fuid, parent, fname, module, type, creating_date, " +
+            "changing_date, changed_from, permission_flag, " +
+            "subfolder_flag, default_flag " +
+        "FROM " +
+            "oxfolder_tree " +
+        "WHERE " +
             "cid = ? AND module = 8 AND type = 2 AND fname = ? AND parent = 15";
-    
+
 
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#getAlreadyCopied()
@@ -179,7 +179,7 @@ public class FolderCopyTask implements CopyUserTaskService {
         final Integer dstUsrId = tools.getDestinationUserId();
         final Connection srcCon = tools.getSourceConnection();
         final Connection dstCon = tools.getDestinationConnection();
-        
+
         /*
          * Load all private folders from oxfolder_tree and modify object and parent ids.
          */
@@ -196,22 +196,22 @@ public class FolderCopyTask implements CopyUserTaskService {
                 throw UserCopyExceptionCodes.UNKNOWN_PROBLEM.create(e);
             }
         }
-        
+
         final Map<Integer, Integer> idMapping = new HashMap<Integer, Integer>();
         exchangeIds(folderTree, folderTree.getRoot(), i(dstCtxId), i(dstUsrId), dstCon, -1, idMapping);
-        
+
         /*
          * Write folders and permissions.
          */
         writeFoldersToDB(dstCon, folderTree, i(dstCtxId));
         writePermissionsToDB(idMapping.values(), dstCon, i(dstCtxId), i(dstUsrId));
-        
+
         /*
          * Load and write virtual folders.
          */
         final List<VirtualFolder> virtualFolders = loadVirtualFoldersFromDB(srcCon, i(srcCtxId), i(srcUsrId));
         writeVirtualFoldersToDB(virtualFolders, idMapping, dstCon, i(dstCtxId), i(dstUsrId));
-        
+
         /*
          * Check if public infostore folder for mail attachments exists in source and destination context.
          * Create if necessary.
@@ -220,7 +220,7 @@ public class FolderCopyTask implements CopyUserTaskService {
         if ("i18n-defined".equals(attachmentFolderName)) {
             attachmentFolderName = FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME;
         }
-        checkAndCreateMailAttachmentFolder(srcCtx, dstCtx, dstUsrId, srcCon, dstCon, attachmentFolderName);       
+        checkAndCreateMailAttachmentFolder(srcCtx, dstCtx, dstUsrId, srcCon, dstCon, attachmentFolderName);
         final FolderObject srcAttachmentFolder = loadAttachmentFolderFromDB(srcCon, srcCtxId, attachmentFolderName);
         final FolderObject dstAttachmentFolder = loadAttachmentFolderFromDB(dstCon, dstCtxId, attachmentFolderName);
 
@@ -232,14 +232,14 @@ public class FolderCopyTask implements CopyUserTaskService {
         if (srcAttachmentFolder != null && dstAttachmentFolder != null) {
             folderMapping.addMapping(srcAttachmentFolder.getObjectID(), srcAttachmentFolder, dstAttachmentFolder.getObjectID(), dstAttachmentFolder);
         }
-        
+
         for (final Integer fuid : originFolders.keySet()) {
             final FolderEqualsWrapper originWrapper = originFolders.get(fuid);
             final Integer targetId = idMapping.get(fuid);
             if (targetId == null) {
                 throw UserCopyExceptionCodes.UNKNOWN_PROBLEM.create();
             }
-            
+
             final FolderEqualsWrapper targetWrapper = movedFolders.get(targetId);
             if (targetId == null || targetWrapper == null) {
                 throw UserCopyExceptionCodes.UNKNOWN_PROBLEM.create();
@@ -249,8 +249,8 @@ public class FolderCopyTask implements CopyUserTaskService {
 
         return folderMapping;
     }
-    
-    private void checkAndCreateMailAttachmentFolder(final Context srcCtx, final Context dstCtx, final int userId, final Connection srcCon, final Connection dstCon, final String attachmentFolderName) throws OXException {      
+
+    private void checkAndCreateMailAttachmentFolder(final Context srcCtx, final Context dstCtx, final int userId, final Connection srcCon, final Connection dstCon, final String attachmentFolderName) throws OXException {
         try {
             final int sourceAttachmentFolderId = OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, attachmentFolderName, FolderObject.INFOSTORE, srcCon, srcCtx);
             int destAttachmentFolderId = OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, attachmentFolderName, FolderObject.INFOSTORE, srcCon, dstCtx);
@@ -269,11 +269,11 @@ public class FolderCopyTask implements CopyUserTaskService {
                 attachmentFolder.setPermissionFlag(FolderObject.PUBLIC_PERMISSION);
                 attachmentFolder.setSubfolderFlag(false);
                 attachmentFolder.setDefaultFolder(false);
-                
+
                 final List<FolderObject> folders = new ArrayList<FolderObject>(1);
                 folders.add(attachmentFolder);
                 writeFoldersToDB(dstCon, folders, dstCtx.getContextId());
-                
+
                 final List<FolderPermission> permissions = new ArrayList<FolderPermission>(2);
                 final FolderPermission userPermission = new FolderPermission();
                 userPermission.setUserId(dstCtx.getMailadmin());
@@ -285,7 +285,7 @@ public class FolderCopyTask implements CopyUserTaskService {
                 userPermission.setAdminFlag(true);
                 userPermission.setGroupFlag(false);
                 userPermission.setSystem(false);
-                
+
                 final FolderPermission groupPermission = new FolderPermission();
                 groupPermission.setUserId(0);
                 groupPermission.setFolderId(destAttachmentFolderId);
@@ -296,17 +296,17 @@ public class FolderCopyTask implements CopyUserTaskService {
                 groupPermission.setAdminFlag(false);
                 groupPermission.setGroupFlag(true);
                 groupPermission.setSystem(false);
-                
+
                 permissions.add(userPermission);
                 permissions.add(groupPermission);
-                
+
                 writePermissionsToDB(permissions, dstCon, dstCtx.getContextId());
             }
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         }
     }
-    
+
     private FolderObject loadAttachmentFolderFromDB(final Connection con, final int cid, final String folderName) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -320,7 +320,7 @@ public class FolderCopyTask implements CopyUserTaskService {
                 final FolderObject folder = buildFolderFromResultSet(rs);
                 return folder;
             }
-            
+
             return null;
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
@@ -328,7 +328,7 @@ public class FolderCopyTask implements CopyUserTaskService {
             DBUtils.closeSQLStuff(rs, stmt);
         }
     }
-    
+
     private boolean ignoreFolder(final int id) {
         return id == 0 || id == 1 || id == 9 || id == 10 || id == 15;
     }
@@ -356,7 +356,7 @@ public class FolderCopyTask implements CopyUserTaskService {
 
         return folderMap;
     }
-    
+
     private FolderObject buildFolderFromResultSet(final ResultSet rs) throws SQLException {
         int i = 1;
         final FolderObject folder = new FolderObject(rs.getInt(i++));
@@ -371,7 +371,7 @@ public class FolderCopyTask implements CopyUserTaskService {
         folder.setSubfolderFlag(rs.getBoolean(i++));
         folder.setDefaultFolder(rs.getBoolean(i++));
 
-        return folder;        
+        return folder;
     }
 
     private Tree<FolderEqualsWrapper> buildFolderTree(final SortedMap<Integer, FolderEqualsWrapper> folderMap) throws OXException {
@@ -385,14 +385,14 @@ public class FolderCopyTask implements CopyUserTaskService {
         userInfostoreFolder.setParentFolderID(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
         final FolderEqualsWrapper publicInfostoreFolder = new FolderEqualsWrapper(new FolderObject(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID), "orig");
         publicInfostoreFolder.setParentFolderID(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
-        
+
         final SortedMap<Integer, FolderEqualsWrapper> extendedMap = new TreeMap<Integer, FolderEqualsWrapper>();
         extendedMap.putAll(folderMap);
         extendedMap.put(privateFolder.getObjectID(), privateFolder);
         extendedMap.put(systemInfostoreFolder.getObjectID(), systemInfostoreFolder);
         extendedMap.put(userInfostoreFolder.getObjectID(), userInfostoreFolder);
         extendedMap.put(publicInfostoreFolder.getObjectID(), publicInfostoreFolder);
-        
+
         /*
          * A recursion is used here to be sure that the folder tree always contains a folders parent before the folder is added.
          * If the tree does not contain the parent already, the parent will be added first.
@@ -447,10 +447,10 @@ public class FolderCopyTask implements CopyUserTaskService {
                 foldersToWrite.add(folder);
             }
         }
-        
+
         writeFoldersToDB(con, foldersToWrite, cid);
     }
-    
+
     private void writeFoldersToDB(final Connection con, final List<FolderObject> folders, final int cid) throws OXException {
         PreparedStatement stmt = null;
         try {
@@ -509,7 +509,7 @@ public class FolderCopyTask implements CopyUserTaskService {
             throw UserCopyExceptionCodes.UNKNOWN_PROBLEM.create(e);
         }
     }
-    
+
     private void writePermissionsToDB(final Collection<Integer> folderIds, final Connection con, final int cid, final int uid) throws OXException {
         final List<FolderPermission> permissions = new ArrayList<FolderPermission>();
         for (final int folderId : folderIds) {
@@ -523,13 +523,13 @@ public class FolderCopyTask implements CopyUserTaskService {
             permission.setAdminFlag(true);
             permission.setGroupFlag(false);
             permission.setSystem(false);
-            
+
             permissions.add(permission);
         }
-        
+
         writePermissionsToDB(permissions, con, cid);
     }
-    
+
     private void writePermissionsToDB(final List<FolderPermission> permissions, final Connection con, final int cid) throws OXException {
         PreparedStatement stmt = null;
         try {
@@ -547,7 +547,7 @@ public class FolderCopyTask implements CopyUserTaskService {
                 stmt.setInt(i++, permission.hasGroupFlag() ? 1 : 0);
                 stmt.setInt(i++, permission.hasSystem() ? 1 : 0);
                 stmt.addBatch();
-            }                
+            }
 
             stmt.executeBatch();
         } catch (final SQLException e) {
@@ -556,7 +556,7 @@ public class FolderCopyTask implements CopyUserTaskService {
             DBUtils.closeSQLStuff(stmt);
         }
     }
-    
+
     List<VirtualFolder> loadVirtualFoldersFromDB(final Connection con, final int cid, final int uid) throws OXException {
         final List<VirtualFolder> folderList = new ArrayList<VirtualFolder>();
         PreparedStatement stmt = null;
@@ -566,7 +566,7 @@ public class FolderCopyTask implements CopyUserTaskService {
             stmt.setInt(1, cid);
             stmt.setInt(2, uid);
             rs = stmt.executeQuery();
-            
+
             while (rs.next()) {
                 final VirtualFolder folder = new VirtualFolder();
                 int i = 1;
@@ -581,18 +581,18 @@ public class FolderCopyTask implements CopyUserTaskService {
                 if (rs.wasNull()) {
                     folder.setSortNum(-1);
                 }
-                
+
                 folderList.add(folder);
-            }            
+            }
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
-        
+
         return folderList;
     }
-    
+
     private void writeVirtualFoldersToDB(final List<VirtualFolder> folderList, final Map<Integer, Integer> idMapping, final Connection con, final int cid, final int uid) throws OXException {
         PreparedStatement stmt = null;
         try {
@@ -605,13 +605,13 @@ public class FolderCopyTask implements CopyUserTaskService {
                 final String parentIdStr = folder.getParentId();
                 Integer folderId = null;
                 Integer parentId = null;
-                try {                    
+                try {
                     Integer tmp = Integer.parseInt(folderIdStr);
                     final Integer newFolderId = idMapping.get(tmp);
                     if (newFolderId != null) {
                         folderId = newFolderId;
                     }
-                    
+
                     tmp = Integer.parseInt(parentIdStr);
                     final Integer newParentId = idMapping.get(tmp);
                     if (newParentId != null) {
@@ -620,7 +620,7 @@ public class FolderCopyTask implements CopyUserTaskService {
                 } catch (final NumberFormatException e) {
                     // do nothing
                 }
-                
+
                 int i = 1;
                 stmt.setInt(i++, cid);
                 stmt.setInt(i++, folder.getTree());
@@ -652,10 +652,10 @@ public class FolderCopyTask implements CopyUserTaskService {
                 } else {
                     stmt.setInt(i++, folder.getSortNum());
                 }
-                
+
                 stmt.addBatch();
             }
-            
+
             stmt.executeBatch();
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);

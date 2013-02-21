@@ -65,7 +65,7 @@ import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link SMSMessageConverter} - Converter for SMS/MMS messages.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SMSMessageConverter {
@@ -74,7 +74,7 @@ public class SMSMessageConverter {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static SMSMessageConverter getInstance() {
@@ -90,7 +90,7 @@ public class SMSMessageConverter {
 
     /**
      * Converts specified message to a SMS/MMS message.
-     * 
+     *
      * @param message The message to convert
      * @return The resulting SMS/MMS message
      * @throws OXException If conversion fails

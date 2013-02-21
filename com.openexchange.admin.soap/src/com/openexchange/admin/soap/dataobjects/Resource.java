@@ -57,15 +57,15 @@ public class Resource {
     private Integer id;
 
     private String name;
-    
+
     private String displayname;
-    
+
     private String description;
-    
+
     private String email;
-    
+
     private Boolean available;
-    
+
     /**
      * Instantiates a new {@link Resource} object
      */
@@ -76,7 +76,7 @@ public class Resource {
 
     /**
      * Instantiates a new {@link Resource} object with the given id
-     * 
+     *
      * @param id An {@link Integer} object containing the id
      */
     public Resource(final Integer id) {
@@ -94,7 +94,7 @@ public class Resource {
         this.email = res.getEmail();
         this.available = res.getAvailable();
     }
-    
+
     private void init() {
         this.id = null;
         this.name = null;
@@ -103,7 +103,7 @@ public class Resource {
         this.email = null;
         this.available = null;
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.admin.rmi.dataobjects.NameAndIdObject#getId()
      */
@@ -134,7 +134,7 @@ public class Resource {
 
     /**
      * Returns the displayname of this resource
-     * 
+     *
      * @return A {@link String} containing the displayname
      */
     public String getDisplayname() {
@@ -143,7 +143,7 @@ public class Resource {
 
     /**
      * Sets the displayname for this resource
-     * 
+     *
      * @param displayname A {@link String} containing the displayname
      */
     public void setDisplayname(final String displayname) {
@@ -152,7 +152,7 @@ public class Resource {
 
     /**
      * Returns the E-Mail of this resource
-     * 
+     *
      * @return A {@link String} object containing the E-Mail address
      */
     public String getEmail() {
@@ -161,7 +161,7 @@ public class Resource {
 
     /**
      * Sets the email address for this resource
-     * 
+     *
      * @param email A {@link String} object containing the E-Mail address
      */
     public void setEmail(final String email) {
@@ -184,7 +184,7 @@ public class Resource {
 
     /**
      * Returns the description of this resource
-     * 
+     *
      * @return A {@link String} object containing the description
      */
     public String getDescription() {
@@ -193,7 +193,7 @@ public class Resource {
 
     /**
      * Sets the description for this resource
-     * 
+     *
      * @param description A {@link String} object containing the description
      */
     public void setDescription(final String description) {

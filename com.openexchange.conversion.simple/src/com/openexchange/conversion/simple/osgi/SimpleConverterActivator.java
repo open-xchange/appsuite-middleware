@@ -63,7 +63,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
 /**
  * {@link SimpleConverterActivator} To register a simple conversion service to
  * convert Object "data" from a certain format into another certain format.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -83,13 +83,13 @@ public class SimpleConverterActivator extends HousekeepingActivator {
 	 */
 	@Override
 	protected void startBundle() throws Exception {
-	    //Get the Default converter that is able to convert AJAXRequestResults from..to 
+	    //Get the Default converter that is able to convert AJAXRequestResults from..to
 		Converter converter = getService(Converter.class);
-		
+
 		final AJAXConverterAdapter rtConverter = new AJAXConverterAdapter(converter);
 		registerService(SimpleConverter.class, rtConverter);
-		
-		
+
+
 		track(SimplePayloadConverter.class, new SimpleRegistryListener<SimplePayloadConverter>() {
 
 			public void added(ServiceReference<SimplePayloadConverter> ref,
@@ -102,9 +102,9 @@ public class SimpleConverterActivator extends HousekeepingActivator {
 				// TODO: Figure out something here
 			}
 		});
-		
+
 		openTrackers();
-		
+
 	}
 
 }

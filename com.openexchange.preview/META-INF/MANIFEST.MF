@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Preview Bundle
 Bundle-SymbolicName: com.openexchange.preview
-Bundle-Version: 7.0.0
+Bundle-Version: 7.0.1
 Bundle-Activator: com.openexchange.preview.osgi.PreviewActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -76,6 +76,7 @@ Import-Package: com.openexchange.conversion,
  org.apache.tika.sax,
  org.apache.tika.sax.xpath,
  org.apache.tika.utils,
+ org.json,
  org.osgi.framework,
  org.osgi.service.event,
  org.osgi.util.tracker,
@@ -87,7 +88,6 @@ Bundle-ClassPath: .,
  lib/itextpdf-5.1.2.jar,
  lib/jOpenDocument-1.2.jar,
  lib/jodconverter-core-3.0-beta-4.jar,
- lib/json-20090211.jar,
  lib/juh-3.2.1.jar,
  lib/jurt-3.2.1.jar,
  lib/ridl-3.2.1.jar,

@@ -78,7 +78,7 @@ public final class MimeSnippetDeleteListener implements DeleteListener {
     }
 
     @Override
-    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws com.openexchange.exception.OXException {
+    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
         if (DeleteEvent.TYPE_USER != event.getType()) {
             return;
         }
@@ -118,8 +118,6 @@ public final class MimeSnippetDeleteListener implements DeleteListener {
             for (final String id : ids) {
                 MimeSnippetManagement.deleteSnippet(id, userId, contextId, writeCon);
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {

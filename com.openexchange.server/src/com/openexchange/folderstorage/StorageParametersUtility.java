@@ -57,7 +57,7 @@ import java.util.Set;
 
 /**
  * {@link StorageParametersUtility} - A utility class for {@link StorageParameters}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class StorageParametersUtility {
@@ -71,7 +71,7 @@ public final class StorageParametersUtility {
 
     /**
      * Checks whether to hand-down permissions on update operation.
-     * 
+     *
      * @param params The storage parameters
      * @return <code>true</code> to hand down; otherwise <code>false</code>
      */
@@ -86,7 +86,7 @@ public final class StorageParametersUtility {
 
     /**
      * Gets specified boolean parameter.
-     * 
+     *
      * @param name The name
      * @param params The storage parameters
      * @return <code>true</code> if boolean parameter is present and set to <code>true</code>; otherwise <code>false</code>
@@ -112,7 +112,7 @@ public final class StorageParametersUtility {
      * <p>
      * <code>true</code> if given value is not <code>null</code> and equals ignore-case to one of the values "true", "yes", "y", "on", or
      * "1".
-     * 
+     *
      * @param value The parameter value to check
      * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
      */

@@ -7,22 +7,22 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       Backend extensions to serve App Suite frontend
+Summary:       Backend extensions to serve OX App Suite frontend
 Requires:      open-xchange-core >= @OXVERSION@
 Requires:      open-xchange-halo
 Requires:      open-xchange-appsuite-manifest
 
 %description
-This package installs the OSGi bundles and configuration files that are necessary to use the App Suite frontend. If the Open-Xchange 6
+This package installs the OSGi bundles and configuration files that are necessary to use the OX App Suite frontend. If the Open-Xchange 6
 frontend is used, this package has no effect at all.
-The available Apps and the access permissions in the App Suite frontend are configured by this package. Additionally this package contains
+The available Apps and the access permissions in the OX App Suite frontend are configured by this package. Additionally this package contains
 dependencies to all necessary other extensions of the backend.
 
 Authors:
@@ -38,6 +38,21 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
+%post
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    # SoftwareChange_Request-1287
+    pfile=/opt/open-xchange/etc/manifests.properties
+    if ! ox_exists_property com.openexchange.apps.path $pfile; then
+       ox_set_property com.openexchange.apps.path "/opt/open-xchange/appsuite" $pfile
+    fi
+fi
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -51,6 +66,18 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Feb 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth release candidate for 7.0.1
+* Tue Feb 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Third release candidate for 7.0.1
+* Thu Feb 14 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 7.0.1
+* Fri Feb 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.0.1
+* Tue Jan 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-01-23
+* Thu Jan 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.0.1
 * Fri Dec 21 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Build for public patch 2012-12-21
 * Tue Dec 18 2012 Marcus Klein <marcus.klein@open-xchange.com>

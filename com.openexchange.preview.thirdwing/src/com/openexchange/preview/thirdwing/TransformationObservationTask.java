@@ -104,12 +104,12 @@ public class TransformationObservationTask implements Observer {
 
     private final AtomicBoolean done;
     private final AtomicBoolean hasMore;
-    
+
     private final ReentrantLock lock = new ReentrantLock();
     private final Condition signal = lock.newCondition();
     private final AtomicBoolean pageRendered;
-    
-    
+
+
     private final List<String> content;
 
     private OXException exception;
@@ -126,7 +126,7 @@ public class TransformationObservationTask implements Observer {
         done = new AtomicBoolean(false);
         hasMore = new AtomicBoolean(true);
         pageRendered = new AtomicBoolean(true);
-        
+
         content = new ArrayList<String>();
         this.pages = pages;
         this.transformer = transformer;
@@ -134,21 +134,21 @@ public class TransformationObservationTask implements Observer {
     }
 
     public List<String> call() {
-    	
+
     	FileInputStream fis = null;
     	try {
         	transformer.addObserver(this);
         	final IOUnit unit = new IOUnit((fis = new FileInputStream(file)));
         	unit.setStreamProvider(streamProvider);
-        	contentIterator = transformer.transformDocument(unit, 80, true); 
+        	contentIterator = transformer.transformDocument(unit, 80, true);
         	while (contentIterator.hasNext() && !done.get()) {
         		try {
         			contentIterator.writeNextContent();
         		} finally {
         		}
 				// Wait for Event
-				
-				
+
+
             }
     	} catch (final FileNotFoundException e) {
 			exception = PreviewExceptionCodes.ERROR.create();
@@ -205,7 +205,7 @@ public class TransformationObservationTask implements Observer {
         } else if (key.equals(UpdateMessages.PREVIEW_IMAGE_CREATION_STARTED) || message.getKey().equals(UpdateMessages.PREVIEW_IMAGE_CREATION_FAILED)) {
         }
     }
-    
+
     public boolean hasMoreContent() {
     	return hasMore.get();
     }

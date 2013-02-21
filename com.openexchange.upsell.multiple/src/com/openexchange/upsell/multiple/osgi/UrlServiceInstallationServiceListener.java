@@ -55,7 +55,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.upsell.multiple.api.UpsellURLService;
 
 /**
- * 
+ *
  *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *

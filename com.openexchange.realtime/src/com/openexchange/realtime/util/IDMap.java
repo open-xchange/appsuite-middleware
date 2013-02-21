@@ -59,7 +59,7 @@ import com.openexchange.realtime.packet.ID;
 
 /**
  * {@link IDMap} - Maps {@link ID}s to arbitrary values.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -77,7 +77,7 @@ public class IDMap<T> implements Map<ID, T> {
 
     /**
      * Initializes a new {@link IDMap}.
-     * 
+     *
      * @param concurrent Whether this map should be created in a thread-safe manner or not
      */
     public IDMap(final boolean concurrent) {
@@ -159,7 +159,7 @@ public class IDMap<T> implements Map<ID, T> {
      * Get a set of equivalent IDs. Equivalent in that way that they represent
      * the same user@context entity. An entity may still be reachable via
      * another channel and/or resource although the original id isn't reachable
-     * anylonger. 
+     * anylonger.
      * @param id the id of the entity we are looking for
      * @return a Set of key-value pairs mapping ID to arbitrary value types.
      */

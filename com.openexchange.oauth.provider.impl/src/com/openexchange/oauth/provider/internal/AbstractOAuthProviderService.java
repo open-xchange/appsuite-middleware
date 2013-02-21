@@ -74,7 +74,7 @@ import com.openexchange.tools.sql.DBUtils;
  * {@link AbstractOAuthProviderService} - The abstract class for OAuth providers.
  * <p>
  * <a href="http://wiki.oauth.net/w/page/12238543/ProblemReporting">OAuth error codes</a>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractOAuthProviderService implements OAuthProviderConstants {
@@ -106,7 +106,7 @@ public abstract class AbstractOAuthProviderService implements OAuthProviderConst
 
     /**
      * Initializes a new {@link AbstractOAuthProviderService}.
-     * 
+     *
      * @throws OXException If service provider cannot be loaded from database
      */
     protected AbstractOAuthProviderService(final ServiceLookup services) throws OXException {
@@ -120,7 +120,7 @@ public abstract class AbstractOAuthProviderService implements OAuthProviderConst
 
     /**
      * Gets the property names of secret properties.
-     * 
+     *
      * @return The secret property names.
      */
     protected static Set<String> getSecretPropertyNames() {
@@ -129,7 +129,7 @@ public abstract class AbstractOAuthProviderService implements OAuthProviderConst
 
     /**
      * Gets the <tt>OAuthServiceProvider</tt> instance
-     * 
+     *
      * @return The provider
      */
     public OAuthServiceProvider getProvider() {
@@ -138,7 +138,7 @@ public abstract class AbstractOAuthProviderService implements OAuthProviderConst
 
     /**
      * Loads the service provider.
-     * 
+     *
      * @return The service provider
      * @throws OXException If loading fails
      */
@@ -166,7 +166,7 @@ public abstract class AbstractOAuthProviderService implements OAuthProviderConst
 
     /**
      * Gets available context identifier.
-     * 
+     *
      * @return The context identifiers
      * @throws OXException If identifiers cannot be loaded from configDB
      */
@@ -176,7 +176,7 @@ public abstract class AbstractOAuthProviderService implements OAuthProviderConst
 
     /**
      * Gets available context identifier.
-     * 
+     *
      * @param optService The optional database service
      * @return The context identifiers
      * @throws OXException If identifiers cannot be loaded from configDB
@@ -292,7 +292,7 @@ public abstract class AbstractOAuthProviderService implements OAuthProviderConst
 
     /**
      * Encrypts specified string.
-     * 
+     *
      * @param toEncrypt The string to encrypt
      * @return The encrypted string
      * @throws OXException If operation fails
@@ -311,7 +311,7 @@ public abstract class AbstractOAuthProviderService implements OAuthProviderConst
 
     /**
      * Decrypts specified string.
-     * 
+     *
      * @param toDecrypt The string to decrypt
      * @return The decrypted string
      * @throws OXException If operation fails

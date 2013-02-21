@@ -99,12 +99,12 @@ public class VersionsAction extends AbstractFileAction {
             final SearchIterator<File> iter = CreatedByComparator.resort(versions.results(), comparator);
             final TimedResult<File> delegate = versions;
             versions = new TimedResult<File>() {
-                
+
                 @Override
                 public long sequenceNumber() throws OXException {
                     return delegate.sequenceNumber();
                 }
-                
+
                 @Override
                 public SearchIterator<File> results() throws OXException {
                     return iter;
@@ -125,7 +125,8 @@ public class VersionsAction extends AbstractFileAction {
 
                     @Override
                     public boolean accept(final File thing) throws OXException {
-                        return thing.getVersion() != 0;
+                        final String version = thing.getVersion();
+                        return version != null && !version.equals("0");
                     }
 
 

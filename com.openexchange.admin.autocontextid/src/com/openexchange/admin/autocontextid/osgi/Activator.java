@@ -70,6 +70,7 @@ public class Activator extends HousekeepingActivator {
     @Override
     public void startBundle() throws Exception {
         try {
+            AdminCache.compareAndSetBundleContext(null, context);
             ConfigurationService service = getService(ConfigurationService.class);
             AdminCache.compareAndSetConfigurationService(null, service);
             initCache(service);

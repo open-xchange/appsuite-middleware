@@ -129,11 +129,7 @@ final class Update {
 
     Group getOrig() throws OXException {
         if (null == orig) {
-            try {
-                orig = storage.getGroup(changed.getIdentifier(), ctx);
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
+            orig = storage.getGroup(changed.getIdentifier(), ctx);
         }
         return orig;
     }
@@ -281,11 +277,7 @@ final class Update {
             tmp[i++] = iter.next();
         }
         final UserStorage storage = UserStorage.getInstance();
-        try {
-            storage.invalidateUser(ctx, tmp);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        storage.invalidateUser(ctx, tmp);
         // The time stamp of folder must be increased. The GUI the reloads the
         // folder. This must be done because through this change some folders
         // may get visible or invisible.

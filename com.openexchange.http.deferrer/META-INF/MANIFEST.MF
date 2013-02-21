@@ -2,16 +2,25 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Deferrer Plug-in
 Bundle-SymbolicName: com.openexchange.http.deferrer
-Bundle-Version: 7.0.0
+Bundle-Version: 7.0.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.dispatcher,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.tools.service,
  javax.servlet,
  javax.servlet.http,
+ org.apache.commons.codec,
+ org.apache.commons.codec.binary,
+ org.apache.commons.codec.digest,
+ org.apache.commons.codec.net,
+ org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.http,
  org.osgi.util.tracker

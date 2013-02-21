@@ -73,5 +73,5 @@ public final class FolderReplacement extends FormatLocalizedStringReplacement {
     public boolean relevantChange() {
         return false;
     }
-    
+
 }

@@ -58,7 +58,7 @@ public class ChatMessage {
 	public static final int NO_PRIORITY = -1;
 	private String message;
 	private int priority = NO_PRIORITY;
-	
+
 	public ChatMessage(String message) {
 		super();
 		this.message = message;
@@ -67,17 +67,17 @@ public class ChatMessage {
 	public void setMessage(String message) {
 		this.message = message;
 	}
-	
+
 	public String getMessage() {
 		return message;
 	}
-	
+
 	public int getPriority() {
 		return priority;
 	}
-	
+
 	public void setPriority(int priority) {
 		this.priority = priority;
 	}
-	
+
 }

@@ -80,7 +80,7 @@ import com.openexchange.index.StandardIndexDocument;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
-    
+
     @Before
     public void setUpTest() throws OXException {
         assertNotNull("IndexFacadeService was null.", indexFacade);
@@ -90,46 +90,46 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
                                     .build();
         indexAccess.deleteByQuery(params);
     }
-    
+
     @Test
     public void testSimpleQuery() throws Exception {
         assertNotNull("IndexFacadeService was null.", indexFacade);
         IndexAccess<Attachment> indexAccess = indexFacade.acquireIndexAccess(Types.ATTACHMENT, user.getId(), context.getId());
-        
+
         Attachment a1 = createAttachment(
-            Types.INFOSTORE, 
-            IndexConstants.DEFAULT_ACCOUNT, 
-            "1", 
-            "1", 
-            String.valueOf(new Random().nextInt()), 
+            Types.INFOSTORE,
+            IndexConstants.DEFAULT_ACCOUNT,
+            "1",
+            "1",
+            String.valueOf(new Random().nextInt()),
             "sample1.txt");
         indexAccess.addDocument(new StandardIndexDocument<Attachment>(a1));
-        
+
         Attachment a2 = createAttachment(
-            Types.INFOSTORE, 
-            IndexConstants.DEFAULT_ACCOUNT, 
-            "2", 
-            "1", 
-            String.valueOf(new Random().nextInt()), 
+            Types.INFOSTORE,
+            IndexConstants.DEFAULT_ACCOUNT,
+            "2",
+            "1",
+            String.valueOf(new Random().nextInt()),
             "sample2.txt");
         indexAccess.addDocument(new StandardIndexDocument<Attachment>(a2));
-        
+
         Attachment a3 = createAttachment(
-            Types.EMAIL, 
-            "acc2", 
-            "2", 
-            "1", 
-            String.valueOf(new Random().nextInt()), 
+            Types.EMAIL,
+            "acc2",
+            "2",
+            "1",
+            String.valueOf(new Random().nextInt()),
             "sample.txt");
         indexAccess.addDocument(new StandardIndexDocument<Attachment>(a3));
-        
+
         QueryParameters q1 = new QueryParameters.Builder()
             .setHandler(SearchHandler.SIMPLE)
             .setSearchTerm("sample")
             .build();
         IndexResult<Attachment> r1 = indexAccess.query(q1, null);
         assertTrue("Wrong size.", r1.getNumFound() == 3);
-        
+
         QueryParameters q2 = new QueryParameters.Builder()
             .setHandler(SearchHandler.SIMPLE)
             .setSearchTerm("sample")
@@ -138,7 +138,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
         IndexResult<Attachment> r2 = indexAccess.query(q2, null);
         assertTrue("Wrong size.", r2.getNumFound() == 1);
         checkAttachments(a3, r2.getResults().get(0).getObject());
-        
+
         Set<String> folders = new HashSet<String>();
         folders.add("1");
         folders.add("2");
@@ -150,7 +150,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
             .build();
         IndexResult<Attachment> r3 = indexAccess.query(q3, null);
         assertTrue("Wrong size.", r3.getNumFound() == 2);
-        
+
         Set<AccountFolders> afSet = new HashSet<AccountFolders>();
         afSet.add(af1);
         afSet.add(new AccountFolders(a3.getAccount()));
@@ -162,39 +162,39 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
         IndexResult<Attachment> r4 = indexAccess.query(q4, null);
         assertTrue("Wrong size.", r4.getNumFound() == 3);
     }
-    
+
     @Test
     public void testGetQuery() throws Exception {
         assertNotNull("IndexFacadeService was null.", indexFacade);
         IndexAccess<Attachment> indexAccess = indexFacade.acquireIndexAccess(Types.ATTACHMENT, user.getId(), context.getId());
-        
+
         Attachment a1 = createAttachment(
-            Types.INFOSTORE, 
-            IndexConstants.DEFAULT_ACCOUNT, 
-            "1", 
-            "1", 
-            String.valueOf(new Random().nextInt()), 
+            Types.INFOSTORE,
+            IndexConstants.DEFAULT_ACCOUNT,
+            "1",
+            "1",
+            String.valueOf(new Random().nextInt()),
             "sample1.txt");
         indexAccess.addDocument(new StandardIndexDocument<Attachment>(a1));
-        
+
         Attachment a2 = createAttachment(
-            Types.INFOSTORE, 
-            IndexConstants.DEFAULT_ACCOUNT, 
-            "2", 
-            "1", 
-            String.valueOf(new Random().nextInt()), 
+            Types.INFOSTORE,
+            IndexConstants.DEFAULT_ACCOUNT,
+            "2",
+            "1",
+            String.valueOf(new Random().nextInt()),
             "sample2.txt");
         indexAccess.addDocument(new StandardIndexDocument<Attachment>(a2));
-        
+
         Attachment a3 = createAttachment(
-            Types.EMAIL, 
-            "acc2", 
-            "2", 
-            "1", 
-            String.valueOf(new Random().nextInt()), 
+            Types.EMAIL,
+            "acc2",
+            "2",
+            "1",
+            String.valueOf(new Random().nextInt()),
             "sample.txt");
         indexAccess.addDocument(new StandardIndexDocument<Attachment>(a3));
-        
+
         Set<String> allIds = new HashSet<String>();
         allIds.add(AttachmentUUID.newUUID(context.getId(), user.getId(), a1).toString());
         allIds.add(AttachmentUUID.newUUID(context.getId(), user.getId(), a2).toString());
@@ -205,7 +205,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
             .build();
         IndexResult<Attachment> r1 = indexAccess.query(q1, null);
         assertTrue("Wrong size.", r1.getNumFound() == 3);
-        
+
         Set<String> folders = new HashSet<String>();
         folders.add("1");
         folders.add("2");
@@ -217,7 +217,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
             .build();
         IndexResult<Attachment> r2 = indexAccess.query(q2, null);
         assertTrue("Wrong size.", r2.getNumFound() == 2);
-        
+
         QueryParameters q3 = new QueryParameters.Builder()
             .setHandler(SearchHandler.GET_REQUEST)
             .setIndexIds(allIds)
@@ -227,45 +227,45 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
         assertTrue("Wrong size.", r3.getNumFound() == 1);
         checkAttachments(a3, r3.getResults().get(0).getObject());
     }
-    
+
     @Test
     public void testAllQuery() throws Exception {
         assertNotNull("IndexFacadeService was null.", indexFacade);
         IndexAccess<Attachment> indexAccess = indexFacade.acquireIndexAccess(Types.ATTACHMENT, user.getId(), context.getId());
-        
+
         Attachment a1 = createAttachment(
-            Types.INFOSTORE, 
-            IndexConstants.DEFAULT_ACCOUNT, 
-            "1", 
-            "1", 
-            String.valueOf(new Random().nextInt()), 
+            Types.INFOSTORE,
+            IndexConstants.DEFAULT_ACCOUNT,
+            "1",
+            "1",
+            String.valueOf(new Random().nextInt()),
             "sample1.txt");
         indexAccess.addDocument(new StandardIndexDocument<Attachment>(a1));
-        
+
         Attachment a2 = createAttachment(
-            Types.INFOSTORE, 
-            IndexConstants.DEFAULT_ACCOUNT, 
-            "2", 
-            "1", 
-            String.valueOf(new Random().nextInt()), 
+            Types.INFOSTORE,
+            IndexConstants.DEFAULT_ACCOUNT,
+            "2",
+            "1",
+            String.valueOf(new Random().nextInt()),
             "sample2.txt");
         indexAccess.addDocument(new StandardIndexDocument<Attachment>(a2));
-        
+
         Attachment a3 = createAttachment(
-            Types.EMAIL, 
-            "acc2", 
-            "2", 
-            "1", 
-            String.valueOf(new Random().nextInt()), 
+            Types.EMAIL,
+            "acc2",
+            "2",
+            "1",
+            String.valueOf(new Random().nextInt()),
             "sample.txt");
         indexAccess.addDocument(new StandardIndexDocument<Attachment>(a3));
-        
+
         QueryParameters q1 = new QueryParameters.Builder()
             .setHandler(SearchHandler.ALL_REQUEST)
             .build();
         IndexResult<Attachment> r1 = indexAccess.query(q1, null);
         assertTrue("Wrong size.", r1.getNumFound() == 3);
-        
+
         AccountFolders af1 = new AccountFolders(IndexConstants.DEFAULT_ACCOUNT);
         QueryParameters q2 = new QueryParameters.Builder()
             .setHandler(SearchHandler.ALL_REQUEST)
@@ -273,7 +273,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
             .build();
         IndexResult<Attachment> r2 = indexAccess.query(q2, null);
         assertTrue("Wrong size.", r2.getNumFound() == 2);
-        
+
         QueryParameters q3 = new QueryParameters.Builder()
             .setHandler(SearchHandler.ALL_REQUEST)
             .setModule(Types.EMAIL)
@@ -282,39 +282,39 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
         assertTrue("Wrong size.", r3.getNumFound() == 1);
         checkAttachments(a3, r3.getResults().get(0).getObject());
     }
-    
+
     @Test
     public void testCustomQuery() throws Exception {
         assertNotNull("IndexFacadeService was null.", indexFacade);
         IndexAccess<Attachment> indexAccess = indexFacade.acquireIndexAccess(Types.ATTACHMENT, user.getId(), context.getId());
-        
+
         Attachment a1 = createAttachment(
-            Types.INFOSTORE, 
-            IndexConstants.DEFAULT_ACCOUNT, 
-            "1", 
-            "1", 
-            String.valueOf(new Random().nextInt()), 
+            Types.INFOSTORE,
+            IndexConstants.DEFAULT_ACCOUNT,
+            "1",
+            "1",
+            String.valueOf(new Random().nextInt()),
             "sample1.txt");
         indexAccess.addDocument(new StandardIndexDocument<Attachment>(a1));
-        
+
         Attachment a2 = createAttachment(
-            Types.INFOSTORE, 
-            IndexConstants.DEFAULT_ACCOUNT, 
-            "2", 
-            "2", 
-            String.valueOf(new Random().nextInt()), 
+            Types.INFOSTORE,
+            IndexConstants.DEFAULT_ACCOUNT,
+            "2",
+            "2",
+            String.valueOf(new Random().nextInt()),
             "sample2.txt");
         indexAccess.addDocument(new StandardIndexDocument<Attachment>(a2));
-        
+
         Attachment a3 = createAttachment(
-            Types.EMAIL, 
-            "acc2", 
-            "2", 
-            "3", 
-            String.valueOf(new Random().nextInt()), 
+            Types.EMAIL,
+            "acc2",
+            "2",
+            "3",
+            String.valueOf(new Random().nextInt()),
             "sample.txt");
         indexAccess.addDocument(new StandardIndexDocument<Attachment>(a3));
-    
+
         SearchTerm<?> orTerm = new ORTerm(new SearchTerm<?>[] { new ObjectIdTerm("1"), new ObjectIdTerm("2"), new ObjectIdTerm("3") });
         QueryParameters q1 = new QueryParameters.Builder()
             .setHandler(SearchHandler.CUSTOM)
@@ -322,7 +322,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
             .build();
         IndexResult<Attachment> r1 = indexAccess.query(q1, null);
         assertTrue("Wrong size.", r1.getNumFound() == 3);
-        
+
         QueryParameters q2 = new QueryParameters.Builder()
             .setHandler(SearchHandler.CUSTOM)
             .setSearchTerm(orTerm)
@@ -331,7 +331,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
         IndexResult<Attachment> r2 = indexAccess.query(q2, null);
         assertTrue("Wrong size.", r2.getNumFound() == 1);
         checkAttachments(a3, r2.getResults().get(0).getObject());
-        
+
         Set<String> folders = new HashSet<String>();
         folders.add("1");
         folders.add("2");
@@ -344,7 +344,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
         IndexResult<Attachment> r3 = indexAccess.query(q3, null);
         assertTrue("Wrong size.", r3.getNumFound() == 2);
     }
-    
+
     private void checkAttachments(Attachment expected, Attachment actual) {
         assertEquals("Wrong module.", expected.getModule(), actual.getModule());
         assertEquals("Wrong account.", expected.getAccount(), actual.getAccount());
@@ -352,7 +352,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
         assertEquals("Wrong object id.", expected.getObjectId(), actual.getObjectId());
         assertEquals("Wrong attachment id.", expected.getAttachmentId(), actual.getAttachmentId());
     }
-    
+
     private Attachment createAttachment(int module, String account, String folder, String objectId, String attachmentId, String fileName) {
         Attachment attachment = new Attachment();
         attachment.setModule(module);
@@ -364,7 +364,7 @@ public class SolrAttachmentIndexAccessTest extends AbstractSolrIndexAccessTest {
         attachment.setContent(TestDocuments.toInputStream(TestDocuments.DOC1));
         attachment.setFileSize(TestDocuments.DOC1.length);
         attachment.setMimeType("text/plain");
-        
+
         return attachment;
     }
 

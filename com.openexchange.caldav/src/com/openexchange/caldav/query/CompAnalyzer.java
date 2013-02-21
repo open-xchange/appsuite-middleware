@@ -59,7 +59,7 @@ import java.util.List;
  */
 public class CompAnalyzer extends AnalyzerElement {
     private final String name;
-    
+
     public CompAnalyzer(String name) {
         super();
         this.name = name;

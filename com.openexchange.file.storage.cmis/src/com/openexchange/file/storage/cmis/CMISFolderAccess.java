@@ -144,7 +144,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
                 throw CMISExceptionCodes.NOT_A_FOLDER.create(folderId);
             }
             if (!root) {
-                return convertFolder(folderObjectId, (Folder) object);                
+                return convertFolder(folderObjectId, (Folder) object);
             }
             final CMISFolder folder = convertFolder(folderObjectId, (Folder) object);
             folder.setRootFolder(true);
@@ -196,7 +196,7 @@ public final class CMISFolderAccess extends AbstractCMISAccess implements FileSt
          * Convert to a folder
          */
         final CMISFolder cmisFolder = new CMISFolder(session.getUserId());
-        cmisFolder.parseSmbFolder(folder);
+        cmisFolder.parseCmisFolder(folder);
         cmisFolder.setFileCount(fileCount);
         cmisFolder.setSubfolders(hasSubdir);
         cmisFolder.setSubscribedSubfolders(hasSubdir);

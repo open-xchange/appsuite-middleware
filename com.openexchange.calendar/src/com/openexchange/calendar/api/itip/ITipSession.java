@@ -91,13 +91,6 @@ public class ITipSession implements Session {
 	@Override
     public void setParameter(final String name, final Object value) {
 		// Nothing to do
-
-	}
-
-	@Override
-    public void removeRandomToken() {
-		// Nothing to do
-
 	}
 
 	@Override
@@ -115,7 +108,6 @@ public class ITipSession implements Session {
 	@Override
     public void setHash(final String hash) {
 		// Nothing to do
-
 	}
 
 	@Override
@@ -129,5 +121,10 @@ public class ITipSession implements Session {
 		// Nothing to do
 
 	}
+
+    @Override
+    public boolean isTransient() {
+        return false;
+    }
 
 }

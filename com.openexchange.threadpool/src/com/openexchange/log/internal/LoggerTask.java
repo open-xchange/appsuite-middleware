@@ -57,6 +57,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
+import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogPropertyName;
 import com.openexchange.log.Loggable;
 import com.openexchange.threadpool.AbstractTask;
@@ -107,14 +108,14 @@ final class LoggerTask extends AbstractTask<Object> {
         }
 
         @Override
-        public Map<String, Object> properties() {
+        public Map<LogProperties.Name, Object> properties() {
             return Collections.emptyMap();
         }
     };
 
     private final BlockingQueue<Loggable> queue;
-
     private final AtomicBoolean keepgoing;
+    private final String lineSeparator;
 
     /**
      * Initializes a new {@link LoggerTask}.
@@ -123,6 +124,7 @@ final class LoggerTask extends AbstractTask<Object> {
      */
     protected LoggerTask(final BlockingQueue<Loggable> queue) {
         super();
+        lineSeparator = System.getProperty("line.separator");
         keepgoing = new AtomicBoolean(true);
         this.queue = queue;
     }
@@ -247,7 +249,7 @@ final class LoggerTask extends AbstractTask<Object> {
 
     private static final Pattern CRLF = Pattern.compile("\r?\n");
 
-    private static String prependLocation(final String message, final Loggable loggable, final LogPropertyName.LogLevel logLevel) {
+    private String prependLocation(final String message, final Loggable loggable, final LogPropertyName.LogLevel logLevel) {
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
         final StackTraceElement[] trace = loggable.getCallerTrace();
         String logClass = null;
@@ -271,14 +273,14 @@ final class LoggerTask extends AbstractTask<Object> {
                             sb.append(')');
                         }
                     }
-                    sb.append('\n').append(' ');
+                    sb.append(lineSeparator).append(' ');
                     logClass = className;
                     break;
                 }
             }
         }
         if (null != message) {
-            sb.append(CRLF.matcher(message).replaceAll("$0 "));
+            sb.append(CRLF.matcher(message).replaceAll(lineSeparator + " "));
         }
         return sb.toString();
     }

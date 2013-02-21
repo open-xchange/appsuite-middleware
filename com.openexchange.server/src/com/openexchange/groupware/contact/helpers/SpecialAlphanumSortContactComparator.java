@@ -162,13 +162,13 @@ public class SpecialAlphanumSortContactComparator implements Comparator<Contact>
             return 0; // Neutral
         }
     }
-    
+
     private static boolean isNotEmpty(final String string) {
         if (null != string) {
             for (int i = 0; i < string.length(); i++) {
                 if (false == Character.isWhitespace(string.charAt(i))) {
                     return true;
-                }                
+                }
             }
         }
         return false;

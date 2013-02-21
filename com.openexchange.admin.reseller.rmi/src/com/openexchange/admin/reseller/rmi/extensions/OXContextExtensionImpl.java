@@ -61,23 +61,23 @@ public class OXContextExtensionImpl extends OXCommonExtension {
     private static final long serialVersionUID = 8443761921961452860L;
 
     private String errortext;
-    
+
     private ResellerAdmin owner;
-    
+
     private String customid;
-    
+
     private Restriction[] restriction;
-    
+
     private boolean restrictionset;
-    
+
     private boolean ownerset;
-    
+
     private int sid;
-    
+
     private boolean sidset;
-    
+
     private boolean customidset;
-    
+
     /**
      * Initializes a new {@link OXContextExtensionImpl}.
      * @param sid
@@ -94,7 +94,7 @@ public class OXContextExtensionImpl extends OXCommonExtension {
         super();
         setSid(sid);
     }
-    
+
     /**
      * Initializes a new {@link OXContextExtensionImpl}.
      * @param owner
@@ -134,7 +134,7 @@ public class OXContextExtensionImpl extends OXCommonExtension {
     }
     /**
      * Returns the owner of this context
-     * 
+     *
      * @return
      */
     public final ResellerAdmin getOwner() {
@@ -154,10 +154,10 @@ public class OXContextExtensionImpl extends OXCommonExtension {
     public String getExtensionError() {
         return this.errortext;
     }
-    
+
     /**
      * Sets the owner of this context
-     * 
+     *
      * @param owner
      */
     public final void setOwner(final ResellerAdmin owner) {
@@ -165,34 +165,34 @@ public class OXContextExtensionImpl extends OXCommonExtension {
         this.owner = owner;
     }
 
-    
+
     public final void setSid(int sid) {
         this.sidset = true;
         this.sid = sid;
     }
 
-    
+
     public final boolean isOwnerset() {
         return ownerset;
     }
 
-    
+
     public final boolean isSidset() {
         return sidset;
     }
 
-    
+
     public final Restriction[] getRestriction() {
         return restriction;
     }
 
-    
+
     public final void setRestriction(Restriction[] restriction) {
         this.restrictionset = true;
         this.restriction = restriction;
     }
 
-    
+
     public final boolean isRestrictionset() {
         return restrictionset;
     }
@@ -200,7 +200,7 @@ public class OXContextExtensionImpl extends OXCommonExtension {
     public final boolean isCustomidset() {
         return customidset;
     }
-    
+
     /**
      * @return the customid
      */
@@ -208,7 +208,7 @@ public class OXContextExtensionImpl extends OXCommonExtension {
         return customid;
     }
 
-    
+
     /**
      * @param customid the customid to set
      */
@@ -216,5 +216,5 @@ public class OXContextExtensionImpl extends OXCommonExtension {
         this.customidset = true;
         this.customid = customid;
     }
-    
+
 }

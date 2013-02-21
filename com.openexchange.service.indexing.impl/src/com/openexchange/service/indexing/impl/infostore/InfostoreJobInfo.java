@@ -60,17 +60,17 @@ import com.openexchange.service.indexing.JobInfo;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class InfostoreJobInfo extends JobInfo {
-    
+
     private static final long serialVersionUID = 2186833384874500056L;
-    
+
     public final String account;
-    
+
     public final long folder;
-    
+
     public boolean force;
-    
+
     public boolean deleteFolder;
-    
+
     private String uniqueId = null;
 
     /**
@@ -86,7 +86,7 @@ public class InfostoreJobInfo extends JobInfo {
         force = builder.force;
         deleteFolder = builder.deleteFolder;
     }
-    
+
     @Override
     public int getModule() {
         return Types.INFOSTORE;
@@ -100,38 +100,38 @@ public class InfostoreJobInfo extends JobInfo {
             sb.append(contextId);
             sb.append('/');
             sb.append(userId);
-            
+
             if (account != null) {
                 sb.append('/');
                 sb.append(account);
             }
-            
+
             sb.append('/');
             sb.append(folder);
-            
+
             uniqueId = sb.toString();
         }
-        
+
         return uniqueId;
     }
-    
+
     @Override
     public String toString() {
         return toUniqueId();
     }
-    
+
     public static Builder newBuilder(Class<? extends IndexingJob> jobClass) {
         return new Builder(jobClass);
     }
-    
+
     public static final class Builder extends JobInfoBuilder<Builder> {
 
         protected String account;
-        
+
         protected long folder;
-        
+
         protected boolean force = false;
-        
+
         protected boolean deleteFolder = false;
 
         /**
@@ -141,22 +141,22 @@ public class InfostoreJobInfo extends JobInfo {
         public Builder(Class<? extends IndexingJob> jobClass) {
             super(jobClass);
         }
-        
+
         public Builder account(String account) {
             this.account = account;
             return this;
         }
-        
+
         public Builder folder(long folder) {
             this.folder = folder;
             return this;
         }
-        
+
         public Builder force() {
             force = true;
             return this;
         }
-        
+
         public Builder delete() {
             this.deleteFolder = true;
             return this;
@@ -166,6 +166,6 @@ public class InfostoreJobInfo extends JobInfo {
         public JobInfo build() {
             return new InfostoreJobInfo(this);
         }
-        
+
     }
 }

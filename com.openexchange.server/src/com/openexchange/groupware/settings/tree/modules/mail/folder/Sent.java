@@ -113,7 +113,7 @@ public class Sent implements PreferencesItemService {
                         // Admin has no mail access
                         setting.setSingleValue(null);
                     } else {
-                        throw new OXException(e);
+                        throw e;
                     }
                 } finally {
                     if (mail != null) {

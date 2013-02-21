@@ -123,7 +123,7 @@ public class DBPoolingExceptionStrings implements LocalizableStrings {
     // transaction counter is used. If this transaction counter is missing this exception gets thrown.
     // %1$d is replaced with the context identifier that is stored in the schema.
     public static final String TRANSACTION_MISSING_MSG = "Transaction counter is missing for context %1$d.";
-    
+
     // This error message may happen when provisioning contexts. Writing the database assigment failed in database.
     // %1$d is replaced with the context identifier.
     // %2$d is replaced with the server identifier.

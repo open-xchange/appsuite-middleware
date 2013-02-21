@@ -19,7 +19,7 @@ cluster_name: 'Test Cluster'
 # the heaviest-loaded existing node.  If there is no load information
 # available, such as is the case with a new cluster, it will pick
 # a random token, which will lead to hot spots.
-initial_token: 
+initial_token:
 
 # See http://wiki.apache.org/cassandra/HintedHandoff
 hinted_handoff_enabled: true
@@ -177,7 +177,7 @@ seed_provider:
       parameters:
           # seeds is actually a comma-delimited list of addresses.
           # Ex: "<ip1>,<ip2>,<ip3>"
-          - seeds: "localhost"
+          - seeds: "127.0.0.1"
 
 # emergency pressure valve: each time heap usage after a full (CMS)
 # garbage collection is above this fraction of the max, Cassandra will
@@ -381,12 +381,15 @@ in_memory_compaction_limit_in_mb: 64
 # Uncomment to make compaction mono-threaded, the pre-0.8 default.
 #concurrent_compactors: 1
 
-# Multi-threaded compaction. When enabled, each compaction will use
-# up to one thread per core, plus one thread per sstable being merged.
-# This is usually only useful for SSD-based hardware: otherwise, 
-# your concern is usually to get compaction to do LESS i/o (see:
-# compaction_throughput_mb_per_sec), not more.
-multithreaded_compaction: false
+# multithreaded_compaction: false. When enabled, each compaction will
+# use up to one thread per core, plus one thread per sstable being
+# merged.  This is usually only useful for SSD-based hardware:
+# otherwise, your concern is usually to get compaction to do LESS i/o
+# (see: compaction_throughput_mb_per_sec), not more.
+#
+# WARNING: this setting has caused compaction deadlocks for multiple
+# users (see CASSANDRA-4492).  It is recommended to leave this off
+# unless you are prepared to help troubleshoot.
 
 # Throttles compaction to the given total throughput across the entire
 # system. The faster you insert data, the faster you need to compact in

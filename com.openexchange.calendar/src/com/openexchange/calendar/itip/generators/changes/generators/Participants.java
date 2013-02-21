@@ -104,7 +104,7 @@ public class Participants implements ChangeDescriptionGenerator{
 
     private static final Map<ChangeType, String> PARTICIPANT_MESSAGE_MAP = new HashMap<ChangeType, String>(){{
         put(ChangeType.ADD, Messages.HAS_ADDED_PARTICIPANT);
-        
+
         put(ChangeType.REMOVE,  Messages.HAS_REMOVED_PARTICIPANT);
 
         put(ChangeType.ACCEPT, Messages.HAS_CHANGED_STATE);
@@ -112,35 +112,35 @@ public class Participants implements ChangeDescriptionGenerator{
         put(ChangeType.TENTATIVE, Messages.HAS_CHANGED_STATE);
 
     }};
-    
+
     private static final Map<ChangeType, String> STATE_MESSAGE_MAP = new HashMap<ChangeType, String>(){{
-      
+
         put(ChangeType.ACCEPT,  Messages.ACCEPTED);
         put(ChangeType.DECLINE, Messages.DECLINED);
         put(ChangeType.TENTATIVE, Messages.TENTATIVELY_ACCEPTED);
      }};
-    
+
 
     private static final Map<ChangeType,String> GROUP_MESSAGE_MAP = new HashMap<ChangeType, String>(){{
         put(ChangeType.ADD, Messages.HAS_INVITED_GROUP);
         put(ChangeType.REMOVE, Messages.HAS_REMOVED_GROUP);
     }};
-    
+
     private static final Map<ChangeType, String> RESOURCE_MESSAGE_MAP = new HashMap<ChangeType, String>(){{
         put(ChangeType.ADD,  Messages.HAS_ADDED_RESOURCE);
         put(ChangeType.REMOVE, Messages.HAS_REMOVED_RESOURCE);
     }};
-    
-    
-    
+
+
+
     private final UserService users;
     private final GroupService groups;
     private final ResourceService resources;
 
 	private final boolean stateChanges;
-    
-    
-    
+
+
+
     public Participants(UserService users, GroupService groups, ResourceService resources, boolean stateChanges) {
         super();
         this.users = users;
@@ -151,16 +151,16 @@ public class Participants implements ChangeDescriptionGenerator{
 
     @Override
     public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) throws OXException {
-        
+
         List<Integer> userIds = new ArrayList<Integer>();
         List<Integer> groupIds = new ArrayList<Integer>();
         List<Integer> resourceIds = new ArrayList<Integer>();
-        
+
         Map<Integer,ChangeType> userChange = new HashMap<Integer, ChangeType>();
         Map<Integer,ChangeType> resourceChange = new HashMap<Integer, ChangeType>();
         Map<Integer,ChangeType> groupChange = new HashMap<Integer, ChangeType>();
         Map<String,ChangeType> externalChange = new HashMap<String, ChangeType>();
-        
+
         Set<String> external = new HashSet<String>();
         Participant[] participants = updated.getParticipants();
         if (participants != null) {
@@ -171,7 +171,7 @@ public class Participants implements ChangeDescriptionGenerator{
                 }
             }
         }
-        
+
         participants = original.getParticipants();
         if (participants != null) {
             for(Participant p : participants) {
@@ -181,7 +181,7 @@ public class Participants implements ChangeDescriptionGenerator{
                 }
             }
         }
-        
+
 
         FieldUpdate update = diff.getUpdateFor("participants");
         if (update != null) {
@@ -190,28 +190,28 @@ public class Participants implements ChangeDescriptionGenerator{
             investigateSetOperation(difference, userIds, groupIds, resourceIds, userChange, resourceChange, groupChange, externalChange, ChangeType.REMOVE, difference.getRemoved());
             investigateChanges(difference, userIds, userChange, externalChange, external);
         }
-        
-        
+
+
         update = diff.getUpdateFor("confirmations");
         if (update != null) {
             Difference difference = (Difference) update.getExtraInfo();
-            
+
             investigateSetOperation(difference, userIds, groupIds, resourceIds, userChange, resourceChange, groupChange, externalChange, ChangeType.ADD, difference.getAdded());
             investigateSetOperation(difference, userIds, groupIds, resourceIds, userChange, resourceChange, groupChange, externalChange, ChangeType.REMOVE, difference.getRemoved());
             investigateChanges( difference, userIds, userChange, externalChange, external);
         }
-               
-        
+
+
         update = diff.getUpdateFor("users");
         if (update != null) {
             Difference difference = (Difference) update.getExtraInfo();
 
             investigateChanges(difference, userIds, userChange, externalChange, external);
-            
+
         }
 
         List<Sentence> changes = new ArrayList<Sentence>();
-        
+
         User[] user = users.getUser(ctx, Autoboxing.Coll2i(userIds));
         for (User u : user) {
             ChangeType changeType = userChange.get(u.getId());
@@ -228,7 +228,7 @@ public class Participants implements ChangeDescriptionGenerator{
             case TENTATIVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.TENTATIVE)); break;
             }
         }
-        
+
         List<String> externalMails = new ArrayList<String>(externalChange.keySet());
         Collections.sort(externalMails);
         for (String mail : externalMails) {
@@ -246,7 +246,7 @@ public class Participants implements ChangeDescriptionGenerator{
             case TENTATIVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.TENTATIVE)); break;
             }
         }
-        
+
         for(Integer id : groupChange.keySet()) {
             Group group = groups.getGroup(ctx, id.intValue());
             ChangeType changeType = externalChange.get(id.toString());
@@ -271,12 +271,12 @@ public class Participants implements ChangeDescriptionGenerator{
             }
         }
 
-        
+
         return changes;
     }
 
     private void investigateChanges(Difference difference, List<Integer> userIds, Map<Integer, ChangeType> userChange, Map<String, ChangeType> externalChange, Set<String> external) {
-        
+
         for(Change change : difference.getChanged()) {
             if (change instanceof ConfirmationChange) {
                 ConfirmationChange cchange = (ConfirmationChange) change;
@@ -285,18 +285,18 @@ public class Participants implements ChangeDescriptionGenerator{
                 int newStatus = cchange.getNewStatus();
                 ChangeType changeType = null;
                 switch (newStatus) {
-                case CalendarObject.ACCEPT: 
-                    changeType = ChangeType.ACCEPT; 
+                case CalendarObject.ACCEPT:
+                    changeType = ChangeType.ACCEPT;
                     break;
-                case CalendarObject.DECLINE: 
-                    changeType = ChangeType.DECLINE; 
+                case CalendarObject.DECLINE:
+                    changeType = ChangeType.DECLINE;
                     break;
-                case CalendarObject.TENTATIVE: 
-                    changeType = ChangeType.TENTATIVE; 
+                case CalendarObject.TENTATIVE:
+                    changeType = ChangeType.TENTATIVE;
                     break;
                 }
 
-                
+
                 if (external.contains(identifier)) {
                     externalChange.put(identifier, changeType);
                 } else {
@@ -315,19 +315,19 @@ public class Participants implements ChangeDescriptionGenerator{
                 userIds.add(up.getIdentifier());
                 userChange.put(up.getIdentifier(), changeType);
             }
-            
+
             if (added instanceof ExternalUserParticipant) {
                 ExternalUserParticipant ep = (ExternalUserParticipant) added;
                 externalChange.put(ep.getEmailAddress(), changeType);
             }
-            
+
             if (added instanceof ResourceParticipant) {
                 ResourceParticipant rp = (ResourceParticipant) added;
                 resourceIds.add(rp.getIdentifier());
                 resourceChange.put(rp.getIdentifier(), changeType);
-                
+
             }
-            
+
             if (added instanceof GroupParticipant) {
                 GroupParticipant gp = (GroupParticipant) added;
                 groupIds.add(gp.getIdentifier());
@@ -340,7 +340,7 @@ public class Participants implements ChangeDescriptionGenerator{
     public String[] getFields() {
         return FIELDS;
     }
-    
-    
+
+
 
 }

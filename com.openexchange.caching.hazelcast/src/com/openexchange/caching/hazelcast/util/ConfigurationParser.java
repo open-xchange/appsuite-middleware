@@ -73,7 +73,7 @@ import com.openexchange.java.UnsynchronizedStringReader;
 
 /**
  * {@link ConfigurationParser}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConfigurationParser {
@@ -207,7 +207,7 @@ public final class ConfigurationParser {
 
     /**
      * Parses specified properties.
-     * 
+     *
      * @param properties The properties to parse
      * @return The resulting map configurations
      */

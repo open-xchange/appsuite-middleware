@@ -67,9 +67,9 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  *
  */
-@Action(method = RequestMethod.PUT, 
-		name = "copy", 
-		description = "Copy an EAV Contact from one folder to another.", 
+@Action(method = RequestMethod.PUT,
+		name = "copy",
+		description = "Copy an EAV Contact from one folder to another.",
 		parameters = { @Parameter(name = "") } )
 public class CopyAction extends AbstractAction {
 
@@ -90,7 +90,7 @@ public class CopyAction extends AbstractAction {
 		JSONObject json = (JSONObject) requestData.getData();
 		EAVContact c = new EAVContact();
 		UUID folderUUID = null;
-		
+
 		try {
 			c.setUUID(UUID.fromString(json.getString("uuid")));
 			c.setTimeUUID(UUID.fromString(json.getString("timeuuid")));
@@ -99,9 +99,9 @@ public class CopyAction extends AbstractAction {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		
+
 		getContactService().getEAVContactService().copyContactToFolder(c, folderUUID);
-		
+
 		return new AJAXRequestResult(new JSONObject());
 	}
 

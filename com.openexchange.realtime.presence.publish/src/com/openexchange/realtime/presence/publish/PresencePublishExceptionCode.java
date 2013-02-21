@@ -53,7 +53,6 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
-import static com.openexchange.realtime.presence.publish.PresencePublishExceptionMessage.*;
 
 
 /**
@@ -62,7 +61,7 @@ import static com.openexchange.realtime.presence.publish.PresencePublishExceptio
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public enum PresencePublishExceptionCode implements OXExceptionCode {
-    
+
     /** The following needed service is missing: "%1$s" */
 //    NEEDED_SERVICE_MISSING(NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 1)
     ;
@@ -76,7 +75,7 @@ public enum PresencePublishExceptionCode implements OXExceptionCode {
         number = detailNumber;
         this.category = category;
     }
-    
+
     @Override
     public boolean equals(OXException e) {
         return OXExceptionFactory.getInstance().equals(this, e);
@@ -101,7 +100,7 @@ public enum PresencePublishExceptionCode implements OXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      *

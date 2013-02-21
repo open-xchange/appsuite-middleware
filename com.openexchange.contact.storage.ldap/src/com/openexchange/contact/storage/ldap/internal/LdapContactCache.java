@@ -77,20 +77,20 @@ import com.openexchange.timer.TimerService;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link LdapContactCache} 
- * 
+ * {@link LdapContactCache}
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class LdapContactCache {
-    
+
     private static final org.apache.commons.logging.Log LOG = LogFactory.getLog(LdapContactCache.class);
     private static final EnumSet<ContactField> CACHED_FIELDS = EnumSet.of(
-        ContactField.CONTEXTID, ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.UID, 
+        ContactField.CONTEXTID, ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.UID,
         ContactField.LAST_MODIFIED, ContactField.CREATION_DATE, ContactField.MODIFIED_BY, ContactField.CREATED_BY,
-        ContactField.PRIVATE_FLAG, ContactField.USE_COUNT, ContactField.MARK_AS_DISTRIBUTIONLIST, ContactField.DISTRIBUTIONLIST, 
+        ContactField.PRIVATE_FLAG, ContactField.USE_COUNT, ContactField.MARK_AS_DISTRIBUTIONLIST, ContactField.DISTRIBUTIONLIST,
         ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3,
-        ContactField.DISPLAY_NAME, ContactField.FILE_AS, ContactField.COMPANY, ContactField.YOMI_COMPANY, 
-        ContactField.SUR_NAME, ContactField.GIVEN_NAME, ContactField.YOMI_LAST_NAME, ContactField.YOMI_FIRST_NAME 
+        ContactField.DISPLAY_NAME, ContactField.FILE_AS, ContactField.COMPANY, ContactField.YOMI_COMPANY,
+        ContactField.SUR_NAME, ContactField.GIVEN_NAME, ContactField.YOMI_LAST_NAME, ContactField.YOMI_FIRST_NAME
     );
     private static final ContactField[] CACHED_FIELDS_ARRAY = CACHED_FIELDS.toArray(new ContactField[CACHED_FIELDS.size()]);
 
@@ -101,7 +101,7 @@ public class LdapContactCache {
 
     /**
      * Initializes a new {@link LdapContactCache}.
-     * 
+     *
      * @param storage the storage to cache the data for
      * @param refreshInterval the refresh interval in ms
      * @throws OXException
@@ -114,14 +114,14 @@ public class LdapContactCache {
         this.incrementalSync = incrementalSync;
         initCache(getRegionName(), properties);
     }
-    
+
     private String getRegionName() throws OXException {
         return "CONTACT_LDAP_" + storage.getContextID() + "_" + storage.getFolderID();
     }
 
     /**
-     * Gets the contact to which the specified object ID is mapped. 
-     * 
+     * Gets the contact to which the specified object ID is mapped.
+     *
      * @param objectID the contact's object ID
      * @return the contact, or <code>null</code> if not found.
      * @throws OXException
@@ -131,8 +131,8 @@ public class LdapContactCache {
     }
 
     /**
-     * Gets a list of the contact with the specified object IDs. 
-     * 
+     * Gets a list of the contact with the specified object IDs.
+     *
      * @param objectIDs
      * @return
      * @throws OXException
@@ -142,13 +142,13 @@ public class LdapContactCache {
         List<Contact> contacts = new ArrayList<Contact>(objectIDs.length);
         for (int objectID : objectIDs) {
             contacts.add((Contact)cache.get(Integer.valueOf(objectID)));
-        }        
+        }
         return contacts;
     }
-    
+
     /**
      * Gets all contacts.
-     * 
+     *
      * @return the contacts
      * @throws OXException
      */
@@ -164,11 +164,11 @@ public class LdapContactCache {
             return contacts;
         }
     }
-    
+
     /**
-     * Gets a value indicating whether all of the supplied fields are present 
+     * Gets a value indicating whether all of the supplied fields are present
      * in the cache or not.
-     *  
+     *
      * @param requestedFields the contact fields
      * @return <code>true</code>, if the fields are cached, <code>false</code>,
      *         otherwise
@@ -177,11 +177,11 @@ public class LdapContactCache {
     public static boolean isCached(ContactField[] requestedFields) throws OXException {
         return null != requestedFields && CACHED_FIELDS.containsAll(Arrays.asList(requestedFields));
     }
-    
+
     /**
-     * Creates an array of contact fields that are not covered by the cached 
+     * Creates an array of contact fields that are not covered by the cached
      * data.
-     * 
+     *
      * @param requestedFields the fields to check
      * @param mandatoryFields fields that always should be added to the result
      * @return the unknown fields
@@ -253,8 +253,8 @@ public class LdapContactCache {
             }
         }
         return true;
-    } 
-    
+    }
+
     private static void initCache(String regionName, Properties properties) throws OXException {
         Properties customProperties = new Properties();
         for (Entry<Object, Object> entry : properties.entrySet()) {
@@ -264,7 +264,7 @@ public class LdapContactCache {
         }
         LdapServiceLookup.getService(CacheService.class).loadConfiguration(properties);
     }
-    
+
     private Cache getCache() throws OXException {
         if (null == this.loader) {
             synchronized (this) {
@@ -281,11 +281,11 @@ public class LdapContactCache {
         }
         return LdapServiceLookup.getService(CacheService.class).getCache(getRegionName());
     }
-    
+
     private final class ContactLoader implements Runnable {
-        
+
         private Date lastModified;
-    
+
         public ContactLoader() {
             super();
             this.lastModified = null;
@@ -303,7 +303,7 @@ public class LdapContactCache {
                 LOG.error(e.getMessage(), e);
             }
         }
-        
+
         private void refreshContacts() throws OXException {
             Cache cache = LdapServiceLookup.getService(CacheService.class).getCache(getRegionName());
             LOG.debug("Refreshing contacts.");
@@ -314,12 +314,12 @@ public class LdapContactCache {
             SearchIterator<Contact> modifiedContacts = null;
             SearchIterator<Contact> deletedContacts = null;
             try {
-                modifiedContacts = storage.doModified(null, Integer.toString(storage.getFolderID()), lastModified, 
-                    CACHED_FIELDS_ARRAY, SortOptions.EMPTY);    
+                modifiedContacts = storage.doModified(null, Integer.toString(storage.getFolderID()), lastModified,
+                    CACHED_FIELDS_ARRAY, SortOptions.EMPTY);
                 while (modifiedContacts.hasNext()) {
                     Contact contact = modifiedContacts.next();
                     newLastModified = getLatestModified(newLastModified, contact);
-                    cache.put(Integer.valueOf(contact.getObjectID()), contact);
+                    cache.put(Integer.valueOf(contact.getObjectID()), contact, false);
                     updated++;
                 }
                 deletedContacts = storage.doDeleted(null, Integer.toString(storage.getFolderID()), lastModified, new ContactField[] {
@@ -336,13 +336,13 @@ public class LdapContactCache {
             }
             if (0 < updated || 0 < deleted) {
                 this.lastModified = newLastModified;
-                LOG.debug("Contacts refreshed, got " + updated + " modified and " + deleted + 
+                LOG.debug("Contacts refreshed, got " + updated + " modified and " + deleted +
                     " deleted contacts in "  + (new Date().getTime() - start.getTime()) + "ms.");
             } else {
                 LOG.debug("No changes detected, check took " + (new Date().getTime() - start.getTime()) + "ms.");
             }
         }
-        
+
         private void reloadContacts() throws OXException {
             Cache cache = LdapServiceLookup.getService(CacheService.class).getCache(getRegionName());
             LOG.debug("Reloading contacts.");
@@ -351,11 +351,11 @@ public class LdapContactCache {
             Date newLastModified = new Date(0);
             SearchIterator<Contact> contacts = null;
             try {
-                contacts = storage.doAll(null, Integer.toString(storage.getFolderID()), CACHED_FIELDS_ARRAY, SortOptions.EMPTY);    
+                contacts = storage.doAll(null, Integer.toString(storage.getFolderID()), CACHED_FIELDS_ARRAY, SortOptions.EMPTY);
                 while (contacts.hasNext()) {
                     Contact contact = contacts.next();
                     newLastModified = getLatestModified(newLastModified, contact);
-                    cache.put(Integer.valueOf(contact.getObjectID()), contact);
+                    cache.put(Integer.valueOf(contact.getObjectID()), contact, false);
                     added++;
                 }
             } finally {
@@ -364,12 +364,12 @@ public class LdapContactCache {
             this.lastModified = newLastModified;
             LOG.debug("Contacts reloaded, got " + added + " entries in " + (new Date().getTime() - start.getTime()) + "ms.");
         }
-        
+
         private Date getLatestModified(Date lastModified, Contact contact) {
-            return null != contact.getLastModified() && lastModified.after(contact.getLastModified()) ? 
+            return null != contact.getLastModified() && lastModified.after(contact.getLastModified()) ?
                 lastModified : contact.getLastModified();
         }
-        
+
     }
-    
+
 }

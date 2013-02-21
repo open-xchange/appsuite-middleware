@@ -51,7 +51,7 @@ package com.openexchange.index.solr.internal.querybuilder.utils;
 
 /**
  * {@link Token}
- * 
+ *
  * @author Sven Maurmann
  */
 public class Token {

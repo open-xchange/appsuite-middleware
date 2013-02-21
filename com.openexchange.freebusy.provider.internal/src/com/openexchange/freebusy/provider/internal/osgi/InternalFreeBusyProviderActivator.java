@@ -79,7 +79,7 @@ public class InternalFreeBusyProviderActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ResourceService.class, AppointmentSqlFactoryService.class, ContextService.class, 
+        return new Class<?>[] { UserService.class, ResourceService.class, AppointmentSqlFactoryService.class, ContextService.class,
             GroupService.class };
     }
 
@@ -91,14 +91,14 @@ public class InternalFreeBusyProviderActivator extends HousekeepingActivator {
             registerService(InternalFreeBusyProvider.class, new InternalFreeBusyProviderImpl());
         } catch (Exception e) {
             LOG.error("error starting com.openexchange.freebusy.provider.internal", e);
-            throw e;            
+            throw e;
         }
     }
 
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: com.openexchange.freebusy.provider.internal");
-        InternalFreeBusyProviderLookup.set(null);            
+        InternalFreeBusyProviderLookup.set(null);
         super.stopBundle();
     }
 

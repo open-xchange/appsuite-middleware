@@ -106,7 +106,7 @@ public final class OutlookFolder implements FolderExtension {
 
     /**
      * Gets the associated folder from real folder tree.
-     * 
+     *
      * @return The real folder
      */
     public Folder getRealFolder() {

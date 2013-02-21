@@ -1,18 +1,18 @@
-/* 
- * Copyright 2005 - 2009 Terracotta, Inc. 
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
- * use this file except in compliance with the License. You may obtain a copy 
- * of the License at 
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0 
- *   
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT 
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- * License for the specific language governing permissions and limitations 
+/*
+ * Copyright 2005 - 2009 Terracotta, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
  * under the License.
- * 
+ *
  */
 
 package org.quartz.examples.example2;
@@ -39,12 +39,12 @@ import org.quartz.impl.StdSchedulerFactory;
 /**
  * This Example will demonstrate all of the basics of scheduling capabilities
  * of Quartz using Simple Triggers.
- * 
+ *
  * @author Bill Kratzer
  */
 public class SimpleTriggerExample {
 
-    
+
     public void run() throws Exception {
         System.out.println("------- Initializing -------------------");
 
@@ -65,8 +65,8 @@ public class SimpleTriggerExample {
         JobDetail job = newJob(SimpleJob.class)
             .withIdentity("job1", "group1")
             .build();
-        
-        SimpleTrigger trigger = (SimpleTrigger) newTrigger() 
+
+        SimpleTrigger trigger = (SimpleTrigger) newTrigger()
             .withIdentity("trigger1", "group1")
             .startAt(startTime)
             .build();
@@ -74,8 +74,8 @@ public class SimpleTriggerExample {
         // schedule it to run!
         Date ft = sched.scheduleJob(job, trigger);
         System.out.println(job.getKey() +
-                " will run at: " + ft +  
-                " and repeat: " + trigger.getRepeatCount() + 
+                " will run at: " + ft +
+                " and repeat: " + trigger.getRepeatCount() +
                 " times, every " + trigger.getRepeatInterval() / 1000 + " seconds");
 
         // job2 will only fire once at date/time "ts"
@@ -83,15 +83,15 @@ public class SimpleTriggerExample {
             .withIdentity("job2", "group1")
             .build();
 
-        trigger = (SimpleTrigger) newTrigger() 
+        trigger = (SimpleTrigger) newTrigger()
             .withIdentity("trigger2", "group1")
             .startAt(startTime)
             .build();
 
         ft = sched.scheduleJob(job, trigger);
         System.out.println(job.getKey() +
-                " will run at: " + ft +  
-                " and repeat: " + trigger.getRepeatCount() + 
+                " will run at: " + ft +
+                " and repeat: " + trigger.getRepeatCount() +
                 " times, every " + trigger.getRepeatInterval() / 1000 + " seconds");
 
         // job3 will run 11 times (run once and repeat 10 more times)
@@ -110,13 +110,13 @@ public class SimpleTriggerExample {
 
         ft = sched.scheduleJob(job, trigger);
         System.out.println(job.getKey() +
-                " will run at: " + ft +  
-                " and repeat: " + trigger.getRepeatCount() + 
+                " will run at: " + ft +
+                " and repeat: " + trigger.getRepeatCount() +
                 " times, every " + trigger.getRepeatInterval() / 1000 + " seconds");
-        
+
         // the same job (job3) will be scheduled by a another trigger
         // this time will only repeat twice at a 70 second interval
-        
+
         trigger = newTrigger()
             .withIdentity("trigger3", "group2")
             .startAt(startTime)
@@ -128,8 +128,8 @@ public class SimpleTriggerExample {
 
         ft = sched.scheduleJob(trigger);
         System.out.println(job.getKey() +
-                " will [also] run at: " + ft +  
-                " and repeat: " + trigger.getRepeatCount() + 
+                " will [also] run at: " + ft +
+                " and repeat: " + trigger.getRepeatCount() +
                 " times, every " + trigger.getRepeatInterval() / 1000 + " seconds");
 
         // job4 will run 6 times (run once and repeat 5 more times)
@@ -148,8 +148,8 @@ public class SimpleTriggerExample {
 
         ft = sched.scheduleJob(job, trigger);
         System.out.println(job.getKey() +
-                " will run at: " + ft +  
-                " and repeat: " + trigger.getRepeatCount() + 
+                " will run at: " + ft +
+                " and repeat: " + trigger.getRepeatCount() +
                 " times, every " + trigger.getRepeatInterval() / 1000 + " seconds");
 
         // job5 will run once, five minutes in the future
@@ -157,15 +157,15 @@ public class SimpleTriggerExample {
             .withIdentity("job5", "group1")
             .build();
 
-        trigger = (SimpleTrigger) newTrigger() 
+        trigger = (SimpleTrigger) newTrigger()
             .withIdentity("trigger5", "group1")
             .startAt(futureDate(5, IntervalUnit.MINUTE))
             .build();
 
         ft = sched.scheduleJob(job, trigger);
         System.out.println(job.getKey() +
-                " will run at: " + ft +  
-                " and repeat: " + trigger.getRepeatCount() + 
+                " will run at: " + ft +
+                " and repeat: " + trigger.getRepeatCount() +
                 " times, every " + trigger.getRepeatInterval() / 1000 + " seconds");
 
         // job6 will run indefinitely, every 40 seconds
@@ -180,11 +180,11 @@ public class SimpleTriggerExample {
                     .withIntervalInSeconds(40)
                     .repeatForever())
             .build();
-            
+
         ft = sched.scheduleJob(job, trigger);
         System.out.println(job.getKey() +
-                " will run at: " + ft +  
-                " and repeat: " + trigger.getRepeatCount() + 
+                " will run at: " + ft +
+                " and repeat: " + trigger.getRepeatCount() +
                 " times, every " + trigger.getRepeatInterval() / 1000 + " seconds");
 
         System.out.println("------- Starting Scheduler ----------------");
@@ -200,7 +200,7 @@ public class SimpleTriggerExample {
         job = newJob(SimpleJob.class)
             .withIdentity("job7", "group1")
             .build();
-        
+
         trigger = newTrigger()
             .withIdentity("trigger7", "group1")
             .startAt(startTime)
@@ -211,18 +211,18 @@ public class SimpleTriggerExample {
 
         ft = sched.scheduleJob(job, trigger);
         System.out.println(job.getKey() +
-                " will run at: " + ft +  
-                " and repeat: " + trigger.getRepeatCount() + 
+                " will run at: " + ft +
+                " and repeat: " + trigger.getRepeatCount() +
                 " times, every " + trigger.getRepeatInterval() / 1000 + " seconds");
-        
+
         // jobs can be fired directly... (rather than waiting for a trigger)
         job = newJob(SimpleJob.class)
             .withIdentity("job8", "group1")
             .storeDurably()
             .build();
-    
+
         sched.addJob(job, true);
-        
+
         System.out.println("'Manually' triggering job8...");
         sched.triggerJob(jobKey("job8", "group1"));
 
@@ -230,12 +230,12 @@ public class SimpleTriggerExample {
 
         try {
             // wait 33 seconds to show jobs
-            Thread.sleep(30L * 1000L); 
+            Thread.sleep(30L * 1000L);
             // executing...
         } catch (Exception e) {
         }
 
-        // jobs can be re-scheduled...  
+        // jobs can be re-scheduled...
         // job 7 will run immediately and repeat 10 times for every second
         System.out.println("------- Rescheduling... --------------------");
         trigger = newTrigger()
@@ -248,11 +248,11 @@ public class SimpleTriggerExample {
 
         ft = sched.rescheduleJob(trigger.getKey(), trigger);
         System.out.println("job7 rescheduled to run at: " + ft);
-        
+
         System.out.println("------- Waiting five minutes... ------------");
         try {
             // wait five minutes to show jobs
-            Thread.sleep(300L * 1000L); 
+            Thread.sleep(300L * 1000L);
             // executing...
         } catch (Exception e) {
         }

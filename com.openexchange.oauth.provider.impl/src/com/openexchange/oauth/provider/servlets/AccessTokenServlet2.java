@@ -71,7 +71,7 @@ import com.openexchange.oauth.provider.v2.OAuth2ProviderService;
 
 /**
  * {@link AccessTokenServlet2} - Access Token request handler for OAuth2.0
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AccessTokenServlet2 extends HttpServlet {

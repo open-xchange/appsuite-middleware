@@ -62,7 +62,6 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexManagementService;
-import com.openexchange.test.osgi.OSGiTest;
 
 
 /**
@@ -75,7 +74,7 @@ public abstract class AbstractSolrIndexAccessTest {
     protected static IndexFacadeService indexFacade;
 
     protected static ConfigurationService config;
-    
+
     protected static IndexManagementService managementService;
 
     protected static Credentials superAdminCredentials;
@@ -87,7 +86,7 @@ public abstract class AbstractSolrIndexAccessTest {
     protected static Context context;
 
     protected static User user;
-    
+
 
     @BeforeClass
     public static void setUpClass() throws Exception {
@@ -111,7 +110,7 @@ public abstract class AbstractSolrIndexAccessTest {
             contextInterface.delete(context, superAdminCredentials);
         }
     }
-    
+
     public static void setIndexFacade(IndexFacadeService indexFacade) {
         AbstractSolrIndexAccessTest.indexFacade = indexFacade;
     }
@@ -119,11 +118,11 @@ public abstract class AbstractSolrIndexAccessTest {
     public static void setConfigurationService(ConfigurationService config) {
         AbstractSolrIndexAccessTest.config = config;
     }
-    
+
     public static void setIndexManagementService(IndexManagementService managementService) {
         AbstractSolrIndexAccessTest.managementService = managementService;
     }
-    
+
     private static Context newContext(String name, int id) {
         Context newContext = new Context();
         Filestore filestore = new Filestore();

@@ -50,15 +50,15 @@
 package com.openexchange.database.provider;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
 
 public class RequestDBProvider implements DBProvider {
 
@@ -327,11 +327,7 @@ public class RequestDBProvider implements DBProvider {
         txIds.set(null);
         final DBProvider prov = getProvider();
         if(prov instanceof Closeable) {
-            try {
-                ((Closeable)prov).close();
-            } catch (final IOException e) {
-                LOG.debug("",e);
-            }
+            Streams.close((Closeable) prov);
         }
     }
 

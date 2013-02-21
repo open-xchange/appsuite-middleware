@@ -58,7 +58,7 @@ import com.openexchange.database.AbstractCreateTableImpl;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrCoresCreateTableService extends AbstractCreateTableImpl {
-    
+
     private static final String CT_CORES =
         "CREATE TABLE solrCores (" +
             "cid INT4 unsigned NOT NULL," +
@@ -72,7 +72,7 @@ public class SolrCoresCreateTableService extends AbstractCreateTableImpl {
             "KEY server (server)," +
             "KEY store (store)" +
          ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-    
+
 
     @Override
     public String[] requiredTables() {
@@ -86,7 +86,7 @@ public class SolrCoresCreateTableService extends AbstractCreateTableImpl {
     }
 
     @Override
-    protected String[] getCreateStatements() {        
+    protected String[] getCreateStatements() {
         return new String[] { CT_CORES };
     }
 }

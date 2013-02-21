@@ -69,12 +69,12 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public class OXResellerUserImpl implements OXUserPluginInterface {
 
     private final Log log = LogFactory.getLog(this.getClass());
-    
+
     private OXResellerStorageInterface oxresell = null;
 
     /**
-     * @throws StorageException 
-     * 
+     * @throws StorageException
+     *
      */
     public OXResellerUserImpl() throws StorageException {
         oxresell = OXResellerStorageInterface.getInstance();

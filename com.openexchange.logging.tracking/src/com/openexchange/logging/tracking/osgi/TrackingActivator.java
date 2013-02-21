@@ -75,17 +75,17 @@ public class TrackingActivator extends HousekeepingActivator {
 	@Override
 	protected void startBundle() throws Exception {
 		final TrackingConfiguration config = new TrackingConfiguration(getService(UserService.class), getService(ContextService.class));
-		
+
 		final SessionHolder sh = getService(SessionHolder.class);
-		
-		
+
+
 		registerService(LogWrapperFactory.class, new LogWrapperFactory() {
-			
+
 			public Log wrap(String className, Log log) {
 				return new TrackingFileLog(new SessionBasedTrackingConfiguration(className, config, sh), log);
 			}
 		});
-		
+
 		trackingJMXActivator.setConfig(config);
 	}
 

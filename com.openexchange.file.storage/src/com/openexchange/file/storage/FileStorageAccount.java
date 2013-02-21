@@ -71,27 +71,27 @@ public interface FileStorageAccount extends Serializable, FileStorageConstants {
      *
      * @return The configuration as a {@link Map}
      */
-    public Map<String, Object> getConfiguration();
+    Map<String, Object> getConfiguration();
 
     /**
      * Gets the identifier.
      *
      * @return The identifier
      */
-    public String getId();
+    String getId();
 
     /**
      * Gets the display name.
      *
      * @return The display name
      */
-    public String getDisplayName();
+    String getDisplayName();
 
     /**
      * Gets the associated file storage service.
      *
      * @return The associated file storage service
      */
-    public FileStorageService getFileStorageService();
+    FileStorageService getFileStorageService();
 
 }

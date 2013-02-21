@@ -92,17 +92,12 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 	@Override
 	protected void update(final PasswordChangeEvent event) throws OXException {
 
-		String shellscript_to_execute = null;
-		try {
-			shellscript_to_execute = getShellCommand();
-		} catch (final OXException e1) {
-			throw new OXException(e1);
-		}
+		String shellscript_to_execute = getShellCommand();
 		User user = null;
 		{
 			final UserService userService = getServiceRegistry().getService(UserService.class);
 			if (userService == null) {
-				throw new OXException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName()));
+				throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class.getName());
 			}
 			user = userService.getUser(event.getSession().getUserId(), event.getContext());
 
@@ -161,12 +156,12 @@ public final class ScriptPasswordChange extends PasswordChangeService {
 		    }
 		} catch (final IOException e) {
 			LOG.fatal("IO error while changing password for user "+usern+" in context "+cid+"\n",e);
-			throw new OXException(ServiceExceptionCode.IO_ERROR.create( e));
+			throw ServiceExceptionCode.IO_ERROR.create(e);
 		} catch (final InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
             Thread.currentThread().interrupt();
 			LOG.fatal("Error while changing password for user "+usern+" in context "+cid+"\n",e);
-			throw new OXException(ServiceExceptionCode.IO_ERROR.create( e));
+			throw ServiceExceptionCode.IO_ERROR.create(e);
 		}
 
 	}

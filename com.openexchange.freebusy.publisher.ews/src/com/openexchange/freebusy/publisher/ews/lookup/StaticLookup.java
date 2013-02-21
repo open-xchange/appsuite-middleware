@@ -55,13 +55,13 @@ import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link StaticLookup}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class StaticLookup extends Lookup {
-    
+
     private final String template;
-    
+
     /**
      * Initializes a new {@link StaticLookup}.
      */
@@ -69,7 +69,7 @@ public class StaticLookup extends Lookup {
         super();
         this.template = template;
     }
-    
+
     public StaticLookup() throws OXException {
         this(Tools.getConfigProperty("com.openexchange.freebusy.publisher.ews.lookup.static"));
     }
@@ -82,5 +82,5 @@ public class StaticLookup extends Lookup {
         }
         return legacyExchangeDNs;
     }
-    
+
 }

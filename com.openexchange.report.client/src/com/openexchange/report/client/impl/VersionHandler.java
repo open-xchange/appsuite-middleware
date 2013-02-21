@@ -60,20 +60,14 @@ public class VersionHandler {
         String[] retval = new String[2];
 
         // For debugging in eclipse
-        // String path = new File("../com.openexchange.admin/META-INF/MANIFEST.MF").getAbsolutePath();
+        // String path = new File("../com.openexchange.version/META-INF/MANIFEST.MF").getAbsolutePath();
         // URL manifestURL = new URL("file:" + path);
-        URL manifestURL = new URL("jar:file:/opt/open-xchange/bundles/com.openexchange.admin.jar!/META-INF/MANIFEST.MF");
+        URL manifestURL = new URL("jar:file:/opt/open-xchange/bundles/com.openexchange.version.jar!/META-INF/MANIFEST.MF");
         Attributes attrs = new Manifest(manifestURL.openStream()).getMainAttributes();
-        retval[0] = attrs.getValue("OXVersion") + " Rev" + attrs.getValue("OXRevision");
 
-        // For debugging in eclipse
-        // path = new File("../com.openexchange.server/META-INF/MANIFEST.MF").getAbsolutePath();
-        // manifestURL = new URL("file:" + path);
-        manifestURL = new URL("file:/opt/open-xchange/bundles/com.openexchange.server/META-INF/MANIFEST.MF");
-        attrs = new Manifest(manifestURL.openStream()).getMainAttributes();
-        retval[1] = attrs.getValue("OXVersion") + " Rev" + attrs.getValue("OXRevision");
+        retval[0] = attrs.getValue("OXVersion") + " Rev" + attrs.getValue("OXRevision");
+        retval[1] = String.valueOf(attrs.getValue("OXBuildDate"));
 
         return retval;
     }
-
 }

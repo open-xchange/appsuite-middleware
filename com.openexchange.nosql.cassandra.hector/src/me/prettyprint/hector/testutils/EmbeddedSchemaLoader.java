@@ -10,7 +10,6 @@ import java.util.Map;
 
 import org.apache.cassandra.config.CFMetaData;
 import org.apache.cassandra.config.ColumnDefinition;
-import org.apache.cassandra.config.ConfigurationException;
 import org.apache.cassandra.config.KSMetaData;
 import org.apache.cassandra.config.Schema;
 import org.apache.cassandra.db.ColumnFamilyType;
@@ -31,17 +30,10 @@ import com.google.common.base.Charsets;
 
 public class EmbeddedSchemaLoader {
   public static void loadSchema() {
-    try
-    {
       Schema.instance.load(schemaDefinition());
-    }
-    catch (ConfigurationException e)
-    {
-        throw new RuntimeException(e);
-    }
   }
 
-  public static Collection<KSMetaData> schemaDefinition() throws ConfigurationException {
+  public static Collection<KSMetaData> schemaDefinition() {
     List<KSMetaData> schema = new ArrayList<KSMetaData>();
 
     // A whole bucket of shorthand
@@ -110,7 +102,6 @@ public class EmbeddedSchemaLoader {
   }
 
   private static CFMetaData indexCFMD(String ksName, String cfName, final Boolean withIdxType)
-    throws ConfigurationException
   {
       return standardCFMD(ksName, cfName)
               .columnMetadata(new HashMap<ByteBuffer, ColumnDefinition>()
@@ -131,7 +122,6 @@ public class EmbeddedSchemaLoader {
   
   private static CFMetaData cqlTestCf(String ksName, String cfName,
       AbstractType comp)
-  throws ConfigurationException
   {     
     return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard, comp, null)
         .keyValidator(UTF8Type.instance).columnMetadata(new HashMap<ByteBuffer, ColumnDefinition>()

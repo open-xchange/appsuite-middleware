@@ -54,7 +54,7 @@ import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
  * {@link ConfirmationsDiffer}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class ConfirmationsDiffer extends Differ<CalendarObject> {

@@ -107,7 +107,8 @@ public class Bug15354Test extends AbstractAJAXSession {
             thread[i].join();
         }
         for (int i = 0; i < writer.length; i++) {
-            assertNull(writer[i].getThrowable());
+            final Throwable throwable = writer[i].getThrowable();
+            assertNull("Expected no Throwable, but there is one: " + throwable, throwable);
         }
         client.execute(new SetRequest(Tree.Beta, B(origValue)));
         super.tearDown();

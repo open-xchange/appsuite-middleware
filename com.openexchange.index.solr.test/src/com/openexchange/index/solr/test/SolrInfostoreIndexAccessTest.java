@@ -77,7 +77,7 @@ import com.openexchange.index.StandardIndexDocument;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrInfostoreIndexAccessTest extends AbstractSolrIndexAccessTest {
-    
+
     @Before
     public void setUpTest() throws OXException {
         assertNotNull("IndexFacadeService was null.", indexFacade);
@@ -87,21 +87,21 @@ public class SolrInfostoreIndexAccessTest extends AbstractSolrIndexAccessTest {
                                     .build();
         indexAccess.deleteByQuery(params);
     }
-    
+
     @Test
     public void testSimpleQuery() throws Exception {
         assertNotNull("IndexFacadeService was null.", indexFacade);
         IndexAccess<DocumentMetadata> indexAccess = indexFacade.acquireIndexAccess(Types.INFOSTORE, user.getId(), context.getId());
-        
+
         DocumentMetadata d1 = createDocument(1, 1L, "First Document", "This is the first document");
         indexAccess.addDocument(new StandardIndexDocument<DocumentMetadata>(d1));
-        
+
         DocumentMetadata d2 = createDocument(2, 1L, "Second Document", "This is the second document");
         indexAccess.addDocument(new StandardIndexDocument<DocumentMetadata>(d2));
-        
+
         DocumentMetadata d3 = createDocument(3, 2L, "Third Document", "This is the third document");
         indexAccess.addDocument(new StandardIndexDocument<DocumentMetadata>(d3));
-        
+
         QueryParameters q1 = new QueryParameters.Builder()
             .setHandler(SearchHandler.SIMPLE)
             .setSearchTerm("First")
@@ -109,7 +109,7 @@ public class SolrInfostoreIndexAccessTest extends AbstractSolrIndexAccessTest {
         IndexResult<DocumentMetadata> r1 = indexAccess.query(q1, null);
         assertTrue("Wrong result size.", r1.getNumFound() == 1);
         checkDocuments(d1, r1.getResults().get(0).getObject());
-        
+
         AccountFolders af1 = new AccountFolders(IndexConstants.DEFAULT_ACCOUNT, Collections.singleton("1"));
         QueryParameters q2 = new QueryParameters.Builder()
             .setHandler(SearchHandler.SIMPLE)
@@ -119,21 +119,21 @@ public class SolrInfostoreIndexAccessTest extends AbstractSolrIndexAccessTest {
         IndexResult<DocumentMetadata> r2 = indexAccess.query(q2, null);
         assertTrue("Wrong result size.", r2.getNumFound() == 2);
     }
-    
+
     @Test
     public void testGetQuery() throws Exception {
         assertNotNull("IndexFacadeService was null.", indexFacade);
         IndexAccess<DocumentMetadata> indexAccess = indexFacade.acquireIndexAccess(Types.INFOSTORE, user.getId(), context.getId());
-        
+
         DocumentMetadata d1 = createDocument(1, 1L, "First Document", "This is the first document");
         indexAccess.addDocument(new StandardIndexDocument<DocumentMetadata>(d1));
-        
+
         DocumentMetadata d2 = createDocument(2, 1L, "Second Document", "This is the second document");
         indexAccess.addDocument(new StandardIndexDocument<DocumentMetadata>(d2));
-        
+
         DocumentMetadata d3 = createDocument(3, 2L, "Third Document", "This is the third document");
         indexAccess.addDocument(new StandardIndexDocument<DocumentMetadata>(d3));
-        
+
         Set<String> allIds = new HashSet<String>();
         allIds.add(InfostoreUUID.newUUID(context.getId(), user.getId(), d1).toString());
         allIds.add(InfostoreUUID.newUUID(context.getId(), user.getId(), d2).toString());
@@ -144,7 +144,7 @@ public class SolrInfostoreIndexAccessTest extends AbstractSolrIndexAccessTest {
             .build();
         IndexResult<DocumentMetadata> r1 = indexAccess.query(q1, null);
         assertTrue("Wrong result size.", r1.getNumFound() == 3);
-        
+
         AccountFolders af1 = new AccountFolders(IndexConstants.DEFAULT_ACCOUNT, Collections.singleton("1"));
         QueryParameters q2 = new QueryParameters.Builder()
             .setHandler(SearchHandler.GET_REQUEST)
@@ -154,27 +154,27 @@ public class SolrInfostoreIndexAccessTest extends AbstractSolrIndexAccessTest {
         IndexResult<DocumentMetadata> r2 = indexAccess.query(q2, null);
         assertTrue("Wrong result size.", r2.getNumFound() == 2);
     }
-    
+
     @Test
     public void testAllQuery() throws Exception {
         assertNotNull("IndexFacadeService was null.", indexFacade);
         IndexAccess<DocumentMetadata> indexAccess = indexFacade.acquireIndexAccess(Types.INFOSTORE, user.getId(), context.getId());
-        
+
         DocumentMetadata d1 = createDocument(1, 1L, "First Document", "This is the first document");
         indexAccess.addDocument(new StandardIndexDocument<DocumentMetadata>(d1));
-        
+
         DocumentMetadata d2 = createDocument(2, 1L, "Second Document", "This is the second document");
         indexAccess.addDocument(new StandardIndexDocument<DocumentMetadata>(d2));
-        
+
         DocumentMetadata d3 = createDocument(3, 2L, "Third Document", "This is the third document");
         indexAccess.addDocument(new StandardIndexDocument<DocumentMetadata>(d3));
-        
+
         QueryParameters q1 = new QueryParameters.Builder()
             .setHandler(SearchHandler.ALL_REQUEST)
             .build();
         IndexResult<DocumentMetadata> r1 = indexAccess.query(q1, null);
         assertTrue("Wrong result size.", r1.getNumFound() == 3);
-        
+
         AccountFolders af1 = new AccountFolders(IndexConstants.DEFAULT_ACCOUNT, Collections.singleton("1"));
         QueryParameters q2 = new QueryParameters.Builder()
             .setHandler(SearchHandler.ALL_REQUEST)
@@ -183,12 +183,12 @@ public class SolrInfostoreIndexAccessTest extends AbstractSolrIndexAccessTest {
         IndexResult<DocumentMetadata> r2 = indexAccess.query(q2, null);
         assertTrue("Wrong result size.", r2.getNumFound() == 2);
     }
-    
+
     @Test
     public void testCustomQuery() throws Exception {
         assertNotNull("IndexFacadeService was null.", indexFacade);
         IndexAccess<DocumentMetadata> indexAccess = indexFacade.acquireIndexAccess(Types.INFOSTORE, user.getId(), context.getId());
-        
+
         QueryParameters q1 = new QueryParameters.Builder()
             .setHandler(SearchHandler.CUSTOM)
             .setSearchTerm(new Object())
@@ -199,12 +199,12 @@ public class SolrInfostoreIndexAccessTest extends AbstractSolrIndexAccessTest {
             // TODO: Expect correct exception
         }
     }
-    
+
     private void checkDocuments(DocumentMetadata expected, DocumentMetadata actual) {
         assertEquals("Wrong folder", expected.getFolderId(), actual.getFolderId());
         assertEquals("Wrong id", expected.getId(), actual.getId());
     }
-    
+
     private DocumentMetadata createDocument(int id, long folderId, String title, String description) {
         DocumentMetadata d1 = new TestDocumentMetadata();
         d1.setId(id);
@@ -218,7 +218,7 @@ public class SolrInfostoreIndexAccessTest extends AbstractSolrIndexAccessTest {
         d1.setModifiedBy(d1.getCreatedBy());
         d1.setTitle(title);
         d1.setDescription(description);
-        
+
         return d1;
     }
 

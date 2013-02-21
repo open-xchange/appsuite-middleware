@@ -311,4 +311,9 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
         return null;
     }
 
+    @Override
+    public Object addresses() {
+        return null;
+    }
+
 }

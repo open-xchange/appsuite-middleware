@@ -95,7 +95,7 @@ public enum PublicationErrorMessage implements OXExceptionCode {
      * Published document has been deleted in meantime and therefore is no longer available.
      */
     NotExist(CATEGORY_PERMISSION_DENIED, 8, NOT_EXIST_MSG),
-    
+
     ;
 
     private Category category;

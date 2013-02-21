@@ -67,7 +67,7 @@ public class TrackingFileLog implements Log {
 		if (!config.isDebugEnabled()) {
 			return;
 		}
-		
+
 		config.getLog().debug(msg);
 	}
 
@@ -168,7 +168,7 @@ public class TrackingFileLog implements Log {
 		if (!config.isWarnEnabled()) {
 			return;
 		}
-		
+
 		config.getLog().warn(msg);
 	}
 

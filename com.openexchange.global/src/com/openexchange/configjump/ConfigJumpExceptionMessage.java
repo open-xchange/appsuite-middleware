@@ -65,7 +65,7 @@ public class ConfigJumpExceptionMessage implements LocalizableStrings {
     private ConfigJumpExceptionMessage() {
         super();
     }
-    
+
     // Unknown problem: "%s".
     public final static String UNKNOWN_MSG = "Unknown problem: \"%s\".";
 

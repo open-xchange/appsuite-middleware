@@ -56,7 +56,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SessionStorageService} - A session storage service.
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -64,7 +64,7 @@ public interface SessionStorageService {
 
     /**
      * Gets the session associated with given session Id
-     * 
+     *
      * @param sessionId The session Id
      * @return The session associated with given session Id
      * @throws OXException If no session with given session Id found
@@ -73,7 +73,7 @@ public interface SessionStorageService {
 
     /**
      * Adds a new session to session storage.
-     * 
+     *
      * @param session The session
      * @throws OXException If adding session failed, e.g. duplicate session
      */
@@ -81,7 +81,7 @@ public interface SessionStorageService {
 
     /**
      * Adds given sessions to session storage if not already contained.
-     * 
+     *
      * @param sessions The sessions
      * @throws OXException If adding sessions fails for some reason
      */
@@ -89,7 +89,7 @@ public interface SessionStorageService {
 
     /**
      * Adds given session to session storage if not already contained.
-     * 
+     *
      * @param session The session
      * @throws OXException If adding session fails for some reason
      * @return <code>true</code> if session could be added; otherwise <code>false</code> if such a session is already present
@@ -98,7 +98,7 @@ public interface SessionStorageService {
 
     /**
      * Remove the session with given session Id from session storage
-     * 
+     *
      * @param sessionId The session Id
      * @throws OXException If no session with given session Id found
      */
@@ -106,7 +106,7 @@ public interface SessionStorageService {
 
     /**
      * Remove all sessions for user with given user Id and context Id from session storage
-     * 
+     *
      * @param userId The user Id
      * @param contextId The context Id
      * @throws OXException If remove of user sessions failed
@@ -115,7 +115,7 @@ public interface SessionStorageService {
 
     /**
      * Remove all sessions from context with given context Id
-     * 
+     *
      * @param contextId The context Id
      * @throws OXException If remove of context sessions failed
      */
@@ -123,7 +123,7 @@ public interface SessionStorageService {
 
     /**
      * Check for active sessions in context with given context Id
-     * 
+     *
      * @param contextId The context Id
      * @return <code>true</code> if context has active sessions, otherwise <code>false</code>
      * @throws OXException
@@ -132,7 +132,7 @@ public interface SessionStorageService {
 
     /**
      * Get all sessions from user with given user Id and context Id
-     * 
+     *
      * @param userId The user Id
      * @param contextId The context Id
      * @return Array of all user sessions
@@ -142,7 +142,7 @@ public interface SessionStorageService {
 
     /**
      * Get an active session from user with given user Id and context Id
-     * 
+     *
      * @param userId The user Id
      * @param contextId The context Id
      * @return An active session from the user
@@ -152,7 +152,7 @@ public interface SessionStorageService {
 
     /**
      * Get the first found session from user with given user Id and context Id
-     * 
+     *
      * @param userId The user Id
      * @param contextId The context Id
      * @return The user session
@@ -162,21 +162,21 @@ public interface SessionStorageService {
 
     /**
      * Get a list of all stored sessions
-     * 
+     *
      * @return A list of all stored sessions
      */
     public List<Session> getSessions();
 
     /**
      * Get the number of active sessions in session storage
-     * 
+     *
      * @return The number of active sessions
      */
     public int getNumberOfActiveSessions();
 
     /**
      * Get session identified by given random token
-     * 
+     *
      * @param randomToken The random token
      * @param newIP New IP of client
      * @return The session identified by given random token
@@ -186,7 +186,7 @@ public interface SessionStorageService {
 
     /**
      * Get session identified by given alternative Id
-     * 
+     *
      * @param altId The alternative Id
      * @return The session identified by given alternative Id
      * @throws OXException If no session with given alternative Id found
@@ -195,7 +195,7 @@ public interface SessionStorageService {
 
     /**
      * Gets the session associated with given session Id
-     * 
+     *
      * @param sessionId The session Id
      * @return The session associated with given session Id
      * @throws OXException If no session with given session Id found
@@ -204,16 +204,43 @@ public interface SessionStorageService {
 
     /**
      * Change password in session with given session Id
-     * 
+     *
      * @param sessionId The session Id
      * @param newPassword The new password
-     * @throws OXException If changing password failed
+     * @throws OXException If changing password fails or any reason
      */
     public void changePassword(String sessionId, String newPassword) throws OXException;
 
     /**
+     * Sets the local IP address for denoted session.
+     *
+     * @param sessionId The session Id
+     * @param localIp The new local IP address
+     * @throws OXException If changing local IP address fails or any reason
+     */
+    public void setLocalIp(String sessionId, String localIp) throws OXException;
+
+    /**
+     * Sets the client identifier for denoted session.
+     *
+     * @param sessionId The session Id
+     * @param client The new client identifier
+     * @throws OXException If changing client identifier fails or any reason
+     */
+    public void setClient(String sessionId, String client) throws OXException;
+
+    /**
+     * Sets the hash identifier for denoted session.
+     *
+     * @param sessionId The session Id
+     * @param client The new hash identifier
+     * @throws OXException If changing hash identifier fails or any reason
+     */
+    public void setHash(String sessionId, String hash) throws OXException;
+
+    /**
      * Check authId for duplicates
-     * 
+     *
      * @param login Login name to check
      * @param authId AuthId to check
      * @throws OXException If duplicate found
@@ -222,9 +249,18 @@ public interface SessionStorageService {
 
     /**
      * Clean up session storage
-     * 
+     *
      * @throws OXException On error while clearing
      */
     public void cleanUp() throws OXException;
 
+    /**
+     * Gets the number of currently stored sessions of a user.
+     *
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @return The number of sessions
+     * @throws OXException
+     */
+    int getUserSessionCount(int userId, int contextId) throws OXException;
 }

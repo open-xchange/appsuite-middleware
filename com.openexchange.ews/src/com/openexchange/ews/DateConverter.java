@@ -60,16 +60,16 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * {@link DateConverter}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class DateConverter {
-    
+
     /**
      * A default date converter instance.
      */
     public static final DateConverter DEFAULT = new DateConverter();
-    
+
     private static final DatatypeFactory DATATYPE_FACTORY;
     static {
         try {
@@ -80,7 +80,7 @@ public class DateConverter {
     }
 
     private static final ThreadLocal<DateFormat> DATE_FORMAT = new ThreadLocal<DateFormat>() {
-        
+
         @Override
         protected DateFormat initialValue() {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSS'Z'");
@@ -93,24 +93,24 @@ public class DateConverter {
 
     /**
      * Initializes a new {@link DateConverter}.
-     * 
+     *
      * @param timeZone the timezone to use
      */
     public DateConverter(TimeZone timeZone) {
         super();
         this.timeZone = timeZone;
     }
-    
+
     /**
      * Initializes a new {@link DateConverter} using the <code>UTC</code> timezone.
      */
     public DateConverter() {
         this(TimeZone.getTimeZone("UTC"));
     }
-    
+
     /**
      * Gets the XML calendar represented by the supplied date instance.
-     * 
+     *
      * @param date the date
      * @return the calendar, or <code>null</code> if the supplied value was <code>null</code>
      */
@@ -127,23 +127,23 @@ public class DateConverter {
 
     /**
      * Gets the date represented by the supplied XML calendar instance.
-     * 
+     *
      * @param xmlCalendar the XML calendar
      * @return the date, or <code>null</code> if the supplied value was <code>null</code>
      */
     public Date getDate(XMLGregorianCalendar xmlCalendar) {
-        return null != xmlCalendar ? xmlCalendar.toGregorianCalendar(timeZone, null, null).getTime() : null; 
+        return null != xmlCalendar ? xmlCalendar.toGregorianCalendar(timeZone, null, null).getTime() : null;
     }
-    
+
     /**
-     * Gets an Exchange representation of the supplied date to be used in 
+     * Gets an Exchange representation of the supplied date to be used in
      * <code>MapiPropertyTypeType.SYSTEM_TIME</code> properties.
-     * 
+     *
      * @param date the date
      * @return the formatted system time string
      */
     public String getSystemTimeString(Date date) {
         return DATE_FORMAT.get().format(date);
-    }   
+    }
 
 }

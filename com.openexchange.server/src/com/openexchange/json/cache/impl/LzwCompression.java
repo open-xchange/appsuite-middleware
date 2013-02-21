@@ -57,10 +57,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Scanner;
+import com.openexchange.java.Streams;
 
 /**
  * {@link LzwCompression} - Performs LZW compression/decompression.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LzwCompression {
@@ -531,7 +532,7 @@ public final class LzwCompression {
 
     /**
      * Compresses given input to specified output stream.
-     * 
+     *
      * @param in The input stream to compress
      * @param out The compressed output stream
      * @throws IOException If an I/O error occurs
@@ -563,7 +564,7 @@ public final class LzwCompression {
 
     /**
      * Decompresses given input to specified output stream.
-     * 
+     *
      * @param in The input stream to decompress
      * @param out The decompressed output stream
      * @throws IOException If an I/O error occurs
@@ -634,13 +635,7 @@ public final class LzwCompression {
     }
 
     private static void close(final Closeable closeable) {
-        if (null != closeable) {
-            try {
-                closeable.close();
-            } catch (final IOException e) {
-                // Ignore
-            }
-        }
+        Streams.close(closeable);
     }
 
     public static void main(final String args[]) throws Exception {

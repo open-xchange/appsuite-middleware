@@ -65,6 +65,9 @@ public final class CIFSExceptionMessages implements LocalizableStrings {
     // A CIFS/SMB error occurred: %1$s
     public static final String SMB_ERROR_MSG = "A CIFS/SMB error occurred: %1$s";
 
+    // A CIFS/SMB error occurred: %1$s (status=%2$s)
+    public static final String SMB_ERROR_WITH_STATUS = "A CIFS/SMB error occurred: %1$s (status=%2$s)";
+
     // Invalid CIFS/SMB URL: %1$s
     public static final String INVALID_SMB_URL_MSG = "Invalid CIFS/SMB URL: %1$s";
 
@@ -88,6 +91,193 @@ public final class CIFSExceptionMessages implements LocalizableStrings {
 
     // Versioning not supported by CIFS/SMB file storage.
     public static final String VERSIONING_NOT_SUPPORTED_MSG = "Versioning not supported by CIFS/SMB file storage.";
+
+    // The operation completed successfully.
+    public static final String NT_STATUS_OK = "The operation completed successfully.";
+
+    // A device attached to the system is not functioning.
+    public static final String NT_STATUS_UNSUCCESSFUL = "A device attached to the system is not functioning.";
+
+    // Incorrect function.
+    public static final String NT_STATUS_NOT_IMPLEMENTED = "Incorrect function.";
+
+    // The parameter is incorrect.
+    public static final String NT_STATUS_INVALID_INFO_CLASS = "The parameter is incorrect.";
+
+    // Invalid access to memory location.
+    public static final String NT_STATUS_ACCESS_VIOLATION = "Invalid access to memory location.";
+
+    // The handle is invalid.
+    public static final String NT_STATUS_INVALID_HANDLE = "The handle is invalid.";
+
+    // The parameter is incorrect.
+    public static final String NT_STATUS_INVALID_PARAMETER = "The parameter is incorrect.";
+
+    // The system cannot find the file specified.
+    public static final String NT_STATUS_NO_SUCH_DEVICE = "The system cannot find the file specified.";
+
+    // The system cannot find the file specified.
+    public static final String NT_STATUS_NO_SUCH_FILE = "The system cannot find the file specified.";
+
+    // More data is available.
+    public static final String NT_STATUS_MORE_PROCESSING_REQUIRED = "More data is available.";
+
+    // Access is denied.
+    public static final String NT_STATUS_ACCESS_DENIED = "Access is denied.";
+
+    // The data area passed to a system call is too small.
+    public static final String NT_STATUS_BUFFER_TOO_SMALL = "The data area passed to a system call is too small.";
+
+    // The filename, directory name, or volume label syntax is incorrect.
+    public static final String NT_STATUS_OBJECT_NAME_INVALID = "The filename, directory name, or volume label syntax is incorrect.";
+
+    // The system cannot find the file specified.
+    public static final String NT_STATUS_OBJECT_NAME_NOT_FOUND = "The system cannot find the file specified.";
+
+    // Cannot create a file when that file already exists.
+    public static final String NT_STATUS_OBJECT_NAME_COLLISION = "Cannot create a file when that file already exists.";
+
+    // The handle is invalid.
+    public static final String NT_STATUS_PORT_DISCONNECTED = "The handle is invalid.";
+
+    // The specified path is invalid.
+    public static final String NT_STATUS_OBJECT_PATH_INVALID = "The specified path is invalid.";
+
+    // The system cannot find the path specified.
+    public static final String NT_STATUS_OBJECT_PATH_NOT_FOUND = "The system cannot find the path specified.";
+
+    // The specified path is invalid.
+    public static final String NT_STATUS_OBJECT_PATH_SYNTAX_BAD = "The specified path is invalid.";
+
+    // The process cannot access the file because it is being used by another process.
+    public static final String NT_STATUS_SHARING_VIOLATION = "The process cannot access the file because it is being used by another process.";
+
+    // Access is denied.
+    public static final String NT_STATUS_DELETE_PENDING = "Access is denied.";
+
+    // There are currently no logon servers available to service the logon request.
+    public static final String NT_STATUS_NO_LOGON_SERVERS = "There are currently no logon servers available to service the logon request.";
+
+    // The specified user already exists.
+    public static final String NT_STATUS_USER_EXISTS = "The specified user already exists.";
+
+    // The specified user does not exist.
+    public static final String NT_STATUS_NO_SUCH_USER = "The specified user does not exist.";
+
+    // The specified network password is not correct.
+    public static final String NT_STATUS_WRONG_PASSWORD = "The specified network password is not correct.";
+
+    // Logon failure: unknown user name or bad password.
+    public static final String NT_STATUS_LOGON_FAILURE = "Logon failure: unknown user name or bad password.";
+
+    // Logon failure: user account restriction.
+    public static final String NT_STATUS_ACCOUNT_RESTRICTION = "Logon failure: user account restriction.";
+
+    // Logon failure: account logon time restriction violation.
+    public static final String NT_STATUS_INVALID_LOGON_HOURS = "Logon failure: account logon time restriction violation.";
+
+    // Logon failure: user not allowed to log on to this computer.
+    public static final String NT_STATUS_INVALID_WORKSTATION = "Logon failure: user not allowed to log on to this computer.";
+
+    // Logon failure: the specified account password has expired.
+    public static final String NT_STATUS_PASSWORD_EXPIRED = "Logon failure: the specified account password has expired.";
+
+    // Logon failure: account currently disabled.
+    public static final String NT_STATUS_ACCOUNT_DISABLED = "Logon failure: account currently disabled.";
+
+    // No mapping between account names and security IDs was done.
+    public static final String NT_STATUS_NONE_MAPPED = "No mapping between account names and security IDs was done.";
+
+    // The security ID structure is invalid.
+    public static final String NT_STATUS_INVALID_SID = "The security ID structure is invalid.";
+
+    // All pipe instances are busy.
+    public static final String NT_STATUS_INSTANCE_NOT_AVAILABLE = "All pipe instances are busy.";
+
+    // All pipe instances are busy.
+    public static final String NT_STATUS_PIPE_NOT_AVAILABLE = "All pipe instances are busy.";
+
+    // The pipe state is invalid.
+    public static final String NT_STATUS_INVALID_PIPE_STATE = "The pipe state is invalid.";
+
+    // All pipe instances are busy.
+    public static final String NT_STATUS_PIPE_BUSY = "All pipe instances are busy.";
+
+    // No process is on the other end of the pipe.
+    public static final String NT_STATUS_PIPE_DISCONNECTED = "No process is on the other end of the pipe.";
+
+    // The pipe is being closed.
+    public static final String NT_STATUS_PIPE_CLOSING = "The pipe is being closed.";
+
+    // Waiting for a process to open the other end of the pipe.
+    public static final String NT_STATUS_PIPE_LISTENING = "Waiting for a process to open the other end of the pipe.";
+
+    // Access is denied.
+    public static final String NT_STATUS_FILE_IS_A_DIRECTORY = "Access is denied.";
+
+    // A duplicate name exists on the network.
+    public static final String NT_STATUS_DUPLICATE_NAME = "A duplicate name exists on the network.";
+
+    // The specified network name is no longer available.
+    public static final String NT_STATUS_NETWORK_NAME_DELETED = "The specified network name is no longer available.";
+
+    // Network access is denied.
+    public static final String NT_STATUS_NETWORK_ACCESS_DENIED = "Network access is denied.";
+
+    // The network name cannot be found.
+    public static final String NT_STATUS_BAD_NETWORK_NAME = "The network name cannot be found.";
+
+    // No more connections can be made to this remote computer at this time because there are already as many connections as the computer can accept.
+    public static final String NT_STATUS_REQUEST_NOT_ACCEPTED = "No more connections can be made to this remote computer at this time because there are already as many connections as the computer can accept.";
+
+    // Indicates a Windows NT Server could not be contacted or that objects within the domain are protected such that necessary information could not be retrieved.
+    public static final String NT_STATUS_CANT_ACCESS_DOMAIN_INFO = "Indicates a Windows NT Server could not be contacted or that objects within the domain are protected such that necessary information could not be retrieved.";
+
+    // The specified domain did not exist.
+    public static final String NT_STATUS_NO_SUCH_DOMAIN = "The specified domain did not exist.";
+
+    // The directory name is invalid.
+    public static final String NT_STATUS_NOT_A_DIRECTORY = "The directory name is invalid.";
+
+    // Access is denied.
+    public static final String NT_STATUS_CANNOT_DELETE = "Access is denied.";
+
+    // The format of the specified computer name is invalid.
+    public static final String NT_STATUS_INVALID_COMPUTER_NAME = "The format of the specified computer name is invalid.";
+
+    // The pipe has been ended.
+    public static final String NT_STATUS_PIPE_BROKEN = "The pipe has been ended.";
+
+    // The specified local group does not exist.
+    public static final String NT_STATUS_NO_SUCH_ALIAS = "The specified local group does not exist.";
+
+    // Logon failure: the user has not been granted the requested logon type at this computer.
+    public static final String NT_STATUS_LOGON_TYPE_NOT_GRANTED = "Logon failure: the user has not been granted the requested logon type at this computer.";
+
+    // The SAM database on the Windows NT Server does not have a computer account for this workstation trust relationship.
+    public static final String NT_STATUS_NO_TRUST_SAM_ACCOUNT = "The SAM database on the Windows NT Server does not have a computer account for this workstation trust relationship.";
+
+    // The trust relationship between the primary domain and the trusted domain failed.
+    public static final String NT_STATUS_TRUSTED_DOMAIN_FAILURE = "The trust relationship between the primary domain and the trusted domain failed.";
+
+    // The account used is a Computer Account. Use your global user account or local user account to access this server.
+    public static final String NT_STATUS_NOLOGON_WORKSTATION_TRUST_ACCOUNT = "The account used is a Computer Account. Use your global user account or local user account to access this server.";
+
+    // The user must change his password before he logs on the first time.
+    public static final String NT_STATUS_PASSWORD_MUST_CHANGE = "The user must change his password before he logs on the first time.";
+
+    // Please use a hostname instead of an IP address in the SMB URL.
+    public static final String NT_STATUS_NOT_FOUND = "Please use a hostname instead of an IP address in the SMB URL.";
+
+    // Your account has been blocked. This can have various reasons like having mistyped the password several times.
+    // Please contact your system administrator or hoster in case you can no longer log in.
+    public static final String NT_STATUS_ACCOUNT_LOCKED_OUT = "Your account has been blocked. This can have various reasons like having mistyped the password several times.\nPlease contact your system administrator or hoster in case you can no longer log in.";
+
+    // The remote system is not reachable by the transport.
+    public static final String NT_STATUS_PATH_NOT_COVERED = "The remote system is not reachable by the transport.";
+
+    // I/O request could not be handled.
+    public static final String NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED = "I/O request could not be handled.";
 
     /**
      * Initializes a new {@link CIFSExceptionMessages}.

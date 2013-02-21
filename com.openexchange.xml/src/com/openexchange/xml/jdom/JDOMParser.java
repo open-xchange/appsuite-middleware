@@ -60,7 +60,7 @@ public interface JDOMParser {
 
     /**
      * Parses given input stream to a jDOM document.
-     * 
+     *
      * @param is The input stream to parse
      * @return The parsed jDOM document
      * @throws JDOMException If a jDOM error occurs

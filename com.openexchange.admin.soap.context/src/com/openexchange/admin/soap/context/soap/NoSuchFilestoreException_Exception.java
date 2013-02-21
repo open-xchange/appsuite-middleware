@@ -12,17 +12,17 @@ import javax.xml.ws.WebFault;
 
 @WebFault(name = "NoSuchFilestoreException", targetNamespace = "http://soap.admin.openexchange.com")
 public class NoSuchFilestoreException_Exception extends java.lang.Exception {
-    
+
     private com.openexchange.admin.soap.context.soap.NoSuchFilestoreException noSuchFilestoreException;
 
     public NoSuchFilestoreException_Exception() {
         super();
     }
-    
+
     public NoSuchFilestoreException_Exception(String message) {
         super(message);
     }
-    
+
     public NoSuchFilestoreException_Exception(String message, Throwable cause) {
         super(message, cause);
     }

@@ -153,7 +153,7 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
         ret.setFileStorageService(service);
         /*-
          * Set login/password if authenticator is absent
-         * 
+         *
          * Check for an appropriate authenticator
          */
         final ConfigFileStorageAuthenticator authenticator = getAuthenticator(serviceId);
@@ -181,7 +181,7 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
 
     /**
      * Gets the appropriate and highest-ranked authenticator for given service identifier.
-     * 
+     *
      * @param serviceId The service identifier
      * @return The appropriate and highest-ranked authenticator or <code>null</code> if none available
      */
@@ -197,6 +197,11 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
 
     @Override
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) {
+        // Nothing to do
+    }
+
+    @Override
+    public void cleanUp(final String secret, final Session session) throws OXException {
         // Nothing to do
     }
 

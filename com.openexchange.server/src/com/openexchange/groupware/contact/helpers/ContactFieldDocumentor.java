@@ -24,7 +24,7 @@ public class ContactFieldDocumentor {
 		System.out.println(formatter.format("%3s %38s %38s\n", "#", "Ajax name", "OXMF name"));
 		for(ContactField field: fields){
 			System.out.println(formatter.format("%3s %38s %38s\n", field.getNumber(), field.getAjaxName(), oxmf(field.getAjaxName())));
-			
+
 		}
 
 	}

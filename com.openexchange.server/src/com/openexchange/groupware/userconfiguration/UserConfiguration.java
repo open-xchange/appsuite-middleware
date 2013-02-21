@@ -53,6 +53,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,7 +67,11 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.userconfiguration.osgi.TrackerAvailabilityChecker;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
+import com.openexchange.passwordchange.PasswordChangeService;
+import com.openexchange.server.Initialization;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -79,11 +84,42 @@ public final class UserConfiguration implements Serializable, Cloneable {
     private static final long serialVersionUID = -8277899698366715803L;
 
     private static final transient Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(UserConfiguration.class));
-    
+
+    /** Checks if associated {@link Permission permission}'s service is available. */
+    public static interface AvailabilityChecker extends Initialization {
+
+        /**
+         * Indicates if associated {@link Permission permission}'s service is available.
+         *
+         * @return <code>true</code> if available; otherwise <code>false</code>
+         */
+        boolean isAvailable();
+    }
+
+    /** Returns always <code>true</code> */
+    public static final AvailabilityChecker TRUE_AVAILABILITY_CHECKER = new AvailabilityChecker() {
+
+        @Override
+        public boolean isAvailable(){
+            return true;
+        }
+
+        @Override
+        public void start() {
+            // Nothing to do
+        }
+
+        @Override
+        public void stop() {
+            // Nothing to do
+        }
+    };
+
     /**
      * Enumeration of known permissions.
      */
-    public static enum Permission {
+    public static enum Permission implements Initialization {
+
         WEBMAIL(UserConfiguration.WEBMAIL, "WebMail"),
         CALENDAR(UserConfiguration.CALENDAR, "Calendar"),
         CONTACTS(UserConfiguration.CONTACTS, "Contacts"),
@@ -104,7 +140,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
         DELEGATE_TASKS(UserConfiguration.DELEGATE_TASKS, "DelegateTasks"),
         EDIT_GROUP(UserConfiguration.EDIT_GROUP, "EditGroup"),
         EDIT_RESOURCE(UserConfiguration.EDIT_RESOURCE, "EditResource"),
-        EDIT_PASSWORD(UserConfiguration.EDIT_PASSWORD, "EditPassword"),
+        EDIT_PASSWORD(UserConfiguration.EDIT_PASSWORD, "EditPassword", TrackerAvailabilityChecker.getAvailabilityCheckerFor(PasswordChangeService.class, true)),
         COLLECT_EMAIL_ADDRESSES(UserConfiguration.COLLECT_EMAIL_ADDRESSES, "CollectEMailAddresses"),
         MULTIPLE_MAIL_ACCOUNTS(UserConfiguration.MULTIPLE_MAIL_ACCOUNTS, "MultipleMailAccounts"),
         SUBSCRIPTION(UserConfiguration.SUBSCRIPTION, "Subscription"),
@@ -116,7 +152,27 @@ public final class UserConfiguration implements Serializable, Cloneable {
         CALDAV(UserConfiguration.CALDAV, "CalDAV"),
         CARDDAV(UserConfiguration.CARDDAV, "CardDAV");
 
-        private static TIntObjectMap<Permission> byBit;
+        private static final class AdderProcedure implements TIntObjectProcedure<Permission> {
+
+            private final Set<String> set;
+            private final int bits;
+
+            AdderProcedure(final int bits, final Set<String> set) {
+                super();
+                this.set = set;
+                this.bits = bits;
+            }
+
+            @Override
+            public boolean execute(final int bit, final Permission p) {
+                if (bit == (bits & bit) && p.isAvailable()) {
+                    set.add(toLowerCase(p.name()));
+                }
+                return true;
+            }
+        }
+
+        private static final TIntObjectMap<Permission> byBit;
         static {
             final Permission[] permissions = values();
             final TIntObjectMap<Permission> m = new TIntObjectHashMap<Permission>(permissions.length);
@@ -127,40 +183,99 @@ public final class UserConfiguration implements Serializable, Cloneable {
         }
 
         /** The associated bit constant */
-        int bit;
+        final int bit;
         /** The associated tag name */
-        String tagName;
+        final String tagName;
+        /** The availability checker */
+        private final AvailabilityChecker checker;
 
         private Permission(final int bit, final String name) {
-            this.bit = bit;
-            this.tagName = name;
+            this(bit, name, TRUE_AVAILABILITY_CHECKER);
         }
 
+        private Permission(final int bit, final String name, final AvailabilityChecker checker) {
+            this.bit = bit;
+            this.tagName = name;
+            this.checker = checker;
+        }
+
+        @Override
+        public void start() throws OXException {
+            checker.start();
+        }
+
+        @Override
+        public void stop() throws OXException {
+            checker.stop();
+        }
+
+        /**
+         * Indicates if associated {@link Permission permission}'s service is available.
+         *
+         * @return <code>true</code> if available; otherwise <code>false</code>
+         */
+        public boolean isAvailable() {
+            return checker.isAvailable();
+        }
+
+        /**
+         * Gets the associated bit constant.
+         *
+         * @return The bit
+         */
         public int getBit() {
             return bit;
         }
 
-        public static Permission byBit(final int permission) {
-            return byBit.get(permission);
-        }
-
+        /**
+         * Gets the tag name.
+         *
+         * @return The tag name
+         */
         public String getTagName() {
             return tagName;
         }
 
-        public static List<Permission> byBits(final int permissionBit) {
+        /**
+         * Gets the permission associated with given bit.
+         *
+         * @param bit The bit
+         * @return The associated permission or <code>null</code>
+         */
+        public static Permission byBit(final int bit) {
+            return byBit.get(bit);
+        }
+
+        /**
+         * Gets the permissions associated with given bits.
+         *
+         * @param bits The bits
+         * @return The associated permissions
+         */
+        public static List<Permission> byBits(final int bits) {
             final Permission[] pa = values();
             final List<Permission> permissions = new ArrayList<Permission>(pa.length);
             for (final Permission p : pa) {
                 final int bit = p.bit;
-                if ((permissionBit & bit) == bit) {
+                if (((bits & bit) == bit) && p.checker.isAvailable()) {
                     permissions.add(p);
                 }
             }
             return permissions;
         }
-    }
-    
+
+        /**
+         * Adds the permission names to specified set associated with given bits.
+         *
+         * @param bits The bits
+         * @param set The set
+         */
+        public static void addByBits(final int bits, final Set<String> set) {
+            byBit.forEachEntry(new AdderProcedure(bits, set));
+        }
+
+    } // End of Permission class
+
     /**
      * The permission bit for mail access.
      */
@@ -400,13 +515,13 @@ public final class UserConfiguration implements Serializable, Cloneable {
         }
         return (null == uc.ctx);
     }
-    
+
     /**
      * Sets the extended permissions
      *
      * @param extendedPermissions The extended permissions to set
      */
-    void setExtendedPermissions(Set<String> extendedPermissions) {
+    void setExtendedPermissions(final Set<String> extendedPermissions) {
         this.extendedPermissions = extendedPermissions;
     }
 
@@ -436,6 +551,10 @@ public final class UserConfiguration implements Serializable, Cloneable {
             if (groups != null) {
                 clone.groups = new int[groups.length];
                 System.arraycopy(groups, 0, clone.groups, 0, groups.length);
+            }
+            final Set<String> thisSet = extendedPermissions;
+            if (thisSet != null) {
+                clone.extendedPermissions = new HashSet<String>(thisSet);
             }
             /*
              * if (userSettingMail != null) { clone.userSettingMail = (UserSettingMail) userSettingMail.clone(); }
@@ -1098,20 +1217,19 @@ public final class UserConfiguration implements Serializable, Cloneable {
     	if (permissionBit == 0) {
     		return true;
     	}
-        final List<Permission> permission = Permission.byBits(permissionBit);
         Set<String> extendedPermissions = getExtendedPermissions();
-        for (Permission p : permission) {
-        	if (!extendedPermissions.contains(p.name().toLowerCase())) {
+        for (final Permission p : Permission.byBits(permissionBit)) {
+        	if (!extendedPermissions.contains(toLowerCase(p.name()))) {
         		return false;
         	}
 		}
         return true;
     }
-    
+
     /**
      * Checks if this user configuration enables specified permission.
      *
-     * @param permission The permission 
+     * @param permission The permission
      * @return <code>true</code> if this user configuration enabled specified permission; otherwise <code>false</code>
      */
     public boolean hasPermission(final Permission permission) {
@@ -1120,7 +1238,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
         }
         return hasPermissionInternal(permission);
     }
-    
+
     /**
      * Checks if this user configuration enables named permission.
      *
@@ -1128,13 +1246,13 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration enabled named permission; otherwise <code>false</code>
      */
     public boolean hasPermission(final String name) {
-    	return getExtendedPermissions().contains(name.toLowerCase());
+    	return getExtendedPermissions().contains(toLowerCase(name));
     }
-    
+
     private boolean hasPermissionInternal(final int permission) {
         return (permissionBits & permission) == permission;
     }
-    
+
     private boolean hasPermissionInternal(Permission permission) {
     	return hasPermissionInternal(permission.bit);
     }
@@ -1144,6 +1262,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
          * Set or unset specified permission
          */
         permissionBits = enable ? (permissionBits | permission) : (permissionBits & ~permission);
+        extendedPermissions = null;
     }
 
     /**
@@ -1182,62 +1301,78 @@ public final class UserConfiguration implements Serializable, Cloneable {
     public String toString() {
         return new StringBuilder(32).append("UserConfiguration_").append(userId).append('@').append(Integer.toBinaryString(permissionBits)).toString();
     }
-    
-    private static final String PERMISSION_PROPERTY = "permissions".intern();
-    private static final Pattern P_SPLIT = Pattern.compile("\\s*[, ]\\s*");
-    
+
 	/**
 	 * Gets the extended permissions.
 	 *
 	 * @return The extended permissions
 	 */
     public Set<String> getExtendedPermissions() {
-        Set<String> retval = extendedPermissions;
-        if (retval == null) {
-            final UserConfigurationStorage configurationStorage = UserConfigurationStorage.getInstance();
-            final Object lock = null == configurationStorage ? this : configurationStorage.getLock(userId, ctx);
-            synchronized (lock) {
-                retval = extendedPermissions;
-                if (retval == null) {
-                    retval = new HashSet<String>();
-                    for (final Permission p : Permission.values()) {
-                        if (hasPermissionInternal(p)) {
-                            retval.add(p.name().toLowerCase());
-                        }
-                    }
-                    // Now apply modifiers from the config cascade
-                    final ConfigViewFactory configViews = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-                    if (configViews != null) {
-                        try {
-                            final ConfigView view = configViews.getView(getUserId(), getContext().getContextId());
-                            final String[] searchPath = configViews.getSearchPath();
-                            for (final String scope : searchPath) {
-                                final String permissions = view.property(PERMISSION_PROPERTY, String.class).precedence(scope).get();
-                                if (permissions != null) {
-                                    for (String permissionModifier : P_SPLIT.split(permissions)) {
-                                        final char firstChar = permissionModifier.charAt(0);
-                                        if ('-' == firstChar) {
-                                            retval.remove(permissionModifier.substring(1).toLowerCase());
-                                            continue;
-                                        } else if ('+' == firstChar) {
-                                            permissionModifier = permissionModifier.substring(1);
-                                        }
-                                        retval.add(permissionModifier.toLowerCase());
-                                    }
-                                }
-                            }
-                        } catch (final OXException x) {
-                            LOG.error(x.getMessage(), x);
-                        }
-                    }
-                    if (null != configurationStorage) {
-                        configurationStorage.setExtendedPermissions(retval, userId, ctx);
-                    }
-                    this.extendedPermissions = retval;
+        Set<String> tmp = extendedPermissions;
+        if (tmp == null) {
+            synchronized (this) {
+                tmp = extendedPermissions;
+                if (tmp == null) {
+                    tmp = calcExtendedPermissions();
+                    this.extendedPermissions = tmp;
                 }
             }
         }
+        return tmp;
+    }
+
+    private static final String PERMISSION_PROPERTY = "permissions".intern();
+    private static final Pattern P_SPLIT = Pattern.compile("\\s*[, ]\\s*");
+
+    /**
+     * Calculates this user configuration's extended permissions.
+     *
+     * @return The extended permissions
+     */
+    public Set<String> calcExtendedPermissions() {
+        final Set<String> retval = new HashSet<String>(128);
+        Permission.addByBits(permissionBits, retval);
+        // Now apply modifiers from the config cascade
+        final ConfigViewFactory configViews = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (configViews != null) {
+            try {
+                final ConfigView view = configViews.getView(userId, ctx.getContextId());
+                final String property = PERMISSION_PROPERTY;
+                for (final String scope : configViews.getSearchPath()) {
+                    final String permissions = view.property(property, String.class).precedence(scope).get();
+                    if (permissions != null) {
+                        for (final String permissionModifier : P_SPLIT.split(permissions)) {
+                            final char firstChar = permissionModifier.charAt(0);
+                            if ('-' == firstChar) {
+                                retval.remove(toLowerCase(permissionModifier.substring(1)));
+                            } else {
+                                if ('+' == firstChar) {
+                                    retval.add(toLowerCase(permissionModifier.substring(1)));
+                                } else {
+                                    retval.add(toLowerCase(permissionModifier));
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch (final OXException x) {
+                LOG.error(x.getMessage(), x);
+            } catch (final RuntimeException x) {
+                LOG.error(x.getMessage(), x);
+            }
+        }
         return retval;
+    }
+
+    /** ASCII-wise lower-case */
+    static String toLowerCase(final CharSequence chars) {
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

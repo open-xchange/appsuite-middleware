@@ -52,212 +52,137 @@ package com.openexchange.sessionstorage.hazelcast;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
+import com.hazelcast.core.EntryEvent;
+import com.hazelcast.core.EntryEventType;
+import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.IMap;
-import com.hazelcast.core.MapEntry;
+import com.hazelcast.core.MultiMap;
 import com.hazelcast.query.Predicate;
 import com.hazelcast.query.SqlPredicate;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
-import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.threadpool.RefusedExecutionBehavior;
-import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.threadpool.behavior.AbortBehavior;
 
 /**
  * {@link HazelcastSessionStorageService} - The {@link SessionStorageService} backed by {@link HazelcastInstance}.
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class HazelcastSessionStorageService implements SessionStorageService {
+public class HazelcastSessionStorageService implements SessionStorageService, EntryListener<String, HazelcastStoredSession> {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastSessionStorageService.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
-
     private static final AtomicReference<HazelcastInstance> REFERENCE = new AtomicReference<HazelcastInstance>();
 
     /**
      * Sets specified {@link HazelcastInstance}.
-     * 
+     *
      * @param hazelcast The {@link HazelcastInstance}
      */
     public static void setHazelcastInstance(final HazelcastInstance hazelcast) {
         REFERENCE.set(hazelcast);
     }
 
-    private static final class GetSessionMapTask extends AbstractTask<IMap<String, HazelcastStoredSession>> {
-
-        private final HazelcastInstance hazelcastInstance;
-        private final String mapName;
-
-        protected GetSessionMapTask(final HazelcastInstance hazelcastInstance, final String mapName) {
-            super();
-            this.hazelcastInstance = hazelcastInstance;
-            this.mapName = mapName;
-        }
-
-        @Override
-        public IMap<String, HazelcastStoredSession> call() throws Exception {
-            return hazelcastInstance.getMap(mapName);
-        }
-    }
-
-    private static volatile Integer timeout;
-    private static int timeout() {
-        Integer tmp = timeout;
-        if (null == tmp) {
-            synchronized (HazelcastSessionStorageService.class) {
-                tmp = timeout;
-                if (null == tmp) {
-                    ConfigurationService service = Services.optService(ConfigurationService.class);
-                    tmp = Integer.valueOf(null == service ? 250 : service.getIntProperty("com.openexchange.sessionstorage.hazelcast.timeout", 250));
-                    timeout = tmp;
-                }
-            }
-        }
-        return tmp.intValue();
-    }
-
-    private final String mapName;
-    private final RefusedExecutionBehavior<IMap<String, HazelcastStoredSession>> abortBehavior;
-    private boolean allowFailIfPaused;
+    private final String sessionsMapName;
+    private final String userSessionsMapName;
 
     /**
      * Initializes a new {@link HazelcastSessionStorageService}.
-     */
-    public HazelcastSessionStorageService(final HazelcastSessionStorageConfiguration config, final HazelcastInstance hazelcast) {
-        super();
-        this.mapName = config.getMapConfig().getName();
-        hazelcast.getConfig().addMapConfig(config.getMapConfig());
-        abortBehavior = AbortBehavior.<IMap<String, HazelcastStoredSession>> getInstance();
-        allowFailIfPaused = false;
-    }
-
-    /**
-     * Sets the fail-if-paused behavior.
      *
-     * @param allowFailIfPaused <code>true</code> to set the fail-if-paused behavior; else <code>false</code>
-     * @return This session storage with new behavior applied
+     * @param sessionsMapName The name of the distributed 'sessions' map
+     * @param userSessionsMapName  The name of the distributed 'userSessions' map
      */
-    public HazelcastSessionStorageService setAllowFailIfPaused(boolean allowFailIfPaused) {
-        this.allowFailIfPaused = allowFailIfPaused;
-        return this;
+    public HazelcastSessionStorageService(String sessionsMapName, String userSessionsMapName) {
+        super();
+        this.sessionsMapName = sessionsMapName;
+        this.userSessionsMapName = userSessionsMapName;
     }
 
-    private IMap<String, HazelcastStoredSession> getMapFrom(final Future<IMap<String, HazelcastStoredSession>> f) throws OXException {
-        try {
-            return f.get(timeout(), TimeUnit.MILLISECONDS);
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final ExecutionException e) {
-            final Throwable t = e.getCause();
-            if (t instanceof OXException) {
-                throw (OXException) t;
-            }
-            if (t instanceof RuntimeException) {
-                throw (RuntimeException) t;
-            }
-            if (t instanceof Error) {
-                throw (Error) t;
-            }
-            throw new IllegalStateException("Not unchecked", t);
-        } catch (final TimeoutException e) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(e, HazelcastInstance.class.getName());
-        } catch (final CancellationException e) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(e, HazelcastInstance.class.getName());
-        }
+    @Override
+    public void entryAdded(EntryEvent<String, HazelcastStoredSession> event) {
+        // ignore
     }
 
-    /**
-     * Gets the map
-     * 
-     * @return The map
-     * @throws OXException If service is unavailable or currently paused
-     */
-    private IMap<String, HazelcastStoredSession> sessions(final boolean failIfPaused) throws OXException {
-        try {
-            final HazelcastInstance hazelcastInstance = REFERENCE.get();
-            if (null == hazelcastInstance) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
-            }
-            final IMap<String, HazelcastStoredSession> sessions;
-            if (failIfPaused && allowFailIfPaused) {
-                // Fail if paused
-                if (Hazelcasts.isPaused()) {
-                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
-                }
-                final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-                if (null == threadPool) {
-                    sessions = hazelcastInstance.getMap(mapName);
-                } else {
-                    final IMap<String, HazelcastStoredSession> map = getMapFrom(threadPool.submit(new GetSessionMapTask(hazelcastInstance, mapName), abortBehavior));
-                    if (null == map) {
-                        throw new HazelcastException("No such map: " + mapName);
+    @Override
+    public void entryRemoved(EntryEvent<String, HazelcastStoredSession> event) {
+        // ignore
+    }
+
+    @Override
+    public void entryUpdated(EntryEvent<String, HazelcastStoredSession> event) {
+        // ignore
+    }
+
+    @Override
+    public void entryEvicted(EntryEvent<String, HazelcastStoredSession> event) {
+        if (null != event && EntryEventType.EVICTED.equals(event.getEventType())) {
+            try {
+                /*
+                 * ensure the session ID is also removed from user sessions multi-map
+                 */
+                String sessionID = event.getKey();
+                MultiMap<Long, String> userSessions = userSessions();
+                if (null != event.getValue()) {
+                    /*
+                     * remove directly by key/value
+                     */
+                    if (userSessions.remove(getKey(event.getValue().getContextId(), event.getValue().getUserId()), sessionID)) {
+                        LOG.debug("Removed session '" + sessionID + "' from user sessions.");
+                    } else {
+                        LOG.warn("Session '" + sessionID + "' not removed from user sessions.");
                     }
-                    sessions = new TimeoutAwareIMap(map, timeout());
+                } else {
+                    /*
+                     * try to find matching entry and remove
+                     */
+                    boolean removed = false;
+                    Set<Entry<Long, String>> entrySet = userSessions().entrySet();
+                    if (null != entrySet) {
+                        for (Entry<Long, String> entry : entrySet) {
+                            if (sessionID.equals(entry.getValue())) {
+                                removed = userSessions.remove(entry.getKey(), entry.getValue());
+                                break;
+                            }
+                        }
+                    }
+                    if (false == removed) {
+                        LOG.warn("Session '" + sessionID + "' not removed from user sessions.");
+                    }
                 }
-            } else {
-                sessions = hazelcastInstance.getMap(mapName);
+            } catch (OXException e) {
+                LOG.error("Error handling entryEvicted event", e);
             }
-            return sessions;
-        } catch (final OXException e) {
-            throw e;
-        } catch (final HazelcastException e) {
-            throw e;
-        } catch (final RuntimeException e) {
-            throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /**
-     * Gets the map
-     * 
-     * @return The map
-     * @throws HazelcastException If service is unavailable or currently paused
-     */
-    private IMap<String, HazelcastStoredSession> sessionsUnchecked(final boolean failIfPaused) {
-        try {
-            final IMap<String, HazelcastStoredSession> map = sessions(failIfPaused);
-            if (null == map) {
-                throw new HazelcastException("No such map: " + mapName);
-            }
-            return map;
-        } catch (final OXException e) {
-            throw new HazelcastException(e.getDisplayMessage(Locale.US), e);
         }
     }
 
     @Override
     public Session lookupSession(final String sessionId) throws OXException {
         try {
-            HazelcastStoredSession storedSession = sessions(true).get(sessionId);
+            HazelcastStoredSession storedSession = sessions().get(sessionId);
             if (null == storedSession) {
                 throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(sessionId);
             }
             return storedSession;
-        } catch (final HazelcastException e) {
+        } catch (HazelcastException e) {
             throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(e, sessionId);
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
                 throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(e, sessionId);
             }
@@ -271,16 +196,17 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             return;
         }
         try {
-            final IMap<String, HazelcastStoredSession> sessionsMap = sessions(false);
-            for (final Session session : sessions) {
+            IMap<String, HazelcastStoredSession> sessionsMap = sessions();
+            for (Session session : sessions) {
                 try {
-                    final HazelcastStoredSession ss = new HazelcastStoredSession(session);
-                    sessionsMap.putIfAbsent(session.getSessionID(), ss);
-                } catch (final HazelcastException e) {
-                    LOG.warn("Session "+ session.getSessionID() + " could not be added to session storage.", e);
+                    if (null == sessionsMap.putIfAbsent(session.getSessionID(), new HazelcastStoredSession(session))) {
+                        userSessions().put(getKey(session.getContextId(), session.getUserId()), session.getSessionID());
+                    }
+                } catch (HazelcastException e) {
+                    LOG.warn("Session " + session.getSessionID() + " could not be added to session storage.", e);
                 }
             }
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -291,8 +217,11 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             return false;
         }
         try {
-            final HazelcastStoredSession ss = new HazelcastStoredSession(session);
-            return null == sessions(false).putIfAbsent(session.getSessionID(), ss);
+            if (null == sessions().putIfAbsent(session.getSessionID(), new HazelcastStoredSession(session))) {
+                userSessions().put(getKey(session.getContextId(), session.getUserId()), session.getSessionID());
+                return true;
+            }
+            return false;
         } catch (final HazelcastException e) {
             throw SessionStorageExceptionCodes.SAVE_FAILED.create(e, session.getSessionID());
         } catch (final OXException e) {
@@ -306,15 +235,31 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     @Override
     public void addSession(final Session session) throws OXException {
         if (null != session) {
+            boolean addedSession = false;
             try {
-                sessions(false).set(session.getSessionID(), new HazelcastStoredSession(session), 0, TimeUnit.SECONDS);
-            } catch (final HazelcastException e) {
-                throw SessionStorageExceptionCodes.SAVE_FAILED.create(e, session.getSessionID());
-            } catch (final OXException e) {
-                if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
-                    throw SessionStorageExceptionCodes.SAVE_FAILED.create(e, session.getSessionID());
+                Future<HazelcastStoredSession> future = sessions().putAsync(session.getSessionID(), new HazelcastStoredSession(session));
+                if (false == userSessions().put(getKey(session.getContextId(), session.getUserId()), session.getSessionID())) {
+                    LOG.warn("Session '" + session.getSessionID() + "' not added to user sessions.");
                 }
-                throw e;
+                future.get();
+                addedSession = true;
+            } catch (HazelcastException e) {
+                throw SessionStorageExceptionCodes.SAVE_FAILED.create(e, session.getSessionID());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw SessionStorageExceptionCodes.SAVE_FAILED.create(e, session.getSessionID());
+            } catch (ExecutionException e) {
+                // (never thrown)
+                throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } finally {
+                if (false == addedSession) {
+                    // simple rollback
+                    try {
+                        userSessions().remove(getKey(session.getContextId(), session.getUserId()), session.getSessionID());
+                    } catch (Exception e) {
+                        LOG.warn("Error rolling back adding user-session", e);
+                    }
+                }
             }
         }
     }
@@ -323,10 +268,17 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     public void removeSession(final String sessionId) throws OXException {
         if (null != sessionId) {
             try {
-                sessions(false).remove(sessionId);
-            } catch (final HazelcastException e) {
+                HazelcastStoredSession removedSession = sessions().remove(sessionId);
+                if (null != removedSession) {
+                    if (false == userSessions().remove(getKey(removedSession.getContextId(), removedSession.getUserId()), sessionId)) {
+                        LOG.warn("Session '" + sessionId + "' not removed from user sessions.");
+                    }
+                } else {
+                    LOG.debug("Session with ID '" + sessionId + "' not found, unable to remove from storage.");
+                }
+            } catch (HazelcastException e) {
                 throw SessionStorageExceptionCodes.REMOVE_FAILED.create(e, sessionId);
-            } catch (final OXException e) {
+            } catch (OXException e) {
                 if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
                     throw SessionStorageExceptionCodes.REMOVE_FAILED.create(e, sessionId);
                 }
@@ -337,75 +289,82 @@ public class HazelcastSessionStorageService implements SessionStorageService {
 
     @Override
     public Session[] removeUserSessions(final int userId, final int contextId) throws OXException {
-        try {
-            List<Session> removed = new ArrayList<Session>();
-            IMap<String, HazelcastStoredSession> sessions = sessions(false);
-            if (null != sessions && 0 < sessions.size()) {
-                Predicate<?, ?> predicate = new SqlPredicate("contextId = " + contextId + " AND userId = " + userId);
-                for (Entry<String, HazelcastStoredSession> entry : sessions.entrySet(predicate)) {
-                    removed.add(sessions.remove(entry.getKey()));
-                }
-            }
-            return removed.toArray(new Session[removed.size()]);
-        } catch (final HazelcastException e) {
-            if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
-            }
-            throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
-                if (DEBUG) {
-                    LOG.debug(e.getMessage(), e);
-                }
-                return new Session[0];
-            }
-            throw e;
+        /*
+         * remove user sessions
+         */
+        Collection<String> removedSessionIDs = userSessions().remove(getKey(contextId, userId));
+        if (null == removedSessionIDs || 0 == removedSessionIDs.size()) {
+            return new Session[0];
         }
+        /*
+         * remove corresponding stored sessions
+         */
+        IMap<String, HazelcastStoredSession> sessions = sessions();
+        Map<String, Future<HazelcastStoredSession>> futures =
+            new HashMap<String, Future<HazelcastStoredSession>>(removedSessionIDs.size());
+        for (String sessionID : removedSessionIDs) {
+            futures.put(sessionID, sessions.removeAsync(sessionID));
+        }
+        List<Session> removedSessions = new ArrayList<Session>(removedSessionIDs.size());
+        for (Entry<String, Future<HazelcastStoredSession>> future : futures.entrySet()) {
+            try {
+                removedSessions.add(future.getValue().get());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw SessionStorageExceptionCodes.REMOVE_FAILED.create(e, future.getKey());
+            } catch (ExecutionException e) {
+                throw SessionStorageExceptionCodes.REMOVE_FAILED.create(
+                    ThreadPools.launderThrowable(e, HazelcastException.class), future.getKey());
+            }
+        }
+        return removedSessions.toArray(new Session[removedSessions.size()]);
     }
 
     @Override
     public void removeContextSessions(final int contextId) throws OXException {
-        try {
-            IMap<String, HazelcastStoredSession> sessions = sessions(false);
-            if (null != sessions && 0 < sessions.size()) {
-                for (Entry<String, HazelcastStoredSession> entry : sessions.entrySet(new SqlPredicate("contextId = " + contextId))) {
-                    sessions.remove(entry.getKey());
-                }
+        /*
+         * search sessions by context ID
+         */
+        IMap<String, HazelcastStoredSession> sessions = sessions();
+        Set<String> sessionIDs = sessions.keySet(new SqlPredicate("contextId = " + contextId));
+        if (null == sessionIDs || 0 == sessionIDs.size()) {
+            return;
+        }
+        /*
+         * schedule remove operations
+         */
+        Map<String, Future<HazelcastStoredSession>> futures = new HashMap<String, Future<HazelcastStoredSession>>(sessionIDs.size());
+        for (String sessionID : sessionIDs) {
+            futures.put(sessionID, sessions.removeAsync(sessionID));
+        }
+        /*
+         * collect removed sessions, remove corresponding user sessions
+         */
+        MultiMap<Long, String> userSessions = userSessions();
+        for (Entry<String, Future<HazelcastStoredSession>> future : futures.entrySet()) {
+            try {
+                 HazelcastStoredSession removedSession = future.getValue().get();
+                 if (null != removedSession) {
+                     userSessions.remove(getKey(removedSession.getContextId(), removedSession.getUserId()));
+                 } else {
+                     LOG.debug("Session with ID '" + future.getKey() + "' not found, unable to remove from storage.");
+                 }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw SessionStorageExceptionCodes.REMOVE_FAILED.create(e, future.getKey());
+            } catch (ExecutionException e) {
+                throw SessionStorageExceptionCodes.REMOVE_FAILED.create(
+                    ThreadPools.launderThrowable(e, HazelcastException.class), future.getKey());
             }
-        } catch (final HazelcastException e) {
-            if (DEBUG) {
-                LOG.debug(e.getMessage(), e);
-            }
-            throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
-                if (DEBUG) {
-                    LOG.debug(e.getMessage(), e);
-                }
-            }
-            throw e;
         }
     }
 
     @Override
-    public boolean hasForContext(final int contextId) {
-        SqlPredicate predicate = new SqlPredicate("contextId = " + contextId);
+    public boolean hasForContext(final int contextId) throws OXException {
         try {
-            /*
-             * try to lookup session from local keyset first
-             */
-            for (HazelcastStoredSession session : filterLocal(predicate, true)) {
-                if (null != session && session.getContextId() == contextId) {
-                    return true;
-                }
-            }
-            /*
-             * also query cluster if not yet found 
-             */
-            for (HazelcastStoredSession session : filter(predicate, true)) {
-                if (null != session && session.getContextId() == contextId) {
-                    return true;
-                }
+            Session session = findSession(new SqlPredicate("contextId = " + contextId));
+            if (null != session && session.getContextId() == contextId) {
+                return true;
             }
         } catch (HazelcastException e) {
             LOG.debug(e.getMessage(), e);
@@ -417,45 +376,49 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public Session[] getUserSessions(final int userId, final int contextId) {
+    public Session[] getUserSessions(final int userId, final int contextId) throws OXException {
         try {
-            List<HazelcastStoredSession> found = new ArrayList<HazelcastStoredSession>();
-            for (HazelcastStoredSession session : filter(new SqlPredicate("contextId = " + contextId + " AND userId = " + userId), true)) {
-                if (null != session && session.getUserId() == userId && session.getContextId() == contextId) {
-                    found.add(session);
+            Collection<String> sessionIDs = userSessions().get(getKey(contextId, userId));
+            if (null != sessionIDs && 0 < sessionIDs.size()) {
+                Map<String, HazelcastStoredSession> sessions = sessions().getAll(new HashSet<String>(sessionIDs));
+                if (null != sessions && 0 < sessions.size()) {
+                    return sessions.values().toArray(new Session[sessions.values().size()]);
                 }
             }
-            return found.toArray(new Session[found.size()]);
         } catch (final HazelcastException e) {
             if (DEBUG) {
                 LOG.debug(e.getMessage(), e);
             }
-            return new Session[0];
         }
+        return new Session[0];
     }
 
     @Override
-    public Session getAnyActiveSessionForUser(final int userId, final int contextId) {
-        SqlPredicate predicate = new SqlPredicate("contextId = " + contextId + " AND userId = " + userId);
+    public Session getAnyActiveSessionForUser(final int userId, final int contextId) throws OXException {
         try {
-            /*
-             * try to lookup session from local keyset first
-             */
-            for (HazelcastStoredSession session : filterLocal(predicate, true)) {
-                if (null != session && session.getUserId() == userId && session.getContextId() == contextId) {
-                    return new HazelcastStoredSession(session);
+            Collection<String> sessionIDs = userSessions().get(getKey(contextId, userId));
+            if (null != sessionIDs && 0 < sessionIDs.size()) {
+                IMap<String, HazelcastStoredSession> sessions = sessions();
+                /*
+                 * try to lookup session from local keyset first
+                 */
+                Set<String> localKeySet = sessions.localKeySet();
+                if (null != localKeySet && 0 < localKeySet.size()) {
+                    for (String sessionID : sessionIDs) {
+                        if (localKeySet.contains(sessionID)) {
+                            return sessions.get(sessionID);
+                        }
+                    }
                 }
+                /*
+                 * get first session from cluster if not yet found
+                 */
+                return sessions.get(sessionIDs.iterator().next());
             }
-            /*
-             * also query cluster if not yet found 
-             */
-            for (HazelcastStoredSession session : filter(predicate, true)) {
-                if (null != session && session.getUserId() == userId && session.getContextId() == contextId) {
-                    return new HazelcastStoredSession(session);
-                }
+        } catch (final HazelcastException e) {
+            if (DEBUG) {
+                LOG.debug(e.getMessage(), e);
             }
-        } catch (HazelcastException e) {
-            LOG.debug(e.getMessage(), e);
         }
         /*
          * not found
@@ -464,46 +427,49 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public Session findFirstSessionForUser(final int userId, final int contextId) {
+    public Session findFirstSessionForUser(final int userId, final int contextId) throws OXException {
         return getAnyActiveSessionForUser(userId, contextId);
     }
 
     @Override
     public List<Session> getSessions() {
         try {
-            final IMap<String, HazelcastStoredSession> sessions = sessionsUnchecked(true);
-            final List<Session> retval = new ArrayList<Session>();
-            for (final String sessionId : sessions.keySet()) {
-                final HazelcastStoredSession storedSession = sessions.get(sessionId);
-                if (null != storedSession) {
-                    retval.add(storedSession);
-                }
-            }
-            return retval;
+            return new ArrayList<Session>(sessions().values());
         } catch (final HazelcastException e) {
             if (DEBUG) {
                 LOG.debug(e.getMessage(), e);
             }
-            return Collections.emptyList();
+        } catch (OXException e) {
+            if (DEBUG) {
+                LOG.debug(e.getMessage(), e);
+            }
         }
+        return Collections.emptyList();
     }
 
     @Override
     public int getNumberOfActiveSessions() {
-        return sessionsUnchecked(true).size();
+        try {
+            return sessions().size();
+        } catch (OXException e) {
+            if (DEBUG) {
+                LOG.debug(e.getMessage(), e);
+            }
+        }
+        return 0;
     }
 
     @Override
     public Session getSessionByRandomToken(final String randomToken, final String newIP) throws OXException {
         try {
             if (null != randomToken) {
-                for (HazelcastStoredSession session : filter(new SqlPredicate("randomToken = '" + randomToken + "'"), true)) {
-                    if (null != session && randomToken.equals(session.getRandomToken())) {
-                        if (false == session.getLocalIp().equals(newIP)) {
-                            session.setLocalIp(newIP);
-                        }
-                        return session;
+                HazelcastStoredSession session = findSession(new SqlPredicate("randomToken = '" + randomToken + "'"));
+                if (null != session && randomToken.equals(session.getRandomToken())) {
+                    if (false == session.getLocalIp().equals(newIP)) {
+                        session.setLocalIp(newIP);
+                        sessions().set(session.getSessionId(), session, 0, TimeUnit.SECONDS);
                     }
+                    return session;
                 }
             }
             throw SessionStorageExceptionCodes.RANDOM_NOT_FOUND.create(randomToken);
@@ -529,20 +495,9 @@ public class HazelcastSessionStorageService implements SessionStorageService {
             if (null == altId) {
                 throw new NullPointerException("altId is null.");
             }
-            Predicate<String, HazelcastStoredSession> altIdPredicate = new Predicate<String, HazelcastStoredSession>() {
-                
-                private static final long serialVersionUID = -4810797295980425113L;
-
-                @Override
-                public boolean apply(MapEntry<String, HazelcastStoredSession> mapEntry) {
-                    return null != mapEntry && null != mapEntry.getValue() && 
-                        altId.equals(mapEntry.getValue().getParameter(Session.PARAM_ALTERNATIVE_ID)); 
-                }
-            };
-            for (HazelcastStoredSession session : filter(altIdPredicate, true)) {
-                if (null != session && altId.equals(session.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
-                    return session;
-                }
+            Session session = findSession(new AltIdPredicate(altId));
+            if (null != session && altId.equals(session.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
+                return session;
             }
             throw SessionStorageExceptionCodes.ALTID_NOT_FOUND.create(altId);
         } catch (final HazelcastException e) {
@@ -567,14 +522,15 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     }
 
     @Override
-    public void cleanUp() {
-        sessionsUnchecked(false).clear();
+    public void cleanUp() throws OXException {
+        sessions().clear();
+        userSessions().clear();
     }
 
     @Override
     public void changePassword(final String sessionId, final String newPassword) throws OXException {
         try {
-            IMap<String, HazelcastStoredSession> sessions = sessions(true);
+            IMap<String, HazelcastStoredSession> sessions = sessions();
             HazelcastStoredSession storedSession = sessions.get(sessionId);
             if (null == storedSession) {
                 throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(sessionId);
@@ -590,13 +546,66 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     }
 
     @Override
+    public void setLocalIp(String sessionId, String localIp) throws OXException {
+        try {
+            IMap<String, HazelcastStoredSession> sessions = sessions();
+            HazelcastStoredSession storedSession = sessions.get(sessionId);
+            if (null == storedSession) {
+                throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(sessionId);
+            }
+            storedSession.setLocalIp(localIp);
+            sessions.set(sessionId, storedSession, 0, TimeUnit.SECONDS);
+        } catch (HazelcastException e) {
+            if (DEBUG) {
+                LOG.debug(e.getMessage(), e);
+            }
+            throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public void setClient(String sessionId, String client) throws OXException {
+        try {
+            IMap<String, HazelcastStoredSession> sessions = sessions();
+            HazelcastStoredSession storedSession = sessions.get(sessionId);
+            if (null == storedSession) {
+                throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(sessionId);
+            }
+            storedSession.setClient(client);
+            sessions.set(sessionId, storedSession, 0, TimeUnit.SECONDS);
+        } catch (HazelcastException e) {
+            if (DEBUG) {
+                LOG.debug(e.getMessage(), e);
+            }
+            throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public void setHash(String sessionId, String hash) throws OXException {
+        try {
+            IMap<String, HazelcastStoredSession> sessions = sessions();
+            HazelcastStoredSession storedSession = sessions.get(sessionId);
+            if (null == storedSession) {
+                throw SessionStorageExceptionCodes.NO_SESSION_FOUND.create(sessionId);
+            }
+            storedSession.setHash(hash);
+            sessions.set(sessionId, storedSession, 0, TimeUnit.SECONDS);
+        } catch (HazelcastException e) {
+            if (DEBUG) {
+                LOG.debug(e.getMessage(), e);
+            }
+            throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
     public void checkAuthId(final String login, final String authId) throws OXException {
         if (null != authId) {
             try {
-                for (HazelcastStoredSession session : filter(new SqlPredicate("authId = '" + authId + "'"), true)) {
-                    if (null != session && authId.equals(session.getAuthId())) {
-                        throw SessionStorageExceptionCodes.DUPLICATE_AUTHID.create(session.getLogin(), login);
-                    }
+                Session session = findSession(new SqlPredicate("authId = '" + authId + "'"));
+                if (null != session && authId.equals(session.getAuthId())) {
+                    throw SessionStorageExceptionCodes.DUPLICATE_AUTHID.create(session.getLogin(), login);
                 }
             } catch (final HazelcastException e) {
                 if (DEBUG) {
@@ -607,46 +616,121 @@ public class HazelcastSessionStorageService implements SessionStorageService {
         }
     }
 
+    @Override
+    public int getUserSessionCount(int userId, int contextId) throws OXException {
+        Collection<String> sessionIDs = userSessions().get(getKey(contextId, userId));
+        return null != sessionIDs ? sessionIDs.size() : 0;
+    }
+
     /**
-     * Filters the stored sessions by a {@link Predicate}.
-     * 
-     * @param predicate The predicate to use for filtering
-     * @param failIfPaused <code>true</code> to abort if the hazelcast instance is paused, <code>false</code>, otherwise
-     * @return The stored sessions matching the predicate, or an empty collection if none were found
+     * 'Touches' a session in the storage causing the map entry's idle time being reseted.
+     *
+     * @param sessionID The session ID
+     * @throws OXException
      */
-    private Collection<HazelcastStoredSession> filter(Predicate<?, ?> predicate, boolean failIfPaused) {
-        IMap<String, HazelcastStoredSession> sessions = sessionsUnchecked(failIfPaused);
-        if (null != sessions) {
-            return sessions.values(predicate);
+    public void touch(String sessionID) throws OXException {
+        /*
+         * calling containsKey resets map entries idle-time
+         */
+        if (false == sessions().containsKey(sessionID)) {
+            LOG.debug("Ignoring keep-alive even for not found session ID: " + sessionID);
         } else {
-            return Collections.emptyList();    
+            LOG.debug("Received keep-alive for '" + sessionID + "'.");
         }
     }
-    
+
     /**
-     * Filters the locally available stored sessions by a {@link Predicate}.
-     * 
-     * @param predicate The predicate to use for filtering
-     * @param failIfPaused <code>true</code> to abort if the hazelcast instance is paused, <code>false</code>, otherwise
-     * @return The stored sessions matching the predicate, or an empty collection if none were found
+     * Gets a session by the supplied predicate, trying to query the local map entries first, and the whole distributed map afterwards
+     * if needed.
+     *
+     * @param predicate The predicate to use
+     * @return The first found matching session, or <code>null</code> if not found
+     * @throws OXException
      */
-    private Collection<HazelcastStoredSession> filterLocal(Predicate<?, ?> predicate, boolean failIfPaused) {
-        IMap<String, HazelcastStoredSession> sessions = sessionsUnchecked(failIfPaused);
-        if (null != sessions) {
-            Collection<HazelcastStoredSession> values = new ArrayList<HazelcastStoredSession>();
-            Set<String> localKeySet = sessions.localKeySet(predicate);
-            if (null != localKeySet && 0 < localKeySet.size()) {
-                for (String key : localKeySet) {
-                    HazelcastStoredSession storedSession = sessions.get(key);
-                    if (null != storedSession) {
-                        values.add(storedSession);
-                    }
+    private HazelcastStoredSession findSession(Predicate<?, ?> predicate) throws OXException, HazelcastException {
+        IMap<String, HazelcastStoredSession> sessions = sessions();
+        if (null == sessions) {
+            return null;
+        }
+        /*
+         * try to lookup session from local keyset first
+         */
+        Set<String> localKeySet = sessions.localKeySet(predicate);
+        if (null != localKeySet && 0 < localKeySet.size()) {
+            for (String key : localKeySet) {
+                HazelcastStoredSession storedSession = sessions.get(key);
+                if (null != storedSession) {
+                    return storedSession;
                 }
-            }            
-            return values;
-        } else {
-            return Collections.emptyList();    
+            }
+        }
+        /*
+         * also query cluster if not yet found
+         */
+        Set<String> keySet = sessions.keySet(predicate);
+        if (null != keySet && 0 < keySet.size()) {
+            for (String key : keySet) {
+                HazelcastStoredSession storedSession = sessions.get(key);
+                if (null != storedSession) {
+                    return storedSession;
+                }
+            }
+        }
+        /*
+         * not found
+         */
+        return null;
+    }
+
+    /**
+     * Gets the 'sessions' map that maps session-IDs to stored sessions.
+     *
+     * @return The 'sessions' map
+     * @throws OXException
+     */
+    private IMap<String, HazelcastStoredSession> sessions() throws OXException {
+        try {
+            HazelcastInstance hazelcastInstance = REFERENCE.get();
+            if (null == hazelcastInstance || false == hazelcastInstance.getLifecycleService().isRunning()) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
+            }
+            return hazelcastInstance.getMap(sessionsMapName);
+        } catch (HazelcastException e) {
+            throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
-    
+
+    /**
+     * Gets the 'userSessions' multi-map that maps context-/user-IDs to session IDs.
+     *
+     * @return The 'userSessions' multi-map
+     * @throws OXException
+     */
+    private MultiMap<Long, String> userSessions() throws OXException {
+        try {
+            HazelcastInstance hazelcastInstance = REFERENCE.get();
+            if (null == hazelcastInstance || false == hazelcastInstance.getLifecycleService().isRunning()) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
+            }
+            return hazelcastInstance.getMultiMap(userSessionsMapName);
+        } catch (HazelcastException e) {
+            throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Creates an unique key from the supplied context- and user-ID
+     *
+     * @param contextID The context ID
+     * @param userID The user ID
+     * @return A long created from the context- and user-ID
+     */
+    private static Long getKey(int contextID, int userID) {
+        return Long.valueOf(((long) contextID << 32) | (userID & 0xFFFFFFFL));
+    }
+
 }

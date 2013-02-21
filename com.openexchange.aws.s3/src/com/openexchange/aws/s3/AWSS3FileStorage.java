@@ -91,7 +91,7 @@ import com.openexchange.tools.file.external.FileStorage;
 
 /**
  * {@link AWSS3FileStorage}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class AWSS3FileStorage implements FileStorage {
@@ -108,7 +108,7 @@ public class AWSS3FileStorage implements FileStorage {
 
     /**
      * Initializes a new {@link AWSS3FileStorage}.
-     * 
+     *
      * @throws OXException
      */
     public AWSS3FileStorage(AmazonS3 amazonS3, AWSS3Configuration config, URI uri) throws OXException {

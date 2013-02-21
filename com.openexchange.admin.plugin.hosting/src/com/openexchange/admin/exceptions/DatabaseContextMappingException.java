@@ -60,5 +60,5 @@ public class DatabaseContextMappingException extends Exception{
     public DatabaseContextMappingException(String s) {
         super( s );
     }
-    
+
 }

@@ -53,7 +53,7 @@ import java.util.Locale;
 
 /**
  * {@link ITipMethod}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public enum ITipMethod {
@@ -76,7 +76,7 @@ public enum ITipMethod {
 
     /**
      * Gets the keyword.
-     * 
+     *
      * @return The keyword
      */
     public String getKeyword() {
@@ -85,7 +85,7 @@ public enum ITipMethod {
 
     /**
      * Gets the method parameter read to append to "Content-Type" header: <code>"method=" + &lt;keyword&gt;</code>
-     * 
+     *
      * @return The method parameter; <code>"method=" + &lt;keyword&gt;</code>
      */
     public String getMethod() {
@@ -126,5 +126,5 @@ public enum ITipMethod {
         return NO_METHOD;
     }
 
-   
+
 }

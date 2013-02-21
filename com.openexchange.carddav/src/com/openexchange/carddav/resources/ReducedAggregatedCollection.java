@@ -62,9 +62,9 @@ import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 /**
- * {@link ReducedAggregatedCollection} - CardDAV collection aggregating the contents 
- * of a reduced set of folders. 
- * 
+ * {@link ReducedAggregatedCollection} - CardDAV collection aggregating the contents
+ * of a reduced set of folders.
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ReducedAggregatedCollection extends AggregatedCollection {
@@ -75,7 +75,7 @@ public class ReducedAggregatedCollection extends AggregatedCollection {
         super(factory, url, displayName);
         LOG.debug(getUrl() + ": initialized.");
     }
-    
+
 	@Override
     protected Collection<Contact> getModifiedContacts(Date since) throws OXException {
         Collection<Contact> contacts = new ArrayList<Contact>();
@@ -111,7 +111,7 @@ public class ReducedAggregatedCollection extends AggregatedCollection {
         }
         return contacts;
     }
-	
+
 	@Override
 	public Date getLastModified() throws WebdavProtocolException {
 	    try {

@@ -56,9 +56,9 @@ import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.rmi.extensions.OXGroupExtensionInterface;
 
 /**
- * 
+ *
  * This class represents a group.
- * 
+ *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
@@ -73,15 +73,15 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     private Integer id;
 
     private String name;
-    
+
     private boolean nameset;
 
     private String displayname;
-    
+
     private boolean displaynameset;
 
     private Integer[] members;
-    
+
     private boolean membersset;
 
     /**
@@ -92,10 +92,10 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
         init();
     }
 
-    
+
     /**
      * Initiates a group object with the given id set
-     * 
+     *
      * @param id An {@link Integer} containing the id
      */
     public Group(final Integer id) {
@@ -106,7 +106,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * Initiates a group object with the given id, name and display name set
-     * 
+     *
      * @param id An {@link Integer} containing the id
      * @param name A {@link String} containing the name
      * @param displayname A {@link String} containing the display name
@@ -129,7 +129,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * Used to check if the display name of this object has been changed
-     * 
+     *
      * @return true if set; false if not
      */
     public final boolean isDisplaynameset() {
@@ -139,7 +139,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * Used to check if the members of this object have been changed
-     * 
+     *
      * @return true if set; false if not
      */
     public final boolean isMembersset() {
@@ -149,7 +149,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * Used to check if the name of this object has been changed
-     * 
+     *
      * @return true if set; false if not
      */
     public final boolean isNameset() {
@@ -191,7 +191,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * Returns the displayname of this group
-     * 
+     *
      * @return A String containing the displayname
      */
     public final String getDisplayname() {
@@ -200,7 +200,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * Sets the displayname for this group
-     * 
+     *
      * @param displayname The displayname as string
      */
     public final void setDisplayname(final String displayname) {
@@ -210,7 +210,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * Returns the members of this group
-     * 
+     *
      * @return An {@link Integer} array containing the member ids
      */
     public final Integer[] getMembers() {
@@ -219,7 +219,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * Sets the the members for this group
-     * 
+     *
      * @param members An {@link Integer} array containing the member ids
      */
     public final void setMembers(final Integer[] members) {
@@ -255,7 +255,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * @param extension
-     * @deprecated 
+     * @deprecated
      */
     @Deprecated
     public final void addExtension(final OXGroupExtensionInterface extension) {
@@ -264,7 +264,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
 
     /**
      * @return
-     * @deprecated 
+     * @deprecated
      */
     @Deprecated
     public final ArrayList<OXGroupExtensionInterface> getExtensions() {
@@ -274,11 +274,11 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
         }
         return retval;
     }
-    
+
     /**
      * @param o
      * @return
-     * @deprecated 
+     * @deprecated
      */
     @Deprecated
     public final boolean removeExtension(final OXGroupExtensionInterface o) {
@@ -293,10 +293,10 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
      * This method is used to get an extensions through the name of this
      * extension. This first occurence will be returned, or null if no fitting
      * extension was found.
-     * 
+     *
      * @param extname a String for the extension
      * @return the {@link OXGroupExtensionInterface} with extname
-     * @deprecated 
+     * @deprecated
      */
     @Deprecated
     public final OXGroupExtensionInterface getExtensionbyName(final String extname) {
@@ -315,7 +315,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     public final String[] getMandatoryMembersCreate() {
         return new String[]{ "displayname", "name" };
     }
-    
+
     /**
      * At the moment no fields are defined here
      */

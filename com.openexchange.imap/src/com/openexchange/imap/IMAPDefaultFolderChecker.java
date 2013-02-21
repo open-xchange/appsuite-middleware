@@ -217,7 +217,7 @@ public class IMAPDefaultFolderChecker {
 
     /**
      * Check presence of default folders.
-     * 
+     *
      * @param key The key for cache look-up
      * @param mailSessionCache The cache
      * @throws MailException If checking default folders' presence fails for any reason
@@ -821,12 +821,12 @@ public class IMAPDefaultFolderChecker {
      * Matcher for {@link StackTraceElement}s.
      */
     protected static interface StackTraceElementMatcher {
-        
+
         boolean accepts(StackTraceElement stackTraceElement);
     }
 
     private static final class ClassNameMatcher implements StackTraceElementMatcher {
-        
+
         private final String className;
         private boolean found;
 
@@ -857,7 +857,7 @@ public class IMAPDefaultFolderChecker {
 
     /**
      * Appends stack trace.
-     * 
+     *
      * @param trace The stack trace
      * @param sb The builder
      * @param num The max. number of elements to append
@@ -866,11 +866,12 @@ public class IMAPDefaultFolderChecker {
         if (null == trace) {
             return;
         }
+        final String lineSeparator = System.getProperty("line.separator");
         for (int i = 0; i < trace.length && matcher.accepts(trace[i]); i++) {
             final StackTraceElement ste = trace[i];
             final String className = ste.getClassName();
             if (null != className) {
-                sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                sb.append("    at ").append(className).append('.').append(ste.getMethodName());
                 if (ste.isNativeMethod()) {
                     sb.append("(Native Method)");
                 } else {
@@ -886,7 +887,7 @@ public class IMAPDefaultFolderChecker {
                         sb.append(')');
                     }
                 }
-                sb.append('\n');
+                sb.append(lineSeparator);
             }
         }
     }

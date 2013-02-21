@@ -326,10 +326,11 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             mailAccess.connect();
             // Get messages
             final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(fa.getFullname(), mailIds, fields);
+            final int unifiedAccountId = this.access.getAccountId();
             for (final MailMessage mail : mails) {
                 if (null != mail) {
                     mail.setFolder(fullName);
-                    mail.setAccountId(accountId);
+                    mail.setAccountId(unifiedAccountId);
                 }
             }
             return mails;
@@ -373,9 +374,10 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             if (null == mail) {
                 return null;
             }
+            final int unifiedAccountId = this.access.getAccountId();
             mail.loadContent();
             mail.setFolder(fullName);
-            mail.setAccountId(fa.getAccountId());
+            mail.setAccountId(unifiedAccountId);
             return mail;
         } finally {
                 closeSafe(mailAccess);
@@ -458,13 +460,13 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             }
                             /*-
                              * 1. Send 'all' request with id, folder_id, level, and received_date - you need all that data.
-                             * 
+                             *
                              * 2. Whenever level equals 0, a new thread starts (new array)
-                             * 
+                             *
                              * 3. Add all objects (id, folder_id, received_date) to that list until level !== 0.
-                             * 
+                             *
                              * 4. Order by received_date (ignore the internal level structure), so that the newest mails show up first.
-                             * 
+                             *
                              * 5. Generate the real list of all threads. This must be again ordered by received_date, so that the most recent threads show up
                              *    first. id and folder_id refer to the most recent mail.
                              */
@@ -613,7 +615,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
             if (messageStorage instanceof ISimplifiedThreadStructure) {
                 try {
-                    return ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fullName, includeSent, false, indexRange, max, sortField, order, mailFields);
+                    return ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fa.getFullname(), includeSent, false, indexRange, max, sortField, order, mailFields);
                 } catch (final OXException e) {
                     if (!MailExceptionCode.UNSUPPORTED_OPERATION.equals(e)) {
                         throw e;
@@ -623,13 +625,13 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
             /*-
              * 1. Send 'all' request with id, folder_id, level, and received_date - you need all that data.
-             * 
+             *
              * 2. Whenever level equals 0, a new thread starts (new array)
-             * 
+             *
              * 3. Add all objects (id, folder_id, received_date) to that list until level !== 0.
-             * 
+             *
              * 4. Order by received_date (ignore the internal level structure), so that the newest mails show up first.
-             * 
+             *
              * 5. Generate the real list of all threads. This must be again ordered by received_date, so that the most recent threads show up
              *    first. id and folder_id refer to the most recent mail.
              */
@@ -826,7 +828,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 throw MailExceptionCode.INTERRUPT_ERROR.create(e);
             } catch (final ExecutionException e) {
                 throw ThreadPools.launderThrowable(e, OXException.class);
-            } 
+            }
         }
         final FullnameArgument fa = UnifiedInboxUtility.parseNestedFullname(fullName);
         MailAccess<?, ?> mailAccess = null;
@@ -837,9 +839,10 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             // Get account's messages
             final MailMessage[] mails =
                 mailAccess.getMessageStorage().getThreadSortedMessages(fa.getFullname(), indexRange, sortField, order, searchTerm, fields);
+            final int unifiedAccountId = this.access.getAccountId();
             for (final MailMessage mail : mails) {
                 mail.setFolder(fullName);
-                mail.setAccountId(accountId);
+                mail.setAccountId(unifiedAccountId);
             }
             return mails;
         } finally {
@@ -974,9 +977,10 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             // Get account's messages
             final MailMessage[] mails =
                 mailAccess.getMessageStorage().searchMessages(fa.getFullname(), indexRange, sortField, order, searchTerm, fields);
+            final int unifiedAccountId = this.access.getAccountId();
             for (final MailMessage mail : mails) {
                 mail.setFolder(fullName);
-                mail.setAccountId(accountId);
+                mail.setAccountId(unifiedAccountId);
             }
             return mails;
         } finally {
@@ -1075,9 +1079,10 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             mailAccess.connect();
             // Get account's messages
             final MailMessage[] mails = mailAccess.getMessageStorage().getUnreadMessages(fa.getFullname(), sortField, order, fields, limit);
+            final int unifiedAccountId = this.access.getAccountId();
             for (final MailMessage mail : mails) {
                 mail.setFolder(fullName);
-                mail.setAccountId(accountId);
+                mail.setAccountId(unifiedAccountId);
             }
             return mails;
         } finally {

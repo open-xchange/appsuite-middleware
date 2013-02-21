@@ -54,17 +54,19 @@ import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.Login;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
@@ -73,9 +75,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
+import com.openexchange.log.LogProperties.Name;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -93,13 +98,15 @@ public class DispatcherServlet extends SessionServlet {
 
     private static final long serialVersionUID = -8060034833311074781L;
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(DispatcherServlet.class));
-    
-    private static final Session NO_SESSION = new SessionObject("");
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DispatcherServlet.class);
+
+    private static final Session NO_SESSION = new SessionObject(Dispatcher.class.getSimpleName() + "-Fake-Session");
 
     /*-
      * /!\ These must be static for our servlet container to work properly. /!\
      */
+
+    private static final EnumSet<Name> PROPS_TO_IGNORE = EnumSet.of(LogProperties.Name.SESSION_CONTEXT_ID);
 
     private static final AtomicReference<Dispatcher> DISPATCHER = new AtomicReference<Dispatcher>();
 
@@ -156,7 +163,7 @@ public class DispatcherServlet extends SessionServlet {
 
     /**
      * Gets the <code>AJAXRequestDataTools</code> instance to use for parsing incoming requests.
-     * 
+     *
      * @return The <code>AJAXRequestDataTools</code> instance
      */
     protected AJAXRequestDataTools getAjaxRequestDataTools() {
@@ -186,6 +193,63 @@ public class DispatcherServlet extends SessionServlet {
      */
     public static void clearRenderer() {
         RESPONSE_RENDERERS.clear();
+    }
+
+    @Override
+    protected void initializeSession(final HttpServletRequest req) throws OXException {
+        if (null != getSessionObject(req, true)) {
+            return;
+        }
+        // Remember session
+        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        if (sessiondService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
+        }
+        ServerSession session = null;
+        boolean sessionParamFound = false;
+        {
+            final String sSession = req.getParameter("session");
+            if (sSession != null && sSession.length() > 0) {
+                final String sessionId = getSessionId(req);
+                session = getSession(req, sessionId, sessiondService);
+                verifySession(req, sessiondService, sessionId, session);
+                rememberSession(req, session);
+                sessionParamFound = true;
+            }
+        }
+        // Check if associated request allows no session (if no "session" parameter was found)
+        boolean mayOmitSession = false;
+        if (!sessionParamFound) {
+            final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
+            final String module = requestDataTools.getModule(PREFIX.get(), req);
+            final String action = requestDataTools.getAction(req);
+            mayOmitSession = DISPATCHER.get().mayOmitSession(module, action);
+        }
+        // Try public session
+        if (!mayOmitSession) {
+            final Cookie[] cookies = req.getCookies();
+            if (cookies != null) {
+                ServerSession simpleSession = null;
+                for (final Cookie cookie : cookies) {
+                    if (Login.PUBLIC_SESSION_NAME.equals(cookie.getName())) {
+                        final String altId = cookie.getValue();
+                        if (null != altId && null != session && altId.equals(session.getParameter(Session.PARAM_ALTERNATIVE_ID))) {
+                            // same session
+                            simpleSession = session;
+                        } else {
+                            // lookup session by alternative id
+                            simpleSession = ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(cookie.getValue()));
+                        }
+                        break;
+                    }
+                }
+                // Check if a simple (aka public) session has been found
+                if (simpleSession != null) {
+                    verifySession(req, sessiondService, simpleSession.getSessionID(), simpleSession);
+                    rememberPublicSession(req, simpleSession);
+                }
+            }
+        }
     }
 
     @Override
@@ -225,24 +289,22 @@ public class DispatcherServlet extends SessionServlet {
         AJAXState state = null;
         final Dispatcher dispatcher = DISPATCHER.get();
         try {
-            final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-            ServerSession session;
+            final AJAXRequestData requestData;
+            final ServerSession session;
+            /*
+             * Parse & acquire session
+             */
             {
+                final AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
                 final String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
     			final String action = requestDataTools.getAction(httpRequest);
-    			session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action));
-                if (session == null && dispatcher.mayOmitSession(module, action)) {
-                	session = fakeSession();
-                }
-                if (null == session) {
-                    throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
-                }
+    			session = getSession(httpRequest, dispatcher, module, action);
+                /*
+                 * Parse AJAXRequestData
+                 */
+                requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, PREFIX.get());
+                requestData.setSession(session);
             }
-            /*
-             * Parse AJAXRequestData
-             */
-            final AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, PREFIX.get());
-            requestData.setSession(session);
             /*
              * Start dispatcher processing
              */
@@ -276,28 +338,30 @@ public class DispatcherServlet extends SessionServlet {
                 return;
             }
             // Handle other OXExceptions
-            if (e.isLoggable(LogLevel.ERROR)) {
+            if (AjaxExceptionCodes.UNEXPECTED_ERROR.equals(e)) {
+                LOG.error(new StringAllocator("Unexpected error: '").append(e.getMessage()).append('\'').toString(), e);
+            } else if (e.isLoggable(LogLevel.ERROR)) {
                 if (LogProperties.isEnabled()) {
-                    StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:\n");
-                    logBuilder.append(LogProperties.getAndPrettyPrint());
+                    final StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:\n");
+                    logBuilder.append(LogProperties.getAndPrettyPrint(PROPS_TO_IGNORE));
                     LOG.error(logBuilder.toString(), e);
                 } else {
                     LOG.error(e.getMessage(), e);
                 }
             }
             final String action = httpRequest.getParameter(PARAMETER_ACTION);
-            APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? httpRequest.getMethod().toUpperCase(Locale.US) : action, httpRequest, httpResponse);
+            APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? toUpperCase(httpRequest.getMethod()) : action, httpRequest, httpResponse);
         } catch (final RuntimeException e) {
             if(LogProperties.isEnabled()) {
-                StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:\n");
-                logBuilder.append(LogProperties.getAndPrettyPrint());
+                final StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:\n");
+                logBuilder.append(LogProperties.getAndPrettyPrint(PROPS_TO_IGNORE));
                 LOG.error(logBuilder.toString(),e);
             } else {
                 LOG.error(e.getMessage(), e);
             }
             final OXException exception = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             final String action = httpRequest.getParameter(PARAMETER_ACTION);
-            APIResponseRenderer.writeResponse(new Response().setException(exception), null == action ? httpRequest.getMethod().toUpperCase(Locale.US) : action, httpRequest, httpResponse);
+            APIResponseRenderer.writeResponse(new Response().setException(exception), null == action ? toUpperCase(httpRequest.getMethod()) : action, httpRequest, httpResponse);
         } finally {
             if (null != state) {
                 dispatcher.end(state);
@@ -305,9 +369,20 @@ public class DispatcherServlet extends SessionServlet {
         }
     }
 
+    private ServerSession getSession(final HttpServletRequest httpRequest, final Dispatcher dispatcher, final String module, final String action) throws OXException {
+        ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action));
+        if (session == null) {
+            if (!dispatcher.mayOmitSession(module, action)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+            }
+            session = fakeSession();
+        }
+        return session;
+    }
+
 	private ServerSession fakeSession() {
 		final UserImpl user = new UserImpl();
-		user.setAttributes(new HashMap<String, Set<String>>());
+		user.setAttributes(new HashMap<String, Set<String>>(1));
 		return new ServerSessionAdapter(NO_SESSION, new ContextImpl(-1), user);
 	}
 
@@ -320,10 +395,12 @@ public class DispatcherServlet extends SessionServlet {
      * @param httpResponse The associated HTTP Servlet response
      */
     protected void sendResponse(final AJAXRequestData requestData, final AJAXRequestResult result, final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) {
-        int highest = Integer.MIN_VALUE;
+        int highest = 0;
+        boolean first = true;
         ResponseRenderer candidate = null;
         for (final ResponseRenderer renderer : RESPONSE_RENDERERS) {
-            if (renderer.handles(requestData, result) && highest <= renderer.getRanking()) {
+            if (renderer.handles(requestData, result) && (first || highest <= renderer.getRanking())) {
+                first = false;
                 highest = renderer.getRanking();
                 candidate = renderer;
             }
@@ -332,6 +409,20 @@ public class DispatcherServlet extends SessionServlet {
             throw new IllegalStateException("No appropriate " + ResponseRenderer.class.getSimpleName() + " for request data/result pair.");
         }
         candidate.write(requestData, result, httpRequest, httpResponse);
+    }
+
+    /** ASCII-wise to upper-case */
+    private String toUpperCase(CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+        }
+        return builder.toString();
     }
 
 }

@@ -57,17 +57,22 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.jslob.JSlob;
+import com.openexchange.jslob.JSlobId;
+import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.json.actions.AbstractMailAccountAction;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
 import com.openexchange.mailaccount.json.fields.MailAccountGetSwitch;
+import com.openexchange.session.Session;
 
 /**
  * {@link MailAccountWriter} - Writes mail account as JSON data.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailAccountWriter {
+public final class MailAccountWriter implements MailAccountFields {
 
     private MailAccountWriter() {
         super();
@@ -81,63 +86,77 @@ public final class MailAccountWriter {
      * @throws JSONException If writing JSON fails
      */
     public static JSONObject write(final MailAccount account) throws JSONException {
-        final JSONObject json = new JSONObject();
+        final JSONObject json = new JSONObject(48);
         final int accountId = account.getId();
-        json.put(MailAccountFields.ID, accountId);
-        json.put(MailAccountFields.LOGIN, account.getLogin());
-        // json.put(MailAccountFields.PASSWORD, account.getLogin());
-        json.put(MailAccountFields.MAIL_PORT, account.getMailPort());
-        json.put(MailAccountFields.MAIL_PROTOCOL, account.getMailProtocol());
-        json.put(MailAccountFields.MAIL_SECURE, account.isMailSecure());
-        json.put(MailAccountFields.MAIL_SERVER, account.getMailServer());
-        json.put(MailAccountFields.MAIL_URL, account.generateMailServerURL());
+        json.put(ID, accountId);
+        json.put(LOGIN, account.getLogin());
+        // json.put(PASSWORD, account.getLogin());
+        json.put(MAIL_PORT, account.getMailPort());
+        json.put(MAIL_PROTOCOL, account.getMailProtocol());
+        json.put(MAIL_SECURE, account.isMailSecure());
+        json.put(MAIL_SERVER, account.getMailServer());
+        json.put(MAIL_URL, account.generateMailServerURL());
 
-        json.put(MailAccountFields.TRANSPORT_PORT, account.getTransportPort());
-        json.put(MailAccountFields.TRANSPORT_PROTOCOL, account.getTransportProtocol());
-        json.put(MailAccountFields.TRANSPORT_SECURE, account.isTransportSecure());
-        json.put(MailAccountFields.TRANSPORT_SERVER, account.getTransportServer());
-        json.put(MailAccountFields.TRANSPORT_URL, account.generateTransportServerURL());
+        json.put(TRANSPORT_PORT, account.getTransportPort());
+        json.put(TRANSPORT_PROTOCOL, account.getTransportProtocol());
+        json.put(TRANSPORT_SECURE, account.isTransportSecure());
+        json.put(TRANSPORT_SERVER, account.getTransportServer());
+        json.put(TRANSPORT_URL, account.generateTransportServerURL());
 
-        json.put(MailAccountFields.TRANSPORT_LOGIN, account.getTransportLogin());
-        // json.put(MailAccountFields.TRANSPORT_PASSWORD, account.getTransportPassword());
+        json.put(TRANSPORT_LOGIN, account.getTransportLogin());
+        // json.put(TRANSPORT_PASSWORD, account.getTransportPassword());
 
-        json.put(MailAccountFields.NAME, account.getName());
-        json.put(MailAccountFields.PRIMARY_ADDRESS, account.getPrimaryAddress());
-        json.put(MailAccountFields.PERSONAL, account.getPersonal());
-        json.put(MailAccountFields.REPLY_TO, account.getReplyTo());
-        json.put(MailAccountFields.SPAM_HANDLER, account.getSpamHandler());
+        json.put(NAME, account.getName());
+        json.put(PRIMARY_ADDRESS, account.getPrimaryAddress());
+        json.put(PERSONAL, account.getPersonal());
+        json.put(SPAM_HANDLER, account.getSpamHandler());
         // Folder names
-        json.put(MailAccountFields.TRASH, account.getTrash());
-        json.put(MailAccountFields.SENT, account.getSent());
-        json.put(MailAccountFields.DRAFTS, account.getDrafts());
-        json.put(MailAccountFields.SPAM, account.getSpam());
-        json.put(MailAccountFields.CONFIRMED_SPAM, account.getConfirmedSpam());
-        json.put(MailAccountFields.CONFIRMED_HAM, account.getConfirmedHam());
+        json.put(TRASH, account.getTrash());
+        json.put(SENT, account.getSent());
+        json.put(DRAFTS, account.getDrafts());
+        json.put(SPAM, account.getSpam());
+        json.put(CONFIRMED_SPAM, account.getConfirmedSpam());
+        json.put(CONFIRMED_HAM, account.getConfirmedHam());
         // Folder full names
-        json.put(MailAccountFields.TRASH_FULLNAME, prepareFullname(accountId, account.getTrashFullname()));
-        json.put(MailAccountFields.SENT_FULLNAME, prepareFullname(accountId, account.getSentFullname()));
-        json.put(MailAccountFields.DRAFTS_FULLNAME, prepareFullname(accountId, account.getDraftsFullname()));
-        json.put(MailAccountFields.SPAM_FULLNAME, prepareFullname(accountId, account.getSpamFullname()));
-        json.put(MailAccountFields.CONFIRMED_SPAM_FULLNAME, prepareFullname(accountId, account.getConfirmedSpamFullname()));
-        json.put(MailAccountFields.CONFIRMED_HAM_FULLNAME, prepareFullname(accountId, account.getConfirmedHamFullname()));
+        json.put(TRASH_FULLNAME, prepareFullname(accountId, account.getTrashFullname()));
+        json.put(SENT_FULLNAME, prepareFullname(accountId, account.getSentFullname()));
+        json.put(DRAFTS_FULLNAME, prepareFullname(accountId, account.getDraftsFullname()));
+        json.put(SPAM_FULLNAME, prepareFullname(accountId, account.getSpamFullname()));
+        json.put(CONFIRMED_SPAM_FULLNAME, prepareFullname(accountId, account.getConfirmedSpamFullname()));
+        json.put(CONFIRMED_HAM_FULLNAME, prepareFullname(accountId, account.getConfirmedHamFullname()));
         // Unified Mail enabled
-        json.put(MailAccountFields.UNIFIED_INBOX_ENABLED, account.isUnifiedINBOXEnabled());
+        json.put(UNIFIED_INBOX_ENABLED, account.isUnifiedINBOXEnabled());
         // Properties
         final Map<String, String> props = account.getProperties();
         if (props.containsKey("pop3.deletewt")) {
-            json.put(MailAccountFields.POP3_DELETE_WRITE_THROUGH, Boolean.parseBoolean(props.get("pop3.deletewt")));
+            json.put(POP3_DELETE_WRITE_THROUGH, Boolean.parseBoolean(props.get("pop3.deletewt")));
         }
         if (props.containsKey("pop3.expunge")) {
-            json.put(MailAccountFields.POP3_EXPUNGE_ON_QUIT, Boolean.parseBoolean(props.get("pop3.expunge")));
+            json.put(POP3_EXPUNGE_ON_QUIT, Boolean.parseBoolean(props.get("pop3.expunge")));
         }
         if (props.containsKey("pop3.refreshrate")) {
-            json.put(MailAccountFields.POP3_REFRESH_RATE, props.get("pop3.refreshrate"));
+            json.put(POP3_REFRESH_RATE, props.get("pop3.refreshrate"));
         }
         if (props.containsKey("pop3.storage")) {
-            json.put(MailAccountFields.POP3_STORAGE, props.get("pop3.storage"));
+            json.put(POP3_STORAGE, props.get("pop3.storage"));
         }
         if (props.containsKey("pop3.path")) {
-            json.put(MailAccountFields.POP3_PATH, props.get("pop3.path"));
+            json.put(POP3_PATH, props.get("pop3.path"));
+        }
+        // Reply-to
+        {
+            
+            final String replyTo = account.getReplyTo();
+            if (null == replyTo) {
+                if (props.containsKey("replyto")) {
+                    json.put(MailAccountFields.REPLY_TO, props.get("replyto"));
+                }                
+            } else {
+                json.put(REPLY_TO, replyTo);
+            }
+        }
+        if (props.containsKey(ADDRESSES)) {
+            json.put(ADDRESSES, props.get(ADDRESSES));
         }
         return json;
     }
@@ -158,11 +177,12 @@ public final class MailAccountWriter {
      * @return A JSON array of JSON arrays for each account
      * @throws OXException If writing JSON fails
      */
-    public static JSONArray writeArray(final MailAccount[] mailAccounts, final List<Attribute> attributes) throws OXException {
-        final JSONArray rows = new JSONArray();
+    public static JSONArray writeArray(final MailAccount[] mailAccounts, final List<Attribute> attributes, final Session session) throws OXException {
+        final JSONArray rows = new JSONArray(mailAccounts.length);
+        final JSlobStorage jSlobStorage = AbstractMailAccountAction.getStorage(); 
         for (final MailAccount account : mailAccounts) {
             final MailAccountGetSwitch getter = new MailAccountGetSwitch(account);
-            final JSONArray row = new JSONArray();
+            final JSONArray row = new JSONArray(64);
             for (final Attribute attribute : attributes) {
                 if (Attribute.PASSWORD_LITERAL == attribute || Attribute.TRANSPORT_PASSWORD_LITERAL == attribute) {
                     row.put(JSONObject.NULL);
@@ -174,6 +194,14 @@ public final class MailAccountWriter {
                         row.put(JSONObject.NULL);
                     } else {
                         row.put(prepareFullname(account.getId(), value.toString()));
+                    }
+                } else if (Attribute.META == attribute) {
+                    final JSlobId jSlobId = new JSlobId(AbstractMailAccountAction.JSLOB_SERVICE_ID, Integer.toString(account.getId()), session.getUserId(), session.getContextId());
+                    final JSlob jSlob = jSlobStorage.opt(jSlobId);
+                    if (null != jSlob) {
+                        row.put(jSlob.getJsonObject());
+                    } else {
+                        row.put(JSONObject.NULL);
                     }
                 } else {
                     final Object value  = attribute.doSwitch(getter);

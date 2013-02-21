@@ -50,6 +50,7 @@
 package com.openexchange.oauth.json.osgi;
 
 import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleContext;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
@@ -75,7 +76,6 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OAuthJSONActivator.class));
 
     private OSGiOAuthService oAuthService;
-
     private WhiteboardSecretService secretService;
 
     @Override
@@ -118,6 +118,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
             /*
              * Service trackers
              */
+            final BundleContext context = this.context;
             track(OAuthService.class, new RegistryServiceTrackerCustomizer<OAuthService>(context, registry, OAuthService.class));
             /*
              * Open trackers
@@ -138,7 +139,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
             secretService = new WhiteboardSecretService(context);
             secretService.open();
             AbstractOAuthAJAXActionService.setSecretService(secretService);
-            
+
             getService(CapabilityService.class).declareCapability("oauth");
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);

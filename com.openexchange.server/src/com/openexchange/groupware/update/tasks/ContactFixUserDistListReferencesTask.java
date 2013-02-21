@@ -70,7 +70,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ContactFixUserDistListReferencesTask}
- * 
+ *
  * Tries to correct references in 'prg_dlist' using the contact's user ID instead of it's object ID.
  * @see https://bugs.open-xchange.com/show_bug.cgi?id=24035
  *
@@ -117,16 +117,16 @@ public final class ContactFixUserDistListReferencesTask extends UpdateTaskAdapte
             Database.backNoTimeout(contextID, true, connection);
         }
     }
-    
+
     private int correctWrongReferences(Connection connection) throws SQLException {
-        String sql = 
+        String sql =
             "UPDATE prg_dlist AS d LEFT JOIN prg_contacts AS c " +
             "ON d.intfield02 = c.userid AND d.cid = c.cid " +
             "SET d.intfield02 = c.intfield01 " +
             "WHERE d.intfield03=1 AND d.field04 = c.field65 " +
             "OR d.intfield03=2 AND d.field04 = c.field66 " +
             "OR d.intfield03=3 AND d.field04 = c.field67;"
-        ;        
+        ;
         PreparedStatement statement = null;
         try {
             statement = connection.prepareStatement(sql);
@@ -137,7 +137,7 @@ public final class ContactFixUserDistListReferencesTask extends UpdateTaskAdapte
     }
 
     private int deleteWrongReferences(Connection connection) throws SQLException {
-        String sql = 
+        String sql =
             "UPDATE prg_dlist AS d LEFT JOIN prg_contacts AS c " +
             "ON d.intfield02 = c.intfield01 AND d.cid = c.cid " +
             "SET d.intfield02 = NULL, d.intfield03 = NULL, d.intfield04 = NULL " +

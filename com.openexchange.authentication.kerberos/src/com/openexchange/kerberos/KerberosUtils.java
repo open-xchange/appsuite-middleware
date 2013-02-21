@@ -80,8 +80,8 @@ public final class KerberosUtils {
     public static final String SESSION_PRINCIPAL = "kerberosPrincipal";
 
     public static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(KerberosUtils.class));
-    
-    public static CallbackHandler getCallbackHandler(final String user, final String password) { 
+
+    public static CallbackHandler getCallbackHandler(final String user, final String password) {
         return new CallbackHandler() {
             @Override
             public void handle(final Callback[] callbacks) {
@@ -93,7 +93,7 @@ public final class KerberosUtils {
                         final PasswordCallback passCallback = (PasswordCallback) callback;
                         passCallback.setPassword(password.toCharArray());
                     } else {
-                        System.out.println(callback.getClass().getName() + ":" + callback.toString());
+                        LOG.error("Unknown callback class: " + callback.getClass().getName() + '#' + callback.toString());
                     }
                 }
             }
@@ -102,7 +102,7 @@ public final class KerberosUtils {
 
     /**
      * Calculate renewal time for ticket in given subject.
-     * 
+     *
      * @param subject Subject containing some private credentials.
      * @return the time in seconds when the ticket needs a renewal.
      * @throws GSSException if fetching the remaining life time from the ticket fails.
@@ -116,7 +116,7 @@ public final class KerberosUtils {
                 remaining = credential.getRemainingLifetime();
             } catch (GSSException e) {
                 throw KerberosExceptionCodes.UNKNOWN.create(e, e.getMessage());
-            } 
+            }
             // if lifetime to small, renew NOW
             if (remaining <= MIN_LIFETIME_SECONDS) {
                 return 0;

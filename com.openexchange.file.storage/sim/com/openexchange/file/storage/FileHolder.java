@@ -56,7 +56,7 @@ import org.apache.commons.io.IOUtils;
 
 /**
  * {@link FileHolder}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class FileHolder {
@@ -71,7 +71,7 @@ public class FileHolder {
         this.file = file;
         this.content = null;
     }
-        
+
     public FileHolder(File file, byte[] content) {
         super();
         this.file = file;
@@ -89,7 +89,7 @@ public class FileHolder {
         } finally {
             IOUtils.closeQuietly(content);
         }
-        
+
         this.content = tmp;
     }
 
@@ -101,7 +101,7 @@ public class FileHolder {
         if (content == null) {
             return null;
         }
-        
+
         return new ByteArrayInputStream(content);
     }
 

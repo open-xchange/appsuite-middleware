@@ -28,14 +28,14 @@ public interface MessagingUserConfigurationInterface {
      * @return
      */
     public int getLength();
-    
+
     /**
      * If the messaging service is enabled for the user or not
-     * 
+     *
      * @return
      */
     public boolean isEnabled();
-    
+
     /**
      * If the message service uses captchas
      * @return
@@ -53,25 +53,25 @@ public interface MessagingUserConfigurationInterface {
      * @return
      */
     public boolean isMMS();
-    
+
     /**
      * Returns an optional Upsell link, if the user has no SMS enabled.
      * @return
      */
     public String getUpsellLink();
-    
+
     /**
      * If the user should have the option to append a signature to the outgoing SMS
      * @return
      */
     public boolean isSignatureOption();
-    
+
     /**
      * Returns the max. number of of recipients, use 0 for unlimited
      * @return
      */
     public int getRecipientLimit();
-    
+
     /**
      * Returns the max. number of of sms, use 0 for unlimited
      * @return

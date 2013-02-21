@@ -144,22 +144,8 @@ public interface UploadFile {
     void setTmpFile(final File tmpFile);
 
     /**
-     * Gets the next homonymous file.
-     *
-     * @return The next homonymous file.
-     */
-    UploadFile getHomonymous();
-
-    /**
-     * Sets the next homonymous file.
-     *
-     * @param homonymous The next homonymous file.
-     */
-    void setHomonymous(final UploadFile homonymous);
-
-    /**
      * Gets the {@link InputStream} to the file held on disk.
-     * 
+     *
      * @return The <tt>InputStream</tt> instance
      * @throws IOException If opening stream fails
      */

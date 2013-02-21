@@ -56,18 +56,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletionService;
+import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
 import javax.security.auth.login.LoginException;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
+import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.Cookie;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.ResponseEnhancement;
 import com.openexchange.authentication.ResultCode;
 import com.openexchange.authentication.SessionEnhancement;
-import com.openexchange.authentication.service.Authentication;
 import com.openexchange.authorization.Authorization;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -77,8 +76,6 @@ import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.groupware.notify.hostname.internal.HostDataImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Strings;
@@ -91,7 +88,6 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.Parameterized;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -104,10 +100,6 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LoginPerformer {
-
-    private interface LoginPerformerClosure {
-        public Authenticated doAuthentication(LoginResultImpl retval) throws OXException;
-    }
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LoginPerformer.class));
 
@@ -141,12 +133,7 @@ public final class LoginPerformer {
     }
 
     public LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties) throws OXException {
-        return doLogin(request, properties, new LoginPerformerClosure() {
-            @Override
-            public Authenticated doAuthentication(final LoginResultImpl retval) throws OXException {
-                return Authentication.login(request.getLogin(), request.getPassword(), properties);
-            }
-        });
+        return doLogin(request, properties, new NormalLoginMethod(request, properties));
     }
 
     /**
@@ -157,28 +144,10 @@ public final class LoginPerformer {
      * @throws OXException If login fails
      */
     public LoginResult doAutoLogin(final LoginRequest request) throws OXException {
-        final Map<String, Object> properties = new HashMap<String, Object>(1);
-        return doLogin(request, properties, new LoginPerformerClosure() {
-            @Override
-            public Authenticated doAuthentication(final LoginResultImpl retval) throws OXException {
-                try {
-                    return Authentication.autologin(request.getLogin(), request.getPassword(), properties);
-                } catch (final OXException e) {
-                    if (LoginExceptionCodes.NOT_SUPPORTED.equals(e)) {
-                        return null;
-                    }
-                    throw e;
-                }
-            }
-        });
+        return doLogin(request, new HashMap<String, Object>(1), new AutoLoginMethod(request, new HashMap<String, Object>(1)));
     }
 
     private static final Pattern SPLIT = Pattern.compile(" *, *");
-
-    private static final String PARAM_SESSION = Parameterized.PARAM_SESSION;
-    private static final String PARAM_VOLATILE = Parameterized.PARAM_VOLATILE;
-
-    private static final int MAX_RETRY = 1;
 
     /**
      * Performs the login for specified login request.
@@ -187,7 +156,7 @@ public final class LoginPerformer {
      * @return The login providing login information
      * @throws OXException If login fails
      */
-    private LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties, final LoginPerformerClosure loginPerfClosure) throws OXException {
+    private LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties, final LoginMethodClosure loginMethod) throws OXException {
         final LoginResultImpl retval = new LoginResultImpl();
         retval.setRequest(request);
         try {
@@ -199,7 +168,7 @@ public final class LoginPerformer {
             if (null != cookies) {
                 properties.put("cookies", cookies);
             }
-            final Authenticated authed = loginPerfClosure.doAuthentication(retval);
+            final Authenticated authed = loginMethod.doAuthentication(retval);
             if (null == authed) {
                 return null;
             }
@@ -231,30 +200,13 @@ public final class LoginPerformer {
             checkClient(request, user, ctx);
             // Create session
             final SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
-            Session session = null;
-            {
-                int cnt = 0;
-                while (null == session && cnt++ < MAX_RETRY) {
-                    final AddSessionParameterImpl parameterObject = new AddSessionParameterImpl(username, request, user, ctx);
-                    parameterObject.setParameter(PARAM_VOLATILE, Boolean.valueOf(request.isVolatile()));
-                    final String sessionId = sessiondService.addSession(parameterObject);
-                    // Look-up generated session instance
-                    session = parameterObject.getParameter(PARAM_SESSION);
-                    if (null == session) {
-                        session = sessiondService.getSession(sessionId);
-                    }
-                }
-                if (null == session) {
-                    // Session could not be created
-                    throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
-                }
+            final Session session = sessiondService.addSession(new AddSessionParameterImpl(username, request, user, ctx));
+            if (null == session) {
+                // Session could not be created
+                throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
             }
             // Initial parameters
             {
-                final HttpServletRequest req = (HttpServletRequest) properties.get("http.request");
-                if (null != req) {
-                    session.setParameter(HostnameService.PARAM_HOST_DATA, new HostDataImpl(req, user.getId(), ctx.getContextId()));
-                }
                 final String capabilities = (String) properties.get("client.capabilities");
                 if (null == capabilities) {
                     session.setParameter(Session.PARAM_CAPABILITIES, Collections.<String> emptyList());
@@ -269,6 +221,7 @@ public final class LoginPerformer {
                     }
                 }
             }
+            retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
             if (SessionEnhancement.class.isInstance(authed)) {
                 ((SessionEnhancement) authed).enhanceSession(session);
             }
@@ -282,7 +235,7 @@ public final class LoginPerformer {
             }
             throw e;
         } catch (final RuntimeException e) {
-        	throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+            throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
         } finally {
             logLoginRequest(request, retval);
         }
@@ -321,19 +274,13 @@ public final class LoginPerformer {
     private User findUser(final Context ctx, final String userInfo) throws OXException {
         final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
         final UserStorage us = UserStorage.getInstance();
-        final User u;
-        try {
-            int userId = 0;
-            if (null != proxyDelimiter && userInfo.contains(proxyDelimiter)) {
-                userId = us.getUserId(userInfo.substring(userInfo.indexOf(proxyDelimiter) + proxyDelimiter.length(), userInfo.length()), ctx);
-            } else {
-                userId = us.getUserId(userInfo, ctx);
-            }
-            u = us.getUser(userId, ctx);
-        } catch (final OXException e) {
-            throw new OXException(e);
+        int userId = 0;
+        if (null != proxyDelimiter && userInfo.contains(proxyDelimiter)) {
+            userId = us.getUserId(userInfo.substring(userInfo.indexOf(proxyDelimiter) + proxyDelimiter.length(), userInfo.length()), ctx);
+        } else {
+            userId = us.getUserId(userInfo, ctx);
         }
-        return u;
+        return us.getUser(userId, ctx);
     }
 
     /**
@@ -382,7 +329,7 @@ public final class LoginPerformer {
                 handleSafely(login, handler, true);
             }
         } else {
-            CompletionService<Void> completionService = null;
+            ThreadPoolCompletionService<Void> completionService = null;
             int blocking = 0;
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
                 final LoginHandlerService handler = it.next();
@@ -391,18 +338,17 @@ public final class LoginPerformer {
                     if (null == completionService) {
                         completionService = new ThreadPoolCompletionService<Void>(executor);
                     }
-                    final Runnable task = new Runnable() {
-                        
+                    Callable<Void> callable = new Callable<Void>() {
                         @Override
-                        public void run() {
+                        public Void call() {
                             handleSafely(login, handler, true);
+                            return null;
                         }
                     };
-                    completionService.submit(task, null);
+                    completionService.submit(callable);
                     blocking++;
                 } else {
                     executor.submit(new LoginPerformerTask() {
-
                         @Override
                         public Object call() {
                             handleSafely(login, handler, true);
@@ -431,7 +377,7 @@ public final class LoginPerformer {
                 handleSafely(logout, it.next(), false);
             }
         } else {
-            CompletionService<Void> completionService = null;
+            ThreadPoolCompletionService<Void> completionService = null;
             int blocking = 0;
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
                 final LoginHandlerService handler = it.next();
@@ -440,14 +386,14 @@ public final class LoginPerformer {
                     if (null == completionService) {
                         completionService = new ThreadPoolCompletionService<Void>(executor);
                     }
-                    final Runnable task = new Runnable() {
-                        
+                    Callable<Void> callable = new Callable<Void>() {
                         @Override
-                        public void run() {
+                        public Void call() {
                             handleSafely(logout, handler, false);
+                            return null;
                         }
                     };
-                    completionService.submit(task, null);
+                    completionService.submit(callable);
                     blocking++;
                 } else {
                     executor.submit(new LoginPerformerTask() {
@@ -499,7 +445,7 @@ public final class LoginPerformer {
     private static void logLoginRequest(final LoginRequest request, final LoginResult result) {
         final StringBuilder sb = new StringBuilder();
         sb.append("Login:");
-        sb.append(request.getLogin());
+        sb.append(Strings.abbreviate(request.getLogin(), 256));
         sb.append(" IP:");
         sb.append(request.getClientIP());
         sb.append(" AuthID:");
@@ -563,5 +509,9 @@ public final class LoginPerformer {
 
     public Session lookupSession(final String sessionId) throws OXException {
         return ServerServiceRegistry.getInstance().getService(SessiondService.class, true).getSession(sessionId);
+    }
+
+    public Session lookupSessionWithTokens(String clientToken, String serverToken) throws OXException {
+        return ServerServiceRegistry.getInstance().getService(SessiondService.class, true).getSessionWithTokens(clientToken, serverToken);
     }
 }

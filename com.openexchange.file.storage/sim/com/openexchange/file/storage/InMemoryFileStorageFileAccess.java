@@ -71,14 +71,14 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
-    
+
     private final Map<String, Map<String, VersionContainer>> storage = new HashMap<String, Map<String, VersionContainer>>();
 
     private final String accountId;
 
     private final String serviceId;
-    
-    
+
+
     public InMemoryFileStorageFileAccess(String serviceId, String accountId) {
         super();
         this.serviceId = serviceId;
@@ -86,34 +86,34 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
     }
 
     @Override
-    public boolean exists(String folderId, String id, int version) throws OXException {
+    public boolean exists(String folderId, String id, String version) throws OXException {
         Map<String, VersionContainer> map = storage.get(folderId);
         if (map == null) {
             return false;
         }
-        
-        return map.containsKey(id) ? map.get(id).containsVersion(version) : false;
+
+        return map.containsKey(id) ? map.get(id).containsVersion(Integer.parseInt(version)) : false;
     }
 
     @Override
-    public File getFileMetadata(String folderId, String id, int version) throws OXException {
+    public File getFileMetadata(String folderId, String id, String version) throws OXException {
         Map<String, VersionContainer> map = storage.get(folderId);
         if (map == null) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
         }
-        
+
         VersionContainer versionContainer = map.get(id);
         if (versionContainer == null) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
         }
-        
+
         if (version == FileStorageFileAccess.CURRENT_VERSION) {
-            version = versionContainer.getCurrentVersionNumber();
+            version = Integer.toString(versionContainer.getCurrentVersionNumber());
         }
-        if (versionContainer.containsVersion(version)) {
-            return versionContainer.getVersion(version).getFile();
+        if (versionContainer.containsVersion(Integer.parseInt(version))) {
+            return versionContainer.getVersion(Integer.parseInt(version)).getFile();
         }
-        
+
         throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
     }
 
@@ -136,7 +136,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
     public void saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         save(file, data);
     }
-    
+
     private void save(File file, InputStream data) throws OXException {
         String folderId = file.getFolderId();
         Map<String, VersionContainer> map = storage.get(folderId);
@@ -144,7 +144,7 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
             map = new HashMap<String, VersionContainer>();
             storage.put(folderId, map);
         }
-        
+
         String id = file.getId();
         if (id == FileStorageFileAccess.NEW) {
             id = UUID.randomUUID().toString();
@@ -157,22 +157,22 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
             }
             VersionContainer versionContainer = new VersionContainer();
             int version = versionContainer.addVersion(holder);
-            file.setVersion(version);
+            file.setVersion(Integer.toString(version));
             map.put(id, versionContainer);
         } else {
             VersionContainer versionContainer = map.get(id);
             if (versionContainer == null) {
                 throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
             }
-            
+
             FileHolder holder;
             if (data == null) {
                 holder = new FileHolder(file);
             } else {
                 holder = new FileHolder(file, data);
             }
-            int version = versionContainer.addVersion(holder);     
-            file.setVersion(version);
+            int version = versionContainer.addVersion(holder);
+            file.setVersion(Integer.toString(version));
         }
     }
 
@@ -187,83 +187,83 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
         for (IDTuple tuple : ids) {
             String folderId = tuple.getFolder();
             String id = tuple.getId();
-            
+
             Map<String, VersionContainer> map = storage.get(folderId);
             if (map == null) {
                 notRemoved.add(tuple);
                 continue;
             }
-            
+
             VersionContainer versionContainer = map.remove(id);
             if (versionContainer == null) {
                 notRemoved.add(tuple);
                 continue;
             }
         }
-        
+
         return notRemoved;
     }
 
     @Override
-    public int[] removeVersion(String folderId, String id, int[] versions) throws OXException {
-        List<Integer> notRemovedList = new ArrayList<Integer>();
+    public String[] removeVersion(String folderId, String id, String[] versions) throws OXException {
+        List<String> notRemovedList = new ArrayList<String>();
         Map<String, VersionContainer> map = storage.get(folderId);
         if (map == null) {
             return versions;
         }
-        
+
         VersionContainer versionContainer = map.get(id);
         if (versionContainer == null) {
             return versions;
         }
-        
-        for (int version : versions) {
+
+        for (String version : versions) {
             FileHolder holder;
             if (version == FileStorageFileAccess.CURRENT_VERSION) {
                 holder = versionContainer.removeVersion(versionContainer.getCurrentVersionNumber());
             } else {
-                holder = versionContainer.removeVersion(version);
+                holder = versionContainer.removeVersion(Integer.parseInt(version));
             }
-            
+
             if (holder == null) {
                 notRemovedList.add(version);
             }
         }
 
-        int[] notRemoved = new int[notRemovedList.size()];
+        String[] notRemoved = new String[notRemovedList.size()];
         for (int i = 0; i < notRemoved.length; i++) {
             notRemoved[i] = notRemovedList.get(i);
         }
-        
+
         return notRemoved;
-    }    
+    }
 
     @Override
-    public InputStream getDocument(String folderId, String id, int version) throws OXException {
+    public InputStream getDocument(String folderId, String id, String version) throws OXException {
         Map<String, VersionContainer> map = storage.get(folderId);
         if (map == null) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
         }
-        
+
         VersionContainer versionContainer = map.get(id);
         if (versionContainer == null) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
         }
-        
+
         FileHolder holder;
         if (version == FileStorageFileAccess.CURRENT_VERSION) {
             holder = versionContainer.getCurrentVersion();
         } else {
-            holder = versionContainer.getVersion(version);
+            holder = versionContainer.getVersion(Integer.parseInt(version));
         }
-        
+
         if (holder == null) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
         }
-        
+
         return holder.getContent();
     }
-    
+
     @Override
     public IDTuple copy(IDTuple source, String destFolder, File update, InputStream newFile, List<Field> modifiedFields) throws OXException {
         final File orig = getFileMetadata(source.getFolder(), source.getId(), CURRENT_VERSION);
@@ -366,90 +366,90 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess {
     @Override
     public FileStorageAccountAccess getAccountAccess() {
         return new FileStorageAccountAccess() {
-            
+
             @Override
             public boolean ping() throws OXException {
                 return true;
             }
-            
+
             @Override
             public boolean isConnected() {
                 return true;
             }
-            
+
             @Override
             public void connect() throws OXException {
 
             }
-            
+
             @Override
             public void close() {
 
             }
-            
+
             @Override
             public boolean cacheable() {
                 return true;
             }
-            
+
             @Override
             public FileStorageService getService() {
                 return new FileStorageService() {
-                    
+
                     @Override
                     public Set<String> getSecretProperties() {
                         return null;
                     }
-                    
+
                     @Override
                     public String getId() {
                         return serviceId;
                     }
-                    
+
                     @Override
                     public DynamicFormDescription getFormDescription() {
                         return null;
                     }
-                    
+
                     @Override
                     public String getDisplayName() {
                         return null;
                     }
-                    
+
                     @Override
                     public FileStorageAccountManager getAccountManager() throws OXException {
                         return null;
                     }
-                    
+
                     @Override
                     public FileStorageAccountAccess getAccountAccess(String accountId, Session session) throws OXException {
                         return null;
                     }
                 };
             }
-            
+
             @Override
             public FileStorageFolder getRootFolder() throws OXException {
                 return null;
             }
-            
+
             @Override
             public FileStorageFolderAccess getFolderAccess() throws OXException {
                 return null;
             }
-            
+
             @Override
             public FileStorageFileAccess getFileAccess() throws OXException {
                 return null;
             }
-            
+
             @Override
             public String getAccountId() {
                 return accountId;
             }
         };
     }
-    
+
     /*
      * Ignore transactional behavior
      */

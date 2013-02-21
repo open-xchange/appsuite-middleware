@@ -104,7 +104,7 @@ public abstract class AppointmentAction implements AJAXActionService {
         CalendarObject.START_DATE, CalendarObject.END_DATE, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE,
         CalendarObject.RECURRENCE_CALCULATOR, CalendarObject.RECURRENCE_ID, CalendarObject.RECURRENCE_POSITION,
         CalendarObject.PARTICIPANTS, CalendarObject.USERS, Appointment.SHOWN_AS, Appointment.DELETE_EXCEPTIONS,
-        Appointment.CHANGE_EXCEPTIONS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE, Appointment.ORGANIZER, Appointment.ORGANIZER_ID, Appointment.PRINCIPAL, Appointment.PRINCIPAL_ID, 
+        Appointment.CHANGE_EXCEPTIONS, Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.TIMEZONE, Appointment.ORGANIZER, Appointment.ORGANIZER_ID, Appointment.PRINCIPAL, Appointment.PRINCIPAL_ID,
         Appointment.UID, Appointment.SEQUENCE, Appointment.CONFIRMATIONS, Appointment.LAST_MODIFIED_OF_NEWEST_ATTACHMENT,
         Appointment.NUMBER_OF_ATTACHMENTS };
 
@@ -179,10 +179,10 @@ public abstract class AppointmentAction implements AJAXActionService {
         if (null == string) {
             return true;
         }
-        final char[] chars = string.toCharArray();
+        final int len = string.length();
         boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < chars.length; i++) {
-            isWhitespace = Character.isWhitespace(chars[i]);
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }
@@ -266,7 +266,7 @@ public abstract class AppointmentAction implements AJAXActionService {
                     }
                     participants[pos] = new UserParticipant(foundUser.getId());
                 } catch (final OXException e) {
-                    log.error(e); // ...and continue doing this for the remaining users
+                    log.debug("Couldn't resolve E-Mail address to an internal user: " + part.getEmailAddress(), e); // ...and continue doing this for the remaining users
                 }
             }
         }

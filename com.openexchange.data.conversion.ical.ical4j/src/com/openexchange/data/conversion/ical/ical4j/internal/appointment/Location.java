@@ -84,6 +84,12 @@ public class Location extends AbstractVerifyingAttributeConverter<VEvent, Appoin
 
     @Override
     public void parse(final int index, final VEvent event, final Appointment appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
-        appointment.setLocation(event.getProperty("LOCATION").getValue());
+        int locMaxLength = 255; //hack for 20972
+        String location = event.getProperty("LOCATION").getValue();
+        if (location.length() > locMaxLength) {
+            location = location.substring(0, locMaxLength);
+            warnings.add(new ConversionWarning(index, ConversionWarning.Code.TRUNCATION_WARNING, location));
+        }
+        appointment.setLocation(location);
     }
 }

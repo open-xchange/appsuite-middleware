@@ -53,7 +53,7 @@ import java.util.UUID;
 /**
  * {@link UUIDService} to encode/decode the tuple contextID, moduleID, objectID into a {@link java.util.UUID}
  * <p>
- * <u><b>Warning</b></u>: In MySQL contextID and objectID are defined as unsigned ints, thus their maximum 
+ * <u><b>Warning</b></u>: In MySQL contextID and objectID are defined as unsigned ints, thus their maximum
  * value would be 4.294.967.295. Java on the other hand does not support unsigned ints, resulting
  * in a range value from -2.147.483.648 to 2.147.483.647. This means that, if at some point the contextID
  * and/or the objectID surpass the the positive upper bound of signed int, the return value of the get methods
@@ -66,7 +66,7 @@ import java.util.UUID;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface UUIDService {
-	
+
 	/**
 	 * Generate a UUID for the tuple contextID, moduleID, objectID
 	 * @param contextID
@@ -75,22 +75,22 @@ public interface UUIDService {
 	 * @return the encoded UUID
 	 */
 	public UUID generateUUID(int contextID, int moduleID, int objectID);
-	
+
 	/**
 	 * Get the contextID from the given UUID which was encoded via the {@link UUIDService}
-	 * 
+	 *
 	 * @param u encoded UUID
 	 * @return contextID
 	 */
 	public int getContextID(UUID u);
-	
+
 	/**
 	 * Get the moduleID from the given UUID which was encoded via the {@link UUIDService}
 	 * @param u encoded UUID
 	 * @return moduleID
 	 */
 	public int getModuleID(UUID u);
-	
+
 	/**
 	 * Get the objectID from the given UUID which was encoded via the {@link UUIDService}
 	 * @param u encoded UUID

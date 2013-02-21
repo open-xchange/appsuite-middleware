@@ -113,13 +113,25 @@ public interface OAuthServiceMetaData {
     String processAuthorizationURL(String authUrl);
 
     /**
+     * Processes specified authorization URL with respect to call-back.
+     * <p>
+     * Intended to be called after {@link #processAuthorizationURL(String)} method.
+     *
+     * @param authUrl The processed authorization URL
+     * @param callback The call-back string
+     * @return The processed authorization URL
+     */
+    String processAuthorizationURLCallbackAware(String authUrl, String callback);
+
+    /**
      * Processes specified arguments.
      *
      * @param arguments The arguments. You can store additional information here
-     * @param parameter The parameters. The request parameters sent to the callback url. You may want to extract items from these and store them in arguments for later processing
+     * @param parameter The parameters. The request parameters sent to the callback URL. You may want to extract items from these and store them in arguments for later processing
      * @param state The state
+     * @throws OXException If an error occurs
      */
-    void processArguments(Map<String, Object> arguments, Map<String, String> parameter, Map<String, Object> state);
+    void processArguments(Map<String, Object> arguments, Map<String, String> parameter, Map<String, Object> state) throws OXException;
 
     /**
      * Gets the optional OAuth token.

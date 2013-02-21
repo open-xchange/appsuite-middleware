@@ -72,11 +72,11 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IsIndexedAction extends AbstractIndexAction {
-        
+
     private static final String FOLDER = "folder";
-    
+
     private static final String ACCOUNT = "account";
-    
+
 
     /**
      * Initializes a new {@link IsIndexedAction}.
@@ -92,25 +92,25 @@ public class IsIndexedAction extends AbstractIndexAction {
         ServerSession session = req.getSession();
         String accountStr = req.getParameter(ACCOUNT);
         String folder = req.getParameter(FOLDER);
-        
+
         int accountId = -1;
         try {
             accountId = Integer.parseInt(accountStr);
         } catch(NumberFormatException e) {
             // May be null, we ignore the account
         }
-        
+
         JSONObject jsonResult = new JSONObject();
         jsonResult.put("isIndexed", isIndexed(session.getContextId(), session.getUserId(), accountId, folder));
         return new AJAXRequestResult(jsonResult, "json");
     }
-    
-    private boolean isIndexed(int contextId, int userId, int accountId, String fullName) throws OXException {        
+
+    private boolean isIndexed(int contextId, int userId, int accountId, String fullName) throws OXException {
         DatabaseService dbService = getService(DatabaseService.class);
         if (null == dbService) {
             return false;
         }
-        
+
         StringBuilder sb = new StringBuilder("SELECT sync FROM mailSync WHERE cid = ? AND user = ?");
         if (fullName != null) {
             sb.append(" AND fullName = ?");
@@ -118,7 +118,7 @@ public class IsIndexedAction extends AbstractIndexAction {
         if (accountId != -1) {
             sb.append(" AND accountId = ?");
         }
-        
+
         Connection con = dbService.getReadOnly(contextId);
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -133,9 +133,9 @@ public class IsIndexedAction extends AbstractIndexAction {
             if (accountId != -1) {
                 stmt.setInt(pos, accountId);
             }
-            
+
             rs = stmt.executeQuery();
-            
+
             boolean indexed = false;
             while(rs.next()) {
                 if (rs.getBoolean(1)) {
@@ -144,7 +144,7 @@ public class IsIndexedAction extends AbstractIndexAction {
                 }
                 indexed = true;
             }
-            
+
             return indexed;
         } catch (SQLException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -155,7 +155,7 @@ public class IsIndexedAction extends AbstractIndexAction {
     }
 
     @Override
-    public String getAction() {        
+    public String getAction() {
         return "isIndexed";
     }
 

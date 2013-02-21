@@ -54,7 +54,7 @@ import java.util.List;
 
 /**
  * {@link Difference}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Difference {

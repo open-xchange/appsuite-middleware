@@ -54,6 +54,7 @@ import java.security.GeneralSecurityException;
 import java.security.Key;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import com.openexchange.java.Strings;
 
 /**
  * {@link OldStyleDecrypt} - Utility class to encrypt/decrypt passwords with a key aka <b>p</b>assword <b>b</b>ased <b>e</b>ncryption
@@ -126,8 +127,8 @@ public final class OldStyleDecrypt {
              * requirements a binary transport encoding for mail must meet.
              *
              */
-            encrypted = org.apache.commons.codec.binary.Base64.decodeBase64(encryptedPassword.getBytes("US-ASCII"));
-        } catch (final UnsupportedEncodingException e) {
+            encrypted = org.apache.commons.codec.binary.Base64.decodeBase64(Strings.toAsciiBytes(encryptedPassword));
+        } catch (final RuntimeException e) {
             // Cannot occur
             LOG.error(e.getMessage(), e);
             return null;

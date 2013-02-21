@@ -36,13 +36,13 @@
  * and therefore, elected the GPL Version 2 license, then the option applies
  * only if the new code is made subject to such option by the copyright
  * holder.
- * 
+ *
  * Portions Copyright 2012 OPEN-XCHANGE, licensed under GPL Version 2.
  */
 
 package com.openexchange.http.grizzly.service.http;
 
-import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.server.OXHttpServer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
@@ -52,7 +52,7 @@ import com.openexchange.log.LogFactory;
 
 /**
  * Grizzly OSGi {@link HttpService} {@link ServiceFactory}.
- * 
+ *
  * @author Hubert Iwaniuk
  * @since Jan 20, 2009
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -63,7 +63,7 @@ public class HttpServiceFactory implements ServiceFactory<HttpService> {
 
     private final OSGiMainHandler mainHttpHandler;
 
-    public HttpServiceFactory(final HttpServer httpServer, final Bundle bundle) {
+    public HttpServiceFactory(final OXHttpServer httpServer, final Bundle bundle) {
         mainHttpHandler = new OSGiMainHandler(bundle);
         httpServer.getServerConfiguration().addHttpHandler(mainHttpHandler, "/");
     }

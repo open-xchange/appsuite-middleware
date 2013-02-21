@@ -55,7 +55,6 @@ import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -79,15 +78,16 @@ import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.StartTagType;
 import net.htmlparser.jericho.Tag;
 import org.apache.commons.logging.Log;
-import com.openexchange.java.Charsets;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.java.AsciiReader;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link HtmlWhitelistFilter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HtmlWhitelistFilter {
@@ -95,7 +95,7 @@ public final class HtmlWhitelistFilter {
     /**
      * Gets the default {@link HtmlWhitelistFilter} instance.
      * @param capacity The capacity
-     * 
+     *
      * @return The default {@link HtmlWhitelistFilter} instance
      */
     public static HtmlWhitelistFilter newDefaultHtmlWhitelistFilter(final int capacity) {
@@ -249,7 +249,7 @@ public final class HtmlWhitelistFilter {
 
     /**
      * Checks whether an image URL was found and replaced.
-     * 
+     *
      * @return <code>true</code> if an image URL was found and replaced; otherwise <code>false</code>
      */
     public boolean isImageURLFound() {
@@ -258,7 +258,7 @@ public final class HtmlWhitelistFilter {
 
     /**
      * Sanitizes specified HTML content.
-     * 
+     *
      * @param pseudoHTML The possibly broken HTML content to sanitize
      * @param formatWhiteSpace Whether whitespace characters shall be replaced with HTML markup
      * @param stripInvalidElements Whether invalid elements shall be removed
@@ -547,7 +547,7 @@ public final class HtmlWhitelistFilter {
                     } else {
                         BufferedReader reader = null;
                         try {
-                            reader = new BufferedReader(new InputStreamReader(new FileInputStream(whitelist), Charsets.US_ASCII));
+                            reader = new BufferedReader(new AsciiReader(new FileInputStream(whitelist)));
                             final StringBuilder sb = new StringBuilder();
                             String line = null;
                             while ((line = reader.readLine()) != null) {
@@ -565,13 +565,7 @@ public final class HtmlWhitelistFilter {
                             }
                             mapStr = new String(DEFAULT_WHITELIST);
                         } finally {
-                            if (null != reader) {
-                                try {
-                                    reader.close();
-                                } catch (final Exception e) {
-                                    LOG.error(e.getMessage(), e);
-                                }
-                            }
+                            Streams.close(reader);
                         }
                     }
                 }
@@ -609,7 +603,7 @@ public final class HtmlWhitelistFilter {
 
     /**
      * Parses specified HTML map.
-     * 
+     *
      * @param htmlMapStr The HTML map string
      * @return The parsed map
      */
@@ -692,7 +686,7 @@ public final class HtmlWhitelistFilter {
 
     /**
      * Parses specified combination map for CSS elements.
-     * 
+     *
      * @param combiMapStr The string representation for combination map
      * @return The parsed map
      */

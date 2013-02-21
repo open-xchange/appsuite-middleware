@@ -86,14 +86,14 @@ public class CoreCalendarActivator extends HousekeepingActivator {
     protected java.lang.Class<?>[] getNeededServices() {
         return new Class<?>[] { CacheService.class };
     }
-    
+
 
     @Override
     protected void startBundle() throws Exception {
         final AppointmentSqlFactory factory = new AppointmentSqlFactory();
         ITipActivator.initFeatures(factory);
         CalendarMySQL.setApppointmentSqlFactory(factory);
-        
+
         registerService(AppointmentSqlFactoryService.class, factory, null);
         registerService(CalendarCollectionService.class, new CalendarCollection(), null);
         registerService(CalendarAdministrationService.class, new CalendarAdministration(), null);

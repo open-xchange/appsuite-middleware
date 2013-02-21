@@ -16,9 +16,9 @@ import com.openexchange.admin.soap.reseller.group.soap.dataobjects.User;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -33,8 +33,8 @@ import com.openexchange.admin.soap.reseller.group.soap.dataobjects.User;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -57,11 +57,11 @@ public class AddMember {
 
     /**
      * Ruft den Wert der ctx-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link ResellerContext }
-     *     
+     *
      */
     public ResellerContext getCtx() {
         return ctx;
@@ -69,11 +69,11 @@ public class AddMember {
 
     /**
      * Legt den Wert der ctx-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link ResellerContext }
-     *     
+     *
      */
     public void setCtx(ResellerContext value) {
         this.ctx = value;
@@ -81,11 +81,11 @@ public class AddMember {
 
     /**
      * Ruft den Wert der grp-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Group }
-     *     
+     *
      */
     public Group getGrp() {
         return grp;
@@ -93,11 +93,11 @@ public class AddMember {
 
     /**
      * Legt den Wert der grp-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Group }
-     *     
+     *
      */
     public void setGrp(Group value) {
         this.grp = value;
@@ -105,25 +105,25 @@ public class AddMember {
 
     /**
      * Gets the value of the members property.
-     * 
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
      * This is why there is not a <CODE>set</CODE> method for the members property.
-     * 
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getMembers().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link User }
-     * 
-     * 
+     *
+     *
      */
     public List<User> getMembers() {
         if (members == null) {
@@ -134,11 +134,11 @@ public class AddMember {
 
     /**
      * Ruft den Wert der auth-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Credentials }
-     *     
+     *
      */
     public Credentials getAuth() {
         return auth;
@@ -146,11 +146,11 @@ public class AddMember {
 
     /**
      * Legt den Wert der auth-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Credentials }
-     *     
+     *
      */
     public void setAuth(Credentials value) {
         this.auth = value;

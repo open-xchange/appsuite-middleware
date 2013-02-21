@@ -54,6 +54,7 @@ import java.net.InetAddress;
 import java.util.concurrent.Callable;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.config.POP3Config;
@@ -106,75 +107,74 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
          */
         final long refreshRate = getRefreshRateMillis();
         final Long lastAccessed = getLastAccessed();
-        if (isConnectable(refreshRate, lastAccessed)) {
-            final String server;
-            /*
-             * Check refresh rate setting
-             */
-            {
-                final POP3Config pop3Config = pop3Access.getPOP3Config();
-                server = pop3Config.getServer();
-                final int port = pop3Config.getPort();
-                String capabilities;
-                try {
-                    capabilities =
-                        POP3CapabilityCache.getCapability(
-                            InetAddress.getByName(IDNA.toASCII(server)),
-                            port,
-                            pop3Config.isSecure(),
-                            pop3Config.getPOP3Properties(),
-                            pop3Config.getLogin());
-                } catch (final Exception e) {
-                    final Session ses = pop3Access.getSession();
-                    final StringBuilder sb = new StringBuilder("Couldn't detect capabilities from POP3 server \"");
-                    sb.append(server).append("\" with login \"");
-                    sb.append(pop3Config.getLogin()).append("\" (user=");
-                    sb.append(ses.getUserId()).append(", context=");
-                    sb.append(ses.getContextId()).append("):\n");
-                    sb.append(e.getMessage());
-                    LOG.warn(sb.toString(), e);
-                    capabilities = POP3CapabilityCache.getDeaultCapabilities();
-                }
-                /*
-                 * Check refresh rate against minimum allowed seconds between logins provided that "LOGIN-DELAY" is contained in
-                 * capabilities
-                 */
-                final int min = parseLoginDelaySeconds(capabilities);
-                if (min >= 0 && (min * 1000) > refreshRate) {
-                    LOG.warn(new StringBuilder(64).append("Refresh rate of ").append(refreshRate / 1000).append(
-                        "sec is lower than minimum allowed seconds between logins (").append(min).append("sec)"));
-                }
-            }
-            if (DEBUG) {
-                LOG.debug("\n\tSynchronizing messages with POP3 account: " + server, new Throwable());
-            }
-            /*
-             * Check default folders since INBOX folder must be present prior to appending to it
-             */
-            folderStorage.checkDefaultFolders();
-            /*
-             * Sync messages
-             */
+        if (!isConnectable(refreshRate, lastAccessed)) {
+            // Refresh not yet possible
+            return null;
+        }
+        /*-
+         * Refresh possible according to configured refresh rate
+         * 
+         * Check refresh rate setting
+         */
+        final String server;
+        {
+            final POP3Config pop3Config = pop3Access.getPOP3Config();
+            server = pop3Config.getServer();
+            final int port = pop3Config.getPort();
+            String capabilities;
             try {
-                final long st = DEBUG ? System.currentTimeMillis() : 0L;
-                /*
-                 * Access POP3 account and synchronize
-                 */
-                pop3Storage.syncMessages(isExpungeOnQuit(), lastAccessed);
-                /*
-                 * Update last-accessed time stamp
-                 */
-                final long stamp = System.currentTimeMillis();
-                pop3StorageProperties.addProperty(POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED, Long.toString(stamp));
-                if (DEBUG) {
-                    final long dur = stamp - st;
-                    final Session session = pop3Access.getSession();
-                    LOG.debug("\n\tSynchronization successfully performed for POP3 account \"" + server + "\" (user=" + session.getUserId() + ", context=" + session.getContextId() + ")in: " + dur + "msec");
-                }
-            } catch (final OXException e) {
-                throw e;
-                // LOG.warn("Connect to POP3 account failed: " + e.getMessage(), e);
+                capabilities =
+                    POP3CapabilityCache.getCapability(
+                        InetAddress.getByName(IDNA.toASCII(server)),
+                        port,
+                        pop3Config.isSecure(),
+                        pop3Config.getPOP3Properties(),
+                        pop3Config.getLogin());
+            } catch (final Exception e) {
+                final Session ses = pop3Access.getSession();
+                final StringAllocator sb = new StringAllocator("Couldn't detect capabilities from POP3 server \"");
+                sb.append(server).append("\" with login \"");
+                sb.append(pop3Config.getLogin()).append("\" (user=");
+                sb.append(ses.getUserId()).append(", context=");
+                sb.append(ses.getContextId()).append("):\n");
+                sb.append(e.getMessage());
+                LOG.warn(sb.toString(), e);
+                capabilities = POP3CapabilityCache.getDeaultCapabilities();
             }
+            /*
+             * Check refresh rate against minimum allowed seconds between logins provided that "LOGIN-DELAY" is contained in
+             * capabilities
+             */
+            final int min = parseLoginDelaySeconds(capabilities);
+            if (min >= 0 && (min * 1000) > refreshRate) {
+                LOG.warn(new StringBuilder(64).append("Refresh rate of ").append(refreshRate / 1000).append(
+                    "sec is lower than minimum allowed seconds between logins (").append(min).append("sec)"));
+            }
+        }
+        if (DEBUG) {
+            LOG.debug("\n\tSynchronizing messages with POP3 account: " + server, new Throwable());
+        }
+        /*
+         * Check default folders since INBOX folder must be present prior to appending to it
+         */
+        folderStorage.checkDefaultFolders();
+        /*
+         * Sync messages
+         */
+        final long st = DEBUG ? System.currentTimeMillis() : 0L;
+        /*
+         * Access POP3 account and synchronize
+         */
+        pop3Storage.syncMessages(isExpungeOnQuit(), lastAccessed);
+        /*
+         * Update last-accessed time stamp
+         */
+        final long stamp = System.currentTimeMillis();
+        pop3StorageProperties.addProperty(POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED, Long.toString(stamp));
+        if (DEBUG) {
+            final long dur = stamp - st;
+            final Session session = pop3Access.getSession();
+            LOG.debug("\n\tSynchronization successfully performed for POP3 account \"" + server + "\" (user=" + session.getUserId() + ", context=" + session.getContextId() + ")in: " + dur + "msec");
         }
         return null;
     }

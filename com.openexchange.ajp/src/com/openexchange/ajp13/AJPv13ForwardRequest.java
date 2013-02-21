@@ -53,7 +53,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -275,12 +274,12 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
             if (null != echoHeaderName) {
                 final String echoValue = servletRequest.getHeader(echoHeaderName);
                 if (null != echoValue) {
-                    LogProperties.putLogProperty("com.openexchange.ajp13.requestId", echoValue);
+                    LogProperties.putLogProperty(LogProperties.Name.AJP_REQUEST_ID, echoValue);
                 }
             }
         }
-        LogProperties.putLogProperty("com.openexchange.ajp13.requestIp", servletRequest.getRemoteAddr());
-        LogProperties.putLogProperty("com.openexchange.ajp13.serverName", servletRequest.getServerName());
+        LogProperties.putLogProperty(LogProperties.Name.AJP_REQUEST_IP, servletRequest.getRemoteAddr());
+        LogProperties.putLogProperty(LogProperties.Name.AJP_SERVER_NAME, servletRequest.getServerName());
         /*
          * Determine if content type indicates form data
          */
@@ -700,7 +699,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                             continue nextCookie;
                         }
                         jsessionIDCookie = current;
-                        LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
+                        LogProperties.putLogProperty(LogProperties.Name.AJP_HTTP_SESSION, id);
                         jsessionIDCookie.setSecure((forceHttps && !Cookies.isLocalLan(servletRequest)) || servletRequest.isSecure());
                         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, true);
                     } else {
@@ -737,7 +736,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
                             continue nextCookie;
                         }
                         jsessionIDCookie = current;
-                        LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
+                        LogProperties.putLogProperty(LogProperties.Name.AJP_HTTP_SESSION, id);
                         jsessionIDCookie.setSecure((forceHttps && !Cookies.isLocalLan(servletRequest)) || servletRequest.isSecure());
                         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, true);
                     }
@@ -787,7 +786,7 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
             }
         }
         final Cookie jsessionIDCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, jsessionIdVal);
-        LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", jsessionIdVal);
+        LogProperties.putLogProperty(LogProperties.Name.AJP_HTTP_SESSION, jsessionIdVal);
         jsessionIDCookie.setSecure((forceHttps && !Cookies.isLocalLan(servletRequest)) || servletRequest.isSecure());
         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, join);
         /*
@@ -853,8 +852,8 @@ public final class AJPv13ForwardRequest extends AbstractAJPv13Request {
         return (nextByte() > 0);
     }
 
-    private static String decodeQueryStringValue(final String charEnc, final String queryStringValue) throws UnsupportedEncodingException {
-        return URLDecoder.decode(queryStringValue, charEnc == null ? AJPv13Config.getServerProperty(Property.DefaultEncoding) : charEnc);
+    private static String decodeQueryStringValue(final String charEnc, final String queryStringValue) {
+        return AJPv13Utility.decodeUrl(queryStringValue, charEnc == null ? AJPv13Config.getServerProperty(Property.DefaultEncoding) : charEnc);
     }
 
 }

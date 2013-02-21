@@ -51,10 +51,10 @@ package com.openexchange.ajax.session.actions;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER;
+import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER_ID;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
 
 /**
  * Parses the redirect response of the formLogin action of the login servlet.
@@ -63,7 +63,7 @@ import com.openexchange.ajax.AJAXServlet;
  */
 public class FormLoginParser extends AbstractRedirectParser<FormLoginResponse> {
 
-    public FormLoginParser() {
+    FormLoginParser() {
         super();
     }
 
@@ -71,7 +71,7 @@ public class FormLoginParser extends AbstractRedirectParser<FormLoginResponse> {
     protected FormLoginResponse createResponse(String location) throws JSONException {
         int fragIndex = location.indexOf('#');
         if (-1 == fragIndex) {
-            return new FormLoginResponse(location, null, null, -1, null);
+            return new FormLoginResponse(location, null, null, -1, null, false);
         }
         String path = location.substring(0, fragIndex);
         String[] params = location.substring(fragIndex + 1).split("&");
@@ -81,10 +81,9 @@ public class FormLoginParser extends AbstractRedirectParser<FormLoginResponse> {
             if (-1 == assignPos) {
                 map.put(param, null);
             }
-            map.put("test", null);
             map.put(param.substring(0, assignPos), param.substring(assignPos + 1));
         }
-        String userIdValue = map.get(AJAXServlet.PARAMETER_USER_ID);
+        String userIdValue = map.get(PARAMETER_USER_ID);
         final int userId;
         if (null == userIdValue) {
             userId = -1;
@@ -95,6 +94,13 @@ public class FormLoginParser extends AbstractRedirectParser<FormLoginResponse> {
                 throw new JSONException("Can not parse user_id value \"" + userIdValue + "\".", e);
             }
         }
-        return new FormLoginResponse(path, map.get(PARAMETER_SESSION), map.get(PARAMETER_USER), userId, map.get("language"));
+        String booleanValue = map.get("store");
+        final boolean store;
+        if (null == booleanValue) {
+            store = false;
+        } else {
+            store = Boolean.parseBoolean(booleanValue);
+        }
+        return new FormLoginResponse(path, map.get(PARAMETER_SESSION), map.get(PARAMETER_USER), userId, map.get("language"), store);
     }
 }

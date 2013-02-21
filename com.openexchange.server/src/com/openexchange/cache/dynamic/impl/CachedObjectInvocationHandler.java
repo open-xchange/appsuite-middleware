@@ -56,7 +56,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.cache.dynamic.OXNoRefresh;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheExceptionCode;
@@ -65,6 +64,7 @@ import com.openexchange.caching.LockAware;
 import com.openexchange.caching.PutIfAbsent;
 import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 public class CachedObjectInvocationHandler<T> implements InvocationHandler {
@@ -119,7 +119,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
 	/**
 	 * Checks if the object was removed from the cache and must be reloaded from
 	 * the database.
-	 * 
+	 *
 	 * @throws OXException
 	 *             if loading or putting into cache fails.
 	 */
@@ -176,7 +176,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
 		lock.lock();
 
 		try {
-			
+
 			final Object tmp = cache.get(factory.getKey());
 			if (null == tmp) {
 				// I am the thread to load the object. Put temporary condition
@@ -219,7 +219,7 @@ public class CachedObjectInvocationHandler<T> implements InvocationHandler {
 			lock.lock();
 			try {
 				cond.signalAll();
-				cache.put(factory.getKey(), (Serializable) cached);
+				cache.put(factory.getKey(), (Serializable) cached, false);
 			} finally {
 				lock.unlock();
 			}

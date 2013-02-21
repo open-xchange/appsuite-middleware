@@ -51,6 +51,7 @@ package com.openexchange.index.solr.internal.attachments.translators;
 
 import org.apache.commons.logging.Log;
 import com.openexchange.groupware.attach.index.SearchTerm;
+import com.openexchange.index.solr.internal.config.FieldConfiguration;
 import com.openexchange.index.solr.internal.querybuilder.Configuration;
 import com.openexchange.index.solr.internal.querybuilder.QueryTranslator;
 import com.openexchange.index.solr.internal.querybuilder.TranslationException;
@@ -62,26 +63,29 @@ import com.openexchange.index.solr.internal.querybuilder.TranslationException;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class CustomTranslator implements QueryTranslator {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(CustomTranslator.class);
-    
+
     private Configuration config;
-    
+
     private String name;
-    
+
+    private FieldConfiguration fieldConfig;
+
 
     @Override
-    public void init(String name, Configuration config) throws TranslationException {
+    public void init(String name, Configuration config, FieldConfiguration fieldConfig) throws TranslationException {
         this.name = name;
         this.config = config;
+        this.fieldConfig = fieldConfig;
     }
 
     @Override
     public String translate(Object o) throws TranslationException {
         if (o instanceof SearchTerm<?>) {
-            return SolrAttachmentSearchTermVisitor.toQuery(name, config, (SearchTerm<?>) o);
+            return SolrAttachmentSearchTermVisitor.toQuery(name, config, (SearchTerm<?>) o, fieldConfig);
         }
-        
+
         throw new TranslationException("The given object must be of type '" + SearchTerm.class.getName() + "'.");
     }
 

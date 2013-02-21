@@ -55,6 +55,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import com.openexchange.java.Streams;
 
 public class ReportConfiguration {
 
@@ -85,7 +86,7 @@ public class ReportConfiguration {
         try {
             properties.load(in);
         } finally {
-            in.close();
+            Streams.close(in);
         }
     }
 

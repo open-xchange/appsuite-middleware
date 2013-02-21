@@ -77,7 +77,7 @@ import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 public abstract class UserAbstraction extends ObjectNamingAbstraction {
-    
+
     private interface MethodDateClosure {
         public void callMethod(final Date value) throws ParseException;
     }
@@ -93,18 +93,18 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         public String getString();
 
         public boolean isRequired();
-        
+
         public void setRequired(final boolean required);
 
     }
 
     protected class MethodAndNames {
         private Method method = null;
-        
+
         private String name = null;
-        
+
         private String returntype = null;
-        
+
         /**
          * @param method
          * @param name
@@ -115,56 +115,56 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             this.name = name;
             this.returntype = returntype;
         }
-        
+
         public Method getMethod() {
             return this.method;
         }
-        
+
         public void setMethod(final Method method) {
             this.method = method;
         }
-        
+
         public String getName() {
             return this.name;
         }
-        
+
         public void setName(final String name) {
             this.name = name;
         }
-        
+
         public final void setReturntype(final String returntype) {
             this.returntype = returntype;
         }
-        
+
         public final String getReturntype() {
             return this.returntype;
         }
-        
+
     }
 
     protected class OptionAndMethod {
         private Method method = null;
-        
+
         private CLIOption option = null;
-        
+
         private String returntype = null;
-        
+
         public final Method getMethod() {
             return this.method;
         }
-        
+
         public final void setMethod(final Method method) {
             this.method = method;
         }
-        
+
         public final CLIOption getOption() {
             return this.option;
         }
-        
+
         public final void setOption(final CLIOption option) {
             this.option = option;
         }
-        
+
         /**
          * @param method
          * @param option
@@ -175,15 +175,15 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             this.option = option;
             this.returntype = returntype;
         }
-        
+
         public final String getReturntype() {
             return this.returntype;
         }
-        
+
         public final void setReturntype(final String returntype) {
             this.returntype = returntype;
         }
-        
+
     }
 
     public enum AccessCombinations implements CSVConstants {
@@ -217,13 +217,13 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         accessUsm(27, OPT_ACCESS_USM, false),
         accessOlox20(28, OPT_ACCESS_OLOX20, false),
         accessDeniedPortal(29, OPT_ACCESS_DENIED_PORTAL, false);
-        
+
         private final String string;
-        
+
         private final int index;
-        
+
         private boolean required;
-        
+
         private AccessCombinations(final int index, final String string, final boolean required) {
             this.index = index;
             this.string = string;
@@ -235,7 +235,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             return string;
         }
 
-        
+
         @Override
         public int getIndex() {
             return index;
@@ -251,9 +251,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             this.required = required;
         }
     }
-    
+
     static int INITIAL_CONSTANTS_VALUE = AccessCombinations.values().length;
-    
+
     public enum Constants implements CSVConstants {
         CONTEXTID(INITIAL_CONSTANTS_VALUE, OPT_NAME_CONTEXT_LONG, true),
         adminuser(INITIAL_CONSTANTS_VALUE + 1, OPT_NAME_ADMINUSER_LONG, false),
@@ -374,11 +374,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         gui_spam_filter_capabilities_enabled(INITIAL_CONSTANTS_VALUE + 116,OPT_GUI_LONG, false);
 
         private final String string;
-        
+
         private final int index;
-        
+
         private boolean required;
-        
+
         private Constants(final int index, final String string, final boolean required) {
             this.index = index;
             this.string = string;
@@ -390,12 +390,12 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             return string;
         }
 
-        
+
         @Override
         public int getIndex() {
             return index;
         }
-        
+
         @Override
         public boolean isRequired() {
             return required;
@@ -411,7 +411,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     final static protected UserModuleAccess NO_RIGHTS_ACCESS = new UserModuleAccess();
 
     protected static final String ACCESS_COMBINATION_NAME_AND_ACCESS_RIGHTS_DETECTED_ERROR = "You can\u00b4t specify access combination name AND single access attributes simultaneously!";
-    
+
     protected static final char OPT_ID_SHORT = 'i';
     protected static final String OPT_ID_LONG = "userid";
     protected static final char OPT_USERNAME_SHORT = 'u';
@@ -436,11 +436,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_COMPANY_LONG = "company";
     protected static final char OPT_ALIASES_SHORT = 'a';
     protected static final String OPT_ALIASES_LONG = "aliases";
-    
+
     protected static final String OPT_EXTENDED_LONG = "extendedoptions";
-    
+
     protected static final String OPT_ACCESSRIGHTS_COMBINATION_NAME = "access-combination-name";
-    
+
     protected static final String OPT_ACCESS_CALENDAR = "access-calendar";
     protected static final String OPT_ACCESS_CONTACTS = "access-contacts";
     protected static final String OPT_ACCESS_DELEGATE_TASKS = "access-delegate-tasks";
@@ -474,7 +474,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ACCESS_PUBLIC_FOLDER_EDITABLE = "access-public-folder-editable";
     protected static final String OPT_GUI_LONG = "gui_spam_filter_capabilities_enabled";
     protected static final String OPT_CSV_IMPORT = "csv-import";
-    
+
     // extended options
     protected static final String OPT_EMAIL1_LONG = "email1";
     protected static final String OPT_MAILENABLED_LONG = "mailenabled";
@@ -579,8 +579,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_TITLE_LONG = "title";
     protected static final String OPT_POSITION_LONG = "position";
 
-    
-    
+
+
     protected static final String JAVA_UTIL_TIME_ZONE = "java.util.TimeZone";
     protected static final String PASSWORDMECH_CLASS = "com.openexchange.admin.rmi.dataobjects.User$PASSWORDMECH";
     protected static final String JAVA_UTIL_HASH_SET = "java.util.HashSet";
@@ -595,7 +595,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String SIMPLE_INT = "int";
     protected static final String OPT_IMAPONLY_LONG = "imaponly";
     protected static final String OPT_DBONLY_LONG = "dbonly";
-    
+
     public static final ArrayList<OptionAndMethod> optionsandmethods = new ArrayList<OptionAndMethod>();
 
     static {
@@ -620,9 +620,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption imapQuotaOption = null;
     protected CLIOption inetMailAccessOption = null;
     protected CLIOption spamFilterOption = null;
-    
+
     protected CLIOption accessRightsCombinationName = null;
-    
+
     // access to modules
     protected CLIOption accessCalendarOption = null;
     protected CLIOption accessContactOption = null;
@@ -655,15 +655,15 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption accessDeniedPortal = null;
     protected CLIOption accessGAB = null;
     protected CLIOption accessPublicFolderEditable = null;
-    
-    
+
+
     // non-generic extended option
     protected CLIOption addGUISettingOption = null;
     protected CLIOption removeGUISettingOption = null;
 
     protected static final String OPT_ADD_GUI_SETTING_LONG = "addguipreferences";
     protected static final String OPT_REMOVE_GUI_SETTING_LONG = "removeguipreferences";
-    
+
     // For right error output
     protected String username = null;
     protected Integer userid = null;
@@ -771,13 +771,13 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     private CLIOption positionOption;
 
     protected HashMap<String, CSVConstants> constantsMap;
-    
+
 //    /**
 //     * This field holds all the options which are displayed by default. So this options can be
 //     * deducted from the other dynamically created options
 //     */
 //    public static final HashSet<String> standardoptions = new HashSet<String>(15);
-//    
+//
 //    static {
 //        // Here we define those getter which shouldn't be listed in the extendedoptions
 //        standardoptions.add("id");
@@ -1015,7 +1015,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 }
             }
         });
-        
+
         return context;
     }
 
@@ -1077,7 +1077,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 if( addguival.length() == 0 ) {
                     throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (empty value)");
                 }
-                if( ! addguival.contains("=") ) {
+                if(addguival.indexOf('=') < 0 ) {
                     throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (not key = value)");
                 }
                 final int idx = addguival.indexOf('=');
@@ -1746,8 +1746,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 }
             }
         }
-    
-    
+
+
         return user;
     }
 
@@ -1779,7 +1779,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
         }
     }
-    
+
     private Date stringToDate(final String string) throws java.text.ParseException {
         final SimpleDateFormat sdf = new SimpleDateFormat(COMMANDLINE_DATEFORMAT);
         sdf.setTimeZone(TimeZone.getTimeZone(COMMANDLINE_TIMEZONE));
@@ -1790,45 +1790,45 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected final void setIdOption(final AdminParser admp){
         this.idOption =  setShortLongOpt(admp,OPT_ID_SHORT,OPT_ID_LONG,"Id of the user", true, NeededQuadState.eitheror);
     }
-    
+
     protected final void setUsernameOption(final AdminParser admp, final NeededQuadState needed) {
         this.userNameOption = setShortLongOpt(admp,OPT_USERNAME_SHORT,OPT_USERNAME_LONG,"Username of the user", true, needed);
     }
-    
+
     protected final void setDisplayNameOption(final AdminParser admp, final NeededQuadState needed) {
-        this.displayNameOption = setShortLongOpt(admp,OPT_DISPLAYNAME_SHORT,OPT_DISPLAYNAME_LONG,"Display name of the user", true, needed); 
+        this.displayNameOption = setShortLongOpt(admp,OPT_DISPLAYNAME_SHORT,OPT_DISPLAYNAME_LONG,"Display name of the user", true, needed);
     }
-    
+
     protected final void setPasswordOption(final AdminParser admp, final NeededQuadState needed) {
-        this.passwordOption =  setShortLongOpt(admp,OPT_PASSWORD_SHORT,OPT_PASSWORD_LONG,"Password for the user", true, needed); 
+        this.passwordOption =  setShortLongOpt(admp,OPT_PASSWORD_SHORT,OPT_PASSWORD_LONG,"Password for the user", true, needed);
     }
-    
+
     protected final void setGivenNameOption(final AdminParser admp, final NeededQuadState needed) {
-        this.givenNameOption =  setShortLongOpt(admp,OPT_GIVENNAME_SHORT,OPT_GIVENNAME_LONG,"Given name for the user", true, needed); 
+        this.givenNameOption =  setShortLongOpt(admp,OPT_GIVENNAME_SHORT,OPT_GIVENNAME_LONG,"Given name for the user", true, needed);
     }
-    
+
     protected final void setSurNameOption(final AdminParser admp, final NeededQuadState needed){
-        this.surNameOption =  setShortLongOpt(admp,OPT_SURNAME_SHORT,OPT_SURNAME_LONG,"Sur name for the user", true, needed); 
+        this.surNameOption =  setShortLongOpt(admp,OPT_SURNAME_SHORT,OPT_SURNAME_LONG,"Sur name for the user", true, needed);
     }
-    
+
     protected final void setLanguageOption(final AdminParser admp){
-        this.languageOption =  setShortLongOpt(admp,OPT_LANGUAGE_SHORT,OPT_LANGUAGE_LONG,"Language for the user (de_DE,en_US)", true, NeededQuadState.notneeded); 
+        this.languageOption =  setShortLongOpt(admp,OPT_LANGUAGE_SHORT,OPT_LANGUAGE_LONG,"Language for the user (de_DE,en_US)", true, NeededQuadState.notneeded);
     }
-    
+
     protected final void setTimezoneOption(final AdminParser admp){
-        this.timezoneOption =  setShortLongOpt(admp,OPT_TIMEZONE_SHORT,OPT_TIMEZONE_LONG,"Timezone of the user (Europe/Berlin)", true, NeededQuadState.notneeded); 
+        this.timezoneOption =  setShortLongOpt(admp,OPT_TIMEZONE_SHORT,OPT_TIMEZONE_LONG,"Timezone of the user (Europe/Berlin)", true, NeededQuadState.notneeded);
     }
-    
+
     protected final void setPrimaryMailOption(final AdminParser admp, final NeededQuadState needed){
-        this.primaryMailOption =  setShortLongOpt(admp,OPT_PRIMARY_EMAIL_SHORT,OPT_PRIMARY_EMAIL_LONG,"Primary mail address", true, needed); 
+        this.primaryMailOption =  setShortLongOpt(admp,OPT_PRIMARY_EMAIL_SHORT,OPT_PRIMARY_EMAIL_LONG,"Primary mail address", true, needed);
     }
-    
+
     protected final void setDepartmentOption(final AdminParser admp){
-        this.departmentOption = setShortLongOpt(admp,OPT_DEPARTMENT_SHORT,OPT_DEPARTMENT_LONG,"Department of the user", true, NeededQuadState.notneeded); 
+        this.departmentOption = setShortLongOpt(admp,OPT_DEPARTMENT_SHORT,OPT_DEPARTMENT_LONG,"Department of the user", true, NeededQuadState.notneeded);
     }
-    
+
     protected final void setCompanyOption(final AdminParser admp){
-        this.companyOption = setShortLongOpt(admp,OPT_COMPANY_SHORT,OPT_COMPANY_LONG,"Company of the user", true, NeededQuadState.notneeded); 
+        this.companyOption = setShortLongOpt(admp,OPT_COMPANY_SHORT,OPT_COMPANY_LONG,"Company of the user", true, NeededQuadState.notneeded);
     }
 
     protected void setAddAccessRightCombinationNameOption(final AdminParser parser) {
@@ -1836,17 +1836,17 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected final void setAliasesOption(final AdminParser admp){
-        this.aliasesOption = setShortLongOpt(admp,OPT_ALIASES_SHORT,OPT_ALIASES_LONG,"Email aliases of the user", true, NeededQuadState.notneeded); 
+        this.aliasesOption = setShortLongOpt(admp,OPT_ALIASES_SHORT,OPT_ALIASES_LONG,"Email aliases of the user", true, NeededQuadState.notneeded);
     }
-    
+
     protected final void setImapOnlyOption(final AdminParser admp){
-        this.imapOnlyOption =  setLongOpt(admp,OPT_IMAPONLY_LONG,"Do this operation only for the IMAP account of the user", false, false); 
+        this.imapOnlyOption =  setLongOpt(admp,OPT_IMAPONLY_LONG,"Do this operation only for the IMAP account of the user", false, false);
     }
-    
+
     protected final void setDBOnlyOption(final AdminParser admp){
-        this.dbOnlyOption =  setLongOpt(admp,OPT_DBONLY_LONG,"Do this operation only in Database system (parameters which apply to extensions will be ignored)", false, false); 
+        this.dbOnlyOption =  setLongOpt(admp,OPT_DBONLY_LONG,"Do this operation only in Database system (parameters which apply to extensions will be ignored)", false, false);
     }
-    
+
     protected final void setAddGuiSettingOption(final AdminParser admp){
         this.addGUISettingOption = setLongOpt(admp,OPT_ADD_GUI_SETTING_LONG,"Add a GUI setting (key=value)", true, false);
     }
@@ -1874,7 +1874,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         returntypes.add(JAVA_UTIL_LOCALE);
         returntypes.add(PASSWORDMECH_CLASS);
         returntypes.add(SIMPLE_INT);
-        
+
         return getGetterGeneral(theMethods, notallowedOrReplace, returntypes);
     }
 
@@ -1887,7 +1887,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 continue;
             }
             final String methodname = method.getName();
-    
+
             if (methodname.startsWith("get")) {
                 final String methodnamewithoutprefix = methodname.substring(3);
                 if (!notallowedOrReplace.containsKey(methodnamewithoutprefix)) {
@@ -1918,14 +1918,14 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         }
         return retlist;
     }
-    
+
     public String parseAndSetAccessCombinationName(final AdminParser parser) {
         return (String) parser.getOptionValue(this.accessRightsCombinationName);
     }
 
     /**
      * Get the mandatory options from the command line and set's them in the user object
-     * 
+     *
      * @param parser The parser object
      * @param usr User object which will be changed
      */
@@ -1946,19 +1946,19 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         if (null != optionValue2) {
             if ("".equals(optionValue2)) { optionValue2 = null; }
             usr.setDisplay_name(optionValue2);
-        }        
-        
+        }
+
         String optionValue3 = (String) parser.getOptionValue(this.givenNameOption);
         if (null != optionValue3) {
             if ("".equals(optionValue3)) { optionValue3 = null; }
             usr.setGiven_name(optionValue3);
         }
-        
+
         String optionValue4 = (String) parser.getOptionValue(this.surNameOption);
         if (null != optionValue4) {
             if ("".equals(optionValue4)) { optionValue4 = null; }
             usr.setSur_name(optionValue4);
-        }        
+        }
 
         String optionValue5 = null;
         if( NEW_USER_PASSWORD != null ) {
@@ -1968,15 +1968,15 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         }
         if (null != optionValue5) {
             usr.setPassword(optionValue5);
-        }   
+        }
 
         final String optionValue6 = (String) parser.getOptionValue(this.primaryMailOption);
         if (null != optionValue6) {
             usr.setPrimaryEmail(optionValue6);
             usr.setEmail1(optionValue6);
-        }        
+        }
     }
-    
+
     protected void prepareConstantsMap() {
         this.constantsMap = new HashMap<String, CSVConstants>();
         for (final Constants value : Constants.values()) {
@@ -1986,10 +1986,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             this.constantsMap.put(value.getString(), value);
         }
     }
-    
+
     /**
-     * Apply module access rights given from command line to the given module access object. 
-     * 
+     * Apply module access rights given from command line to the given module access object.
+     *
      * @param parser The parser object
      * @param usr User object which will be changed
      */
@@ -2026,7 +2026,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         access.setGlobalAddressBookDisabled(accessOption2BooleanCreate(parser, this.accessGAB));
         access.setPublicFolderEditable(accessOption2BooleanCreate(parser, this.accessPublicFolderEditable));
     }
-    
+
     protected final boolean accessOption2BooleanCreate(final AdminParser parser,final CLIOption accessOption){
         // option was set, check what text was sent
         final String optionValue = (String) parser.getOptionValue(accessOption);
@@ -2040,7 +2040,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         }
         return false;
     }
-    
+
     /**
      * @param parser
      * @param access
@@ -2174,7 +2174,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         }
         return changed;
     }
-    
+
     protected final boolean accessOption2BooleanChange(final AdminParser parser, final CLIOption accessOption) {
         // option was set, check what text was sent
         final String optionValue = (String) parser.getOptionValue(accessOption);
@@ -2186,27 +2186,27 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     /**
      * Get the optional options from the command line and set's them in the user object
-     * 
+     *
      * @param parser The parser object
      * @param usr User object which will be changed
-     * @throws InvalidDataException 
+     * @throws InvalidDataException
      */
     protected final void parseAndSetOptionalOptionsinUser(final AdminParser parser, final User usr) throws InvalidDataException {
         final String optionValue = (String) parser.getOptionValue(this.companyOption);
         if (null != optionValue) {
             usr.setCompany(optionValue);
         }
-    
+
         final String optionValue2 = (String) parser.getOptionValue(this.departmentOption);
         if (null != optionValue2) {
             usr.setDepartment(optionValue2);
         }
-    
+
         final String optionValue3 = (String) parser.getOptionValue(this.languageOption);
         if (null != optionValue3) {
             usr.setLanguage(optionValue3);
         }
-    
+
         final String optionValue4 = (String) parser.getOptionValue(this.timezoneOption);
         if (null != optionValue4) {
             if (!Arrays.asList(TimeZone.getAvailableIDs()).contains(optionValue4)) {
@@ -2214,7 +2214,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             }
             usr.setTimezone(optionValue4);
         }
-    
+
         final String aliasOpt = (String) parser.getOptionValue(this.aliasesOption);
         if (null != aliasOpt) {
             final HashSet<String> aliases = new HashSet<String>();
@@ -2224,8 +2224,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             usr.setAliases(aliases);
         }
     }
-    
-    
+
+
     protected final void setModuleAccessOptions(final AdminParser admp) {
         setModuleAccessOptions(admp, false, true);
     }
@@ -2296,7 +2296,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         if( this.getClass().getName().endsWith("Change") ) {
             setRemoveGuiSettingOption(parser);
         }
-        
+
         this.email1Option = setLongOpt(parser, OPT_EMAIL1_LONG, "stringvalue", "Email1", true, false, true);
         this.mailenabledOption = setSettableBooleanLongOpt(parser, OPT_MAILENABLED_LONG, "true / false", "Mailenabled", true, false, true);
         this.birthdayOption = setLongOpt(parser, OPT_BIRTHDAY_LONG, "datevalue", "Birthday", true, false, true);
@@ -2399,10 +2399,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.mail_folder_confirmed_spam_nameOption = setLongOpt(parser, OPT_MAIL_FOLDER_CONFIRMED_SPAM_NAME_LONG, "stringvalue", "Mail_folder_confirmed_spam_name", true, false, true);
         this.defaultsenderaddressOption = setLongOpt(parser, OPT_DEFAULTSENDERADDRESS_LONG, "stringvalue", "DefaultSenderAddress", true, false, true);
         this.foldertreeOption = setIntegerLongOpt(parser, OPT_FOLDERTREE_LONG, "intvalue", "FolderTree", true, false, true);
-        
+
 //        final Method[] methods = User.class.getMethods();
 //        final ArrayList<MethodAndNames> methArrayList = getSetters(methods);
-//    
+//
 //        for (final MethodAndNames methodandnames : methArrayList) {
 //            if (!standardoptions.contains(methodandnames.getName().toLowerCase())) {
 //                if (methodandnames.getReturntype().equals(JAVA_LANG_STRING)) {
@@ -2475,35 +2475,35 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected final void setGui_Spam_option(final AdminParser admp){
-        this.spamFilterOption =  setSettableBooleanLongOpt(admp, OPT_GUI_LONG, "true / false", "GUI_Spam_filter_capabilities_enabled", true, false, true); 
+        this.spamFilterOption =  setSettableBooleanLongOpt(admp, OPT_GUI_LONG, "true / false", "GUI_Spam_filter_capabilities_enabled", true, false, true);
     }
-    
+
     protected final void setCsvImport(final AdminParser admp) {
         admp.setCsvImportOption(setLongOpt(admp, OPT_CSV_IMPORT, "CSV file","Full path to CSV file with user data to import. This option makes \r\n" +
-            "                                                   mandatory command line options obsolete, except credential options (if\r\n" + 
+            "                                                   mandatory command line options obsolete, except credential options (if\r\n" +
             "                                                   needed). But they have to be set in the CSV file.", true, false, false));
     }
 
     /**
      * This method goes through the dynamically created options, and sets the corresponding values
      * in the user object.
-     * 
+     *
      * Attention the user object given as parameter is changed
-     * 
+     *
      * @param parser
      * @param usr
-     * @throws IllegalArgumentException 
-     * @throws InvalidDataException 
+     * @throws IllegalArgumentException
+     * @throws InvalidDataException
      */
     protected final void applyExtendedOptionsToUser(final AdminParser parser, final User usr) throws IllegalArgumentException, InvalidDataException {
-        
+
         String addguival    = (String)parser.getOptionValue(this.addGUISettingOption);
         if( addguival != null ) {
             addguival = addguival.trim();
             if( addguival.length() == 0 ) {
                 throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (empty value)");
             }
-            if( ! addguival.contains("=") ) {
+            if( addguival.indexOf('=') < 0 ) {
                 throw new InvalidDataException("Argument for " + OPT_ADD_GUI_SETTING_LONG + "is wrong (not key = value)");
             }
             final int idx = addguival.indexOf('=');
@@ -2529,7 +2529,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             usr.setGui_spam_filter_enabled(spamfilter);
         }
 
-        
+
         {
             String value = (String)parser.getOptionValue(email1Option);
             if (null != value) {
@@ -3351,7 +3351,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 usr.setPosition(value);
             }
         }
-        
+
 //        for (final OptionAndMethod optionAndMethod : optionsandmethods) {
 //            if (optionAndMethod.getReturntype().equals(JAVA_LANG_STRING)) {
 //                String value = (String)parser.getOptionValue(optionAndMethod.getOption());
@@ -3392,7 +3392,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 //            }
 //        }
     }
-    
+
     protected void applyDynamicOptionsToUser(final AdminParser parser, final User usr) {
         final Map<String, Map<String, String>> dynamicArguments = parser.getDynamicArguments();
         for(final Map.Entry<String, Map<String, String>> namespaced : dynamicArguments.entrySet()) {
@@ -3400,7 +3400,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             for(final Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
                 final String name = pair.getKey();
                 final String value = pair.getValue();
-                
+
                 usr.setUserAttribute(namespace, name, value);
             }
         }
@@ -3410,7 +3410,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected final OXUserInterface getUserInterface() throws NotBoundException, MalformedURLException, RemoteException {
         return (OXUserInterface) Naming.lookup(RMI_HOSTNAME + OXUserInterface.RMI_NAME);
     }
-    
+
     @Override
     protected String getObjectName() {
         return "user";
@@ -3430,9 +3430,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     /**
      * Checks if required columns are set
-     * 
+     *
      * @param idarray
-     * @throws InvalidDataException 
+     * @throws InvalidDataException
      */
     protected void checkRequired(final int[] idarray) throws InvalidDataException {
         for (final Constants value : Constants.values()) {
@@ -3469,7 +3469,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         } else {
             throw new InvalidDataException("no columnnames found");
         }
-        
+
         checkRequired(idarray);
         return idarray;
     }

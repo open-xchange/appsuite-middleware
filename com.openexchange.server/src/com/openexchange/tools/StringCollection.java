@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.java.AllocatingStringWriter;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -159,12 +160,12 @@ public final class StringCollection {
             if (value.length() > 0) {
                 if (value.charAt(0) != '%') {
                     // Prepend '%' character
-                    value = new StringBuilder(value.length() + 1).append('%').append(value).toString();
+                    value = new StringAllocator(value.length() + 1).append('%').append(value).toString();
                 }
                 final int length = value.length();
                 if (value.charAt(length - 1) != '%' || (length > 1 && value.charAt(length - 2) == '\\')) {
                     // Append '%' character
-                    value = new StringBuilder(length + 1).append(value).append('%').toString();
+                    value = new StringAllocator(length + 1).append(value).append('%').toString();
                 }
             } else {
                 value = "%";
@@ -211,7 +212,7 @@ public final class StringCollection {
             if (length > 0) {
                 if (value.charAt(0) != '%') {
                     // Prepend '%' character
-                    value = new StringBuilder(length + 1).append('%').append(value).toString();
+                    value = new StringAllocator(length + 1).append('%').append(value).toString();
                 }
             } else {
                 value = "%";
@@ -222,7 +223,7 @@ public final class StringCollection {
             if (length > 0) {
                 if (value.charAt(length - 1) != '%' || (length > 1 && value.charAt(length - 2) == '\\')) {
                     // Append '%' character
-                    value = new StringBuilder(length + 1).append(value).append('%').toString();
+                    value = new StringAllocator(length + 1).append(value).append('%').toString();
                 }
             } else {
                 value = "%";
@@ -244,7 +245,7 @@ public final class StringCollection {
         if ((s.indexOf('\\') == -1) && (s.indexOf('$') == -1)) {
             return s;
         }
-        final StringBuilder sb = new StringBuilder(s.length());
+        final StringAllocator sb = new StringAllocator(s.length());
         for (int i = 0; i < s.length(); i++) {
             final char c = s.charAt(i);
             if (c == '\\') {
@@ -329,7 +330,7 @@ public final class StringCollection {
         if (length <= 0) {
             return null;
         }
-        final StringBuilder sb = new StringBuilder(length << 2);
+        final StringAllocator sb = new StringAllocator(length << 2);
         sb.append('(');
         sb.append(arr[0]);
         for (int a = 1; a < length; a++) {
@@ -351,7 +352,7 @@ public final class StringCollection {
             return null;
         }
         final int size = set.size();
-        final StringBuilder sb = new StringBuilder(size * 5);
+        final StringAllocator sb = new StringAllocator(size * 5);
         final Integer[] values = set.toArray(new Integer[set.size()]);
         sb.append('(');
         for (int i = 0; i < size; i++) {
@@ -378,7 +379,7 @@ public final class StringCollection {
         if (arr == null || arr.length == 0) {
             return null;
         }
-        final StringBuilder sb = new StringBuilder(arr.length * 5);
+        final StringAllocator sb = new StringAllocator(arr.length * 5);
         sb.append('(');
         for (int a = 0; a < arr.length; a++) {
             if (a > 0) {
@@ -401,7 +402,7 @@ public final class StringCollection {
      * @return SQLInString or null
      */
     public static String getSqlInString(final int arr[][]) {
-        final StringBuilder sb = new StringBuilder();
+        final StringAllocator sb = new StringAllocator();
         if (arr.length > 0) {
             sb.append('(');
             for (int a = 0; a < arr.length; a++) {
@@ -430,13 +431,13 @@ public final class StringCollection {
      */
     public static String getSqlInString(final int i, final int arr[]) {
         if (null == arr) {
-            return new StringBuilder(8).append('(').append(i).append(')').toString();
+            return new StringAllocator(8).append('(').append(i).append(')').toString();
         }
         final int length = arr.length;
         if (0 == length) {
-            return new StringBuilder(8).append('(').append(i).append(')').toString();
+            return new StringAllocator(8).append('(').append(i).append(')').toString();
         }
-        final StringBuilder sb = new StringBuilder(length << 1);
+        final StringAllocator sb = new StringAllocator(length << 1);
         sb.append('(');
         sb.append(i);
         if (length > 0) {
@@ -461,7 +462,7 @@ public final class StringCollection {
         if (m == null) {
             return null;
         }
-        final StringBuilder sb = new StringBuilder();
+        final StringAllocator sb = new StringAllocator();
         sb.append('(');
         final int size = m.size();
         if (size > 0) {
@@ -518,7 +519,7 @@ public final class StringCollection {
     }
 
     public static String getSelect(final int[] cols, final String table) {
-        final StringBuilder sb = new StringBuilder(256);
+        final StringAllocator sb = new StringAllocator(256);
         sb.append("SELECT ");
         boolean first = true;
         for (int a = 0; a < cols.length; a++) {
@@ -544,7 +545,7 @@ public final class StringCollection {
             return null;
         }
 
-        final StringBuilder sb = new StringBuilder();
+        final StringAllocator sb = new StringAllocator();
         for (int a = 0; a < i.length; a++) {
             sb.append(i[a]);
             sb.append(',');
@@ -558,7 +559,7 @@ public final class StringCollection {
             return null;
         }
 
-        final StringBuilder sb = new StringBuilder();
+        final StringAllocator sb = new StringAllocator();
         for (int a = 0; a < s.length; a++) {
             sb.append(s[a]);
             sb.append(',');
@@ -586,7 +587,7 @@ public final class StringCollection {
     }
 
     public static String convertArraytoString(final Object[] o) {
-        final StringBuilder sb = new StringBuilder();
+        final StringAllocator sb = new StringAllocator();
         for (int a = 0; a < o.length; a++) {
             sb.append(o[a]);
         }

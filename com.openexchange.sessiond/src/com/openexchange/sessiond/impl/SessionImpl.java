@@ -49,22 +49,17 @@
 
 package com.openexchange.sessiond.impl;
 
-import java.io.Serializable;
-import java.util.Map;
-import java.util.Map.Entry;
+import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import com.openexchange.caching.objects.CachedSession;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.services.SessiondServiceRegistry;
+import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
  * {@link SessionImpl} - Implements interface {@link Session}
@@ -73,9 +68,6 @@ import com.openexchange.sessiond.services.SessiondServiceRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessionImpl implements PutIfAbsent {
-
-    // A random-enough key for encrypting and decrypting passwords on their way through the caching system.
-    private static final String OBFUSCATION_KEY_PROPERTY = "com.openexchange.sessiond.encryptionKey";
 
     private final String loginName;
     private String password;
@@ -89,8 +81,8 @@ public final class SessionImpl implements PutIfAbsent {
     private final String authId;
     private String hash;
     private String client;
+    private boolean tranzient;
     private final ConcurrentMap<String, Object> parameters;
-    private boolean isVolatile;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionImpl.class));
 
@@ -105,8 +97,15 @@ public final class SessionImpl implements PutIfAbsent {
      * @param secret The secret (cookie identifier)
      * @param randomToken The random token
      * @param localIp The local IP
+     * @param login The full user's login; e.g. <i>test@foo.bar</i>
+     * @param authId The authentication identifier that is used to trace the login request across different systems
+     * @param hash The hash identifier
+     * @param client The client type
+     * @param tranzient <code>true</code> if the session should be transient, <code>false</code>, otherwise
      */
-    public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId, final String secret, final String randomToken, final String localIp, final String login, final String authId, final String hash, final String client) {
+    public SessionImpl(final int userId, final String loginName, final String password, final int contextId, final String sessionId,
+        final String secret, final String randomToken, final String localIp, final String login, final String authId, final String hash,
+        final String client, final boolean tranzient) {
         super();
         this.userId = userId;
         this.loginName = loginName;
@@ -120,6 +119,7 @@ public final class SessionImpl implements PutIfAbsent {
         this.authId = authId;
         this.hash = hash;
         this.client = client;
+        this.tranzient = tranzient;
         parameters = new ConcurrentHashMap<String, Object>();
         parameters.put(PARAM_LOCK, new ReentrantLock());
         parameters.put(PARAM_COUNTER, new AtomicInteger());
@@ -145,6 +145,7 @@ public final class SessionImpl implements PutIfAbsent {
         this.authId = s.getAuthId();
         this.hash = s.getHash();
         this.client = s.getClient();
+        this.tranzient = false;
         parameters = new ConcurrentHashMap<String, Object>();
         parameters.put(PARAM_LOCK, new ReentrantLock());
         parameters.put(PARAM_COUNTER, new AtomicInteger());
@@ -157,38 +158,8 @@ public final class SessionImpl implements PutIfAbsent {
     }
 
     /**
-     * Initializes a new {@link SessionImpl} from specified cached session.
-     *
-     * @param cachedSession The cached session
-     */
-    protected SessionImpl(final CachedSession cachedSession) {
-        super();
-        userId = cachedSession.getUserId();
-        contextId = cachedSession.getContextId();
-        loginName = cachedSession.getLoginName();
-        password = unobfuscate( cachedSession.getPassword() );
-        sessionId = cachedSession.getSessionId();
-        secret = cachedSession.getSecret();
-        randomToken = cachedSession.getRandomToken();
-        login = cachedSession.getLogin();
-        localIp = cachedSession.getLocalIp();
-        authId = cachedSession.getAuthId();
-        hash = cachedSession.getHash();
-        final Map<String, Serializable> params = cachedSession.getParameters();
-        parameters = new ConcurrentHashMap<String, Object>(params.size());
-        for (final Entry<String, Serializable> entry : params.entrySet()) {
-            parameters.put(entry.getKey(), entry.getValue());
-        }
-        parameters.put(PARAM_LOCK, new ReentrantLock());
-        parameters.put(PARAM_COUNTER, new AtomicInteger());
-        if (!parameters.containsKey(PARAM_ALTERNATIVE_ID)) {
-            parameters.put(PARAM_ALTERNATIVE_ID, UUIDSessionIdGenerator.randomUUID());
-        }
-    }
-
-    /**
      * Logs differences between this and specified session.
-     * 
+     *
      * @param s The session to compare with
      * @param logger The logger
      */
@@ -215,7 +186,7 @@ public final class SessionImpl implements PutIfAbsent {
 
     /**
      * Whether specified session is considered equal to this one.
-     * 
+     *
      * @param s The other session
      * @return <code>true</code> if equal; otherwise <code>false</code>
      */
@@ -307,54 +278,6 @@ public final class SessionImpl implements PutIfAbsent {
         return true;
     }
 
-    /**
-     * Creates a new instance of {@link CachedSession} holding this session's state and information ready for being put into session cache.
-     *
-     * @return An appropriate instance of {@link CachedSession}
-     */
-    public CachedSession createCachedSession() {
-        return new CachedSession(userId, loginName, obfuscate( password ), contextId, sessionId, secret, randomToken, localIp, login, authId, hash, client, parameters);
-    }
-
-    private String obfuscate(final String string) {
-        if (isEmpty(string)) {
-            return string;
-        }
-        try {
-            final String key = getObfuscationKey();
-            return isEmpty(key) ? string : SessiondServiceRegistry.getServiceRegistry().getService(CryptoService.class).encrypt(string, key);
-        } catch (final OXException e) {
-            LOG.error("Could not obfuscate a string before migration", e);
-            return string;
-        }
-    }
-
-    private static boolean isEmpty(final String str) {
-        if (null == str) {
-            return true;
-        }
-        final int length = str.length();
-        boolean empty = true;
-        for (int i = 0; empty && i < length; i++) {
-            empty = Character.isWhitespace(str.charAt(i));
-        }
-        return empty;
-    }
-
-    private String getObfuscationKey() {
-        return SessiondServiceRegistry.getServiceRegistry().getService(ConfigurationService.class).getProperty(OBFUSCATION_KEY_PROPERTY);
-    }
-
-    private String unobfuscate(final String string) {
-        try {
-            final String key = getObfuscationKey();
-            return SessiondServiceRegistry.getServiceRegistry().getService(CryptoService.class).decrypt(string, key);
-        } catch (final OXException e) {
-            LOG.error("Could not decode string after migration", e);
-            return string;
-        }
-    }
-
     @Override
     public int getContextId() {
         return contextId;
@@ -402,14 +325,16 @@ public final class SessionImpl implements PutIfAbsent {
     }
 
     @Override
-    public Object setParameterIfAbsent(String name, Object value) {
+    public Object setParameterIfAbsent(final String name, final Object value) {
         if (PARAM_LOCK.equals(name)) {
             return parameters.get(PARAM_LOCK);
         }
         return parameters.putIfAbsent(name, value);
     }
 
-    @Override
+    /**
+     * Removes the random token
+     */
     public void removeRandomToken() {
         randomToken = null;
     }
@@ -419,10 +344,30 @@ public final class SessionImpl implements PutIfAbsent {
         return localIp;
     }
 
-
     @Override
     public void setLocalIp(final String localIp) {
+        try {
+            setLocalIp(localIp, true);
+        } catch (final OXException e) {
+            LOG.error("Failed to propagate change of IP address.", e);
+        }
+    }
+
+    /**
+     * Sets the local IP address
+     *
+     * @param localIp The local IP address
+     * @param propagate Whether to propagate that IP change through {@code SessiondService}
+     * @throws OXException If propagating change fails
+     */
+    public void setLocalIp(final String localIp, final boolean propagate) throws OXException {
         this.localIp = localIp;
+        if (propagate) {
+            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (sessionStorageService != null) {
+                sessionStorageService.setLocalIp(sessionId, localIp);
+            }
+        }
     }
 
     @Override
@@ -471,7 +416,28 @@ public final class SessionImpl implements PutIfAbsent {
 
     @Override
     public void setHash(final String hash) {
+        try {
+            setHash(hash, true);
+        } catch (final OXException e) {
+            LOG.error("Failed to propagate change of hash identifier.", e);
+        }
+    }
+
+    /**
+     * Sets the hash identifier
+     *
+     * @param hash The hash identifier
+     * @param propagate Whether to propagate that change through {@code SessiondService}
+     * @throws OXException If propagating change fails
+     */
+    public void setHash(final String hash, final boolean propagate) throws OXException {
         this.hash = hash;
+        if (propagate) {
+            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (sessionStorageService != null) {
+                sessionStorageService.setHash(sessionId, hash);
+            }
+        }
     }
 
     @Override
@@ -481,24 +447,42 @@ public final class SessionImpl implements PutIfAbsent {
 
     @Override
     public void setClient(final String client) {
-        this.client = client;
-    }
-    
-    /**
-     * Gets the volatile flag
-     *
-     * @return The volatile flag
-     */
-    public boolean isVolatile() {
-        return isVolatile;
+        try {
+            setClient(client, true);
+        } catch (final OXException e) {
+            LOG.error("Failed to propagate change of client identifier.", e);
+        }
     }
 
     /**
-     * Sets the volatile flag.
-     * 
-     * @param isVolatile The volatile flag
+     * Sets the client identifier
+     *
+     * @param client The client identifier
+     * @param propagate Whether to propagate that change through {@code SessiondService}
+     * @throws OXException If propagating change fails
      */
-    public void setVolatile(final boolean isVolatile) {
-        this.isVolatile = isVolatile;
+    public void setClient(final String client, final boolean propagate) throws OXException {
+        this.client = client;
+        if (propagate) {
+            final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
+            if (sessionStorageService != null) {
+                sessionStorageService.setClient(sessionId, client);
+            }
+        }
     }
+
+    @Override
+    public boolean isTransient() {
+        return tranzient;
+    }
+
+    /**
+     * Sets if the session is transient or not.
+     *
+     * @param tranzient <code>true</code> if the session is transient, <code>false</code>, otherwise
+     */
+    public void setTransient(boolean tranzient) {
+        this.tranzient = tranzient;
+    }
+
 }

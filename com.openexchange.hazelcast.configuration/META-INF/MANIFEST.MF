@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Hazelcast Configuration
+Bundle-SymbolicName: com.openexchange.hazelcast.configuration
+Bundle-Version: 7.0.1
+Bundle-Activator: com.openexchange.hazelcast.configuration.osgi.HazelcastConfigurationActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Eclipse-BuddyPolicy: registered
+Import-Package: com.hazelcast.config,
+ com.hazelcast.impl,
+ com.openexchange.config,
+ com.openexchange.configuration,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.tools.strings,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Bundle-ClassPath: .
+Export-Package: com.openexchange.hazelcast.configuration

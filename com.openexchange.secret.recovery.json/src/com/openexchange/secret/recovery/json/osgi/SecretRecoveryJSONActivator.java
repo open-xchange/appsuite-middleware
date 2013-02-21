@@ -50,14 +50,14 @@
 package com.openexchange.secret.recovery.json.osgi;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.secret.SecretService;
+import com.openexchange.secret.recovery.SecretCleanUpService;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.secret.recovery.json.SecretRecoveryActionFactory;
-import com.openexchange.secret.recovery.json.action.AbstractSecretRecoveryAction;
 import com.openexchange.secret.recovery.json.preferences.Enabled;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
@@ -67,24 +67,17 @@ public class SecretRecoveryJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SecretMigrator.class, SecretInconsistencyDetector.class, SecretService.class };
+        return new Class<?>[] { SecretMigrator.class, SecretInconsistencyDetector.class, SecretService.class, SecretCleanUpService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
-            final SecretService secretService = getService(SecretService.class);
-            final SecretMigrator migrator = getService(SecretMigrator.class);
-            final SecretInconsistencyDetector detector = getService(SecretInconsistencyDetector.class);
-
-            AbstractSecretRecoveryAction.detector = detector;
-            AbstractSecretRecoveryAction.migrator = migrator;
-            AbstractSecretRecoveryAction.secretService = secretService;
-
             registerModule(new SecretRecoveryActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "recovery/secret");
             registerService(PreferencesItemService.class, new Enabled());
         } catch (final Exception x) {
             LOG.error(x.getMessage(), x);
+            throw x;
         }
 
     }

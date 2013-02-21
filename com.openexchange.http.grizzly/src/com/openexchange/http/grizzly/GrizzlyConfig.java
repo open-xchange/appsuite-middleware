@@ -49,17 +49,20 @@
 
 package com.openexchange.http.grizzly;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
+import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.server.Initialization;
 
 /**
  * {@link GrizzlyConfig} Collects and exposes configuration parameters needed by GrizzlOX
- * 
+ *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public class GrizzlyConfig implements Initialization {
@@ -97,6 +100,12 @@ public class GrizzlyConfig implements Initialization {
     /** Unique backend route for every single backend behind the load balancer */
     private String backendRoute = "OX0";
 
+    /** Do we want to send absolute or relative redirects */
+    private boolean isAbsoluteRedirect = false;
+
+    /** Do we want to enable the AJP Filter for incoming requests */
+    private boolean isAJPEnabled = false;
+
     // server properties
 
     /** Maximal age of a cookie in seconds. A negative value destroys the cookie when the browser exits. A value of 0 deletes the cookie. */
@@ -106,13 +115,36 @@ public class GrizzlyConfig implements Initialization {
     private int cookieMaxInactivityInterval = 1800;
 
     /** Marks cookies as secure although the request is insecure e.g. when the backend is behind a ssl terminating proxy */
-    private boolean isCookieForceHttps = false;
+    private boolean isForceHttps = false;
 
     /** Make the cookie accessible only via http methods. This prevents Javascript access to the cookie / cross site scripting */
     private boolean isCookieHttpOnly = true;
 
     /** Default encoding for incoming Http Requests, this value must be equal to the web server's default encoding */
     private String defaultEncoding = "UTF-8";
+    
+    /** Do we want to consider X-Forward-* Headers */ 
+    private boolean isConsiderXForwards = false;
+
+    /** A comma separated list of known proxies */
+    private List<String> knownProxies = Collections.emptyList();
+    /**
+     * The name of the protocolHeader used to identify the originating IP address of a client connecting to a web server through an HTTP
+     * proxy or load balancer
+     */
+    private String forHeader = "X-Forwarded-For";
+    
+    /** The name of the protocolHeader used to decide if we are dealing with a in-/secure Request */
+    private String protocolHeader = "X-Forwarded-Proto";
+
+    /** The value indicating secure http communication */
+    private String httpsProtoValue = "https";
+
+    /** The port used for http communication */
+    private int httpProtoPort = 80;
+
+    /** The port used for https communication */
+    private int httpsProtoPort = 443;
 
     // sessiond properties
 
@@ -143,20 +175,35 @@ public class GrizzlyConfig implements Initialization {
         }
 
         // grizzly properties
-        this.httpHost = configService.getProperty("com.openexchange.http.grizzly.httpNetworkListenerHost", "0.0.0.0");
-        this.httpPort = configService.getIntProperty("com.openexchange.http.grizzly.httpNetworkListenerPort", 8080);
         this.isJMXEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasJMXEnabled", false);
         this.isWebsocketsEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasWebSocketsEnabled", false);
         this.isCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
-        this.maxRequestParameters = configService.getIntProperty("com.openexchange.http.grizzly.maxRequestParameters", 30);
-        this.backendRoute = configService.getProperty("com.openexchange.http.grizzly.backendRoute", "OX0");
+        this.isAbsoluteRedirect = configService.getBoolProperty("com.openexchange.http.grizzly.doAbsoluteRedirect", false);
+        this.isAJPEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasAJPEnabled", false);
 
         // server properties
         this.cookieMaxAge = Integer.valueOf(ConfigTools.parseTimespanSecs(configService.getProperty("com.openexchange.cookie.ttl", "1W")));
         this.cookieMaxInactivityInterval = configService.getIntProperty("com.openexchange.servlet.maxInactiveInterval", 1800);
-        this.isCookieForceHttps = configService.getBoolProperty("com.openexchange.forceHTTPS", false);
+        this.isForceHttps = configService.getBoolProperty("com.openexchange.forceHTTPS", false);
         this.isCookieHttpOnly = configService.getBoolProperty("com.openexchange.cookie.httpOnly", true);
         this.defaultEncoding = configService.getProperty("DefaultEncoding", "UTF-8");
+        this.isConsiderXForwards = configService.getBoolProperty("com.openexchange.server.considerXForwards", false);
+        String proxyCandidates = configService.getProperty("com.openexchange.server.knownProxies", "");
+        setKnownProxies(proxyCandidates);
+        this.forHeader = configService.getProperty("com.openexchange.server.forHeader", "X-Forwarded-For");
+        this.protocolHeader = configService.getProperty("com.openexchange.server.protocolHeader", "X-Forwarded-Proto");
+        this.httpsProtoValue = configService.getProperty("com.openexchange.server.httpsProtoValue", "https");
+        this.httpProtoPort = configService.getIntProperty("com.openexchange.server.httpProtoPort", 80);
+        this.httpsProtoPort = configService.getIntProperty("com.openexchange.server.httpsProtoPort", 443);
+
+        this.httpHost = configService.getProperty("com.openexchange.connector.networkListenerHost", "127.0.0.1");
+        // keep backwards compatibility with ajp config
+        if(httpHost.equals("*")) {
+            this.httpHost="0.0.0.0";
+        }
+        this.httpPort = configService.getIntProperty("com.openexchange.connector.networkListenerPort", 8009);
+        this.maxRequestParameters = configService.getIntProperty("com.openexchange.connector.maxRequestParameters", 30);
+        this.backendRoute = configService.getProperty("com.openexchange.server.backendRoute", "OX0");
 
         // sessiond properties
         this.isSessionAutologin = configService.getBoolProperty("com.openexchange.sessiond.autologin", false);
@@ -165,7 +212,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the started
-     * 
+     *
      * @return The started
      */
     public AtomicBoolean getStarted() {
@@ -174,7 +221,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the defaultEncoding used for incoming http requests
-     * 
+     *
      * @return The defaultEncoding
      */
     public String getDefaultEncoding() {
@@ -183,7 +230,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the httpHost
-     * 
+     *
      * @return The httpHost
      */
     public String getHttpHost() {
@@ -192,7 +239,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the httpPort
-     * 
+     *
      * @return The httpPort
      */
     public int getHttpPort() {
@@ -201,7 +248,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the hasJMXEnabled
-     * 
+     *
      * @return The hasJMXEnabled
      */
     public boolean isJMXEnabled() {
@@ -210,7 +257,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the hasWebsocketsEnabled
-     * 
+     *
      * @return The hasWebsocketsEnabled
      */
     public boolean isWebsocketsEnabled() {
@@ -219,7 +266,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the hasCometEnabled
-     * 
+     *
      * @return The hasCometEnabled
      */
     public boolean isCometEnabled() {
@@ -228,7 +275,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the maxRequestParameters
-     * 
+     *
      * @return The maxRequestParameters
      */
     public int getMaxRequestParameters() {
@@ -237,7 +284,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the backendRoute
-     * 
+     *
      * @return The backendRoute
      */
     public String getBackendRoute() {
@@ -246,7 +293,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the cookieMaxAge
-     * 
+     *
      * @return The cookieMaxAge
      */
     public int getCookieMaxAge() {
@@ -255,7 +302,7 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the cookieMaxInactivityInterval
-     * 
+     *
      * @return The cookieMaxInactivityInterval
      */
     public int getCookieMaxInactivityInterval() {
@@ -263,17 +310,17 @@ public class GrizzlyConfig implements Initialization {
     }
 
     /**
-     * Gets the isCookieForceHttps
-     * 
-     * @return The isCookieForceHttps
+     * Gets the isForceHttps
+     *
+     * @return The isForceHttps
      */
-    public boolean isCookieForceHttps() {
-        return instance.isCookieForceHttps;
+    public boolean isForceHttps() {
+        return instance.isForceHttps;
     }
 
     /**
      * Gets the isCookieHttpOnly
-     * 
+     *
      * @return The isCookieHttpOnly
      */
     public boolean isCookieHttpOnly() {
@@ -282,11 +329,111 @@ public class GrizzlyConfig implements Initialization {
 
     /**
      * Gets the isSessionAutologin
-     * 
+     *
      * @return The isSessionAutologin
      */
     public boolean isSessionAutologin() {
         return instance.isSessionAutologin;
+    }
+
+
+    private void setKnownProxies(String ipList) {
+        if(ipList.isEmpty()) {
+            this.knownProxies = Collections.emptyList();
+        } else {
+            List<String> proxyCandidates = IPTools.splitAndTrim(ipList, IPTools.COMMA_SEPARATOR);
+            List<String> erroneousIPs = IPTools.filterErroneousIPs(proxyCandidates);
+            if(!erroneousIPs.isEmpty()) {
+                if(LOG.isWarnEnabled()) {
+                    LOG.warn("Falling back to empty list as com.openexchange.server.knownProxies contains malformed IPs: "+erroneousIPs);
+                }
+            } else {
+                this.knownProxies = proxyCandidates;
+            }
+        }
+    }
+    /**
+     * Returns the known proxies as comma separated list of IPs
+     * @return the known proxies as comma separated list of IPs or an empty String
+     */
+    public List<String> getKnownProxies() {
+        return knownProxies;
+    }
+    
+    /**
+     * Gets the name of forward for header 
+     * @return the forwardHeader
+     */
+    public String getForHeader() {
+        return forHeader;
+    }
+    
+    /**
+     * Gets the protocolHeader
+     *
+     * @return The protocolHeader
+     */
+    public String getProtocolHeader() {
+        return protocolHeader;
+    }
+
+
+    /**
+     * Gets the httpsProtoValue
+     *
+     * @return The httpsProtoValue
+     */
+    public String getHttpsProtoValue() {
+        return httpsProtoValue;
+    }
+
+
+    /**
+     * Gets the httpProtoPort
+     *
+     * @return The httpProtoPort
+     */
+    public int getHttpProtoPort() {
+        return httpProtoPort;
+    }
+
+
+    /**
+     * Gets the httpsProtoPort
+     *
+     * @return The httpsProtoPort
+     */
+    public int getHttpsProtoPort() {
+        return httpsProtoPort;
+    }
+
+
+    /**
+     * Gets the isAbsoluteRedirect
+     *
+     * @return The isAbsoluteRedirect
+     */
+    public boolean isAbsoluteRedirect() {
+        return isAbsoluteRedirect;
+    }
+
+    /**
+     * Gets the isAJPEnabled property.
+     * @return the isAJPEnabled property.
+     */
+    public boolean isAJPEnabled() {
+        return isAJPEnabled;
+    }
+
+    /**
+     * Gets if we should consider X-Forward-Headers that reach the backend.
+     * Those can be spoofed by clients so we have to make sure to consider the headers only if the proxy/proxies reliably override those
+     * headers for incoming requests.
+     * Disabled by default as we now use relative redirects for Grizzly.
+     * @return
+     */
+    public boolean isConsiderXForwards() {
+        return isConsiderXForwards;
     }
 
 }

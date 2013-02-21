@@ -134,12 +134,7 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
     }
 
     private void gatherContextIDs(final int cid, final SortedSet<Integer> contextIds) throws OXException {
-        final Connection writeCon;
-        try {
-            writeCon = Database.getNoTimeout(cid, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection writeCon = Database.getNoTimeout(cid, true);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -158,12 +153,7 @@ public final class NewInfostoreFolderTreeUpdateTask implements UpdateTask {
 
     private void processContext(final int cid, final long creatingTime) throws OXException {
         LOG.info("Performing 'NewInfostoreFolderTreeUpdateTask' on context " + cid);
-        final Connection writeCon;
-        try {
-            writeCon = Database.getNoTimeout(cid, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection writeCon = Database.getNoTimeout(cid, true);
         try {
             final int admin = getContextAdmin(cid, writeCon);
             writeCon.setAutoCommit(false); // BEGIN

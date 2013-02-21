@@ -83,7 +83,7 @@ public final class Update {
 
     /**
      * Updates identifiers.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier
@@ -122,7 +122,7 @@ public final class Update {
 
     /**
      * Updates identifiers.
-     * 
+     *
      * @param cid The context identifier
      * @param tree The tree identifier
      * @param user The user identifier

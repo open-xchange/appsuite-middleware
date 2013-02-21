@@ -65,7 +65,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SMSFolderSupportPreferencesItem} - The {@link PreferencesItemService} for SMS/MMS bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SMSFolderSupportPreferencesItem implements PreferencesItemService {

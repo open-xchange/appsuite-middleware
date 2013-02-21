@@ -54,14 +54,14 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 
 /**
  * @author choeger
- * 
+ *
  */
 public interface OXGroupPluginInterface {
     public void create(final Context ctx, final Group grp, final Credentials cred) throws PluginException;
-    
+
     public void delete(final Context ctx, final Group []grps, final Credentials cred) throws PluginException;
-    
+
     public void change(final Context ctx, final Group grp, final Credentials auth) throws PluginException;
-    
+
     public Group get(final Context ctx, final Group grp, final Credentials cred);
 }

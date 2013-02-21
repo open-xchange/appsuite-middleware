@@ -54,15 +54,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.glassfish.grizzly.threadpool.GrizzlyExecutorService;
 import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
-import com.openexchange.exception.OXException;
-import com.openexchange.http.grizzly.GrizzlyExceptionCode;
 import com.openexchange.http.grizzly.GrizzlyExceptionMessage;
 import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link GrizzlOXExecutorService}
- * 
+ *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public class GrizzlOXExecutorService extends GrizzlyExecutorService {
@@ -72,10 +70,10 @@ public class GrizzlOXExecutorService extends GrizzlyExecutorService {
     private ThreadPoolService threadPoolService;
 
     private final ExecutorService executorService;
-    
+
     /**
      * Initializes a new {@link GrizzlOXExecutorService}.
-     * 
+     *
      * @param config
      */
     public GrizzlOXExecutorService(ThreadPoolConfig config) {

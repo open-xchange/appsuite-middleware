@@ -141,6 +141,40 @@ public final class ReplicationMonitor {
         }
     };
 
+    static Connection checkFallback(Pools pools, AssignmentImpl assign, boolean noTimeout, boolean write) throws OXException {
+        return checkFallback(pools, assign, noTimeout ? NOTIMEOUT : TIMEOUT, write);
+    }
+
+    static Connection checkFallback(Pools pools, AssignmentImpl assign, FetchAndSchema fetch, boolean write) throws OXException {
+        Connection retval;
+        int tries = 0;
+        do {
+            tries++;
+            try {
+                retval = fetch.get(pools, assign, write, false);
+                incrementFetched(assign, write);
+            } catch (PoolingException e) {
+                OXException e1 = createException(assign, write, e);
+                // Immediately fail if connection to master is wanted or no fallback is there.
+                if (write || assign.getWritePoolId() == assign.getReadPoolId()) {
+                    throw e1;
+                }
+                // Try fallback to master.
+                LOG.warn(e1.getMessage(), e1);
+                try {
+                    retval = fetch.get(pools, assign, true, true);
+                    incrementInstead();
+                } catch (PoolingException e2) {
+                    throw createException(assign, true, e2);
+                }
+            }
+        } while (null == retval && tries < 10);
+        if (null == retval) {
+            throw createException(assign, write, null);
+        }
+        return retval;
+    }
+
     static Connection checkActualAndFallback(final Pools pools, final AssignmentImpl assign, final boolean noTimeout, final boolean write) throws OXException {
         return checkActualAndFallback(pools, assign, noTimeout ? NOTIMEOUT : TIMEOUT, write);
     }
@@ -222,7 +256,7 @@ public final class ReplicationMonitor {
         final int poolId;
         if (write) {
             poolId = assign.getWritePoolId();
-            if (poolId != assign.getReadPoolId() && !usedAsRead) {
+            if (poolId != assign.getReadPoolId() && !usedAsRead && Constants.CONFIGDB_WRITE_ID != poolId) {
                 increaseTransactionCounter(assign, con);
             }
         } else {

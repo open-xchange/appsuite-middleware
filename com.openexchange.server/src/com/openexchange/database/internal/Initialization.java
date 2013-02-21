@@ -98,7 +98,7 @@ public final class Initialization {
     public boolean isStarted() {
         return null != pools;
     }
-    
+
     /**
      * Gets the database service
      *

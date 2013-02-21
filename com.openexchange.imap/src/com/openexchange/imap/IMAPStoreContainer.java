@@ -67,7 +67,7 @@ public interface IMAPStoreContainer {
 
     /**
      * Gets a connected IMAP store.
-     * 
+     *
      * @param imapSession The IMAP session
      * @return The connected IMAP store
      * @throws MessagingException If returning a connected IMAP store fails
@@ -77,14 +77,14 @@ public interface IMAPStoreContainer {
 
     /**
      * Returns specified IMAP store to container.
-     * 
+     *
      * @param imapStore The IMAP store to return
      */
     void backStore(IMAPStore imapStore, IMAPValidity validity);
 
     /**
      * Close elapsed {@link IMAPStore} instances.
-     * 
+     *
      * @param stamp The stamp to check against
      * @param debugBuilder The optional debug builder
      */

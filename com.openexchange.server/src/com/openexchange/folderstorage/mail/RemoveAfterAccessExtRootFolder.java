@@ -58,7 +58,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link RemoveAfterAccessExtRootFolder} - A mail folder especially for root folder of an external account implementing
  * {@link RemoveAfterAccessFolder}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RemoveAfterAccessExtRootFolder extends ExternalMailAccountRootFolder implements RemoveAfterAccessFolder {
@@ -69,7 +69,7 @@ public final class RemoveAfterAccessExtRootFolder extends ExternalMailAccountRoo
      * Initializes a new {@link RemoveAfterAccessExtRootFolder} from given mail account.
      * <p>
      * Subfolder identifiers and tree identifier are not set within this constructor.
-     * 
+     *
      * @param mailAccount The underlying mail account
      * @param mailConfig The mail configuration
      * @param session The session

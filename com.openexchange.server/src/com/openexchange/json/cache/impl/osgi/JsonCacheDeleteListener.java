@@ -60,7 +60,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link JsonCacheDeleteListener}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class JsonCacheDeleteListener implements DeleteListener {

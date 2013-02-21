@@ -97,11 +97,11 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
     public List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session) throws OXException {
         List<ITipChange> changes = analysis.getChanges();
         List<Appointment> result = new ArrayList<Appointment>(changes.size());
-        
+
         Map<String, CalendarDataObject> processed = new HashMap<String, CalendarDataObject>();
-        
+
         for (ITipChange change : changes) {
-            
+
             CalendarDataObject appointment = change.getNewAppointment();
             if (appointment == null) {
             	continue;
@@ -123,18 +123,19 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
                 createAppointment(appointment, session);
                 forMail = util.reloadAppointment(appointment, session);
             }
-            
+
             if (appointment != null && !change.isException()) {
                 processed.put(appointment.getUid(), appointment);
             }
+
             writeMail(action, original, forMail, session, owner);
             result.add(appointment);
         }
-        
+
         return result;
     }
 
-    
+
 
     private void updateAppointment(Appointment original, CalendarDataObject appointment, Session session) throws OXException {
         AppointmentDiff appointmentDiff = AppointmentDiff.compare(original, appointment);
@@ -147,10 +148,10 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
                 write = true;
             }
         }
-        
+
         update.setParentFolderID(original.getParentFolderID());
         update.setObjectID(original.getObjectID());
-        
+
         if (!original.containsRecurrencePosition() && !original.containsRecurrenceDatePosition()) {
             if (appointment.containsRecurrencePosition()) {
                 update.setRecurrencePosition(appointment.getRecurrencePosition());
@@ -164,17 +165,18 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
                 update.setRecurrenceDatePosition(original.getRecurrenceDatePosition());
             }
         }
-        
+
         if (write) {
             CalendarDataObject clone = update.clone();
             util.updateAppointment(clone, session, original.getLastModified());
+            original.setLastModified(clone.getLastModified());
         }
-        
+
         saveConfirmations(session, appointmentDiff, update);
-        
+
         appointment.setObjectID(update.getObjectID());
         appointment.setParentFolderID(update.getParentFolderID());
-        
+
         if (update.containsRecurrencePosition()) {
             appointment.setRecurrencePosition(update.getRecurrencePosition());
         }
@@ -189,7 +191,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
                 ConfirmationChange confirmationChange = (ConfirmationChange) change;
                 util.changeConfirmationForExternalParticipant(update, confirmationChange, session);
             }
-            
+
         }
     }
 
@@ -201,7 +203,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
         saveConfirmations(session, appointmentDiff, reloaded);
     }
 
-    
+
     private void ensureParticipant(CalendarDataObject appointment, ITipAction action, int owner) {
         int confirm = CalendarObject.NONE;
         switch (action) {
@@ -236,7 +238,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
             participantList.add(up);
             appointment.setParticipants(participantList);
         }
-        
+
         found = false;
         UserParticipant[] users = appointment.getUsers();
         if (users != null) {
@@ -249,7 +251,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
                 }
             }
         }
-        
+
         if (!found) {
             UserParticipant up = new UserParticipant(owner);
             if (confirm != -1) {
@@ -261,7 +263,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
             appointment.setUsers(participantList);
         }
     }
-    
+
 
 
 

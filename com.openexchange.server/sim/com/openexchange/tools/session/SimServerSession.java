@@ -153,20 +153,12 @@ public class SimServerSession implements ServerSession {
 
     @Override
     public int getUserId() {
-        if (null == user) {
-            throw new IllegalStateException("User not set in SimServerSession instance.");
-        }
-        return user.getId();
+        return null == user ? 0 : user.getId();
     }
 
     @Override
     public String getUserlogin() {
         return null;
-    }
-
-    @Override
-    public void removeRandomToken() {
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -231,5 +223,10 @@ public class SimServerSession implements ServerSession {
 		// Nothing to do
 		return false;
 	}
+
+    @Override
+    public boolean isTransient() {
+        return false;
+    }
 
 }

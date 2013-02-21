@@ -58,7 +58,7 @@ import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 /**
  * {@link PresencePublishActivator} registers a {@link PresenceStatusChangePublisher} as listener at the PresenceStatusService to inform
  * clients about a status change of contacts they did subscribe to.
- * 
+ *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public class PresencePublishActivator extends HousekeepingActivator {

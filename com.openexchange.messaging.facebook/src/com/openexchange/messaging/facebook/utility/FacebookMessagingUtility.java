@@ -49,9 +49,10 @@
 
 package com.openexchange.messaging.facebook.utility;
 
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -68,13 +69,21 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import org.apache.commons.codec.CharEncoding;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.EncoderException;
+import org.apache.commons.codec.net.URLCodec;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
+import org.scribe.model.Response;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.AllocatingStringWriter;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
@@ -89,6 +98,7 @@ import com.openexchange.messaging.facebook.FacebookMessagingMessageAccess;
 import com.openexchange.messaging.facebook.session.FacebookOAuthAccess;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeStringMessagingHeader;
+import com.openexchange.oauth.OAuthExceptionCodes;
 
 /**
  * {@link FacebookMessagingUtility}
@@ -106,7 +116,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Gets pretty-printed string representation of specified node.
-     * 
+     *
      * @param node The node
      * @return The pretty-printed string representation of specified node
      */
@@ -122,7 +132,7 @@ public final class FacebookMessagingUtility {
 
     /**
      * Pretty prints specified node.
-     * 
+     *
      * @param node The node
      * @param writer The writer
      * @throws TransformerException If a transformation error occurs
@@ -644,18 +654,46 @@ public final class FacebookMessagingUtility {
         return -result;
     }
 
+    private static final URLCodec URL_CODEC = new URLCodec(CharEncoding.UTF_8);
+
     /**
-     * URL-encodes specified string.
-     *
-     * @param string The string
-     * @return The URL-encoded string
+     * URL encodes given string.
+     * <p>
+     * Using <code>org.apache.commons.codec.net.URLCodec</code>.
      */
-    public static String encode(final String string) {
+    public static String encodeUrl(final String s) {
         try {
-            return URLEncoder.encode(string, "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            return string;
+            return isEmpty(s) ? s : URL_CODEC.encode(s);
+        } catch (final EncoderException e) {
+            return s;
         }
+    }
+
+    /**
+     * URL decodes given string.
+     * <p>
+     * Using <code>org.apache.commons.codec.net.URLCodec</code>.
+     */
+    public static String decodeUrl(final String s, final String charset) {
+        try {
+            return isEmpty(s) ? s : (isEmpty(charset) ? URL_CODEC.decode(s) : URL_CODEC.decode(s, charset));
+        } catch (final DecoderException e) {
+            return s;
+        } catch (final UnsupportedEncodingException e) {
+            return s;
+        }
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     private static boolean startsWith(final char startingChar, final String toCheck, final boolean ignoreHeadingWhitespaces) {
@@ -681,9 +719,28 @@ public final class FacebookMessagingUtility {
         return startingChar == toCheck.charAt(i);
     }
 
-    private static final String FQL_JSON_START = "https://api.facebook.com/method/fql.query?format=JSON&query=";
-
-    private static final int FQL_JSON_START_LEN = FQL_JSON_START.length();
+    /**
+     * Extracts JSON from given response.
+     *
+     * @param response The response
+     * @return The extracted JSON
+     * @throws OXException If operation fails
+     */
+    public static JSONObject extractJson(final Response response) throws OXException {
+        Reader reader = null;
+        try {
+            reader = new InputStreamReader(response.getStream(), Charsets.UTF_8);
+            final JSONValue value = JSONObject.parse(reader);
+            if (value.isObject()) {
+                return value.toObject();
+            }
+            throw OAuthExceptionCodes.JSON_ERROR.create("Not a JSON object, but " + value.getClass().getName());
+        } catch (final JSONException e) {
+            throw OAuthExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(reader);
+        }
+    }
 
     /**
      * Performs specified FQL query and returns its result as a JSON object.
@@ -692,22 +749,71 @@ public final class FacebookMessagingUtility {
      * @return The queried JSON object
      * @throws OXException If FQL query fails
      */
-    public static List<JSONObject> performFQLQuery(final String fqlQuery, final FacebookOAuthAccess facebookOAuthInfo) throws OXException {
+    public static List<JSONObject> performFQLQuery(final String fqlQuery, final FacebookOAuthAccess facebookOAuthAccess) throws OXException {
+        return fireFQLJsonQuery(fqlQuery, facebookOAuthAccess);
+    }
+
+    private static final String FQL_XML_START = "https://api.facebook.com/method/fql.query?format=XML&query=";
+    private static final int FQL_XML_START_LEN = FQL_XML_START.length();
+
+    /**
+     * Fires given FQL query using specified Facebook REST client.
+     *
+     * @param fqlQuery The FQL query to fire
+     * @param facebookOAuthAccess The Facebook OAuth access
+     * @return The FQL query's results
+     * @throws OXException If query cannot be fired
+     * @deprecated Use {@link #fireFQLJsonQuery(CharSequence, FacebookOAuthAccess)} instead
+     */
+    @Deprecated
+    public static List<Element> fireFQLQuery(final CharSequence fqlQuery, final FacebookOAuthAccess facebookOAuthAccess) throws OXException {
         try {
-            final String encodedQuery = encode(fqlQuery);
-            final String body =
-                facebookOAuthInfo.executeGETRequest(new StringBuilder(FQL_JSON_START_LEN + encodedQuery.length()).append(FQL_JSON_START).append(
-                    encodedQuery).toString());
-            if (startsWith('{', body, true)) {
+            final String encodedQuery = encodeUrl(fqlQuery.toString());
+            return FacebookDOMParser.parseXMLResponse(facebookOAuthAccess.executeGETRequest(new StringBuilder(
+                FQL_XML_START_LEN + encodedQuery.length()).append(FQL_XML_START).append(encodedQuery).toString()));
+        } catch (final RuntimeException e) {
+            throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static final String FQL_JSON_START = "https://api.facebook.com/method/fql.query?format=JSON&query=";
+    private static final int FQL_JSON_START_LEN = FQL_JSON_START.length();
+
+    /**
+     * Fires given FQL query using specified Facebook REST client.
+     *
+     * @param fqlQuery The FQL query to fire
+     * @param facebookOAuthAccess The Facebook OAuth access
+     * @return The FQL query's results
+     * @throws OXException If query cannot be fired
+     */
+    public static List<JSONObject> fireFQLJsonQuery(final CharSequence fqlQuery, final FacebookOAuthAccess facebookOAuthAccess) throws OXException {
+        try {
+            final String encodedQuery = encodeUrl(fqlQuery.toString());
+            final JSONValue body = facebookOAuthAccess.executeGETJsonRequest(new StringBuilder(
+                FQL_JSON_START_LEN + encodedQuery.length()).append(FQL_JSON_START).append(encodedQuery));
+            if (body.isArray()) {
+                final JSONArray array = body.toArray();
+                final int length = array.length();
+                if (length <= 0) {
+                    return Collections.emptyList();
+                }
+                final List<JSONObject> ret = new ArrayList<JSONObject>(length);
+                for (int i = 0; i < length; i++) {
+                    ret.add(array.getJSONObject(i));
+                }
+                return ret;
+            }
+            if (body.isObject()) {
                 /*
                  * Expect the body to be a JSON object
                  */
-                final JSONObject result = new JSONObject(body);
+                final JSONObject result = body.toObject();
                 if (result.has("error")) {
                     final JSONObject error = result.getJSONObject("error");
                     final String type = error.optString("type");
                     final String message = error.optString("message");
-                    if ("OXException".equals(type)) {
+                    if ("OAuthException".equals(type)) {
                         throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == message ? "" : message);
                     }
                     throw FacebookMessagingExceptionCodes.FQL_ERROR.create(
@@ -715,47 +821,12 @@ public final class FacebookMessagingUtility {
                         null == message ? "" : message);
                 }
                 return Collections.singletonList(result);
-            } else if (startsWith('[', body, true)) {
-                /*
-                 * Expect the body to be a JSON array
-                 */
-                final JSONArray result = new JSONArray(body);
-                final int length = result.length();
-                final List<JSONObject> list = new ArrayList<JSONObject>(length);
-                for (int i = 0; i < length; i++) {
-                    list.add(result.getJSONObject(i));
-                }
-                return list;
             }
             throw FacebookMessagingExceptionCodes.INVALID_RESPONSE_BODY.create(body);
         } catch (final JSONException e) {
-            throw FacebookMessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
-            throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private static final String FQL_XML_START = "https://api.facebook.com/method/fql.query?format=XML&query=";
-
-    private static final int FQL_XML_START_LEN = FQL_XML_START.length();
-
-    /**
-     * Fires given FQL query using specified facebook REST client.
-     *
-     * @param fqlQuery The FQL query to fire
-     * @param facebookOAuthInfo The facebook OAuth information
-     * @return The FQL query's results
-     * @throws OXException If query cannot be fired
-     */
-    public static List<Element> fireFQLQuery(final CharSequence fqlQuery, final FacebookOAuthAccess facebookOAuthInfo) throws OXException {
-        try {
-            final String encodedQuery = encode(fqlQuery.toString());
-            return FacebookDOMParser.parseXMLResponse(facebookOAuthInfo.executeGETRequest(new StringBuilder(
-                FQL_XML_START_LEN + encodedQuery.length()).append(FQL_XML_START).append(encodedQuery).toString()));
-        } catch (final Exception e) {
-            throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            throw MessagingExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -859,7 +930,7 @@ public final class FacebookMessagingUtility {
      *
      * @param fields The fields
      * @param postId The post identifier
-     * @param facebookUserId The facebook user identifier
+     * @param facebookUserId The Facebook user identifier
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws OXException If composing query fails
      */
@@ -872,7 +943,7 @@ public final class FacebookMessagingUtility {
      *
      * @param fields The fields
      * @param postIds The post identifiers
-     * @param facebookUserId The facebook user identifier
+     * @param facebookUserId The Facebook user identifier
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws OXException If composing query fails
      */
@@ -885,7 +956,7 @@ public final class FacebookMessagingUtility {
      *
      * @param queryType The query type constant
      * @param fields The fields
-     * @param facebookUserId The facebook user identifier
+     * @param facebookUserId The Facebook user identifier
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws OXException If composing query fails
      */
@@ -900,7 +971,7 @@ public final class FacebookMessagingUtility {
      * @param fields The fields
      * @param sortField The sort field; may be <code>null</code>
      * @param order The order direction
-     * @param facebookUserId The facebook user identifier
+     * @param facebookUserId The Facebook user identifier
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws OXException If composing query fails
      */
@@ -932,7 +1003,7 @@ public final class FacebookMessagingUtility {
      * @param fields The fields
      * @param sortField The sort field; may be <code>null</code>
      * @param order The order direction
-     * @param facebookUserId The facebook user identifier
+     * @param facebookUserId The Facebook user identifier
      * @return The FQL stream query or <code>null</code> if fields require no query
      * @throws OXException If composing query fails
      */

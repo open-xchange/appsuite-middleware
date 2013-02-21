@@ -89,22 +89,22 @@ import com.openexchange.userconf.UserConfigurationService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class InfostoreFolderJob implements IndexingJob {
-    
+
     private static final int CHUNK_SIZE = 100;
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(InfostoreFolderJob.class);
-    
+
 
     public InfostoreFolderJob() {
         super();
     }
-    
+
     @Override
     public void execute(JobInfo jobInfo) throws OXException {
         if (!(jobInfo instanceof InfostoreJobInfo)) {
             throw new IllegalArgumentException("Job info must be an instance of InfostoreJobInfo.");
         }
-        
+
         InfostoreJobInfo info = (InfostoreJobInfo) jobInfo;
         long start = System.currentTimeMillis();
         if (LOG.isDebugEnabled()) {
@@ -148,16 +148,16 @@ public class InfostoreFolderJob implements IndexingJob {
             }
         }
     }
-    
+
     private void deleteFromIndex(InfostoreJobInfo info, IndexAccess<DocumentMetadata> infostoreIndex, IndexAccess<Attachment> attachmentIndex) throws OXException {
         IndexFolderManager.deleteFolderEntry(info.contextId, info.userId, Types.INFOSTORE, info.account, String.valueOf(info.folder));
         AccountFolders accountFolders = new AccountFolders(info.account, Collections.singleton(String.valueOf(info.folder)));
         Builder queryBuilder = new Builder();
         QueryParameters infostoreAllQuery = queryBuilder.setHandler(SearchHandler.ALL_REQUEST)
             .setAccountFolders(Collections.singleton(accountFolders))
-            .build();        
+            .build();
         infostoreIndex.deleteByQuery(infostoreAllQuery);
-        
+
         QueryParameters attachmentAllQuery = new Builder()
             .setHandler(SearchHandler.ALL_REQUEST)
             .setAccountFolders(Collections.singleton(accountFolders))

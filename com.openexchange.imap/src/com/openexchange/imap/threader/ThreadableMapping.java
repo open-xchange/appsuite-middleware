@@ -62,7 +62,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 
 /**
  * {@link ThreadableMapping} - A <code>Message-Id</code> and <code>References</code> mapping from specified {@code MailMessage} instances.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadableMapping {
@@ -138,13 +138,19 @@ public final class ThreadableMapping {
 
     /**
      * Checks specified {@link Iterable} and adds elements to <code>thread</code> if appropriate.
-     * 
+     *
      * @param toCheck The {@link Iterable} to check
      * @param thread The thread to add into
      * @return Whether <code>thread</code> has been changed as a result of this call
      */
     public boolean checkFor(final Iterable<MailMessage> toCheck, final List<MailMessage> thread) {
         boolean changed = false;
+        // Set for existing Message-Ids
+        final Set<String> existingMessageIds = new HashSet<String>(thread.size());
+        for (MailMessage mailMessage : thread) {
+            existingMessageIds.add(mailMessage.getMessageId());
+        }
+        // Set for already processed ones
         final Set<MessageKey> processed = new HashSet<MessageKey>(thread.size());
         for (final MailMessage mail : toCheck) {
             final String messageId = mail.getMessageId();
@@ -153,7 +159,7 @@ public final class ThreadableMapping {
                 final List<MailMessage> referencees = refsMap.get(messageId);
                 if (null != referencees) {
                     for (final MailMessage candidate : referencees) {
-                        if (processed.add(keyFor(candidate))) {
+                        if (!existingMessageIds.contains(candidate.getMessageId()) && processed.add(keyFor(candidate))) {
                             thread.add(candidate);
                             changed = true;
                         }
@@ -182,7 +188,7 @@ public final class ThreadableMapping {
                     final List<MailMessage> references = messageIdMap.get(sReference);
                     if (null != references) {
                         for (final MailMessage candidate : references) {
-                            if (processed.add(keyFor(candidate))) {
+                            if (!existingMessageIds.contains(candidate.getMessageId()) && processed.add(keyFor(candidate))) {
                                 thread.add(candidate);
                                 changed = true;
                             }
@@ -196,7 +202,7 @@ public final class ThreadableMapping {
 
     /**
      * Gets those {@code MailMessage} instances whose <code>References</code> header contain specified <code>Message-Id</code> header.
-     * 
+     *
      * @param messageId The <code>Message-Id</code> header
      * @return The {@code MailMessage} instances
      */
@@ -207,7 +213,7 @@ public final class ThreadableMapping {
 
     /**
      * Gets the {@code MailMessage} instances whose <code>Message-Id</code> header matches given <code>Message-Id</code> header
-     * 
+     *
      * @param messageId The <code>Message-Id</code> header
      * @return The {@code MailMessage} instances
      */
@@ -218,7 +224,7 @@ public final class ThreadableMapping {
 
     /**
      * Fills this mapping with specified {@code MailMessage} instances.
-     * 
+     *
      * @param mails The {@code MailMessage} instances
      * @return This mapping
      */

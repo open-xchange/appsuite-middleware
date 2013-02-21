@@ -248,10 +248,10 @@ public class AJAXRequestData {
         copy.uploadStreamProvider = null;
         return copy;
     }
-    
+
     /**
      * Examines specified {@code HttpServletRequest} instance.
-     *
+     * 
      * @param servletRequest The HTTP Servlet request to examine
      */
     public void examineServletRequest(final HttpServletRequest servletRequest) {
@@ -313,19 +313,18 @@ public class AJAXRequestData {
         this.session = session;
     }
 
-    
     /**
      * Gets the HTTP Servlet request.
-     *
+     * 
      * @return The HTTP Servlet request or <code>null</code> if absent
      */
     public HttpServletRequest getHttpServletRequest() {
         return httpServletRequest;
     }
-    
+
     /**
      * Sets the HTTP Servlet request.
-     *
+     * 
      * @param httpServletRequest The HTTP Servlet request to set
      */
     public void setHttpServletRequest(final HttpServletRequest httpServletRequest) {
@@ -538,6 +537,37 @@ public class AJAXRequestData {
     }
 
     /**
+     * Gets the value mapped to given parameter name.
+     * 
+     * @param name The parameter name
+     * @return The value mapped to given parameter name
+     * @throws NullPointerException If name is <code>null</code>
+     * @throws OXException If no such parameter exists
+     */
+    public String requireParameter(final String name) throws OXException {
+        return checkParameter(name);
+    }
+
+    /**
+     * Gets the value mapped to given parameter name.
+     * 
+     * @param name The parameter name
+     * @return The value mapped to given parameter name
+     * @throws NullPointerException If name is <code>null</code>
+     * @throws OXException If no such parameter exists or its value is empty
+     */
+    public String nonEmptyParameter(final String name) throws OXException {
+        if (null == name) {
+            throw new NullPointerException("name is null");
+        }
+        final String value = params.get(name);
+        if (isEmpty(value)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+        }
+        return value;
+    }
+
+    /**
      * Checks for presence of comma-separated <code>int</code> list.
      * 
      * @param name The parameter name
@@ -684,17 +714,27 @@ public class AJAXRequestData {
     }
 
     /**
+     * Checks if this request data signals extended response.
+     * 
+     * @param request The request data
+     * @return <code>true</code> if extended response is indicated; otherwise <code>false</code>
+     */
+    public boolean isExtendedResponse(final AJAXRequestData request) {
+        return AJAXRequestDataTools.parseBoolParameter(ExtendedResponse.PARAM_EXTENDED_RESPONSE, request);
+    }
+
+    /**
      * Utility method that determines whether the request contains multipart content.
-     *
+     * 
      * @return <code>true</code> if the request is multipart; <code>false</code> otherwise.
      */
     public boolean isMultipartContent() {
         return multipart;
     }
-    
+
     /**
      * Sets the whether the request contains multipart content
-     *
+     * 
      * @param multipart <code>true</code> if the request is multipart; <code>false</code> otherwise.
      */
     public void setMultipart(final boolean multipart) {
@@ -843,11 +883,11 @@ public class AJAXRequestData {
             if (null == uploadEvent) {
                 uploadEvent = AJAXServlet.processUploadStatic(httpServletRequest);
                 final Iterator<UploadFile> iterator = uploadEvent.getUploadFilesIterator();
-                while(iterator.hasNext()) {
+                while (iterator.hasNext()) {
                     thisFiles.add(iterator.next());
                 }
                 final Iterator<String> names = uploadEvent.getFormFieldNames();
-                while(names.hasNext()) {
+                while (names.hasNext()) {
                     final String name = names.next();
                     putParameter(name, uploadEvent.getFormField(name));
                 }
@@ -1022,10 +1062,10 @@ public class AJAXRequestData {
      * @return The state
      */
     public AJAXState getState() {
-    	if (state == null) {
-    		state  = new AJAXState();
-    	}
-    	return state;
+        if (state == null) {
+            state = new AJAXState();
+        }
+        return state;
     }
 
     /**
@@ -1095,6 +1135,19 @@ public class AJAXRequestData {
      */
     public Map<String, Object> getProperties() {
         return Collections.unmodifiableMap(properties);
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

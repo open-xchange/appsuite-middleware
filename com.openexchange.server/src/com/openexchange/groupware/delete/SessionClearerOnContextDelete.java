@@ -88,7 +88,7 @@ public final class SessionClearerOnContextDelete extends ContextDelete {
                 // Ignore
             }
         }
-         * 
+         *
          */
         /*
          * Get SessionD service

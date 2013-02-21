@@ -167,7 +167,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         }
 
     }
-    
+
     enum VacationActionFields {
         DAYS("days",":days"),
         ADDRESSES("addresses",":addresses"),
@@ -241,7 +241,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         token.image = fields.getTagname();
         return new TagArgument(token);
     }
-    
+
     public static TagArgument createTagArg(final String string) {
         final Token token = new Token();
         token.image = ":" + string;
@@ -707,7 +707,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
     };
 
     static {
-        final Map<String, Mapper<Rule>> tmp = new HashMap<String, Mapper<Rule>>();
+        final Map<String, Mapper<Rule>> tmp = new HashMap<String, Mapper<Rule>>(mappers.length);
         for (final Mapper<Rule> mapper : mappers) {
             tmp.put(mapper.getAttrName(), mapper);
         }

@@ -12,17 +12,17 @@ import javax.xml.ws.WebFault;
 
 @WebFault(name = "StorageException", targetNamespace = "http://soap.reseller.admin.openexchange.com")
 public class StorageException_Exception extends java.lang.Exception {
-    
+
     private com.openexchange.admin.soap.reseller.context.reseller.soap.StorageException storageException;
 
     public StorageException_Exception() {
         super();
     }
-    
+
     public StorageException_Exception(String message) {
         super(message);
     }
-    
+
     public StorageException_Exception(String message, Throwable cause) {
         super(message, cause);
     }

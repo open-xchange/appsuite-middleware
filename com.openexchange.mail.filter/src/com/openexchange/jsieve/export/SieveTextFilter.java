@@ -810,7 +810,7 @@ public final class SieveTextFilter {
      */
     private void searchEmptyLineAndRemove(final List<String> retval, final int line) {
         for (int i = line; i < retval.size(); i++) {
-            if (retval.get(i).equals("")) {
+            if (0 == retval.get(i).length()) {
                 retval.remove(i);
                 return;
             }

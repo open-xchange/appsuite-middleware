@@ -54,12 +54,12 @@ package com.openexchange.admin.tools.database;
  * @author cutmasta
  */
 public class TableColumnObject {
-    
+
     private String name = null;
     private int type = java.sql.Types.NULL;
     private Object data = null;
     private int columnSize = -1;
-    
+
     /**
      * Creates a new instance of TableColumnObject
      */
@@ -97,5 +97,5 @@ public class TableColumnObject {
     public void setColumnSize(int columnSize) {
         this.columnSize = columnSize;
     }
-    
+
 }

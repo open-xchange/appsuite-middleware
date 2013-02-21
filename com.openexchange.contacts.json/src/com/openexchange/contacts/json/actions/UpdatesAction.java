@@ -103,7 +103,7 @@ public class UpdatesAction extends ContactAction {
         /*
          * add deleted contacts
          */
-        List<Contact> deletedContacts = new ArrayList<Contact>(); 
+        List<Contact> deletedContacts = new ArrayList<Contact>();
         if (false == "deleted".equals(request.getIgnore())) {
             lastModified = addContacts(deletedContacts, contactService.getDeletedContacts(
                 request.getSession(), request.getFolderID(), since, request.getFields()));

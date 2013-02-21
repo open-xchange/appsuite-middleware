@@ -52,6 +52,7 @@ package com.openexchange.caching.hazelcast;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -70,7 +71,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link LocalCache}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class LocalCache extends DefaultCacheKeyService implements Cache, SupportsLocalOperations, PutIfAbsent {
@@ -269,6 +270,46 @@ public final class LocalCache extends DefaultCacheKeyService implements Cache, S
     public CacheStatistics getStatistics() {
         // Nothing to do
         return null;
+    }
+
+    @Override
+    public Set<?> getGroupKeys(String group) throws OXException {
+        throw CacheExceptionCode.UNSUPPORTED_OPERATION.create("LocalCache.getGroupKeys()");
+    }
+
+    @Override
+    public Set<String> getGroupNames() throws OXException {
+        throw CacheExceptionCode.UNSUPPORTED_OPERATION.create("LocalCache.getGroupNames()");
+    }
+
+    @Override
+    public Set<?> getAllKeys() throws OXException {
+        throw CacheExceptionCode.UNSUPPORTED_OPERATION.create("LocalCache.getAllKeys()");
+    }
+
+    @Override
+    public Set<?> getKeysInRange(int start, int end) throws OXException {
+        throw CacheExceptionCode.UNSUPPORTED_OPERATION.create("LocalCache.getKeysInRange(int,int)");
+    }
+
+    @Override
+    public void put(Serializable key, Serializable obj, boolean invalidate) throws OXException {
+        put(key, obj);
+    }
+
+    @Override
+    public void put(Serializable key, Serializable val, ElementAttributes attr, boolean invalidate) throws OXException {
+        put(key, val, attr);
+    }
+
+    @Override
+    public void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr, boolean invalidate) throws OXException {
+        putInGroup(key, groupName, value, attr);
+    }
+
+    @Override
+    public void putInGroup(Serializable key, String groupName, Serializable value, boolean invalidate) throws OXException {
+        putInGroup(key, groupName, value);
     }
 
 }

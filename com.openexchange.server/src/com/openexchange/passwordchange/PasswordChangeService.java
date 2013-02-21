@@ -200,24 +200,19 @@ public abstract class PasswordChangeService {
          * Remove possible session-bound cached default mail access
          */
         final Session session = event.getSession();
-        try {
-            MailAccess.getMailAccessCache().removeMailAccess(session, MailAccount.DEFAULT_ID);
-        } catch (final OXException e) {
-            LOG.error("Removing cached mail access failed", e);
-            throw new OXException(e);
-        }
+        MailAccess.getMailAccessCache().removeMailAccess(session, MailAccount.DEFAULT_ID);
         /*
          * Invalidate user cache
          */
         final int userId = session.getUserId();
         UserStorage.getInstance().invalidateUser(event.getContext(), userId);
         final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
-        /*  
+        /*
          * Update password in session
          */
         final SessiondService sessiondService = serviceRegistry.getService(SessiondService.class);
         if (sessiondService == null) {
-            throw new OXException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create( SessiondService.class.getName()));
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( SessiondService.class.getName());
         }
         try {
             sessiondService.changeSessionPassword(session.getSessionID(), event.getNewPassword());

@@ -95,11 +95,11 @@ public final class CloseSessionsCLT {
 
     private static void printHelp() {
         final HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp("forceupdatetask", toolkitOptions);
+        helpFormatter.printHelp("closesessions", toolkitOptions);
     }
 
     /**
-     * Initializes a new {@link CloseSessionsCLT}.	
+     * Initializes a new {@link CloseSessionsCLT}.
      */
     private CloseSessionsCLT() {
         super();

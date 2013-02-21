@@ -80,7 +80,7 @@ public class SitePublicationActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         registerService(PublicationService.class, SitePublicationService.getInstance());
-        
+
         getService(HttpService.class).registerServlet(Constants.PUBLICATION_ROOT_URL, new SiteServlet(), null, null);
 
         openTrackers();

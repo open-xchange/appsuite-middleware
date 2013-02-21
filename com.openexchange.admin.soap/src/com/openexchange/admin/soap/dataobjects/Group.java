@@ -51,7 +51,7 @@ package com.openexchange.admin.soap.dataobjects;
 
 
 /**
- * 
+ *
  * This class represents a group.
  */
 public class Group {
@@ -59,11 +59,11 @@ public class Group {
     private Integer id;
 
     private String name;
-    
+
     private String displayname;
-    
+
     private Integer[] members;
-    
+
     /**
      * Initiates an empty group object
      */
@@ -72,10 +72,10 @@ public class Group {
         init();
     }
 
-    
+
     /**
      * Initiates a group object with the given id set
-     * 
+     *
      * @param id An {@link Integer} containing the id
      */
     public Group(final Integer id) {
@@ -86,7 +86,7 @@ public class Group {
 
     /**
      * Initiates a group object with the given id, name and display name set
-     * 
+     *
      * @param id An {@link Integer} containing the id
      * @param name A {@link String} containing the name
      * @param displayname A {@link String} containing the display name
@@ -144,7 +144,7 @@ public class Group {
 
     /**
      * Returns the displayname of this group
-     * 
+     *
      * @return A String containing the displayname
      */
     public final String getDisplayname() {
@@ -153,7 +153,7 @@ public class Group {
 
     /**
      * Sets the displayname for this group
-     * 
+     *
      * @param displayname The displayname as string
      */
     public final void setDisplayname(final String displayname) {
@@ -162,7 +162,7 @@ public class Group {
 
     /**
      * Returns the members of this group
-     * 
+     *
      * @return An {@link Integer} array containing the member ids
      */
     public final Integer[] getMembers() {
@@ -171,7 +171,7 @@ public class Group {
 
     /**
      * Sets the the members for this group
-     * 
+     *
      * @param members An {@link Integer} array containing the member ids
      */
     public final void setMembers(final Integer[] members) {

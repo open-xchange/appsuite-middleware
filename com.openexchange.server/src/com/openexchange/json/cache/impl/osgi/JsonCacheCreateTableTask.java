@@ -64,7 +64,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link JsonCacheCreateTableTask}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class JsonCacheCreateTableTask extends UpdateTaskAdapter {
@@ -72,7 +72,7 @@ public class JsonCacheCreateTableTask extends UpdateTaskAdapter {
 
     /**
      * Initializes a new {@link JsonCacheCreateTableTask}.
-     * 
+     *
      * @param services The service look-up
      */
     public JsonCacheCreateTableTask() {

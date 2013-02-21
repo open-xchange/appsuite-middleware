@@ -35,6 +35,21 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
+%post
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    # SoftwareChange_Request-1294
+    pfile=/opt/open-xchange/etc/settings/oxmobile.properties
+    if ! ox_exists_property mox/defaultContactStoreFolder $pfile; then
+        ox_set_property mox/defaultContactStoreFolder "-1" $pfile
+    fi
+fi
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -46,12 +61,24 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
+* Tue Feb 19 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Fourth release candidate for 7.0.1
+* Tue Feb 19 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Third release candidate for 7.0.1
 * Fri Feb 15 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2013-02-13
+* Thu Feb 14 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Second release candidate for 7.0.1
+* Fri Feb 01 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+First release candidate for 7.0.1
 * Tue Jan 29 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2013-01-28
 * Mon Jan 21 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2013-01-24
+* Tue Jan 15 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2013-01-23
+* Thu Jan 10 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+prepare for 7.0.1
 * Thu Jan 03 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for public patch 2013-01-15
 * Fri Dec 28 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
@@ -100,6 +127,10 @@ Fourth release candidate for 6.22.0
 Third release candidate for 6.22.0
 * Thu Oct 04 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Second release candidate for 6.22.0
+* Tue Sep 04 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+prepare for next EDP drop
 * Tue Aug 21 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Marcus Klein <jenkins@hudson-slave-1.netline.de>

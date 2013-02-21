@@ -90,17 +90,17 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CaldavActivator extends HousekeepingActivator {
-    
+
     private static final String SERVLET_PATH = "/servlet/dav/caldav";
-    
+
     private static final String NULL_PATH = "/servlet/dav/dev/null";
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(CaldavActivator.class);
 
 	protected static final String[] PREFERENCE_PATH = new String[]{"modules", "caldav", "module"};
-    
+
     private volatile OSGiPropertyMixin mixin;
-    
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] {
@@ -113,23 +113,23 @@ public class CaldavActivator extends HousekeepingActivator {
         try {
             CalDAV.setServiceLookup(this);
             CaldavPerformer.setServices(this);
-            
+
             final HttpService httpService = getService(HttpService.class);
             httpService.registerServlet(SERVLET_PATH, new CalDAV(), null, null);
             httpService.registerServlet(NULL_PATH, new DevNullServlet(), null, null);
-            
+
             final CaldavPerformer performer = CaldavPerformer.getInstance();
             final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
             this.mixin = mixin;
-            
+
             registerService(PropertyMixinFactory.class, new PropertyMixinFactory() {
 
                 @Override
                 public PropertyMixin create(final SessionHolder sessionHolder) {
                     return new CalendarUserAddressSet(sessionHolder);
                 }
-                
+
             });
             registerService(PropertyMixin.class, new ScheduleOutboxURL());
             registerService(PropertyMixin.class, new ScheduleInboxURL());
@@ -137,18 +137,18 @@ public class CaldavActivator extends HousekeepingActivator {
             registerService(PropertyMixin.class, new DefaultAlarmVeventDatetime());
 
             registerService(PathRegistration.class, new PathRegistration("caldav"));
-            
+
             registerService(PreferencesItemService.class, new PreferencesItemService() {
-				
+
 				@Override
 				public IValueHandler getSharedValue() {
 					return new ReadOnlyValue() {
-						
+
 						@Override
 						public boolean isAvailable(UserConfiguration userConfig) {
 							return true;
 						}
-						
+
 						@Override
 						public void getValue(Session session, Context ctx, User user,
 								UserConfiguration userConfig, Setting setting) throws OXException {
@@ -156,19 +156,19 @@ public class CaldavActivator extends HousekeepingActivator {
 						}
 					};
 				}
-				
+
 				@Override
 				public String[] getPath() {
 					return PREFERENCE_PATH;
 				}
 			});
-            
+
             openTrackers();
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
         }
     }
-    
+
     @Override
     protected void stopBundle() throws Exception {
         final HttpService httpService = getService(HttpService.class);

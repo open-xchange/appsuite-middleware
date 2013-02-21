@@ -53,14 +53,14 @@ import java.util.Date;
 
 /**
  * {@link Differ}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public abstract class Differ<T extends DataObject> {
 
     /**
      * Calculates the Difference of two Objects. If the Objects do not differ the return value is null.
-     * 
+     *
      * @param original
      * @param update
      * @return
@@ -85,11 +85,11 @@ public abstract class Differ<T extends DataObject> {
         if (v1 == v2) { // Same reference, works on most autoboxed primitives.
             return false;
         }
-        
+
         if (v1 == null) {
             return true;
         }
-        
+
         if (v2 == null) {
             return true;
         }

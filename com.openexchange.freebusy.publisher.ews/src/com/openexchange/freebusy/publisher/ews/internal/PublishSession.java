@@ -53,19 +53,19 @@ import com.openexchange.session.Session;
 
 /**
  * {@link PublishSession}
- * 
+ *
  * Simulated session used to read internal free/busy data.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class PublishSession implements Session {
-    
+
     private final int contextID;
     private final int userID;
-        
+
     /**
      * Initializes a new {@link PublishSession}.
-     * 
+     *
      * @param contextID The context ID
      * @param userID The user ID
      */
@@ -94,7 +94,7 @@ public class PublishSession implements Session {
     @Override
     public void setLocalIp(String ip) {
         // Nothing to do
-        
+
     }
 
     @Override
@@ -154,13 +154,6 @@ public class PublishSession implements Session {
     @Override
     public void setParameter(String name, Object value) {
         // Nothing to do
-        
-    }
-
-    @Override
-    public void removeRandomToken() {
-        // Nothing to do
-        
     }
 
     @Override
@@ -178,7 +171,6 @@ public class PublishSession implements Session {
     @Override
     public void setHash(String hash) {
         // Nothing to do
-        
     }
 
     @Override
@@ -190,7 +182,11 @@ public class PublishSession implements Session {
     @Override
     public void setClient(String client) {
         // Nothing to do
-        
     }
-    
+
+    @Override
+    public boolean isTransient() {
+        return false;
+    }
+
 }

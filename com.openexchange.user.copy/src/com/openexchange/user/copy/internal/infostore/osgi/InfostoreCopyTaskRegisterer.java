@@ -64,14 +64,14 @@ import com.openexchange.user.copy.internal.infostore.InfostoreCopyTask;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class InfostoreCopyTaskRegisterer implements ServiceTrackerCustomizer<QuotaFileStorageFactory, QuotaFileStorageFactory> {
-    
+
     private final BundleContext context;
-    
+
     private ServiceRegistration<CopyUserTaskService> registration;
-    
+
     private InfostoreCopyTask copyTask;
-    
-    
+
+
     public InfostoreCopyTaskRegisterer(final BundleContext context) {
         super();
         this.context = context;
@@ -82,7 +82,7 @@ public class InfostoreCopyTaskRegisterer implements ServiceTrackerCustomizer<Quo
      */
     public QuotaFileStorageFactory addingService(final ServiceReference<QuotaFileStorageFactory> reference) {
         final QuotaFileStorageFactory service = context.getService(reference);
-        copyTask = new InfostoreCopyTask(service);        
+        copyTask = new InfostoreCopyTask(service);
         registration = context.registerService(CopyUserTaskService.class, copyTask, null);
         return service;
     }

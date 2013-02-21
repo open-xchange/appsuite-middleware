@@ -57,6 +57,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.WebdavPostAction;
+import com.openexchange.caldav.action.WebdavMkCalendarAction;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
@@ -101,7 +102,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 
 /**
  * The {@link CaldavPerformer} contains all the wiring for caldav actions. This is the central entry point for caldav requests.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CaldavPerformer implements SessionHolder {
@@ -118,7 +119,7 @@ public class CaldavPerformer implements SessionHolder {
 
     /**
      * Gets the instance of {@link InfostorePerformer}.
-     * 
+     *
      * @return The instance of {@link InfostorePerformer}.
      */
     public static CaldavPerformer getInstance() {
@@ -129,7 +130,7 @@ public class CaldavPerformer implements SessionHolder {
     }
 
     public static enum Action {
-        UNLOCK, PROPPATCH, PROPFIND, OPTIONS, MOVE, MKCOL, LOCK, COPY, DELETE, GET, HEAD, PUT, TRACE, REPORT, POST
+        UNLOCK, PROPPATCH, PROPFIND, OPTIONS, MOVE, MKCOL, LOCK, COPY, DELETE, GET, HEAD, PUT, TRACE, REPORT, POST, MKCALENDAR
     }
 
     private final GroupwareCaldavFactory factory;
@@ -157,6 +158,7 @@ public class CaldavPerformer implements SessionHolder {
         WebdavAction put;
         WebdavAction trace;
         WebdavAction post;
+        WebdavAction mkcalendar;
 
         this.factory = new GroupwareCaldavFactory(
             this,
@@ -182,6 +184,7 @@ public class CaldavPerformer implements SessionHolder {
         get = prepare(new WebdavGetAction(), true, false, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
         head = prepare(new WebdavHeadAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
         post = prepare(new WebdavPostAction(factory), true, true, new WebdavIfAction(0, false, false));
+        mkcalendar = prepare(new WebdavMkCalendarAction(), true, true, new WebdavIfAction(0, false, false));
 
         final OXWebdavPutAction oxWebdavPut = new OXWebdavPutAction();
         oxWebdavPut.setSessionHolder(this);
@@ -207,6 +210,7 @@ public class CaldavPerformer implements SessionHolder {
         actions.put(Action.PUT, put);
         actions.put(Action.TRACE, trace);
         actions.put(Action.POST, post);
+        actions.put(Action.MKCALENDAR, mkcalendar);
 
         makeLockNullTolerant();
 
@@ -298,7 +302,7 @@ public class CaldavPerformer implements SessionHolder {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Executing " + action);
             }
-            
+
             actions.get(action).perform(webdavRequest, webdavResponse);
         } catch (final WebdavProtocolException x) {
             resp.setStatus(x.getStatus());

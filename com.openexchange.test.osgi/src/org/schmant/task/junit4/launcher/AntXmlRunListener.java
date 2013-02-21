@@ -1,5 +1,5 @@
 /* Schmant, the build tool, http://www.schmant.org
- * Copyright (C) 2007, 2008 Karl Gustafsson, Holocene Software, 
+ * Copyright (C) 2007, 2008 Karl Gustafsson, Holocene Software,
  * http://www.holocene.se
  *
  * Schmant is free software; you can redistribute it and/or modify
@@ -53,7 +53,7 @@ import org.w3c.dom.Text;
 /**
  * This {@link RunListener} produces an XML report formatted like Ant's JUnit
  * XML report.
- * @taskpackage org.junit.junit4 
+ * @taskpackage org.junit.junit4
  * @author Karl Gustafsson
  * @since 0.9
  */

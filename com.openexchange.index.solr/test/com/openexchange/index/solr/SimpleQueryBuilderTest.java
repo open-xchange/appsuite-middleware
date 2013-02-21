@@ -49,13 +49,23 @@
 
 package com.openexchange.index.solr;
 
+import static com.openexchange.index.solr.internal.LuceneQueryTools.buildQueryString;
+import static com.openexchange.index.solr.internal.LuceneQueryTools.buildQueryStringWithOr;
+import static com.openexchange.index.solr.internal.LuceneQueryTools.catenateQueriesWithAnd;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import junit.framework.Assert;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.index.memory.MemoryIndex;
+import org.apache.lucene.queryParser.QueryParser;
+import org.apache.lucene.util.Version;
+import org.apache.solr.schema.FieldType;
+import org.apache.solr.schema.StrField;
 import org.junit.Test;
 import com.openexchange.index.solr.internal.querybuilder.BuilderException;
 import com.openexchange.index.solr.internal.querybuilder.SimpleQueryBuilder;
+
 
 
 /**
@@ -64,7 +74,7 @@ import com.openexchange.index.solr.internal.querybuilder.SimpleQueryBuilder;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SimpleQueryBuilderTest extends SimpleQueryBuilder {
-    
+
     /**
      * Initializes a new {@link SimpleQueryBuilderTest}.
      * @param configPath
@@ -86,24 +96,44 @@ public class SimpleQueryBuilderTest extends SimpleQueryBuilder {
         Set<String> value2 = new HashSet<String>();
         value2.add("value2");
         value2.add("value3");
-        
+
         String q1 = buildQueryString(field1, value1);
         Assert.assertEquals("Queries were not equal.", "(field1:\"value1\")", q1);
-        
+
         String q2 = buildQueryStringWithOr(field2, value2);
         Assert.assertTrue("Queries were not equal.", q2.equals("((field2:\"value2\") OR (field2:\"value3\"))") || q2.equals("((field2:\"value3\") OR (field2:\"value2\"))"));
 
         String query = catenateQueriesWithAnd(q1, q2);
         Assert.assertTrue("Wrong query.", query.contains(q1) && query.contains(q2) && query.contains(" AND "));
         Assert.assertEquals("Wrong query size.", q1.length() + q2.length() + "( AND )".length(), query.length());
-        
+
         Assert.assertNull(buildQueryString("abs", null));
         Assert.assertNull(buildQueryString(null, "abc"));
         Assert.assertNull(buildQueryStringWithOr("abs", null));
         Assert.assertNull(buildQueryStringWithOr(null, Collections.singleton("abc")));
         Assert.assertNull(buildQueryStringWithOr("abc", null));
-        Assert.assertNull(catenateQueriesWithAnd(null));
+        Assert.assertNull(catenateQueriesWithAnd((String[]) null));
         Assert.assertNull(catenateQueriesWithAnd(null, null));
+    }
+    
+    @Test
+    public void testBug24918() throws Exception {
+        String folderName = "Apstiprin\u0101ts \"ham";
+        String folderQuery = buildQueryString("full_name", folderName);
+        String accountQuery = buildQueryString("account", 0);
+        String queryString = catenateQueriesWithAnd(accountQuery, folderQuery);
+        
+        FieldType strField = new StrField();
+        Analyzer indexAnalyzer = strField.getAnalyzer();
+        Analyzer queryAnalyzer = strField.getQueryAnalyzer();
+
+        MemoryIndex index = new MemoryIndex();
+        index.addField("account", "0", indexAnalyzer);
+        index.addField("full_name", folderName, indexAnalyzer);
+        QueryParser parser = new QueryParser(Version.LUCENE_CURRENT, "full_name", queryAnalyzer);
+        float score = index.search(parser.parse(queryString));
+        Assert.assertTrue("Query '" + queryString + "' did not match.", score > 0.0f);
+        System.out.println("indexData=" + index.toString());
     }
 
 }

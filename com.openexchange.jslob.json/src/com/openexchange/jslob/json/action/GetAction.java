@@ -61,8 +61,8 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.jslob.JSONPathElement;
 import com.openexchange.jslob.JSlob;
+import com.openexchange.jslob.JSONPathElement;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.json.JSlobRequest;
 import com.openexchange.server.ServiceLookup;
@@ -70,28 +70,28 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link GetAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 @Action(
     name = "get"
     , description = "Get a specific JSlob associated with the current user and context.<br><br>Examples:<br>" +
-    		"Consider the first element of a config cascade preference path to be the id of the jslob:<br>" + 
-    		"<br>" + 
-    		"ui/somekey = somevalue\n" + 
-    		"<br>" + 
-    		"results in<br>" + 
-    		"<br>" + 
-    		"GET /ajax/jslob?action=get&id=ui<br>" + 
-    		"<br>" + 
-    		"{\"somekey\": \"somevalue\"} <br>" + 
-    		"<br>" + 
+    		"Consider the first element of a config cascade preference path to be the id of the jslob:<br>" +
+    		"<br>" +
+    		"ui/somekey = somevalue\n" +
+    		"<br>" +
+    		"results in<br>" +
+    		"<br>" +
+    		"GET /ajax/jslob?action=get&id=ui<br>" +
+    		"<br>" +
+    		"{\"somekey\": \"somevalue\"} <br>" +
+    		"<br>" +
     		"while currently all config cascade properties are mixed into every JSLob" +
     		"<br><br>" +
     		"Or in a REST-like fashion vie GET request:<br>" +
     		"GET /ajax/jslob/ui" +
-    		"<br>" + 
+    		"<br>" +
             "{\"somekey\": \"somevalue\"} <br>"
     , method = RequestMethod.GET
     , parameters = {
@@ -105,7 +105,7 @@ public final class GetAction extends JSlobAction {
 
     /**
      * Initializes a new {@link GetAction}.
-     * 
+     *
      * @param services The service look-up
      */
     public GetAction(final ServiceLookup services, final Map<String, JSlobAction> actions) {
@@ -123,17 +123,17 @@ public final class GetAction extends JSlobAction {
             serviceId = DEFAULT_SERVICE_ID;
         }
         final JSlobService jslobService = getJSlobService(serviceId);
-   
+
         final String id = jslobRequest.checkParameter("id");
         final JSlob jslob = jslobService.get(id, jslobRequest.getSession());
-   
+
         final String serlvetRequestURI = jslobRequest.getRequestData().getSerlvetRequestURI();
         if (!isEmpty(serlvetRequestURI)) {
             final List<JSONPathElement> jPath = JSONPathElement.parsePath(serlvetRequestURI);
             final Object object = JSONPathElement.getPathFrom(jPath, jslob);
             return new AJAXRequestResult(null == object ? JSONObject.NULL : object, "json");
         }
-   
+
         return new AJAXRequestResult(jslob, "jslob");
     }
 

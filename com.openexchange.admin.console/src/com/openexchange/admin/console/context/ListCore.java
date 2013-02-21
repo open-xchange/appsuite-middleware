@@ -54,8 +54,8 @@ import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.ServiceLoader;
 import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.ServiceLoader;
 import com.openexchange.admin.console.context.extensioninterfaces.ContextConsoleListInterface;
 import com.openexchange.admin.console.context.extensioninterfaces.PluginException;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -68,11 +68,11 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 public abstract class ListCore extends ContextAbstraction {
 
     private ServiceLoader<ContextConsoleListInterface> listsubclasses = null;
-    
+
     private interface GetterClosureInterface {
         public ArrayList<String> getData(final ContextConsoleListInterface commonex) throws PluginException;
     }
-    
+
     protected void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
         setCSVOutputOption(parser);
@@ -174,21 +174,7 @@ public abstract class ListCore extends ContextAbstraction {
     private ArrayList<String> abstractGetter(final AdminParser parser, final GetterClosureInterface iface) {
         final ArrayList<String> retval = new ArrayList<String>();
         if (null == this.listsubclasses) {
-            try {
-                this.listsubclasses = ServiceLoader.load(ContextConsoleListInterface.class);
-            } catch (final IllegalAccessException e) {
-                printError(null, null, "Error during initializing extensions: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
-                sysexit(1);
-            } catch (final InstantiationException e) {
-                printError(null, null, "Error during initializing extensions: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
-                sysexit(1);
-            } catch (final ClassNotFoundException e) {
-                printError(null, null, "Error during initializing extensions: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
-                sysexit(1);
-            } catch (final IOException e) {
-                printError(null, null, "Error during initializing extensions: " + e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
-                sysexit(1);
-            }
+            this.listsubclasses = ServiceLoader.load(ContextConsoleListInterface.class);
         }
         for (final ContextConsoleListInterface commoniface : this.listsubclasses) {
             try {
@@ -200,6 +186,4 @@ public abstract class ListCore extends ContextAbstraction {
         }
         return retval;
     }
-
-
 }

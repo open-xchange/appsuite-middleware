@@ -59,13 +59,14 @@ import javax.servlet.http.HttpServletResponse;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthMessage;
 import net.oauth.server.OAuthServlet;
+import com.openexchange.java.Streams;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.internal.DatabaseOAuthProviderService;
 import com.openexchange.oauth.provider.internal.OAuthProviderServiceLookup;
 
 /**
  * A text servlet to echo incoming "echo" param along with userId
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class EchoServlet extends HttpServlet {
@@ -86,6 +87,7 @@ public class EchoServlet extends HttpServlet {
 
     @Override
     protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
+        PrintWriter out = null;
         final OAuthProviderService providerService = getProviderService();
         try {
             final OAuthMessage requestMessage = OAuthServlet.getMessage(request, null);
@@ -94,7 +96,7 @@ public class EchoServlet extends HttpServlet {
             final String userId = (String) accessor.getProperty("user");
 
             response.setContentType("text/plain");
-            final PrintWriter out = response.getWriter();
+            out = response.getWriter();
             out.println("[Your UserId:" + userId + "]");
             for (final Object item : request.getParameterMap().entrySet()) {
                 final Map.Entry parameter = (Map.Entry) item;
@@ -103,10 +105,10 @@ public class EchoServlet extends HttpServlet {
                     out.println(parameter.getKey() + ": " + value);
                 }
             }
-            out.close();
-
         } catch (final Exception e) {
             DatabaseOAuthProviderService.handleException(e, request, response, false);
+        } finally {
+            Streams.close(out);
         }
     }
 

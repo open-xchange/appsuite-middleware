@@ -64,14 +64,14 @@ import com.openexchange.user.copy.internal.oauth.OAuthCopyTask;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class OAuthCopyTaskRegisterer implements ServiceTrackerCustomizer<IDGeneratorService, IDGeneratorService> {
-    
+
     private final BundleContext context;
-    
+
     private ServiceRegistration<CopyUserTaskService> registerService;
 
     private OAuthCopyTask task;
-    
-    
+
+
     public OAuthCopyTaskRegisterer(final BundleContext context) {
         super();
         this.context = context;
@@ -84,7 +84,7 @@ public class OAuthCopyTaskRegisterer implements ServiceTrackerCustomizer<IDGener
         final IDGeneratorService service = context.getService(reference);
         task = new OAuthCopyTask(service);
         registerService = context.registerService(CopyUserTaskService.class, task, null);
-        
+
         return service;
     }
 
@@ -101,7 +101,7 @@ public class OAuthCopyTaskRegisterer implements ServiceTrackerCustomizer<IDGener
         if (registerService != null) {
             registerService.unregister();
             task = null;
-            context.ungetService(reference);            
+            context.ungetService(reference);
         }
     }
 

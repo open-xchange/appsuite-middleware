@@ -56,9 +56,9 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface LdapIDResolver {
-    
+
     int getContactID(String ldapID) throws OXException;
-    
+
     String getLdapID(int contactID) throws OXException;
 
 }

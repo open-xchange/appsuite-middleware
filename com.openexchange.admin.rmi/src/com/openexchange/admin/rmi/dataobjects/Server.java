@@ -53,9 +53,9 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 
 /**
- * 
+ *
  * This class represents a server.
- * 
+ *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
@@ -68,11 +68,11 @@ public class Server implements Serializable, NameAndIdObject {
     private static final long serialVersionUID = -1752789033012449187L;
 
     private Integer id;
-    
+
     private boolean idset;
 
     private String name;
-    
+
     private boolean nameset;
 
     /**
@@ -83,7 +83,7 @@ public class Server implements Serializable, NameAndIdObject {
 
     /**
      * Returns the id of this server object
-     * 
+     *
      * @return An {@link Integer} containing the id
      */
     @Override
@@ -93,7 +93,7 @@ public class Server implements Serializable, NameAndIdObject {
 
     /**
      * Sets the id for this server object
-     * 
+     *
      * @param id An {@link Integer} containing the id
      */
     @Override
@@ -104,7 +104,7 @@ public class Server implements Serializable, NameAndIdObject {
 
     /**
      * Returns the name of this server object
-     * 
+     *
      * @return A {@link String} containing the name
      */
     @Override
@@ -114,7 +114,7 @@ public class Server implements Serializable, NameAndIdObject {
 
     /**
      * Sets the name for this server object
-     * 
+     *
      * @param name A {@link String} containing the name
      */
     @Override
@@ -122,7 +122,7 @@ public class Server implements Serializable, NameAndIdObject {
         this.name = name;
         this.nameset = true;
     }
-    
+
     @Override
     public String toString() {
         StringBuilder ret = new StringBuilder();

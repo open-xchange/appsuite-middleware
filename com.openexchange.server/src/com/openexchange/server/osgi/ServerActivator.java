@@ -182,7 +182,6 @@ import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.impl.Starter;
-import com.openexchange.server.impl.Version;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
@@ -206,7 +205,7 @@ import com.openexchange.xml.spring.SpringParser;
 
 /**
  * {@link ServerActivator} - The activator for server bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ServerActivator extends HousekeepingActivator {
@@ -258,7 +257,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
     /**
      * Gets the bundle context.
-     * 
+     *
      * @return The bundle context or <code>null</code> if not started, yet
      */
     public static BundleContext getContext() {
@@ -377,16 +376,12 @@ public final class ServerActivator extends HousekeepingActivator {
                     final int smallLength = parseInt(0, sa, 1024);
                     final int mediumLength = parseInt(1, sa, 10240);
                     final int largeLength = parseInt(2, sa, 102400);
-                    CharArrayPool.setLengths(smallLength, mediumLength, largeLength);                
+                    CharArrayPool.setLengths(smallLength, mediumLength, largeLength);
                 }
                 JSONObject.initCharPool();
             }
         }
         Config.LoggerProvider = LoggerProvider.DISABLED;
-        // get version information from MANIFEST file
-        final Dictionary<?, ?> headers = context.getBundle().getHeaders();
-        Version.buildnumber = "Rev" + (String) headers.get("OXRevision");
-        Version.version = (String) headers.get("OXVersion");
         // (Re-)Initialize server service registry with available services
         {
             final ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
@@ -507,7 +502,7 @@ public final class ServerActivator extends HousekeepingActivator {
          * getNeededServices(), because publishing bundle needs the HttpService which is in turn provided by server
          */
         track(FileMetadataParserService.class, new ServiceAdderTrackerCustomizer(context));
-        
+
         track(IndexFacadeService.class, new IndexFacadeCustomizer(context));
 
         /*

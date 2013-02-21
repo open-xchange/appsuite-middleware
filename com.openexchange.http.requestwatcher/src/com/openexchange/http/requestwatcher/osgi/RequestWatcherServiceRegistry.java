@@ -54,17 +54,17 @@ import com.openexchange.osgi.ServiceRegistry;
 /**
  * {@link RequestWatcherServiceRegistry} Singleton that extends the existing {@link ServiceRegistry} to gain functionality and acts as central
  * accesspoint for classes of the grizzly bundle.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class RequestWatcherServiceRegistry extends ServiceRegistry{
     private static final RequestWatcherServiceRegistry INSTANCE = new RequestWatcherServiceRegistry();
-    
+
     /**
      * Encapsulated constructor.
      */
     private RequestWatcherServiceRegistry() {}
-    
+
     /**
      * Get the GrizzlyService Registry singleton.
      * @return the GrizzlyService Registry singleton

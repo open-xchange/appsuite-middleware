@@ -68,9 +68,9 @@ import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.tools.ShellExecutor.ArrayOutput;
 
 /**
- * 
+ *
  * @author d7
- * 
+ *
  */
 public class FilestoreDataMover implements Callable<Void> {
 
@@ -86,7 +86,7 @@ public class FilestoreDataMover implements Callable<Void> {
 
     /**
      * @throws IOException
-     * 
+     *
      */
     public FilestoreDataMover(final String src, final String dst, final Context ctx, final Filestore dstStore) throws IOException {
         this.src = src;
@@ -96,9 +96,9 @@ public class FilestoreDataMover implements Callable<Void> {
     }
 
     /**
-     * 
+     *
      * get Size as long (bytes) from the source dir
-     * 
+     *
      * @param source
      * @return
      */
@@ -107,9 +107,9 @@ public class FilestoreDataMover implements Callable<Void> {
     }
 
     /**
-     * 
+     *
      * get the list of files to copy from the source dir
-     * 
+     *
      * @param source
      * @return
      */
@@ -125,7 +125,7 @@ public class FilestoreDataMover implements Callable<Void> {
 
     /**
      * start the copy (rsync)
-     * 
+     *
      * @throws StorageException
      * @throws InterruptedException
      * @throws IOException
@@ -148,12 +148,12 @@ public class FilestoreDataMover implements Callable<Void> {
 
     /**
      * starting the thread
-     * 
+     *
      * @throws StorageException
      * @throws InterruptedException
      * @throws IOException
      * @throws ProgrammErrorException
-     * 
+     *
      */
     @Override
     public Void call() throws StorageException, IOException, InterruptedException, ProgrammErrorException {

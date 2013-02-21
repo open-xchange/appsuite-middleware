@@ -52,16 +52,16 @@ package com.openexchange.ews;
 
 /**
  * {@link EWSFactoryService}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface EWSFactoryService {
-    
+
     /**
      * Creates a new {@link ExchangeWebService}.
-     * 
+     *
      * @param url The URL to the service (usually [SERVER]/EWS/Exchange.asmx)
-     * @param userName The exchange username 
+     * @param userName The exchange username
      * @param password The password
      */
     ExchangeWebService create(String url, String userName, String password);

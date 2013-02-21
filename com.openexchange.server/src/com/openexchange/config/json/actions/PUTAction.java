@@ -68,8 +68,12 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.AbstractSetting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
+import com.openexchange.html.HtmlService;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.HTMLDetector;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -175,18 +179,23 @@ public final class PUTAction extends AbstractConfigAction {
      */
     private void saveSettingWithSubs(final SettingStorage storage, final Setting setting) throws OXException, JSONException {
         if (setting.isLeaf()) {
-            if (!ignorees.contains(setting.getPath())) {
+            final String path = setting.getPath();
+            if (!ignorees.contains(path) && path.indexOf("/io.ox/core") < 0) {
                 final String value = (String) setting.getSingleValue();
-                if (null != value && value.length() > 0 && '[' == value.charAt(0)) {
-                    final JSONArray array = new JSONArray(value);
-                    if (array.length() == 0) {
-                        setting.setEmptyMultiValue();
-                    } else {
-                        for (int i = 0; i < array.length(); i++) {
-                            setting.addMultiValue(array.getString(i));
+                if (!isEmpty(value)) {
+                    if ('[' == value.charAt(0)) {
+                        final JSONArray array = new JSONArray(value);
+                        if (array.length() == 0) {
+                            setting.setEmptyMultiValue();
+                        } else {
+                            for (int i = 0; i < array.length(); i++) {
+                                setting.addMultiValue(array.getString(i));
+                            }
                         }
+                        setting.setSingleValue(null);
+                    } else if ('{' == value.charAt(0)) {
+                        sanitizeJsonSetting(setting);
                     }
-                    setting.setSingleValue(null);
                 }
                 storage.save(setting);
             }
@@ -201,7 +210,8 @@ public final class PUTAction extends AbstractConfigAction {
                 if (sb.length() > reset) {
                     sb.setLength(reset);
                 }
-                if (!ignorees.contains(sb.append(key).toString())) {
+                final String path = sb.append(key).toString();
+                if (!ignorees.contains(path) && path.indexOf("/io.ox/core") < 0) {
                     final Setting sub = ConfigTree.getSettingByPath(setting, new String[] { key });
                     sub.setSingleValue(json.getString(key));
                     try {
@@ -215,6 +225,40 @@ public final class PUTAction extends AbstractConfigAction {
             if (null != exc) {
                 throw exc;
             }
+        }
+    }
+
+    private static final Pattern P_TAG_BODY = Pattern.compile("(?:\r?\n)?</?body[^<]*>(?:\r?\n)?", Pattern.CASE_INSENSITIVE);
+
+    /** Sanitizes possible JSON setting */
+    public static void sanitizeJsonSetting(final Setting setting) {
+        try {
+            final JSONObject jConfig = new JSONObject((String) setting.getSingleValue());
+            boolean saveBack = false;
+            final JSONObject jMailConfig = jConfig.optJSONObject("mail");
+            if (null != jMailConfig && jMailConfig.hasAndNotNull("signatures")) {
+                final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                if (null != htmlService) {
+                    final JSONArray jSignatures = jMailConfig.getJSONArray("signatures");
+                    final int length = jSignatures.length();
+                    for (int i = 0; i < length; i++) {
+                        final JSONObject jSignature = jSignatures.getJSONObject(i);
+                        String content = jSignature.optString("signature_text", null);
+                        if (null != content && HTMLDetector.containsHTMLTags(content.getBytes(Charsets.ISO_8859_1))) {
+                            content = htmlService.sanitize(content, null, false, null, null);
+                            content = P_TAG_BODY.matcher(content).replaceAll("");
+                            jSignature.put("signature_text", content);
+                            saveBack = true;
+                        }
+                    }
+                }
+                
+            }
+            if (saveBack) {
+                setting.setSingleValue(jConfig.toString());
+            }
+        } catch (Exception e) {
+            // Ignore
         }
     }
 

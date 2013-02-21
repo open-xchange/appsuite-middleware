@@ -73,6 +73,7 @@ public final class SessionTestSuite {
         tests.addTestSuite(HttpAuthTest.class);
         tests.addTestSuite(ChangeIPTest.class);
         tests.addTestSuite(FormLoginTest.class);
+        tests.addTestSuite(TokenLoginTest.class);
         return tests;
     }
 }

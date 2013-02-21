@@ -74,6 +74,7 @@ import com.openexchange.config.Filter;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.config.WildcardFilter;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -227,7 +228,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         public void processFile(File file);
     }
 
-    private void processDirectory(final File dir, final FileFilter fileFilter, final FileProcessor processor) {
+    private synchronized void processDirectory(final File dir, final FileFilter fileFilter, final FileProcessor processor) {
         final File[] files = dir.listFiles(fileFilter);
         if (files == null) {
             LOG.info(MessageFormat.format("Can't read {0}. Skipping.", dir));
@@ -281,11 +282,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             tmp.load(fis);
             return tmp;
         } finally {
-            try {
-                fis.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            Streams.close(fis);
         }
     }
 
@@ -525,7 +522,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             return file;
         }
         final File[] subDirs = file.listFiles(new FileFilter() {
-            
+
             @Override
             public boolean accept(final File file) {
                 return file.isDirectory();
@@ -605,13 +602,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             LOG.fatal("Can't read file: " + file);
             return null;
         } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (final IOException e) {
-                    // Ignore
-                }
-            }
+            Streams.close(reader);
         }
     }
 

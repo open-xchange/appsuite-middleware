@@ -61,14 +61,14 @@ import com.openexchange.user.copy.ObjectMapping;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class IntegerToObjectMapping<T> implements ObjectMapping<T> {    
-    
+public abstract class IntegerToObjectMapping<T> implements ObjectMapping<T> {
+
     private final Map<Integer, Integer> idMapping;
-    
+
     private final Map<Integer, T> sourceMapping;
-    
+
     private final Map<Integer, T> destinationMapping;
-    
+
 
     public IntegerToObjectMapping() {
         super();
@@ -83,13 +83,13 @@ public abstract class IntegerToObjectMapping<T> implements ObjectMapping<T> {
     public T getSource(final int id) {
         return sourceMapping.get(id);
     }
-    
+
     /**
      * @see com.openexchange.user.copy.ObjectMapping#getSourceKeys()
      */
     public Set<Integer> getSourceKeys() {
         final Set<Integer> keySet = new HashSet<Integer>(idMapping.keySet());
-        
+
         return keySet;
     }
 
@@ -97,16 +97,16 @@ public abstract class IntegerToObjectMapping<T> implements ObjectMapping<T> {
      * @see com.openexchange.user.copy.ObjectMapping#getDestination(java.lang.Object)
      */
     public abstract T getDestination(T source);
-    
+
     protected T getDestinationById(final Integer id) {
         final Integer dstObjId = idMapping.get(id);
         if (dstObjId != null) {
             return destinationMapping.get(dstObjId);
         }
-        
+
         return null;
     }
-    
+
     public void addMapping(final Integer sourceId, final T source, final Integer destinationId, final T destination) {
         idMapping.put(sourceId, destinationId);
         sourceMapping.put(sourceId, source);

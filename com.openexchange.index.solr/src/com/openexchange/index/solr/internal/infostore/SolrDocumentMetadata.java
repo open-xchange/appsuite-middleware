@@ -63,16 +63,16 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 public class SolrDocumentMetadata implements DocumentMetadata {
 
     private static final long serialVersionUID = -4095262954539802227L;
-    
+
 
     private Date lastModified;
-    
+
     private Date creationDate;
-    
+
     private int modifiedBy;
-    
+
     private long folderId;
-    
+
     private int id;
 
     private String title;
@@ -96,7 +96,7 @@ public class SolrDocumentMetadata implements DocumentMetadata {
     private String filestoreLocation;
 
     private int numberOfVersions;
-        
+
 
     @Override
     public String getProperty(String key) {

@@ -52,7 +52,6 @@ package com.openexchange.calendar.itip.generators;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.calendar.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
@@ -69,27 +68,27 @@ public class Sentence {
     private final List<Object> arguments = new ArrayList<Object>();
     private final List<ArgumentType> types = new ArrayList<ArgumentType>();
     private final List<Object[]> extra = new ArrayList<Object[]>();
-    
+
     public Sentence(String message) {
         this.message = message;
     }
-    
+
     public Sentence add(Object argument, ArgumentType type, Object...extra) {
         arguments.add(argument);
         types.add(type);
         this.extra.add(extra);
         return this;
     }
-    
+
     public Sentence add(Object argument) {
         return add(argument, ArgumentType.NONE);
     }
-    
-    
+
+
     public String getMessage(TypeWrapper wrapper, Locale locale) {
         List<String> wrapped = new ArrayList<String>(arguments.size());
         StringHelper sh = StringHelper.valueOf(locale);
-        
+
         for(int i = 0, size = arguments.size(); i < size; i++) {
             Object argument = arguments.get(i);
             ArgumentType type = types.get(i);
@@ -121,7 +120,7 @@ public class Sentence {
         if (isEmpty(format) || format.indexOf('$') < 0) {
             return format;
         }
-        return SANE_FORMAT.matcher(format).replaceAll("$1" + Matcher.quoteReplacement("$s") + "$2");
+        return SANE_FORMAT.matcher(format).replaceAll("$1" + com.openexchange.java.Strings.quoteReplacement("$s") + "$2");
     }
 
     private static boolean isEmpty(final String string) {
@@ -135,9 +134,9 @@ public class Sentence {
         }
         return isWhitespace;
     }
-    
+
     public String getMessage(Locale locale) {
         return getMessage(new PassthroughWrapper(), locale);
     }
-    
+
 }

@@ -51,7 +51,7 @@ package com.openexchange.aws.ec2;
 
 /**
  * {@link AWSEC2Configuration}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class AWSEC2Configuration {

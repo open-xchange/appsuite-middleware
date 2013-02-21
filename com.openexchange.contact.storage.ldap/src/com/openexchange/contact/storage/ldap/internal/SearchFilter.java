@@ -68,21 +68,21 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
  * {@link SearchFilter}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class SearchFilter {
-	
+
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(SearchFilter.class);
-    
+
     private final Locale locale;
     private final SearchTerm<?> term;
 
     /**
      * Initializes a new {@link SearchFilter}.
-     * 
+     *
      * @param term the search term
-     * @param locale the locale for string comparisons, or <code>null</code> 
+     * @param locale the locale for string comparisons, or <code>null</code>
      *        if not relevant
      */
     public SearchFilter(SearchTerm<?> term, Locale locale) {
@@ -90,11 +90,11 @@ public class SearchFilter {
         this.term = term;
         this.locale = locale;
     }
-    
+
     /**
-     * Creates a new collection and adds all contacts from the supplied 
+     * Creates a new collection and adds all contacts from the supplied
      * collection fulfilling the search criteria.
-     * 
+     *
      * @param contacts
      * @return
      * @throws OXException
@@ -110,7 +110,7 @@ public class SearchFilter {
         }
         return filteredContacts;
     }
-    
+
     private static boolean matches(Contact contact, SearchTerm<?> term, Locale locale) throws OXException {
         if (SingleSearchTerm.class.isInstance(term)) {
             return matches(contact, (SingleSearchTerm)term, locale);
@@ -123,7 +123,7 @@ public class SearchFilter {
 
     private static boolean matches(Contact contact, SingleSearchTerm term, Locale locale) throws OXException {
         /*
-         * get relevant mapping for term 
+         * get relevant mapping for term
          */
         LdapMapping<? extends Object> mapping = LdapMapper.GENERIC.getMapping(term);
         if (null == mapping) {
@@ -143,7 +143,7 @@ public class SearchFilter {
         Object contactValue = mapping.get(contact);
         if (null != contactValue && String.class.isInstance(operandValue) && false == String.class.isInstance(contactValue)) {
             // normalize to strings for comparison (numerical IDs from contact)))
-            contactValue = contactValue.toString();            
+            contactValue = contactValue.toString();
         }
         /*
          * compare values
@@ -167,7 +167,7 @@ public class SearchFilter {
             throw new IllegalArgumentException("Unknown operation: " + term.getOperation());
         }
     }
-    
+
     private static boolean matches(Contact contact, CompositeSearchTerm term, Locale locale) throws OXException {
         SearchTerm<?>[] terms = term.getOperands();
         switch ((CompositeOperation)term.getOperation()) {
@@ -176,7 +176,7 @@ public class SearchFilter {
                 if (false == matches(contact, searchTerm, locale)) {
                     return false;
                 }
-            }            
+            }
             return true;
         case NOT:
             return false == matches(contact, terms[0], locale);
@@ -185,7 +185,7 @@ public class SearchFilter {
                 if (matches(contact, searchTerm, locale)) {
                     return true;
                 }
-            }            
+            }
             return false;
         default:
             throw new IllegalArgumentException("Unknown operation: " + term.getOperation());
@@ -207,7 +207,7 @@ public class SearchFilter {
             } else if (null == locale) {
                 return value1.compareTo(value2);
             } else {
-                return Collator.getInstance(locale).compare(value1, value2);                       
+                return Collator.getInstance(locale).compare(value1, value2);
             }
         } else if (Comparable.class.isInstance(o1)) {
             return ((Comparable)o1).compareTo(o2);
@@ -218,10 +218,10 @@ public class SearchFilter {
 
     private static boolean matchesWildcard(String value, String wildcardPattern, Locale locale) {
         return "*".equals(wildcardPattern) || matchesWildcard(
-            value.toLowerCase(null != locale ? locale : Locale.ENGLISH), 
+            value.toLowerCase(null != locale ? locale : Locale.ENGLISH),
             wildcardPattern.toLowerCase(null != locale ? locale : Locale.ENGLISH), 0, 0);
     }
-    
+
     private static boolean matchesWildcard(String value, String wildcardPattern, int valueIndex, int patternIndex) {
         /*
          * based on http://www.java2s.com/Open-Source/Java/Development/jodd/jodd/util/Wildcard.java.htm
@@ -250,7 +250,7 @@ public class SearchFilter {
                     continue;
                 }
                 if (p == '?') {
-                    valueIndex++; 
+                    valueIndex++;
                     patternIndex++;
                     continue;
                 }
@@ -277,15 +277,15 @@ public class SearchFilter {
                 }
             } else {
                 nextIsNotWildcard = false;
-            }    
+            }
             // check if pattern char and string char are equals
             if (p != value.charAt(valueIndex)) {
                 return false;
-            }    
+            }
             // everything matches for now, continue
-            valueIndex++; 
+            valueIndex++;
             patternIndex++;
         }
     }
-    
+
 }

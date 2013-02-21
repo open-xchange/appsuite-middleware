@@ -1,18 +1,18 @@
-/* 
- * Copyright 2005 - 2009 Terracotta, Inc. 
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
- * use this file except in compliance with the License. You may obtain a copy 
- * of the License at 
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0 
- *   
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT 
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- * License for the specific language governing permissions and limitations 
+/*
+ * Copyright 2005 - 2009 Terracotta, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
  * under the License.
- * 
+ *
  */
 
 package org.quartz.examples.example13;
@@ -31,13 +31,13 @@ import org.quartz.JobKey;
  * <p>
  * A dumb implementation of Job, for unit testing purposes.
  * </p>
- * 
+ *
  * @author James House
  */
 public class SimpleRecoveryJob implements Job {
 
     private static final String COUNT = "count";
-    
+
     /**
      * Quartz requires a public empty constructor so that the
      * scheduler can instantiate the class whenever it needs.
@@ -51,7 +51,7 @@ public class SimpleRecoveryJob implements Job {
      * <code>{@link org.quartz.Trigger}</code> fires that is associated with
      * the <code>Job</code>.
      * </p>
-     * 
+     *
      * @throws JobExecutionException
      *             if there is an exception while executing the job.
      */
@@ -84,13 +84,13 @@ public class SimpleRecoveryJob implements Job {
         }
         count++;
         data.put(COUNT, count);
-        
-        System.out.println("SimpleRecoveryJob: " + jobKey + 
-                " done at " + new Date() + 
+
+        System.out.println("SimpleRecoveryJob: " + jobKey +
+                " done at " + new Date() +
                 "\n Execution #" + count);
-         
+
     }
 
-    
+
 
 }

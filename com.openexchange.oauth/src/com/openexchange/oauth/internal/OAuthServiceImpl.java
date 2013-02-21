@@ -70,14 +70,17 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Api;
+import org.scribe.builder.api.DropBoxApi;
 import org.scribe.builder.api.FacebookApi;
+import org.scribe.builder.api.FlickrApi;
 import org.scribe.builder.api.FoursquareApi;
 import org.scribe.builder.api.GoogleApi;
 import org.scribe.builder.api.LinkedInApi;
-import org.scribe.builder.api.TwitterApi;
-import org.scribe.builder.api.YahooApi;
 import org.scribe.builder.api.TumblrApi;
-import org.scribe.builder.api.FlickrApi;
+import org.scribe.builder.api.TwitterApi;
+import org.scribe.builder.api.VkontakteApi;
+import org.scribe.builder.api.XingApi;
+import org.scribe.builder.api.YahooApi;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import com.openexchange.context.ContextService;
@@ -86,6 +89,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthAccount;
@@ -103,6 +107,7 @@ import com.openexchange.oauth.services.ServiceRegistry;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
 import com.openexchange.secret.SecretEncryptionStrategy;
+import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.session.Session;
@@ -120,7 +125,7 @@ import com.openexchange.tools.session.SessionHolder;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<PWUpdate>, EncryptedItemDetectorService, SecretMigrator {
+public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<PWUpdate>, EncryptedItemDetectorService, SecretMigrator, EncryptedItemCleanUpService {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OAuthServiceImpl.class));
 
@@ -131,7 +136,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     private final IDGeneratorService idGenerator;
 
     private final ContextService contexts;
-    
+
     private final CallbackRegistry callbackRegistry;
 
     /**
@@ -266,21 +271,21 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Process authorization URL
              */
-            final String authURL = metaData.processAuthorizationURL(authorizationURL.toString());
+            final String authURL = metaData.processAuthorizationURLCallbackAware(metaData.processAuthorizationURL(authorizationURL.toString()), callbackUrl);
             /*
              * Return interaction
              */
-            
+
             if (metaData.registerTokenBasedDeferrer()) {
             	callbackRegistry.add(callbackUrl, scribeToken.getToken());
             }
-            
+
             return new OAuthInteractionImpl(
                 scribeToken == null ? OAuthToken.EMPTY_TOKEN : new ScribeOAuthToken(scribeToken),
                 authURL,
                 callbackUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK);
         } catch (final org.scribe.exceptions.OAuthException e) {
-            throw OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+            throw handleScribeOAuthException(e);
         } catch (final Exception e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -424,11 +429,28 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     public void deleteAccount(final int accountId, final int user, final int contextId) throws OXException {
         final Context context = getContext(contextId);
         final Connection con = getConnection(false, context);
+        startTransaction(con);
+        boolean committed = false;
         try {
-            con.setAutoCommit(false); // BEGIN
+            deleteAccount(accountId, user, contextId, con);
+            con.commit(); // COMMIT
+            committed = true;
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
+            throw e;
+        } catch (final RuntimeException e) {
+            throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (!committed) {
+                rollback(con);
+            }
+            autocommit(con);
+            provider.releaseReadConnection(context, con);
         }
+    }
+
+    private void deleteAccount(final int accountId, final int user, final int contextId, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             final DeleteListenerRegistry deleteListenerRegistry = DeleteListenerRegistry.getInstance();
@@ -444,20 +466,14 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              * Post folder event
              */
             postOAuthDeleteEvent(accountId, user, contextId);
-            con.commit(); // COMMIT
         } catch (final SQLException e) {
-            rollback(con);
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            rollback(con);
             throw e;
-        } catch (final Exception e) {
-            rollback(con);
+        } catch (final RuntimeException e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
-            autocommit(con);
-            provider.releaseReadConnection(context, con);
         }
     }
 
@@ -580,7 +596,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             provider.releaseReadConnection(context, con);
         }
     }
-    
+
     @Override
     public OAuthAccount getDefaultAccount(final API api, final Session session) throws OXException {
         final int contextId = session.getContextId();
@@ -696,7 +712,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 account.setSecret(oAuthToken.getSecret());
             }
         } catch (final org.scribe.exceptions.OAuthException e) {
-            throw OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+            throw handleScribeOAuthException(e);
         } catch (final Exception e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -709,26 +725,36 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     // Helper Methods
 
     private static org.scribe.oauth.OAuthService getScribeService(final OAuthServiceMetaData metaData, final String callbackUrl) throws OXException {
-        final String serviceId = metaData.getId().toLowerCase(Locale.ENGLISH);
         final Class<? extends Api> apiClass;
-        if (serviceId.indexOf("twitter") >= 0) {
-            apiClass = TwitterApi.class;
-        } else if (serviceId.indexOf("linkedin") >= 0) {
-            apiClass = LinkedInApi.class;
-        } else if (serviceId.indexOf("google") >= 0) {
-            apiClass = GoogleApi.class;
-        } else if (serviceId.indexOf("yahoo") >= 0) {
-            apiClass = YahooApi.class;
-        } else if (serviceId.indexOf("foursquare") >= 0) {
-            apiClass = FoursquareApi.class;
-        } else if (serviceId.indexOf("facebook") >= 0) {
-            apiClass = FacebookApi.class;
-        } else if (serviceId.indexOf("tumblr") >= 0) {
-            apiClass = TumblrApi.class;
-        } else if (serviceId.indexOf("flickr") >= 0) {
-            apiClass = FlickrApi.class;
+        if (metaData instanceof com.openexchange.oauth.ScribeAware) {
+            apiClass = ((com.openexchange.oauth.ScribeAware) metaData).getScribeService();
         } else {
-            throw OAuthExceptionCodes.UNSUPPORTED_SERVICE.create(serviceId);
+            final String serviceId = metaData.getId().toLowerCase(Locale.ENGLISH);
+            if (serviceId.indexOf("twitter") >= 0) {
+                apiClass = TwitterApi.class;
+            } else if (serviceId.indexOf("linkedin") >= 0) {
+                apiClass = LinkedInApi.class;
+            } else if (serviceId.indexOf("google") >= 0) {
+                apiClass = GoogleApi.class;
+            } else if (serviceId.indexOf("yahoo") >= 0) {
+                apiClass = YahooApi.class;
+            } else if (serviceId.indexOf("foursquare") >= 0) {
+                apiClass = FoursquareApi.class;
+            } else if (serviceId.indexOf("facebook") >= 0) {
+                apiClass = FacebookApi.class;
+            } else if (serviceId.indexOf("tumblr") >= 0) {
+                apiClass = TumblrApi.class;
+            } else if (serviceId.indexOf("flickr") >= 0) {
+                apiClass = FlickrApi.class;
+            } else if (serviceId.indexOf("dropbox") >= 0) {
+                apiClass = DropBoxApi.class;
+            } else if (serviceId.indexOf("xing") >= 0) {
+                apiClass = XingApi.class;
+            } else if (serviceId.indexOf("vkontakte") >= 0) {
+                apiClass = VkontakteApi.class;
+            } else {
+                throw OAuthExceptionCodes.UNSUPPORTED_SERVICE.create(serviceId);
+            }
         }
         final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(apiClass);
         serviceBuilder.apiKey(metaData.getAPIKey()).apiSecret(metaData.getAPISecret());
@@ -841,7 +867,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     public void update(final String recrypted, final PWUpdate customizationNote) throws OXException {
         final StringBuilder b = new StringBuilder();
         b.append("UPDATE oauthAccounts SET ").append(customizationNote.field).append("= ? WHERE cid = ? AND id = ?");
-        
+
         final Context context = getContext(customizationNote.cid);
         Connection con = null;
         PreparedStatement stmt = null;
@@ -855,6 +881,75 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e.getMessage());
         } finally {
+            provider.releaseWriteConnection(context, con);
+        }
+    }
+
+    @Override
+    public void cleanUpEncryptedItems(String secret, ServerSession session) throws OXException {
+        final CryptoService cryptoService = ServiceRegistry.getInstance().getService(CryptoService.class);
+        final int contextId = session.getContextId();
+        final Context context = getContext(contextId);
+        final Connection con = getConnection(false, context);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Boolean committed = null;
+        try {
+            stmt = con.prepareStatement("SELECT id, accessToken, accessSecret FROM oauthAccounts WHERE cid = ? AND user = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, session.getUserId());
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return;
+            }
+            final List<Integer> accounts = new ArrayList<Integer>(8);
+            do {
+                try {
+                    // Try using the secret.
+                    final String accessToken = rs.getString(2);
+                    if (!isEmpty(accessToken)) {
+                        cryptoService.decrypt(accessToken, secret);
+                    }
+                    final String accessSecret = rs.getString(3);
+                    if (!isEmpty(accessSecret)) {
+                        cryptoService.decrypt(accessSecret, secret);
+                    }
+                } catch (final OXException e) {
+                    // Clean-up
+                    accounts.add(Integer.valueOf(rs.getInt(1)));
+                }
+            } while (rs.next());
+            closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+            if (accounts.isEmpty()) {
+                return;
+            }
+            /*
+             * Delete them
+             */
+            committed = Boolean.FALSE;
+            startTransaction(con);
+            // Statement
+            stmt = con.prepareStatement("UPDATE oauthAccounts SET accessToken = ?, accessSecret = ? WHERE cid = ? AND user = ? AND id = ?");
+            stmt.setString(1, "");
+            stmt.setString(2, "");
+            stmt.setInt(3, contextId);
+            stmt.setInt(4, session.getUserId());
+            for (final Integer accountId : accounts) {
+                stmt.setInt(5, accountId.intValue());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+            con.commit();
+            committed = Boolean.TRUE;
+        } catch (final SQLException e) {
+            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            if (null != committed && !committed.booleanValue()) {
+                rollback(con);
+            }
+            closeSQLStuff(rs, stmt);
             provider.releaseWriteConnection(context, con);
         }
     }
@@ -898,8 +993,14 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             do {
                 try {
                     // Try using the new secret. Maybe this account doesn't need the migration
-                    cryptoService.decrypt(rs.getString(2), newSecret);
-                    cryptoService.decrypt(rs.getString(3), newSecret);
+                    final String accessToken = rs.getString(2);
+                    if (!isEmpty(accessToken)) {
+                        cryptoService.decrypt(accessToken, newSecret);
+                    }
+                    final String accessSecret = rs.getString(3);
+                    if (!isEmpty(accessSecret)) {
+                        cryptoService.decrypt(accessSecret, newSecret);
+                    }
                 } catch (final OXException e) {
                     // Needs migration
                     final DefaultOAuthAccount account = new DefaultOAuthAccount();
@@ -934,6 +1035,49 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         }
     }
 
-	
+    private static void startTransaction(final Connection con) throws OXException {
+        try {
+            con.setAutoCommit(false); // BEGIN
+        } catch (final SQLException e) {
+            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static OXException handleScribeOAuthException(org.scribe.exceptions.OAuthException e) {
+        final String message = e.getMessage();
+        if (null != message) {
+            final String lcMsg = toLowerCase(message);
+            String str = "can't extract token and secret from this:";
+            int pos = lcMsg.indexOf(str);
+            if (pos > 0) {
+                return OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, message.substring(pos + str.length()));
+            }
+            str = "can't extract a token from an empty string";
+            pos = lcMsg.indexOf(str);
+            if (pos > 0) {
+                return OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, message.substring(pos));
+            }
+            str = "can't extract a token from this:";
+            pos = lcMsg.indexOf(str);
+            if (pos > 0) {
+                return OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, message.substring(pos + str.length()));
+            }
+        }
+        return OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
+    }
 
 }

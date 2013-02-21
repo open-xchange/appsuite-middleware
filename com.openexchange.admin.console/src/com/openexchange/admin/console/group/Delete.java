@@ -65,7 +65,7 @@ public class Delete extends DeleteCore {
     public Delete(final String[] args2) {
 
         final AdminParser parser = new AdminParser("deletegroup");
-        
+
         commonfunctions(parser, args2);
     }
 

@@ -63,8 +63,8 @@ public interface SessionThreadCountMBean {
     public static final String SESSION_THREAD_COUNT_DOMAIN = "com.openexchange.sessionCount";
 
     /**
-     * Gets the thread information from sessions whose number of threads exceed/are equal to specified threshold. 
-     * 
+     * Gets the thread information from sessions whose number of threads exceed/are equal to specified threshold.
+     *
      * @param threshold The threshold
      * @return The thread information
      */

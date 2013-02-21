@@ -54,23 +54,23 @@ import java.util.concurrent.FutureTask;
 
 /**
  * A FutureTask extented by Progress
- * 
+ *
  * @author d7
- * 
+ *
  * @param <V>
  */
 public class ExtendedFutureTask<V> extends FutureTask<V> {
 
     private final Callable<V> callable;
-    
+
     private final String typeofjob;
-    
+
     private final String furtherinformation;
-    
+
     protected final int id;
-    
+
     protected final int cid;
-    
+
     public ExtendedFutureTask(final Callable<V> callable, final String typeofjob, final String furtherinformation, final int id, final int cid) {
         super(callable);
         this.callable = callable;
@@ -82,7 +82,7 @@ public class ExtendedFutureTask<V> extends FutureTask<V> {
 
     /**
      * Convenience method for detecting if a job runs
-     * 
+     *
      * @return
      */
     public boolean isRunning() {
@@ -91,7 +91,7 @@ public class ExtendedFutureTask<V> extends FutureTask<V> {
 
     /**
      * Convenience method for detecting if a job failed
-     * 
+     *
      * @return
      */
     public boolean isFailed() {
@@ -106,10 +106,10 @@ public class ExtendedFutureTask<V> extends FutureTask<V> {
         }
         return false;
     }
-    
+
     /**
      * Gets the progress percentage of the underlying job
-     * 
+     *
      * @return The progress in percent
      * @throws NoSuchMethodException If the job doesn't support this feature
      */
@@ -120,7 +120,7 @@ public class ExtendedFutureTask<V> extends FutureTask<V> {
         } else {
             throw new NoSuchMethodException();
         }
-        
+
     }
 
     public final String getFurtherinformation() {

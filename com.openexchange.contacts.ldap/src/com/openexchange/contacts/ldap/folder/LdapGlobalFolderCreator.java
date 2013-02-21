@@ -257,11 +257,6 @@ public class LdapGlobalFolderCreator {
             }
 
             @Override
-            public void removeRandomToken() {
-                // Nothing to do
-            }
-
-            @Override
             public void setParameter(final String name, final Object value) {
                 // Nothing to do
             }
@@ -295,6 +290,11 @@ public class LdapGlobalFolderCreator {
             public void setHash(final String hash) {
                 // Nothing to do
 
+            }
+
+            @Override
+            public boolean isTransient() {
+                return false;
             }
 
         };

@@ -57,7 +57,7 @@ import java.util.Collection;
  * {@link MessageInfo} - A message information in thread-sort string;
  * <p>
  * E.g. <code>"${23}"</code> or <code>"${INBOX/110}"</code> or <code>"${0/INBOX/110}"</code>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessageInfo {
@@ -74,7 +74,7 @@ public final class MessageInfo {
 
     /**
      * Extracts the message numbers from specified collection
-     * 
+     *
      * @param messageIds The message identifiers
      * @return The message numbers
      */
@@ -88,7 +88,7 @@ public final class MessageInfo {
 
     /**
      * Extracts the message numbers from specified collection
-     * 
+     *
      * @param messageIds The message identifiers
      * @return The message numbers
      */
@@ -103,7 +103,7 @@ public final class MessageInfo {
 
     /**
      * Gets the message identifier for specified string.
-     * 
+     *
      * @param msgId The message idenfifier's string representation
      * @return The message identifier
      */
@@ -113,7 +113,7 @@ public final class MessageInfo {
 
     /**
      * Gets the message identifier for specified string.
-     * 
+     *
      * @param msgId The message idenfifier's string representation
      * @return The message identifier
      */
@@ -169,7 +169,7 @@ public final class MessageInfo {
 
     /**
      * Initializes a new {@link MessageInfo}.
-     * 
+     *
      * @param messageNumber The message number
      */
     public MessageInfo(final int messageNumber) {
@@ -181,7 +181,7 @@ public final class MessageInfo {
 
     /**
      * Gets the <code>slen</code>
-     * 
+     *
      * @return The <code>slen</code>
      */
     public int getSlen() {
@@ -190,7 +190,7 @@ public final class MessageInfo {
 
     /**
      * Sets the <code>slen</code>
-     * 
+     *
      * @param slen The <code>slen</code> to set
      * @return This message identifier
      */
@@ -201,7 +201,7 @@ public final class MessageInfo {
 
     /**
      * Gets the message number
-     * 
+     *
      * @return The message number
      */
     public int getMessageNumber() {
@@ -210,7 +210,7 @@ public final class MessageInfo {
 
     /**
      * Sets the message number
-     * 
+     *
      * @param messageNumber The message number to set
      * @return This message identifier
      */
@@ -221,7 +221,7 @@ public final class MessageInfo {
 
     /**
      * Gets the full name
-     * 
+     *
      * @return The full name
      */
     public String getFullName() {
@@ -230,7 +230,7 @@ public final class MessageInfo {
 
     /**
      * Sets the full name
-     * 
+     *
      * @param fullName The full name to set
      * @return This message identifier
      */
@@ -241,7 +241,7 @@ public final class MessageInfo {
 
     /**
      * Gets the account identifier
-     * 
+     *
      * @return The account identifier
      */
     public int getAccountId() {
@@ -250,7 +250,7 @@ public final class MessageInfo {
 
     /**
      * Sets the account identifier
-     * 
+     *
      * @param accountId The account identifier to set
      * @return This message identifier
      */
@@ -315,7 +315,7 @@ public final class MessageInfo {
 
     /**
      * Parses a positive <code>int</code> value from passed {@link String} instance.
-     * 
+     *
      * @param s The string to parse
      * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
      */

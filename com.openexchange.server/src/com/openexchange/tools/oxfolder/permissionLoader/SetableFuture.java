@@ -56,7 +56,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link SetableFuture} - A modifiable future task.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SetableFuture extends FutureTask<OCLPermission[]> implements Serializable {

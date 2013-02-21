@@ -68,7 +68,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link JSlobAction} - Abstract JSlob action.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class JSlobAction implements AJAXActionService {
@@ -100,7 +100,7 @@ public abstract class JSlobAction implements AJAXActionService {
 
     /**
      * Initializes a new {@link JSlobAction}.
-     * 
+     *
      * @param services The service look-up
      */
     protected JSlobAction(final ServiceLookup services, final Map<String, JSlobAction> actions) {
@@ -140,7 +140,7 @@ public abstract class JSlobAction implements AJAXActionService {
 
     /**
      * Gets the JSlob service associated with specified JSlob service identifier.
-     * 
+     *
      * @param jslobServiceId The JSlob service identifier
      * @return The JSlob service
      * @throws OXException If JSlob service cannot be returned
@@ -155,7 +155,7 @@ public abstract class JSlobAction implements AJAXActionService {
 
     /**
      * Performs given JSlob request.
-     * 
+     *
      * @param jslobRequest The JSlob request
      * @return The AJAX result
      * @throws OXException If performing request fails
@@ -164,7 +164,7 @@ public abstract class JSlobAction implements AJAXActionService {
 
     /**
      * Performs given JSlob request in REST style.
-     * 
+     *
      * @param jslobRequest The JSlob request
      * @param method The REST method to perform
      * @return The AJAX result
@@ -178,14 +178,14 @@ public abstract class JSlobAction implements AJAXActionService {
 
     /**
      * Gets the action identifier for this JSlob action.
-     * 
+     *
      * @return The action identifier; e.g. <code>"get"</code>
      */
     public abstract String getAction();
 
     /**
      * Gets the REST method identifiers for this JSlob action.
-     * 
+     *
      * @return The REST method identifiers or <code>null</code> (e.g. <code>"GET"</code>)
      */
     public List<Method> getRESTMethods() {

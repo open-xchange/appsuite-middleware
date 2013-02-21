@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -248,6 +249,38 @@ public class RefresherTest extends TestCase {
                 public boolean isLocal() {
                     // Nothing to do
                     return false;
+                }
+                @Override
+                public Set<?> getGroupKeys(String group) {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public Set<String> getGroupNames() {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public Set<?> getAllKeys() throws OXException {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public Set<?> getKeysInRange(int start, int end) throws OXException {
+                    throw new UnsupportedOperationException();
+                }
+                @Override
+                public void put(Serializable key, Serializable obj, boolean invalidate) throws OXException {
+                    put(key, obj);
+                }
+                @Override
+                public void put(Serializable key, Serializable val, ElementAttributes attr, boolean invalidate) throws OXException {
+                    put(key, val, attr);
+                }
+                @Override
+                public void putInGroup(Serializable key, String groupName, Object value, ElementAttributes attr, boolean invalidate) throws OXException {
+                    putInGroup(key, groupName, value, attr);
+                }
+                @Override
+                public void putInGroup(Serializable key, String groupName, Serializable value, boolean invalidate) throws OXException {
+                    putInGroup(key, groupName, value);
                 }
             };
             @Override

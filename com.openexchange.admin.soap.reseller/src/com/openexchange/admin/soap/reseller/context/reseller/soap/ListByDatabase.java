@@ -12,9 +12,9 @@ import com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Database;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -27,8 +27,8 @@ import com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Database;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -45,11 +45,11 @@ public class ListByDatabase {
 
     /**
      * Ruft den Wert der db-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Database }
-     *     
+     *
      */
     public Database getDb() {
         return db;
@@ -57,11 +57,11 @@ public class ListByDatabase {
 
     /**
      * Legt den Wert der db-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Database }
-     *     
+     *
      */
     public void setDb(Database value) {
         this.db = value;
@@ -69,11 +69,11 @@ public class ListByDatabase {
 
     /**
      * Ruft den Wert der auth-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Credentials }
-     *     
+     *
      */
     public Credentials getAuth() {
         return auth;
@@ -81,11 +81,11 @@ public class ListByDatabase {
 
     /**
      * Legt den Wert der auth-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Credentials }
-     *     
+     *
      */
     public void setAuth(Credentials value) {
         this.auth = value;

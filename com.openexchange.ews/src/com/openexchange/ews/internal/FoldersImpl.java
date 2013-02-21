@@ -75,15 +75,15 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link FoldersImpl}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class FoldersImpl extends Common implements Folders {
-    
+
     public FoldersImpl(ExchangeWebService service, ExchangeServicePortType port) {
         super(service, port);
     }
-    
+
     @Override
     public BaseFolderType getFolder(BaseFolderIdType folderID, DefaultShapeNamesType shape) throws OXException {
         NonEmptyArrayOfBaseFolderIdsType folderIds = new NonEmptyArrayOfBaseFolderIdsType();
@@ -92,7 +92,7 @@ public class FoldersImpl extends Common implements Folders {
         folderShape.setBaseShape(shape);
         GetFolderType request = new GetFolderType();
         request.setFolderShape(folderShape);
-        request.setFolderIds(folderIds);        
+        request.setFolderIds(folderIds);
         Holder<GetFolderResponseType> responseHolder = new Holder<GetFolderResponseType>();
         port.getFolder(request, getRequestVersion(), responseHolder, getVersionHolder());
         FolderInfoResponseMessageType responseMessage = (FolderInfoResponseMessageType)getResponseMessage(responseHolder);
@@ -106,14 +106,14 @@ public class FoldersImpl extends Common implements Folders {
             return responseMessage.getFolders().getFolderOrCalendarFolderOrContactsFolder().get(0);
         }
     }
-    
+
     @Override
     public BaseFolderType getFolder(DistinguishedFolderIdNameType distinguishedFolderIdName, DefaultShapeNamesType shape) throws OXException {
         DistinguishedFolderIdType distinguishedFolderIdType = new DistinguishedFolderIdType();
         distinguishedFolderIdType.setId(distinguishedFolderIdName);
         return getFolder(distinguishedFolderIdType, shape);
     }
-    
+
     @Override
     public List<BaseFolderType> findFoldersByName(BaseFolderIdType parentFolderID, String displayName, FolderQueryTraversalType traversal, DefaultShapeNamesType shape) throws OXException {
         RestrictionType restriction = getIsEqualRestriction(UnindexedFieldURIType.FOLDER_DISPLAY_NAME, displayName);
@@ -124,7 +124,7 @@ public class FoldersImpl extends Common implements Folders {
             return folders;
         }
     }
-    
+
     @Override
     public BaseFolderType findFolderByName(BaseFolderIdType parentFolderID, String displayName, FolderQueryTraversalType traversal, DefaultShapeNamesType shape) throws OXException {
         RestrictionType restriction = getIsEqualRestriction(UnindexedFieldURIType.FOLDER_DISPLAY_NAME, displayName);
@@ -137,7 +137,7 @@ public class FoldersImpl extends Common implements Folders {
             return folders.get(0);
         }
     }
-    
+
     private List<BaseFolderType> findFolders(BaseFolderIdType parentFolderID, RestrictionType restriction, FolderQueryTraversalType traversal, DefaultShapeNamesType shape) throws OXException {
         NonEmptyArrayOfBaseFolderIdsType parentFolderIDs = new NonEmptyArrayOfBaseFolderIdsType();
         parentFolderIDs.getFolderIdOrDistinguishedFolderId().add(parentFolderID);

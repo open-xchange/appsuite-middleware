@@ -298,10 +298,10 @@ public class User {
     private Integer folderTree;
 
     private SOAPStringMap guiPreferencesForSoap;
-    
+
     private SOAPStringMapMap userAttributes;
 
-    
+
     /**
      * @return the userAttributes
      */
@@ -309,7 +309,7 @@ public class User {
         return userAttributes;
     }
 
-    
+
     /**
      * @param userAttributes the userAttributes to set
      */
@@ -340,7 +340,7 @@ public class User {
         super();
         SOAPUtils.user2SoapUser(u, this);
     }
-    
+
     /**
      * Returns the id of the user
      *
@@ -2538,11 +2538,11 @@ public class User {
     public final void setGuiPreferencesForSoap(final SOAPStringMap guiPreferences) {
         this.guiPreferencesForSoap = guiPreferences;
     }
-    
+
     public final SOAPStringMap getGuiPreferencesForSoap() {
         return this.guiPreferencesForSoap;
     }
-    
+
     /**
      * Returns the port of the imap server of this user object
      *

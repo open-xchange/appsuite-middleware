@@ -49,12 +49,12 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
@@ -64,6 +64,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.log.LogFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -193,10 +194,8 @@ public class TasksSQLImpl implements TasksSQLInterface {
             final int folderId = task.getParentFolderID();
             folder = Tools.getFolder(ctx, folderId);
             Permission.checkCreate(ctx, user, userConfig, folder);
-            if (task.getPrivateFlag() && (Tools.isFolderPublic(folder)
-                || Tools.isFolderShared(folder, user))) {
-                throw TaskExceptionCode.PRIVATE_FLAG.create(Integer
-                    .valueOf(folderId));
+            if (task.getPrivateFlag() && (Tools.isFolderPublic(folder) || Tools.isFolderShared(folder, user))) {
+                throw TaskExceptionCode.PRIVATE_FLAG.create(I(folderId));
             }
             // TODO create insert class
             // Create folder mappings
@@ -204,14 +203,12 @@ public class TasksSQLImpl implements TasksSQLInterface {
             if (Tools.isFolderPublic(folder)) {
                 folders = TaskLogic.createFolderMapping(folderId, task.getCreatedBy(), InternalParticipant.EMPTY_INTERNAL);
             } else {
-                Tools.fillStandardFolders(ctx, ParticipantStorage
-                    .extractInternal(parts));
+                Tools.fillStandardFolders(ctx, ParticipantStorage.extractInternal(parts));
                 int creator = userId;
                 if (Tools.isFolderShared(folder, user)) {
                     creator = folder.getCreator();
                 }
-                folders = TaskLogic.createFolderMapping(folderId, creator,
-                    ParticipantStorage.extractInternal(parts));
+                folders = TaskLogic.createFolderMapping(folderId, creator,ParticipantStorage.extractInternal(parts));
             }
             // Insert task
             TaskLogic.insertTask(ctx, task, parts, folders);
@@ -231,8 +228,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
     }
 
     @Override
-    public void updateTaskObject(final Task task, final int folderId,
-        final Date lastRead) throws OXException {
+    public void updateTaskObject(Task task, int folderId, Date lastRead) throws OXException {
         final Context ctx;
         final int userId = session.getUserId();
         final User user;
@@ -260,35 +256,26 @@ public class TasksSQLImpl implements TasksSQLInterface {
     }
 
     @Override
-    public void deleteTaskObject(final int taskId, final int folderId,
-        final Date lastModified) throws OXException {
-        final FolderStorage foldStor = FolderStorage.getInstance();
+    public void deleteTaskObject(int taskId, int folderId, Date lastModified) throws OXException {
         final FolderObject folder;
         final Context ctx;
         final int userId = session.getUserId();
         final User user;
         final UserConfiguration userConfig;
-        final Task task;
         try {
             ctx = Tools.getContext(session.getContextId());
             user = Tools.getUser(ctx, userId);
             userConfig = Tools.getUserConfiguration(ctx, userId);
-            // Check if folder exists
             folder = Tools.getFolder(ctx, folderId);
-            // Check if folder is correct.
-            foldStor.selectFolderById(ctx, taskId, folderId, StorageType
-                .ACTIVE);
-            // Load task with participants.
-            task = GetTask.load(ctx, folderId, taskId, StorageType.ACTIVE);
-            // TODO Switch to only delete the participant from task
-            // Check delete permission
-            Permission.checkDelete(ctx, user, userConfig, folder, task);
         } catch (final OXException e) {
             throw e;
         }
+        final DeleteData delete = new DeleteData(ctx, user, userConfig, folder, taskId, lastModified);
         try {
-            // TODO create delete class
-            TaskLogic.deleteTask(session, ctx, userId, task, lastModified);
+            delete.prepare();
+            delete.doDelete();
+            delete.deleteReminder();
+            delete.sentEvent(session);
         } catch (final OXException e) {
             throw e;
         }

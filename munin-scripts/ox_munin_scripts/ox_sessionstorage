@@ -1,0 +1,50 @@
+#!/usr/bin/perl -w
+#%# family=auto
+#%# capabilities=autoconf
+
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
+$listbundles="/opt/open-xchange/sbin/listbundles";
+$showexec="$showruntimestats -c";
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+    if (-e "/opt/open-xchange/bundles/com.openexchange.sessionstorage.hazelcast.jar") {
+        print "yes\n";
+    } else {
+        print "no\n";
+    }
+    exit 0;
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config")
+{
+	print "graph_title Sessions in Storage\n";
+	print "graph_args --base 1000 -l 0\n";
+	print "graph_category Open Xchange\n";
+	print "graph_vlabel Number\n";
+	print "a.label Sessions\n";
+	print "a.draw LINE1\n";
+	print "b.label UserSessions\n";
+	print "b.draw LINE1\n";
+	exit 0;
+}
+
+
+open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";   
+
+while (<SHOWRUNTIME>)
+{
+    if ($_ =~ m/com.hazelcast:type=Map.+?name=sessions-\d+,Size\s*?=\s*?(\d+)/) {
+	    $val = $1;
+	    print "a.value $val\n";
+	    next;
+	}
+	
+	if ($_ =~ m/com.hazelcast:type=MultiMap.+?name=userSessions-\d+,Size\s*?=\s*?(\d+)/) {
+	    $val = $1;
+	    print "b.value $val\n";
+	    next;
+	}
+}
+
+close (SHOWRUNTIME);

@@ -50,9 +50,12 @@
 package com.openexchange.groupware.container.mail;
 
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
 import javax.activation.DataHandler;
@@ -66,10 +69,16 @@ import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import org.apache.commons.logging.Log;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -78,14 +87,14 @@ import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
-import com.openexchange.server.impl.Version;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+import com.openexchange.version.Version;
 
 /**
  * MailObject
@@ -94,9 +103,24 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class MailObject {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailObject.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(MailObject.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    private static volatile String staticHostName;
+
+    private static volatile UnknownHostException warnSpam;
+
+    static {
+        // Ensure every mail-related stuff is orderly started
+        MailInitialization.MailcapInitialization.getInstance().start();
+        try {
+            staticHostName = InetAddress.getLocalHost().getCanonicalHostName();
+        } catch (final UnknownHostException e) {
+            staticHostName = "localhost";
+            warnSpam = e;
+        }
+    }
 
     public static final int DONT_SET = -2;
 
@@ -332,6 +356,9 @@ public class MailObject {
             }
             multipart.addBodyPart(bodyPart);
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
@@ -466,7 +493,7 @@ public class MailObject {
             /*
              * Set mailer TODO: Read in mailer from file
              */
-            msg.setHeader(HEADER_X_MAILER, "Open-Xchange Mailer v" + Version.getVersionString());
+            msg.setHeader(HEADER_X_MAILER, "Open-Xchange Mailer v" + Version.getInstance().getVersionString());
             /*
              * Set organization
              */
@@ -512,23 +539,22 @@ public class MailObject {
             if (internalRecipient) {
                 msg.setHeader(HEADER_X_OX_OBJECT, Integer.toString(objectId));
             }
-            
+
             if (internalRecipient && uid != null) {
             	msg.setHeader(HEADER_X_OX_UID, uid);
             }
-            
+
             if (internalRecipient && recurrenceDatePosition != 0) {
             	msg.setHeader(HEADER_X_OX_RECURRENCE_DATE, String.valueOf(recurrenceDatePosition));
             }
-
-            msg.saveChanges();
+            saveChangesSafe(msg);
             /*
              * Finally transport mail
              */
             final MailTransport transport = MailTransport.getInstance(session);
             try {
-                final UnsynchronizedByteArrayOutputStream bos = new UnsynchronizedByteArrayOutputStream();
-                msg.writeTo(bos);
+                final ByteArrayOutputStream bos = Streams.newByteArrayOutputStream(2048);
+                writeTo(msg, bos);
                 transport.sendRawMessage(bos.toByteArray());
                 if (DEBUG) {
                     LOG.debug("Sent mail:\n" + new String(bos.toByteArray()));
@@ -541,6 +567,67 @@ public class MailObject {
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private void writeTo(final MimeMessage msg, final ByteArrayOutputStream bos) throws IOException, MessagingException {
+        try {
+            msg.writeTo(bos);
+        } catch (final javax.activation.UnsupportedDataTypeException e) {
+            final String cts = msg.getHeader("Content-Type", null);
+            if (null == cts || !cts.startsWith("multipart/")) {
+                throw e;
+            }
+            boolean throwIt = false;
+            try {
+                final Multipart multipart = (Multipart) msg.getContent();
+                final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(2048);
+                multipart.writeTo(baos);
+                msg.setDataHandler(new DataHandler(new MessageDataSource(Streams.asInputStream(baos), multipart.getContentType())));
+                saveChangesSafe(msg);
+                bos.reset();
+                msg.writeTo(bos);
+                throwIt = false;
+            } catch (final Exception ignore) {
+                // Ignore
+            }
+            if (throwIt) {
+                throw e;
+            }
+        }
+    }
+
+    private void saveChangesSafe(final MimeMessage mimeMessage) throws OXException {
+        final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
+        String hostName;
+        if (null == hostnameService) {
+            hostName = getHostName();
+        } else {
+            hostName = hostnameService.getHostname(session.getUserId(), session.getContextId());
+        }
+        if (null == hostName) {
+            hostName = getHostName();
+        }
+        MimeMessageConverter.saveChanges(mimeMessage, hostName);
+    }
+
+    private static String getHostName() {
+        final Props logProperties = LogProperties.optLogProperties();
+        if (null == logProperties) {
+            return getStaticHostName();
+        }
+        final String serverName = logProperties.get(LogProperties.Name.AJP_SERVER_NAME);
+        if (null == serverName) {
+            return getStaticHostName();
+        }
+        return serverName;
+    }
+
+    private static String getStaticHostName() {
+        final UnknownHostException warning = warnSpam;
+        if (warning != null) {
+            LOG.error("Can't resolve my own hostname, using 'localhost' instead, which is certainly not what you want!", warning);
+        }
+        return staticHostName;
     }
 
     public void addBccAddr(final String addr) {
@@ -618,11 +705,11 @@ public class MailObject {
     public void setSubject(final String subject) {
         this.subject = subject;
     }
-    
+
     public void setUid(final String uid) {
 		this.uid = uid;
 	}
-    
+
     public String getUid() {
 		return uid;
 	}
@@ -630,7 +717,7 @@ public class MailObject {
     public void setRecurrenceDatePosition(final long time) {
     	this.recurrenceDatePosition = time;
 	}
-    
+
     public long getRecurrenceDatePosition() {
 		return recurrenceDatePosition;
 	}

@@ -64,7 +64,7 @@ import com.openexchange.mail.mime.HeaderCollection;
 
 /**
  * {@link ContentAwareMailMessage} - Enhances {@link MailMessage} by {@link #getPrimaryContent()} method.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ContentAwareMailMessage extends MailMessage {
@@ -77,7 +77,7 @@ public class ContentAwareMailMessage extends MailMessage {
 
     /**
      * Initializes a new {@link ContentAwareMailMessage}.
-     * 
+     *
      * @param primaryContent The primary content
      * @param message The delegate message
      */
@@ -89,7 +89,7 @@ public class ContentAwareMailMessage extends MailMessage {
 
     /**
      * Gets the primary content
-     * 
+     *
      * @return The primary content or <code>null</code> if absent
      */
     public String getPrimaryContent() {

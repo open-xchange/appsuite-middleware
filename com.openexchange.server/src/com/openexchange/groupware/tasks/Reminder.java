@@ -190,7 +190,7 @@ final class Reminder {
                 .getDate());
         }
     }
-    
+
     static void loadReminder(final Context ctx, final int userId,
         final Collection<Task> tasks, final Connection con) throws OXException {
             final ReminderService remStor = new ReminderHandler(ctx);
@@ -228,13 +228,13 @@ final class Reminder {
         }
     }
 
-    static void deleteReminder(final Context ctx, final Connection con, final Task task) throws OXException {
+    static void deleteReminder(final Context ctx, final Task task) throws OXException {
         final ReminderService reminder = new ReminderHandler(ctx);
         try {
-            reminder.deleteReminder(task.getObjectID(), Types.TASK, con);
+            reminder.deleteReminder(task.getObjectID(), Types.TASK);
         } catch (final OXException e) {
             if (!ReminderExceptionCode.NOT_FOUND.equals(e)) {
-                throw new OXException(e);
+                throw e;
             }
         }
     }

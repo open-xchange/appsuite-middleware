@@ -69,7 +69,7 @@ public class EnterShopAction extends AbstractLibertyAction{
 	public EnterShopAction(ServiceLookup services) {
 		super(services);
 	}
-	
+
 	@Override
 	public AJAXRequestResult perform(AJAXRequestData requestData,
 			ServerSession session) throws OXException {
@@ -79,5 +79,5 @@ public class EnterShopAction extends AbstractLibertyAction{
 			throw AjaxExceptionCodes.JSON_ERROR.create();
 		}
 	}
-	
+
 }

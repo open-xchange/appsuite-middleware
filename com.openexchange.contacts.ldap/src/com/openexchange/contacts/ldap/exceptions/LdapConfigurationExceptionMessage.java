@@ -65,7 +65,7 @@ public class LdapConfigurationExceptionMessage implements LocalizableStrings {
     private LdapConfigurationExceptionMessage() {
         super();
     }
-    
+
     /**
      * The value given for authtype "%s" is invalid
      */
@@ -155,7 +155,7 @@ public class LdapConfigurationExceptionMessage implements LocalizableStrings {
      * The value given for derefAliases "%s" in file "%s" is invalid
      */
     public final static String DEREF_ALIASES_WRONG_MSG = "The value given for derefAliases \"%s\" in file \"%s\" is invalid";
-    
+
     /**
      * LDAP contacts cannot be deleted
      */

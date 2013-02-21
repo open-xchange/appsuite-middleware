@@ -216,7 +216,7 @@ public final class HttpSessionManagement {
 
     /**
      * Creates a new HTTP session
-     * 
+     *
      * @throws IllegalStateException If max. number of HTTP session is exceeded
      */
     public static void createHttpSession() {

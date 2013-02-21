@@ -56,7 +56,7 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link OXMFSubscriptionErrorMessage}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public enum OXMFSubscriptionErrorMessage implements OXExceptionCode {
@@ -68,7 +68,13 @@ public enum OXMFSubscriptionErrorMessage implements OXExceptionCode {
     IOException(CATEGORY_SERVICE_DOWN, 3, OXMFErrorStrings.IOException_HELP, OXMFErrorStrings.IOException),
     HttpException(CATEGORY_SERVICE_DOWN, 4, OXMFErrorStrings.HttpException_HELP, OXMFErrorStrings.HttpException),
     CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES(CATEGORY_ERROR, 5, OXMFErrorStrings.CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES_HELP, OXMFErrorStrings.CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES),
-    ERROR_LOADING_SUBSCRIPTION(CATEGORY_SERVICE_DOWN, 6, OXMFErrorStrings.ERROR_LOADING_SUBSCRIPTION_HELP, OXMFErrorStrings.ERROR_LOADING_SUBSCRIPTION), ;
+    ERROR_LOADING_SUBSCRIPTION(CATEGORY_SERVICE_DOWN, 6, OXMFErrorStrings.ERROR_LOADING_SUBSCRIPTION_HELP, OXMFErrorStrings.ERROR_LOADING_SUBSCRIPTION),
+    /**
+     * The string cannot be parsed to a valid URL.
+     */
+    INVALID_URL(CATEGORY_USER_INPUT, 7, OXMFErrorStrings.INVALID_URL, OXMFErrorStrings.INVALID_URL),
+    
+    ;
 
     private Category category;
 
@@ -116,7 +122,7 @@ public enum OXMFSubscriptionErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -125,7 +131,7 @@ public enum OXMFSubscriptionErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -135,7 +141,7 @@ public enum OXMFSubscriptionErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

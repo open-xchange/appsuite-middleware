@@ -59,14 +59,14 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
  * {@link ConfigImpl}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ConfigImpl implements Config {
-    
+
     private static final String SSL_SOCKET_FACTORY = "com.sun.xml.internal.ws.transport.https.client.SSLSocketFactory";
     private static final String HOSTNAME_VERIFIER = "com.sun.xml.internal.ws.transport.https.client.hostname.verifier";
-    
+
     private ExchangeVersionType exchangeVersion = ExchangeVersionType.EXCHANGE_2010;
 
     private static final HostnameVerifier IGNORING_HOSTNAME_VERIFIER = new HostnameVerifier() {
@@ -75,12 +75,12 @@ public class ConfigImpl implements Config {
             return true;
         }
     };
-    
+
     private final BindingProvider bindingProvier;
-    
+
     /**
      * Initializes a new {@link ConfigImpl}.
-     * 
+     *
      * @param bindingProvier The underlying binding provider
      */
     public ConfigImpl(BindingProvider bindingProvier) {
@@ -95,7 +95,7 @@ public class ConfigImpl implements Config {
     public void setEndpointAddress(String endpoint) {
         put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, endpoint);
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.ews.Config#getEndpointAddress()
      */
@@ -103,7 +103,7 @@ public class ConfigImpl implements Config {
     public String getEndpointAddress() {
         return (String)get(BindingProvider.ENDPOINT_ADDRESS_PROPERTY);
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.ews.Config#setUserName(java.lang.String)
      */
@@ -111,7 +111,7 @@ public class ConfigImpl implements Config {
     public void setUserName(String userName) {
         put(BindingProvider.USERNAME_PROPERTY, userName);
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.ews.Config#getUserName()
      */
@@ -119,7 +119,7 @@ public class ConfigImpl implements Config {
     public String getUserName() {
         return (String)get(BindingProvider.USERNAME_PROPERTY);
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.ews.Config#setPassword(java.lang.String)
      */
@@ -127,7 +127,7 @@ public class ConfigImpl implements Config {
     public void setPassword(String password) {
         put(BindingProvider.PASSWORD_PROPERTY, password);
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.ews.Config#getPassword()
      */
@@ -135,7 +135,7 @@ public class ConfigImpl implements Config {
     public String getPassword() {
         return (String)get(BindingProvider.PASSWORD_PROPERTY);
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.ews.Config#setTrustAllCerts(boolean)
      */
@@ -166,17 +166,17 @@ public class ConfigImpl implements Config {
             put(HOSTNAME_VERIFIER, IGNORING_HOSTNAME_VERIFIER);
         } else {
             remove(HOSTNAME_VERIFIER);
-        }        
+        }
     }
-    
+
     /* (non-Javadoc)
      * @see com.openexchange.ews.Config#isIgnoreHostnameValidation()
      */
     @Override
     public boolean isIgnoreHostnameValidation() {
-        return null != get(HOSTNAME_VERIFIER);  
-    }    
-    
+        return null != get(HOSTNAME_VERIFIER);
+    }
+
     /* (non-Javadoc)
      * @see com.openexchange.ews.Config#getExchangeVersion()
      */
@@ -204,10 +204,10 @@ public class ConfigImpl implements Config {
             return null;
         }
     }
-    
+
     private Object get(String key) {
         return bindingProvier.getRequestContext().get(key);
     }
-    
+
 }
 

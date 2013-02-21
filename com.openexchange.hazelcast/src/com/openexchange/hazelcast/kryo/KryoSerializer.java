@@ -56,7 +56,7 @@ import com.esotericsoftware.kryo.io.Output;
 /**
  * {@link KryoSerializer} - Serializes/Deserializes any object using <img src="http://kryo.googlecode.com/svn/wiki/kryo-logo.jpg" width="88"
  * height="37">.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class KryoSerializer {
@@ -70,7 +70,7 @@ public final class KryoSerializer {
 
     /**
      * Serializes specified object to an byte array using given class loader.
-     * 
+     *
      * @param obj The object to serialize
      * @param classLoader The class loader to use
      * @return The serialized object's byte array
@@ -86,7 +86,7 @@ public final class KryoSerializer {
 
     /**
      * Deserializes specified object's byte array using given class loader.
-     * 
+     *
      * @param bytes The serialized object's byte array
      * @param classLoader The class loader to use
      * @return The deserialized object

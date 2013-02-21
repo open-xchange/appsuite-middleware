@@ -65,7 +65,7 @@ import com.openexchange.log.LogFactory;
 
 /**
  * {@link ContextExtendedFactory}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ContextExtendedFactory implements OXObjectFactory<ContextExtended> {

@@ -53,11 +53,19 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link SecretMigrator}
- * 
+ * {@link SecretMigrator} - Migrates existing encrypted items from old secret to new secret.
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface SecretMigrator {
 
+    /**
+     * Migrates existing encrypted items from old secret to new secret.
+     *
+     * @param oldSecret The old secret
+     * @param newSecret The new secret
+     * @param session The session providing needed user information
+     * @throws OXException If migrate attempt fails
+     */
     public void migrate(String oldSecret, String newSecret, ServerSession session) throws OXException;
 }

@@ -55,7 +55,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import net.htmlparser.jericho.Renderer;
@@ -66,8 +68,8 @@ import org.apache.commons.logging.Log;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
-import org.xml.sax.SAXException;
-import com.openexchange.config.ConfigurationService;
+import org.joox.JOOX;
+import org.joox.Match;
 import com.openexchange.exception.OXException;
 import com.openexchange.textxtraction.AbstractTextXtractService;
 import com.openexchange.textxtraction.DelegateTextXtraction;
@@ -80,49 +82,55 @@ import com.openexchange.textxtraction.TextXtractExceptionCodes;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class TikaTextXtractService extends AbstractTextXtractService {
-    
+
+    static final Set<String> PARSERS = new HashSet<String>();
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(TikaTextXtractService.class);
-    
+
     private static final Object PRESENT = new Object();
-    
+
     private final ConcurrentMap<DelegateTextXtraction, Object> delegatees;
-    
-    private Tika tika = null;
+
+    Tika tika = null;
+
+    static {
+        PARSERS.add("org.apache.tika.parser.html.HtmlParser");
+        PARSERS.add("org.apache.tika.parser.microsoft.OfficeParser");
+        PARSERS.add("org.apache.tika.parser.microsoft.ooxml.OOXMLParser");
+        PARSERS.add("org.apache.tika.parser.odf.OpenDocumentParser");
+        PARSERS.add("org.apache.tika.parser.pdf.PDFParser");
+        PARSERS.add("org.apache.tika.parser.rtf.RTFParser");
+        PARSERS.add("org.apache.tika.parser.txt.TXTParser");
+        PARSERS.add("org.apache.tika.parser.xml.DcXMLParser");
+    }
 
 
     /**
      * Initializes a new {@link TikaTextXtractService}.
      * @param service
      */
-    public TikaTextXtractService(ConfigurationService service) {
+    public TikaTextXtractService() {
         super();
         delegatees = new ConcurrentHashMap<DelegateTextXtraction, Object>(4);
+
+        Match configMatch = JOOX.$("config");
+        for (String parser : PARSERS) {
+            configMatch.append(JOOX.$("parser").attr("class", parser));
+        }
+
         try {
-        	final TikaConfig config;
-        	if (service == null) {
-        	    config = new TikaConfig();
-        	} else {
-        	    final String tikaConfigPathFileName = service.getProperty(TextXtractionProperties.TIKA_CONFIG_FILE_NAME);
-                if (tikaConfigPathFileName == null) {
-                    throw new IllegalStateException("Property " + TextXtractionProperties.TIKA_CONFIG_FILE_NAME + " must not be null.");
-                }
-        	    final File tikaConfigFile = service.getFileByName(tikaConfigPathFileName);
-        	    config = new TikaConfig(tikaConfigFile);
-        	}           
-            
-            tika = new Tika(config);        
+            TikaConfig config = new TikaConfig(configMatch.document());
+            tika = new Tika(config);
         } catch (TikaException e) {
             LOG.error(e.getMessage(), e);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
-        } catch (SAXException e) {
-            LOG.error(e.getMessage(), e);
-        }        
+        }
     }
-    
+
     /**
      * Adds given delegate.
-     * 
+     *
      * @param delegateTextXtraction The delegate to add
      * @return <code>true</code> on success; otherwise <code>false</code>
      */
@@ -132,7 +140,7 @@ public class TikaTextXtractService extends AbstractTextXtractService {
 
     /**
      * Removes given delegate.
-     * 
+     *
      * @param delegateTextXtraction The delegate to remove
      */
     public void removeDelegateTextXtraction(final DelegateTextXtraction delegateTextXtraction) {
@@ -143,10 +151,10 @@ public class TikaTextXtractService extends AbstractTextXtractService {
     public String extractFrom(InputStream inputStream, String optMimeType) throws OXException {
         if (tika == null) {
             throw new IllegalStateException("Tika must not be null. The service has not been initalized correctly.");
-        }        
+        }
 
-        long start = System.currentTimeMillis();    
-        File tempFile = null;        
+        long start = System.currentTimeMillis();
+        File tempFile = null;
         FileOutputStream fos = null;
         FileInputStream fis = null;
         String text;
@@ -161,7 +169,7 @@ public class TikaTextXtractService extends AbstractTextXtractService {
                         tempFile = File.createTempFile(Long.toString(start), "ox.tmp");
                         fos = new FileOutputStream(tempFile);
                         IOUtils.copy(inputStream, fos);
-                        
+
                         fis = new FileInputStream(tempFile);
                         text = delegatee.extractFrom(fis, optMimeType);
                     } else {
@@ -176,16 +184,15 @@ public class TikaTextXtractService extends AbstractTextXtractService {
             } finally {
                 if (tempFile != null) {
                     IOUtils.closeQuietly(inputStream);
-                }                
+                }
                 IOUtils.closeQuietly(fos);
                 IOUtils.closeQuietly(fis);
             }
-            
-            if (null != text) {                        
+
+            if (null != text) {
                 return text;
             }
         }
-        
         /*
          * None of the delegates could extract some text.
          */
@@ -196,7 +203,6 @@ public class TikaTextXtractService extends AbstractTextXtractService {
             } else {
                 tikaInputStream = new BufferedInputStream(new FileInputStream(tempFile));
             }
-            
             return tika.parseToString(tikaInputStream);
         } catch (IOException e) {
             throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
@@ -204,7 +210,7 @@ public class TikaTextXtractService extends AbstractTextXtractService {
             throw TextXtractExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             IOUtils.closeQuietly(tikaInputStream);
-        }    
+        }
     }
 
     @Override

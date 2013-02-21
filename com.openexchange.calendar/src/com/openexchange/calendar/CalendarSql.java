@@ -65,12 +65,16 @@ import org.apache.commons.logging.Log;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.configuration.ConfigurationException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarConfig;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarFolderObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
+import com.openexchange.groupware.calendar.RecurringResultInterface;
+import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -95,6 +99,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -528,18 +533,19 @@ public class CalendarSql implements AppointmentSQLInterface {
         final User user = Tools.getUser(session, ctx);
         try {
             writecon = DBPool.pickupWriteable(ctx);
-
             final CalendarOperation co = new CalendarOperation();
             final CalendarSqlImp cimp = CalendarSql.cimp;
             final CalendarDataObject edao = cimp.loadObjectForUpdate(cdao, session, ctx, inFolder, writecon, checkPermissions);
-            
+            DBPool.pushWrite(ctx, writecon);
+            writecon = null;
+
             if (cdao.isIgnoreOutdatedSequence() && cdao.getSequence() < edao.getSequence()) {
                 // Silently ignore updates on Appointments with an outdated Sequence. OLOX2-Requirement.
                 cdao.setLastModified(edao.getLastModified());
                 LOG.info("Ignored update on Appointment due to outdated sequence: " + edao.getContextID() + "-" + edao.getObjectID() + " (cid-objectId)");
                 return null;
             }
-            
+
             if (co.prepareUpdateAction(cdao, edao, session.getUserId(), inFolder, user.getTimeZone())) {
                 // Insert-through-update detected
                 throw OXCalendarExceptionCodes.UPDATE_WITHOUT_OBJECT_ID.create();
@@ -576,6 +582,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     }
                 }
 
+                writecon = DBPool.pickupWriteable(ctx);
                 try {
                     writecon.setAutoCommit(false);
                     if (cdao.containsParentFolderID()) {
@@ -593,19 +600,13 @@ public class CalendarSql implements AppointmentSQLInterface {
                         throw bue;
                     }
                 } catch(final SQLException sqle) {
-                    try {
-                        if (writecon != null) {
-                            writecon.rollback();
-                        }
-                    } catch(final SQLException rb) {
-                        LOG.error("Rollback failed: " + rb.getMessage(), rb);
-                    }
+                    Databases.rollback(writecon);
                     throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
                 } finally {
-                    if (writecon != null) {
-                        writecon.setAutoCommit(true);
-                    }
+                    Databases.autocommit(writecon);
                 }
+                DBPool.pushWrite(ctx, writecon);
+                writecon = null;
             }
             return conflicts;
         } catch(final DataTruncation dt) {
@@ -639,9 +640,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         } catch (final RuntimeException e) {
             throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(26));
         } finally {
-            if (writecon != null) {
-                DBPool.pushWrite(ctx, writecon);
-            }
+            DBPool.pushWrite(ctx, writecon);
         }
     }
 
@@ -1257,7 +1256,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     public SearchIterator<Appointment> getAppointmentsBetween(final int user_uid, final Date start, final Date end, final int cols[], final int orderBy, final Order orderDir) throws OXException, SQLException {
         return getModifiedAppointmentsBetween(user_uid, start, end, cols, null, orderBy, orderDir);
     }
-    
+
     @Override
     public SearchIterator<Appointment> getAppointmentsBetween(final Date start, final Date end, int cols[], final int orderBy, final Order order) throws OXException, SQLException {
         if (session == null) {
@@ -1381,7 +1380,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     @Override
     public List<Appointment> getAppointmentsWithExternalParticipantBetween(final String email, int[] cols, final Date start, final Date end, final int orderBy, final Order order) throws OXException {
         final List<Appointment> appointments = new ArrayList<Appointment>();
-        cols = addColumnIfNecessary(cols, CalendarObject.PARTICIPANTS);
+        cols = addColumnIfNecessary(cols, CalendarObject.PARTICIPANTS, CalendarObject.RECURRENCE_TYPE, CalendarObject.RECURRENCE_POSITION, CalendarObject.RECURRENCE_ID);
         SearchIterator<Appointment> searchIterator;
         try {
             searchIterator = getModifiedAppointmentsBetween(session.getUserId(), start, end, cols, null, orderBy, order);
@@ -1399,13 +1398,13 @@ public class CalendarSql implements AppointmentSQLInterface {
             }
         }
 
-        return appointments;
+        return extractOccurrences(appointments, start, end);
     }
 
     @Override
     public List<Appointment> getAppointmentsWithUserBetween(final User user, int[] cols, final Date start, final Date end, final int orderBy, final Order order) throws OXException {
         final List<Appointment> appointments = new ArrayList<Appointment>();
-        cols = addColumnIfNecessary(cols, CalendarObject.USERS);
+        cols = addColumnIfNecessary(cols, CalendarObject.USERS, CalendarObject.RECURRENCE_TYPE, CalendarObject.RECURRENCE_POSITION, CalendarObject.RECURRENCE_ID);
         SearchIterator<Appointment> searchIterator;
         try {
             searchIterator = getModifiedAppointmentsBetween(session.getUserId(), start, end, cols, null, orderBy, order);
@@ -1423,19 +1422,50 @@ public class CalendarSql implements AppointmentSQLInterface {
             }
         }
 
-        return appointments;
+        return extractOccurrences(appointments, start, end);
     }
 
-    private int[] addColumnIfNecessary(final int[] cols, final int participants) {
+    private int[] addColumnIfNecessary(final int[] cols, final int... columnsToAdd) {
 
         final ArrayList<Integer> columns = new ArrayList<Integer>();
         for (final int c : cols) {
             columns.add(c);
         }
-        if (!columns.contains(participants)) {
-            columns.add(participants);
+        for (int columnToAdd : columnsToAdd) {
+            if (!columns.contains(columnToAdd)) {
+                columns.add(columnToAdd);
+            }
         }
 
         return I2i(columns);
+    }
+
+    private List<Appointment> extractOccurrences(List<Appointment> appointments, Date start, Date end) throws OXException {
+        List<Appointment> retval = new ArrayList<Appointment>();
+
+        for (Appointment appointment : appointments) {
+            if (appointment.getRecurrenceType() == Appointment.NO_RECURRENCE || appointment.getRecurrencePosition() != 0) {
+                retval.add(appointment);
+                continue;
+            }
+
+            if (appointment.getRecurrenceType() != CalendarObject.NONE && appointment.getRecurrencePosition() == 0) {
+                RecurringResultsInterface recuResults = recColl.calculateRecurring(appointment, start.getTime(), end.getTime(), 0);
+
+                if (recuResults != null) {
+                    for (int a = 0; a < recuResults.size(); a++) {
+                        Appointment app = appointment.clone();
+                        final RecurringResultInterface result = recuResults.getRecurringResult(a);
+                        app.setStartDate(new Date(result.getStart()));
+                        app.setEndDate(new Date(result.getEnd()));
+                        app.setRecurrencePosition(result.getPosition());
+
+                        retval.add(app);
+                    }
+                }
+            }
+        }
+
+        return retval;
     }
 }

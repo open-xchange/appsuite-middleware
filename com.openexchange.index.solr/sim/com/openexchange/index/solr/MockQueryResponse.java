@@ -62,17 +62,17 @@ import org.apache.solr.common.SolrDocumentList;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class MockQueryResponse extends QueryResponse {
-    
+
     private static final long serialVersionUID = -2792639362830739756L;
-    
+
     private final Set<Map<String, Object>> entries;
-    
-    
+
+
     public MockQueryResponse(Set<Map<String, Object>> entries) {
         super();
         this.entries = entries;
     }
-    
+
     @Override
     public SolrDocumentList getResults() {
         SolrDocumentList documents = new SolrDocumentList();
@@ -84,8 +84,8 @@ public class MockQueryResponse extends QueryResponse {
             }
             documents.add(document);
         }
-        
+
         return documents;
     }
-    
+
 }

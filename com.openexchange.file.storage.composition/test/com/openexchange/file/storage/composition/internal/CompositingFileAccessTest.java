@@ -74,11 +74,11 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
-import com.openexchange.file.storage.composition.FileID;
-import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
 import com.openexchange.sim.Block;
@@ -116,8 +116,6 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     private final IDSetter setId = new IDSetter(fileId.getFileId());
 
-
-
     public CompositingFileAccessTest() {
         super(new SimSession());
     }
@@ -134,9 +132,9 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testExists() throws OXException {
-        fileAccess.expectCall("exists", fileId.getFolderId(), fileId.getFileId(), 12).andReturn(true);
+        fileAccess.expectCall("exists", fileId.getFolderId(), fileId.getFileId(), "12").andReturn(true);
 
-        assertTrue(exists(fileId.toUniqueID(), 12));
+        assertTrue(exists(fileId.toUniqueID(), "12"));
         verifyAccount();
 
         fileAccess.assertAllWereCalled();
@@ -174,9 +172,9 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testGetDocument() throws OXException {
-        fileAccess.expectCall("getDocument", fileId.getFolderId(), fileId.getFileId(), 12);
+        fileAccess.expectCall("getDocument", fileId.getFolderId(), fileId.getFileId(), "12");
 
-        getDocument(fileId.toUniqueID(), 12);
+        getDocument(fileId.toUniqueID(), "12");
 
         verifyAccount();
         fileAccess.assertAllWereCalled();
@@ -250,9 +248,9 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         file.setId(fileId.getFileId());
         file.setFolderId(fileId.getFolderId());
 
-        fileAccess.expectCall("getFileMetadata", fileId.getFolderId(), fileId.getFileId(), 12).andReturn(file);
+        fileAccess.expectCall("getFileMetadata", fileId.getFolderId(), fileId.getFileId(), "12").andReturn(file);
 
-        getFileMetadata(fileId.toUniqueID(), 12);
+        getFileMetadata(fileId.toUniqueID(), "12");
 
         fileAccess.assertAllWereCalled();
     }
@@ -331,7 +329,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     // Somewhat brittle test
     @Test
     public void testRemoveDocuments() throws OXException {
-        final FileStorageFileAccess.IDTuple tuple = new FileStorageFileAccess.IDTuple(fileId.getFolderId(), fileId.getFileId());  
+        final FileStorageFileAccess.IDTuple tuple = new FileStorageFileAccess.IDTuple(fileId.getFolderId(), fileId.getFileId());
         final FileStorageFileAccess.IDTuple tuple2 = new FileStorageFileAccess.IDTuple(fileId2.getFolderId(), fileId2.getFileId());
         fileAccess.expectCall("hashCode").andReturn(1); // Look if it's there
         fileAccess.expectCall("hashCode").andReturn(1); // Store it
@@ -345,7 +343,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         fileAccess.expectCall("getAccountAccess").andReturn(this);
         fileAccess.expectCall("getAccountAccess").andReturn(this);
 
-        
+
         fileAccess.expectCall("removeDocument", Arrays.asList(tuple2), 12L).andReturn(Arrays.asList(tuple2));
         fileAccess.expectCall("getAccountAccess").andReturn(this);
         fileAccess.expectCall("getAccountAccess").andReturn(this);
@@ -368,9 +366,9 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
     @Test
     public void testRemoveVersions() throws OXException {
-        final int[] versions = new int[] { 1, 2, 3 };
+        final String[] versions = new String[] { "1", "2", "3" };
 
-        fileAccess.expectCall("removeVersion", fileId.getFolderId(), fileId.getFileId(), versions).andReturn(new int[0]);
+        fileAccess.expectCall("removeVersion", fileId.getFolderId(), fileId.getFileId(), versions).andReturn(new String[0]);
         fileAccess.expectCall("getAccountAccess").andReturn(this);
         fileAccess.expectCall("getAccountAccess").andReturn(this);
         removeVersion(fileId.toUniqueID(), versions);
@@ -496,8 +494,8 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         file.setFolderId(folderId.toUniqueID());
 
         fileAccess.expectCall("getFileMetadata", folderId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(file);
-        fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);        
-        
+        fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+
         saveDocument(file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
 
         verifyAccount();
@@ -514,7 +512,7 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
 
         fileAccess.expectCall("getFileMetadata", folderId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).andReturn(file);
         fileAccess.expectCall("saveDocument", file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
-        
+
         saveDocument(file, EMPTY_INPUT_STREAM, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, Arrays.asList(File.Field.TITLE));
 
         verifyAccount();
@@ -942,22 +940,17 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
         return Arrays.asList(account);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageAccountManager#migrateToNewSecret(java.lang.String, java.lang.String,
-     * com.openexchange.session.Session)
-     */
     @Override
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws OXException {
         // Nothing to do
 
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.file.storage.FileStorageAccountManager#updateAccount(com.openexchange.file.storage.FileStorageAccount,
-     * com.openexchange.session.Session)
-     */
+    @Override
+    public void cleanUp(String secret, Session session) throws OXException {
+        // noop
+    }
+
     @Override
     public void updateAccount(final FileStorageAccount account, final Session session) throws OXException {
         // Nothing to do
@@ -1002,17 +995,17 @@ public class CompositingFileAccessTest extends CompositingIDBasedFileAccess impl
     @Override
     protected EventAdmin getEventAdmin() {
         return new EventAdmin() {
-            
+
             @Override
             public void sendEvent(Event arg0) {
                 // Nothing to do
-                
+
             }
-            
+
             @Override
             public void postEvent(Event arg0) {
                 // Nothing to do
-                
+
             }
         };
     }

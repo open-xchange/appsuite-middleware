@@ -58,7 +58,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CompletionService;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -90,6 +90,7 @@ import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.PathAware;
 import com.openexchange.multiple.internal.MultipleHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.BoundedCompletionService;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -97,9 +98,14 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
+/**
+ * The <tt>Multiple</tt> Servlet processes <a href="http://oxpedia.org/wiki/index.php?title=HTTP_API#Module_.22multiple.22">multiple incoming JSON</a> requests.
+ */
 public class Multiple extends SessionServlet {
 
     private static final long serialVersionUID = 3029074251138469122L;
+
+    private static final String ACTION = PARAMETER_ACTION;
 
     protected static final String MODULE = "module";
 
@@ -119,7 +125,7 @@ public class Multiple extends SessionServlet {
 
     /**
      * Sets the dispatcher instance.
-     * 
+     *
      * @param dispatcher The dispatcher to set
      */
     public static void setDispatcher(final Dispatcher dispatcher) {
@@ -128,7 +134,7 @@ public class Multiple extends SessionServlet {
 
     /**
      * Gets the dispatcher instance
-     * 
+     *
      * @return The dispatcher instance or <code>null</code>
      */
     private static Dispatcher getDispatcher() {
@@ -150,8 +156,7 @@ public class Multiple extends SessionServlet {
                 Streams.close(reader);
             }
         }
-        JSONArray respArr = new JSONArray();
-
+        JSONArray respArr = null;
         try {
             final ServerSession session = getSessionObject(req);
             if (session == null) {
@@ -171,10 +176,13 @@ public class Multiple extends SessionServlet {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(CONTENTTYPE_JAVASCRIPT);
         final Writer writer = resp.getWriter();
-        writeTo(respArr, writer);
+        writeTo(null == respArr ? new JSONArray(0) : respArr, writer);
         writer.flush();
     }
-    
+
+    /** The concurrency level for processing multiple requests */
+    private static final int CONCURRENCY_LEVEL = -1;
+
     public static JSONArray perform(JSONArray dataArray, HttpServletRequest req, ServerSession session) throws OXException, JSONException {
     	final int length = dataArray.length();
         final JSONArray respArr = new JSONArray(length);
@@ -183,9 +191,9 @@ public class Multiple extends SessionServlet {
             try {
                 // Distinguish between serially and concurrently executable requests
                 List<JsonInOut> serialTasks = null;
-                ThreadPoolCompletionService<Object> concurrentTasks = null;
+                CompletionService<Object> concurrentTasks = null;
                 int concurrentTasksCount = 0;
-                // Build-up mapping & schedule for serial or concurrent execution
+                // Build-up mapping & schedule for either serial or concurrent execution
                 final ConcurrentTIntObjectHashMap<JsonInOut> mapping = new ConcurrentTIntObjectHashMap<JsonInOut>(length);
                 for (int pos = 0; pos < length; pos++) {
                     final JSONObject dataObject = dataArray.getJSONObject(pos);
@@ -203,7 +211,12 @@ public class Multiple extends SessionServlet {
                         serialTasks.add(jsonInOut);
                     } else {
                         if (null == concurrentTasks) {
-                            concurrentTasks = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
+                            final int concurrencyLevel = CONCURRENCY_LEVEL;
+                            if (concurrencyLevel <= 0 || length <= concurrencyLevel) {
+                                concurrentTasks = new ThreadPoolCompletionService<Object>(ThreadPools.getThreadPool()).setTrackable(true);
+                            } else {
+                                concurrentTasks = new BoundedCompletionService<Object>(ThreadPools.getThreadPool(), concurrencyLevel).setTrackable(true);
+                            }
                         }
                         concurrentTasks.submit(new CallableImpl(jsonInOut, session, module, req));
                         concurrentTasksCount++;
@@ -227,19 +240,10 @@ public class Multiple extends SessionServlet {
                     // Await completion service
                     for (int i = 0; i < concurrentTasksCount; i++) {
                         try {
-                            concurrentTasks.take().get();
+                            concurrentTasks.take();
                         } catch (final InterruptedException e) {
                             Thread.currentThread().interrupt();
                             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-                        } catch (final ExecutionException e) {
-                            final Throwable cause = e.getCause();
-                            if (cause instanceof JSONException) {
-                                throw (JSONException) cause;
-                            }
-                            if (cause instanceof OXException) {
-                                throw (OXException) cause;
-                            }
-                            ThreadPools.launderThrowable(e, RuntimeException.class);
                         }
                     }
                 }
@@ -247,7 +251,7 @@ public class Multiple extends SessionServlet {
                 for (int pos = 0; pos < length; pos++) {
                     final JsonInOut jsonInOut = mapping.get(pos);
                     if (null != jsonInOut) {
-                        respArr.put(jsonInOut.getOutputObject());                        
+                        respArr.put(jsonInOut.getOutputObject());
                     }
                 }
             } finally {
@@ -265,7 +269,7 @@ public class Multiple extends SessionServlet {
         try {
             final OXJSONWriter jWriter = new OXJSONWriter();
             final JSONObject inObject = jsonInOut.getInputObject();
-            ajaxState = doAction(module, inObject.optString(PARAMETER_ACTION), inObject, session, req, jWriter, null);
+            ajaxState = doAction(module, inObject.optString(ACTION), inObject, session, req, jWriter, null);
             jsonInOut.setOutputObject(jWriter.getObject());
         } finally {
             if (null != ajaxState) {
@@ -276,7 +280,7 @@ public class Multiple extends SessionServlet {
 
     protected static final AJAXState parseActionElement(final JSONObject inObject, final JSONArray serialResponses, final ServerSession session, final HttpServletRequest req, final AJAXState state) throws OXException {
         try {
-            return doAction(DataParser.checkString(inObject, MODULE), inObject.optString(PARAMETER_ACTION), inObject, session, req, new OXJSONWriter(serialResponses), state);
+            return doAction(DataParser.checkString(inObject, MODULE), inObject.optString(ACTION), inObject, session, req, new OXJSONWriter(serialResponses), state);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
@@ -588,7 +592,7 @@ public class Multiple extends SessionServlet {
             this.pos = pos;
             this.inObject = inObject;
         }
-        
+
         /**
          * Gets the (zero-based) position.
          *
@@ -597,7 +601,7 @@ public class Multiple extends SessionServlet {
         public int getPos() {
             return pos;
         }
-        
+
         /**
          * Gets the input object
          *
@@ -606,7 +610,7 @@ public class Multiple extends SessionServlet {
         public JSONObject getInputObject() {
             return inObject;
         }
-        
+
         /**
          * Gets the output object
          *
@@ -618,7 +622,7 @@ public class Multiple extends SessionServlet {
 
         /**
          * Sets the output object
-         * 
+         *
          * @param outObject The output object to set
          */
         public void setOutputObject(final JSONValue outObject) {

@@ -110,7 +110,7 @@ public abstract class AbstractAttachmentAction implements AJAXActionService {
 
     /**
      * Checks current size of uploaded data against possible quota restrictions.
-     * 
+     *
      * @param size The size
      * @param requestData The associated request data
      * @throws OXException If any quota restrictions are exceeded

@@ -62,7 +62,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ContactStorageActivator extends HousekeepingActivator {
-    
+
     private final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ContactStorageActivator.class));
 
     /**
@@ -88,7 +88,7 @@ public class ContactStorageActivator extends HousekeepingActivator {
             /*
              * start tracking
              */
-            super.track(ContactStorage.class, new ContactStorageListener(registry));            
+            super.track(ContactStorage.class, new ContactStorageListener(registry));
             super.openTrackers();
             /*
              * register services
@@ -96,7 +96,7 @@ public class ContactStorageActivator extends HousekeepingActivator {
             super.registerService(ContactStorageRegistry.class, registry);
         } catch (final Exception e) {
             LOG.error("error starting \"com.openexchange.contact.storage\"", e);
-            throw e;            
+            throw e;
         }
     }
 
@@ -105,5 +105,5 @@ public class ContactStorageActivator extends HousekeepingActivator {
         LOG.info("stopping bundle: com.openexchange.contact.storage");
         super.stopBundle();
     }
-    
+
 }

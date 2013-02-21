@@ -101,6 +101,7 @@ import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.webdav.workarounds.LiberalUnLockMethod;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -418,7 +419,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     @Override
-    public boolean exists(final String folderId, final String id, final int version) throws OXException {
+    public boolean exists(final String folderId, final String id, final String version) throws OXException {
         try {
             final String fid = checkFolderId(folderId, rootUri);
             final URI uri = new URI(fid + id, true);
@@ -476,7 +477,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     @Override
-    public File getFileMetadata(final String folderId, final String id, final int version) throws OXException {
+    public File getFileMetadata(final String folderId, final String id, final String version) throws OXException {
         if (version != CURRENT_VERSION) {
             throw WebDAVFileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
         }
@@ -627,7 +628,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     @Override
-    public InputStream getDocument(final String folderId, final String id, final int version) throws OXException {
+    public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
         final String fid = checkFolderId(folderId, rootUri);
         final URI uri;
         try {
@@ -708,11 +709,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                     /*
                      * Close given stream
                      */
-                    try {
-                        data.close();
-                    } catch (final IOException e) {
-                        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(WebDAVFileStorageFileAccess.class)).error(e.getMessage(), e);
-                    }
+                    Streams.close(data);
                 }
             }
         } catch (final OXException e) {
@@ -724,9 +721,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         } catch (final DavException e) {
             throw WebDAVFileStorageExceptionCodes.DAV_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
-            if (e instanceof OXException) {
-                throw new OXException(e);
-            }
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
@@ -774,8 +768,8 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     }
 
     @Override
-    public int[] removeVersion(final String folderId, final String id, final int[] versions) throws OXException {
-        for (final int version : versions) {
+    public String[] removeVersion(final String folderId, final String id, final String[] versions) throws OXException {
+        for (final String version : versions) {
             if (version != CURRENT_VERSION) {
                 throw WebDAVFileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
             }
@@ -800,7 +794,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             } finally {
                 closeHttpMethod(deleteMethod);
             }
-            return new int[0];
+            return new String[0];
         } catch (final HttpException e) {
             throw WebDAVFileStorageExceptionCodes.HTTP_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
@@ -1096,7 +1090,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
          * Consider start/end index
          */
         if (start != NOT_SET && end != NOT_SET && end > start) {
-
             final int fromIndex = start;
             int toIndex = end;
             if ((fromIndex) > results.size()) {

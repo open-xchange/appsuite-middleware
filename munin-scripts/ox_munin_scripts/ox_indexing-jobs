@@ -1,0 +1,46 @@
+#!/usr/bin/perl -w
+#%# family=auto
+#%# capabilities=autoconf
+
+$listjobs="/opt/open-xchange/sbin/listindexingjobs";
+
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf") {
+    if (-x $listjobs) {
+        print "yes\n";
+        exit 0;
+    } else {
+        print "no\n";
+        exit 0;
+    }
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config") {
+    print "graph_title Indexing Jobs\n";
+    print "graph_category Open Xchange\n";
+    print "graph_vlabel number of jobs\n";
+    print "a.label stored jobs\n";
+    print "b.label currently running jobs\n";
+    exit 0
+}
+
+open(JOBS,"$listjobs |") || die "can not read monitoring output";
+
+while (<JOBS>)
+{
+    if ( $_ =~ /All scheduled jobs/) {
+        s/.*://;
+        $val=$_+0;
+        print "a.value $val\n";
+        next;
+    }
+    
+    if ( $_ =~ /Currently running jobs on this node/) {
+        s/.*://;
+        $val=$_+0;
+        print "b.value $val\n";
+        next;
+    }
+}
+
+close (JOBS);

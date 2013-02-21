@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Messaging Generic Bundle
 Bundle-SymbolicName: com.openexchange.messaging.generic
-Bundle-Version: 7.0.0
+Bundle-Version: 7.0.1
 Bundle-Activator: com.openexchange.messaging.generic.osgi.MessagingGenericActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -20,6 +20,7 @@ Import-Package: com.openexchange.cache,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.delete,
  com.openexchange.groupware.update,
+ com.openexchange.java,
  com.openexchange.log,
  com.openexchange.mail,
  com.openexchange.mail.mime,
@@ -38,9 +39,14 @@ Import-Package: com.openexchange.cache,
  com.openexchange.tools.sql,
  com.openexchange.tools.stream,
  gnu.trove,
+ gnu.trove.impl.hash,
  gnu.trove.list,
  gnu.trove.list.array,
+ gnu.trove.map,
+ gnu.trove.map.hash,
  gnu.trove.procedure,
+ gnu.trove.set,
+ gnu.trove.set.hash,
  javax.activation,
  javax.mail,
  javax.mail.internet,

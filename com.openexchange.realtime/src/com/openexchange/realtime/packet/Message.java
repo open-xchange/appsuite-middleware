@@ -52,7 +52,7 @@ package com.openexchange.realtime.packet;
 
 /**
  * {@link Message} - A regular message associated with a certain {@link Type type}.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -84,7 +84,7 @@ public class Message extends Stanza {
 
     /**
      * Gets the type.
-     * 
+     *
      * @return The type
      */
     public Type getType() {
@@ -93,7 +93,7 @@ public class Message extends Stanza {
 
     /**
      * Sets the type.
-     * 
+     *
      * @param type The type
      */
     public void setType(final Type type) {

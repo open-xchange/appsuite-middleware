@@ -52,7 +52,6 @@ package com.openexchange.http.grizzly.filter.backendroute;
 import java.io.IOException;
 import java.util.Iterator;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.glassfish.grizzly.filterchain.BaseFilter;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
 import org.glassfish.grizzly.filterchain.NextAction;
@@ -73,7 +72,7 @@ public class AppendBackendRouteFilter extends BaseFilter {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(AppendBackendRouteFilter.class);
     private String backendRoute;
-    
+
     /**
      * Gets the backendRoute
      *
@@ -102,9 +101,9 @@ public class AppendBackendRouteFilter extends BaseFilter {
         }
         setBackendRoute(backendRoute);
     }
-    
-    
-    
+
+
+
     /* (non-Javadoc)
      * @see org.glassfish.grizzly.filterchain.BaseFilter#handleAccept(org.glassfish.grizzly.filterchain.FilterChainContext)
      */
@@ -121,7 +120,7 @@ public class AppendBackendRouteFilter extends BaseFilter {
         return super.handleClose(ctx);
     }
 
-    /** 
+    /**
      * While handling reads we have to handle several different cases of JSessionId in the incoming request:
      * <ol>
      *   <li>
@@ -161,7 +160,7 @@ public class AppendBackendRouteFilter extends BaseFilter {
     /**
      * Request might not have had a JSessionID but response received one during Servlet.service().
      * Check Headers for new JSessionId and append the backend route if it has a route configured.
-     * @see org.glassfish.grizzly.filterchain.BaseFilter#handleRead(org.glassfish.grizzly.filterchain.FilterChainContext) 
+     * @see org.glassfish.grizzly.filterchain.BaseFilter#handleRead(org.glassfish.grizzly.filterchain.FilterChainContext)
      */
     @Override
     public NextAction handleWrite(FilterChainContext ctx) throws IOException {
@@ -197,7 +196,7 @@ public class AppendBackendRouteFilter extends BaseFilter {
                 writeToDebugLog(new StringBuilder("JSessionId is invalid: ").append(clientCookieInspector.getJSessionIdValue()).toString());
                 clientCookieInspector.fixJSessionId();
                 writeToDebugLog(new StringBuilder("Fixed JSessionId is: ").append(clientCookieInspector.getJSessionIdValue()).toString());
-                
+
                 //fix response
                 HttpResponsePacket httpResponsePacket = httpRequestPacket.getResponse();
                 ServerCookieInspector serverCookieInspector = new ServerCookieInspector(httpResponsePacket, backendRoute);
@@ -215,7 +214,7 @@ public class AppendBackendRouteFilter extends BaseFilter {
      * Check if one of the Set-Cookie headers contains a JSessionId and modify response if needed.
      * @param httpResponsePacket the outgoing http respone, must not be null
      * @param backendRoute the currently configured backend route, must not be null
-     * @throws 
+     * @throws
      */
     private void checkSetCookieHeaders(HttpResponsePacket httpResponsePacket, String backendRoute) {
         if(httpResponsePacket == null || backendRoute == null) {
@@ -238,7 +237,7 @@ public class AppendBackendRouteFilter extends BaseFilter {
             }
         }
     }
-    
+
     /**
      * Write a String to the info log.
      * @param logValue the String that should be logged
@@ -248,7 +247,7 @@ public class AppendBackendRouteFilter extends BaseFilter {
             LOG.info(logValue);
         }
     }
-    
+
     /**
      * Write a String to the debug log.
      * @param logValue the String that should be logged

@@ -67,7 +67,7 @@ import com.openexchange.mail.mime.converters.MimeMessageConverter;
 
 /**
  * {@link MailCreator}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class MailCreator {
@@ -113,7 +113,7 @@ public class MailCreator {
                 }
             }
         }
-        
+
         for (int i = 0; i < msgs.length; i++) {
             MailMessage convertMessage = MimeMessageConverter.convertMessage(msgs[i]);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -134,8 +134,8 @@ public class MailCreator {
             sb.append(" };");
             System.out.println(sb.toString());
         }
-        
-        
+
+
     }
 
 }

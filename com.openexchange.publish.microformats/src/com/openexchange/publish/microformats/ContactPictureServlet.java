@@ -107,9 +107,9 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
     public static void setContactService(final ContactService service) {
         contacts = service;
     }
-    
+
     private static FileResponseRenderer fileResponseRenderer = null;
-    
+
     public static void setFileResponseRenderer(final FileResponseRenderer renderer) {
     	fileResponseRenderer = renderer;
     }
@@ -149,21 +149,21 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
     }
 
     private void writeImage(final Contact contact, final HttpServletRequest req, final HttpServletResponse resp, final Session session) throws IOException, OXException {
-        
+
         final AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(req, false, false, ServerSessionAdapter.valueOf(session), "/publications/");
-        
+
         final ByteArrayFileHolder holder = new ByteArrayFileHolder(contact.getImage1());
         holder.setContentType(contact.getImageContentType());
         final AJAXRequestResult result = new AJAXRequestResult(holder, "file");
-        
-        
+
+
         fileResponseRenderer.write(request, result, req, resp);
-        
+
     }
 
     private Contact loadContact(final Publication publication, final int folderId, final int contactId) throws OXException {
-    	return contacts.getContact(new PublicationSession(publication), Integer.toString(folderId), Integer.toString(contactId), 
-    			new ContactField[] { ContactField.IMAGE1, ContactField.IMAGE_LAST_MODIFIED } ); 
+    	return contacts.getContact(new PublicationSession(publication), Integer.toString(folderId), Integer.toString(contactId),
+    			new ContactField[] { ContactField.IMAGE1, ContactField.IMAGE_LAST_MODIFIED } );
     }
 
     private Map<String, String> getPublicationArguments(final HttpServletRequest req) throws UnsupportedEncodingException {

@@ -96,12 +96,7 @@ public final class Insert {
      * @throws OXException If insertion fails
      */
     public static void insertFolder(final int cid, final int tree, final int user, final Folder folder) throws OXException {
-        final DatabaseService databaseService;
-        try {
-            databaseService = getServiceRegistry().getService(DatabaseService.class, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final DatabaseService databaseService = getServiceRegistry().getService(DatabaseService.class, true);
         // Get a connection
         final Connection con = databaseService.getWritable(cid);
         try {

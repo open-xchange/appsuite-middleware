@@ -72,21 +72,21 @@ import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
 public class TrackingConfiguration implements TrackingConfigurationMBean {
-	
+
 	private final ConcurrentMap<String, ConcurrentMap<String, LogLevel>> sessionLevels = new ConcurrentHashMap<String, ConcurrentMap<String, LogLevel>>();
-	
+
 	private final ConcurrentMap<Integer, ConcurrentMap<String, LogLevel>> cidLevels = new ConcurrentHashMap<Integer, ConcurrentMap<String, LogLevel>>();
-	
+
 	private final ConcurrentMap<Integer, ConcurrentMap<Integer, ConcurrentMap<String, LogLevel>>> userLevels = new ConcurrentHashMap<Integer, ConcurrentMap<Integer, ConcurrentMap<String, LogLevel>>>();
-	
+
 	private final UserService users;
 	private final ContextService contexts;
-	
+
 	public TrackingConfiguration(UserService users, ContextService contexts) {
 		this.users = users;
 		this.contexts = contexts;
 	}
-	
+
 	public void setLogLevel(String className, String sessionId, String lvl) {
 		LogLevel level = LogLevel.valueOf(lvl.toUpperCase());
 		ConcurrentMap<String, LogLevel> clazzMap = new ConcurrentHashMap<String, LogLevel>();
@@ -100,7 +100,7 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 			clazzMap.put(className, level);
 		}
 	}
-	
+
 	public void setLogLevel(String className, int cid, int uid, String lvl) {
 		LogLevel level = LogLevel.valueOf(lvl.toUpperCase());
 
@@ -116,7 +116,7 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 			clazzMap.put(className, level);
 		}
 	}
-	
+
 	public void setLogLevel(String className, int cid, String lvl) {
 		LogLevel level = LogLevel.valueOf(lvl.toUpperCase());
 
@@ -132,7 +132,7 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 			clazzMap.put(className, level);
 		}
 	}
-	
+
 	private int getUserId(String userName, int cid) throws OXException {
 		Context context;
 		context = contexts.getContext(cid);
@@ -145,9 +145,9 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 		}
 		return candidates[0].getId();
 	}
-	
+
 	public boolean setLogLevel(String className, int cid, String userName, String level) {
-		
+
 		try {
 			setLogLevel(className, cid, getUserId(userName, cid), level);
 		} catch (OXException e) {
@@ -155,7 +155,7 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 		}
 		return true;
 	}
-	
+
 	public void clearTracking(int cid, int uid) {
 		ConcurrentMap<Integer, ConcurrentMap<String, LogLevel>> userMap = userLevels.get(Integer.valueOf(cid));
 		if (userMap != null) {
@@ -182,9 +182,9 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 		}
 		return true;
 	}
-	
 
-		
+
+
 	public boolean isDebugEnabled(String[] className, Session sessionObject) {
 		return getLogLevel(className, sessionObject).includes(LogLevel.DEBUG);
 	}
@@ -217,7 +217,7 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 			LogFactory.getLog("com.openexchange.logging.tracking.session."+session.getSessionID()),
 			LogFactory.getLog("com.openexchange.logging.tracking.ctx."+session.getContextId()),
 			LogFactory.getLog("com.openexchange.logging.tracking.uid."+session.getContextId()+"."+session.getUserId()),
-			
+
 		};
 		return new Log() {
 
@@ -237,21 +237,21 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 				for(Log l: logs) {
 					l.error(arg0);
 				}
-				
+
 			}
 
 			public void error(Object arg0, Throwable arg1) {
 				for(Log l: logs) {
 					l.error(arg0, arg1);
 				}
-				
+
 			}
 
 			public void fatal(Object arg0) {
 				for(Log l: logs) {
 					l.fatal(arg0);
 				}
-				
+
 			}
 
 			public void fatal(Object arg0, Throwable arg1) {
@@ -263,37 +263,37 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 			public void info(Object arg0) {
 				for(Log l: logs) {
 					l.info(arg0);
-				}				
+				}
 			}
 
 			public void info(Object arg0, Throwable arg1) {
 				for(Log l: logs) {
 					l.info(arg0, arg1);
-				}	
+				}
 			}
-			
+
 			public void trace(Object arg0) {
 				for(Log l: logs) {
 					l.trace(arg0);
-				}	
+				}
 			}
 
 			public void trace(Object arg0, Throwable arg1) {
 				for(Log l: logs) {
 					l.trace(arg0, arg1);
-				}	
+				}
 			}
 
 			public void warn(Object arg0) {
 				for(Log l: logs) {
 					l.warn(arg0);
-				}	
+				}
 			}
 
 			public void warn(Object arg0, Throwable arg1) {
 				for(Log l: logs) {
 					l.warn(arg0, arg1);
-				}	
+				}
 			}
 
 
@@ -320,11 +320,11 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 			public boolean isWarnEnabled() {
 				return true;
 			}
-			
-			
+
+
 		};
 	}
-	
+
 	private LogLevel getLogLevel(String[] className, Session sessionObject) {
 		if (sessionObject == null) {
 			return LogLevel.OFF;
@@ -355,21 +355,21 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 			return LogLevel.OFF;
 		}
 		int length = className.length;
-		
+
 		Set<LogLevel> allLevels = new HashSet<LogLevel>();
-		
+
 		while(length > 0) {
 			StringBuilder b = new StringBuilder();
 			for(int i = 0; i < length; i++) {
 				b.append(className[i]).append(".");
 			}
 			b.setLength(b.length() - 1);
-			
+
 			LogLevel logLevel = clazzMap.get(b.toString());
 			if (logLevel != null) {
 				allLevels.add(logLevel);
 			}
-			
+
 			length--;
 		}
 		if (allLevels.isEmpty()) {
@@ -381,6 +381,6 @@ public class TrackingConfiguration implements TrackingConfigurationMBean {
 	}
 
 
-	
+
 
 }

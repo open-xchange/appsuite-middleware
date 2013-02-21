@@ -57,7 +57,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PresenceSubscriptionService}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public interface PresenceSubscriptionService {
@@ -65,7 +65,7 @@ public interface PresenceSubscriptionService {
     /**
      * Sends a presence request to a specific user, defined in the Presence object. This request might be handled immediately if the
      * recipient is available or is stored for later handling.
-     * 
+     *
      * @param subscription
      * @param message optional message
      * @param session
@@ -75,7 +75,7 @@ public interface PresenceSubscriptionService {
 
     /**
      * Allows a given user to see (or not to see) the current users presence status.
-     * 
+     *
      * @param id The user who is allowed to receive the presence status.
      * @param approval
      * @param session
@@ -85,7 +85,7 @@ public interface PresenceSubscriptionService {
 
     /**
      * Returns all active subscribers for the current user.
-     * 
+     *
      * @param session
      * @return
      * @throws OXException
@@ -94,7 +94,7 @@ public interface PresenceSubscriptionService {
 
     /**
      * Returns all active subscriptions for the current user.
-     * 
+     *
      * @param session
      * @return
      * @throws OXException
@@ -103,7 +103,7 @@ public interface PresenceSubscriptionService {
 
     /**
      * Returns all pending requests for the current user.
-     * 
+     *
      * @param session
      * @return
      * @throws OXException
@@ -112,7 +112,7 @@ public interface PresenceSubscriptionService {
 
     /**
      * Sends all pending reuqests for the current user.
-     * 
+     *
      * @param session
      * @throws OXException
      */

@@ -67,8 +67,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  *
  */
-@Action(method = RequestMethod.PUT, name = "getProperties", description = "Get unnamed properties from an EAV Contact.", parameters = { 
-		@Parameter(name = "uuid"), 
+@Action(method = RequestMethod.PUT, name = "getProperties", description = "Get unnamed properties from an EAV Contact.", parameters = {
+		@Parameter(name = "uuid"),
 		@Parameter(name = "props", description = "JSONArray with unnamed properties to get from the EAV Contact" )})
 public class GetPropertiesAction extends AbstractAction {
 
@@ -95,8 +95,8 @@ public class GetPropertiesAction extends AbstractAction {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		
+
 		String s = getContactService().getEAVContactService().getProperties(uuid, prop);
 		return new AJAXRequestResult(s);
 	}
-} 
+}

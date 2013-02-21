@@ -59,16 +59,16 @@ import com.openexchange.osgi.console.ServiceState;
 
 /**
  * {@link DeferredActivatorMBeanImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DeferredActivatorMBeanImpl extends StandardMBean implements DeferredActivatorMBean {
 
     /**
      * Initializes a new {@link DeferredActivatorMBeanImpl}.
-     * 
+     *
      * @throws NotCompliantMBeanException  If the mbeanInterface does not follow JMX design patterns for Management Interfaces, or if this
-     *             does not implement the specified interface. 
+     *             does not implement the specified interface.
      */
     public DeferredActivatorMBeanImpl() throws NotCompliantMBeanException {
         super(DeferredActivatorMBean.class);
@@ -79,7 +79,7 @@ public final class DeferredActivatorMBeanImpl extends StandardMBean implements D
         final ServiceState serviceState = DeferredActivator.getLookup().determineState(name);
         return serviceState.getMissingServices();
     }
-    
+
     @Override
     public Map<String, List<String>> listAllMissingServices() {
         final Map<String, List<String>> res = new ConcurrentHashMap<String, List<String>>();

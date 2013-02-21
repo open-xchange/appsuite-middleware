@@ -52,12 +52,24 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc push_m
 %doc com.openexchange.push.mail.notify/ChangeLog
 
 %changelog
+* Tue Feb 19 2013 Carsten Hoeger <choeger@open-xchange.com>
+Fourth release candidate for 7.0.1
+* Tue Feb 19 2013 Carsten Hoeger <choeger@open-xchange.com>
+Third release candidate for 7.0.1
 * Fri Feb 15 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-02-13
+* Thu Feb 14 2013 Carsten Hoeger <choeger@open-xchange.com>
+Second release candidate for 7.0.1
+* Fri Feb 01 2013 Carsten Hoeger <choeger@open-xchange.com>
+First release candidate for 7.0.1
 * Tue Jan 29 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-01-28
 * Mon Jan 21 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-01-24
+* Tue Jan 15 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-01-23
+* Thu Jan 10 2013 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 7.0.1
 * Thu Jan 03 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for public patch 2013-01-15
 * Fri Dec 28 2012 Carsten Hoeger <choeger@open-xchange.com>
@@ -106,6 +118,10 @@ Fourth release candidate for 6.22.0
 Third release candidate for 6.22.0
 * Thu Oct 04 2012 Carsten Hoeger <choeger@open-xchange.com>
 Second release candidate for 6.22.0
+* Tue Sep 04 2012 Carsten Hoeger <choeger@open-xchange.com>
+First release candidate for 6.23.0
+* Mon Sep 03 2012 Carsten Hoeger <choeger@open-xchange.com>
+prepare for next EDP drop
 * Tue Aug 21 2012 Carsten Hoeger <choeger@open-xchange.com>
 First release candidate for 6.22.0
 * Mon Aug 20 2012 Carsten Hoeger <choeger@open-xchange.com>

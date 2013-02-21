@@ -96,6 +96,7 @@ import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.AllocatingStringWriter;
+import com.openexchange.java.Streams;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -419,14 +420,7 @@ public class Infostore extends PermissionServlet {
             } catch (final OXException e) {
                 LOG.debug("", e);
             }
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (final IOException e) {
-                    LOG.debug("", e);
-                }
-            }
-
+            Streams.close(in);
         }
         PrintWriter w = null;
         try {
@@ -603,11 +597,11 @@ public class Infostore extends PermissionServlet {
                 String contentDisposition = null;
                 if (null == contentDisposition) {
                     final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32).append("attachment");
-                    DownloadUtility.appendFilenameParameter(metadata.getFileName(), SAVE_AS_TYPE, userAgent, sb);
+                    DownloadUtility.appendFilenameParameter(metadata.getFileName(), null, userAgent, sb);
                     res.setHeader("Content-Disposition", sb.toString());
                 } else {
                     final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32).append(contentDisposition);
-                    DownloadUtility.appendFilenameParameter(metadata.getFileName(), SAVE_AS_TYPE, userAgent, sb);
+                    DownloadUtility.appendFilenameParameter(metadata.getFileName(), null, userAgent, sb);
                     res.setHeader("Content-Disposition", sb.toString());
                     // Tools.setHeaderForFileDownload(userAgent, res, metadata.getFileName());
                 }
@@ -641,26 +635,9 @@ public class Infostore extends PermissionServlet {
             handleOXException(res, x, STR_ERROR, true, session);
             return;
         } finally {
-
-            if (os != null) {
-                try {
-                    os.flush();
-                } catch (final IOException e) {
-                    LOG.debug("", e);
-                }
-                try {
-                    os.close();
-                } catch (final IOException e) {
-                    LOG.debug("", e);
-                }
-            }
-            if (documentData != null) {
-                try {
-                    documentData.close();
-                } catch (final IOException e) {
-                    LOG.debug("", e);
-                }
-            }
+            Streams.flush(os);
+            Streams.close(os);
+            Streams.close(documentData);
         }
     }
 

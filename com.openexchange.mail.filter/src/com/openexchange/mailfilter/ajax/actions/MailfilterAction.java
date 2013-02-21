@@ -77,6 +77,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.IfCommand;
 import com.openexchange.jsieve.commands.Rule;
@@ -186,9 +187,9 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
     private final String scriptname;
 
     private boolean useSIEVEResponseCodes = false;
-    
+
     private final Subject krbSubject;
-    
+
     /**
      * Default constructor.
      */
@@ -216,7 +217,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             sieveHandler.initializeConnection();
         }
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -336,7 +337,6 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         synchronized (mutex) {
             final Parameters parameters = request.getParameters();
             final Credentials credentials = request.getCredentials();
-            final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
             final SieveHandler sieveHandler = connectRight(credentials);
             try {
                 handlerConnect(sieveHandler);
@@ -351,24 +351,24 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     log.debug("The following sieve script will be parsed:\n"
                         + script);
                 }
-                final RuleListAndNextUid readScriptFromString = sieveTextFilter
-                    .readScriptFromString(script);
-                final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter
-                    .splitClientRulesAndRequire(
-                        readScriptFromString.getRulelist(),
-                        parameters.getParameter(Parameter.FLAG),
-                        readScriptFromString.isError());
-                final ArrayList<Rule> clientrules = clientrulesandrequire
-                    .getRules();
+                final SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
+                final RuleListAndNextUid readScriptFromString = sieveTextFilter.readScriptFromString(script);
+                final ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(
+                    readScriptFromString.getRulelist(),
+                    parameters.getParameter(Parameter.FLAG),
+                    readScriptFromString.isError());
+                final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
                 changeOutgoingVacationRule(clientrules);
-                return CONVERTER.write(clientrules
-                    .toArray(new Rule[clientrules.size()]));
+                return CONVERTER.write(clientrules.toArray(new Rule[clientrules.size()]));
             } catch (final UnsupportedEncodingException e) {
                 throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
             } catch (final IOException e) {
-                throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), Integer.valueOf(sieveHandler.getSievePort()));
+                throw OXMailfilterExceptionCode.IO_CONNECTION_ERROR.create(
+                    e,
+                    sieveHandler.getSieveHost(),
+                    Integer.valueOf(sieveHandler.getSievePort()));
             } catch (final OXSieveHandlerException e) {
-            	throw handleParsingException(e, credentials);
+                throw handleParsingException(e, credentials);
             } catch (final OXSieveHandlerInvalidCredentialsException e) {
                 throw OXMailfilterExceptionCode.INVALID_CREDENTIALS.create(e, EMPTY_ARGS);
             } catch (final ParseException e) {
@@ -881,7 +881,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 final ArrayList<String> header = new ArrayList<String>();
                 header.add("From");
 
-                final String[] split = vacationdomains.split(",");
+                final String[] split = Strings.splitByComma(vacationdomains);
 
                 argList.add(header);
                 argList.add(Arrays.asList(split));
@@ -1113,7 +1113,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         }
         return Category.CATEGORY_ERROR;
     }
-    
+
     /**
      * The SIEVE parser is not very expressive when it comes to exceptions.
      * This method analyses an exception message and throws a more detailed

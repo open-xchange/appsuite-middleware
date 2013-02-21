@@ -76,16 +76,16 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class UWACopyTask implements CopyUserTaskService {
-    
+
     private static final String SELECT_WIDGET_SQL = "SELECT id, autorefresh, standalone, title, url, visible, protected, parameters FROM uwaWidget WHERE cid = ? AND user = ?";
-    
+
     private static final String SELECT_POSITION_SQL = "SELECT adj FROM uwaWidgetPosition WHERE cid = ? AND user = ? AND id = ?";
-    
+
     private static final String INSERT_WIDGET_SQL = "INSERT INTO uwaWidget (cid, user, id, autorefresh, standalone, title, url, visible, protected, parameters) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    
+
     private static final String INSERT_POSITION_SQL = "INSERT INTO uwaWidgetPosition (cid, user, id, adj) VALUES (?, ?, ?, ?)";
-    
-    
+
+
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#getAlreadyCopied()
      */
@@ -107,15 +107,15 @@ public class UWACopyTask implements CopyUserTaskService {
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#copyUser(java.util.Map)
      */
-    public ObjectMapping<?> copyUser(final Map<String, ObjectMapping<?>> copied) throws OXException {        
-        final CopyTools copyTools = new CopyTools(copied);        
+    public ObjectMapping<?> copyUser(final Map<String, ObjectMapping<?>> copied) throws OXException {
+        final CopyTools copyTools = new CopyTools(copied);
         final Integer srcCtxId = copyTools.getSourceContextId();
         final Integer dstCtxId = copyTools.getDestinationContextId();
         final Integer srcUsrId = copyTools.getSourceUserId();
         final Integer dstUsrId = copyTools.getDestinationUserId();
         final Connection srcCon = copyTools.getSourceConnection();
         final Connection dstCon = copyTools.getDestinationConnection();
-        
+
         try {
             if (DBUtils.tableExists(srcCon, "uwaWidget")) {
                 final List<Widget> widgets = loadWidgetsFromDB(srcCon, i(srcCtxId), i(srcUsrId));
@@ -123,11 +123,11 @@ public class UWACopyTask implements CopyUserTaskService {
             }
         } catch (SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
-        }       
-        
+        }
+
         return null;
     }
-    
+
     void writeWidgetsToDB(final Connection con, final int cid, final int uid, final List<Widget> widgets) throws OXException {
         PreparedStatement wstmt = null;
         PreparedStatement pstmt = null;
@@ -146,20 +146,20 @@ public class UWACopyTask implements CopyUserTaskService {
                 wstmt.setInt(i++, widget.isVisible() ? 1 : 0);
                 wstmt.setInt(i++, widget.isProtectedAttr() ? 1 : 0);
                 setStringOrNull(i++, wstmt, widget.getParameters());
-                
+
                 wstmt.addBatch();
-                
+
                 final String adj = widget.getAdj();
                 if (adj != null) {
                     pstmt.setInt(1, cid);
                     pstmt.setInt(2, uid);
                     pstmt.setString(3, widget.getId());
                     pstmt.setString(4, adj);
-                    
+
                     pstmt.addBatch();
                 }
             }
-            
+
             wstmt.executeBatch();
             pstmt.executeBatch();
         } catch (final SQLException e) {
@@ -169,20 +169,20 @@ public class UWACopyTask implements CopyUserTaskService {
             DBUtils.closeSQLStuff(pstmt);
         }
     }
-    
+
     List<Widget> loadWidgetsFromDB(final Connection con, final int cid, final int uid) throws OXException {
         final List<Widget> widgets = new ArrayList<Widget>();
         PreparedStatement wstmt = null;
         PreparedStatement pstmt = null;
-        ResultSet wrs = null;        
+        ResultSet wrs = null;
         try {
             wstmt = con.prepareStatement(SELECT_WIDGET_SQL);
             wstmt.setInt(1, cid);
             wstmt.setInt(2, uid);
-            
+
             wrs = wstmt.executeQuery();
             pstmt = con.prepareStatement(SELECT_POSITION_SQL);
-            while (wrs.next()) {                
+            while (wrs.next()) {
                 int i = 1;
                 final Widget widget = new Widget();
                 final String id = wrs.getString(i++);
@@ -194,7 +194,7 @@ public class UWACopyTask implements CopyUserTaskService {
                 widget.setVisible(getIntOrNegative(i++, wrs) == 1 ? true : false);
                 widget.setProtectedAttr(getIntOrNegative(i++, wrs) == 1 ? true : false);
                 widget.setParameters(wrs.getString(i++));
-                
+
                 ResultSet prs = null;
                 try {
                     pstmt.setInt(1, cid);
@@ -207,7 +207,7 @@ public class UWACopyTask implements CopyUserTaskService {
                 } finally {
                     DBUtils.closeSQLStuff(prs);
                 }
-                
+
                 widgets.add(widget);
             }
         } catch (final SQLException e) {
@@ -216,14 +216,14 @@ public class UWACopyTask implements CopyUserTaskService {
             DBUtils.closeSQLStuff(wrs, wstmt);
             DBUtils.closeSQLStuff(pstmt);
         }
-        
+
         return widgets;
     }
 
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#done(java.util.Map, boolean)
      */
-    public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {        
+    public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {
     }
 
 }

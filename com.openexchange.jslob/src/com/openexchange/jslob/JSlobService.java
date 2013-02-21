@@ -52,42 +52,42 @@ package com.openexchange.jslob;
 import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.session.Session;
 
 /**
  * {@link JSlobService} - The JSlob service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface JSlobService {
 
     /**
      * Gets the service identifier.
-     * 
+     *
      * @return The service identifier
      */
     String getIdentifier();
 
     /**
      * Gets the aliases for this service.
-     * 
+     *
      * @return The aliases for this service.
      */
     List<String> getAliases();
 
     /**
      * Gets the JSlob associated with given user in given context.
-     * 
+     *
      * @param id The identifier of the JSlob
      * @param userId session An active session
      * @return The JSlob
      * @throws OXException If JSlob cannot be returned
      */
-    JSlob get(String id, ServerSession session) throws OXException;
+    JSlob get(String id, Session session) throws OXException;
 
     /**
      * Gets the shared JSlob.
-     * 
+     *
      * @param id The identifier of the JSlob
      * @return The JSlob
      * @throws OXException If JSlob cannot be returned
@@ -96,16 +96,16 @@ public interface JSlobService {
 
     /**
      * Gets the JSlobs associated with given user in given context.
-     * 
+     *
      * @param session an active session
      * @return The JSlobs
      * @throws OXException If JSlobs cannot be returned
      */
-    Collection<JSlob> get(ServerSession session) throws OXException;
+    Collection<JSlob> get(Session session) throws OXException;
 
     /**
      * Gets the shared JSlobs.
-     * 
+     *
      * @return The JSlobs
      * @throws OXException If JSlobs cannot be returned
      */
@@ -115,19 +115,19 @@ public interface JSlobService {
      * Sets the JSlob associated with given user in given context.
      * <p>
      * If passed JSlob is <code>null</code>, a delete is performed.
-     * 
+     *
      * @param id The path of the JSlob
      * @param jsonJSlob The JSlob or <code>null</code> for deletion
      * @param session an active session
      * @throws OXException If JSlob cannot be set
      */
-    void set(String id, JSlob jsonJSlob, ServerSession session) throws OXException;
+    void set(String id, JSlob jsonJSlob, Session session) throws OXException;
 
     /**
      * Sets the shared JSlob.
      * <p>
      * If passed JSlob is <code>null</code>, a delete is performed.
-     * 
+     *
      * @param id The path of the JSlob
      * @param jsonJSlob The JSlob or <code>null</code> for deletion
      * @throws OXException If JSlob cannot be set
@@ -136,12 +136,12 @@ public interface JSlobService {
 
     /**
      * Updates the JSlob associated with given user in given context.
-     * 
+     *
      * @param id The path of the JSlob
      * @param jsonUpdate The JSON update providing the data to update
      * @param session an active session
      * @throws OXException If update fails
      */
-    void update(String id, JSONUpdate update, ServerSession session) throws OXException;
+    void update(String id, JSONUpdate update, Session session) throws OXException;
 
 }

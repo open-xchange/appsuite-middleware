@@ -72,19 +72,19 @@ public interface OXUserCopyInterface extends Remote {
 
     /**
      * Moves the user <code>user</code> from <code>src</code> context to <code>dest</code> context
-     * 
+     *
      * @param user the user to copy
      * @param src the context where the user was located before
      * @param dest the context where the user should be copied to
      * @return the resulting user object with the new identifier of the user in the context
      * @throws RemoteException
-     * @throws InvalidDataException 
-     * @throws InvalidCredentialsException 
-     * @throws StorageException 
-     * @throws NoSuchUserException 
-     * @throws NoSuchContextException 
-     * @throws DatabaseUpdateException 
-     * @throws UserExistsException 
+     * @throws InvalidDataException
+     * @throws InvalidCredentialsException
+     * @throws StorageException
+     * @throws NoSuchUserException
+     * @throws NoSuchContextException
+     * @throws DatabaseUpdateException
+     * @throws UserExistsException
      */
     public User copyUser(final User user, final Context src, final Context dest, final Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, NoSuchUserException, DatabaseUpdateException, NoSuchContextException, UserExistsException;
 }

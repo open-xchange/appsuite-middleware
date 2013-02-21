@@ -53,7 +53,7 @@ import com.openexchange.session.Session;
 
 /**
  * Reserved tokens.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum ReservedToken implements Token {
@@ -109,7 +109,7 @@ public enum ReservedToken implements Token {
 
     /**
      * Gets the reserved token for specified token name.
-     * 
+     *
      * @param token The token name
      * @return The reserved token or <code>null</code>
      */

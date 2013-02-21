@@ -245,5 +245,5 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
 
         return list;
     }
-    
+
 }

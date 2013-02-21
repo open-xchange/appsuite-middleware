@@ -57,10 +57,10 @@ public class MacDetail {
     private String count;
 
     private String nrAdm;
-    
+
     private String nrDisabled;
-    
-    
+
+
     /**
      * @return the nrAdm
      */
@@ -68,7 +68,7 @@ public class MacDetail {
         return nrAdm;
     }
 
-    
+
     /**
      * @param nrAdm the nrAdm to set
      */
@@ -76,7 +76,7 @@ public class MacDetail {
         this.nrAdm = nradm;
     }
 
-    
+
     /**
      * @return the nrDisabled
      */
@@ -84,7 +84,7 @@ public class MacDetail {
         return nrDisabled;
     }
 
-    
+
     /**
      * @param nrDisabled the nrDisabled to set
      */

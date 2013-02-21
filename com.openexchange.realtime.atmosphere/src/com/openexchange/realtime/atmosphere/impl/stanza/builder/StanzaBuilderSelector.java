@@ -56,11 +56,10 @@ import com.openexchange.realtime.atmosphere.osgi.ExtensionRegistry;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link StanzaBuilderSelector} - Select and instantiate a new StanzaBuilder matching the client's message.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class StanzaBuilderSelector {
@@ -69,14 +68,14 @@ public class StanzaBuilderSelector {
     /**
      * Get a parser that is adequate for he JSONObject that has to be parsed.
      * Incoming JSONObjects must contain an <code>element</code> key that let's us determine the needed StanzaBuilder.
-     * 
+     *
      * <pre>
      * {
      *  element: 'presence'
      *  ...
      * };
      * </pre>
-     * 
+     *
      * @param json the JSONObject that has to be parsed.
      * @return a Builder adequate for the JSONObject that has to be transformed
      * @throws IllegalArgumentException if the JSONObject is null

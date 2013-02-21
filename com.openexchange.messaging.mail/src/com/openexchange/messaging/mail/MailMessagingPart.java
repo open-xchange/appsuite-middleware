@@ -69,7 +69,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.utils.CharsetDetector;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingContent;

@@ -1249,11 +1249,11 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
         }
     }
-    
+
     @Override
     public int getAdminId(final Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, NoSuchContextException {
         auth = auth == null ? new Credentials("","") : auth;
-        
+
         new BasicAuthenticator(context).doAuthentication(auth);
 
         try {
@@ -1274,7 +1274,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     public boolean exists(final Context ctx, Credentials auth) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException {
         auth = auth == null ? new Credentials("","") : auth;
         new BasicAuthenticator(context).doAuthentication(auth);
-        
+
         if(ctx == null) {
             throw new InvalidDataException("Given context is invalid");
         }
@@ -1294,7 +1294,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw new InvalidDataException("neither id or name is set in supplied context object");
         }
     }
-    
+
     @Override
     public boolean checkExists(final Context ctx, Credentials auth) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException {
         return exists(ctx, auth);

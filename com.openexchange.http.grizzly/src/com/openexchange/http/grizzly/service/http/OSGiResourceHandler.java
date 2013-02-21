@@ -36,7 +36,7 @@
  * and therefore, elected the GPL Version 2 license, then the option applies
  * only if the new code is made subject to such option by the copyright
  * holder.
- * 
+ *
  * Portions Copyright 2012 OPEN-XCHANGE, licensed under GPL Version 2.
  */
 
@@ -162,11 +162,11 @@ public class OSGiResourceHandler extends HttpHandler implements OSGiHandler {
      */
     private boolean authenticate(Request request, Response response,
             OSGiServletContext servletContext) throws IOException {
-        
+
         HttpServletRequestImpl servletRequest = new OSGiHttpServletRequest(request, servletContext);
         HttpServletResponseImpl servletResponse = HttpServletResponseImpl.create();
         servletResponse.initialize(response);
-        
+
         return httpContext.handleSecurity(servletRequest, servletResponse);
     }
 

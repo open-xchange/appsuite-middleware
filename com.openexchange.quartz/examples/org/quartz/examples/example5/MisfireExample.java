@@ -1,18 +1,18 @@
-/* 
- * Copyright 2005 - 2009 Terracotta, Inc. 
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
- * use this file except in compliance with the License. You may obtain a copy 
- * of the License at 
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0 
- *   
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT 
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- * License for the specific language governing permissions and limitations 
+/*
+ * Copyright 2005 - 2009 Terracotta, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
  * under the License.
- * 
+ *
  */
 
 package org.quartz.examples.example5;
@@ -38,7 +38,7 @@ import org.quartz.impl.StdSchedulerFactory;
  * misfire instructions affect the firings of triggers of <code>StatefulJob</code>
  * s - when the jobs take longer to execute that the frequency of the trigger's
  * repitition.
- * 
+ *
  * <p>
  * While the example is running, you should note that there are two triggers
  * with identical schedules, firing identical jobs. The triggers "want" to fire
@@ -53,12 +53,12 @@ import org.quartz.impl.StdSchedulerFactory;
  * missed) - so that it does not refire immediately, but rather at the next
  * scheduled time.
  * </p>
- * 
+ *
  * @author <a href="mailto:bonhamcm@thirdeyeconsulting.com">Chris Bonham</a>
  */
 public class MisfireExample {
 
-    
+
     public void run() throws Exception {
         System.out.println("------- Initializing -------------------");
 
@@ -81,19 +81,19 @@ public class MisfireExample {
             .withIdentity("statefulJob1", "group1")
             .usingJobData(StatefulDumbJob.EXECUTION_DELAY, 10000L)
             .build();
-    
-        SimpleTrigger trigger = newTrigger() 
+
+        SimpleTrigger trigger = newTrigger()
             .withIdentity("trigger1", "group1")
             .startAt(startTime)
             .withSchedule(simpleSchedule()
                     .withIntervalInSeconds(3)
                     .repeatForever())
             .build();
-        
+
         Date ft = sched.scheduleJob(job, trigger);
         System.out.println(job.getKey() +
-                " will run at: " + ft +  
-                " and repeat: " + trigger.getRepeatCount() + 
+                " will run at: " + ft +
+                " and repeat: " + trigger.getRepeatCount() +
                 " times, every " + trigger.getRepeatInterval() / 1000 + " seconds");
 
         // statefulJob2 will run every three seconds
@@ -102,8 +102,8 @@ public class MisfireExample {
             .withIdentity("statefulJob2", "group1")
             .usingJobData(StatefulDumbJob.EXECUTION_DELAY, 10000L)
             .build();
-    
-        trigger = newTrigger() 
+
+        trigger = newTrigger()
             .withIdentity("trigger2", "group1")
             .startAt(startTime)
             .withSchedule(simpleSchedule()
@@ -111,11 +111,11 @@ public class MisfireExample {
                     .repeatForever()
                     .withMisfireHandlingInstructionNowWithExistingCount()) // set misfire instructions
             .build();
-        
+
         ft = sched.scheduleJob(job, trigger);
         System.out.println(job.getKey() +
-                " will run at: " + ft +  
-                " and repeat: " + trigger.getRepeatCount() + 
+                " will run at: " + ft +
+                " and repeat: " + trigger.getRepeatCount() +
                 " times, every " + trigger.getRepeatInterval() / 1000 + " seconds");
 
         System.out.println("------- Starting Scheduler ----------------");
@@ -124,10 +124,10 @@ public class MisfireExample {
         sched.start();
 
         System.out.println("------- Started Scheduler -----------------");
-        
+
         try {
             // sleep for ten minutes for triggers to file....
-            Thread.sleep(600L * 1000L); 
+            Thread.sleep(600L * 1000L);
         } catch (Exception e) {
         }
 

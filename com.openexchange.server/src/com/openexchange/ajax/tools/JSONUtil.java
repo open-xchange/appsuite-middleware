@@ -58,7 +58,7 @@ import org.json.JSONTokener;
 
 /**
  * {@link JSONUtil} - Provides JSON utility methods.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONUtil {
@@ -72,7 +72,7 @@ public final class JSONUtil {
 
     /**
      * Creates a {@link JSONObject} containing the merged view on given JSON objects.
-     * 
+     *
      * @param jObject1 The first JSON object
      * @param jObjects The other JSON objects to merge with
      * @return The merged JSON object
@@ -128,7 +128,7 @@ public final class JSONUtil {
                 j1.put(key, object2);
             }
         }
-        
+
     }
 
     private static void mergeInto(final JSONArray a1, final JSONArray a2) throws JSONException {
@@ -155,7 +155,7 @@ public final class JSONUtil {
      * Gets the appropriate JSON value for specified string.
      * <p>
      * The value can be a Boolean, Double, Integer, JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object.
-     * 
+     *
      * @param value The value
      * @return The resulting object
      * @throws JSONException If String cannot be transformed to any object according to JSON specification

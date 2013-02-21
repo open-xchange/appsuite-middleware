@@ -80,7 +80,7 @@ public class JSONAssertion implements JSONCondition {
 
     /**
      * Checks for equality of specified JSON values.
-     * 
+     *
      * @param jsonValue1 The first JSON value
      * @param jsonValue2 The second JSON value
      * @return <code>true</code> if equal; otherwise <code>false</code>
@@ -102,20 +102,20 @@ public class JSONAssertion implements JSONCondition {
             if (!jsonValue2.isArray()) {
                 return false;
             }
-            return getListFrom((JSONArray) jsonValue1).equals(getListFrom((JSONArray) jsonValue2));
+            return getListFrom(jsonValue1.toArray()).equals(getListFrom(jsonValue2.toArray()));
         }
         if (jsonValue1.isObject()) {
             if (!jsonValue2.isObject()) {
                 return false;
             }
-            return getMapFrom((JSONObject) jsonValue1).equals(getMapFrom((JSONObject) jsonValue2));
+            return getMapFrom(jsonValue1.toObject()).equals(getMapFrom(jsonValue2.toObject()));
         }
         return false;
     }
 
     /**
      * Checks for equality of specified JSON datas.
-     * 
+     *
      * @param jsonData1 The first JSON data
      * @param jsonData2 The second JSON data
      * @return <code>true</code> if equal; otherwise <code>false</code>

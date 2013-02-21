@@ -63,7 +63,7 @@ import com.openexchange.mail.*;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public enum MailIndexField implements IndexField {
-    
+
     UUID(null),
     TIMESTAMP(null),
     ACCOUNT(MailField.ACCOUNT_NAME),
@@ -92,26 +92,26 @@ public enum MailIndexField implements IndexField {
     SUBJECT(MailField.SUBJECT),
     CONTENT_FLAG(null),
     CONTENT(MailField.BODY);
-    
-    
+
+
     private static final Map<MailField, EnumSet<MailIndexField>> reverseMap = new EnumMap<MailField, EnumSet<MailIndexField>>(MailField.class);
-        
+
     private final MailField mailField;
-    
+
     static {
         for (final MailIndexField field : values()) {
             final MailField tmpMailField = field.getMailField();
-            if (tmpMailField != null) {                
+            if (tmpMailField != null) {
                 EnumSet<MailIndexField> enumSet = reverseMap.get(tmpMailField);
                 if (enumSet == null) {
                     enumSet = EnumSet.noneOf(MailIndexField.class);
                     reverseMap.put(tmpMailField, enumSet);
                 }
-                enumSet.add(field);                
+                enumSet.add(field);
             }
         }
     }
-    
+
     public static Set<MailIndexField> getFor(final MailField[] mailFields) {
         final EnumSet<MailIndexField> indexFields = EnumSet.noneOf(MailIndexField.class);
         for (final MailField mailField : mailFields) {
@@ -120,27 +120,27 @@ public enum MailIndexField implements IndexField {
                 indexFields.addAll(enumSet);
             }
         }
-        
+
         return indexFields;
     }
-    
+
     public static MailIndexField getFor(final MailField mailField) {
         final EnumSet<MailIndexField> enumSet = reverseMap.get(mailField);
         if (enumSet.size() > 0) {
             return enumSet.iterator().next();
         }
-        
+
         return null;
     }
-    
+
     private MailIndexField(final MailField mailField) {
         this.mailField = mailField;
     }
-    
+
     public boolean hasMailField() {
         return mailField != null;
     }
-    
+
     public MailField getMailField() {
         return mailField;
     }

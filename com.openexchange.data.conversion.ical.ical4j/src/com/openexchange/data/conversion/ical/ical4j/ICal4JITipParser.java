@@ -60,15 +60,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.Method;
 import org.apache.commons.logging.Log;
-import com.openexchange.java.Charsets;
-import com.openexchange.log.LogFactory;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
@@ -80,6 +77,9 @@ import com.openexchange.data.conversion.ical.itip.ITipSpecialHandling;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.log.LogFactory;
 
 /**
  * {@link ICal4JITipParser}
@@ -109,12 +109,12 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
             reader = new BufferedReader(new InputStreamReader(ical, Charsets.UTF_8));
 
             net.fortuna.ical4j.model.Calendar calendar = parse(reader);
-            
+
             boolean microsoft = looksLikeMicrosoft(calendar);
-            
+
             Method method = (Method) calendar.getProperty(Property.METHOD);
             ITipMethod methodValue = (method == null) ? ITipMethod.NO_METHOD : ITipMethod.get(method.getValue());
-            
+
             List<AttributeConverter<VEvent, Appointment>> converters = AppointmentConverters.getConverters(methodValue);
 
             int i = 0;
@@ -126,7 +126,7 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
                     if (message == null) {
                         message = new ITipMessage();
                         if (microsoft) {
-                        	message.addFeature(ITipSpecialHandling.MICROSOFT);
+                            message.addFeature(ITipSpecialHandling.MICROSOFT);
                         }
                         message.setMethod(methodValue);
                         messagesPerUID.put(appointment.getUid(), message);
@@ -140,10 +140,10 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
                     } else {
                         message.setAppointment(appointment);
                     }
-                    if (vevent.getProperty(Property.COMMENT) != null ) {
+                    if (vevent.getProperty(Property.COMMENT) != null) {
                         message.setComment(vevent.getProperty(Property.COMMENT).getValue());
                     }
-                    
+
                 } catch (ConversionError conversionError) {
                     conversionError.printStackTrace();
                     errors.add(conversionError);
@@ -159,9 +159,23 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
         return messages;
     }
 
-	private boolean looksLikeMicrosoft(Calendar calendar) {
-		Property property = calendar.getProperty("PRODID");
-		return property.getValue().toLowerCase().contains("microsoft");
-	}
+    private boolean looksLikeMicrosoft(Calendar calendar) {
+        Property property = calendar.getProperty("PRODID");
+        return null != property && null != property.getValue() && toLowerCase(property.getValue()).indexOf("microsoft") >= 0;
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
+    }
 
 }

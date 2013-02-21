@@ -10,9 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -24,8 +24,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -39,11 +39,11 @@ public class NoSuchGroupException {
 
     /**
      * Ruft den Wert der noSuchGroupException-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link com.openexchange.admin.soap.reseller.group.rmi.exceptions.NoSuchGroupException }
-     *     
+     *
      */
     public com.openexchange.admin.soap.reseller.group.rmi.exceptions.NoSuchGroupException getNoSuchGroupException() {
         return noSuchGroupException;
@@ -51,11 +51,11 @@ public class NoSuchGroupException {
 
     /**
      * Legt den Wert der noSuchGroupException-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link com.openexchange.admin.soap.reseller.group.rmi.exceptions.NoSuchGroupException }
-     *     
+     *
      */
     public void setNoSuchGroupException(com.openexchange.admin.soap.reseller.group.rmi.exceptions.NoSuchGroupException value) {
         this.noSuchGroupException = value;

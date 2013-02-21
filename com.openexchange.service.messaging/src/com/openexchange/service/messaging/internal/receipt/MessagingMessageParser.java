@@ -53,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.UUID;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.service.messaging.MessagingServiceExceptionCode;
 import com.openexchange.service.messaging.internal.Constants;
@@ -173,7 +174,7 @@ public final class MessagingMessageParser {
             throw MessagingServiceExceptionCode.UNPARSEABLE_STRING.create();
         }
         if (encoded) {
-            return new String(decodeQuotedPrintable(sb.toString().getBytes(com.openexchange.java.Charsets.US_ASCII)), com.openexchange.java.Charsets.UTF_8);
+            return new String(decodeQuotedPrintable(Charsets.toAsciiBytes(sb)), com.openexchange.java.Charsets.UTF_8);
         }
         return sb.toString();
     }

@@ -50,6 +50,8 @@
 package com.openexchange.mail.text;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
@@ -72,6 +74,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.AllocatingStringWriter;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
@@ -161,6 +164,9 @@ public final class HtmlProcessing {
             if (DisplayMode.RAW.equals(mode)) {
                 retval = content;
             } else {
+
+                // dumpToFile(content, "~/Desktop/html-original.html");
+
                 retval = htmlService.dropScriptTagsInHeader(content);
                 if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                     final boolean externalImagesAllowed = usm.isAllowHTMLImages();
@@ -205,6 +211,8 @@ public final class HtmlProcessing {
                         retval = replaceBody(retval, cssPrefix);
                     }
                 }
+
+                // dumpToFile(retval, "~/Desktop/html-processed.html");
             }
         } else {
             retval = content;
@@ -242,7 +250,7 @@ public final class HtmlProcessing {
 
     /**
      * Calculates the MD5 for given string.
-     * 
+     *
      * @param str The string
      * @return The MD5 hash
      */
@@ -259,7 +267,7 @@ public final class HtmlProcessing {
 
     /**
      * Replaces body tag with an appropriate &lt;div&gt; tag.
-     * 
+     *
      * @param htmlContent The HTML content
      * @param cssPrefix The CSS prefix
      * @return The HTML content with replaced body tag
@@ -295,6 +303,11 @@ public final class HtmlProcessing {
         }
         sb.append(bodyMatcher.group(2));
         sb.append("</div>");
+        // Is there more behind closing <body> tag?
+        final int end = bodyMatcher.end();
+        if (end < htmlContent.length()) {
+            sb.append(htmlContent.substring(end));
+        }
         return sb.toString();
     }
 
@@ -307,7 +320,7 @@ public final class HtmlProcessing {
             return rest;
         }
         final String color = m.group(1);
-        String ret = rest;
+        final String ret = rest;
         final StringBuffer sbuf = new StringBuffer(ret.length());
         m.appendReplacement(sbuf, "");
         m.appendTail(sbuf);
@@ -317,7 +330,7 @@ public final class HtmlProcessing {
             return sbuf.append(" style=\"background-color: ").append(color).append(";\"").toString();
         }
         sbuf.setLength(0);
-        m.appendReplacement(sbuf, "style=\"" + Matcher.quoteReplacement(m.group(1)) + " background-color: " + color + ";\"");
+        m.appendReplacement(sbuf, "style=\"" + com.openexchange.java.Strings.quoteReplacement(m.group(1)) + " background-color: " + color + ";\"");
         m.appendTail(sbuf);
         return sbuf.toString();
     }
@@ -345,7 +358,7 @@ public final class HtmlProcessing {
 
     /**
      * Sanitizes possible CSS style sheets contained in provided HTML content.
-     * 
+     *
      * @param htmlContent The HTML content
      * @param optHtmlService The optional HTML service
      * @return The HTML content with sanitized CSS style sheets
@@ -410,10 +423,10 @@ public final class HtmlProcessing {
     private static final Pattern PATTERN_STYLE = Pattern.compile("<style.*?>.*?</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     private static final Pattern PATTERN_STYLE_FILE = Pattern.compile("<link.*?(type=['\"]text/css['\"].*?href=['\"](.*?)['\"]|href=['\"](.*?)['\"].*?type=['\"]text/css['\"]).*?/>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-    
+
     /**
      * Drops CSS style sheet information from given HTML content.
-     * 
+     *
      * @param htmlContent The HTML content
      * @return The HTML content cleansed by CSS style sheet information
      */
@@ -901,6 +914,24 @@ public final class HtmlProcessing {
         } catch (final UnsupportedEncodingException e) {
             LOG.error(e.getMessage(), e);
             return text;
+        }
+    }
+
+    private static void dumpToFile(final String content, final String fileName) {
+        if (isEmpty(content)) {
+            return;
+        }
+        BufferedWriter writer = null;
+        try {
+            writer = new BufferedWriter(new FileWriter(fileName));
+            writer.write(content);
+            writer.flush();
+        } catch (final IOException e) {
+            LOG.error(e.getMessage(), e);
+        } catch (final RuntimeException e) {
+            LOG.error(e.getMessage(), e);
+        } finally {
+            Streams.close(writer);
         }
     }
 

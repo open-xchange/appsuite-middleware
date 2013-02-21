@@ -91,7 +91,7 @@ public final class FolderMap {
 
     /**
      * Initializes a new {@link FolderMap}.
-     * 
+     *
      * @param maxCapacity the max capacity
      * @param maxLifeUnits the max life units
      * @param unit the unit
@@ -106,7 +106,7 @@ public final class FolderMap {
 
     /**
      * Initializes a new {@link FolderMap}.
-     * 
+     *
      * @param maxCapacity the max capacity
      * @param maxLifeMillis the max life milliseconds
      */
@@ -131,7 +131,7 @@ public final class FolderMap {
 
     /**
      * Put if absent.
-     * 
+     *
      * @param treeId the tree id
      * @param folder the folder
      * @return The folder
@@ -142,7 +142,7 @@ public final class FolderMap {
 
     /**
      * Put if absent.
-     * 
+     *
      * @param folderId the folder id
      * @param treeId the tree id
      * @param folder the folder
@@ -157,21 +157,23 @@ public final class FolderMap {
             return null;
         }
         if (prev.elapsed(maxLifeMillis)) {
-            synchronized (map) {
-                prev = map.get(key);
-                if (prev.elapsed(maxLifeMillis)) {
-                    shrink();
-                    map.put(key, wrapper);
-                    return null;
-                }
+            if (map.replace(key, prev, wrapper)) {
+                // Successfully replaced with elapsed one
+                return null;
             }
+            prev = map.get(key);
+            if (null == prev) {
+                prev = map.putIfAbsent(key, wrapper);
+                return null == prev ? null : prev.getValue();
+            }
+            return prev.getValue();
         }
         return prev.getValue();
     }
 
     /**
      * Gets the size.
-     * 
+     *
      * @return The size
      */
     public int size() {
@@ -180,7 +182,7 @@ public final class FolderMap {
 
     /**
      * Checks if empty flag is set.
-     * 
+     *
      * @return <code>true</code> if empty flag is set; otherwise <code>false</code>
      */
     public boolean isEmpty() {
@@ -189,7 +191,7 @@ public final class FolderMap {
 
     /**
      * Contains.
-     * 
+     *
      * @param folderId the folder id
      * @param treeId the tree id
      * @return <code>true</code> if successful; otherwise <code>false</code>
@@ -200,7 +202,7 @@ public final class FolderMap {
 
     /**
      * Gets the folder.
-     * 
+     *
      * @param folderId the folder id
      * @param treeId the tree id
      * @return The folder
@@ -252,11 +254,11 @@ public final class FolderMap {
             }
             if (LogProperties.isEnabled()) {
                 final Props properties = LogProperties.getLogProperties();
-                properties.put("com.openexchange.session.sessionId", session.getSessionID());
-                properties.put("com.openexchange.session.userId", Integer.valueOf(session.getUserId()));
-                properties.put("com.openexchange.session.contextId", Integer.valueOf(session.getContextId()));
+                properties.put(LogProperties.Name.SESSION_SESSION_ID, session.getSessionID());
+                properties.put(LogProperties.Name.SESSION_USER_ID, Integer.valueOf(session.getUserId()));
+                properties.put(LogProperties.Name.SESSION_CONTEXT_ID, Integer.valueOf(session.getContextId()));
                 final String client  = session.getClient();
-                properties.put("com.openexchange.session.clientId", client == null ? "unknown" : client);
+                properties.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : client);
             }
             ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(new LoadSubfolders(folder, treeId, this, session)), AbortBehavior.getInstance());
         } catch (final Exception e) {
@@ -267,7 +269,7 @@ public final class FolderMap {
 
     /**
      * Puts specified folder.
-     * 
+     *
      * @param treeId the tree id
      * @param folder the folder
      * @return The folder
@@ -278,7 +280,7 @@ public final class FolderMap {
 
     /**
      * Puts specified folder.
-     * 
+     *
      * @param folderId the folder id
      * @param treeId the tree id
      * @param folder the folder
@@ -300,7 +302,7 @@ public final class FolderMap {
 
     /**
      * Removes the folder.
-     * 
+     *
      * @param folderId the folder id
      * @param treeId the tree id
      */
@@ -310,7 +312,7 @@ public final class FolderMap {
 
     /**
      * Removes the folder.
-     * 
+     *
      * @param folderId the folder id
      * @param treeId the tree id
      * @param session The session
@@ -358,12 +360,9 @@ public final class FolderMap {
 
     private static final class Wrapper {
 
-        private final Folder value;
-
+        protected final Folder value;
         private final long stamp;
-
         protected final boolean removeAfterAccess;
-
         protected final boolean loadSubfolders;
 
         public Wrapper(final Folder value) {
@@ -504,7 +503,7 @@ public final class FolderMap {
                             for (final String subfolderId : subfolderIDs) {
                                 loaded = folderStorage.loadFolder(treeId, subfolderId, StorageType.WORKING, params);
                                 if (loaded.isGlobalID()) {
-                                    folderStorage.putFolder(loaded, treeId, params);
+                                    folderStorage.putFolder(loaded, treeId, params, false);
                                 } else {
                                     folderMap.put(treeId, loaded, session);
                                 }
@@ -515,7 +514,7 @@ public final class FolderMap {
                     lock.unlock();
                 }
             } catch (final Exception e) {
-                LOG.debug(e.getMessage(), e); 
+                LOG.debug(e.getMessage(), e);
             }
         }
     }
@@ -555,7 +554,7 @@ public final class FolderMap {
                     for (final SortableId sortableId : subfolders) {
                         final Folder loaded = folderStorage.loadFolder(treeId, sortableId.getId(), StorageType.WORKING, params);
                         if (loaded.isGlobalID()) {
-                            folderStorage.putFolder(loaded, treeId, params);
+                            folderStorage.putFolder(loaded, treeId, params, false);
                         } else {
                             folderMap.put(treeId, loaded, session);
                         }
@@ -564,7 +563,7 @@ public final class FolderMap {
                     lock.unlock();
                 }
             } catch (final Exception e) {
-                LOG.debug(e.getMessage(), e); 
+                LOG.debug(e.getMessage(), e);
             }
         }
     }

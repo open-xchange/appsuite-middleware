@@ -70,7 +70,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link AJPv13Activator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJPv13Activator extends HousekeepingActivator {
@@ -80,7 +80,7 @@ public final class AJPv13Activator extends HousekeepingActivator {
      */
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Activator.class));
 
-    private List<Initialization> inits;
+    private volatile List<Initialization> inits;
 
     /**
      * Initializes a new {@link AJPv13Activator}.
@@ -134,7 +134,8 @@ public final class AJPv13Activator extends HousekeepingActivator {
                 }
             };
             AJPv13ServiceRegistry.SERVICE_REGISTRY.set(serviceRegistry);
-            inits = new ArrayList<Initialization>(3);
+            final List<Initialization> inits = new ArrayList<Initialization>(4);
+            this.inits = inits;
             /*
              * Set starter dependent on mode
              */
@@ -197,14 +198,15 @@ public final class AJPv13Activator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         try {
             cleanUp();
+            final List<Initialization> inits = this.inits;
             if (inits != null) {
                 while (!inits.isEmpty()) {
                     inits.remove(0).stop();
                 }
-                inits = null;
+                this.inits = null;
             }
             if (LOG.isInfoEnabled()) {
-                LOG.info(new StringBuilder(32).append("NIO AJP server successfully stopped.").toString());
+                LOG.info("AJP server successfully stopped.");
             }
             /*
              * Clear service registry

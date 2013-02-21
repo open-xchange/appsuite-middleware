@@ -74,7 +74,7 @@ import com.openexchange.server.ServiceLookup;
  */
 @Action(method = RequestMethod.GET, name = "all", description = "Get all groups", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "The group id.") 
+    @Parameter(name = "id", description = "The group id.")
 }, responseDescription = "An array of group objects as described in Group data.")
 public final class AllAction extends AbstractGroupAction {
 

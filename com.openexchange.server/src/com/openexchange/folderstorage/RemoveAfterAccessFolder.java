@@ -60,7 +60,7 @@ import com.openexchange.mailaccount.UnifiedInboxManagement;
  * <p>
  * Applies only to locally (not globally) cached folders; meaning {@link #isCacheable()} MUST return <code>true</code> AND
  * {@link #isGlobalID()} MUST return <code>false</code>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface RemoveAfterAccessFolder extends Folder {
@@ -72,21 +72,21 @@ public interface RemoveAfterAccessFolder extends Folder {
 
     /**
      * Whether to load subfolders.
-     * 
+     *
      * @return <code>true</code> to load subfolders; otherwise <code>false</code>
      */
     boolean loadSubfolders();
 
     /**
      * Gets the user identifier.
-     * 
+     *
      * @return The user identifier or <code>-1</code>
      */
     int getUserId();
 
     /**
      * Gets the context identifier.
-     * 
+     *
      * @return The context identifier or <code>-1</code>
      */
     int getContextId();

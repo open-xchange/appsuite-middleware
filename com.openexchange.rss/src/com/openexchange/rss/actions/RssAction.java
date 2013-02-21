@@ -59,11 +59,9 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -87,7 +85,7 @@ public class RssAction implements AJAXActionService {
 	private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(RssAction.class));
 	private final HttpURLFeedFetcher fetcher;
 	private final HashMapFeedInfoCache feedCache;
-	
+
 	public RssAction () {
 		feedCache = new HashMapFeedInfoCache();
 		fetcher = new HttpURLFeedFetcher(feedCache);
@@ -183,20 +181,39 @@ public class RssAction implements AJAXActionService {
         return new AJAXRequestResult(results, "rss");
     }
 
-	private static String urlDecodeSafe(final String urlString) {
+	private static String urlDecodeSafe(final String urlString) throws MalformedURLException {
 	    if (isEmpty(urlString)) {
             return urlString;
         }
 	    try {
             final String ret = URLDecoder.decode(urlString, "ISO-8859-1");
             if (isAscii(ret)) {
-                return ret;
+                return checkUrl(ret);
             }
-            return URLDecoder.decode(urlString, "UTF-8");
+            return checkUrl(URLDecoder.decode(urlString, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             return urlString;
         }
 	}
+
+	/**
+     * Checks given URL string for syntactical correctness.
+     * 
+     * @param sUrl The URL string
+	 * @throws MalformedURLException If URL string is invalid
+     */
+    private static String checkUrl(final String sUrl) throws MalformedURLException {
+        if (isEmpty(sUrl)) {
+            // Nothing to check
+            return sUrl;
+        }
+        final java.net.URL url = new java.net.URL(sUrl);
+        final String protocol = url.getProtocol();
+        if (!"http".equals(protocol) && !"https".equals(protocol)) {
+            throw new MalformedURLException("Only http & https protocols supported.");
+        }
+        return sUrl;
+    }
 
 	/**
      * Checks whether the specified string's characters are ASCII 7 bit
@@ -205,10 +222,10 @@ public class RssAction implements AJAXActionService {
      * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
      */
     private static boolean isAscii(final String s) {
-        final char[] chars = s.toCharArray();
+        final int length = s.length();
         boolean isAscci = true;
-        for (int i = 0; (i < chars.length) && isAscci; i++) {
-            isAscci &= (chars[i] < 128);
+        for (int i = 0; (i < length) && isAscci; i++) {
+            isAscci = (s.charAt(i) < 128);
         }
         return isAscci;
     }

@@ -61,38 +61,38 @@ import com.openexchange.groupware.container.Contact;
  * Extends the functionality of the {@link com.openexchange.groupware.container.Contact }
  * by supporting the EAV model. Contains a HashMap where all the unnamed properties are stored.
  * Use the addUnnamedProperty method, in order to set an unnamed property for the contact.
- * The getter/setter methods for userfield[1-20] in {@link com.openexchange.groupware.container.Contact} 
+ * The getter/setter methods for userfield[1-20] in {@link com.openexchange.groupware.container.Contact}
  * should be deprecated in order to use the new EAV model.
  * <br/> <br/>
  * Additionally, provides UUID fields for the CID, ID and FID MySQL fields (codename Kiffer :)
- * 
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class EAVContact extends Contact implements Comparable<EAVContact> {
-	
+
 	private static final long serialVersionUID = -839484638375498364L;
-	
+
 	/** UUID is the primary unique key for each contact aka ID **/
 	private UUID uuid;
-	
+
 	/** The context UUID aka CID **/
 	private UUID contextUUID;
-	
+
 	/** The folder UUID aka FID **//*
 	private UUID folderUUID;*/
-	
+
 	/** The folder UUID list aka FID **/
 	private final List<UUID> folderUUIDs;
-	
+
 	/** The time UUID for this contact aka time of creation **/
 	private UUID timeUUID;
-	
+
 	/** a hash map to hold the unnamed properties **/
 	private final HashMap<String, String> unnamedProperties;
-	
+
 	/** Holds all the named properties for an object. Used only by the {@link #CassandraContactDAO.populateDTO */
 	private final HashMap<String, ByteBuffer> namedProperties = new HashMap<String, ByteBuffer>();
-	
+
 	/**
 	 * Default constructor
 	 */
@@ -100,17 +100,17 @@ public class EAVContact extends Contact implements Comparable<EAVContact> {
 		unnamedProperties = new HashMap<String, String>();
 		folderUUIDs = new ArrayList<UUID>();
 	}
-	
+
 	/**
 	 * Add a 'named property' to the contact
-	 * 
+	 *
 	 * @param key name of the property
 	 * @param value of the property
 	 */
 	public void addNamedProperty(String key, ByteBuffer value) {
 		namedProperties.put(key, value);
 	}
-	
+
 	/**
 	 * Get a 'named property' from the contact
 	 * @param key property
@@ -119,78 +119,78 @@ public class EAVContact extends Contact implements Comparable<EAVContact> {
 	public ByteBuffer getNamedProperty(String key) {
 		return namedProperties.get(key);
 	}
-	
+
 	/**
 	 * Returns true if the hash map contains the specified
 	 * 'named property'
-	 * 
+	 *
 	 * @param key
-	 * @return 
+	 * @return
 	 */
 	public boolean containsNamedProperty(String key) {
 		return namedProperties.containsKey(key);
 	}
-	
+
 	/**
 	 * Clears the named properties.
 	 */
 	public void clearNamedProperties() {
 		namedProperties.clear();
 	}
-	
+
 	/**
 	 * Add an 'unnamed property' to the contact
-	 * 
+	 *
 	 * @param key name of the property
 	 * @param value value of the property
 	 */
 	public void addUnnamedProperty(String key, String value) {
 		unnamedProperties.put(key, value);
 	}
-	
+
 	/**
 	 * Get an unnamed property from the contact
-	 * 
+	 *
 	 * @param key property
 	 * @return the value
 	 */
 	public String getUnnamedProperty(String key) {
 		return unnamedProperties.get(key);
 	}
-	
+
 	/**
 	 * Get all names of the unnamed properties *-)
-	 * 
+	 *
 	 * @return a list with all names of the unnamed properties
 	 */
 	public List<String> getUnnamedPropertyNames() {
 		List<String> keys = new ArrayList<String>();
 		Iterator<String> iteratorKeys = unnamedProperties.keySet().iterator();
-		
+
 		while (iteratorKeys.hasNext()) {
 			keys.add(iteratorKeys.next());
 		}
-		
+
 		return keys;
 	}
-	
+
 	/**
 	 * Get all values of the unnamed properties
-	 * 
+	 *
 	 * @return a list with all values of the unnamed properties
 	 */
 	public List<String> getUnnamedPropertyValues() {
 		List<String> values = new ArrayList<String>();
-		
+
 		Iterator<String> iteratorKeys = unnamedProperties.keySet().iterator();
-		
+
 		while (iteratorKeys.hasNext()) {
 			values.add(unnamedProperties.get(iteratorKeys.next()));
 		}
-		
+
 		return values;
 	}
-	
+
 	/**
 	 * @return keys iterator
 	 */
@@ -267,15 +267,15 @@ public class EAVContact extends Contact implements Comparable<EAVContact> {
 	public void setTimeUUID(UUID timeUUID) {
 		this.timeUUID = timeUUID;
 	}
-	
+
 	/**
 	 * Add contact to the specified folder
-	 * @param uuid 
+	 * @param uuid
 	 */
 	public void addFolderUUID(UUID uuid) {
 		folderUUIDs.add(uuid);
 	}
-	
+
 	/**
 	 * Remove contact from the specified folder
 	 * @param uuid
@@ -283,10 +283,10 @@ public class EAVContact extends Contact implements Comparable<EAVContact> {
 	public void removeFolderUUID(UUID uuid) {
 		folderUUIDs.remove(uuid);
 	}
-	
+
 	/**
 	 * Get a list with all folder UUIDs in which the contact resides
-	 * 
+	 *
 	 * @return list with folders
 	 */
 	public List<UUID> getFolderUUIDs() {

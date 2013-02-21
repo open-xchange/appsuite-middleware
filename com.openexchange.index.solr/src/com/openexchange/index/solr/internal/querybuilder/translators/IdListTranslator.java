@@ -50,14 +50,17 @@
 package com.openexchange.index.solr.internal.querybuilder.translators;
 
 import java.util.Set;
+
 import org.apache.commons.logging.Log;
+
+import com.openexchange.index.solr.internal.config.FieldConfiguration;
 import com.openexchange.index.solr.internal.querybuilder.Configuration;
 import com.openexchange.index.solr.internal.querybuilder.QueryTranslator;
 import com.openexchange.index.solr.internal.querybuilder.TranslationException;
 
 /**
  * {@link IdListTranslator}
- * 
+ *
  * @author Sven Maurmann
  */
 public class IdListTranslator implements QueryTranslator {
@@ -73,10 +76,10 @@ public class IdListTranslator implements QueryTranslator {
     private String handlerName;
 
     private static Log log = com.openexchange.log.Log.loggerFor(IdListTranslator.class);
-    
+
 
     @Override
-    public void init(String name, Configuration config) throws TranslationException {
+    public void init(String name, Configuration config, FieldConfiguration fieldConfig) throws TranslationException {
         handlerName = name.trim();
 
         log.info("[init]: initializing configuration for handler \'" + handlerName + "\'");
@@ -101,14 +104,16 @@ public class IdListTranslator implements QueryTranslator {
             Set<?> idList = (Set<?>) o;
 
             for (Object idVal : idList) {
-                if (idVal instanceof String)
+                if (idVal instanceof String) {
                     b.append(idKey + ":" + idVal + " ");
-                else
+                } else {
                     log.warn("[translate]: Wrong type in list");
+                }
             }
 
             return b.toString().trim();
-        } else
+        } else {
             throw new IllegalArgumentException(TRANSLATION_ERROR);
+        }
     }
 }

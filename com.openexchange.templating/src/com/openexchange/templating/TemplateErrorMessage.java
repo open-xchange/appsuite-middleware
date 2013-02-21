@@ -54,20 +54,27 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
+/**
+ * {@link TemplateErrorMessage} - Error codes for templating module.
+ */
 public enum TemplateErrorMessage implements OXExceptionCode {
 
     IOException(CATEGORY_SERVICE_DOWN, 1, TemplateExceptionMessage.IOException_HELP, TemplateExceptionMessage.IOException_MSG),
     UnderlyingException(CATEGORY_ERROR, 2, TemplateExceptionMessage.UnderlyingException_HELP, TemplateExceptionMessage.UnderlyingException_MSG),
     TemplateNotFound(CATEGORY_ERROR, 3, TemplateExceptionMessage.TemplateNotFound_HELP, TemplateExceptionMessage.TemplateNotFound_MSG),
-    SQLException(CATEGORY_ERROR, 4, TemplateExceptionMessage.SQLException_HELP, TemplateExceptionMessage.SQLException_MSG);
+    SQLException(CATEGORY_ERROR, 4, TemplateExceptionMessage.SQLException_HELP, TemplateExceptionMessage.SQLException_MSG),
+    AccessDenied(CATEGORY_PERMISSION_DENIED, 4, TemplateExceptionMessage.AccessDenied_HELP, TemplateExceptionMessage.AccessDenied_MSG),
+    ;
 
-    private Category category;
+    /**
+     * The prefix.
+     */
+    public static final String PREFIX = "TMPL";
 
-    private int errorCode;
-
-    private String help;
-
-    private String message;
+    private final Category category;
+    private final int errorCode;
+    private final String help;
+    private final String message;
 
     private TemplateErrorMessage(final Category category, final int errorCode, final String help, final String message) {
         this.category = category;
@@ -78,7 +85,7 @@ public enum TemplateErrorMessage implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "TMPL";
+        return PREFIX;
     }
 
     @Override
@@ -107,7 +114,7 @@ public enum TemplateErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
@@ -116,7 +123,7 @@ public enum TemplateErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance
      */
@@ -126,7 +133,7 @@ public enum TemplateErrorMessage implements OXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @param cause The optional initial cause
      * @param args The message arguments in case of printf-style message
      * @return The newly created {@link OXException} instance

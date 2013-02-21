@@ -78,7 +78,7 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class OAuthCopyTask implements CopyUserTaskService {
-    
+
     private static final String SELECT_ACCOUNTS =
         "SELECT " +
             "id, displayName, accessToken, accessSecret, " +
@@ -87,22 +87,22 @@ public class OAuthCopyTask implements CopyUserTaskService {
             "cid = ? " +
         "AND " +
             "user = ?";
-    
+
     private static final String INSERT_ACCOUNTS =
         "INSERT INTO " +
             "oauthAccounts " +
             "(cid, user, id, displayName, accessToken, accessSecret, serviceId) " +
         "VALUES " +
             "(?, ?, ?, ?, ?, ?, ?)";
-    
+
     private final IDGeneratorService idService;
-    
-    
+
+
     public OAuthCopyTask(final IDGeneratorService idService) {
         super();
         this.idService = idService;
     }
-    
+
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#getAlreadyCopied()
      */
@@ -133,15 +133,15 @@ public class OAuthCopyTask implements CopyUserTaskService {
         final Integer dstUsrId = copyTools.getDestinationUserId();
         final Connection srcCon = copyTools.getSourceConnection();
         final Connection dstCon = copyTools.getDestinationConnection();
-        
+
         final IntegerMapping accountMapping = new IntegerMapping();
         try {
             final boolean hasOAuth = DBUtils.tableExists(srcCon, "oauthAccounts");
             if (hasOAuth) {
                 final List<OAuthAccount> accounts = loadOAuthAccountsFromDB(srcCon, i(srcUsrId), i(srcCtxId));
-                final Map<Integer, Integer> oAuthMapping = exchangeOAuthIds(dstCon, accounts, dstCtx);                    
+                final Map<Integer, Integer> oAuthMapping = exchangeOAuthIds(dstCon, accounts, dstCtx);
                 writeOAuthAccountsToDB(accounts, dstCon, i(dstCtxId), i(dstUsrId));
-                
+
                 for (final Integer origin : oAuthMapping.keySet()) {
                     final Integer target = oAuthMapping.get(origin);
                     accountMapping.addMapping(origin, target);
@@ -150,7 +150,7 @@ public class OAuthCopyTask implements CopyUserTaskService {
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         }
-        
+
         return accountMapping;
     }
 
@@ -159,7 +159,7 @@ public class OAuthCopyTask implements CopyUserTaskService {
      */
     public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {
     }
-    
+
     public Map<Integer, Integer> exchangeOAuthIds(final Connection con, final List<OAuthAccount> accounts, final Context ctx) throws OXException {
         final Map<Integer, Integer> mapping = new HashMap<Integer, Integer>();
         for (final OAuthAccount account : accounts) {
@@ -167,16 +167,16 @@ public class OAuthCopyTask implements CopyUserTaskService {
                 final int oldId = account.getId();
                 final int newId = idService.getId("com.openexchange.oauth.account", ctx.getContextId());
                 account.setId(newId);
-                
+
                 mapping.put(oldId, newId);
             } catch (final OXException e) {
                 throw UserCopyExceptionCodes.ID_PROBLEM.create(e, "com.openexchange.oauth.account");
             }
         }
-        
+
         return mapping;
     }
-    
+
     List<OAuthAccount> loadOAuthAccountsFromDB(final Connection con, final int uid, final int cid) throws OXException {
         final List<OAuthAccount> accounts = new ArrayList<OAuthAccount>();
         PreparedStatement stmt = null;
@@ -203,13 +203,13 @@ public class OAuthCopyTask implements CopyUserTaskService {
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
-            
+
         return accounts;
     }
-    
+
     void writeOAuthAccountsToDB(final List<OAuthAccount> accounts, final Connection con, final int cid, final int uid) throws OXException {
         PreparedStatement stmt = null;
-        try {            
+        try {
             stmt = con.prepareStatement(INSERT_ACCOUNTS);
             for (final OAuthAccount account : accounts) {
                 int i = 1;
@@ -220,10 +220,10 @@ public class OAuthCopyTask implements CopyUserTaskService {
                 stmt.setString(i++, account.getAccessToken());
                 stmt.setString(i++, account.getAccessSecret());
                 stmt.setString(i++, account.getServiceId());
-                
+
                 stmt.addBatch();
             }
-            
+
             stmt.executeBatch();
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);

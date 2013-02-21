@@ -77,7 +77,7 @@ import com.openexchange.sim.SimBuilder;
 
 /**
  * {@link ReplyITipAnalyzerTest}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
@@ -87,7 +87,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         List<ITipMethod> methods = new ReplyITipAnalyzer(null, null).getMethods();
         assertEquals(Arrays.asList(ITipMethod.REPLY), methods);
     }
-    
+
     private void statusTest(ConfirmStatus status) throws OXException {
         // Simulate ITipIntegration with a matching appointment
         SimBuilder integrationBuilder = new SimBuilder();
@@ -132,10 +132,10 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
         assertEquals(ITipChange.Type.UPDATE, change.getType());
         //assertEquals(status, change.getParticipantChange().getConfirmStatusUpdate());
-        
+
         assertEquals("123-123-123-123", change.getNewAppointment().getUid());
         assertEquals(12, change.getCurrentAppointment().getObjectID());
-        
+
         assertEquals("Yes or no or whatever!", change.getParticipantChange().getComment());
 
         // NewAppointment contains all participants plus the changed state of the external participant
@@ -161,7 +161,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         }
 
         assertActions(analysis, ITipAction.UPDATE);
-    
+
         integrationBuilder.assertAllWereCalled();
     }
 
@@ -169,20 +169,20 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
     public void testAccept() throws OXException {
         statusTest(ConfirmStatus.ACCEPT);
     }
-    
-    
+
+
     @Test
     public void testDecline() throws OXException {
         statusTest(ConfirmStatus.DECLINE);
     }
-    
-    
+
+
     @Test
     public void testTentative() throws OXException {
-        statusTest(ConfirmStatus.TENTATIVE);    
+        statusTest(ConfirmStatus.TENTATIVE);
     }
 
-  
+
     @Test
     public void testPartyCrasher() throws OXException {
      // Simulate ITipIntegration with a matching appointment
@@ -229,16 +229,16 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         ITipChange change = changes.get(0);
 
         assertEquals(ITipChange.Type.UPDATE, change.getType());
-        
+
         assertEquals("123-123-123-123", change.getNewAppointment().getUid());
         assertEquals(12, change.getCurrentAppointment().getObjectID());
-        
+
         assertEquals("Yes or no or whatever!", change.getParticipantChange().getComment());
 
         // NewAppointment contains all participants plus the changed state of the external participant
         Participant[] participants = change.getNewAppointment().getParticipants();
         assertEquals(3, participants.length);
-        
+
         boolean foundPartyCrasher = false;
         for (Participant participant : participants) {
             switch (participant.getType()) {
@@ -267,7 +267,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         // TODO: Diff Completed
         // Accept shows up in diff
         // Party Crasher shows up in diff
-        
+
         assertActions(analysis, ITipAction.ACCEPT_PARTY_CRASHER);
 
         integrationBuilder.assertAllWereCalled();
@@ -275,24 +275,24 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
     public void testDelegation() {
         // TODO
-    }   
+    }
 
     public void testOnBehalfOf() {
         // TODO
     }
 
     // Exceptions
-    
+
     private void exceptionStatusTest(ConfirmStatus status) throws OXException {
         // Simulate ITipIntegration with a matching appointment
         SimBuilder integrationBuilder = new SimBuilder();
 
         // The reply contains an appointment
-        
+
         // And an exception
         CalendarDataObject changedException = appointment("123-123-123-123");
         changedException.setRecurrenceDatePosition(new Date(12345));
-        
+
         // With a user that has accepted
         ExternalUserParticipant externalParticipant = new ExternalUserParticipant("external@somewhere.invalid");
         externalParticipant.setStatus(status);
@@ -308,16 +308,16 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         CalendarDataObject original = appointment("123-123-123-123");
         original.setObjectID(12);
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(original);
-        
-        // Along with two exceptions 
+
+        // Along with two exceptions
         CalendarDataObject originalException = changedException.clone();
         originalException.setObjectID(23);
         CalendarDataObject otherException = changedException.clone();
         otherException.setRecurrenceDatePosition(new Date(5432100000L));
-        
+
         integrationBuilder.expectCall("getExceptions", original, session).andReturn(new ArrayList(Arrays.asList(otherException, originalException)));
-        
-        
+
+
         // with the original exception containing the creator and the external participant
 
         externalParticipant = new ExternalUserParticipant("external@somewhere.invalid");
@@ -339,10 +339,10 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals(ITipChange.Type.UPDATE, change.getType());
         assertTrue(change.isException());
         //assertEquals(status, change.getParticipantChange().getConfirmStatusUpdate());
-        
+
         assertEquals("123-123-123-123", change.getNewAppointment().getUid());
         assertEquals(23, change.getCurrentAppointment().getObjectID());
-        
+
         assertEquals("Yes or no or whatever!", change.getParticipantChange().getComment());
 
         // NewAppointment contains all participants plus the changed state of the external participant
@@ -372,7 +372,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertActions(analysis, ITipAction.UPDATE);
         integrationBuilder.assertAllWereCalled();
     }
-    
+
     @Test
     public void testAcceptsException() throws OXException {
         exceptionStatusTest(ConfirmStatus.ACCEPT);
@@ -382,8 +382,8 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
     public void testDeclinesException() throws OXException {
         exceptionStatusTest(ConfirmStatus.DECLINE);
     }
-    
-    @Test   
+
+    @Test
     public void testTentativelyAcceptsException() throws OXException {
         exceptionStatusTest(ConfirmStatus.TENTATIVE);
     }
@@ -398,11 +398,11 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         CalendarDataObject appointment = appointment("123-123-123-123");
         appointment.setRecurrenceType(CalendarObject.WEEKLY);
         appointment.setInterval(1);
-        
+
         // And an exception
         CalendarDataObject changedException = appointment("123-123-123-123");
         changedException.setRecurrenceDatePosition(new Date(12345));
-        
+
         // With a user that has accepted
         ExternalUserParticipant externalParticipant = new ExternalUserParticipant("partycrasher@somewhere.invalid");
         externalParticipant.setStatus(status);
@@ -418,16 +418,16 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         CalendarDataObject original = appointment("123-123-123-123");
         original.setObjectID(12);
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(original);
-        
-        // Along with two exceptions 
+
+        // Along with two exceptions
         CalendarDataObject originalException = changedException.clone();
         originalException.setObjectID(23);
         CalendarDataObject otherException = changedException.clone();
         otherException.setRecurrenceDatePosition(new Date(5432100000L));
-        
+
         integrationBuilder.expectCall("getExceptions", original, session).andReturn(new ArrayList(Arrays.asList(otherException, originalException)));
-        
-        
+
+
         // with the original exception containing the creator and the external participant
 
         externalParticipant = new ExternalUserParticipant("external@somewhere.invalid");
@@ -450,10 +450,10 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
         assertEquals(ITipChange.Type.UPDATE, change.getType());
         assertTrue(change.isException());
-        
+
         assertEquals("123-123-123-123", change.getNewAppointment().getUid());
         assertEquals(23, change.getCurrentAppointment().getObjectID());
-        
+
         assertEquals("Yes or no or whatever!", change.getParticipantChange().getComment());
 
         // NewAppointment contains all participants plus the changed state of the external participant
@@ -483,7 +483,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
                 fail("Did not expect: " + participant);
             }
         }
-        
+
         assertTrue(foundPartyCrasher);
 
         // TODO: Diff Completed
@@ -491,25 +491,25 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertActions(analysis, ITipAction.ACCEPT_PARTY_CRASHER);
         integrationBuilder.assertAllWereCalled();
     }
-    
+
     public void testDelegationInException() {
         // TODO
     }
-    
+
     public void testOnBehalfOfInException() {
         // TODO
     }
-    
+
     @Test
     public void testContainsOnlyException() throws OXException {
         ConfirmStatus status = ConfirmStatus.ACCEPT;
         SimBuilder integrationBuilder = new SimBuilder();
 
-        
+
         // Reply contains only an exception
         CalendarDataObject changedException = appointment("123-123-123-123");
         changedException.setRecurrenceDatePosition(new Date(12345));
-        
+
         // With a user that has accepted
         ExternalUserParticipant externalParticipant = new ExternalUserParticipant("external@somewhere.invalid");
         externalParticipant.setStatus(status);
@@ -525,16 +525,16 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         CalendarDataObject original = appointment("123-123-123-123");
         original.setObjectID(12);
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(original);
-        
-        // Along with two exceptions 
+
+        // Along with two exceptions
         CalendarDataObject originalException = changedException.clone();
         originalException.setObjectID(23);
         CalendarDataObject otherException = changedException.clone();
         otherException.setRecurrenceDatePosition(new Date(5432100000L));
-        
+
         integrationBuilder.expectCall("getExceptions", original, session).andReturn(new ArrayList(Arrays.asList(otherException, originalException)));
-        
-        
+
+
         // with the original exception containing the creator and the external participant
 
         externalParticipant = new ExternalUserParticipant("external@somewhere.invalid");
@@ -558,10 +558,10 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         assertEquals(ITipChange.Type.UPDATE, change.getType());
         assertTrue(change.isException());
         assertEquals(status, change.getParticipantChange().getConfirmStatusUpdate());
-        
+
         assertEquals("123-123-123-123", change.getNewAppointment().getUid());
         assertEquals(23, change.getCurrentAppointment().getObjectID());
-        
+
         assertEquals("Yes or no or whatever!", change.getParticipantChange().getComment());
 
         // NewAppointment contains all participants plus the changed state of the external participant
@@ -593,7 +593,7 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
     }
 
     // Error Cases
-    
+
     @Test
     public void testAppointmentDoesntExistAnymore() throws OXException {
         // Simulate ITipIntegration with a matching appointment
@@ -624,24 +624,24 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
         List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
-        
+
         ITipAnnotation error = annotations.get(0);
         assertEquals("An attendee wanted to change his/her participant state in an appointment that could not be found. Probably the appointment was already canceled.", error.getMessage());
-        
-        
+
+
         integrationBuilder.assertAllWereCalled();
     }
-    
+
     @Test
     public void testExceptionDoesntExistAnymore() throws OXException {
         ConfirmStatus status = ConfirmStatus.ACCEPT;
         SimBuilder integrationBuilder = new SimBuilder();
 
-        
+
         // Reply contains only an exception
         CalendarDataObject changedException = appointment("123-123-123-123");
         changedException.setRecurrenceDatePosition(new Date(12345));
-        
+
         // With a user that has accepted
         ExternalUserParticipant externalParticipant = new ExternalUserParticipant("external@somewhere.invalid");
         externalParticipant.setStatus(status);
@@ -657,14 +657,14 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
         CalendarDataObject original = appointment("123-123-123-123");
         original.setObjectID(12);
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(original);
-        
-        // Along with one other non matching exceptions 
+
+        // Along with one other non matching exceptions
         CalendarDataObject otherException = changedException.clone();
         otherException.setRecurrenceDatePosition(new Date(5432100000L));
-        
+
         integrationBuilder.expectCall("getExceptions", original, session).andReturn(new ArrayList(Arrays.asList(otherException)));
-        
-        
+
+
 
 
         ITipIntegrationUtility utility = integrationBuilder.getSim(ITipIntegrationUtility.class);
@@ -673,10 +673,10 @@ public class ReplyITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
         List<ITipChange> changes = analysis.getChanges();
         assertEquals(0, changes.size());
-        
+
         List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
-        
+
         ITipAnnotation error = annotations.get(0);
         assertEquals("An attendee wanted to change his/her participant state in an appointment that could not be found. Probably the appointment was already canceled.", error.getMessage());
 

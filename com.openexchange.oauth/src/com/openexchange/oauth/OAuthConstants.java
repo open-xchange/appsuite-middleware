@@ -116,6 +116,11 @@ public final class OAuthConstants {
      */
     public static final String URLPARAM_OAUTH_VERIFIER = "oauth_verifier";
 
+    /**
+     * The URL parameter for call-back URL.
+     */
+    public static final String URLPARAM_OAUTH_CALLBACK = "oauth_callback";
+
     /*-
      * ------------------- Session parameters -------------------
      */

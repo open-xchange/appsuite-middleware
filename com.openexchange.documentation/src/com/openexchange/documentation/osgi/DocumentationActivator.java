@@ -67,13 +67,13 @@ import com.openexchange.osgi.HousekeepingActivator;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class DocumentationActivator extends HousekeepingActivator {
-    
+
     private final String[] TRACKED_CLASSES = {
         AnnotatedServices.class.getName(),
         ModuleDescription.class.getName(),
         "com.openexchange.ajax.requesthandler.AJAXActionServiceFactory"
-    };    
-	
+    };
+
     /**
      * Initializes a new {@link DocumentationActivator}.
      */
@@ -96,7 +96,7 @@ public class DocumentationActivator extends HousekeepingActivator {
     	super.registerService(DocumentationRegistry.class, registry);
     	super.registerService(DescriptionFactory.class, factory);
     }
-    
+
     private Filter constructFilter() throws InvalidSyntaxException {
         final StringBuilder stringBuilder = new StringBuilder("(|");
         for (final String className : TRACKED_CLASSES) {

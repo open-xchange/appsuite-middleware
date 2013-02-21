@@ -74,6 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.upload.impl.UploadFileImpl;
+import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -164,7 +165,7 @@ public final class MIMEStructure2ComposedMailParser {
      * Parses specified JSON message structure & returns the resulting {@link ComposedMailMessage} instances.
      *
      * @param jsonMessage The JSON message structure
-     * @param warnings 
+     * @param warnings
      * @return The resulting {@link ComposedMailMessage} instances.
      * @throws OXException If parsing fails
      */
@@ -323,7 +324,7 @@ public final class MIMEStructure2ComposedMailParser {
                         /*
                          * Treat as an attachment
                          */
-                        addAsAttachment(jsonBody.getString("data").getBytes(com.openexchange.java.Charsets.US_ASCII), contentType, headers);
+                        addAsAttachment(Charsets.toAsciiBytes(jsonBody.getString("data")), contentType, headers);
                     }
                 } else {
                     if (null == textBodyPart) {
@@ -334,11 +335,11 @@ public final class MIMEStructure2ComposedMailParser {
                         /*
                          * Treat as an attachment
                          */
-                        addAsAttachment(jsonBody.getString("data").getBytes(com.openexchange.java.Charsets.US_ASCII), contentType, headers);
+                        addAsAttachment(Charsets.toAsciiBytes(jsonBody.getString("data")), contentType, headers);
                     }
                 }
             } else {
-                addAsAttachment(jsonBody.getString("data").getBytes(com.openexchange.java.Charsets.US_ASCII), contentType, headers);
+                addAsAttachment(Charsets.toAsciiBytes(jsonBody.getString("data")), contentType, headers);
             }
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -347,7 +348,7 @@ public final class MIMEStructure2ComposedMailParser {
 
     private void parseSimpleBodyBinary(final JSONObject jsonBody, final ContentType contentType, final Map<String, String> headers) throws OXException {
         try {
-            addAsAttachment(Base64.decodeBase64(jsonBody.getString("data").getBytes(com.openexchange.java.Charsets.US_ASCII)), contentType, headers);
+            addAsAttachment(Base64.decodeBase64(Charsets.toAsciiBytes(jsonBody.getString("data"))), contentType, headers);
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
@@ -576,8 +577,7 @@ public final class MIMEStructure2ComposedMailParser {
         if ("message-id".equals(name)) {
             return "Message-ID";
         }
-        final char[] chars = name.toCharArray();
-        final int len = chars.length;
+        final int len = name.length();
         if (len <= 0) {
             return "";
         }
@@ -588,12 +588,12 @@ public final class MIMEStructure2ComposedMailParser {
             sb = builder;
             sb.setLength(0);
         }
-        sb.append(Character.toUpperCase(chars[0]));
+        sb.append(Character.toUpperCase(name.charAt(0)));
         int i = 1;
         while (i < len) {
-            final char c = chars[i++];
+            final char c = name.charAt(i++);
             if ('-' == c && i < len) {
-                sb.append(c).append(Character.toUpperCase(chars[i++]));
+                sb.append(c).append(Character.toUpperCase(name.charAt(i++)));
             } else {
                 sb.append(c);
             }

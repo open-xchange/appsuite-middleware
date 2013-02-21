@@ -104,7 +104,13 @@ public enum Attribute {
     // The personal
     PERSONAL_LITERAL(MailAccountFields.PERSONAL, 1037),
     // The reply-to
-    REPLY_TO_LITERAL(MailAccountFields.REPLY_TO, 1038);
+    REPLY_TO_LITERAL(MailAccountFields.REPLY_TO, 1038),
+    // Addresses
+    ADDRESSES(MailAccountFields.ADDRESSES, 1039),
+    /** (Virtual attribute) Meta */
+    META(MailAccountFields.META, 1040),
+
+    ;
 
     public static final Set<Attribute> MAIL_URL_ATTRIBUTES = Collections.unmodifiableSet(EnumSet.of(
         Attribute.MAIL_PORT_LITERAL,
@@ -205,6 +211,11 @@ public enum Attribute {
             return switcher.pop3Storage();
         case POP3_PATH_LITERAL:
             return switcher.pop3Path();
+        case ADDRESSES:
+            return switcher.addresses();
+        case META:
+            // Ignore for virtual attribute
+            return null;
         default:
             throw new IllegalArgumentException(getName());
         }

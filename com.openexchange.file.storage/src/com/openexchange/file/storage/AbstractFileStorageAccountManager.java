@@ -66,7 +66,7 @@ public abstract class AbstractFileStorageAccountManager implements FileStorageAc
 
     /**
      * Initializes a new {@link AbstractFileStorageAccountManager}.
-     * 
+     *
      * @param factory The factory
      */
     protected AbstractFileStorageAccountManager(final FileStorageServiceFactory factory) {
@@ -75,6 +75,11 @@ public abstract class AbstractFileStorageAccountManager implements FileStorageAc
 
     @Override
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws OXException {
+        // Nope
+    }
+
+    @Override
+    public void cleanUp(String secret, Session session) throws OXException {
         // Nope
     }
 

@@ -65,7 +65,7 @@ public class WebdavProtocolExceptionMessage implements LocalizableStrings {
     private WebdavProtocolExceptionMessage() {
         super();
     }
-    
+
     // A WebDAV error occurred.
     public final static String GENERAL_ERROR_MSG = "A WebDAV error occurred.";
 
@@ -86,7 +86,7 @@ public class WebdavProtocolExceptionMessage implements LocalizableStrings {
 
     // File "%1$s" does not exist.
     public final static String FILE_NOT_FOUND_MSG = "File \"%1$s\" does not exist.";
-    
+
     // "%1$s" is a directory.
     public final static String FILE_IS_DIRECTORY_MSG = "\"%1$s\" is a directory.";
 

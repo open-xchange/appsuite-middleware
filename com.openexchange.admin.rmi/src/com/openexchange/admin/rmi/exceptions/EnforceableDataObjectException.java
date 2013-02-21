@@ -56,12 +56,12 @@ package com.openexchange.admin.rmi.exceptions;
 public class EnforceableDataObjectException extends Exception {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -7692303400774923314L;
 
     /**
-     * 
+     *
      */
     public EnforceableDataObjectException() {
         super();

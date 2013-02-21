@@ -37,7 +37,7 @@ public class ExtensionRegistry extends ServiceRegistry {
 
     /**
      * Get the Registry singleton.
-     * 
+     *
      * @return the Registry singleton
      */
     public static ExtensionRegistry getInstance() {
@@ -46,7 +46,7 @@ public class ExtensionRegistry extends ServiceRegistry {
 
     /**
      * Gets the appropriate handler for the specified Stanz class.
-     * 
+     *
      * @param stanzaClass The Stanza subclass we want to handle.
      * @return The appropriate handler or <code>null</code> if none is applicable.
      */
@@ -56,7 +56,7 @@ public class ExtensionRegistry extends ServiceRegistry {
 
     /**
      * Adds specified handler to this library.
-     * 
+     *
      * @param transformer The handler to add
      */
     public void addStanzaHandler(StanzaHandler handler) {
@@ -65,7 +65,7 @@ public class ExtensionRegistry extends ServiceRegistry {
 
     /**
      * Removes specified handler from this library.
-     * 
+     *
      * @param transformer The handler to remove
      */
     public void removeStanzaHandler(StanzaHandler handler) {
@@ -74,7 +74,7 @@ public class ExtensionRegistry extends ServiceRegistry {
 
     /**
      * Gets the appropriate transformer for the specified Stanz class.
-     * 
+     *
      * @param stanzaClass The Stanza subclass we want to transform.
      * @return The appropriate transformer or <code>null</code> if none is applicable.
      */
@@ -84,7 +84,7 @@ public class ExtensionRegistry extends ServiceRegistry {
 
     /**
      * Adds specified transformer to this library.
-     * 
+     *
      * @param transformer The transformer to add
      */
     public void addPayloadElementTransFormer(AtmospherePayloadElementTransformer transformer) {
@@ -93,7 +93,7 @@ public class ExtensionRegistry extends ServiceRegistry {
 
     /**
      * Removes specified transformer from this library.
-     * 
+     *
      * @param transformer The transformer to remove
      */
     public void removePayloadElementTransformer(AtmospherePayloadElementTransformer transformer) {
@@ -102,7 +102,7 @@ public class ExtensionRegistry extends ServiceRegistry {
 
     /**
      * Get the collected ElementPaths the registered PayloadElementTransformers are able to transform.
-     * 
+     *
      * @return the collected ElementPaths the registered PayloadElementTransformers are able to transform.
      */
     public Set<ElementPath> getTransformableableElementPaths() {

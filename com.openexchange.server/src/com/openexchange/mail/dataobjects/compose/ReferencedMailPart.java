@@ -128,6 +128,9 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
         try {
             handleReferencedPart(referencedPart, session);
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -148,6 +151,9 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
         try {
             handleReferencedPart(referencedMail, session);
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -343,6 +349,9 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
             fis = file.getInputStream();
             cachedContent = readStream(fis, charset);
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } finally {
             if (fis != null) {
@@ -380,17 +389,13 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
 
     @Override
     public InputStream getInputStream() throws OXException {
-        try {
-            if (data != null) {
-                return new UnsynchronizedByteArrayInputStream(data);
-            }
-            if (file != null) {
-                return file.getInputStream();
-            }
-            throw MailExceptionCode.NO_CONTENT.create();
-        } catch (final OXException e) {
-            throw new OXException(e);
+        if (data != null) {
+            return new UnsynchronizedByteArrayInputStream(data);
         }
+        if (file != null) {
+            return file.getInputStream();
+        }
+        throw MailExceptionCode.NO_CONTENT.create();
     }
 
     @Override

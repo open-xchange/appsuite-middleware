@@ -90,7 +90,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * Utility methods for providers that store consumers, tokens and secrets in database.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DatabaseOAuthProviderService extends AbstractOAuthProviderService implements OAuthProviderService {
@@ -109,7 +109,7 @@ public class DatabaseOAuthProviderService extends AbstractOAuthProviderService i
 
     /**
      * Initializes a new {@link DatabaseOAuthProviderService}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public DatabaseOAuthProviderService(final ServiceLookup services) throws OXException {
@@ -141,7 +141,7 @@ public class DatabaseOAuthProviderService extends AbstractOAuthProviderService i
 
     /**
      * Loads consumers from database
-     * 
+     *
      * @param databaseService The database service
      * @throws OXException If loading consumers fails
      */
@@ -353,7 +353,7 @@ public class DatabaseOAuthProviderService extends AbstractOAuthProviderService i
 
     /**
      * Looks-up consumer by identifier.
-     * 
+     *
      * @param id The consumer identifier
      * @return The consumer or <code>null</code>
      */

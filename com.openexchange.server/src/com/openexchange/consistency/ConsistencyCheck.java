@@ -61,6 +61,7 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import com.openexchange.java.Streams;
 
 /**
  * CommandLineClient to run the consistency tool.
@@ -365,12 +366,12 @@ public class ConsistencyCheck {
         }
 
         private void disconnect() {
-            try {
-                if(jmxConnector != null) {
+            if (null != jmxConnector) {
+                try {
                     jmxConnector.close();
+                } catch (final Exception e) {
+                    // Ignore
                 }
-            } catch (final IOException e) {
-                //IGNORE
             }
         }
 

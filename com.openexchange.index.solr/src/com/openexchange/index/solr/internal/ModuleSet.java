@@ -51,6 +51,7 @@ package com.openexchange.index.solr.internal;
 
 import java.util.HashSet;
 import java.util.Set;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -59,17 +60,17 @@ import java.util.Set;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ModuleSet {
-    
+
     private final Set<Integer> modules = new HashSet<Integer>();
-    
-    
+
+
     public ModuleSet() {
         super();
     }
-    
+
     public ModuleSet(String moduleStr) {
         super();
-        String[] split = moduleStr.split("\\s*,\\s*");
+        String[] split = Strings.splitByComma(moduleStr);
         for (String s : split) {
             try {
                 modules.add(new Integer(s.trim()));
@@ -78,19 +79,19 @@ public class ModuleSet {
             }
         }
     }
-    
+
     public boolean addModule(int module) {
         return modules.add(module);
     }
-    
+
     public boolean removeModule(int module) {
         return modules.remove(module);
     }
-    
+
     public boolean containsModule(int module) {
         return modules.contains(module);
     }
-    
+
     /**
      * Returns the string representation of this module set.
      */
@@ -99,7 +100,7 @@ public class ModuleSet {
         if (modules.isEmpty()) {
             return "";
         }
-        
+
         StringBuilder sb = new StringBuilder();
         for (Integer module : modules) {
             sb.append(module);

@@ -1,0 +1,29 @@
+open-xchange-hostname-config-cascade (7.0.1-4) unstable; urgency=low
+
+  * Fourth release candidate for 7.0.1
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 19 Feb 2013 16:52:35 +0100
+
+open-xchange-hostname-config-cascade (7.0.1-3) unstable; urgency=low
+
+  * Third release candidate for 7.0.1
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 19 Feb 2013 09:21:39 +0100
+
+open-xchange-hostname-config-cascade (7.0.1-2) unstable; urgency=low
+
+  * Second release candidate for 7.0.1
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 14 Feb 2013 13:54:42 +0100
+
+open-xchange-hostname-config-cascade (7.0.1-1) unstable; urgency=low
+
+  * First release candidate for 7.0.1
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 01 Feb 2013 14:56:23 +0100
+
+open-xchange-hostname-config-cascade (7.0.1-0) unstable; urgency=low
+
+  * Initial packaging
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 23 Jan 2013 14:04:39 +0100

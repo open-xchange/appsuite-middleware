@@ -58,7 +58,6 @@ import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.MessageDispatcher;
-import com.openexchange.realtime.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.ElementPath;
@@ -66,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MessageDispatcherImpl}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
@@ -99,7 +98,7 @@ public class MessageDispatcherImpl implements MessageDispatcher {
      * protocol</li>
      * <li><b>Priority and Capabilities</b>: Get the preferred channel that can handle the Stanza if no protocol is given</li>
      * </ol>
-     * 
+     *
      * @param stanza The stanza to dispatch
      * @param session The current session
      * @return Null or the chosen channel that is able to handle the stanza.

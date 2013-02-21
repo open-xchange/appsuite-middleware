@@ -81,7 +81,7 @@ import com.openexchange.mail.search.ToTerm;
 
 /**
  * {@link SolrMailIndexAccessTest}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
@@ -100,22 +100,22 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
                                     .build();
         indexAccess.deleteByQuery(params);
     }
-    
+
     @Test
     public void testIndexLock() throws Exception {
         try {
             managementService.lockIndex(context.getId(), user.getId(), Types.EMAIL);
             assertTrue("Index was not locked.", managementService.isLocked(context.getId(), user.getId(), Types.EMAIL));
-            
+
             try {
                 indexFacade.acquireIndexAccess(Types.EMAIL, user.getId(), context.getId());
             } catch (OXException e) {
                 assertTrue("Wrong exception.", IndexExceptionCodes.INDEX_LOCKED.equals(e));
             }
-            
+
             managementService.unlockIndex(context.getId(), user.getId(), Types.EMAIL);
             assertFalse("Index was locked.", managementService.isLocked(context.getId(), user.getId(), Types.EMAIL));
-            
+
             IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, user.getId(), context.getId());
             managementService.lockIndex(context.getId(), user.getId(), Types.EMAIL);
             assertTrue("Index was not locked.", managementService.isLocked(context.getId(), user.getId(), Types.EMAIL));
@@ -128,7 +128,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
             } catch (OXException e) {
                 assertTrue("Wrong exception.", IndexExceptionCodes.INDEX_LOCKED.equals(e));
             }
-            
+
             managementService.unlockIndex(context.getId(), user.getId(), Types.EMAIL);
             assertFalse("Index was locked.", managementService.isLocked(context.getId(), user.getId(), Types.EMAIL));
             indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, user.getId(), context.getId());
@@ -166,17 +166,17 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
         IndexResult<MailMessage> r1 = indexAccess.query(q1, null);
         assertTrue("Wrong result size.", r1.getNumFound() == 1);
         checkResult(m1, r1.getResults().get(0).getObject());
-        
+
         QueryParameters q2 = buildSimpleQuery(m2.getAccountId(), m2.getFolder(), m2.getSubject());
         IndexResult<MailMessage> r2 = indexAccess.query(q2, null);
         assertTrue("Wrong result size.", r2.getNumFound() == 1);
         checkResult(m2, r2.getResults().get(0).getObject());
-        
+
         QueryParameters q3 = buildSimpleQuery(m3.getAccountId(), m3.getFolder(), m3.getSubject());
         IndexResult<MailMessage> r3 = indexAccess.query(q3, null);
         assertTrue("Wrong result size.", r3.getNumFound() == 1);
         checkResult(m3, r3.getResults().get(0).getObject());
-        
+
         QueryParameters params = new QueryParameters.Builder()
                                     .setHandler(SearchHandler.SIMPLE)
                                     .setSearchTerm(m1.getSubject())
@@ -184,7 +184,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
         IndexResult<MailMessage> result = indexAccess.query(params, null);
         assertTrue("Wrong result size.", result.getNumFound() == 3);
     }
-    
+
     @Test
     public void testGetQuery() throws Exception {
         assertNotNull("IndexFacadeService was null.", indexFacade);
@@ -207,7 +207,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
         m3.setFolder("INBOX");
         m3.setAccountId(1);
         indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m3));
-        
+
         Set<String> allIds = new HashSet<String>();
         allIds.add(MailUUID.newUUID(context.getId(), user.getId(), m1).toString());
         allIds.add(MailUUID.newUUID(context.getId(), user.getId(), m2).toString());
@@ -215,23 +215,23 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
         QueryParameters query = buildGetQuery(allIds);
         IndexResult<MailMessage> result = indexAccess.query(query, null);
         assertTrue("Wrong result size.", result.getNumFound() == 3);
-        
+
         QueryParameters q1 = buildGetQuery(Collections.singleton(MailUUID.newUUID(context.getId(), user.getId(), m1).toString()));
         IndexResult<MailMessage> r1 = indexAccess.query(q1, null);
         assertTrue("Wrong result size.", r1.getNumFound() == 1);
         checkResult(m1, r1.getResults().get(0).getObject());
-        
+
         QueryParameters q2 = buildGetQuery(Collections.singleton(MailUUID.newUUID(context.getId(), user.getId(), m2).toString()));
         IndexResult<MailMessage> r2 = indexAccess.query(q2, null);
         assertTrue("Wrong result size.", r2.getNumFound() == 1);
         checkResult(m2, r2.getResults().get(0).getObject());
-        
+
         QueryParameters q3 = buildGetQuery(Collections.singleton(MailUUID.newUUID(context.getId(), user.getId(), m3).toString()));
         IndexResult<MailMessage> r3 = indexAccess.query(q3, null);
         assertTrue("Wrong result size.", r3.getNumFound() == 1);
         checkResult(m3, r3.getResults().get(0).getObject());
     }
-    
+
     @Test
     public void testAllQuery() throws Exception {
         assertNotNull("IndexFacadeService was null.", indexFacade);
@@ -245,7 +245,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
 
         MailMessage m2 = TestMails.toMailMessage(TestMails.MAIL1);
         m2.setMailId(String.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
-        m2.setFolder("INBOX/Somewhere");
+        m2.setFolder("Apstiprināts \"ham");
         m2.setAccountId(0);
         indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m2));
 
@@ -254,28 +254,28 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
         m3.setFolder("INBOX");
         m3.setAccountId(1);
         indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m3));
-        
+
         QueryParameters allQuery = new QueryParameters.Builder()
                                     .setHandler(SearchHandler.ALL_REQUEST)
                                     .build();
         IndexResult<MailMessage> result = indexAccess.query(allQuery, null);
         assertTrue("Wrong result size.", result.getNumFound() == 3);
-        
+
         QueryParameters q1 = buildAllQuery(m1.getAccountId(), m1.getFolder());
         IndexResult<MailMessage> r1 = indexAccess.query(q1, null);
         assertTrue("Wrong result size.", r1.getNumFound() == 1);
         checkResult(m1, r1.getResults().get(0).getObject());
-        
+
         QueryParameters q2 = buildAllQuery(m2.getAccountId(), m2.getFolder());
         IndexResult<MailMessage> r2 = indexAccess.query(q2, null);
         assertTrue("Wrong result size.", r2.getNumFound() == 1);
         checkResult(m2, r2.getResults().get(0).getObject());
-        
+
         QueryParameters q3 = buildAllQuery(m3.getAccountId(), m3.getFolder());
         IndexResult<MailMessage> r3 = indexAccess.query(q3, null);
         assertTrue("Wrong result size.", r3.getNumFound() == 1);
         checkResult(m3, r3.getResults().get(0).getObject());
-        
+
         AccountFolders accountFolders = new AccountFolders(String.valueOf(m1.getAccountId()));
         QueryParameters secondAllQuery = new QueryParameters.Builder()
                                             .setHandler(SearchHandler.ALL_REQUEST)
@@ -284,7 +284,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
         IndexResult<MailMessage> result2 = indexAccess.query(secondAllQuery, null);
         assertTrue("Wrong result size.", result2.getNumFound() == 2);
     }
-    
+
     @Test
     public void testCustomQuery() throws Exception {
         assertNotNull("IndexFacadeService was null.", indexFacade);
@@ -294,18 +294,18 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
         m1.setFolder("INBOX");
         m1.setAccountId(0);
         indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m1));
-        
+
         MailMessage m2 = TestMails.toMailMessage(TestMails.MAIL1);
         m2.setMailId(String.valueOf(new Random().nextInt(Integer.MAX_VALUE)));
         m2.setFolder("INBOX");
         m2.setAccountId(0);
         m2.removeFrom();
-        m2.addFrom(new InternetAddress("erwgtrg@asdeafer.cd"));        
+        m2.addFrom(new InternetAddress("erwgtrg@asdeafer.cd"));
         m2.removeTo();
         m2.addTo(new InternetAddress("bncvvn@yxcvyvyxcv.kh"));
         m2.setSubject(UUID.randomUUID().toString());
         indexAccess.addDocument(new StandardIndexDocument<MailMessage>(m2));
-        
+
         SearchTerm<?> fromTerm = new FromTerm(m1.getFrom()[0].toUnicodeString());
         SearchTerm<?> toTerm = new ToTerm(m1.getTo()[0].toUnicodeString());
         SearchTerm<?> fromAndTo = new com.openexchange.mail.search.ANDTerm(fromTerm, toTerm);
@@ -315,11 +315,11 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
                                     .setHandler(SearchHandler.CUSTOM)
                                     .setSearchTerm(finalTerm)
                                     .build();
-        
+
         IndexResult<MailMessage> result = indexAccess.query(query, null);
         assertTrue("Wrong result size.", result.getNumFound() == 1);
         checkResult(m1, result.getResults().get(0).getObject());
-        
+
         SearchTerm<?> notTerm = new NOTTerm(new SubjectTerm(m1.getSubject()));
         QueryParameters query2 = new QueryParameters.Builder()
                                     .setHandler(SearchHandler.CUSTOM)
@@ -329,13 +329,13 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
         assertTrue("Wrong result size.", result2.getNumFound() == 1);
         checkResult(m2, result2.getResults().get(0).getObject());
     }
-    
+
     private void checkResult(MailMessage expected, MailMessage actual) {
         assertEquals("Wrong Account", expected.getAccountId(), actual.getAccountId());
         assertEquals("Wrong Folder", expected.getFolder(), actual.getFolder());
         assertEquals("Wrong mail id", expected.getMailId(), actual.getMailId());
     }
-    
+
     private QueryParameters buildAllQuery(int account, String folder) {
         AccountFolders accountFolders = new AccountFolders(String.valueOf(account), Collections.singleton(folder));
         QueryParameters params = new QueryParameters.Builder()
@@ -344,7 +344,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
                                     .build();
         return params;
     }
-    
+
     private QueryParameters buildGetQuery(Set<String> uuids) {
         QueryParameters params = new QueryParameters.Builder()
                                     .setHandler(SearchHandler.GET_REQUEST)
@@ -352,7 +352,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
                                     .build();
         return params;
     }
-    
+
     private QueryParameters buildSimpleQuery(int account, String folder, String searchTerm) {
         AccountFolders accountFolders = new AccountFolders(String.valueOf(account), Collections.singleton(folder));
         QueryParameters params = new QueryParameters.Builder()
@@ -360,7 +360,7 @@ public class SolrMailIndexAccessTest extends AbstractSolrIndexAccessTest {
                                     .setSearchTerm(searchTerm)
                                     .setAccountFolders(Collections.singleton(accountFolders))
                                     .build();
-        
+
         return params;
     }
 

@@ -51,6 +51,7 @@ package com.openexchange.webdav.action;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.regex.Pattern;
 
 
 /**
@@ -65,6 +66,8 @@ import java.net.URLDecoder;
  */
 public class ApacheURLDecoder {
 
+    private static final Pattern SPLIT = Pattern.compile("\\+");
+
     /**
      * @param string The String to decode
      * @param encoding The encoding to assume for special characters
@@ -72,7 +75,7 @@ public class ApacheURLDecoder {
      * @throws UnsupportedEncodingException
      */
     public String decode(String string, String encoding) throws UnsupportedEncodingException {
-        String[] chunks = string.split("\\+");
+        String[] chunks = SPLIT.split(string, 0);
         StringBuilder decoded = new StringBuilder(string.length());
         boolean endsWithPlus = string.endsWith("+");
         for (int i = 0; i < chunks.length; i++) {

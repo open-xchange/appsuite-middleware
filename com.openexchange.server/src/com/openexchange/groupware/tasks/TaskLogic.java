@@ -63,7 +63,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -456,22 +455,19 @@ public final class TaskLogic {
         if (!task.containsStartDate() || !task.containsEndDate() || null == task.getStartDate() || null == task.getEndDate() || !task.containsRecurrenceType() || CalendarObject.NO_RECURRENCE == task.getRecurrenceType()) {
             return;
         }
-        try {
-            task.setRecurrenceCalculator((int) ((task.getEndDate().getTime() - task.getStartDate().getTime()) / (Constants.MILLI_DAY)));
-            final CalendarCollectionService service = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-            final RecurringResultsInterface results = service.calculateRecurring(task, 0, 0, 1);
-            if (null == results || 0 == results.size()) {
-                return;
-            }
-            final RecurringResultInterface result = results.getRecurringResult(0);
-            if (!new Date(result.getStart()).equals(task.getStartDate())) {
-                task.setStartDate(new Date(result.getStart()));
-            }
-            if (!new Date(result.getEnd()).equals(task.getEndDate())) {
-                task.setEndDate(new Date(result.getEnd()));
-            }
-        } catch (final OXException e) {
-            throw new OXException(e);
+
+        task.setRecurrenceCalculator((int) ((task.getEndDate().getTime() - task.getStartDate().getTime()) / (Constants.MILLI_DAY)));
+        final CalendarCollectionService service = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+        final RecurringResultsInterface results = service.calculateRecurring(task, 0, 0, 1);
+        if (null == results || 0 == results.size()) {
+            return;
+        }
+        final RecurringResultInterface result = results.getRecurringResult(0);
+        if (!new Date(result.getStart()).equals(task.getStartDate())) {
+            task.setStartDate(new Date(result.getStart()));
+        }
+        if (!new Date(result.getEnd()).equals(task.getEndDate())) {
+            task.setEndDate(new Date(result.getEnd()));
         }
     }
 
@@ -510,7 +506,7 @@ public final class TaskLogic {
                 break;
             case Participant.GROUP:
                 final GroupParticipant group = (GroupParticipant) participant;
-                try {
+                {
                     final int[] member = GroupStorage.getInstance().getGroup(group.getIdentifier(), ctx).getMember();
                     if (member.length == 0) {
                         throw TaskExceptionCode.GROUP_IS_EMPTY.create(group.getDisplayName());
@@ -522,8 +518,6 @@ public final class TaskLogic {
                             retval.add(tParticipant);
                         }
                     }
-                } catch (final OXException e) {
-                    throw new OXException(e);
                 }
                 break;
             case Participant.EXTERNAL_USER:
@@ -828,7 +822,7 @@ public final class TaskLogic {
 
     private static final int[] ALL_COLUMNS = Task.ALL_COLUMNS;
 
-    private static Task clone(final Task task) {
+    static Task clone(final Task task) {
         final Task ret = new Task();
         for (final int field : ALL_COLUMNS) {
             if (task.contains(field)) {
@@ -855,9 +849,7 @@ public final class TaskLogic {
     private static void deleteFolder(final Context ctx, final Connection con, final int taskId, final Set<Folder> removed) throws OXException {
         final Set<Folder> folders = foldStor.selectFolder(ctx, con, taskId, ACTIVE);
         foldStor.deleteFolder(ctx, con, taskId, folders, ACTIVE);
-        final Iterator<Folder> iter = removed.iterator();
-        while (iter.hasNext()) {
-            final Folder folder = iter.next();
+        for (Folder folder : removed) {
             if (folder.getIdentifier() > 0) {
                 folders.add(folder);
             }
@@ -875,7 +867,7 @@ public final class TaskLogic {
      * @throws OXException if an exception occurs.
      */
     static void informDelete(final Session session, final Context ctx, final Connection con, final Task task) throws OXException {
-        Reminder.deleteReminder(ctx, con, task);
+        Reminder.deleteReminder(ctx, task);
         try {
             new EventClient(session).delete(task);
         } catch (final OXException e) {

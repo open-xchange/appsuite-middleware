@@ -59,13 +59,13 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class Messages implements LocalizableStrings {
     public static final String REQUESTED_A_REFRESHER = "An attendee would like to be brought up to date about this appointment.";
-    
-    
+
+
     /**
      * Example: "This appointment has attachments, please see the appointment at http://ox.superhoster.invalid/index.html#m=calendar&f=bla&i=bla to retrieve them"
      */
     public static final String HAS_ATTACHMENTS = "This appointment has attachments. Click on the following link to view the appointment and to retrieve the attachments: %1$s.";
-    
+
     public static final String ADD_TO_UNKNOWN = "The organizer would like to create an exception for a  recurring appointment that could not be found. Either ignore this update, or ask the organizer to again send you the recurrence.";
     public static final String ADD_WOULD_OVERWRITE_EXISTING_EXCEPTION = "The organizer would like to change the occurrence of a recurrence on a day that already contains such a change. The server can only store one change for a series per day.";
     public static final String CANCEL_UNKNOWN_APPOINTMENT = "The organizer would like to cancel an appointment that could not be found.";
@@ -78,11 +78,11 @@ public class Messages implements LocalizableStrings {
     public static final String ALREADY_UPDATED = "This message contains appointment updates that were already accepted by another user. Best ignore this message.";
     public static final String INTERNAL_MAIL = "This message comes from an internal user. Best ignore it.";
     public static final String SHARED_FOLDER = "This invitation was sent to someone else, not you. This appointment would have to be created in a user's private folder to which you do not have write permissions.";
-    
+
     public static final String ATTACHMENTS_CHANGED = "The appointment's attachments have been changed";
-    
+
     public static final String FIELDS_CHANGED = "One or more other fields have been updated";
-    
+
     public static final String RESERVERD = "Reserved";
 
     public static final String TEMPORARY = "Temporary";
@@ -131,12 +131,12 @@ public class Messages implements LocalizableStrings {
      * Example: "UserXY has tentatively accepted the invitation"
      */
     public static final String TENTATIVE_INTRO = "%1$s has %2$s the invitation:";
-    
+
     /**
      * Example: "UserXY has tentatively accepted the invitation on behalf of UserAB"
      */
     public static final String TENTATIVE_ON_BEHALF_INTRO = "%1$s has %2$s the invitation on behalf of %3$s:";
-    
+
     /**
      * Example: "UserXY has tentatively accepted the invitation on your behalf"
      */
@@ -158,9 +158,9 @@ public class Messages implements LocalizableStrings {
     public static final String COUNTER_PARTICIPANT_INTRO = "%1$s has asked %2$s to change the event:";
 
     public static final String CREATE_INTRO = "You have been invited to an event by %1$s:";
-    
+
     public static final String CREATE_ON_BEHALF_INTRO = "You have been invited to an event organized by %1$s on behalf of %2$s";
-    
+
     public static final String CREATE_ON_YOUR_BEHALF_INTRO = "%1$s is organizing an event on your behalf.";
 
     public static final String CREATE_EXCEPTION_INTRO = "%1$s created a recurrence exception. Original date: %2$s:";
@@ -200,7 +200,7 @@ public class Messages implements LocalizableStrings {
     public static final String HAS_CHANGED_TITLE = "The appointment has a new description: %1$s.";
 
 	public static final String HAS_CHANGED_SHOWN_AS = "The appointment will now be shown as: \"%1$s\".";
-    
+
 	public static final String HAS_CHANGED_TIMEZONE = "The appointment timezone was changed to: %1$s";
 
 	public static final String ASK_CHANGE_LOCATION = "Change the location to %1$s.";
@@ -303,6 +303,6 @@ public class Messages implements LocalizableStrings {
 	public static final String ORGANIZER_JUSTIFICATION = "You have received this E-Mail because you are the organizer of this appointment.";
 
 	public static final String RESOURCE_MANAGER_JUSTIFICATION = "You have received this E-Mail because this appointment contains the resource %1$s which is managed by you.";
-    
+
 }
 

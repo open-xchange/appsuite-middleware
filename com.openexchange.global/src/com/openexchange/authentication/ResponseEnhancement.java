@@ -51,7 +51,7 @@ package com.openexchange.authentication;
 
 /**
  * An interface which can be used to add further response details to the {@link Authenticated} return object of a authentication bundle.
- * This information is used to redirect the client or add additional headers and/or cookies to the response for the client. 
+ * This information is used to redirect the client or add additional headers and/or cookies to the response for the client.
  *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */

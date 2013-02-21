@@ -70,7 +70,7 @@ public final class FolderField implements Serializable {
 
     /**
      * Initializes a new {@link FolderField}.
-     * 
+     *
      * @param field The field number
      * @param name The field name
      * @param defaulValue The default value if property is missing
@@ -84,7 +84,7 @@ public final class FolderField implements Serializable {
 
     /**
      * Gets the default value if associated property is missing
-     * 
+     *
      * @return The default value for this field
      */
     public Object getDefaultValue() {

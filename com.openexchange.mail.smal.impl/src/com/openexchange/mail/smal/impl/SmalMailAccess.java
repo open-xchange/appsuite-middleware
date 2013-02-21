@@ -246,6 +246,16 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
     }
 
     @Override
+    public void setWaiting(boolean waiting) {
+        delegateMailAccess.setWaiting(waiting);
+    }
+
+    @Override
+    public boolean isWaiting() {
+        return delegateMailAccess.isWaiting();
+    }
+
+    @Override
     public MailConfig getMailConfig() throws OXException {
         return delegateMailAccess.getMailConfig();
     }

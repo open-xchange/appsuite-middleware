@@ -92,9 +92,9 @@ public interface File {
 
     void setTitle(String title);
 
-    int getVersion();
+    String getVersion();
 
-    void setVersion(int version);
+    void setVersion(String version);
 
     String getContent();
 

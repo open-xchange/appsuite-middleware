@@ -81,7 +81,7 @@ public class ITipAnalysisWriter {
     public ITipAnalysisWriter(final TimeZone timezone) {
         this.appointmentWriter = new AppointmentWriter(timezone);
     }
-    
+
     public void write(final ITipAnalysis analysis, final JSONObject object) throws JSONException {
     	if (analysis.getMessage() != null && analysis.getMessage().getMethod() != null) {
             object.put("messageType", analysis.getMessage().getMethod().toString().toLowerCase());
@@ -120,7 +120,7 @@ public class ITipAnalysisWriter {
     	if (change.getIntroduction() != null) {
         	changeObject.put("introduction", change.getIntroduction());
     	}
-    	
+
         changeObject.put("type", change.getType().name().toLowerCase());
         changeObject.put("exception", change.isException());
         final CalendarDataObject newAppointment = change.getNewAppointment();
@@ -129,28 +129,28 @@ public class ITipAnalysisWriter {
             appointmentWriter.writeAppointment(newAppointment, newAppointmentObject);
             changeObject.put("newAppointment", newAppointmentObject);
         }
-        
+
         final Appointment currentAppointment = change.getCurrentAppointment();
         if (currentAppointment != null) {
             final JSONObject currentAppointmentObject = new JSONObject();
             appointmentWriter.writeAppointment(currentAppointment, currentAppointmentObject);
             changeObject.put("currentAppointment", currentAppointmentObject);
         }
-        
+
         final CalendarDataObject masterAppointment = change.getMasterAppointment();
         if (masterAppointment != null) {
             final JSONObject masterAppointmentObject = new JSONObject();
             appointmentWriter.writeAppointment(masterAppointment, masterAppointmentObject);
             changeObject.put("masterAppointment", masterAppointmentObject);
         }
-        
+
         final Appointment deletedAppointment = change.getDeletedAppointment();
         if (deletedAppointment != null) {
             final JSONObject deletedAppointmentObject = new JSONObject();
             appointmentWriter.writeAppointment(deletedAppointment, deletedAppointmentObject);
             changeObject.put("deletedAppointment", deletedAppointmentObject);
         }
-        
+
         final List<Appointment> conflicts = change.getConflicts();
         if (conflicts != null && !conflicts.isEmpty()) {
             final JSONArray array = new JSONArray();
@@ -161,17 +161,17 @@ public class ITipAnalysisWriter {
             }
             changeObject.put("conflicts", array);
         }
-        
+
         final ParticipantChange participantChange = change.getParticipantChange();
         // TODO
-        
+
         final AppointmentDiff diff = change.getDiff();
         if (diff != null) {
             final JSONObject diffObject = new JSONObject();
             writeDiff(diffObject, diff);
             changeObject.put("diff", diffObject);
         }
-        
+
         final List<String> diffDescription = change.getDiffDescription();
         if (diff != null && diffDescription != null && !diffDescription.isEmpty()) {
             final JSONArray array = new JSONArray();
@@ -189,18 +189,18 @@ public class ITipAnalysisWriter {
 
             writeField("old", fieldUpdate.getOriginalValue(), fieldUpdate.getFieldNumber(), fieldUpdate.getFieldName(), difference);
             writeField("new", fieldUpdate.getNewValue(), fieldUpdate.getFieldNumber(), fieldUpdate.getFieldName(), difference);
-            
+
             final Object extraInfo = fieldUpdate.getExtraInfo();
             if (extraInfo != null) {
                 final JSONObject extraInfoObject = new JSONObject();
                 writeExtraInfo(extraInfo, extraInfoObject);
                 difference.put("extra", extraInfoObject);
             }
-            
+
             diffObject.put(fieldUpdate.getFieldName(), difference);
-            
+
         }
-        
+
     }
 
     private void writeField(final String key, final Object value, final int fieldNumber, final String fieldName, final JSONObject difference) throws JSONException {
@@ -218,7 +218,7 @@ public class ITipAnalysisWriter {
         if (!Difference.class.isInstance(extraInfo)) {
             return;
         }
-        
+
         final Difference difference = (Difference) extraInfo;
         if (difference.getField() != Difference.COMMON) {
             JSONObject json = new JSONObject();
@@ -232,7 +232,7 @@ public class ITipAnalysisWriter {
             calendarDataObject.set(difference.getField(), difference.getRemoved());
             appointmentWriter.writeAppointment(calendarDataObject, json);
             extraInfoObject.put("removed", json.get(CalendarField.getByColumn(difference.getField()).getJsonName()));
-            
+
             final List<Change> changed = difference.getChanged();
             final JSONArray jsonChanges = new JSONArray();
             for (final Change change : changed) {
@@ -252,7 +252,7 @@ public class ITipAnalysisWriter {
                 }
                 jsonChanges.put(jsonChange);
             }
-            
+
             if (jsonChanges.length() > 0) {
                 extraInfoObject.put("changed", jsonChanges);
             }
@@ -270,7 +270,7 @@ public class ITipAnalysisWriter {
             writeAnnotation(annotation, annotationObject);
             array.put(annotationObject);
         }
-        
+
         object.put("annotations",array);
     }
 

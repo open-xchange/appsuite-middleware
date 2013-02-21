@@ -54,14 +54,14 @@ import com.openexchange.admin.rmi.dataobjects.Resource;
 
 /**
  * @author choeger
- * 
+ *
  */
 public interface OXResourcePluginInterface {
     public void create(final Context ctx, final Resource res, final Credentials cred) throws PluginException;
-    
+
     public void delete(final Context ctx, final Resource res, final Credentials cred) throws PluginException;
-    
+
     public void change(final Context ctx, final Resource res, final Credentials auth) throws PluginException;
-    
+
     public Resource get(final Context ctx, final Resource res, final Credentials cred);
 }

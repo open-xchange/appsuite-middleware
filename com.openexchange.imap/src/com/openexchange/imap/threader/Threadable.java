@@ -61,7 +61,7 @@ import com.openexchange.imap.threadsort.MessageInfo;
 
 /**
  * {@code Threadable} - An element within thread-sorted structure holding needed message information.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @see Threader
  */
@@ -102,7 +102,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
 
     /**
      * Initializes a new {@code Threadable}.
-     * 
+     *
      * @param next The next element
      * @param subject The subject
      * @param id The identifier
@@ -134,7 +134,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
 
     /**
      * Gets the appropriate {@code MessageInfo} for this {@code Threadable}.
-     * 
+     *
      * @return The appropriate {@code MessageInfo}
      */
     public MessageInfo toMessageInfo() {
@@ -143,7 +143,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
 
     /**
      * Gets the UID.
-     * 
+     *
      * @return The UID
      */
     public long getUid() {
@@ -275,7 +275,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
 
     /**
      * Gets the number of this {@code Threadable}'s top elements.
-     * 
+     *
      * @return The number of top elements
      */
     public int tops() {
@@ -290,7 +290,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
 
     /**
      * Gets the size of this {@code Threadable}.
-     * 
+     *
      * @return The size
      */
     public int size() {
@@ -347,7 +347,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
 
     /**
      * Sets the full name
-     * 
+     *
      * @param fullName The full name to set
      * @return This threadable
      */
@@ -358,7 +358,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
 
     /**
      * Gets the full name
-     * 
+     *
      * @return The full name
      */
     public String getFullName() {
@@ -367,7 +367,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
 
     /**
      * Gets the kid
-     * 
+     *
      * @return The kid
      */
     public Threadable kid() {
@@ -376,7 +376,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
 
     /**
      * Gets the next
-     * 
+     *
      * @return The next
      */
     public Threadable next() {
@@ -394,7 +394,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
 
     /**
      * Sets the child.
-     * 
+     *
      * @param child The child
      */
     public void setChild(final Threadable child) {

@@ -78,7 +78,7 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.log.LogFactory;
-import com.openexchange.server.impl.Version;
+import com.openexchange.version.Version;
 import com.openexchange.session.Session;
 import com.openexchange.webdav.LastModifiedCache;
 import com.openexchange.webdav.PendingInvocations;
@@ -331,7 +331,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
 
             // SEND FIRST XML LINE
             os.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n").getBytes());
-            os.write(("<D:multistatus xmlns:D=\"DAV:\" version=\"" + Version.getVersionString() + "\" buildname=\""
+            os.write(("<D:multistatus xmlns:D=\"DAV:\" version=\"" + Version.getInstance().getVersionString() + "\" buildname=\""
                     + Version.NAME + "\">").getBytes());
 
             if (hasObjectMode) {
@@ -410,7 +410,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
 
             final OutputStream os = resp.getOutputStream();
             os.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n").getBytes());
-            os.write(("<D:multistatus xmlns:D=\"DAV:\" version=\"" + Version.getVersionString() + "\" buildname=\"" + Version.NAME + "\">").getBytes());
+            os.write(("<D:multistatus xmlns:D=\"DAV:\" version=\"" + Version.getInstance().getVersionString() + "\" buildname=\"" + Version.NAME + "\">").getBytes());
             os.flush();
 
             writeResponse(dataObject, httpErrorCode, description, clientId, resp.getOutputStream(), new XMLOutputter());
@@ -611,7 +611,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
      */
     private final void commit(final OutputStream os, final Session session, final PendingInvocations<I> pendingInvocations) throws IOException, OXException {
         os.write(("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n").getBytes());
-        os.write(("<D:multistatus xmlns:D=\"DAV:\" version=\"" + Version.getVersionString() + "\" buildname=\""
+        os.write(("<D:multistatus xmlns:D=\"DAV:\" version=\"" + Version.getInstance().getVersionString() + "\" buildname=\""
                 + Version.NAME + "\">").getBytes());
         os.flush();
         performActions(os, session, pendingInvocations);

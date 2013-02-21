@@ -90,6 +90,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -138,15 +139,10 @@ public final class ICalJSONDataHandler implements DataHandler {
 
     @Override
     public Object processData(final Data<? extends Object> data, final DataArguments dataArguments, final Session session) throws OXException {
-        final Context ctx;
-        try {
-            ctx = ContextStorage.getStorageContext(session);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Context ctx = ContextStorage.getStorageContext(session);
         final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
         if (iCalParser == null) {
-            throw new OXException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ICalParser.class.getName()));
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ICalParser.class.getName());
         }
         final List<CalendarDataObject> appointments;
         final List<Task> tasks;
@@ -189,8 +185,6 @@ public final class ICalJSONDataHandler implements DataHandler {
                  */
                 tasks = parseTaskStream(ctx, iCalParser, inputStreamCopy, conversionErrors, conversionWarnings, timeZone);
             }
-        } catch (final ConversionError e) {
-            throw new OXException(e);
         } catch (final IOException e) {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
@@ -262,10 +256,8 @@ public final class ICalJSONDataHandler implements DataHandler {
                     }
                     objects.put(jsonAppointment);
                 }
-            } catch (final OXException e) {
-                throw new OXException(e);
             } catch (final JSONException e) {
-                throw new OXException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]));
+                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             }
         }
         /*
@@ -283,7 +275,7 @@ public final class ICalJSONDataHandler implements DataHandler {
                     objects.put(jsonTask);
                 }
             } catch (final JSONException e) {
-                throw new OXException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]));
+                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
             }
         }
         return objects;
@@ -309,17 +301,13 @@ public final class ICalJSONDataHandler implements DataHandler {
                 continue;
             }
 
-            try {
-                final int id = appointmentSql.resolveUid(calendarData.getUid());
-                if (id != 0) {
-                    final int folder = appointmentSql.getFolder(id);
-                    if (folder != 0) {
-                        calendarData.setParentFolderID(folder);
-                    }
-                    calendarData.setObjectID(id);
+            final int id = appointmentSql.resolveUid(calendarData.getUid());
+            if (id != 0) {
+                final int folder = appointmentSql.getFolder(id);
+                if (folder != 0) {
+                    calendarData.setParentFolderID(folder);
                 }
-            } catch (final OXException e) {
-                throw new OXException(e);
+                calendarData.setObjectID(id);
             }
         }
     }
@@ -356,11 +344,7 @@ public final class ICalJSONDataHandler implements DataHandler {
         try {
             return iCalParser.parseAppointments(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings);
         } finally {
-            try {
-                inputStream.close();
-            } catch (final IOException e) {
-                LOG.error("Error closing input stream", e);
-            }
+            Streams.close(inputStream);
         }
     }
 
@@ -369,11 +353,7 @@ public final class ICalJSONDataHandler implements DataHandler {
         try {
             return iCalParser.parseTasks(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings);
         } finally {
-            try {
-                inputStream.close();
-            } catch (final IOException e) {
-                LOG.error("Error closing input stream", e);
-            }
+            Streams.close(inputStream);
         }
     }
 
@@ -458,13 +438,7 @@ public final class ICalJSONDataHandler implements DataHandler {
                     }
                     out.flush();
                 } finally {
-                    if (out != null) {
-                        try {
-                            out.close();
-                        } catch (final IOException e) {
-                            LOG.error(e.getMessage(), e);
-                        }
-                    }
+                    Streams.close(out);
                 }
                 file = tmpFile;
             }

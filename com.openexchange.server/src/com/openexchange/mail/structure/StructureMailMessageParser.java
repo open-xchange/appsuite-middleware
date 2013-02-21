@@ -76,6 +76,7 @@ import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -94,7 +95,7 @@ import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageHandler;
-import com.openexchange.mail.utils.CharsetDetector;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -453,11 +454,11 @@ public final class StructureMailMessageParser {
                 }
                 {
                     final String version = mailPart.getFirstHeader("MIME-Version");
-                    buf.write(("MIME-Version: " + (null == version ? "1.0" : version) + "\r\n").getBytes(com.openexchange.java.Charsets.US_ASCII));
+                    buf.write(Charsets.toAsciiBytes("MIME-Version: " + (null == version ? "1.0" : version) + "\r\n"));
                 }
                 {
                     final String ct = MimeMessageUtility.extractHeader("Content-Type", new UnsynchronizedByteArrayInputStream(bytes), false);
-                    buf.write(("Content-Type:" + ct + "\r\n").getBytes(com.openexchange.java.Charsets.US_ASCII));
+                    buf.write(Charsets.toAsciiBytes("Content-Type:" + ct + "\r\n"));
                 }
                 buf.write(extractBodyFrom(bytes));
                 if (!handler.handleSMIMEBodyData(buf.toByteArray())) {
@@ -825,14 +826,16 @@ public final class StructureMailMessageParser {
         return filename;
     }
 
-    private static boolean isEmptyString(final String str) {
-        final char[] chars = str.toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            if (!Character.isWhitespace(chars[i])) {
-                return false;
-            }
+    private static boolean isEmptyString(final String string) {
+        if (null == string) {
+            return true;
         }
-        return true;
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     /**

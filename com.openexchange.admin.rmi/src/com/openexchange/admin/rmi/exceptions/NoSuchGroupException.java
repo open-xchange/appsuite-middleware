@@ -52,19 +52,19 @@ package com.openexchange.admin.rmi.exceptions;
 
 /**
  * Is thrown if a user doesn't exist in an operation
- * 
+ *
  * @author d7
  *
  */
 public class NoSuchGroupException extends Exception {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -994183866598925225L;
 
     /**
-     * 
+     *
      */
     public NoSuchGroupException() {
         super("User does not exist");

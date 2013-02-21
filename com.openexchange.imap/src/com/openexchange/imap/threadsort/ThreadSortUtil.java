@@ -101,7 +101,7 @@ public final class ThreadSortUtil {
         if (null == threadResponse) {
             return Collections.emptyList();
         }
-        final char[] chars = threadResponse.toCharArray();
+        //final char[] chars = threadResponse.toCharArray();
         final List<MessageInfo> list = new LinkedList<MessageInfo>();
         int start = threadResponse.indexOf('{', 0);
         if (start < 0) {
@@ -147,7 +147,7 @@ public final class ThreadSortUtil {
 
     /**
      * Extracts sequence numbers from specified thread list
-     * 
+     *
      * @param threadList The thread list
      * @return The extracted sequence numbers
      */
@@ -173,7 +173,7 @@ public final class ThreadSortUtil {
 
     /**
      * Extracts sequence numbers from specified thread list
-     * 
+     *
      * @param threadList The thread list
      * @return The extracted sequence numbers; &lt;full-name&gt; &lt;=&gt; &lt;sequence-numbers&gt;
      */
@@ -203,7 +203,7 @@ public final class ThreadSortUtil {
             }
         }
     }
-    
+
     private static final char DIGIT_START = '\u0030';
 
     private static final char DIGIT_END = '\u0039';
@@ -212,7 +212,7 @@ public final class ThreadSortUtil {
      * Determines if the specified character is a ISO-LATIN-1 digit.
      * <p>
      * '\u0030' through '\u0039', ISO-LATIN-1 digits ('0' through '9');
-     * 
+     *
      * @param c The character to check for a digit
      * @return <code>true</code> if character is a ISO-LATIN-1 digit; otherwise <code>false</code>
      */
@@ -228,15 +228,15 @@ public final class ThreadSortUtil {
      * @return An array of <code>javax.mail.Message</code> objects only filled with message's sequence number.
      */
     public static ExtendedMimeMessage[] getMessagesFromThreadResponse(final String folderFullname, final char separator, final String threadResponse) {
-        final char[] chars = threadResponse.toCharArray();
         final List<ExtendedMimeMessage> tmp = new ArrayList<ExtendedMimeMessage>();
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(8);
+        final int length = threadResponse.length();
         int i = 0;
-        while (i < chars.length) {
-            char c = chars[i++];
+        while (i < length) {
+            char c = threadResponse.charAt(i++);
             while (Character.isDigit(c)) {
                 sb.append(c);
-                c = chars[i++];
+                c = threadResponse.charAt(i++);
             }
             if (sb.length() > 0) {
                 tmp.add(new ExtendedMimeMessage(folderFullname, separator, Integer.parseInt(sb.toString())));
@@ -393,7 +393,7 @@ public final class ThreadSortUtil {
 
     /**
      * Converts specified structured list to simplified structure.
-     * 
+     *
      * @param structuredList The structured list to convert
      * @param comparator The comparator to use to sort child messages
      */

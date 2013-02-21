@@ -50,7 +50,6 @@
 package com.openexchange.realtime.atmosphere.payload.converter.primitive;
 
 import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.payload.converter.AbstractPOJOConverter;
 import com.openexchange.tools.session.ServerSession;

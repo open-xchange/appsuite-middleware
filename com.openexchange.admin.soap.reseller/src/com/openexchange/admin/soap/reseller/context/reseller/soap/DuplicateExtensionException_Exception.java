@@ -12,17 +12,17 @@ import javax.xml.ws.WebFault;
 
 @WebFault(name = "DuplicateExtensionException", targetNamespace = "http://soap.reseller.admin.openexchange.com")
 public class DuplicateExtensionException_Exception extends java.lang.Exception {
-    
+
     private com.openexchange.admin.soap.reseller.context.reseller.soap.DuplicateExtensionException duplicateExtensionException;
 
     public DuplicateExtensionException_Exception() {
         super();
     }
-    
+
     public DuplicateExtensionException_Exception(String message) {
         super(message);
     }
-    
+
     public DuplicateExtensionException_Exception(String message, Throwable cause) {
         super(message, cause);
     }

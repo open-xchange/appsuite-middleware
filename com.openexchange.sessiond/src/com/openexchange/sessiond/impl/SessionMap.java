@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link SessionMap} - The thread-safe map for session identifier mappings and more.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessionMap {
@@ -78,7 +78,7 @@ public final class SessionMap {
 
     /**
      * Initializes a new {@link SessionMap}.
-     * 
+     *
      * @param initialCapacity The initial map's capacity
      */
     public SessionMap(final int initialCapacity) {
@@ -90,7 +90,7 @@ public final class SessionMap {
 
     /**
      * Gets the map's size.
-     * 
+     *
      * @return The size
      */
     public int size() {
@@ -107,7 +107,7 @@ public final class SessionMap {
 
     /**
      * Checks for presence of a session associated with given session identifier.
-     * 
+     *
      * @param sessionId The session identifier
      * @return <code>true</code> if such a session is present; otherwise <code>false</code>
      */
@@ -123,7 +123,7 @@ public final class SessionMap {
 
     /**
      * Checks for presence of a session associated with given alternative identifier.
-     * 
+     *
      * @param altId The alternative identifier
      * @return <code>true</code> if such a session is present; otherwise <code>false</code>
      */
@@ -141,7 +141,7 @@ public final class SessionMap {
 
     /**
      * Gets the session associated with specified session identifier.
-     * 
+     *
      * @param sessionId The session identifier
      * @return The associated session or <code>null</code> if absent
      */
@@ -157,7 +157,7 @@ public final class SessionMap {
 
     /**
      * Gets the session associated with specified alternative identifier.
-     * 
+     *
      * @param altId The alternative identifier
      * @return The associated session or <code>null</code> if absent
      */
@@ -175,7 +175,7 @@ public final class SessionMap {
 
     /**
      * Puts specified session into this map if no session is already associated with given session identifier.
-     * 
+     *
      * @param sessionId The session identifier
      * @param session The session to put
      * @return The session already associated with given session identifier or <code>null</code> on successful put
@@ -199,7 +199,7 @@ public final class SessionMap {
 
     /**
      * Puts specified session into this map if no session is already associated with given session identifier.
-     * 
+     *
      * @param sessionId The session identifier
      * @param session The session to put
      * @return The session already associated with given session identifier or <code>null</code> on successful put
@@ -224,7 +224,7 @@ public final class SessionMap {
 
     /**
      * Puts specified session into this map if no session is already associated with given alternative identifier.
-     * 
+     *
      * @param altId The alternative identifier
      * @param session The session to put
      * @return The session already associated with given alternative identifier or <code>null</code> on successful put
@@ -252,7 +252,7 @@ public final class SessionMap {
 
     /**
      * Removes the session associated with specified session identifier.
-     * 
+     *
      * @param sessionId The session identifier
      * @return The possibly removed session or <code>null</code>
      */
@@ -275,7 +275,7 @@ public final class SessionMap {
 
     /**
      * Removes the session associated with specified alternative identifier.
-     * 
+     *
      * @param altId The alternative identifier
      * @param altOnly <code>true</code> to only remove from alternative identifier mappings; otherwise <code>false</code> to also consider
      *            session identifier mappings.
@@ -304,7 +304,7 @@ public final class SessionMap {
      * Returns a {@link Collection} view of the sessions contained in this map.
      * <p>
      * The collection is <b>NOT</b> backed by the map.
-     * 
+     *
      * @return The {@link Collection} view of the sessions contained in this map
      */
     public Collection<SessionControl> values() {

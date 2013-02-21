@@ -63,7 +63,7 @@ public enum CsvExceptionCodes implements OXExceptionCode {
     /** Illegal state: Found data after presumed last line. */
     DATA_AFTER_LAST_LINE(DATA_AFTER_LAST_LINE_MSG, CATEGORY_ERROR, 1001),
     /** Cannot find an importer for format %s into folders %s */
-    LOADING_FOLDER_FAILED(LOADING_FOLDER_FAILED_MSG, CATEGORY_ERROR, 204), 
+    LOADING_FOLDER_FAILED(LOADING_FOLDER_FAILED_MSG, CATEGORY_ERROR, 204),
     /** Cannot load folder (not found, no rights, who knows? used to be I_E 204 */
     UTF8_ENCODE_FAILED(UTF8_ENCODE_FAILED_MSG, CATEGORY_ERROR, 104),
     /** Could not encode as UTF-8 */

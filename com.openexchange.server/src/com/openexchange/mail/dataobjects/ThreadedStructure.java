@@ -52,15 +52,15 @@ package com.openexchange.mail.dataobjects;
 import java.util.List;
 
 /**
- * {@link ThreadedStructure}
- * 
+ * {@link ThreadedStructure} - A container providing thread-sorted mails.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadedStructure {
 
     /**
      * Creates a new {@link ThreadedStructure} for specified list of thread-sorted mails.
-     * 
+     *
      * @param mails The thread-sorted mails
      * @return A new {@link ThreadedStructure} instance
      */
@@ -80,7 +80,7 @@ public final class ThreadedStructure {
 
     /**
      * Gets the thread-sorted mails
-     * 
+     *
      * @return The thread-sorted mails
      */
     public List<List<MailMessage>> getMails() {

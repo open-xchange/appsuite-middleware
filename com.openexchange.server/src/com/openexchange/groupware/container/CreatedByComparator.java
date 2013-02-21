@@ -59,7 +59,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 
 /**
  * {@link CreatedByComparator} - Comparator for "created-by" field.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CreatedByComparator implements Comparator<DataObject> {
@@ -74,7 +74,7 @@ public class CreatedByComparator implements Comparator<DataObject> {
 
     /**
      * Initializes a new {@link CreatedByComparator}.
-     * 
+     *
      * @param locale The session user's locale
      * @param context The associated context
      */
@@ -88,7 +88,7 @@ public class CreatedByComparator implements Comparator<DataObject> {
 
     /**
      * Sets whether descending sorting shall be performed.
-     * 
+     *
      * @param desc <code>true</code> for descending order; otherwise <code>false</code> to ascending
      * @return This comparator with new behavior applied
      */

@@ -35,6 +35,8 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
+. /opt/open-xchange/lib/oxfunctions.sh
+ox_update_permissions /opt/open-xchange/etc/aws.properties root:open-xchange 640
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -46,7 +48,10 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/aws.properties
 %config(noreplace) /opt/open-xchange/etc/*
+%dir /opt/open-xchange/sbin/
+/opt/open-xchange/sbin/setupautoscaling
 
 %changelog
 * Tue Sep 11 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>

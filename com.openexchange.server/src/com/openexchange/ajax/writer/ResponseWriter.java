@@ -74,12 +74,14 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Parsing;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
+import com.openexchange.exception.OXExceptionConstants;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.log.Log;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * JSON writer for the response container objekt.
+ * JSON writer for the response container object.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
@@ -90,10 +92,32 @@ public final class ResponseWriter {
      */
     private static final Set<String> RESERVED_IDENTIFIERS = ResponseFields.RESERVED_IDENTIFIERS;
 
+    private static volatile Locale defaultLocale;
     /**
      * The default locale.
      */
-    private static final Locale DEFAULT_LOCALE = Locale.US;
+    private static Locale defaultLocale() {
+        Locale tmp = defaultLocale;
+        if (null == tmp) {
+            synchronized (ResponseWriter.class) {
+                tmp = defaultLocale;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        tmp = Locale.US;
+                    } else {
+                        final String property = service.getProperty("com.openexchange.i18n.defaultLocale");
+                        tmp = null == property ? Locale.US : LocaleTools.getLocale(property);
+                        if (null == tmp) {
+                            tmp = Locale.US;
+                        }
+                    }
+                    defaultLocale = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
 
     private ResponseWriter() {
         super();
@@ -108,7 +132,10 @@ public final class ResponseWriter {
                 b = includeStackTraceOnError;
                 if (null == b) {
                     final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    b = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.ajax.response.includeStackTraceOnError", false));
+                    if (null == service) {
+                        return false;
+                    }
+                    b = Boolean.valueOf(service.getBoolProperty("com.openexchange.ajax.response.includeStackTraceOnError", false));
                     includeStackTraceOnError = b;
                 }
             }
@@ -124,8 +151,8 @@ public final class ResponseWriter {
      * @throws JSONException If writing JSON fails
      */
     public static JSONObject getJSON(final Response response) throws JSONException {
-        final JSONObject json = new JSONObject();
-        write(response, json, DEFAULT_LOCALE);
+        final JSONObject json = new JSONObject(8);
+        write(response, json, defaultLocale());
         return json;
     }
 
@@ -138,7 +165,7 @@ public final class ResponseWriter {
      * @throws JSONException If writing JSON fails
      */
     public static JSONObject getJSON(final Response response, final Locale locale) throws JSONException {
-        final JSONObject json = new JSONObject();
+        final JSONObject json = new JSONObject(8);
         write(response, json, locale);
         return json;
     }
@@ -151,7 +178,7 @@ public final class ResponseWriter {
      * @throws JSONException If writing JSON fails
      */
     public static void write(final Response response, final JSONObject json) throws JSONException {
-        write(response, json, DEFAULT_LOCALE);
+        write(response, json, defaultLocale());
     }
 
     /**
@@ -199,7 +226,7 @@ public final class ResponseWriter {
 
     /**
      * Writes given properties to specified JSON object.
-     * 
+     *
      * @param json The JSON object
      * @param properties The properties
      * @throws JSONException If writing JSON fails
@@ -222,47 +249,50 @@ public final class ResponseWriter {
     }
 
     /**
-     * Writes specified warning to given JSON object using passed locale.
+     * Writes specified warning to given JSON object using passed locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
      *
      * @param json The JSON object
      * @param warning The warning
      * @param locale The locale
      * @throws JSONException If writing JSON fails
+     * @see OXExceptionConstants#PROPERTY_LOCALE
      */
     public static void addWarning(final JSONObject json, final OXException warning, final Locale locale) throws JSONException {
         if (null == warning) {
             return;
         }
-        final JSONObject jsonWarning = new JSONObject();
+        final JSONObject jsonWarning = new JSONObject(8);
         addException(jsonWarning, warning.setCategory(Category.CATEGORY_WARNING), locale);
         json.put(WARNINGS, jsonWarning);
     }
 
     /**
-     * Writes specified warnings to given JSON object using default locale.
+     * Writes specified warnings to given JSON object using default locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
      *
      * @param json The JSON object
      * @param warnings The warnings
      * @throws JSONException If writing JSON fails
+     * @see OXExceptionConstants#PROPERTY_LOCALE
      */
     public static void addWarnings(final JSONObject json, final List<OXException> warnings) throws JSONException {
-        addWarnings(json, warnings, DEFAULT_LOCALE);
+        addWarnings(json, warnings, defaultLocale());
     }
 
     /**
-     * Writes specified warnings to given JSON object using passed locale.
+     * Writes specified warnings to given JSON object using passed locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
      *
      * @param json The JSON object
      * @param warnings The warnings
      * @param locale The locale
      * @throws JSONException If writing JSON fails
+     * @see OXExceptionConstants#PROPERTY_LOCALE
      */
     public static void addWarnings(final JSONObject json, final List<OXException> warnings, final Locale locale) throws JSONException {
         if (null == warnings || warnings.isEmpty()) {
             return;
         }
         if (1 == warnings.size()) {
-            final JSONObject jsonWarning = new JSONObject();
+            final JSONObject jsonWarning = new JSONObject(8);
             final OXException warning = warnings.get(0).setCategory(Category.CATEGORY_WARNING);
             addException(jsonWarning, warning, locale);
             json.put(WARNINGS, jsonWarning);
@@ -271,7 +301,7 @@ public final class ResponseWriter {
                 addException(json, warning, locale);
             }
         } else {
-            final JSONArray jsonArray = new JSONArray();
+            final JSONArray jsonArray = new JSONArray(warnings.size());
             for (final OXException warning : warnings) {
                 final JSONObject jsonWarning = new JSONObject();
                 addException(jsonWarning, warning.setCategory(Category.CATEGORY_WARNING), locale);
@@ -285,40 +315,53 @@ public final class ResponseWriter {
     }
 
     /**
-     * Writes specified exception to given JSON object using default locale.
+     * Writes specified exception to given JSON object using default locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
      *
      * @param json The JSON object
      * @param exception The exception to write
      * @throws JSONException If writing JSON fails
+     * @see OXExceptionConstants#PROPERTY_LOCALE
      */
     public static void addException(final JSONObject json, final OXException exception) throws JSONException {
-        addException(json, exception, DEFAULT_LOCALE);
+        addException(json, exception, defaultLocale());
     }
 
     /**
-     * Writes specified exception to given JSON object using passed locale.
+     * Writes specified exception to given JSON object using passed locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
      *
      * @param json The JSON object
      * @param errorKey The key value for the error value inside the JSON object
      * @param exception The exception to write
      * @param locale The locale
      * @throws JSONException If writing JSON fails
+     * @see OXExceptionConstants#PROPERTY_LOCALE
      */
     public static void addException(final JSONObject json, final OXException exception, final Locale locale) throws JSONException {
         addException(json, ERROR, exception, locale);
     }
 
     /**
-     * Writes specified exception to given JSON object using passed locale.
+     * Writes specified exception to given JSON object using passed locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
      *
      * @param json The JSON object
      * @param errorKey The key value for the error value inside the JSON object
      * @param exception The exception to write
      * @param locale The locale
      * @throws JSONException If writing JSON fails
+     * @see OXExceptionConstants#PROPERTY_LOCALE
      */
     public static void addException(final JSONObject json, String errorKey, final OXException exception, final Locale locale) throws JSONException {
-        json.put(errorKey, exception.getDisplayMessage(locale));
+        final Locale l;
+        {
+            final String property = exception.getProperty(OXExceptionConstants.PROPERTY_LOCALE);
+            if (null == property) {
+                l = LocaleTools.getSaneLocale(locale);
+            } else {
+                final Locale parsedLocale = LocaleTools.getLocale(property);
+                l = null == parsedLocale ? LocaleTools.getSaneLocale(locale) : parsedLocale;
+            }
+        }
+        json.put(errorKey, exception.getDisplayMessage(l));
         /*
          * Put argument JSON array for compatibility reasons
          */
@@ -329,9 +372,9 @@ public final class ResponseWriter {
             }
             // Enforce first condition; review later on
             if ((null == args) || (0 == args.length)) {
-                json.put(ERROR_PARAMS, new JSONArray());
+                json.put(ERROR_PARAMS, new JSONArray(0));
             } else {
-                final JSONArray jArray = new JSONArray();
+                final JSONArray jArray = new JSONArray(args.length);
                 for (final Object arg : args) {
                     jArray.put(arg);
                 }
@@ -346,7 +389,7 @@ public final class ResponseWriter {
             if (1 == categories.size()) {
                 json.put(ERROR_CATEGORIES, categories.get(0).toString());
             } else {
-                final JSONArray jArray = new JSONArray();
+                final JSONArray jArray = new JSONArray(categories.size());
                 for (final Category category : categories) {
                     jArray.put(category.toString());
                 }
@@ -368,9 +411,9 @@ public final class ResponseWriter {
         }
         if (includeStackTraceOnError()) {
             // Write exception
-            final JSONArray jsonStack = new JSONArray();
-            jsonStack.put(exception.getSoleMessage());
             StackTraceElement[] traceElements = exception.getStackTrace();
+            final JSONArray jsonStack = new JSONArray(traceElements.length << 1);
+            jsonStack.put(exception.getSoleMessage());
             Throwable cause = exception;
             final StringBuilder tmp = new StringBuilder(64);
             while (null != traceElements && traceElements.length > 0) {
@@ -398,21 +441,21 @@ public final class ResponseWriter {
             sb.append("(Native Method)");
         } else {
             final String fileName = element.getFileName();
-            if (null != fileName) {
+            if (null == fileName) {
+                sb.append("(Unknown Source)");
+            } else {
                 sb.append('(').append(fileName);
                 final int lineNumber = element.getLineNumber();
                 if (lineNumber >= 0) {
                     sb.append(':').append(lineNumber);
                 }
                 sb.append(')');
-            } else {
-                sb.append("(Unknown Source)");
             }
         }
     }
 
     private static void toJSON(final JSONObject json, final ProblematicAttribute[] problematics) throws JSONException {
-        final JSONArray array = new JSONArray();
+        final JSONArray array = new JSONArray(problematics.length);
         for (final ProblematicAttribute problematic : problematics) {
             array.put(toJSON(problematic));
         }
@@ -431,7 +474,7 @@ public final class ResponseWriter {
     }
 
     public static JSONObject toJSON(final Truncated truncated) throws JSONException {
-        final JSONObject json = new JSONObject();
+        final JSONObject json = new JSONObject(3);
         json.put(TruncatedFields.ID, truncated.getId());
         json.put(TruncatedFields.LENGTH, truncated.getLength());
         json.put(TruncatedFields.MAX_SIZE, truncated.getMaxSize());
@@ -439,7 +482,7 @@ public final class ResponseWriter {
     }
 
     public static JSONObject toJSON(final Parsing parsing) throws JSONException {
-        final JSONObject json = new JSONObject();
+        final JSONObject json = new JSONObject(1);
         json.put(ParsingFields.NAME, parsing.getAttribute());
         return json;
     }
@@ -448,7 +491,7 @@ public final class ResponseWriter {
      * This method adds the old truncated ids.
      */
     private static void addTruncated(final JSONObject json, final ProblematicAttribute[] problematics) throws JSONException {
-        final JSONArray array = new JSONArray();
+        final JSONArray array = new JSONArray(problematics.length);
         for (final ProblematicAttribute problematic : problematics) {
             if (Truncated.class.isAssignableFrom(problematic.getClass())) {
                 array.put(((Truncated) problematic).getId());
@@ -466,7 +509,7 @@ public final class ResponseWriter {
      */
     public static void write(final Response response, final JSONWriter writer, final Locale locale) throws JSONException {
         writer.object();
-        final JSONObject json = new JSONObject();
+        final JSONObject json = new JSONObject(8);
         write(response, json, locale);
         final Set<Map.Entry<String, Object>> entrySet = json.entrySet();
         final int len = entrySet.size();
@@ -487,7 +530,8 @@ public final class ResponseWriter {
      * @throws IOException If an I/O error occurs during writing
      */
     public static void write(final Response response, final Writer writer) throws JSONException, IOException {
-        write(response, writer, response.getLocale() == null ? DEFAULT_LOCALE : response.getLocale());
+        final Locale locale = response.getLocale();
+        write(response, writer, locale == null ? defaultLocale() : locale);
     }
 
     /**
@@ -500,10 +544,24 @@ public final class ResponseWriter {
      * @throws IOException If an I/O error occurs during writing
      */
     public static void write(final Response response, final Writer writer, final Locale locale) throws JSONException, IOException {
+        write(response, writer, locale, false);
+    }
+
+    /**
+     * Serializes a Response object to the writer.
+     *
+     * @param response Response object to serialize.
+     * @param writer the serialized object will be written to this writer.
+     * @param locale The locale
+     * @param asciiOnly <code>true</code> to only write ASCII characters; otherwise <code>false</code>
+     * @throws JSONException if writing fails.
+     * @throws IOException If an I/O error occurs during writing
+     */
+    public static void write(final Response response, final Writer writer, final Locale locale, final boolean asciiOnly) throws JSONException, IOException {
         final JSONObject json = new JSONObject();
         ResponseWriter.write(response, json, locale);
         try {
-            json.write(writer);
+            json.write(writer, asciiOnly);
         } catch (final JSONException e) {
             if (e.getCause() instanceof IOException) {
                 /*
@@ -527,7 +585,7 @@ public final class ResponseWriter {
      * @throws JSONException If writing JSON fails
      */
     public static void writeWarnings(final List<OXException> warnings, final JSONWriter writer) throws JSONException {
-        writeWarnings(warnings, writer, DEFAULT_LOCALE);
+        writeWarnings(warnings, writer, defaultLocale());
     }
 
     /**
@@ -547,14 +605,14 @@ public final class ResponseWriter {
             final OXException warning = warnings.get(0);
             writer.object();
             try {
-                writeException(warning.setCategory(Category.CATEGORY_WARNING), writer, locale);
+                writeException(warning/*.setCategory(Category.CATEGORY_WARNING)*/, writer, locale);
             } finally {
                 writer.endObject();
             }
             if (writer instanceof OXJSONWriter) {
                 final JSONValue jv = ((OXJSONWriter) writer).getObject();
                 if (jv.isObject()) {
-                    final JSONObject json = (JSONObject) jv;
+                    final JSONObject json = jv.toObject();
                     if (!json.hasAndNotNull(ERROR)) {
                         addException(json, warning, locale);
                     }
@@ -566,7 +624,7 @@ public final class ResponseWriter {
                 for (final OXException warning : warnings) {
                     writer.object();
                     try {
-                        writeException(warning.setCategory(Category.CATEGORY_WARNING), writer, locale);
+                        writeException(warning/*.setCategory(Category.CATEGORY_WARNING)*/, writer, locale);
                     } finally {
                         writer.endObject();
                     }
@@ -577,7 +635,7 @@ public final class ResponseWriter {
             if (!warnings.isEmpty() && (writer instanceof OXJSONWriter)) {
                 final JSONValue jv = ((OXJSONWriter) writer).getObject();
                 if (jv.isObject()) {
-                    final JSONObject json = (JSONObject) jv;
+                    final JSONObject json = jv.toObject();
                     if (!json.hasAndNotNull(ERROR)) {
                         addException(json, warnings.get(0), locale);
                     }
@@ -595,7 +653,7 @@ public final class ResponseWriter {
      * @throws JSONException - if writing fails
      */
     public static void writeException(final OXException exc, final JSONWriter writer) throws JSONException {
-        writeException(exc, writer, DEFAULT_LOCALE);
+        writeException(exc, writer, defaultLocale());
     }
 
     /**

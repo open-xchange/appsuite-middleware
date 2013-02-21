@@ -69,7 +69,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
-import com.openexchange.mail.utils.CharsetDetector;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -93,7 +93,7 @@ public final class MimeProcessingUtility {
 
     /**
      * Gets denoted folder's owner if it is shared.
-     * 
+     *
      * @param fullName The full name
      * @param accountId The account identifier
      * @param session The session

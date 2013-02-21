@@ -68,14 +68,14 @@ public class SimSession implements Session {
     private String password;
 
     public SimSession() {
-    	
+
     }
-    
+
     public SimSession(int user, int context) {
     	this.userId = user;
     	this.contextId = context;
     }
-    
+
     @Override
     public boolean containsParameter(final String name) {
         return parameters.containsKey(name);
@@ -133,7 +133,6 @@ public class SimSession implements Session {
         this.randomToken = randomToken;
     }
 
-    @Override
     public void removeRandomToken() {
         randomToken = null;
     }
@@ -220,6 +219,11 @@ public class SimSession implements Session {
     @Override
     public void setClient(final String client) {
         // Nothing to do
+    }
+
+    @Override
+    public boolean isTransient() {
+        return false;
     }
 
 }

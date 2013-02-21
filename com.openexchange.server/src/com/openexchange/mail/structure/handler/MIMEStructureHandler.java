@@ -85,6 +85,9 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.CharsetDetector;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -107,7 +110,6 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.structure.Base64JSONString;
 import com.openexchange.mail.structure.StructureHandler;
 import com.openexchange.mail.structure.StructureMailMessageParser;
-import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedPart;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -266,7 +268,7 @@ public final class MIMEStructureHandler implements StructureHandler {
             final JSONValue prev = currentBodyObject;
             final JSONArray jsonArray;
             if (prev.isArray()) {
-                jsonArray = (JSONArray) prev;
+                jsonArray = prev.toArray();
             } else {
                 jsonArray = new JSONArray();
                 jsonArray.put(prev);
@@ -337,7 +339,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     @Override
     public boolean handleSMIMEBodyData(final byte[] data) throws OXException {
         try {
-            currentMailObject.put("smime_body_data", new String(Base64.encodeBase64(data, false), com.openexchange.java.Charsets.US_ASCII));
+            currentMailObject.put("smime_body_data", Charsets.toAsciiString(Base64.encodeBase64(data, false)));
             return true;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -676,6 +678,9 @@ public final class MIMEStructureHandler implements StructureHandler {
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -703,6 +708,9 @@ public final class MIMEStructureHandler implements StructureHandler {
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -723,19 +731,16 @@ public final class MIMEStructureHandler implements StructureHandler {
                         }
                         bytes = out.toByteArray();
                     } catch (final IOException e) {
+                        if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                        }
                         throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                     } finally {
-                        if (null != inputStream) {
-                            try {
-                                inputStream.close();
-                            } catch (final IOException e) {
-                                LOG.error(e.getMessage(), e);
-                            }
-                        }
+                        Streams.close(inputStream);
                     }
                 }
                 // Add own JSONString implementation to support streaming
-                bodyObject.put(DATA, new String(Base64.encodeBase64(bytes, false), com.openexchange.java.Charsets.US_ASCII));
+                bodyObject.put(DATA, Charsets.toAsciiString(Base64.encodeBase64(bytes, false)));
             }
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -1017,14 +1022,14 @@ public final class MIMEStructureHandler implements StructureHandler {
         InputStream getInputStream() throws IOException;
     }
 
-    private static boolean isEmpty(final String s) {
-        if (null == s) {
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
             return true;
         }
-        final char[] chars = s.toCharArray();
+        final int len = string.length();
         boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < chars.length; i++) {
-            isWhitespace = Character.isWhitespace(chars[i]);
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

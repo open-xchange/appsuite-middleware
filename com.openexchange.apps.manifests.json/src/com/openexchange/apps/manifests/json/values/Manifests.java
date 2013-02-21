@@ -67,8 +67,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class Manifests implements ComputedServerConfigValueService {
 
-	private JSONArray manifests;
-	private ServiceLookup services;
+	private final JSONArray manifests;
+	private final ServiceLookup services;
 
 
 	public Manifests(ServiceLookup services, JSONArray manifests) {
@@ -80,7 +80,7 @@ public class Manifests implements ComputedServerConfigValueService {
 	@Override
 	public void addValue(JSONObject serverConfig, AJAXRequestData request,
 			ServerSession session) throws OXException, JSONException {
-		
+
 		serverConfig.put("manifests", AllAction.getManifests(session, manifests, services));
 
 	}

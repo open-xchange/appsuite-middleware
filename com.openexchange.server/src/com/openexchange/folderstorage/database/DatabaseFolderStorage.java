@@ -822,7 +822,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         /*
                          * A virtual database folder
                          */
-                        retval = VirtualListFolder.getVirtualListFolder(folderId);
+                        final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
+                        retval = VirtualListFolder.getVirtualListFolder(folderId, altNames);
                     } else {
                         /*
                          * A non-virtual database folder
@@ -868,7 +869,14 @@ public final class DatabaseFolderStorage implements FolderStorage {
          * Check shared...
          */
         if (owner != storageParameters.getUserId() && PrivateType.getInstance().equals(folder.getType())) {
-            return getFolder(treeId, folder.getID(), StorageType.WORKING, storageParameters);
+            try {
+                return getFolder(treeId, folder.getID(), StorageType.WORKING, storageParameters);
+            } catch (final OXException e) {
+                if (OXFolderExceptionCode.NOT_EXISTS.equals(e) || FolderExceptionErrorMessage.NOT_FOUND.equals(e)) {
+                    return getFolder(treeId, folder.getID(), StorageType.BACKUP, storageParameters);
+                }
+                throw e;
+            }
         }
         return folder;
     }
@@ -880,9 +888,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public List<Folder> getFolders(final String treeId, final List<String> folderIdentifiers, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(false, storageParameters);
+        ConnectionProvider provider = null;
         try {
-            final Connection con = provider.getConnection();
             final User user = storageParameters.getUser();
             final Context ctx = storageParameters.getContext();
             final UserConfiguration userConfiguration;
@@ -894,6 +901,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
                 }
             }
+            final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
             /*
              * Either from working or from backup storage type
              */
@@ -916,7 +924,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
                             ret[index] = SystemRootFolder.getSystemRootFolder();
                         } else if (Arrays.binarySearch(VIRTUAL_IDS, folderId) >= 0) {
-                            ret[index] = VirtualListFolder.getVirtualListFolder(folderId);
+                            ret[index] = VirtualListFolder.getVirtualListFolder(folderId, altNames);
                         } else {
                             map.put(folderId, index);
                         }
@@ -925,9 +933,10 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 /*
                  * Batch load
                  */
+                provider = getConnection(false, storageParameters);
+                final Connection con = provider.getConnection();
                 if (!map.isEmpty()) {
                     final Session session = storageParameters.getSession();
-                    final boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
                     for (final FolderObject folderObject : getFolderObjects(map.keys(), ctx, con)) {
                         if (null != folderObject) {
                             final int index = map.get(folderObject.getObjectID());
@@ -935,6 +944,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         }
                     }
                 }
+                provider.close();
+                provider = null;
                 /*
                  * Set proper tree identifier
                  */
@@ -967,6 +978,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
             for (final String folderIdentifier : folderIdentifiers) {
                 list.add(getUnsignedInteger(folderIdentifier));
             }
+            provider = getConnection(false, storageParameters);
+            final Connection con = provider.getConnection();
             final List<FolderObject> folders =
                 OXFolderBatchLoader.loadFolderObjectsFromDB(
                     list.toArray(),
@@ -976,6 +989,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     false,
                     "del_oxfolder_tree",
                     "del_oxfolder_permissions");
+            provider.close();
+            provider = null;
             final int size = folders.size();
             final List<Folder> ret = new ArrayList<Folder>(size);
             for (int i = 0; i < size; i++) {
@@ -992,7 +1007,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
         } catch (final OXException e) {
             throw e;
         } finally {
-            provider.close();
+            if (null != provider) {
+                provider.close();
+            }
         }
     }
 
@@ -1791,12 +1808,12 @@ public final class DatabaseFolderStorage implements FolderStorage {
     }
 
     private static ConnectionProvider getConnection(final boolean modify, final StorageParameters storageParameters) throws OXException {
-        final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
-        final Context context = storageParameters.getContext();
         ConnectionMode connection = optParameter(ConnectionMode.class, PARAM_CONNECTION, storageParameters);
         if (null != connection) {
             return new NonClosingConnectionProvider(connection/*, databaseService, context.getContextId()*/);
         }
+        final Context context = storageParameters.getContext();
+        final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
         connection = modify ? new ConnectionMode(databaseService.getWritable(context), true) : new ConnectionMode(databaseService.getReadOnly(context), false);
         return new ClosingConnectionProvider(connection, databaseService, context.getContextId());
     }

@@ -49,26 +49,24 @@
 
 package com.openexchange.oauth.yahoo.internal;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import org.scribe.builder.api.Api;
+import org.scribe.builder.api.YahooApi;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
-
-
 
 /**
  * {@link OAuthServiceMetaDataYahooImpl}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OAuthServiceMetaDataYahooImpl extends AbstractOAuthServiceMetaData{
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OAuthServiceMetaDataYahooImpl.class));
+public class OAuthServiceMetaDataYahooImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
 
     private final DeferringURLService deferrer;
 
     public OAuthServiceMetaDataYahooImpl(String apiKey, String apiSecret, DeferringURLService deferrer) {
+        super();
         setId("com.openexchange.oauth.yahoo");
         setApiKey(apiKey);
         setApiSecret(apiSecret);
@@ -84,8 +82,13 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractOAuthServiceMetaData{
         return deferrer.getDeferredURL(callbackUrl);
     }
 
-	@Override
-	public API getAPI() {
-		return API.YAHOO;
-	}
+    @Override
+    public API getAPI() {
+        return API.YAHOO;
+    }
+
+    @Override
+    public Class<? extends Api> getScribeService() {
+        return YahooApi.class;
+    }
 }

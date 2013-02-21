@@ -290,13 +290,15 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                     final char c = (char) read;
                     reader.unread(c);
                     if ('[' == c || '{' == c) {
-                        retval.setData(JSONObject.parse(reader));
+                        try {
+                            retval.setData(JSONObject.parse(reader));
+                        } catch (final JSONException e) {
+                            retval.setData(AJAXServlet.readFrom(reader));
+                        }
                     } else {
                         retval.setData(AJAXServlet.readFrom(reader));
                     }
                 }
-            } catch (final JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             } finally {
                 Streams.close(reader);
             }

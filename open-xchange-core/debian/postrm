@@ -77,12 +77,17 @@ for FILE in ${COMMONCONFFILES}; do
         /opt/open-xchange/etc/${FILE} 6.20.99 open-xchange -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange)
 done
 
-GWCONFFILES="attachment.properties cache.ccf calendar.properties configdb.properties contact.properties event.properties file-logging.properties HTMLEntities.properties importerExporter.xml import.properties infostore.properties javamail.properties ldap.properties login.properties mailcache.ccf mail.properties mime.types noipcheck.cnf notification.properties ox-scriptconf.sh participant.properties passwordchange.properties server.properties sessioncache.ccf sessiond.properties smtp.properties system.properties user.properties whitelist.properties folder-reserved-names"
+GWCONFFILES="attachment.properties cache.ccf calendar.properties configdb.properties contact.properties event.properties file-logging.properties HTMLEntities.properties importerExporter.xml import.properties infostore.properties javamail.properties ldap.properties login.properties mailcache.ccf mail.properties mime.types noipcheck.cnf notification.properties ox-scriptconf.sh participant.properties passwordchange.properties server.properties sessiond.properties smtp.properties system.properties user.properties whitelist.properties folder-reserved-names"
 
 for FILE in ${GWCONFFILES}; do
     dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/${FILE} \
         /opt/open-xchange/etc/${FILE} 6.20.99 open-xchange -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange)
 done
+
+# SoftwareChange_Request-1297
+if [ -e /opt/open-xchange/etc/sessioncache.ccf ]; then
+    dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/sessioncache.ccf -- "$@"
+fi
 
 # SoftwareChange_Request-1094
 dpkg-maintscript-helper rm_conffile \

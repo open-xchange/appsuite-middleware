@@ -56,6 +56,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import com.openexchange.java.Charsets;
 import com.openexchange.push.udp.PushRequest;
 
 /**
@@ -128,7 +129,7 @@ public class PeerServerListener {
             }
             b.setLength(b.length()-1);
             final StringBuilder b2 = new StringBuilder().append(PushRequest.MAGIC).append('\1').append(b.length()).append('\1').append(b);
-            data = b2.toString().getBytes(com.openexchange.java.Charsets.US_ASCII);
+            data = Charsets.toAsciiBytes(b2);
             final DatagramPacket datagramPackage = new DatagramPacket(data, data.length, remoteAddress, remotePort);
             mySocket.send(datagramPackage);
         } catch (final UnsupportedEncodingException e) {

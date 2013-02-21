@@ -60,7 +60,7 @@ import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link ProcessingProgress} - The status of an in-progress folder.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ProcessingProgress {
@@ -102,7 +102,7 @@ public final class ProcessingProgress {
 
     /**
      * Sets the future
-     * 
+     *
      * @param future The future to set
      * @return This progress with argument applied
      */
@@ -113,7 +113,7 @@ public final class ProcessingProgress {
 
     /**
      * Sets the first-time flag
-     * 
+     *
      * @param firstTime The first-time flag to set
      * @return This progress with argument applied
      */
@@ -124,7 +124,7 @@ public final class ProcessingProgress {
 
     /**
      * Sets the high-attention flag
-     * 
+     *
      * @param hasHighAttention The high-attention flag to set
      * @return This progress with argument applied
      */
@@ -138,7 +138,7 @@ public final class ProcessingProgress {
      * <p>
      * <b><small>NOTE</small></b>: When process type is set, this progress may be returned to caller. Therefore a count-down of associated
      * latch is performed to release waiting caller's thread.
-     * 
+     *
      * @param processType The process type to set
      * @return This progress with argument applied
      */
@@ -151,7 +151,7 @@ public final class ProcessingProgress {
 
     /**
      * Awaits completion of associated processor's run.
-     * 
+     *
      * @throws OXException If processor run failed
      * @throws InterruptedException If waiting is aborted
      */
@@ -188,7 +188,7 @@ public final class ProcessingProgress {
 
     /**
      * Checks if associated processing task is already completed.
-     * 
+     *
      * @return <code>true</code> if done; otherwise <code>false</code>
      */
     public boolean isDone() throws OXException, InterruptedException {
@@ -214,7 +214,7 @@ public final class ProcessingProgress {
 
     /**
      * Checks if specified fields are covered by this processing result.
-     * 
+     *
      * @param fields The fields to check against
      * @return <code>true</code> if specified fields are covered by this processing result; otherwise <code>false</code>
      */
@@ -231,7 +231,7 @@ public final class ProcessingProgress {
 
     /**
      * Checks if this processing result was yielded from submitting a job.
-     * 
+     *
      * @return <code>true</code> if associated with a job; otherwise <code>false</code> if immediate processing was performed
      */
     public boolean asJob() {
@@ -240,7 +240,7 @@ public final class ProcessingProgress {
 
     /**
      * Checks whether processing took place the first time for associated folder.
-     * 
+     *
      * @return <code>true</code> for first time processing; otherwise <code>false</code>
      */
     public boolean isFirstTime() {
@@ -249,7 +249,7 @@ public final class ProcessingProgress {
 
     /**
      * Checks whether processed folder has high attention.
-     * 
+     *
      * @return <code>true</code> if processed folder has high attention; otherwise <code>false</code>
      */
     public boolean isHasHighAttention() {
@@ -258,7 +258,7 @@ public final class ProcessingProgress {
 
     /**
      * Gets the process type
-     * 
+     *
      * @return The process type
      */
     public ProcessType getProcessType() {

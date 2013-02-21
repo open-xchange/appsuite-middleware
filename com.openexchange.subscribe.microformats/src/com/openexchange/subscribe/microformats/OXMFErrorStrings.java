@@ -78,4 +78,7 @@ public class OXMFErrorStrings implements LocalizableStrings{
     public static final String ERROR_LOADING_SUBSCRIPTION = "Could not fetch site at %1$s. Please check the spelling or whether you can reach the site in your browser.";
     public static final String ERROR_LOADING_SUBSCRIPTION_HELP = "Try again later.";
 
+    // The string cannot be parsed to a valid URL.
+    public static final String INVALID_URL = "The string cannot be parsed to a valid URL.";
+
 }

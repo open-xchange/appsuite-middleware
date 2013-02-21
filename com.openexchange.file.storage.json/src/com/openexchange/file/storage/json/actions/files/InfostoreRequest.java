@@ -79,7 +79,7 @@ public interface InfostoreRequest {
 
     String getId() throws OXException;
 
-    int getVersion() throws OXException;
+    String getVersion() throws OXException;
 
     String getFolderId() throws OXException;
 
@@ -101,7 +101,7 @@ public interface InfostoreRequest {
 
     String getFolderForID(String id) throws OXException;
 
-    int[] getVersions() throws OXException;
+    String[] getVersions() throws OXException;
 
     long getDiff() throws OXException;
 

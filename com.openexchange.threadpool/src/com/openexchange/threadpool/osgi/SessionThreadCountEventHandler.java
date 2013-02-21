@@ -74,7 +74,7 @@ public final class SessionThreadCountEventHandler extends ServiceTracker<Session
     private final SessionThreadCounterImpl counterImpl;
 
     private final int threshold;
-    
+
     /**
      * Initializes a new {@link SessionThreadCountEventHandler}.
      */
@@ -117,10 +117,11 @@ public final class SessionThreadCountEventHandler extends ServiceTracker<Session
             sb.append("<missing stack trace>\n");
             return;
         }
+        final String lineSeparator = System.getProperty("line.separator");
         for (final StackTraceElement ste : trace) {
             final String className = ste.getClassName();
             if (null != className) {
-                sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                sb.append("    at ").append(className).append('.').append(ste.getMethodName());
                 if (ste.isNativeMethod()) {
                     sb.append("(Native Method)");
                 } else {
@@ -136,7 +137,7 @@ public final class SessionThreadCountEventHandler extends ServiceTracker<Session
                         sb.append(')');
                     }
                 }
-                sb.append('\n');
+                sb.append(lineSeparator);
             }
         }
     }

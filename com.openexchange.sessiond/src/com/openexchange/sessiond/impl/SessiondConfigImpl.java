@@ -51,9 +51,9 @@ package com.openexchange.sessiond.impl;
 
 import static com.openexchange.sessiond.SessiondProperty.SESSIOND_AUTOLOGIN;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.log.LogFactory;
 
 /**
  * SessionConfig
@@ -74,6 +74,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     private long randomTokenTimeout = 60L * 1000L;
     private long longLifeTime = 7L * 24L * 60L * 60L * 1000L;
     private boolean autoLogin = false;
+    private String obfuscationKey = "auw948cz,spdfgibcsp9e8ri+<#qawcghgifzign7c6gnrns9oysoeivn";
 
     public SessiondConfigImpl(final ConfigurationService conf) {
         maxSession = conf.getIntProperty("com.openexchange.sessiond.maxSession", maxSession);
@@ -118,6 +119,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
 
         tmp = conf.getProperty(SESSIOND_AUTOLOGIN.getPropertyName(), SESSIOND_AUTOLOGIN.getDefaultValue());
         autoLogin = Boolean.parseBoolean(tmp);
+        obfuscationKey = conf.getProperty("com.openexchange.sessiond.encryptionKey", obfuscationKey);
     }
 
     @Override
@@ -175,4 +177,10 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     public long getLongTermSessionContainerTimeout() {
         return LONG_CONTAINER_LIFE_TIME;
     }
+
+    @Override
+    public String getObfuscationKey() {
+        return obfuscationKey;
+    }
+
 }

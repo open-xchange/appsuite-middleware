@@ -52,18 +52,18 @@ package com.openexchange.report.client.transport;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 
-public class ProxyAuthenticator extends Authenticator { 
+public class ProxyAuthenticator extends Authenticator {
     private final String proxyUsername;
     private final String proxyPassword;
-    
-    public ProxyAuthenticator(String proxyUsername, String proxyPassword) { 
-        this.proxyUsername = proxyUsername; 
-        this.proxyPassword = proxyPassword; 
-    } 
-    
-    @Override
-    protected PasswordAuthentication getPasswordAuthentication() { 
-        return new PasswordAuthentication(proxyUsername, proxyPassword.toCharArray()); 
-    } 
 
-} 
+    public ProxyAuthenticator(String proxyUsername, String proxyPassword) {
+        this.proxyUsername = proxyUsername;
+        this.proxyPassword = proxyPassword;
+    }
+
+    @Override
+    protected PasswordAuthentication getPasswordAuthentication() {
+        return new PasswordAuthentication(proxyUsername, proxyPassword.toCharArray());
+    }
+
+}

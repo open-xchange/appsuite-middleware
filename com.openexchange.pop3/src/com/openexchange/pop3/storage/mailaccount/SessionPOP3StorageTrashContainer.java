@@ -135,11 +135,13 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
     }
 
     private void init() throws OXException {
-        final Set<String> tmp = delegatee.getUIDLs();
-        for (final String uidl : tmp) {
-            set.put(uidl, PRESENT);
+        if (1 == mode[0]) {
+            final Set<String> tmp = delegatee.getUIDLs();
+            for (final String uidl : tmp) {
+                set.put(uidl, PRESENT);
+            }
+            mode[0] = 0;
         }
-        mode[0] = 0;
     }
 
     private void checkInit(final Lock obtainedReadLock) throws OXException {

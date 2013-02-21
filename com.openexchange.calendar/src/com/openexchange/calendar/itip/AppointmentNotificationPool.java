@@ -81,28 +81,30 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link AppointmentNotificationPool}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class AppointmentNotificationPool implements
 		AppointmentNotificationPoolService, Runnable {
 	private static final Log LOG = com.openexchange.log.Log.loggerFor(AppointmentNotificationPool.class);
-	
+
 	// TODO: Keep shared folder owner, if possible
-	
+
 	private static final int MINUTES = 60000;
-	
+
 	private int detailChangeInterval = 2 *MINUTES;
 	private int stateChangeInterval = 10 *MINUTES;
 	private int priorityInterval = 15 *MINUTES;
-	
+
 	private final NotificationMailGeneratorFactory generatorFactory;
 	private final MailSenderService notificationMailer;
-	
+
 	private final ReentrantLock lock = new ReentrantLock();
-	
+
 	private final Map<Integer, Map<Integer, QueueItem>> items = new HashMap<Integer, Map<Integer, QueueItem>>();
-	
+
+	private final Map<Integer, Map<NotificationParticipant, List<Appointment>>> sent = new HashMap<Integer, Map<NotificationParticipant, List<Appointment>>>();
+
 	public AppointmentNotificationPool(TimerService timer,
 			NotificationMailGeneratorFactory generatorFactory,
 			MailSenderService notificationMailer, int detailChangeInterval, int stateChangeInterval, int priorityInterval) {
@@ -112,15 +114,15 @@ public class AppointmentNotificationPool implements
 		this.detailChangeInterval = detailChangeInterval;
 		this.stateChangeInterval = stateChangeInterval;
 		this.priorityInterval = priorityInterval;
-		
+
 		timer.scheduleAtFixedRate(this, 1000, Math.min(stateChangeInterval, Math.min(detailChangeInterval, priorityInterval))/2);
 	}
-	
+
 	@Override
     public void run() {
 		try {
 			lock.lock();
-			
+
 			for(QueueItem item: allItems()) {
 				tick(item.getContextId(), item.getAppointmentId(), false);
 			}
@@ -137,15 +139,15 @@ public class AppointmentNotificationPool implements
 		if (original == null) {
 			throw new NullPointerException("Please specify an original appointment, a new appointment and a session");
 		}
-		
+
 		if (newAppointment == null) {
 			throw new NullPointerException("Please specify an original appointment, a new appointment and a session");
 		}
-		
+
 		if (session == null) {
 			throw new NullPointerException("Please specify an original appointment, a new appointment and a session");
 		}
-		
+
 		try {
 			lock.lock();
 			item(session.getContextId(), original.getObjectID()).remember(original, newAppointment, session, sharedFolderOwner);
@@ -166,6 +168,65 @@ public class AppointmentNotificationPool implements
 		}
 	}
 
+    @Override
+    public void aware(Appointment appointment, NotificationParticipant recipient, Session session) {
+        Map<NotificationParticipant, List<Appointment>> participants = sent.get(session.getContextId());
+        if (participants == null) {
+            participants = new HashMap<NotificationParticipant, List<Appointment>>();
+            sent.put(session.getContextId(), participants);
+        }
+
+        List<Appointment> appointments = participants.get(recipient);
+        if (appointments == null) {
+            appointments = new ArrayList<Appointment>();
+            participants.put(recipient, appointments);
+        }
+
+        appointments.remove(appointment); // Stops working, if equals() depends on more than the objectId
+        appointments.add(appointment);
+    }
+
+    /**
+     * Searches for an Appointment about a recipient was already informed. Removes this appointments from memory.
+     *
+     * @param participant
+     * @param appointment
+     * @param contextId
+     * @return The appointment, null if not found.
+     */
+    private Appointment removeFromSent(NotificationParticipant participant, Appointment appointment, int contextId) {
+        Map<NotificationParticipant, List<Appointment>> participants = sent.get(contextId);
+        if (participants == null) {
+            return null;
+        }
+
+        List<Appointment> appointments = participants.get(participant);
+        if (appointments == null) {
+            return null;
+        }
+
+        Appointment retval = null;
+        for (Appointment app : appointments) {
+            if (app.getObjectID() == appointment.getObjectID()) {
+                retval = app;
+            }
+        }
+        appointments.remove(retval);
+
+        if (appointments.isEmpty()) {
+            participants.remove(participant);
+        }
+        if (participants.isEmpty()) {
+            sent.remove(contextId);
+        }
+
+        return retval;
+    }
+
+    private void clearSentItems(int contextId) {
+        sent.remove(contextId);
+    }
+
 	private void tick(int contextId, int objectID, boolean force) {
 		try {
 			HandlingSuggestion handlingSuggestion = item(contextId, objectID).tick(force);
@@ -183,7 +244,7 @@ public class AppointmentNotificationPool implements
 			throws OXException {
 		drop(session.getContextId(), appointment.getObjectID());
 	}
-	
+
 	private Collection<QueueItem> allItems() {
 		List<QueueItem> allItems = new LinkedList<QueueItem>();
 		for(Map<Integer, QueueItem> contextMaps: items.values()) {
@@ -191,7 +252,7 @@ public class AppointmentNotificationPool implements
 		}
 		return allItems;
 	}
-	
+
 	private QueueItem item(int contextId, int objectID) {
 		Map<Integer, QueueItem> contextMap = items.get(contextId);
 		if (contextMap == null) {
@@ -212,11 +273,13 @@ public class AppointmentNotificationPool implements
 	private void drop(int contextId, int objectID) {
 		Map<Integer, QueueItem> contextMap = items.get(contextId);
 		if (contextMap == null) {
+		    clearSentItems(contextId);
 			return;
 		}
 		contextMap.remove(objectID);
 		if (contextMap.isEmpty()) {
 			items.remove(contextId);
+            clearSentItems(contextId);
 		}
 	}
 
@@ -227,7 +290,7 @@ public class AppointmentNotificationPool implements
 		private final long timestamp;
 		private AppointmentDiff diff;
 		private int sharedFolderOwner = -1;
-		
+
 		public Update(Appointment oldAppointment, Appointment newAppointment, Session session, int sharedFolderOwner) {
 			this.oldAppointment = oldAppointment;
 			this.newAppointment = newAppointment;
@@ -239,23 +302,23 @@ public class AppointmentNotificationPool implements
 		public Session getSession() {
 			return session;
 		}
-		
+
 		public long getTimestamp() {
 			return timestamp;
 		}
-		
+
 		public Appointment getOldAppointment() {
 			return oldAppointment;
 		}
-		
+
 		public Appointment getNewAppointment() {
 			return newAppointment;
 		}
-		
+
 		public int getSharedFolderOwner() {
 			return sharedFolderOwner;
 		}
-		
+
 		public AppointmentDiff getDiff() {
 			if (diff == null) {
 				diff = AppointmentDiff.compare(oldAppointment, newAppointment, NotificationMailGenerator.DEFAULT_SKIP);
@@ -267,20 +330,20 @@ public class AppointmentNotificationPool implements
 			return new PartitionIndex(session.getUserId(), sharedFolderOwner);
 		}
 	}
-	
+
 	private static enum HandlingSuggestion {
 		KEEP, DONE
 	}
-	
+
 	private final class QueueItem {
 		private Appointment original;
 		private Appointment mostRecent;
 		private long newestTime;
 		private long lastKnownStartDateForNextOccurrence;
 		private Session session;
-		
+
 		private final LinkedList<Update> updates = new LinkedList<Update>();
-	
+
 		public void remember(Appointment original, Appointment newAppointment, Session session, int sharedFolderOwner) {
 			if (this.original == null) {
 				this.original = original;
@@ -310,15 +373,15 @@ public class AppointmentNotificationPool implements
 				copyParticipantStates(newAppointment, this.original);
 			}
 		}
-		
-		
+
+
 		public HandlingSuggestion tick(boolean force) throws OXException {
 			if (original == null) {
 				return HandlingSuggestion.DONE;
 			}
 			// Diff most recent and original version
 			AppointmentDiff overallDiff = AppointmentDiff.compare(original, mostRecent, NotificationMailGenerator.DEFAULT_SKIP);
-			
+
 			if (overallDiff.isAboutStateChangesOnly()) {
 				if (!force && getInterval() < stateChangeInterval && getIntervalToStartDate() > priorityInterval) {
 					return HandlingSuggestion.KEEP;
@@ -349,9 +412,12 @@ public class AppointmentNotificationPool implements
 			if (moreThanOneUserActed()) {
 				generator.noActor();
 			}
-			List<NotificationParticipant> recipients = generator
-					.getRecipients();
+			List<NotificationParticipant> recipients = generator.getRecipients();
 			for (NotificationParticipant participant : recipients) {
+                if (isAlreadyInformed(participant, mostRecent, session.getContextId())) {
+                    continue; // Skip this participant. He was already informed about the exact same Appointment.
+                }
+
 				NotificationMail mail = generator.generateUpdateMailFor(participant);
 				if (mail != null) {
 					notificationMailer.sendMail(mail, session);
@@ -368,12 +434,25 @@ public class AppointmentNotificationPool implements
             List<NotificationParticipant> recipients = generator.getRecipients();
             for (NotificationParticipant participant : recipients) {
                 if (!(participant.isExternal() || participant.isResource())) {
+                    if (isAlreadyInformed(participant, mostRecent, session.getContextId())) {
+                        continue; // Skip this participant. He was already informed about the exact same Appointment.
+                    }
+
                     NotificationMail mail = generator.generateUpdateMailFor(participant);
                     if (mail != null) {
                         notificationMailer.sendMail(mail, session);
                     }
                 }
             }
+        }
+
+        private boolean isAlreadyInformed(NotificationParticipant participant, Appointment mostRecent, int contextId) {
+            Appointment alreadySent = removeFromSent(participant, mostRecent, contextId);
+            if (alreadySent != null) {
+                AppointmentDiff diff = AppointmentDiff.compare(alreadySent, mostRecent);
+                return diff.getDifferingFieldNames().isEmpty();
+            }
+            return false;
         }
 
 
@@ -414,7 +493,7 @@ public class AppointmentNotificationPool implements
 					return (int) (o1[1].getTimestamp() - o2[1].getTimestamp());
 				}
 			});
-			
+
 			for (Update[] userScopedUpdate : userScopedUpdates) {
 				Session session = userScopedUpdate[1].getSession();
 				Appointment oldAppointment = userScopedUpdate[0].getOldAppointment();
@@ -434,7 +513,7 @@ public class AppointmentNotificationPool implements
 				}
 			}
 		}
-		
+
 		private void copyParticipantStates(Appointment src, Appointment dest) {
 			Map<String, Participant> oldStates = new HashMap<String, Participant>();
 			if (src.getUsers() != null) {
@@ -442,14 +521,14 @@ public class AppointmentNotificationPool implements
 					oldStates.put(String.valueOf(up.getIdentifier()), up);
 				}
 			}
-			
+
 			if (src.getConfirmations() != null) {
 				for (ConfirmableParticipant cp: src.getConfirmations()) {
 					oldStates.put(cp.getEmailAddress(), cp);
 				}
 			}
-			
-			
+
+
 			if (dest.getParticipants() != null) {
 				List<Participant> newParticipants = new ArrayList<Participant>(dest.getParticipants().length);
 				for(Participant p: dest.getParticipants()) {
@@ -474,14 +553,14 @@ public class AppointmentNotificationPool implements
 					} else {
 						newParticipants.add(p);
 					}
-					
+
 				}
 				dest.setParticipants(newParticipants);
 			}
-			
+
 			if (dest.getUsers() != null) {
 				List<UserParticipant> newUsers = new ArrayList<UserParticipant>(dest.getUsers().length);
-				
+
 				for (UserParticipant up: dest.getUsers()) {
 					up = new UserParticipant(up.getIdentifier());
 					UserParticipant oup = (UserParticipant) oldStates.get(String.valueOf(up.getIdentifier()));
@@ -491,13 +570,13 @@ public class AppointmentNotificationPool implements
 					}
 					newUsers.add(up);
 				}
-				
+
 				dest.setUsers(newUsers);
 			}
-			
+
 			if (dest.getConfirmations() != null) {
 				List<ConfirmableParticipant> newConfirmations = new ArrayList<ConfirmableParticipant>(dest.getConfirmations().length);
-				
+
 				for (ConfirmableParticipant cp: dest.getConfirmations()) {
 					cp = new ExternalUserParticipant(cp.getEmailAddress());
 					ConfirmableParticipant ocp = (ConfirmableParticipant) oldStates.get(String.valueOf(cp.getEmailAddress()));
@@ -505,10 +584,10 @@ public class AppointmentNotificationPool implements
 						cp.setStatus(ocp.getStatus());
 						cp.setMessage(ocp.getMessage());
 					}
-					
+
 					newConfirmations.add(cp);
 				}
-				
+
 				dest.setConfirmations(newConfirmations);
 			}
 		}
@@ -519,10 +598,10 @@ public class AppointmentNotificationPool implements
 			// And set the participant states to the values in the old appointment
 			// Then finally construct a mail to all internal participants
 			Appointment facsimile = mostRecent.clone();
-			
+
 			copyParticipantStates(original, facsimile);
-			
-			
+
+
 			ITipMailGenerator generator = generatorFactory.create(facsimile, mostRecent,
 					session, -1);
 			generator.noActor();
@@ -568,16 +647,16 @@ public class AppointmentNotificationPool implements
 		private int getInterval() {
 			return (int) (System.currentTimeMillis() - newestTime);
 		}
-		
+
 		public int getContextId() {
 			return session.getContextId();
 		}
-		
+
 		public int getAppointmentId() {
 			return original.getObjectID();
 		}
 	}
-	
+
 	private static final class PartitionIndex {
 		public int uid,sharedFolderOwner;
 
@@ -617,8 +696,8 @@ public class AppointmentNotificationPool implements
 			return true;
 		}
 
-		
-		
+
+
 	}
 
 }

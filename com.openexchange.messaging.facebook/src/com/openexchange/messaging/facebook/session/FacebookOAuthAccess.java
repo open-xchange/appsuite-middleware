@@ -49,12 +49,15 @@
 
 package com.openexchange.messaging.facebook.session;
 
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.FacebookApi;
 import org.scribe.model.OAuthRequest;
@@ -62,12 +65,15 @@ import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.facebook.FacebookConfiguration;
 import com.openexchange.messaging.facebook.FacebookConstants;
 import com.openexchange.messaging.facebook.FacebookMessagingExceptionCodes;
 import com.openexchange.messaging.facebook.FacebookMessagingResource;
 import com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry;
+import com.openexchange.messaging.facebook.utility.FacebookMessagingUtility;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
@@ -84,12 +90,12 @@ public final class FacebookOAuthAccess {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(FacebookOAuthAccess.class);
 
     /**
-     * Gets the facebook OAuth access for given facebook messaging account.
+     * Gets the Facebook OAuth access for given Facebook messaging account.
      *
-     * @param messagingAccount The facebook messaging account providing credentials and settings
+     * @param messagingAccount The Facebook messaging account providing credentials and settings
      * @param session The user session
-     * @return The facebook OAuth access; either newly created or fetched from underlying registry
-     * @throws OXException If a Facebook session could not be created
+     * @return The Facebook OAuth access; either newly created or fetched from underlying registry
+     * @throws OXException If a Facebook OAuth access could not be created
      */
     public static FacebookOAuthAccess accessFor(final MessagingAccount messagingAccount, final Session session) throws OXException {
         final FacebookOAuthAccessRegistry registry = FacebookOAuthAccessRegistry.getInstance();
@@ -106,7 +112,7 @@ public final class FacebookOAuthAccess {
     }
 
     /**
-     * The facebook OAuth service.
+     * The Facebook OAuth service.
      */
     private final org.scribe.oauth.OAuthService facebookOAuthService;
 
@@ -116,12 +122,12 @@ public final class FacebookOAuthAccess {
     private final OAuthAccount oauthAccount;
 
     /**
-     * The facebook user identifier.
+     * The Facebook user identifier.
      */
     private final String facebookUserId;
 
     /**
-     * The facebook user's full name
+     * The Facebook user's full name
      */
     private final String facebookUserName;
 
@@ -131,14 +137,9 @@ public final class FacebookOAuthAccess {
     private final Token facebookAccessToken;
 
     /**
-     * The last-accessed time stamp.
-     */
-    private volatile long lastAccessed;
-
-    /**
      * Initializes a new {@link FacebookMessagingResource}.
      *
-     * @param messagingAccount The facebook messaging account providing credentials and settings
+     * @param messagingAccount The Facebook messaging account providing credentials and settings
      * @throws OXException
      */
     private FacebookOAuthAccess(final MessagingAccount messagingAccount, final Session session, final int user, final int contextId) throws OXException {
@@ -176,12 +177,10 @@ public final class FacebookOAuthAccess {
             final OAuthRequest request = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
             facebookOAuthService.signRequest(facebookAccessToken, request);
             final Response response = request.send();
-            final JSONObject object = new JSONObject(response.getBody());
+            final JSONObject object = FacebookMessagingUtility.extractJson(response);
             checkForErrors(object);
             facebookUserId = object.getString("id");
             facebookUserName = object.getString("name");
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final org.scribe.exceptions.OAuthException e) {
             throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
@@ -208,22 +207,12 @@ public final class FacebookOAuthAccess {
         if (object.has("error")) {
             final JSONObject error = object.getJSONObject("error");
             if ("OAuthException".equals(error.opt("type"))) {
-                final OXException e = new OXException(OAuthExceptionCodes.TOKEN_EXPIRED.create(oauthAccount.getDisplayName()));
+                final OXException e = OAuthExceptionCodes.TOKEN_EXPIRED.create(oauthAccount.getDisplayName());
                 LOG.error(e.getErrorCode() + " exceptionId=" + e.getExceptionId() + " JSON error object:\n" + error.toString(2));
                 throw e;
-            } else {
-                throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(object.getString("message"));
             }
+            throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(object.getString("message"));
         }
-    }
-
-    /**
-     * Gets the last-accessed time stamp.
-     *
-     * @return The last-accessed time stamp
-     */
-    public long getLastAccessed() {
-        return lastAccessed;
     }
 
     @Override
@@ -242,18 +231,18 @@ public final class FacebookOAuthAccess {
     }
 
     /**
-     * Gets the facebook user identifier.
+     * Gets the Facebook user identifier.
      *
-     * @return The facebook user identifier
+     * @return The Facebook user identifier
      */
     public String getFacebookUserId() {
         return facebookUserId;
     }
 
     /**
-     * Gets the facebook user's full name.
+     * Gets the Facebook user's full name.
      *
-     * @return The facebook user's full name.
+     * @return The Facebook user's full name.
      */
     public String getFacebookUserName() {
         return facebookUserName;
@@ -295,6 +284,29 @@ public final class FacebookOAuthAccess {
             throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
             throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Executes GET request for specified URL using JSON format.
+     *
+     * @param url The URL
+     * @return The response
+     * @throws OXException If request fails
+     */
+    public JSONValue executeGETJsonRequest(final CharSequence url) throws OXException {
+        Reader reader = null;
+        try {
+            final OAuthRequest request = new OAuthRequest(Verb.GET, url.toString());
+            facebookOAuthService.signRequest(facebookAccessToken, request);
+            reader = new InputStreamReader(request.send().getStream(), Charsets.UTF_8);
+            return JSONObject.parse(reader);
+        } catch (final org.scribe.exceptions.OAuthException e) {
+            throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(reader);
         }
     }
 

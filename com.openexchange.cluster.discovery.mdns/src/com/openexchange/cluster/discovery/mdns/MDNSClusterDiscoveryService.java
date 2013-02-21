@@ -63,7 +63,7 @@ import com.openexchange.mdns.MDNSServiceEntry;
 
 /**
  * {@link MDNSClusterDiscoveryService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MDNSClusterDiscoveryService extends AbstractClusterDiscoveryService {
@@ -73,7 +73,7 @@ public final class MDNSClusterDiscoveryService extends AbstractClusterDiscoveryS
 
     /**
      * Initializes a new {@link MDNSClusterDiscoveryService}.
-     * 
+     *
      * @param serviceId
      */
     public MDNSClusterDiscoveryService(final String serviceId, final BundleContext context) {
@@ -84,7 +84,7 @@ public final class MDNSClusterDiscoveryService extends AbstractClusterDiscoveryS
 
     /**
      * Sets the {@link MDNSService} instance
-     * 
+     *
      * @param mdnsService The {@link MDNSService} instance
      */
     public void setMDNSService(final MDNSService mdnsService) {

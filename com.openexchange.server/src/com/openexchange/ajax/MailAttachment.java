@@ -70,6 +70,7 @@ import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenRegistry;
@@ -164,9 +165,7 @@ public class MailAttachment extends AJAXServlet {
                     String htmlContent = MessageUtility.readMailPart(mailPart, cs);
                     htmlContent = MessageUtility.simpleHtmlDuplicateRemoval(htmlContent);
                     final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                    attachmentInputStream =
-                        new UnsynchronizedByteArrayInputStream(htmlService.filterWhitelist(
-                            htmlService.getConformHTML(htmlContent, contentType.getCharsetParameter())).getBytes(Charsets.forName(cs)));
+                    attachmentInputStream = new UnsynchronizedByteArrayInputStream(sanitizeHtml(htmlContent, htmlService).getBytes(Charsets.forName(cs)));
                 } else {
                     attachmentInputStream = mailPart.getInputStream();
                 }
@@ -197,7 +196,7 @@ public class MailAttachment extends AJAXServlet {
                     attachmentInputStream = checkedDownload.getInputStream();
                     /*-
                      * Check for Android client
-                     * 
+                     *
                     final boolean isAndroid = (null != userAgent && userAgent.toLowerCase(Locale.ENGLISH).indexOf("android") >= 0);
                     if (isAndroid) {
                         final ManagedFileManagement service = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
@@ -223,7 +222,7 @@ public class MailAttachment extends AJAXServlet {
                             attachmentInputStream = new FileInputStream(file);
                         }
                     }
-                     * 
+                     *
                      */
                 }
                 /*
@@ -246,9 +245,7 @@ public class MailAttachment extends AJAXServlet {
                 }
             } finally {
                 token.close();
-                if (null != attachmentInputStream) {
-                    attachmentInputStream.close();
-                }
+                Streams.close(attachmentInputStream);
                 if (null != file) {
                     file.delete();
                 }
@@ -315,6 +312,10 @@ public class MailAttachment extends AJAXServlet {
             je.initCause(e);
             LOG.error(je.getMessage(), je);
         }
+    }
+
+    private static String sanitizeHtml(final String htmlContent, final HtmlService htmlService) {
+        return htmlService.sanitize(htmlContent, null, false, null, null);
     }
 
     @Override

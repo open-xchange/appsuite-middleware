@@ -50,15 +50,20 @@
 package com.openexchange.messaging.facebook;
 
 import static com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.checkContent;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Collection;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
 import org.scribe.model.Verb;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingAddressHeader;
@@ -84,7 +89,7 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
     /**
      * Initializes a new {@link FacebookMessagingAccountTransport}.
      *
-     * @param messagingAccount The facebook account
+     * @param messagingAccount The Facebook account
      * @param session The session
      * @throws OXException If initialization fails
      */
@@ -102,8 +107,8 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
      *
      * @param message The message
      * @param recipients The recipients
-     * @param facebookRestClient The facebook REST client
-     * @param facebookUserId The facebook user identifier
+     * @param facebookRestClient The Facebook REST client
+     * @param facebookUserId The Facebook user identifier
      * @throws OXException If transport fails
      */
     public static void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients, final FacebookOAuthAccess facebookOAuthAccess, final String facebookUserId) throws OXException {
@@ -154,15 +159,26 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
                             "https://graph.facebook.com/" + targetId + "/feed?message=" + encode(stringContent.getData()));
                     facebookOAuthAccess.getFacebookOAuthService().signRequest(facebookOAuthAccess.getFacebookAccessToken(), request);
                     final Response response = request.send();
-                    final JSONObject result = new JSONObject(response.getBody());
-                    if (result.has("error")) {
-                        final JSONObject error = result.getJSONObject("error");
-                        final String type = error.optString("type");
-                        final String msg = error.optString("message");
-                        if ("OAuthException".equals(type)) {
-                            throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == msg ? "" : msg);
+                    Reader reader = null;
+                    try {
+                        reader = new InputStreamReader(response.getStream(), Charsets.UTF_8);
+                        final JSONValue value = JSONObject.parse(reader);
+                        if (value.isObject()) {
+                            final JSONObject result = value.toObject();
+                            if (result.has("error")) {
+                                final JSONObject error = result.getJSONObject("error");
+                                final String type = error.optString("type");
+                                final String msg = error.optString("message");
+                                if ("OAuthException".equals(type)) {
+                                    throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == msg ? "" : msg);
+                                }
+                                throw FacebookMessagingExceptionCodes.FQL_ERROR.create(
+                                    null == type ? "<unknown>" : type,
+                                    null == msg ? "" : msg);
+                            }
                         }
-                        throw FacebookMessagingExceptionCodes.FQL_ERROR.create(null == type ? "<unknown>" : type, null == msg ? "" : msg);
+                    } finally {
+                        Streams.close(reader);
                     }
                 }
             } else {
@@ -180,15 +196,26 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
                             "https://graph.facebook.com/" + targetId + "/feed?message=" + encode(Utility.textFormat(stringContent.getData())));
                     facebookOAuthAccess.getFacebookOAuthService().signRequest(facebookOAuthAccess.getFacebookAccessToken(), request);
                     final Response response = request.send();
-                    final JSONObject result = new JSONObject(response.getBody());
-                    if (result.has("error")) {
-                        final JSONObject error = result.getJSONObject("error");
-                        final String type = error.optString("type");
-                        final String msg = error.optString("message");
-                        if ("OAuthException".equals(type)) {
-                            throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == msg ? "" : msg);
+                    Reader reader = null;
+                    try {
+                        reader = new InputStreamReader(response.getStream(), Charsets.UTF_8);
+                        final JSONValue value = JSONObject.parse(reader);
+                        if (value.isObject()) {
+                            final JSONObject result = value.toObject();
+                            if (result.has("error")) {
+                                final JSONObject error = result.getJSONObject("error");
+                                final String type = error.optString("type");
+                                final String msg = error.optString("message");
+                                if ("OAuthException".equals(type)) {
+                                    throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == msg ? "" : msg);
+                                }
+                                throw FacebookMessagingExceptionCodes.FQL_ERROR.create(
+                                    null == type ? "<unknown>" : type,
+                                    null == msg ? "" : msg);
+                            }
                         }
-                        throw FacebookMessagingExceptionCodes.FQL_ERROR.create(null == type ? "<unknown>" : type, null == msg ? "" : msg);
+                    } finally {
+                        Streams.close(reader);
                     }
                 } else {
                     /*
@@ -200,15 +227,26 @@ public final class FacebookMessagingAccountTransport extends FacebookMessagingRe
                             "https://graph.facebook.com/" + targetId + "/feed?message=" + encode(stringContent.getData()));
                     facebookOAuthAccess.getFacebookOAuthService().signRequest(facebookOAuthAccess.getFacebookAccessToken(), request);
                     final Response response = request.send();
-                    final JSONObject result = new JSONObject(response.getBody());
-                    if (result.has("error")) {
-                        final JSONObject error = result.getJSONObject("error");
-                        final String type = error.optString("type");
-                        final String msg = error.optString("message");
-                        if ("OAuthException".equals(type)) {
-                            throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == msg ? "" : msg);
+                    Reader reader = null;
+                    try {
+                        reader = new InputStreamReader(response.getStream(), Charsets.UTF_8);
+                        final JSONValue value = JSONObject.parse(reader);
+                        if (value.isObject()) {
+                            final JSONObject result = value.toObject();
+                            if (result.has("error")) {
+                                final JSONObject error = result.getJSONObject("error");
+                                final String type = error.optString("type");
+                                final String msg = error.optString("message");
+                                if ("OAuthException".equals(type)) {
+                                    throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == msg ? "" : msg);
+                                }
+                                throw FacebookMessagingExceptionCodes.FQL_ERROR.create(
+                                    null == type ? "<unknown>" : type,
+                                    null == msg ? "" : msg);
+                            }
                         }
-                        throw FacebookMessagingExceptionCodes.FQL_ERROR.create(null == type ? "<unknown>" : type, null == msg ? "" : msg);
+                    } finally {
+                        Streams.close(reader);
                     }
                 }
             }

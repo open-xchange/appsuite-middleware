@@ -53,21 +53,21 @@ import java.io.Serializable;
 
 /**
  * This object must be send with every method call in ox rmi interface!
- * 
+ *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
 public class Credentials implements Serializable{
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -5716255479339902964L;
 
     private String login;
 
     private String password;
-    
+
     /**
      * Creates a new instance of the object
      */
@@ -125,28 +125,28 @@ public class Credentials implements Serializable{
     private void init() {
         this.login = null;
         this.password = null;
-        
+
     }
 
     /**
      * Constructs a <code>String</code> with all attributes
      * in name = value format.
      *
-     * @return a <code>String</code> representation 
+     * @return a <code>String</code> representation
      * of this object.
      */
     @Override
     public String toString()
     {
         final String TAB = "\n  ";
-    
+
         final StringBuilder retValue = new StringBuilder();
-        
+
         retValue.append("Credentials ( ")
             .append(super.toString()).append(TAB)
             .append("login = ").append(this.login).append(TAB)
             .append(" )");
-        
+
         return retValue.toString();
     }
 

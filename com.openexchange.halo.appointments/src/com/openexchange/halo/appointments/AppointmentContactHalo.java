@@ -72,26 +72,24 @@ import com.openexchange.tools.session.ServerSession;
 
 public class AppointmentContactHalo extends AbstractContactHalo implements HaloContactDataSource {
 
-	private final ServiceLookup services;
+    private final ServiceLookup services;
 
-	public AppointmentContactHalo(
-			ServiceLookup services) {
-		this.services = services;
-	}
+    public AppointmentContactHalo(ServiceLookup services) {
+        this.services = services;
+    }
 
-	@Override
-	public String getId() {
-		return "com.openexchange.halo.appointments";
-	}
+    @Override
+    public String getId() {
+        return "com.openexchange.halo.appointments";
+    }
 
-	@Override
-	public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req,
-			ServerSession session) throws OXException {
-		AppointmentSQLInterface appointmentService = getAppointmentService(session);
+    @Override
+    public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException {
+        AppointmentSQLInterface appointmentService = getAppointmentService(session);
 
-		int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-		String parameterStart = req.checkParameter(AJAXServlet.PARAMETER_START);
-		Date start = new Date(Long.parseLong(parameterStart));
+        int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
+        String parameterStart = req.checkParameter(AJAXServlet.PARAMETER_START);
+        Date start = new Date(Long.parseLong(parameterStart));
         String parameterEnd = req.checkParameter(AJAXServlet.PARAMETER_END);
         Date end = new Date(Long.parseLong(parameterEnd));
         String parameterSort = req.getParameter(AJAXServlet.PARAMETER_SORT);
@@ -99,50 +97,45 @@ public class AppointmentContactHalo extends AbstractContactHalo implements HaloC
         String parameterOrder = req.getParameter(AJAXServlet.PARAMETER_ORDER);
         Order order = OrderFields.parse(parameterOrder);
 
-		List<Appointment> appointments = null;
-		if (query.getUser() != null && query.getUser().getId() == session.getUser().getId()) {
-			appointments = new LinkedList<Appointment>(); 
-		} else if (query.getUser() != null) {
-		    appointments = appointmentService.getAppointmentsWithUserBetween(query.getUser(), columns, start, end, orderBy, order);
-		} else {
-			Contact searchContact = query.getContact();
-			List<String> addresses = getEMailAddresses(searchContact);
-			appointments = new LinkedList<Appointment>();
-			for(String address: addresses){
-				appointments.addAll( appointmentService.getAppointmentsWithExternalParticipantBetween(address, columns, start, end, orderBy, order) );
-			}
-			if(addresses.size() > 1){
-				Collections.sort(appointments, new Comparator<Appointment>() {
-					@Override
-					public int compare(Appointment app, Appointment other) {
-						return app.getStartDate().compareTo(other.getStartDate());
-					}
-				});
-			}
-		}
+        List<Appointment> appointments = null;
+        if (query.getUser() != null && query.getUser().getId() == session.getUser().getId()) {
+            appointments = new LinkedList<Appointment>();
+        } else if (query.getUser() != null) {
+            appointments = appointmentService.getAppointmentsWithUserBetween(query.getUser(), columns, start, end, orderBy, order);
+        } else {
+            Contact searchContact = query.getContact();
+            List<String> addresses = getEMailAddresses(searchContact);
+            appointments = new LinkedList<Appointment>();
+            for (String address : addresses) {
+                appointments.addAll(appointmentService.getAppointmentsWithExternalParticipantBetween(
+                    address,
+                    columns,
+                    start,
+                    end,
+                    orderBy,
+                    order));
+            }
+        }
 
-//		//TODO: Construct a list of appointments with the given user and the session user in the near future
-//		CalendarDataObject cdo1 = new CalendarDataObject();
-//		cdo1.setTitle("An Appointment");
-//		cdo1.setStartDate(new Date());
-//		cdo1.setEndDate(new Date());
-//
-//		CalendarDataObject cdo2 = new CalendarDataObject();
-//		cdo2.setTitle("Another Appointment");
-//		cdo2.setStartDate(new Date());
-//		cdo2.setEndDate(new Date());
+        Collections.sort(appointments, new Comparator<Appointment>() {
 
-		return new AJAXRequestResult(appointments, "appointment");
-	}
+            @Override
+            public int compare(Appointment app, Appointment other) {
+                return app.getStartDate().compareTo(other.getStartDate());
+            }
+        });
 
-	public AppointmentSQLInterface getAppointmentService(ServerSession session) {
-		AppointmentSqlFactoryService factoryService = services.getService(AppointmentSqlFactoryService.class);
-		return factoryService.createAppointmentSql(session);
-	}
+        return new AJAXRequestResult(appointments, "appointment");
+    }
 
-	@Override
-	public boolean isAvailable(ServerSession session) {
-		return session.getUserConfiguration().hasCalendar();
-	}
+    private AppointmentSQLInterface getAppointmentService(ServerSession session) {
+        AppointmentSqlFactoryService factoryService = services.getService(AppointmentSqlFactoryService.class);
+        return factoryService.createAppointmentSql(session);
+    }
+
+    @Override
+    public boolean isAvailable(ServerSession session) {
+        return session.getUserConfiguration().hasCalendar();
+    }
 
 }

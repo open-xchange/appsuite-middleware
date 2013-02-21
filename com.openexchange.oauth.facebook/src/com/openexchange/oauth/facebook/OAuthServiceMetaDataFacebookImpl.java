@@ -59,6 +59,8 @@ import java.net.URLEncoder;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.scribe.builder.api.Api;
+import org.scribe.builder.api.FacebookApi;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
@@ -74,7 +76,7 @@ import com.openexchange.oauth.OAuthToken;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaData {
+public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
 
     private final ConfigurationService configurationService;
     private final DeferringURLService deferrer;
@@ -206,13 +208,35 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
         String token = null;
         if(matcher.matches()) {
             token = matcher.group(1);
+            token = checkToken(token);
         }
+
         return new DefaultOAuthToken(token, "");
+    }
+
+    private static final Pattern P_EXPIRES = Pattern.compile("&expires(=[0-9]+)?$");
+
+    private static String checkToken(final String accessToken) {
+        if (accessToken.indexOf("&expires") < 0) {
+            return accessToken;
+        }
+        final Matcher m = P_EXPIRES.matcher(accessToken);
+        final StringBuffer sb = new StringBuffer(accessToken.length());
+        if (m.find()) {
+            m.appendReplacement(sb, "");
+        }
+        m.appendTail(sb);
+        return sb.toString();
     }
 
 	@Override
 	public API getAPI() {
 		return API.FACEBOOK;
 	}
+
+    @Override
+    public Class<? extends Api> getScribeService() {
+        return FacebookApi.class;
+    }
 
 }

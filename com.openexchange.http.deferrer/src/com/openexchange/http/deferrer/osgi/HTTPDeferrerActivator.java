@@ -62,7 +62,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
  * {@link HTTPDeferrerActivator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class HTTPDeferrerActivator extends HousekeepingActivator {
@@ -85,7 +85,7 @@ public class HTTPDeferrerActivator extends HousekeepingActivator {
             }
 
         });
-        
+
         track(CustomRedirectURLDetermination.class, new SimpleRegistryListener<CustomRedirectURLDetermination>() {
 
 			@Override
@@ -102,7 +102,7 @@ public class HTTPDeferrerActivator extends HousekeepingActivator {
 				DeferrerServlet.CUSTOM_HANDLERS.remove(service);
 			}
 		});
-        
+
         openTrackers();
     }
 

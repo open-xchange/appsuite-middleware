@@ -52,7 +52,6 @@ package com.openexchange.realtime.packet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import com.google.common.base.Predicate;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.payload.PayloadElement;
@@ -69,7 +68,7 @@ import com.openexchange.realtime.util.ElementPath;
  * PayloadTrees. Extensions to Presence Stanza can be queried via the {@link Presence#getExtensions()} function and programmatically
  * extracted from the Stanza via {@link Stanza#getPayload(com.openexchange.realtime.util.ElementPath)} function.
  * </p>
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -89,7 +88,7 @@ public class Presence extends Stanza {
      * <li>none: is used for the initial presence message of a client to signal its availability for communications.</li>
      * <li>pending:</li>
      * </ol>
-     * 
+     *
      * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
      */
     public enum Type {
@@ -139,7 +138,7 @@ public class Presence extends Stanza {
      * Initializes a new {@link Presence} based on another Presence. This will produce a deep copy up to the leafs of the PayloadTreeNode,
      * more exactly the data Portion of the PayloadElement in the PayloadTreeNode as we are dealing with Objects that must not neccessarily
      * implement Cloneable or Serializable.
-     * 
+     *
      * @param other The Presence to copy, must not be null
      * @throws IllegalArgumentException if the other Presence is null
      */
@@ -147,6 +146,8 @@ public class Presence extends Stanza {
         if (other == null) {
             throw new IllegalArgumentException("Other Presence must not be null.");
         }
+        super.setFrom(other.getFrom());
+        super.setTo(other.getTo());
         this.error = other.error;
         this.message = other.message;
         this.payloads = other.deepCopyPayloads();
@@ -183,7 +184,7 @@ public class Presence extends Stanza {
 
     /**
      * Gets the type of Presence Stanza
-     * 
+     *
      * @return The state
      */
     public Type getType() {
@@ -192,7 +193,7 @@ public class Presence extends Stanza {
 
     /**
      * Sets the type of the Presence Stanza
-     * 
+     *
      * @param type The state to set
      */
     public void setType(Type type) {
@@ -201,7 +202,7 @@ public class Presence extends Stanza {
 
     /**
      * Gets the message.
-     * 
+     *
      * @return The message
      */
     public String getMessage() {
@@ -218,7 +219,7 @@ public class Presence extends Stanza {
 
     /**
      * Gets the state e.g. online or away
-     * 
+     *
      * @return The state
      */
     public PresenceState getState() {
@@ -227,7 +228,7 @@ public class Presence extends Stanza {
 
     /**
      * Sets the state e.g. online or away
-     * 
+     *
      * @param state The state
      */
     public void setState(PresenceState state) {
@@ -237,7 +238,7 @@ public class Presence extends Stanza {
 
     /**
      * Gets the priority.
-     * 
+     *
      * @return The priority
      */
     public byte getPriority() {
@@ -246,7 +247,7 @@ public class Presence extends Stanza {
 
     /**
      * Sets the priority.
-     * 
+     *
      * @param priority The priority to set
      */
     public void setPriority(byte priority) {
@@ -256,7 +257,7 @@ public class Presence extends Stanza {
 
     /**
      * Get the error element describing the error-type Stanza in more detail.
-     * 
+     *
      * @return Null or the OXException representing the error
      */
     public OXException getError() {
@@ -265,7 +266,7 @@ public class Presence extends Stanza {
 
     /**
      * Set the error element describing the error-type Stanza in more detail.
-     * 
+     *
      * @param error The OXException representing the error
      */
     public void setError(OXException error) {
@@ -275,7 +276,7 @@ public class Presence extends Stanza {
 
     /**
      * Get the default payloads.
-     * 
+     *
      * @return The default payloads as defined in the Presence specification.
      */
     public Collection<PayloadTree> getDefaultPayloads() {
@@ -284,7 +285,7 @@ public class Presence extends Stanza {
 
     /**
      * Get the extension payloads.
-     * 
+     *
      * @return Extension payloads that aren't defined in the Presence specification and not accessible via getters and setters.
      */
     public Collection<PayloadTree> getExtensions() {
@@ -294,7 +295,7 @@ public class Presence extends Stanza {
     /**
      * Write a payload to the PayloadTree identified by the ElementPath. There is only one tree for the default elements which only contains
      * one node so we can set the data by directly writing to the root node.
-     * 
+     *
      * @param path The ElementPath identifying the PayloadTree.
      * @param data The payload data to write into the root node.
      */
@@ -323,6 +324,128 @@ public class Presence extends Stanza {
                 throw new IllegalStateException("PayloadTreeNode removed? This shouldn't happen!");
             }
             node.setData(data, data.getClass().getSimpleName());
+        }
+
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * Static {@link Builder} to create Presence Stanzas more fluently.
+     *
+     * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+     */
+    public static class Builder {
+
+        Presence presence;
+
+        /**
+         * Initializes a new {@link Builder} with an empty Presence that can then be configured via the Builder.
+         */
+        public Builder() {
+            this.presence = new Presence();
+        }
+
+        /**
+         * Set the sender of the Presence stanza.
+         *
+         * @param from the sender of the Presence stanza.
+         * @return the builder for further modification or building of the current Presence
+         */
+        public Builder from(ID from) {
+            presence.setFrom(from);
+            return this;
+        }
+
+        /**
+         * Set the recipient of the Presence stanza
+         *
+         * @param to the recipeint of the Presence stanza
+         * @return the builder for further modification or building of the current Presence
+         */
+        public Builder to(ID to) {
+            presence.setTo(to);
+            return this;
+        }
+
+        /**
+         * Set the error of the Presence stanza.
+         *
+         * @param error the error of the Presence stanza.
+         * @return the builder for further modification or building of the current Presence
+         */
+        public Builder error(OXException error) {
+            presence.setError(error);
+            return this;
+        }
+
+        /**
+         * Set the message of the Presence stanza.
+         *
+         * @param message the message of the Presence stanza.
+         * @return the builder for further modification or building of the current Presence
+         */
+        public Builder message(String message) {
+            presence.setMessage(message);
+            return this;
+        }
+
+        /**
+         * Set the priority of the Presence stanza.
+         *
+         * @param priority the priority of the Presence stanza.
+         * @return the builder for further modification or building of the current Presence
+         */
+        public Builder priority(byte priority) {
+            presence.setPriority(priority);
+            return this;
+        }
+
+        /**
+         * Set the state of the Presence stanza.
+         *
+         * @param state the state of the Presence stanza.
+         * @return the builder for further modification or building of the current Presence
+         */
+        public Builder state(PresenceState state) {
+            presence.setState(state);
+            return this;
+        }
+
+        /**
+         * Set the type of the Presence stanza.
+         *
+         * @param type the tyoe of the Presence stanza.
+         * @return the builder for further modification or building of the current Presence
+         */
+        public Builder type(Type type) {
+            presence.setType(type);
+            return this;
+        }
+
+        /**
+         * A valid minimal Presence(Initial Presence when coming online) only has to contain a sender.
+         *
+         * @param presence The Presence to validate
+         * @throws IllegalStateException when validation fails
+         */
+        private void validate() {
+            if (presence.getFrom() == null) {
+                throw new IllegalStateException("Presence is missing: from");
+            }
+        }
+
+        /**
+         * Validate and return the constructed Presence stanza.
+         *
+         * @return the constructed Presence stanza
+         * @throws IllegalStateException when validation of the configured presence object fails
+         */
+        public Presence build() {
+            validate();
+            return this.presence;
         }
 
     }

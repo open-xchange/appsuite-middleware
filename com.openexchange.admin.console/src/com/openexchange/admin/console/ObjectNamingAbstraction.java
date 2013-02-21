@@ -70,7 +70,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 /**
  * This abstract class declares an abstract method to get the object name with which the command line tool
  * deals. This is used for output
- * 
+ *
  * @author d7
  *
  */
@@ -89,7 +89,7 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
     protected final void displayDeletedMessage(final String id, final Integer ctxid, final AdminParser parser) {
         createMessageForStdout(id, ctxid, "deleted", parser);
     }
-    
+
     protected void createMessageForStdout(final String id, final Integer ctxid, final String type, final AdminParser parser) {
         createMessage(id, ctxid, type, System.out, parser, false);
     }
@@ -127,20 +127,20 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
             ps.println(sb.toString());
         }
     }
-    
+
     protected void createMessageForStderr(final String id, final Integer ctxid, final String type, final AdminParser parser) {
         createMessage(id, ctxid, type, System.err, parser, true);
     }
-    
+
     protected final void printError(final String id, final Integer ctxid, final String msg, final AdminParser parser) {
         printFirstPartOfErrorText(id, ctxid, parser);
-        printError(msg, parser);    
+        printError(msg, parser);
     }
 
     protected final void printInvalidInputMsg(final String id, final Integer ctxid, final String msg, final AdminParser parser) {
         printFirstPartOfErrorText(id, ctxid, parser);
-        printInvalidInputMsg(msg);    
-    }    
+        printInvalidInputMsg(msg);
+    }
 
     protected void printServerException(final String id, final Integer ctxid, final Exception e, final AdminParser parser) {
         printFirstPartOfErrorText(id, ctxid, parser);

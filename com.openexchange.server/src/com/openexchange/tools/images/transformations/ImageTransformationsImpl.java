@@ -74,6 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.images.ImageTransformations;
@@ -83,47 +84,47 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link ImageTransformationsImpl}
- * 
+ *
  * Default {@link ImageTransformations} implementation.
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ImageTransformationsImpl implements ImageTransformations {
-    
+
     private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ImageTransformationsImpl.class));
-    
+
     private final InputStream sourceImageStream;
     private final List<ImageTransformation> transformations;
     private BufferedImage sourceImage;
     private Metadata metadata;
     private boolean compress;
-    
+
     private ImageTransformationsImpl(BufferedImage sourceImage, InputStream sourceImageStream) {
         super();
         this.sourceImage = sourceImage;
         this.sourceImageStream = sourceImageStream;
         this.transformations = new ArrayList<ImageTransformation>();
     }
-    
+
     /**
      * Initializes a new {@link ImageTransformationsImpl}.
-     * 
+     *
      * @param sourceImage The source image
      */
     public ImageTransformationsImpl(BufferedImage sourceImage) {
         this(sourceImage, null);
-    }    
+    }
 
     /**
      * Initializes a new {@link ImageTransformationsImpl}.
-     * 
+     *
      * @param sourceImage The source image
-     * @throws IOException 
+     * @throws IOException
      */
     public ImageTransformationsImpl(InputStream sourceImageStream) throws IOException {
         this(null, sourceImageStream);
-    }    
+    }
 
     @Override
     public ImageTransformations rotate() {
@@ -153,14 +154,18 @@ public class ImageTransformationsImpl implements ImageTransformations {
     public BufferedImage getImage() throws IOException {
         if (false == needsTransformation(null) && null != sourceImage) {
             return sourceImage;
-        } else {
-            return getImage(null);
         }
+        // Get BufferedImage
+        return getImage(null);
     }
 
     @Override
     public byte[] getBytes(String formatName) throws IOException {
         String imageFormat = getImageFormat(formatName);
+        return innerGetBytes(imageFormat);
+    }
+
+    private byte[] innerGetBytes(final String imageFormat) throws IOException {
         return write(getImage(imageFormat), imageFormat);
     }
 
@@ -168,17 +173,17 @@ public class ImageTransformationsImpl implements ImageTransformations {
     public InputStream getInputStream(String formatName) throws IOException {
         String imageFormat = getImageFormat(formatName);
         if (false == needsTransformation(imageFormat) && null != sourceImageStream) {
-            // nothing to do at all
+            // Nothing to do
             return sourceImageStream;
-        } else {
-            byte[] bytes = getBytes(imageFormat);
-            return null != bytes ? Streams.newByteArrayInputStream(bytes) : null;
-        }            
+        }
+        // Perform transformations
+        byte[] bytes = innerGetBytes(imageFormat);
+        return null == bytes ? null : Streams.newByteArrayInputStream(bytes);
     }
-    
+
     /**
      * Gets a value indicating whether the denoted format name leads to transformations or not.
-     * 
+     *
      * @param formatName The format name
      * @return <code>true</code>, if there are transformations for the targte image format, <code>false</code>, otherwise
      */
@@ -188,49 +193,49 @@ public class ImageTransformationsImpl implements ImageTransformations {
         }
         for (ImageTransformation transformation : transformations) {
             if (transformation.supports(formatName)) {
-                return true;                                        
+                return true;
             }
         }
         return false;
     }
-    
+
     /**
      * Gets the resulting image after applying all transformations.
-     * 
+     *
      * @param formatName the image format to use, or <code>null</code> if not relevant
      * @return The transformed image
      * @throws IOException
      */
     private BufferedImage getImage(String formatName) throws IOException {
         BufferedImage image = getSourceImage(formatName);
-        if (null != image) {
+        if (null != image && image.getHeight() > 3 && image.getWidth() > 3) {
             ImageInformation imageInformation = null != this.metadata ? getImageInformation(this.metadata) : null;
             for (ImageTransformation transformation : transformations) {
                 if (transformation.supports(formatName)) {
-                    image = transformation.perform(image, imageInformation);                                        
+                    image = transformation.perform(image, imageInformation);
                 }
             }
         }
         return image;
     }
-    
+
     /**
      * Gets the source image, either from the supplied buffered image or the supplied stream, extracting image metadata as needed.
-     * 
+     *
      * @param formatName The format to use, e.g. "jpeg" or "tiff"
      * @return The source image
      * @throws IOException
      */
     private BufferedImage getSourceImage(String formatName) throws IOException {
         if (null == this.sourceImage && null != this.sourceImageStream) {
-            this.sourceImage = needsMetadata(formatName) ? readAndExtractMetadata(sourceImageStream) : read(sourceImageStream); 
+            this.sourceImage = needsMetadata(formatName) ? readAndExtractMetadata(sourceImageStream) : read(sourceImageStream);
         }
         return sourceImage;
     }
-    
+
     /**
      * Gets a value indicating whether additional metadata is required for one of the transformations or not.
-     * 
+     *
      * @param formatName The format to use, e.g. "jpeg" or "tiff"
      * @return <code>true</code>, if metadata is needed, <code>false</code>, otherwise
      */
@@ -245,10 +250,10 @@ public class ImageTransformationsImpl implements ImageTransformations {
         }
         return false;
     }
-    
+
     /**
      * Writes out an image into a byte-array.
-     * 
+     *
      * @param image The image to write
      * @param formatName The format to use, e.g. "jpeg" or "tiff"
      * @return The image data
@@ -264,24 +269,24 @@ public class ImageTransformationsImpl implements ImageTransformations {
             if (needsCompression(formatName)) {
                 writeCompressed(image, formatName, outputStream);
             } else {
-                write(image, formatName, outputStream);            
+                write(image, formatName, outputStream);
             }
             return outputStream.toByteArray();
         } finally {
             Streams.close(outputStream);
         }
     }
-    
+
     private boolean needsCompression(String formatName) {
-        return this.compress && null != formatName && "jpeg".equalsIgnoreCase(formatName) || "jpg".equalsIgnoreCase(formatName);        
+        return this.compress && null != formatName && "jpeg".equalsIgnoreCase(formatName) || "jpg".equalsIgnoreCase(formatName);
     }
-    
+
     private static void write(BufferedImage image, String formatName, OutputStream output) throws IOException {
         if (false == ImageIO.write(image, formatName, output)) {
             throw new IOException("no appropriate writer is found");
         }
     }
-    
+
     private static void writeCompressed(BufferedImage image, String formatName, OutputStream output) throws IOException {
         ImageWriter writer = null;
         ImageOutputStream imageOutputStream = null;
@@ -309,11 +314,11 @@ public class ImageTransformationsImpl implements ImageTransformations {
             }
         }
     }
-    
+
     /**
-     * Tries to adjust the default settings on the supplied image write parameters to apply compression, ignoring any 
-     * {@link UnsupportedOperationException}s that may occur. 
-     * 
+     * Tries to adjust the default settings on the supplied image write parameters to apply compression, ignoring any
+     * {@link UnsupportedOperationException}s that may occur.
+     *
      * @param parameters The parameters to adjust for compression
      */
     private static void adjustCompressionParams(ImageWriteParam parameters) {
@@ -333,10 +338,10 @@ public class ImageTransformationsImpl implements ImageTransformations {
             LOG.debug(e.getMessage(), e);
         }
     }
-    
+
     /**
      * Reads a buffered image from the supplied stream and closes the stream afterwards.
-     * 
+     *
      * @param inputStream The stream to read the image from
      * @return The buffered image
      * @throws IOException
@@ -351,10 +356,10 @@ public class ImageTransformationsImpl implements ImageTransformations {
             Streams.close(inputStream);
         }
     }
-    
+
     /**
      * Reads a buffered image from the supplied stream and closes the stream afterwards, trying to extract metadata information.
-     * 
+     *
      * @param inputStream The stream to read the image from
      * @return The buffered image
      * @throws IOException
@@ -377,84 +382,128 @@ public class ImageTransformationsImpl implements ImageTransformations {
             return null;
         } finally {
             if (managedFile != null) {
-                managedFile.delete();
-            }
-        }
-    }
-    
-    /**
-     * Extracts image information from the supplied metadata.
-     * 
-     * @param metadata The metadata to extract the image information
-     * @return The image information, or <code>null</code> if none could be extracted 
-     */
-    private static ImageInformation getImageInformation(Metadata metadata) {
-        if (null != metadata) {
-            int orientation = 1;
-            int width = 0;
-            int height = 0;
-            try {
-                Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
-                if (null != directory) {
-                    orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+                try {
+                    managedFile.delete();
+                } catch (final Exception x) {
+                    // Ignore
                 }
-                JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
-                if (null != jpegDirectory) {
-                    width = jpegDirectory.getImageWidth();
-                    height = jpegDirectory.getImageHeight();
-                }
-            } catch (MetadataException e) {
-                LOG.debug("Unable to retrieve image information.", e);
-                return null;
             }
-            return new ImageInformation(orientation, width, height);
-        } else {
-            return null;
         }
     }
 
     /**
-     * Strips a leading "image/" as well as trailing additional properties after the first ";" from the supplied value if necessary from 
+     * Extracts image information from the supplied metadata.
+     *
+     * @param metadata The metadata to extract the image information
+     * @return The image information, or <code>null</code> if none could be extracted
+     */
+    private static ImageInformation getImageInformation(Metadata metadata) {
+        if (null == metadata) {
+            return null;
+        }
+        int orientation = 1;
+        int width = 0;
+        int height = 0;
+        try {
+            Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
+            if (null != directory) {
+                orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+            }
+            JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
+            if (null != jpegDirectory) {
+                width = jpegDirectory.getImageWidth();
+                height = jpegDirectory.getImageHeight();
+            }
+        } catch (MetadataException e) {
+            LOG.debug("Unable to retrieve image information.", e);
+            return null;
+        }
+        return new ImageInformation(orientation, width, height);
+    }
+
+    /**
+     * Strips a leading "image/" as well as trailing additional properties after the first ";" from the supplied value if necessary from
      * image formats passed as content type. Also implicitly converts "pjpeg"- and "x-png"-formats as used by Internet Explorer to their
-     * common format names. 
-     * 
-     * @param value The value
+     * common format names.
+     *
+     * @param value The sImage
      * @return The cleaned image format
      */
-    private static String getImageFormat(String value) {
-        if (null != value) {
-            if (value.toLowerCase().startsWith("image/")) {
-                value = value.substring(6);
-            }
-            int idx = value.indexOf(';'); 
-            if (0 < idx) {
-                value = value.substring(0, idx);
-            }
-            if ("pjpeg".equals(value)) {
-                LOG.debug("Assuming 'jpeg' for image format " + value);
-                return "jpeg";
-            } else if ("x-png".equals(value)) {
-                LOG.debug("Assuming 'png' for image format " + value);
-                return "png";
-            }
-            return value;
-        } else {
+    private static String getImageFormat(final String value) {
+        if (null == value) {
             LOG.debug("No format name specified, falling back to 'jpeg'.");
             return "jpeg";
         }
+        // Sanitize given image format
+        String val = value;
+        if (val.toLowerCase().startsWith("image/")) {
+            val = val.substring(6);
+        }
+        int idx = val.indexOf(';');
+        if (0 < idx) {
+            val = val.substring(0, idx);
+        }
+        if ("pjpeg".equals(val)) {
+            LOG.debug("Assuming 'jpeg' for image format " + val);
+            return "jpeg";
+        }
+        if ("x-png".equals(val)) {
+            LOG.debug("Assuming 'png' for image format " + val);
+            return "png";
+        }
+        return val;
     }
 
     /**
      * Gets a value indicating whether an image format can be read or not.
-     * 
+     *
      * @param formatName The image format name
      * @return <code>true</code> if the image format can be read, <code>false</code>, otherwise
      */
     private static boolean canRead(String formatName) {
-        if ("vnd.microsoft.icon".equalsIgnoreCase(formatName) || "x-icon".equalsIgnoreCase(formatName)) {
-            // ImageIO has problems reading icons: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6633448
+        String tmp = toLowerCase(formatName);
+        if ("vnd.microsoft.icon".equals(tmp) || "x-icon".equals(tmp)) {
             return false;
         }
-        return true;
+        //TODO: cache reader format names
+        for (String readerFormatName : ImageIO.getReaderFormatNames()) {
+            if (toLowerCase(readerFormatName).equals(tmp)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets a value indicating whether an image format can be written or not.
+     *
+     * @param formatName The image format name
+     * @return <code>true</code> if the image format can be written, <code>false</code>, otherwise
+     */
+//    private static boolean canWrite(String formatName) {
+//        String tmp = toLowerCase(formatName);
+//        if ("vnd.microsoft.icon".equals(tmp) || "x-icon".equals(tmp)) {
+//            return false;
+//        }
+//        for (String writerFormatName : ImageIO.getWriterFormatNames()) {
+//            if (toLowerCase(writerFormatName).equals(tmp)) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 }

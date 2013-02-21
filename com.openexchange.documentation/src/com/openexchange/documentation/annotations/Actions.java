@@ -59,10 +59,10 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Actions {
-    
+
     /**
      * Specifies the actions. Required.
-     * 
+     *
      * @return The actions
      */
     Action[] value();

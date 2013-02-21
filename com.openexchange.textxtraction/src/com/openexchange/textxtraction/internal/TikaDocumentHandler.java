@@ -56,7 +56,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.nio.charset.UnsupportedCharsetException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
@@ -79,7 +78,6 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.textxtraction.TextXtractExceptionCodes;
 
@@ -202,8 +200,8 @@ public final class TikaDocumentHandler {
         try {
             final ByteArrayOutputStream bout = Streams.newByteArrayOutputStream(8192);
             TEXT.process(stream, bout, this);
-            return new String(bout.toByteArray(), Charsets.forName(encoding));
-        } catch (final UnsupportedCharsetException e) {
+            return bout.toString(encoding);
+        } catch (final UnsupportedEncodingException e) {
             throw TextXtractExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(stream);

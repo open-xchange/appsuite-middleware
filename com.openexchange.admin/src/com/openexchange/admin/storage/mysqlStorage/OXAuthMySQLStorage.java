@@ -71,7 +71,7 @@ import com.openexchange.admin.tools.GenericChecks;
 
 /**
  * Default mysql implementation for admin auth.
- * 
+ *
  * @author cutmasta
  */
 public class OXAuthMySQLStorage extends OXAuthStorageInterface {
@@ -88,9 +88,9 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
     }
 
     /**
-     * 
+     *
      * Authenticates the admin user of the system within context.
-     * 
+     *
      */
     @Override
     public boolean authenticate(final Credentials authdata, final Context ctx) throws StorageException {
@@ -197,7 +197,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
 //                    log.error(e.getMessage(), e);
 //                    throw new StorageException(e);
 //                }
-//                
+//
 //            }
         } else {
             return false;

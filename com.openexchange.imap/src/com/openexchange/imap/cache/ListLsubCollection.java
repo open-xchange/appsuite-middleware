@@ -449,7 +449,7 @@ final class ListLsubCollection {
 
     /**
      * Initializes ACL lists.
-     * 
+     *
      * @param imapFolder The IMAP folder to obtain <tt>IMAPProtocol</tt> instance from
      * @throws MessagingException If ACL capability cannot be checked
      */
@@ -664,7 +664,7 @@ final class ListLsubCollection {
 
     /**
      * Lists special folders via <code>LIST (SPECIAL-USE) "" "*"</code>.
-     * 
+     *
      * @param protocol The associated IMAP protocol
      * @throws ProtocolException If a protocol error occurs
      */
@@ -1029,7 +1029,7 @@ final class ListLsubCollection {
          * Perform command: LIST "" <full-name>
          */
         final String mbox = BASE64MailboxEncoder.encode(fullName);
-        final Argument args = new Argument();   
+        final Argument args = new Argument();
         args.writeString(mbox);
         final Response[] r = performCommand(protocol, "LIST \"\"", args);
         final Response response = r[r.length - 1];
@@ -1077,7 +1077,7 @@ final class ListLsubCollection {
         /*
          * Perform command: LIST "" <full-name>
          */
-        final Argument args = new Argument();   
+        final Argument args = new Argument();
         args.writeString(mbox);
         final Response[] r = performCommand(protocol, "LSUB \"\"", args);
         final Response response = r[r.length - 1];
@@ -1352,7 +1352,7 @@ final class ListLsubCollection {
      * Gets the LIST entry marked with "\Drafts" attribute.
      * <p>
      * Needs the <code>"SPECIAL-USE"</code> capability.
-     * 
+     *
      * @return The entry or <code>null</code>
      */
     public ListLsubEntryImpl getDraftsEntry() {
@@ -1363,7 +1363,7 @@ final class ListLsubCollection {
      * Gets the LIST entry marked with "\Junk" attribute.
      * <p>
      * Needs the <code>"SPECIAL-USE"</code> capability.
-     * 
+     *
      * @return The entry or <code>null</code>
      */
     public ListLsubEntryImpl getJunkEntry() {
@@ -1374,7 +1374,7 @@ final class ListLsubCollection {
      * Gets the LIST entry marked with "\Sent" attribute.
      * <p>
      * Needs the <code>"SPECIAL-USE"</code> capability.
-     * 
+     *
      * @return The entry or <code>null</code>
      */
     public ListLsubEntryImpl getSentEntry() {
@@ -1385,7 +1385,7 @@ final class ListLsubCollection {
      * Gets the LIST entry marked with "\Trash" attribute.
      * <p>
      * Needs the <code>"SPECIAL-USE"</code> capability.
-     * 
+     *
      * @return The entry or <code>null</code>
      */
     public ListLsubEntryImpl getTrashEntry() {
@@ -1394,7 +1394,7 @@ final class ListLsubCollection {
 
     /**
      * Gets the LIST entry for specified full name.
-     * 
+     *
      * @param fullName The full name
      * @return The LIST entry for specified full name or <code>null</code>
      */
@@ -1408,7 +1408,7 @@ final class ListLsubCollection {
 
     /**
      * Gets the LSUB entry for specified full name.
-     * 
+     *
      * @param fullName The full name
      * @return The LSUB entry for specified full name or <code>null</code>
      */
@@ -2060,10 +2060,11 @@ final class ListLsubCollection {
             sb.append("<missing stack trace>\n");
             return;
         }
+        final String lineSeparator = System.getProperty("line.separator");
         for (final StackTraceElement ste : trace) {
             final String className = ste.getClassName();
             if (null != className) {
-                sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                sb.append("    at ").append(className).append('.').append(ste.getMethodName());
                 if (ste.isNativeMethod()) {
                     sb.append("(Native Method)");
                 } else {
@@ -2079,7 +2080,7 @@ final class ListLsubCollection {
                         sb.append(')');
                     }
                 }
-                sb.append('\n');
+                sb.append(lineSeparator);
             }
         }
     }

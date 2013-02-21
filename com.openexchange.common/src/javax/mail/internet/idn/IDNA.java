@@ -55,7 +55,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * {@link IDNA} - Helper class for internationalized domain names (IDN).
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IDNA {
@@ -77,7 +77,7 @@ public final class IDNA {
      * href="http://blog.http.net/code/gnu-libidn-eszett-hotfix/">http.net</a>!
      * <p>
      * <code>"someone@m&uuml;ller.de"</code> is converted to <code>"someone@xn--mller-kva.de"</code>
-     * 
+     *
      * @param idnAddress The unicode representation of an internet address
      * @return The ASCII-encoded (punycode) of given internet address or <code>null</code> if argument is <code>null</code>
      * @throws AddressException If ASCII representation of given internet address cannot be created
@@ -95,10 +95,10 @@ public final class IDNA {
             if (pos == length - 1) {
                 return idnAddress;
             }
-            return new com.openexchange.java.StringAllocator(length + 8).append(idnAddress.substring(0, pos)).append('@').append(
+            return new StringBuilder(length + 8).append(idnAddress.substring(0, pos)).append('@').append(
                 gnu.inet.encoding.IDNA.toASCII(idnAddress.substring(pos + 1), true)).toString();
         } catch (final gnu.inet.encoding.IDNAException e) {
-            throw new AddressException(new com.openexchange.java.StringAllocator(e.getMessage()).append(": ").append(idnAddress).toString());
+            throw new AddressException(new StringBuilder(e.getMessage()).append(": ").append(idnAddress).toString());
         }
     }
 
@@ -110,7 +110,7 @@ public final class IDNA {
      * href="http://blog.http.net/code/gnu-libidn-eszett-hotfix/">http.net</a>!
      * <p>
      * <code>"someone@xn--mller-kva.de"</code> is converted to <code>"someone@m&uuml;ller.de"</code>
-     * 
+     *
      * @param aceAddress The ASCII-encoded (punycode) address
      * @return The unicode representation of given internet address or <code>null</code> if argument is <code>null</code>
      */
@@ -122,7 +122,7 @@ public final class IDNA {
         if (pos < 0 || aceAddress.indexOf(ACE_PREFIX) < 0) {
             return aceAddress;
         }
-        return new com.openexchange.java.StringAllocator(aceAddress.length()).append(aceAddress.substring(0, pos)).append('@').append(
+        return new StringBuilder(aceAddress.length()).append(aceAddress.substring(0, pos)).append('@').append(
             gnu.inet.encoding.IDNA.toUnicode(aceAddress.substring(pos + 1), true)).toString();
     }
 
@@ -133,7 +133,7 @@ public final class IDNA {
     /**
      * Converts a Unicode string to ASCII using the procedure in RFC3490 section 4.1. Unassigned characters are not allowed and STD3 ASCII
      * rules are enforced. The input string may be a domain name containing dots.
-     * 
+     *
      * @param unicodeHostName The host name as Unicode string.
      * @return The encoded host name or <code>null</code> if argument is <code>null</code>
      */
@@ -147,7 +147,7 @@ public final class IDNA {
                 return gnu.inet.encoding.IDNA.toASCII(unicodeHostName, true);
             }
             pos += SCHEME_DELIM.length();
-            final com.openexchange.java.StringAllocator b = new com.openexchange.java.StringAllocator(unicodeHostName.length() + 16);
+            final StringBuilder b = new StringBuilder(unicodeHostName.length() + 16);
             b.append(unicodeHostName.substring(0, pos));
             final String host = unicodeHostName.substring(pos);
             pos = -1;
@@ -169,7 +169,7 @@ public final class IDNA {
     /**
      * Converts an ASCII-encoded string to Unicode. Unassigned characters are not allowed and STD3 host names are enforced. Input may be
      * domain name containing dots.
-     * 
+     *
      * @param asciiHostName The host name as ASCII string.
      * @return The Unicode host name or <code>null</code> if argument is <code>null</code>
      */
@@ -182,7 +182,7 @@ public final class IDNA {
             return gnu.inet.encoding.IDNA.toUnicode(asciiHostName, true);
         }
         pos += SCHEME_DELIM.length();
-        final com.openexchange.java.StringAllocator b = new com.openexchange.java.StringAllocator(asciiHostName.length());
+        final StringBuilder b = new StringBuilder(asciiHostName.length());
         b.append(asciiHostName.substring(0, pos));
         final String host = asciiHostName.substring(pos);
         pos = -1;
@@ -199,7 +199,7 @@ public final class IDNA {
 
     /**
      * Checks whether the specified string's characters are ASCII 7 bit
-     * 
+     *
      * @param s The string to check
      * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
      */

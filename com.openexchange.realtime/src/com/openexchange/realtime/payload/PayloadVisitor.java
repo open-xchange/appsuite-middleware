@@ -49,17 +49,15 @@
 
 package com.openexchange.realtime.payload;
 
-import com.openexchange.realtime.util.ElementPath;
-
 /**
  * {@link PayloadVisitor} - Visits a payload object.
- * 
+ *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public interface PayloadVisitor {
 
     /**
-     * Visit the Payload object. 
+     * Visit the Payload object.
      * @param element The PayloadElement
      * @param data The PayloadData
      */

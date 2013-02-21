@@ -78,27 +78,27 @@ public class DeclineCounterITipAnalyzerTest extends AbstractITipAnalyzerTest {
         List<ITipMethod> methods = new DeclineCounterITipAnalyzer(null, null).getMethods();
         assertEquals(Arrays.asList(ITipMethod.DECLINECOUNTER), methods);
     }
-    
+
     @Test
     public void testDeclineCounter() throws OXException {
-        
+
         CalendarDataObject appointment = appointment("123-123-123-123");
         CalendarDataObject declinedFor = appointment("123-123-123-123");
         declinedFor.setObjectID(12);
-        
+
         ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.DECLINECOUNTER);
         message.setAppointment(appointment);
-        
+
         SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(declinedFor);
-        
+
         ITipAnalysis analysis = new DeclineCounterITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
-        
+
         assertEquals(12, analysis.getAnnotations().get(0).getAppointment().getObjectID());
         assertActions(analysis, ITipAction.DECLINE, ITipAction.REFRESH);
     }
-    
+
     @Test
     public void testDeclineCounterOfAnException() throws OXException {
         CalendarDataObject appointment = appointment("123-123-123-123");
@@ -106,48 +106,48 @@ public class DeclineCounterITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
         CalendarDataObject declinedForMaster = appointment("123-123-123-123");
         declinedForMaster.setObjectID(12);
-        
+
         CalendarDataObject declinedForException = appointment("123-123-123-123");
         declinedForException.setObjectID(13);
         declinedForException.setRecurrenceDatePosition(new Date(12345));
-        
+
         ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.DECLINECOUNTER);
         message.addException(appointment);
-        
+
         SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(declinedForMaster);
         integrationBuilder.expectCall("getExceptions", declinedForMaster, session).andReturn(new ArrayList<CalendarDataObject>(Arrays.asList(declinedForException)));
-        
-        
+
+
         ITipAnalysis analysis = new DeclineCounterITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
-        
+
         assertEquals(13, analysis.getAnnotations().get(0).getAppointment().getObjectID());
         assertActions(analysis, ITipAction.DECLINE, ITipAction.REFRESH);
     }
-    
+
     // Error Cases
     @Test
     public void testDeclineCounterForNonExistingAppointment() throws OXException {
-        
+
         CalendarDataObject appointment = appointment("123-123-123-123");
-        
+
         ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.DECLINECOUNTER);
         message.setAppointment(appointment);
-        
+
         SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(null);
-        
+
         ITipAnalysis analysis = new DeclineCounterITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
-        
+
         List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
         assertEquals("The organizer declined your counter proposal for an appointment that could not be found. It was probably deleted in the meantime.", annotations.get(0).getMessage());
-        
+
         assertActions(analysis, ITipAction.IGNORE, ITipAction.REFRESH);
     }
-    
+
     @Test
     public void testDeclineCounterForNonExistingException() throws OXException {
         CalendarDataObject appointment = appointment("123-123-123-123");
@@ -155,51 +155,51 @@ public class DeclineCounterITipAnalyzerTest extends AbstractITipAnalyzerTest {
 
         CalendarDataObject declinedForMaster = appointment("123-123-123-123");
         declinedForMaster.setObjectID(12);
-        
+
         CalendarDataObject declinedForException = appointment("123-123-123-123");
         declinedForException.setObjectID(13);
         declinedForException.setRecurrenceDatePosition(new Date(54321000000L));
-        
+
         ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.DECLINECOUNTER);
         message.addException(appointment);
-        
+
         SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(declinedForMaster);
         integrationBuilder.expectCall("getExceptions", declinedForMaster, session).andReturn(new ArrayList<CalendarDataObject>(Arrays.asList(declinedForException)));
-        
-        
+
+
         ITipAnalysis analysis = new DeclineCounterITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
-        
+
         List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
         assertEquals("The organizer declined your counter proposal for an appointment that could not be found. It was probably deleted in the meantime.", annotations.get(0).getMessage());
-        
+
         assertActions(analysis, ITipAction.IGNORE, ITipAction.REFRESH);
     }
-    
+
     @Test
     public void testIrrelevantSequenceNumber() throws OXException {
         CalendarDataObject appointment = appointment("123-123-123-123");
         appointment.setSequence(1);
         CalendarDataObject declinedFor = appointment("123-123-123-123");
         declinedFor.setSequence(2);
-        
+
         ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.DECLINECOUNTER);
         message.setAppointment(appointment);
-        
+
         SimBuilder integrationBuilder = new SimBuilder();
         integrationBuilder.expectCall("resolveUid", "123-123-123-123", session).andReturn(declinedFor);
-        
+
         ITipAnalysis analysis = new DeclineCounterITipAnalyzer(integrationBuilder.getSim(ITipIntegrationUtility.class), null).analyze(message, null, null, session);
-        
+
         List<ITipAnnotation> annotations = analysis.getAnnotations();
         assertEquals(1, annotations.size());
         assertEquals("This is an update to an appointment that has been changed in the meantime. Best ignore it.", annotations.get(0).getMessage());
-        
+
         assertActions(analysis, ITipAction.IGNORE);
     }
-    
+
 
 }

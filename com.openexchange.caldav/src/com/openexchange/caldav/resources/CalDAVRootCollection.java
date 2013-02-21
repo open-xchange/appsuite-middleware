@@ -52,7 +52,6 @@ package com.openexchange.caldav.resources;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
@@ -73,17 +72,17 @@ import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
 /**
- * {@link CalDAVRootCollection} 
+ * {@link CalDAVRootCollection}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class CalDAVRootCollection extends CommonCollection {
-    
+
     /**
      * The reserved tree identifier for MS Outlook folder tree: <code>"1"</code>.
      * (copied from com.openexchange.folderstorage.outlook)
      */
-    private static final String OUTLOOK_TREE_ID = "1"; 
+    private static final String OUTLOOK_TREE_ID = "1";
 
     private final GroupwareCaldavFactory factory;
     private String trashFolderID;
@@ -91,19 +90,19 @@ public class CalDAVRootCollection extends CommonCollection {
 
     /**
      * Initializes a new {@link CalDAVRootCollection}.
-     * 
+     *
      * @param factory the factory
      */
     public CalDAVRootCollection(GroupwareCaldavFactory factory) {
         super(factory, new WebdavPath());
         this.factory = factory;
     }
-    
+
     @Override
     protected GroupwareCaldavFactory getFactory() {
         return this.factory;
     }
-    
+
     protected FolderService getFolderService() {
         return factory.getFolderService();
     }
@@ -130,35 +129,49 @@ public class CalDAVRootCollection extends CommonCollection {
         try {
             for (UserizedFolder folder : getSubfolders()) {
                 if (name.equals(folder.getID())) {
+                    LOG.debug(this.getUrl() + ": found child collection by name '" + name + "'");
                     return createCollection(folder);
                 }
             }
+            LOG.debug(this.getUrl() + ": child collection '" + name + "' not found, creating placeholder collection");
+            return new UndecidedFolderCollection(factory, constructPathForChildResource(name));
+
         } catch (OXException e) {
             throw protocolException(e);
         }
-        throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+//        throw protocolException(HttpServletResponse.SC_NOT_FOUND);
     }
-    
+
+//    private CalDAVFolderCollection<?> createCollection(UserizedFolder folder) throws OXException {
+//        if (TaskContentType.getInstance().equals(folder.getContentType())) {
+//            return new TaskCollection(factory, constructPathForChildResource(folder), folder);
+//        } else if (CalendarContentType.getInstance().equals(folder.getContentType())) {
+//            return new AppointmentCollection(factory, constructPathForChildResource(folder), folder);
+//        } else {
+//            throw new UnsupportedOperationException("content type " + folder.getContentType() + " not supported");
+//        }
+//    }
+
     private CalDAVFolderCollection<?> createCollection(UserizedFolder folder) throws OXException {
         if (TaskContentType.getInstance().equals(folder.getContentType())) {
-            return new TaskCollection(factory, constructPathForChildResource(folder), folder);            
+            return new TaskCollection(factory, constructPathForChildResource(folder), folder);
         } else if (CalendarContentType.getInstance().equals(folder.getContentType())) {
-            return new AppointmentCollection(factory, constructPathForChildResource(folder), folder);            
+            return new AppointmentCollection(factory, constructPathForChildResource(folder), folder);
         } else {
             throw new UnsupportedOperationException("content type " + folder.getContentType() + " not supported");
         }
     }
-    
+
     private CalDAVFolderCollection<?> createCollection(UserizedFolder folder, int order) throws OXException {
         if (TaskContentType.getInstance().equals(folder.getContentType())) {
-            return new TaskCollection(factory, constructPathForChildResource(folder), folder, order);            
+            return new TaskCollection(factory, constructPathForChildResource(folder), folder, order);
         } else if (CalendarContentType.getInstance().equals(folder.getContentType())) {
-            return new AppointmentCollection(factory, constructPathForChildResource(folder), folder, order);            
+            return new AppointmentCollection(factory, constructPathForChildResource(folder), folder, order);
         } else {
             throw new UnsupportedOperationException("content type " + folder.getContentType() + " not supported");
         }
     }
-    
+
     @Override
     public List<WebdavResource> getChildren() throws WebdavProtocolException {
         List<WebdavResource> children = new ArrayList<WebdavResource>();
@@ -183,7 +196,7 @@ public class CalDAVRootCollection extends CommonCollection {
 
     /**
      * Constructs a string representing the WebDAV name for a folder resource.
-     * 
+     *
      * @param folder the folder to construct the name for
      * @return the name
      */
@@ -194,7 +207,7 @@ public class CalDAVRootCollection extends CommonCollection {
     private WebdavPath constructPathForChildResource(UserizedFolder folder) {
         return constructPathForChildResource(constructNameForChildResource(folder));
     }
-    
+
     /**
      * Gets a list of all visible and subscribed calendar folders in the configured folder tree.
      * @return
@@ -208,12 +221,12 @@ public class CalDAVRootCollection extends CommonCollection {
         folders.addAll(getVisibleFolders(PrivateType.getInstance(), TaskContentType.getInstance()));
         return folders;
     }
-    
+
     /**
      * Gets a list containing all visible folders of the given {@link Type}.
      * @param type
      * @return
-     * @throws FolderException 
+     * @throws FolderException
      */
     private List<UserizedFolder> getVisibleFolders(Type type, ContentType contentType) throws OXException {
         List<UserizedFolder> folders = new ArrayList<UserizedFolder>();
@@ -227,16 +240,16 @@ public class CalDAVRootCollection extends CommonCollection {
         }
         return folders;
     }
-    
+
     /**
      * Gets the id of the default trash folder
-     * 
+     *
      * @return
      */
     private String getTrashFolderID() {
         if (null == trashFolderID) {
             try {
-                trashFolderID = getFolderService().getDefaultFolder(factory.getUser(), OUTLOOK_TREE_ID, 
+                trashFolderID = getFolderService().getDefaultFolder(factory.getUser(), OUTLOOK_TREE_ID,
                         TrashContentType.getInstance(), factory.getSession(), null).getID();
             } catch (OXException e) {
                 LOG.warn("unable to determine default trash folder", e);
@@ -244,15 +257,15 @@ public class CalDAVRootCollection extends CommonCollection {
         }
         return this.trashFolderID;
     }
-    
+
     /**
-     * Checks whether the supplied folder is a trash folder, i.e. one of 
+     * Checks whether the supplied folder is a trash folder, i.e. one of
      * it's parent folders is the default trash folder.
-     * 
+     *
      * @param folder
      * @return
      * @throws WebdavProtocolException
-     * @throws FolderException 
+     * @throws FolderException
      */
     private boolean isTrashFolder(UserizedFolder folder) throws OXException {
         String trashFolderId = this.getTrashFolderID();

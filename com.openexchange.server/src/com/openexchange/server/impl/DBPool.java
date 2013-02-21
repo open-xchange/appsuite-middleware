@@ -77,38 +77,54 @@ public class DBPool  {
     }
 
     public static final boolean push(final Connection con) {
-        Database.back(false, con);
+        if (null != con) {
+            Database.back(false, con);
+        }
         return true;
     }
 
     public static final boolean push(final Context context, final Connection con) {
-        Database.back(context, false, con);
+        if (null != con) {
+            Database.back(context, false, con);
+        }
         return true;
     }
 
     public static final boolean pushWrite(final Connection con) {
-        Database.back(true, con);
+        if (null != con) {
+            Database.back(true, con);
+        }
         return true;
     }
 
     public static final boolean pushWrite(final Context context, final Connection con) {
-        Database.back(context, true, con);
+        if (null != con) {
+            Database.back(context, true, con);
+        }
         return true;
     }
 
     public static final void closeReaderSilent(final Connection con) {
-        Database.back(false, con);
+        if (null != con) {
+            Database.back(false, con);
+        }
     }
 
     public static final void closeReaderSilent(final Context context, final Connection con) {
-        Database.back(context, false, con);
+        if (null != con) {
+            Database.back(context, false, con);
+        }
     }
 
     public static final void closeWriterSilent(final Connection con) {
-        Database.back(true, con);
+        if (null != con) {
+            Database.back(true, con);
+        }
     }
 
     public static final void closeWriterSilent(final Context context, final Connection con) {
-        Database.back(context, true, con);
+        if (null != con) {
+            Database.back(context, true, con);
+        }
     }
 }

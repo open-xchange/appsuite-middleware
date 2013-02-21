@@ -80,7 +80,7 @@ public class Tree<T> {
         if (pNode == null) {
             return false;
         } else {
-            final Node<T> node = new Node<T>(toAdd, pNode);            
+            final Node<T> node = new Node<T>(toAdd, pNode);
             if (pNode.addChild(node)) {
                 nodes.put(toAdd, node);
                 return true;
@@ -121,19 +121,19 @@ public class Tree<T> {
 
     public boolean removeChild(final T object) {
         removeChildRecursive(object);
-        
+
         final Node<T> node = nodes.get(object);
         if (node != null) {
             final Node<T> parent = node.getParent();
             if (parent.removeChild(node)) {
                 removeChildRecursive(object);
                 return true;
-            }         
+            }
         }
 
         return false;
     }
-    
+
     private void removeChildRecursive(final T object) {
         final Node<T> node = nodes.remove(object);
         if (node != null && !node.isLeaf()) {
@@ -169,11 +169,11 @@ public class Tree<T> {
 
         return false;
     }
-    
+
     public Set<T> getAllNodesAsSet() {
         final Set<T> set = new HashSet<T>();
         set.addAll(nodes.keySet());
-        
+
         return set;
     }
 

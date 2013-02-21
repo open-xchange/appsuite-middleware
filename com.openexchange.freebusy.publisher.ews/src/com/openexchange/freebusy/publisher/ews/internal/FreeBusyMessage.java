@@ -69,11 +69,11 @@ import com.openexchange.freebusy.FreeBusyData;
 
 /**
  * {@link FreeBusyMessage}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class FreeBusyMessage {
-    
+
     private static final PathToExtendedFieldType PidTagScheduleInfoMonthsTentative = pathTo("0x6851", INTEGER_ARRAY);
     private static final PathToExtendedFieldType PidTagScheduleInfoFreeBusyTentative = pathTo("0x6852", BINARY_ARRAY);
     private static final PathToExtendedFieldType PidTagScheduleInfoMonthsBusy = pathTo("0x6853", INTEGER_ARRAY);
@@ -91,29 +91,29 @@ public class FreeBusyMessage {
     private static final PathToExtendedFieldType PidTagGatewayNeedsToRefresh = pathTo("0x6846", BOOLEAN);
 
     private final EncodedFreeBusyData encodedData;
-    
+
     /**
      * Initializes a new {@link FreeBusyMessage}.
-     * 
+     *
      * @param freeBusyData The free/busy data to use
      */
     public FreeBusyMessage(EncodedFreeBusyData freeBusyData) {
         super();
         this.encodedData = freeBusyData;
     }
-    
+
     /**
      * Initializes a new {@link FreeBusyMessage}.
-     * 
+     *
      * @param freeBusyData The free/busy data to use
      */
     public FreeBusyMessage(FreeBusyData freeBusyData) {
         this(new EncodedFreeBusyData(freeBusyData));
     }
-    
+
     /**
      * Creates a {@link PostItemType} for this  free/busy message.
-     * 
+     *
      * @return The post item
      */
     public PostItemType createPostItem(String emailAddress, String subject) {
@@ -124,21 +124,21 @@ public class FreeBusyMessage {
         properties.add(createExtendedProperty(PidTagGatewayNeedsToRefresh, "1"));
         properties.add(createExtendedProperty(PidTagNormalizedSubject, subject));
         properties.add(createExtendedProperty(PidTagFreeBusyMessageEmailAddress, emailAddress));
-        addScheduleInfo(properties, PidTagScheduleInfoMonthsMerged, encodedData.getMergedMonths(), 
+        addScheduleInfo(properties, PidTagScheduleInfoMonthsMerged, encodedData.getMergedMonths(),
                 PidTagScheduleInfoFreeBusyMerged, encodedData.getMergedTimes());
-        addScheduleInfo(properties, PidTagScheduleInfoMonthsBusy, encodedData.getBusyMonths(), 
+        addScheduleInfo(properties, PidTagScheduleInfoMonthsBusy, encodedData.getBusyMonths(),
                 PidTagScheduleInfoFreeBusyBusy, encodedData.getBusyTimes());
-        addScheduleInfo(properties, PidTagScheduleInfoMonthsAway, encodedData.getAwayMonths(), 
+        addScheduleInfo(properties, PidTagScheduleInfoMonthsAway, encodedData.getAwayMonths(),
                 PidTagScheduleInfoFreeBusyAway, encodedData.getAwayTimes());
-        addScheduleInfo(properties, PidTagScheduleInfoMonthsTentative, encodedData.getTentativeMonths(), 
+        addScheduleInfo(properties, PidTagScheduleInfoMonthsTentative, encodedData.getTentativeMonths(),
                 PidTagScheduleInfoFreeBusyTentative, encodedData.getTentativeTimes());
         properties.add(createExtendedProperty(PidTagFreeBusyPublishStart, Long.toString(encodedData.getPublishStart())));
         properties.add(createExtendedProperty(PidTagFreeBusyPublishEnd, Long.toString(encodedData.getPublishEnd())));
         properties.add(createExtendedProperty(PidTagFreeBusyRangeTimestamp, getSystemTimeString(new Date())));
-        return postItem;        
+        return postItem;
     }
-    
-    private static void addScheduleInfo(List<ExtendedPropertyType> properties, PathToExtendedFieldType fieldURIMonths, List<Integer> months, 
+
+    private static void addScheduleInfo(List<ExtendedPropertyType> properties, PathToExtendedFieldType fieldURIMonths, List<Integer> months,
         PathToExtendedFieldType fieldURIFreeBusy, List<String> freeBusy) {
         if (null != months) {
             properties.add(createExtendedProperty(fieldURIMonths, createArrayOfPropertyTypes(months)));
@@ -147,11 +147,11 @@ public class FreeBusyMessage {
             properties.add(createExtendedProperty(fieldURIFreeBusy, createArrayOfPropertyTypes(freeBusy)));
         }
     }
-    
+
     /**
-     * Gets an Exchange representation of the supplied date to be used in 
+     * Gets an Exchange representation of the supplied date to be used in
      * <code>MapiPropertyTypeType.SYSTEM_TIME</code> properties.
-     * 
+     *
      * @param date the date
      * @return the formatted system time string
      */
@@ -160,7 +160,7 @@ public class FreeBusyMessage {
         exchangeDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return exchangeDateFormat.format(date);
     }
-    
+
     private static <T> NonEmptyArrayOfPropertyValuesType createArrayOfPropertyTypes(List<T> values) {
         NonEmptyArrayOfPropertyValuesType nonEmptyArrayOfPropertyValuesType = new NonEmptyArrayOfPropertyValuesType();
         for (T t : values) {
@@ -185,7 +185,7 @@ public class FreeBusyMessage {
 
     /**
      * Constructs a {@link PathToExtendedFieldType} using a property's tag and type.
-     * 
+     *
      * @param propertyTag The property tag
      * @param propertyType The property type
      * @return the path to the extended field structure
@@ -196,5 +196,5 @@ public class FreeBusyMessage {
         extendedField.setPropertyType(propertyType);
         return extendedField;
     }
-    
+
 }

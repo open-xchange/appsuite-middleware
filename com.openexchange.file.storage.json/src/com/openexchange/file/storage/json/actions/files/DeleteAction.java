@@ -59,7 +59,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 
 /**
  * {@link DeleteAction}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 @Action(method = RequestMethod.PUT, name = "delete", description = "Delete infoitems", parameters = {

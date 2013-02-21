@@ -70,7 +70,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class LdapExecutor  {
-    
+
     private static org.apache.commons.logging.Log LOG = Log.loggerFor(LdapExecutor.class);
 
     private final LdapFactory factory;
@@ -78,7 +78,7 @@ public class LdapExecutor  {
     private String defaultNamingContext;
 
     public LdapExecutor(LdapFactory factory, Session session) throws OXException {
-        super();        
+        super();
         this.factory = factory;
         this.context = factory.createContext(session);
     }
@@ -90,7 +90,7 @@ public class LdapExecutor  {
             throw LdapExceptionCodes.ERROR_GETTING_ATTRIBUTE.create(e, e.getMessage());
         }
     }
-    
+
     public List<LdapResult> search(String baseDN, String filter, String[] attributeNames, SortKey[] sortKeys, int maxResults) throws OXException {
         SearchControls searchControls = factory.createSearchControls(attributeNames, maxResults);
         if (null == baseDN) {
@@ -98,14 +98,14 @@ public class LdapExecutor  {
         }
         return search(baseDN, filter, searchControls, sortKeys, false);
     }
-    
+
     public List<LdapResult> searchDeleted(String filter, String[] attributeNames, SortKey[] sortKeys, int maxResults) throws OXException {
         SearchControls searchControls = factory.createSearchControls(attributeNames, maxResults);
         String searchFilter = null != filter ? "(&" + filter + "(isDeleted=TRUE))" : "(isDeleted=TRUE)";
         String baseDN = getDefaultNamingContext();
         return search(baseDN, searchFilter, searchControls, sortKeys, true);
     }
-    
+
     private List<LdapResult> search(String baseDN, String filter, SearchControls searchControls, SortKey[] sortKeys, boolean deleted) throws OXException {
         List<LdapResult> results = new ArrayList<LdapResult>();
         byte[] cookie = null;
@@ -125,7 +125,7 @@ public class LdapExecutor  {
             throw LdapExceptionCodes.LDAP_ERROR.create(e, e.getMessage());
         }
     }
-    
+
     private byte[] extractPagedResultsCookie() throws NamingException {
         Control[] controls = context.getResponseControls();
         if (null != controls && 0 < controls.length) {
@@ -137,7 +137,7 @@ public class LdapExecutor  {
         }
         return null;
     }
-    
+
     private String getDefaultNamingContext() throws OXException {
         if (null == this.defaultNamingContext) {
             this.defaultNamingContext = discoverDefaultNamingContext();

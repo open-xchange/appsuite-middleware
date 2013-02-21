@@ -53,7 +53,7 @@ import com.openexchange.groupware.search.Order;
 
 /**
  * {@link SortInfo}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SortInfo {
@@ -64,7 +64,7 @@ public final class SortInfo {
 
     /**
      * Initializes a new {@link SortInfo}.
-     * 
+     *
      * @param field The field
      * @param sort The sort order
      */

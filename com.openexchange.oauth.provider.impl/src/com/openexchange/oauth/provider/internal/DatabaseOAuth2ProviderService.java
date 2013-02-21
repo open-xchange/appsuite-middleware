@@ -92,7 +92,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link DatabaseOAuth2ProviderService} - The database OAuth v2 provider implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DatabaseOAuth2ProviderService extends AbstractOAuthProviderService implements OAuth2ProviderService {
@@ -110,7 +110,7 @@ public final class DatabaseOAuth2ProviderService extends AbstractOAuthProviderSe
 
     /**
      * Initializes a new {@link DatabaseOAuth2ProviderService}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public DatabaseOAuth2ProviderService(final ServiceLookup services) throws OXException {
@@ -128,7 +128,7 @@ public final class DatabaseOAuth2ProviderService extends AbstractOAuthProviderSe
 
     /**
      * Loads consumers from database
-     * 
+     *
      * @param databaseService The database service
      * @throws OXException If loading consumers fails
      */
@@ -343,7 +343,7 @@ public final class DatabaseOAuth2ProviderService extends AbstractOAuthProviderSe
 
     /**
      * Looks-up client by identifier.
-     * 
+     *
      * @param id The client identifier
      * @return The client or <code>null</code>
      */

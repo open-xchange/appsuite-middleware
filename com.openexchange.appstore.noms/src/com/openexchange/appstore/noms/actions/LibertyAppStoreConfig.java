@@ -51,8 +51,6 @@ package com.openexchange.appstore.noms.actions;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Collection;
-
 import org.apache.commons.codec.binary.Base64;
 
 /**
@@ -66,7 +64,7 @@ public class LibertyAppStoreConfig {
     private final String gatewayQuery;
     private String userName;
     private String password;
-	
+
 	public LibertyAppStoreConfig(String url, String storefront, String gateway, String gatewayQuery, String userName, String password) {
 		super();
 		this.url = url;
@@ -84,11 +82,11 @@ public class LibertyAppStoreConfig {
 	public void setUrl(String url) {
 		this.url = url;
 	}
-	
+
 	public String getStorefront() {
 		return storefront;
 	}
-	
+
 	public String getStorefrontWithSubstitutions() {
 		String ret = getStorefront();
 		ret = ret.replace("[user]", enc(getUserName()));
@@ -118,20 +116,20 @@ public class LibertyAppStoreConfig {
 
 	public String getAppLink(String app, String path) {
 		String query = gatewayQuery.replace("[app]", enc(app)).replace("[path]", path).replace("[user]", enc(getUserName())).replace("[password]", enc(getPassword()));
-	
+
 		try {
 			return gateway + "?coded=" + URLEncoder.encode(Base64.encodeBase64String(query.getBytes()), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return null;
 		}
-		
+
 	}
 
 	public String getMarkup(String parameter) {
 		return parameter.replace("[user]", enc(getUserName())).replace("[password]", enc(getPassword()));
 	}
-	
+
 	private String enc(String s) {
 		try {
 			return URLEncoder.encode(s, "UTF-8");
@@ -139,5 +137,5 @@ public class LibertyAppStoreConfig {
 			return s;
 		}
 	}
-	
+
 }

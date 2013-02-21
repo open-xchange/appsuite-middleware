@@ -57,14 +57,17 @@ import javax.management.ObjectName;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.caching.CacheInformationMBean;
 import com.openexchange.caching.CacheKeyService;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.DefaultCacheKeyService;
+import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.internal.JCSCacheInformation;
 import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
+import com.openexchange.caching.internal.NotifyingCache;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
@@ -103,7 +106,7 @@ public final class CacheActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, CacheEventService.class };
     }
 
     @Override
@@ -129,6 +132,7 @@ public final class CacheActivator extends HousekeepingActivator {
         JCSCacheServiceInit.initInstance();
         final ConfigurationService service = getService(ConfigurationService.class);
         JCSCacheServiceInit.getInstance().start(service);
+        JCSCacheServiceInit.getInstance().setCacheEventService(getService(CacheEventService.class));
         registerService(CacheKeyService.class, new DefaultCacheKeyService());
         /*
          * Register service
@@ -141,6 +145,7 @@ public final class CacheActivator extends HousekeepingActivator {
             registerService(CacheService.class, jcsCacheService, dictionary);
             cacheService = jcsCacheService;
         } else {
+            LOG.info("\n\n\tDefault cache service implementation has been disabled.\n");
             track(CacheService.class, new SimpleRegistryListener<CacheService>() {
 
                 @Override
@@ -183,6 +188,18 @@ public final class CacheActivator extends HousekeepingActivator {
             }
         }
         track(ManagementService.class, new ServiceTrackerCustomizerImpl(context));
+        track(EventAdmin.class, new SimpleRegistryListener<EventAdmin>() {
+
+            @Override
+            public void added(final ServiceReference<EventAdmin> ref, final EventAdmin service) {
+                NotifyingCache.setEventAdmin(service);
+            }
+
+            @Override
+            public void removed(final ServiceReference<EventAdmin> ref, final EventAdmin service) {
+                NotifyingCache.setEventAdmin(null);
+            }
+        });
         openTrackers();
     }
 

@@ -56,50 +56,50 @@ import java.util.Set;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class Node<T> {
-    
+
     private final T value;
-    
+
     private Node<T> parent;
-    
+
     private Set<Node<T>> children;
-    
-    
+
+
     public Node(final T value, final Node<T> parent) {
         super();
         this.value = value;
         this.parent = parent;
         children = new HashSet<Node<T>>();
     }
-    
+
     public boolean addChild(final Node<T> node) {
-        return children.add(node);      
+        return children.add(node);
     }
-    
+
     public Set<Node<T>> getChildren() {
         return new HashSet<Node<T>>(children);
     }
-    
+
     public void setChildren(final Set<Node<T>> children) {
         this.children = new HashSet<Node<T>>();
         this.children.addAll(children);
     }
-    
+
     public void setParent(final Node<T> node) {
         parent = node;
     }
-    
+
     public boolean isLeaf() {
         return children.isEmpty();
     }
-    
+
     public T getValue() {
         return value;
     }
-    
+
     public Node<T> getParent() {
         return parent;
     }
-    
+
     public Set<Node<T>> getChildren(final Node<T> node) {
         if (this.equals(node)) {
             return getChildren();
@@ -118,12 +118,12 @@ public class Node<T> {
             }
         }
     }
-    
+
     public boolean removeChild(final Node<T> child) {
         if (children.contains(child)) {
             return children.remove(child);
         }
-        
+
         return false;
     }
 
@@ -158,7 +158,7 @@ public class Node<T> {
         }
         return true;
     }
-    
+
     @Override
     public String toString() {
         return "{" + value.toString() + "}";

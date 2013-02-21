@@ -159,13 +159,7 @@ public final class Tools {
      * @throws OXException if no database connection can be obtained or an error occurs while reading the folder.
      */
     static int getUserTaskStandardFolder(final Context ctx, final int userId) throws OXException {
-        int folder;
-        try {
-            folder = new OXFolderAccess(ctx).getDefaultFolder(userId, FolderObject.TASK).getObjectID();
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
-        return folder;
+        return new OXFolderAccess(ctx).getDefaultFolder(userId, FolderObject.TASK).getObjectID();
     }
 
     /**
@@ -222,27 +216,15 @@ public final class Tools {
     }
 
     static Context getContext(final int contextId) throws OXException {
-        try {
-            return ContextStorage.getStorageContext(contextId);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return ContextStorage.getStorageContext(contextId);
     }
 
     static UserConfiguration getUserConfiguration(final Context ctx, final int userId) throws OXException {
-        try {
-            return UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
     }
 
     static User getUser(final Context ctx, final int userId) throws OXException {
-        try {
-            return UserStorage.getInstance().getUser(userId, ctx);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return UserStorage.getInstance().getUser(userId, ctx);
     }
 
 }

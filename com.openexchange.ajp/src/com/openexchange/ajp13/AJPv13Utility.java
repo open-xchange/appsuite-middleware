@@ -50,9 +50,11 @@
 package com.openexchange.ajp13;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.regex.Pattern;
+import org.apache.commons.codec.CharEncoding;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.EncoderException;
+import org.apache.commons.codec.net.URLCodec;
 
 /**
  * {@link AJPv13Utility} - Provides some utility methods for AJP processing
@@ -72,32 +74,47 @@ public final class AJPv13Utility {
 
     private static final Pattern P_MINUS = Pattern.compile("-");
 
+    private static final URLCodec URL_CODEC = new URLCodec(CharEncoding.ISO_8859_1);
+
     /**
-     * Generates URL-encoding of specified text.
-     * 
-     * @param text The text
-     * @return The URL-encoded text
+     * URL encodes given string.
+     * <p>
+     * Using <code>org.apache.commons.codec.net.URLCodec</code>.
      */
-    public static String urlEncode(final String text) {
+    public static String urlEncode(final String s) {
         try {
-            return P_MINUS.matcher(P_DOT.matcher(URLEncoder.encode(text, "iso-8859-1")).replaceAll("%2E")).replaceAll("%2D");
-        } catch (final UnsupportedEncodingException e) {
-            return text;
+            return isEmpty(s) ? s : P_MINUS.matcher(P_DOT.matcher(URL_CODEC.encode(s)).replaceAll("%2E")).replaceAll("%2D");
+        } catch (final EncoderException e) {
+            return s;
         }
     }
 
     /**
-     * Generates URL-decoding of specified text.
-     * 
-     * @param text The text
-     * @return The URL-decoded text
+     * URL decodes given string.
+     * <p>
+     * Using <code>org.apache.commons.codec.net.URLCodec</code>.
      */
-    public static String urlDecode(final String text) {
+    public static String decodeUrl(final String s, final String charset) {
         try {
-            return URLDecoder.decode(text, "iso-8859-1");
+            return isEmpty(s) ? s : (isEmpty(charset) ? URL_CODEC.decode(s) : URL_CODEC.decode(s, charset));
+        } catch (final DecoderException e) {
+            return s;
         } catch (final UnsupportedEncodingException e) {
-            return text;
+            return s;
         }
+    }
+
+    /** Checks for an empty string */
+    public static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     /**

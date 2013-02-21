@@ -53,7 +53,7 @@ package com.openexchange.loxandra.test;
  *
  */
 public class TestHelloImpl implements TestHelloService {
-	
+
 	public TestHelloImpl() {
 		System.out.println(sayHello());
 	}

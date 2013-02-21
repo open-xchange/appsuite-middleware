@@ -8,18 +8,18 @@ import javax.xml.namespace.QName;
 
 
 /**
- * This object contains factory methods for each 
- * Java content interface and Java element interface 
- * generated in the com.openexchange.admin.soap.reseller.context.rmi.dataobjects package. 
- * <p>An ObjectFactory allows you to programatically 
- * construct new instances of the Java representation 
- * for XML content. The Java representation of XML 
- * content can consist of schema derived interfaces 
- * and classes representing the binding of schema 
- * type definitions, element declarations and model 
- * groups.  Factory methods for each of these are 
+ * This object contains factory methods for each
+ * Java content interface and Java element interface
+ * generated in the com.openexchange.admin.soap.reseller.context.rmi.dataobjects package.
+ * <p>An ObjectFactory allows you to programatically
+ * construct new instances of the Java representation
+ * for XML content. The Java representation of XML
+ * content can consist of schema derived interfaces
+ * and classes representing the binding of schema
+ * type definitions, element declarations and model
+ * groups.  Factory methods for each of these are
  * provided in this class.
- * 
+ *
  */
 @XmlRegistry
 public class ObjectFactory {
@@ -63,14 +63,14 @@ public class ObjectFactory {
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: com.openexchange.admin.soap.reseller.context.rmi.dataobjects
-     * 
+     *
      */
     public ObjectFactory() {
     }
 
     /**
      * Create an instance of {@link Filestore }
-     * 
+     *
      */
     public Filestore createFilestore() {
         return new Filestore();
@@ -78,7 +78,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Database }
-     * 
+     *
      */
     public Database createDatabase() {
         return new Database();
@@ -86,7 +86,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link EnforceableDataObject }
-     * 
+     *
      */
     public EnforceableDataObject createEnforceableDataObject() {
         return new EnforceableDataObject();
@@ -94,7 +94,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Credentials }
-     * 
+     *
      */
     public Credentials createCredentials() {
         return new Credentials();
@@ -102,7 +102,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "read_idset", scope = Database.class)
     public JAXBElement<Boolean> createDatabaseReadIdset(Boolean value) {
@@ -111,7 +111,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "poolMaxset", scope = Database.class)
     public JAXBElement<Boolean> createDatabasePoolMaxset(Boolean value) {
@@ -120,7 +120,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "mandatoryMembersRegister", scope = Database.class)
     public JAXBElement<String> createDatabaseMandatoryMembersRegister(String value) {
@@ -129,7 +129,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "clusterWeightset", scope = Database.class)
     public JAXBElement<Boolean> createDatabaseClusterWeightset(Boolean value) {
@@ -138,7 +138,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "driverset", scope = Database.class)
     public JAXBElement<Boolean> createDatabaseDriverset(Boolean value) {
@@ -147,7 +147,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Integer }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "clusterWeight", scope = Database.class)
     public JAXBElement<Integer> createDatabaseClusterWeight(Integer value) {
@@ -156,7 +156,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Integer }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "poolHardLimit", scope = Database.class)
     public JAXBElement<Integer> createDatabasePoolHardLimit(Integer value) {
@@ -165,7 +165,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "loginset", scope = Database.class)
     public JAXBElement<Boolean> createDatabaseLoginset(Boolean value) {
@@ -174,7 +174,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "maxUnitsset", scope = Database.class)
     public JAXBElement<Boolean> createDatabaseMaxUnitsset(Boolean value) {
@@ -183,7 +183,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Integer }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "poolMax", scope = Database.class)
     public JAXBElement<Integer> createDatabasePoolMax(Integer value) {
@@ -192,7 +192,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "idset", scope = Database.class)
     public JAXBElement<Boolean> createDatabaseIdset(Boolean value) {
@@ -201,7 +201,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "url", scope = Database.class)
     public JAXBElement<String> createDatabaseUrl(String value) {
@@ -210,7 +210,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "poolInitialset", scope = Database.class)
     public JAXBElement<Boolean> createDatabasePoolInitialset(Boolean value) {
@@ -219,7 +219,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "master", scope = Database.class)
     public JAXBElement<Boolean> createDatabaseMaster(Boolean value) {
@@ -228,7 +228,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "mandatoryMembersCreate", scope = Database.class)
     public JAXBElement<String> createDatabaseMandatoryMembersCreate(String value) {
@@ -237,7 +237,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "masterset", scope = Database.class)
     public JAXBElement<Boolean> createDatabaseMasterset(Boolean value) {
@@ -246,7 +246,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Integer }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "id", scope = Database.class)
     public JAXBElement<Integer> createDatabaseId(Integer value) {
@@ -255,7 +255,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "urlset", scope = Database.class)
     public JAXBElement<Boolean> createDatabaseUrlset(Boolean value) {
@@ -264,7 +264,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "mandatoryMembersChange", scope = Database.class)
     public JAXBElement<String> createDatabaseMandatoryMembersChange(String value) {
@@ -273,7 +273,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Integer }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "poolInitial", scope = Database.class)
     public JAXBElement<Integer> createDatabasePoolInitial(Integer value) {
@@ -282,7 +282,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "name", scope = Database.class)
     public JAXBElement<String> createDatabaseName(String value) {
@@ -291,7 +291,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "scheme", scope = Database.class)
     public JAXBElement<String> createDatabaseScheme(String value) {
@@ -300,7 +300,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "login", scope = Database.class)
     public JAXBElement<String> createDatabaseLogin(String value) {
@@ -309,7 +309,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "driver", scope = Database.class)
     public JAXBElement<String> createDatabaseDriver(String value) {
@@ -318,7 +318,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "poolHardLimitset", scope = Database.class)
     public JAXBElement<Boolean> createDatabasePoolHardLimitset(Boolean value) {
@@ -327,7 +327,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "currentUnitsset", scope = Database.class)
     public JAXBElement<Boolean> createDatabaseCurrentUnitsset(Boolean value) {
@@ -336,7 +336,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "mandatoryMembersDelete", scope = Database.class)
     public JAXBElement<String> createDatabaseMandatoryMembersDelete(String value) {
@@ -345,7 +345,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Integer }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "maxUnits", scope = Database.class)
     public JAXBElement<Integer> createDatabaseMaxUnits(Integer value) {
@@ -354,7 +354,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "masterIdset", scope = Database.class)
     public JAXBElement<Boolean> createDatabaseMasterIdset(Boolean value) {
@@ -363,7 +363,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Integer }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "masterId", scope = Database.class)
     public JAXBElement<Integer> createDatabaseMasterId(Integer value) {
@@ -372,7 +372,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "schemeset", scope = Database.class)
     public JAXBElement<Boolean> createDatabaseSchemeset(Boolean value) {
@@ -381,7 +381,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Integer }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "currentUnits", scope = Database.class)
     public JAXBElement<Integer> createDatabaseCurrentUnits(Integer value) {
@@ -390,7 +390,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Integer }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "read_id", scope = Database.class)
     public JAXBElement<Integer> createDatabaseReadId(Integer value) {
@@ -399,7 +399,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "nameset", scope = Database.class)
     public JAXBElement<Boolean> createDatabaseNameset(Boolean value) {
@@ -408,7 +408,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link Boolean }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "passwordset", scope = Database.class)
     public JAXBElement<Boolean> createDatabasePasswordset(Boolean value) {
@@ -417,7 +417,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
-     * 
+     *
      */
     @XmlElementDecl(namespace = "http://dataobjects.rmi.admin.openexchange.com/xsd", name = "password", scope = Database.class)
     public JAXBElement<String> createDatabasePassword(String value) {

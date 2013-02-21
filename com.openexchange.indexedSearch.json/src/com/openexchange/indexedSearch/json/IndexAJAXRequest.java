@@ -58,7 +58,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link IndexAJAXRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IndexAJAXRequest {
@@ -74,7 +74,7 @@ public final class IndexAJAXRequest {
 
     /**
      * Initializes a new {@link IndexAJAXRequest}.
-     * 
+     *
      * @param session The session
      * @param request The request
      */
@@ -110,7 +110,7 @@ public final class IndexAJAXRequest {
 
     /**
      * Requires <code>int</code> parameter.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>int</code>
      * @throws OXException If parameter is missing or not a number
@@ -129,7 +129,7 @@ public final class IndexAJAXRequest {
 
     /**
      * Gets the data object.
-     * 
+     *
      * @return The data object or <code>null</code> if no data object available
      */
     public <V> V getData() {
@@ -170,7 +170,7 @@ public final class IndexAJAXRequest {
 
     /**
      * Gets optional <code>int</code> parameter.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>int</code>
      * @throws OXException If parameter is an invalid number value
@@ -187,6 +187,15 @@ public final class IndexAJAXRequest {
         }
     }
 
+    public boolean optBoolean(final String name, final boolean fallback) throws OXException {
+        final String parameter = request.getParameter(name);
+        if (null == parameter) {
+            return fallback;
+        }
+
+        return Boolean.parseBoolean(parameter);
+    }
+
     /**
      * Split pattern for CSV.
      */
@@ -194,7 +203,7 @@ public final class IndexAJAXRequest {
 
     /**
      * Checks for presence of comma-separated <code>int</code> list.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>int</code> array
      * @throws OXException If an error occurs
@@ -218,7 +227,7 @@ public final class IndexAJAXRequest {
 
     /**
      * Checks for presence of comma-separated <code>String</code> list.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>String</code> array
      * @throws OXException If parameter is absdent
@@ -233,7 +242,7 @@ public final class IndexAJAXRequest {
 
     /**
      * Checks for presence of comma-separated <code>String</code> list.
-     * 
+     *
      * @param name The parameter name
      * @return The <code>String</code> array
      */
@@ -247,7 +256,7 @@ public final class IndexAJAXRequest {
 
     /**
      * Gets the request.
-     * 
+     *
      * @return The request
      */
     public AJAXRequestData getRequest() {
@@ -256,7 +265,7 @@ public final class IndexAJAXRequest {
 
     /**
      * Gets the session.
-     * 
+     *
      * @return The session
      */
     public ServerSession getSession() {

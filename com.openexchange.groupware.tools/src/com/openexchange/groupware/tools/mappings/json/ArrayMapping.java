@@ -51,17 +51,15 @@ package com.openexchange.groupware.tools.mappings.json;
 
 import java.util.Arrays;
 import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.ArrayFactory;
 import com.openexchange.session.Session;
 
 /**
- * {@link ArrayMapping} - JSON specific mapping for array properties. 
+ * {@link ArrayMapping} - JSON specific mapping for array properties.
  *
  * @param <O> the type of the object
  * @param <T> the type of the array elements
@@ -81,7 +79,7 @@ public abstract class ArrayMapping<T, O> extends DefaultJsonMapping<T[], O> impl
 			this.set(to, null);
 		} else {
 			JSONArray jsonArray = from.getJSONArray(getAjaxName());
-			int size = jsonArray.length();		
+			int size = jsonArray.length();
 			T[] array = newArray(size);
 			for (int i = 0; i < size; i++) {
 				array[i] = this.deserialize(jsonArray, i);
@@ -93,7 +91,7 @@ public abstract class ArrayMapping<T, O> extends DefaultJsonMapping<T[], O> impl
 	@Override
 	public Object serialize(O from, TimeZone timeZone, Session session) throws JSONException {
 		final T[] value = this.get(from);
-		return null != value ? Arrays.asList(value) : (JSONArray)null;
+		return null != value ? new JSONArray(Arrays.asList(value)) : (JSONArray)null;
 	}
 
 }

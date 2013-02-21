@@ -80,6 +80,7 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
+import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -103,7 +104,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     private List<String> ids = null;
 
-    private int[] versions;
+    private String[] versions;
 
     private static final FileMetadataParser parser = FileMetadataParser.getInstance();
 
@@ -170,10 +171,10 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
 
         final String parameter = data.getParameter(Param.COLUMNS.getName());
-        if (parameter == null || parameter.equals("")) {
+        if (parameter == null || parameter.length() == 0) {
             return columns = Arrays.asList(File.Field.values());
         }
-        final String[] columnStrings = parameter.split("\\s*,\\s*");
+        final String[] columnStrings = Strings.splitByComma(parameter);
         final List<Field> fields = new ArrayList<Field>(columnStrings.length);
         final List<String> unknownColumns = new ArrayList<String>(columnStrings.length);
 
@@ -251,14 +252,14 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     @Override
-    public int getVersion() {
+    public String getVersion() {
         final String parameter = data.getParameter(Param.VERSION.getName());
         if (parameter == null) {
             return FileStorageFileAccess.CURRENT_VERSION;
         }
-        return Integer.parseInt(parameter);
+        return parameter;
     }
-    
+
     @Override
     public boolean isForSpecificVersion() {
     	return getVersion() != FileStorageFileAccess.CURRENT_VERSION;
@@ -271,7 +272,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             return Collections.emptySet();
         }
 
-        return new HashSet<String>(Arrays.asList(parameter.split("\\s*,\\s*")));
+        return new HashSet<String>(Arrays.asList(Strings.splitByComma(parameter)));
     }
 
     @Override
@@ -328,16 +329,16 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     @Override
-    public int[] getVersions() throws OXException {
+    public String[] getVersions() throws OXException {
         if (versions != null) {
             return versions;
         }
         final JSONArray body = (JSONArray) data.getData();
 
         try {
-            versions = new int[body.length()];
+            versions = new String[body.length()];
             for (int i = 0; i < versions.length; i++) {
-                versions[i] = body.getInt(i);
+                versions[i] = body.getString(i);
             }
         } catch (final JSONException x) {
             throw AjaxExceptionCodes.JSON_ERROR.create( x.getMessage());
@@ -448,7 +449,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             file.setId(getId());
             fields.add(File.Field.ID);
         }
-        
+
         if (object.has("content")) {
         	try {
 				contentData = object.opt("content").toString().getBytes("UTF-8");

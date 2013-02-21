@@ -56,6 +56,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
 import org.json.JSONString;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -93,15 +95,14 @@ public final class Base64JSONString implements JSONString {
                 out.write(buf, 0, read);
             }
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } finally {
-            try {
-                in.close();
-            } catch (final IOException e) {
-                com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Base64JSONString.class)).error(e.getMessage(), e);
-            }
+            Streams.close(in);
         }
-        value = JSONObject.quote(new String(Base64.encodeBase64(out.toByteArray(), false), com.openexchange.java.Charsets.US_ASCII));
+        value = JSONObject.quote(Charsets.toAsciiString(Base64.encodeBase64(out.toByteArray(), false)));
     }
 
     @Override

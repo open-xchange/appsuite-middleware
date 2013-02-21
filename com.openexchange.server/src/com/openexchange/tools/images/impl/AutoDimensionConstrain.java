@@ -89,8 +89,12 @@ public class AutoDimensionConstrain extends DimensionConstrain {
         int dstWidth = (int) Math.round(dimension.width * scaleWidth);
         int dstHeight = (int) Math.round(dimension.height * scaleHeight);
 
-        if (dstWidth < 3) dstWidth = 3;
-        if (dstHeight < 3) dstHeight = 3;
+        if (dstWidth < 3) {
+            dstWidth = 3;
+        }
+        if (dstHeight < 3) {
+            dstHeight = 3;
+        }
 
         return new Dimension(dstWidth, dstHeight);
     }

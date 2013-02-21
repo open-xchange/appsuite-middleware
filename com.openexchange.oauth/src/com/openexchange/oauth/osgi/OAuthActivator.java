@@ -74,6 +74,7 @@ import com.openexchange.oauth.services.ServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.secret.SecretEncryptionFactoryService;
+import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.sessiond.SessiondService;
@@ -162,7 +163,7 @@ public final class OAuthActivator extends HousekeepingActivator {
              */
             CallbackRegistry cbRegistry = new CallbackRegistry();
             getService(TimerService.class).scheduleAtFixedRate(cbRegistry, 600000, 600000);
-            
+
             delegateServices = new OSGiDelegateServiceMap();
             delegateServices.put(DBProvider.class, new OSGiDatabaseServiceDBProvider().start(context));
             delegateServices.put(ContextService.class, new OSGiContextService().start(context));
@@ -175,16 +176,17 @@ public final class OAuthActivator extends HousekeepingActivator {
                 registry,
                 delegateServices.get(ContextService.class),
                 cbRegistry);
-            
+
             registerService(CustomRedirectURLDetermination.class, cbRegistry);
-            registerService(OAuthService.class, oauthService, null);
-            registerService(OAuthServiceMetaDataRegistry.class, registry, null);
-            registerService(EncryptedItemDetectorService.class, oauthService, null);
-            registerService(SecretMigrator.class, oauthService, null);
-            
+            registerService(OAuthService.class, oauthService);
+            registerService(OAuthServiceMetaDataRegistry.class, registry);
+            registerService(EncryptedItemDetectorService.class, oauthService);
+            registerService(SecretMigrator.class, oauthService);
+            registerService(EncryptedItemCleanUpService.class, oauthService);
+
             final ScribeHTTPClientFactoryImpl oauthFactory = new ScribeHTTPClientFactoryImpl();
 			registerService(OAuthHTTPClientFactory.class, oauthFactory);
-			
+
 			SimpleRegistryListener<HTTPResponseProcessor> listener = new SimpleRegistryListener<HTTPResponseProcessor>() {
 
 				@Override

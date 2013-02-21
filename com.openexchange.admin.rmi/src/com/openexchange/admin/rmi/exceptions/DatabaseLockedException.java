@@ -51,7 +51,7 @@ package com.openexchange.admin.rmi.exceptions;
 
 /**
  * This exception is thrown when the underlying database is locked due to an update or so
- * 
+ *
  * @author dsieben
  *
  */

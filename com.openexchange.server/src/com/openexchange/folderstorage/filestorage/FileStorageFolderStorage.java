@@ -77,6 +77,7 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.ServiceAware;
+import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -94,10 +95,6 @@ import com.openexchange.folderstorage.filestorage.contentType.FileStorageContent
 import com.openexchange.folderstorage.type.FileStorageType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.dataobjects.MailFolderDescription;
-import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -655,6 +652,9 @@ public final class FileStorageFolderStorage implements FolderStorage {
         final String fullname = fsfi.getFolderId();
 
         final List<FileStorageFolder> children = Arrays.asList(accountAccess.getFolderAccess().getSubfolders(fullname, true));
+        if (accountAccess instanceof WarningsAware) {
+            addWarnings(storageParameters, (WarningsAware) accountAccess);
+        }
         /*
          * Sort
          */
@@ -1083,5 +1083,14 @@ public final class FileStorageFolderStorage implements FolderStorage {
             return collator.compare(o1.getName(), o2.getName());
         }
     } // End of FileStorageFolderComparator
+
+    private static void addWarnings(final StorageParameters storageParameters, final WarningsAware warningsAware) {
+        final List<OXException> list = warningsAware.getAndFlushWarnings();
+        if (null != list && !list.isEmpty()) {
+            for (OXException warning : list) {
+                storageParameters.addWarning(warning);
+            }
+        }
+    }
 
 }

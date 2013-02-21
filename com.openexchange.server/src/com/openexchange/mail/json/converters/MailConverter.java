@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
+import javax.mail.MessagingException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -85,6 +86,7 @@ import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.mime.MimeFilter;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.preferences.ServerUserSetting;
@@ -93,7 +95,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MailConverter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailConverter implements ResultConverter, MailActionConstants {
@@ -105,7 +107,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
 
     /**
      * Gets the instance
-     * 
+     *
      * @return The instance
      */
     public static MailConverter getInstance() {
@@ -152,7 +154,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
 
     /**
      * Converts to JSON output format.
-     * 
+     *
      * @param requestData The AJAX request data
      * @param result The AJAX result
      * @param session The associated session
@@ -197,7 +199,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
     private void convertThreadStructure(final ThreadedStructure structure, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException, JSONException {
         /*-
          * The data UI needs looks like this:
-         * 
+         *
          * [{ id: 1234, folder_id: 'default0/INBOX', thread: [{ id: 1234, folder_id: 'default0/INBOX'}, {id: 4711, folder_id: 'default0/INBOX' }, ...]
          */
         /*
@@ -225,7 +227,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             final int contextId = session.getContextId();
             for (final List<MailMessage> mails : structure.getMails()) {
                 if (mails != null && !mails.isEmpty()) {
-                    final JSONObject jo = new JSONObject();
+                    final JSONObject jo = new JSONObject(32);
                     writeThreadSortedMail(mails, jo, writers, headerWriters, containsMultipleFolders, writeThreadAsObjects, userId, contextId);
                     jsonWriter.value(jo);
                 }
@@ -281,19 +283,19 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         MailListField.ID, MailListField.FOLDER_ID });
 
     private void writeThreadSortedMail(final List<MailMessage> mails, final JSONObject jMail, final MailFieldWriter[] writers, final MailFieldWriter[] headerWriters, final boolean containsMultipleFolders, final boolean writeThreadAsObjects, final int userId, final int contextId) throws OXException, JSONException {
-        final MailMessage mail = mails.get(0);
-        int accountID = mail.getAccountId();
+        final MailMessage rootMessage = mails.get(0);
+        int accountID = rootMessage.getAccountId();
         for (int j = 0; j < writers.length; j++) {
-            writers[j].writeField(jMail, mail, 0, true, accountID, userId, contextId);
+            writers[j].writeField(jMail, rootMessage, 0, true, accountID, userId, contextId);
         }
         if (null != headerWriters) {
             for (int j = 0; j < headerWriters.length; j++) {
-                headerWriters[j].writeField(jMail, mail, 0, true, accountID, userId, contextId);
+                headerWriters[j].writeField(jMail, rootMessage, 0, true, accountID, userId, contextId);
             }
         }
         int unreadCount = 0;
         // Add child nodes
-        final JSONArray jChildMessages = new JSONArray();
+        final JSONArray jChildMessages = new JSONArray(mails.size());
         if (writeThreadAsObjects) {
             for (final MailMessage child : mails) {
                 final JSONObject jChild = new JSONObject();
@@ -307,11 +309,11 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                     }
                 }
                 /*-
-                 * 
+                 *
                 for (final MailFieldWriter w : WRITER_IDS) {
                     w.writeField(jChild, child, 0, true, accountID, userId, contextId);
                 }
-                 * 
+                 *
                  */
                 jChildMessages.put(jChild);
                 /*
@@ -553,7 +555,16 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 ttlMillis,
                 mimeFilter);
         } catch (final OXException e) {
-            if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
+            if (MailExceptionCode.MESSAGING_ERROR.equals(e)) {
+                final Throwable cause = e.getCause();
+                if (cause instanceof javax.mail.MessageRemovedException) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND.create(cause, mail.getMailId(), mail.getFolder());
+                } else if (cause instanceof javax.mail.MessagingException) {
+                    throw MimeMailException.handleMessagingException((MessagingException) cause, null, session);
+                }
+            }
+            // Handle others
+            else if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
                 LOG.warn(
                     new StringBuilder("Requested mail could not be found. ").append(
                         "Most likely this is caused by concurrent access of multiple clients ").append(

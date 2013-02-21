@@ -61,7 +61,7 @@ public interface Parameterizable {
      * Puts given name-value-pair into this data's parameters.
      * <p>
      * A <code>null</code> value removes the mapping.
-     * 
+     *
      * @param name The parameter name
      * @param value The parameter value
      * @throws NullPointerException If name is <code>null</code>

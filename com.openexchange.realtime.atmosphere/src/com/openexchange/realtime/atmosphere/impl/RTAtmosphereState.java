@@ -66,14 +66,14 @@ public class RTAtmosphereState {
 	public AtmosphereResource atmosphereResource;
 	public ServerSession session;
 	public ID id;
-	
+
 	private final ReentrantLock lock = new ReentrantLock();
 	public boolean handshake = true;
-	
+
 	public void lock() {
 		lock.lock();
 	}
-	
+
 	public void unlock() {
 		lock.unlock();
 	}

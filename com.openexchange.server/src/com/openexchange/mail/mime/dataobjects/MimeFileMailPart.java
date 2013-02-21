@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.mime.dataobjects;
 
-import static com.openexchange.mail.utils.CharsetDetector.detectCharset;
+import static com.openexchange.java.CharsetDetector.detectCharset;
 import static com.openexchange.mail.utils.MessageUtility.readStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -60,6 +60,7 @@ import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.Part;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -197,15 +198,12 @@ public abstract class MimeFileMailPart extends MailPart {
             } catch (final FileNotFoundException e) {
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             } catch (final IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             } finally {
-                if (fis != null) {
-                    try {
-                        fis.close();
-                    } catch (final IOException e) {
-                        LOG.error(e.getMessage(), e);
-                    }
-                }
+                Streams.close(fis);
             }
             return cachedContent;
         }

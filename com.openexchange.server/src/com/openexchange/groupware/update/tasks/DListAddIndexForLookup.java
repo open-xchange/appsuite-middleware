@@ -65,7 +65,7 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 
 /**
  * {@link DListAddIndexForLookup} - Creates indexes on tables "prg_dlist" and "del_dlist" to improve look-up.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DListAddIndexForLookup extends UpdateTaskAdapter {

@@ -50,6 +50,7 @@
 package com.openexchange.sessiond;
 
 import java.util.Collection;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 
@@ -61,12 +62,27 @@ import com.openexchange.session.Session;
 public class AbstractSimSessiondService implements SessiondService {
 
     @Override
-    public String addSession(final AddSessionParameter parameterObject) {
+    public Session addSession(final AddSessionParameter parameterObject) {
         return null;
     }
 
     @Override
     public void changeSessionPassword(final String sessionId, final String newPassword) {
+        // Nothing to do
+    }
+
+    @Override
+    public void setClient(String sessionId, String client) throws OXException {
+        // Nothing to do
+    }
+
+    @Override
+    public void setHash(String sessionId, String hash) throws OXException {
+        // Nothing to do
+    }
+
+    @Override
+    public void setLocalIp(String sessionId, String localIp) throws OXException {
         // Nothing to do
     }
 
@@ -93,6 +109,11 @@ public class AbstractSimSessiondService implements SessiondService {
     @Override
     public Session getSessionByRandomToken(final String randomToken) {
         return null;
+    }
+
+    @Override
+    public Session getSessionWithTokens(String clientToken, String serverToken) throws OXException {
+        throw SessionExceptionCodes.NOT_IMPLEMENTED.create();
     }
 
     @Override
@@ -131,6 +152,6 @@ public class AbstractSimSessiondService implements SessiondService {
     @Override
     public void removeContextSessions(final int contextId) {
         // Nothing to do
-        
+
     }
 }

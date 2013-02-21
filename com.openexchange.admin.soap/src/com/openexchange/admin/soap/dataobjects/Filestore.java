@@ -72,7 +72,7 @@ public class Filestore {
      * Reserved space in mega bytes (MB)
      */
     private Long reserved;
-    
+
     private Integer maxContexts;
 
     private Integer currentContexts;
@@ -86,7 +86,7 @@ public class Filestore {
 
     /**
      * Initiates a filestore object with given id set
-     * 
+     *
      * @param id An {@link Integer} containing the id
      */
     public Filestore(Integer id) {
@@ -104,10 +104,10 @@ public class Filestore {
         this.url = fs.getUrl();
         this.used = fs.getUsed();
     }
-    
+
     /**
      * Returns the id of this filestore object
-     * 
+     *
      * @return An {@link Integer} containing the id
      */
     public Integer getId() {
@@ -116,7 +116,7 @@ public class Filestore {
 
     /**
      * Sets the id for this filestore object
-     * 
+     *
      * @param id An {@link Integer} containing the id
      */
     public void setId(final Integer id) {
@@ -125,7 +125,7 @@ public class Filestore {
 
     /**
      * Returns the url of this filestore object
-     * 
+     *
      * @return A {@link String} containing the url
      */
     public String getUrl() {
@@ -134,7 +134,7 @@ public class Filestore {
 
     /**
      * Sets the url for this filestore object
-     * 
+     *
      * @param url A {@link String} containing the url
      */
     public void setUrl(final String url) {
@@ -143,7 +143,7 @@ public class Filestore {
 
     /**
      * Returns the size of this filestore object (in MB)
-     * 
+     *
      * @return A {@link Long} containing the size (in MB)
      */
     public Long getSize() {
@@ -155,7 +155,7 @@ public class Filestore {
      */
     /**
      * Sets the size for this filestore object (in MB)
-     * 
+     *
      * @param size A {@link Long} containing the size (in MB)
      */
     public void setSize(final Long size) {
@@ -164,7 +164,7 @@ public class Filestore {
 
     /**
      * Returns the maximum amount of contexts of this filestore object
-     * 
+     *
      * @return An {@link Integer} containing the maximum amoung of contexts
      */
     public Integer getMaxContexts() {
@@ -173,7 +173,7 @@ public class Filestore {
 
     /**
      * Sets the maximum amount of contexts for this filestore object
-     * 
+     *
      * @param maxContexts A {@link String} containing the maximum amount of contexts
      */
     public void setMaxContexts(final Integer maxContexts) {
@@ -182,7 +182,7 @@ public class Filestore {
 
     /**
      * Returns the current amount of contexts of this filestore object
-     * 
+     *
      * @return An {@link Integer} containing the current
      */
     public Integer getCurrentContexts() {
@@ -191,7 +191,7 @@ public class Filestore {
 
     /**
      * Sets the current amount of contexts for this filestore object
-     * 
+     *
      * @param currentContexts An {@link Integer} containing the current amount of contexts
      */
     public void setCurrentContexts(final Integer currentContexts) {
@@ -200,7 +200,7 @@ public class Filestore {
 
     /**
      * Returns the currently used size of this filestore object (in MB)
-     * 
+     *
      * @return A {@link Long} containing the currently used size (in MB)
      */
     public Long getUsed() {
@@ -209,7 +209,7 @@ public class Filestore {
 
     /**
      * Sets the currently used size for this filestore object (in MB)
-     * 
+     *
      * @param quota_used A {@link Long} containing the currently used size
      */
     public void setUsed(final Long quota_used) {

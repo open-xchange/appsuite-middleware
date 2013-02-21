@@ -62,28 +62,28 @@ import com.openexchange.webdav.protocol.WebdavPath;
 
 /**
  * {@link Tools}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Tools {
 
-    
+
     public static Date getLatestModified(Date lastModified1, Date lastModified2) {
         return lastModified1.after(lastModified2) ? lastModified1 : lastModified2;
     }
-    
+
     public static Date getLatestModified(Date lastModified, CommonObject object) {
         return getLatestModified(lastModified, object.getLastModified());
     }
-    
+
     public static Date getLatestModified(Date lastModified, UserizedFolder folder) {
         return getLatestModified(lastModified, folder.getLastModifiedUTC());
     }
 
     /**
-     * Parses a numerical identifier from a string, wrapping a possible 
+     * Parses a numerical identifier from a string, wrapping a possible
      * NumberFormatException into an OXException.
-     * 
+     *
      * @param id the id string
      * @return the parsed identifier
      * @throws OXException
@@ -92,14 +92,14 @@ public class Tools {
         try {
             return Integer.parseInt(id);
         } catch (NumberFormatException e) {
-            throw new OXException(e); 
+            throw new OXException(e);
         }
     }
-    
+
     /**
-     * Gets the resource name from an url, i.e. the path's name without the 
+     * Gets the resource name from an url, i.e. the path's name without the
      * filename extension.
-     * 
+     *
      * @param url the webdav path
      * @param fileExtension the extension
      * @return the resource name
@@ -109,9 +109,9 @@ public class Tools {
     }
 
     /**
-     * Gets the resource name from a filename, i.e. the resource name without the 
+     * Gets the resource name from a filename, i.e. the resource name without the
      * filename extension.
-     * 
+     *
      * @param filename the filename
      * @param fileExtension the extension
      * @return the resource name

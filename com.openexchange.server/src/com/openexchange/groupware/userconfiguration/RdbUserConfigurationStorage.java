@@ -56,7 +56,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -65,20 +66,31 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.DBPool;
 
 /**
- * {@link RdbUserConfigurationStorage} - The database storage implementation of an user configuration storage.
+ * {@link RdbUserConfigurationStorage} - The database storage implementation of a user configuration storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class RdbUserConfigurationStorage extends UserConfigurationStorage {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.LogFactory.getLog(RdbUserConfigurationStorage.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(RdbUserConfigurationStorage.class);
+
+    private static final AtomicBoolean initExtendedPermissions = new AtomicBoolean(true);
 
     /**
      * Initializes a new {@link RdbUserConfigurationStorage}
      */
     public RdbUserConfigurationStorage() {
         super();
+    }
+
+    /**
+     * Sets whether to initialize extended permissions. Default is <code>true</code>.
+     *
+     * @param initExtendedPermissions <code>true</code> to initialize extended permissions; else <code>false</code>
+     * @return This storage
+     */
+    public static void setInitExtendedPermissions(final boolean initExtendedPermissions) {
+        RdbUserConfigurationStorage.initExtendedPermissions.set(initExtendedPermissions);
     }
 
     @Override
@@ -96,20 +108,9 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     @Override
-    public Object getLock(int userId, Context ctx) {
-        // Dummy object
-        return new Object();
-    }
-
-    @Override
-    public void setExtendedPermissions(Set<String> extendedPermissions, int userId, Context ctx) {
-        // Nothing to do
-    }
-
-    @Override
-    public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx) throws OXException {
+    public UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx, boolean initExtendedPermissions) throws OXException {
         try {
-            return loadUserConfiguration(userId, groups, ctx);
+            return loadUserConfiguration(userId, groups, ctx, initExtendedPermissions, null);
         } catch (final SQLException e) {
             throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
         }
@@ -257,7 +258,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
      *             implementation
      */
     public static UserConfiguration loadUserConfiguration(final int userId, final Context ctx) throws SQLException, OXException {
-        return loadUserConfiguration(userId, null, ctx, null);
+        return loadUserConfiguration(userId, null, ctx, true, null);
     }
 
     /**
@@ -272,7 +273,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
      *             implementation
      */
     public static UserConfiguration loadUserConfiguration(final int userId, final int[] groups, final Context ctx) throws SQLException, OXException {
-        return loadUserConfiguration(userId, groups, ctx, null);
+        return loadUserConfiguration(userId, groups, ctx, true, null);
     }
 
     /**
@@ -302,10 +303,11 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
-            if (rs.next()) {
-                return new UserConfiguration(rs.getInt(1), userId, groups, ctx);
+            final UserConfiguration uc = rs.next() ? new UserConfiguration(rs.getInt(1), userId, groups, ctx) : new UserConfiguration(0, userId, groups, ctx);
+            if (initExtendedPermissions.get()) {
+                uc.setExtendedPermissions(uc.calcExtendedPermissions());
             }
-            return new UserConfiguration(0, userId, groups, ctx);
+            return uc;
         } finally {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
         }
@@ -366,7 +368,7 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
      * @throws OXException - if a readable connection could not be obtained from connection pool
      * @throws OXException - if no matching user configuration is kept in database
      */
-    public static UserConfiguration loadUserConfiguration(final int userId, final int[] groupsArg, final Context ctx, final Connection readConArg) throws SQLException, OXException {
+    public static UserConfiguration loadUserConfiguration(final int userId, final int[] groupsArg, final Context ctx, final boolean calcPerms, final Connection readConArg) throws SQLException, OXException {
         final int[] groups = groupsArg == null ? UserStorage.getInstance().getUser(userId, ctx).getGroups() : groupsArg;
         Connection readCon = readConArg;
         boolean closeCon = false;
@@ -381,10 +383,14 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
-            if (rs.next()) {
-                return new UserConfiguration(rs.getInt(1), userId, groups, ctx);
+            if (!rs.next()) {
+                throw UserConfigurationCodes.NOT_FOUND.create(Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
             }
-            throw UserConfigurationCodes.NOT_FOUND.create(Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
+            final UserConfiguration userConfiguration = new UserConfiguration(rs.getInt(1), userId, groups, ctx);
+            if (calcPerms && initExtendedPermissions.get()) {
+                userConfiguration.setExtendedPermissions(userConfiguration.calcExtendedPermissions());
+            }
+            return userConfiguration;
         } finally {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
         }
@@ -442,12 +448,17 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
                 stmt.setInt(1, ctx.getContextId());
             }
             result = stmt.executeQuery();
+            final boolean initExtPerms = initExtendedPermissions.get();
             while (result.next()) {
                 final int userId = result.getInt(1);
                 if (userMap.containsKey(userId)) {
                     final int index = userMap.get(userId);
                     final User user = users[index];
-                    retval[index] = new UserConfiguration(result.getInt(2), user.getId(), user.getGroups(), ctx);
+                    final UserConfiguration userConfiguration = new UserConfiguration(result.getInt(2), user.getId(), user.getGroups(), ctx);
+                    if (initExtPerms) {
+                        userConfiguration.setExtendedPermissions(userConfiguration.calcExtendedPermissions());
+                    }
+                    retval[index] = userConfiguration;
                 }
             }
         } finally {

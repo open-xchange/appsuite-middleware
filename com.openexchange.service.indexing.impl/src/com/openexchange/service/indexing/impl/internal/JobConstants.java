@@ -56,7 +56,7 @@ package com.openexchange.service.indexing.impl.internal;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class JobConstants {
-    
+
     public static final String JOB_INFO = "jobInfo";
 
 }

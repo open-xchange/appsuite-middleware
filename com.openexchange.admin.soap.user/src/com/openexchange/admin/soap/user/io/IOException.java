@@ -11,9 +11,9 @@ import com.openexchange.admin.soap.user.soap.Exception;
 
 /**
  * <p>Java-Klasse f\u00fcr IOException complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType name="IOException">
  *   &lt;complexContent>
@@ -24,8 +24,8 @@ import com.openexchange.admin.soap.user.soap.Exception;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "IOException")

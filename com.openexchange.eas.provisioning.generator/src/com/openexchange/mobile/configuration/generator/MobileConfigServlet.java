@@ -101,7 +101,7 @@ public class MobileConfigServlet extends HttpServlet {
 
     /**
      * Splits the given login into a username and a domain part
-     * 
+     *
      * @param username
      * @return An array. Index 0 is the username. Index 1 is the domain
      * @throws ConfigurationException
@@ -238,7 +238,7 @@ public class MobileConfigServlet extends HttpServlet {
 
     /**
      * Reads the language from the header, returns either ENGLISH or GERMAN. No other value can be returned
-     * 
+     *
      * @param req
      * @return
      */
@@ -367,7 +367,7 @@ public class MobileConfigServlet extends HttpServlet {
     }
 
     private void printError(final HttpServletRequest req, final HttpServletResponse resp, final ErrorMessage string) throws IOException {
-        resp.sendRedirect(Activator.ALIAS + "?error=" + URLEncoder.encode(String.valueOf(string.ordinal()), "UTF-8"));
+        resp.sendRedirect(Activator.ALIAS + "?error=" + Integer.toString(string.ordinal()));
     }
 
     private void writeMobileConfig(final PrintWriter printWriter, final OutputStream outStream, final String email, final String host, final String username, final String domain) throws IOException, OXException {

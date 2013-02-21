@@ -93,13 +93,13 @@ public class DefaultFile extends AbstractFile {
 
     private int numberOfVersions;
 
-    private Map<String, String> properties;
+    private final Map<String, String> properties;
 
     private String title;
 
     private String url;
 
-    private int version;
+    private String version;
 
     private String versionComment;
 
@@ -116,7 +116,17 @@ public class DefaultFile extends AbstractFile {
         properties = new HashMap<String, String>();
     }
 
+    /**
+     * Initializes a new {@link DefaultFile} from given file.
+     */
     public DefaultFile(final File file) {
+        super();
+        final Set<String> propertyNames = file.getPropertyNames();
+        final Map<String, String> properties = new HashMap<String, String>(propertyNames.size());
+        for (final String propertyName : propertyNames) {
+            properties.put(propertyName, file.getProperty(propertyName));
+        }
+        this.properties = properties;
         copyFrom(file);
     }
 
@@ -133,6 +143,15 @@ public class DefaultFile extends AbstractFile {
     @Override
     public String getContent() {
         return content;
+    }
+
+    /**
+     * Sets the content of this file.
+     *
+     * @param content The content
+     */
+    public void setContent(String content) {
+        this.content = content;
     }
 
     @Override
@@ -243,7 +262,7 @@ public class DefaultFile extends AbstractFile {
     }
 
     @Override
-    public int getVersion() {
+    public String getVersion() {
         return version;
     }
 
@@ -348,7 +367,7 @@ public class DefaultFile extends AbstractFile {
     }
 
     @Override
-    public void setVersion(final int version) {
+    public void setVersion(final String version) {
         this.version = version;
     }
 

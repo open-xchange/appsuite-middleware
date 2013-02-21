@@ -104,7 +104,7 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
     protected Interface getInterface() {
         return Interface.WEBDAV_XML;
     }
-    
+
     @Override
     protected boolean isServletDisabled() {
         return true;

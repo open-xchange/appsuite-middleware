@@ -1,18 +1,18 @@
-/* 
- * Copyright 2005 - 2009 Terracotta, Inc. 
- * 
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not 
- * use this file except in compliance with the License. You may obtain a copy 
- * of the License at 
- * 
- *   http://www.apache.org/licenses/LICENSE-2.0 
- *   
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT 
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the 
- * License for the specific language governing permissions and limitations 
+/*
+ * Copyright 2005 - 2009 Terracotta, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
  * under the License.
- * 
+ *
  */
 
 package org.quartz.examples.example6;
@@ -32,10 +32,10 @@ import org.quartz.SimpleTrigger;
 import org.quartz.impl.StdSchedulerFactory;
 
 /**
- * 
+ *
  * This job demonstrates how Quartz can handle JobExecutionExceptions that are
  * thrown by jobs.
- * 
+ *
  * @author Bill Kratzer
  */
 public class JobExceptionExample {
@@ -63,8 +63,8 @@ public class JobExceptionExample {
             .withIdentity("badJob1", "group1")
             .usingJobData("denominator", "0")
             .build();
-        
-        SimpleTrigger trigger = newTrigger() 
+
+        SimpleTrigger trigger = newTrigger()
             .withIdentity("trigger1", "group1")
             .startAt(startTime)
             .withSchedule(simpleSchedule()
@@ -83,8 +83,8 @@ public class JobExceptionExample {
         job = newJob(BadJob2.class)
             .withIdentity("badJob2", "group1")
             .build();
-        
-        trigger = newTrigger() 
+
+        trigger = newTrigger()
             .withIdentity("trigger2", "group1")
             .startAt(startTime)
             .withSchedule(simpleSchedule()

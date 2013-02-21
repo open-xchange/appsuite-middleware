@@ -60,7 +60,7 @@ import com.openexchange.realtime.packet.Presence.Type;
 /**
  * {@link PresenceBuilder} - Parse an atmosphere request and build a Presence Stanza from it by adding the recipients ID.
  * Building includes transformation from JSON to POJO and Initialization from the PayloadTree.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class PresenceBuilder extends StanzaBuilder<Presence> {
@@ -69,7 +69,7 @@ public class PresenceBuilder extends StanzaBuilder<Presence> {
 
     /**
      * Create a new PresenceBuilder Initializes a new {@link PresenceBuilder}.
-     * 
+     *
      * @param from The sender's ID, must not be null
      * @param json The sender's message, must not be null
      * @param serverSession The ServerSession associated with the incoming Stanza/Sender
@@ -89,7 +89,7 @@ public class PresenceBuilder extends StanzaBuilder<Presence> {
         basics();
         type();
         return stanza;
-        
+
     }
 
     private void type() {

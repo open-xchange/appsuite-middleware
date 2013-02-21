@@ -61,7 +61,7 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 
 /**
  * {@link ManagedFileInputStreamRegistry}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ManagedFileInputStreamRegistry implements MessagingInputStreamRegistry {
@@ -70,7 +70,7 @@ public final class ManagedFileInputStreamRegistry implements MessagingInputStrea
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static ManagedFileInputStreamRegistry getInstance() {
@@ -107,7 +107,7 @@ public final class ManagedFileInputStreamRegistry implements MessagingInputStrea
 
     /**
      * Starts this registry.
-     * 
+     *
      * @param context The bundle context used to track needed service
      */
     public void start(final BundleContext context) {

@@ -85,7 +85,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link DefaultNotificationParticipantResolver}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
  *         Laguna</a>
  */
@@ -217,7 +217,7 @@ public class DefaultNotificationParticipantResolver implements
 		boolean foundUser = false;
 		boolean foundOnBehalfOf = false;
 		boolean foundPrincipal = false;
-		
+
 		final int appId = (appointment.getObjectID() <= 0 && original != null) ? original.getObjectID() : appointment.getObjectID();
 
 		for (final User u : participantUsers) {
@@ -256,7 +256,7 @@ public class DefaultNotificationParticipantResolver implements
 			}
 			participant.setUser(u);
 			participant.setContext(ctx);
-			
+
 			participant.setFolderId(util.getFolderIdForUser(appId, u.getId(), ctx.getContextId()));
 
 			final NotificationConfiguration configuration = defaultConfiguration
@@ -458,7 +458,7 @@ public class DefaultNotificationParticipantResolver implements
 				notificationOrganizer.setContext(ctx);
 			}
 			notificationOrganizer.setConfiguration(configuration);
-			
+
 			retval.add(notificationOrganizer);
 		}
 

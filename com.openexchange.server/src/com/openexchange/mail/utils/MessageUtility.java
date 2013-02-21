@@ -62,6 +62,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -167,13 +168,7 @@ public final class MessageUtility {
         } catch (final MessagingException e) {
             return getPartRawInputStream(p);
         } finally {
-            if (null != tmp) {
-                try {
-                    tmp.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
+            Streams.close(tmp);
         }
     }
 
@@ -235,7 +230,7 @@ public final class MessageUtility {
     public static String readMimePart(final Part p, final String charset) throws MessagingException {
         try {
             final InputStreamProvider streamProvider = new AbstractInputStreamProvider() {
-                
+
                 @Override
                 public InputStream getInputStream() throws IOException {
                     try {
@@ -257,7 +252,7 @@ public final class MessageUtility {
             final InputStreamProvider streamProvider;
             if (p instanceof MimeBodyPart) {
                 streamProvider = new AbstractInputStreamProvider() {
-                    
+
                     @Override
                     public InputStream getInputStream() throws IOException {
                         try {
@@ -269,7 +264,7 @@ public final class MessageUtility {
                 };
             } else if (p instanceof MimeMessage) {
                 streamProvider = new AbstractInputStreamProvider() {
-                    
+
                     @Override
                     public InputStream getInputStream() throws IOException {
                         try {
@@ -304,7 +299,7 @@ public final class MessageUtility {
      */
     public static String readMailPart(final MailPart mailPart, final String charset) throws IOException, OXException {
         final InputStreamProvider streamProvider = new AbstractInputStreamProvider() {
-            
+
             @Override
             public InputStream getInputStream() throws IOException {
                 try {
@@ -404,7 +399,7 @@ public final class MessageUtility {
             return new String(bytes, detectedCharset);
         }
         final String retval = readStream0(streamProvider.getInputStream(), charset);
-        if (retval.indexOf(UNKNOWN) < 0) {
+        if (true || retval.indexOf(UNKNOWN) < 0) {
             return retval;
         }
         final byte[] bytes = getBytesFrom(streamProvider.getInputStream());
@@ -527,12 +522,8 @@ public final class MessageUtility {
             for (int read; (read = inStream.read(buf, 0, BUFSIZE)) > 0;) {
                 tmp.write(buf, 0, read);
             }
-            if (null == charset) {
-                final byte[] bytes = tmp.toByteArray();
-                return new String(bytes, Charsets.forName(detectCharset(bytes)));
-            }
             try {
-                return new String(tmp.toByteArray(), Charsets.forName(charset));
+                return tmp.toString(charset);
             } catch (final UnsupportedCharsetException e) {
                 LOG.error("Unsupported encoding in a message detected and monitored: \"" + charset + '"', e);
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(charset);
@@ -556,11 +547,7 @@ public final class MessageUtility {
             }
             throw e;
         } finally {
-            try {
-                inStream.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            Streams.close(inStream);
         }
     }
 
@@ -643,11 +630,7 @@ public final class MessageUtility {
             }
             throw e;
         } finally {
-            try {
-                in.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            Streams.close(in);
         }
     }
 
@@ -673,7 +656,7 @@ public final class MessageUtility {
 
     /**
      * Detects possible duplicate &lt;html&gt; tags and removes all but last.
-     * 
+     *
      * @param html The HTML content
      * @return The HTML content with duplicate &lt;html&gt; tags removed
      */
@@ -686,7 +669,7 @@ public final class MessageUtility {
         {
             int count = 0;
             int idx = 0;
-            final int subLen = sub.length();            
+            final int subLen = sub.length();
             while ((idx = lc.indexOf(sub, idx)) >= 0) {
                 count++;
                 idx += subLen;

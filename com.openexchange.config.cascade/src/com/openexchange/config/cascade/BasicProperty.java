@@ -57,13 +57,13 @@ import com.openexchange.exception.OXException;
  * {@link BasicProperty}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added JavaDoc
  */
 public interface BasicProperty {
 
     /**
      * Sets this property's value
-     * 
+     *
      * @param value The value
      * @throws OXException If setting value fails
      */
@@ -71,7 +71,7 @@ public interface BasicProperty {
 
     /**
      * Gets this property's value
-     * 
+     *
      * @return The value
      * @throws OXException If retrieving value fails
      */
@@ -79,7 +79,7 @@ public interface BasicProperty {
 
     /**
      * Sets specified meta data.
-     * 
+     *
      * @param metadataName The meta data's name
      * @param value The meta data's value
      * @throws OXException If setting meta data fails
@@ -88,7 +88,7 @@ public interface BasicProperty {
 
     /**
      * Gets specified meta data.
-     * 
+     *
      * @param metadataName The meta data's name
      * @return The meta data's value or <code>null</code> if absent
      * @throws OXException
@@ -97,7 +97,7 @@ public interface BasicProperty {
 
     /**
      * Indicates whether this property is defined.
-     * 
+     *
      * @return <code>true</code> if defined; otherwise <code>false</code>
      * @throws OXException If checking defined state fails
      */
@@ -105,7 +105,7 @@ public interface BasicProperty {
 
     /**
      * Gets the listing of all available meta data names.
-     * 
+     *
      * @return The meta data names
      * @throws OXException If listing cannot be returned
      */

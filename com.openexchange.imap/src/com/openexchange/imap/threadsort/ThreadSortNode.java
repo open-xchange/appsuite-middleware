@@ -146,7 +146,7 @@ public class ThreadSortNode {
 
     /**
      * Filters from nodes those sub-trees which solely consist of nodes associated with given full name
-     * 
+     *
      * @param fullName The full name to filter with
      * @param threadList The nodes
      */
@@ -176,7 +176,7 @@ public class ThreadSortNode {
 
     /**
      * Applies specified full name to every node.
-     * 
+     *
      * @param fullName The full name to apply
      * @param threadList The thread list to apply to
      */

@@ -80,7 +80,7 @@ public class SyncCollection extends WebdavPropfindAction {
     public SyncCollection(final Protocol protocol) {
         super(protocol);
     }
-    
+
     @Override
     public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
         final Element response = new Element("multistatus", DAV_NS);
@@ -104,11 +104,11 @@ public class SyncCollection extends WebdavPropfindAction {
 
         final ResourceMarshaller marshaller = getMarshaller(req, forceAllProp, requestBody, null);
         final String token = getSyncToken(req, requestBody);
-        Syncstatus<WebdavResource> syncStatus = ((CommonFolderCollection<?>)req.getCollection()).getSyncStatus(token); 
+        Syncstatus<WebdavResource> syncStatus = ((CommonFolderCollection<?>)req.getCollection()).getSyncStatus(token);
         final List<Element> all = new ArrayList<Element>();
         final int[] statusCodes = syncStatus.getStatusCodes();
         final PropertiesMarshaller helper = new PropertiesMarshaller(req.getURLPrefix(), req.getCharset());
-        
+
         for (final int sc : statusCodes) {
             if (sc == 404) {
                 for(final WebdavStatus<WebdavResource> status : syncStatus.toIterable(sc)) {
@@ -129,7 +129,7 @@ public class SyncCollection extends WebdavPropfindAction {
         syncToken.setText(syncStatus.getToken());
         response.addContent(syncToken);
         response.addContent(all);
-        
+
         try {
             res.setStatus(Protocol.SC_MULTISTATUS);
             res.setContentType("text/xml; charset=UTF-8");

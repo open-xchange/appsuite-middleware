@@ -80,30 +80,20 @@ public class CascadingConfigObjectRegistryFactory implements ConfigObjectRegistr
 
     @Override
     public ConfigObjectRegistry getView(int user, int context) throws OXException {
-        try {
             return new CascadingConfigObjectRegistry(configFactory.getView(user, context), config, pathMapping);
-        } catch (OXException e) {
-            throw new OXException(e);
-        }
     }
 
     private void initPaths() throws OXException {
-        try {
-            ConfigView basicView = configFactory.getView();
-            Map<String, ComposedConfigProperty<String>> all = basicView.all();
-            for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
-                String name = entry.getKey();
-                ComposedConfigProperty<String> property = entry.getValue();
-                String cobjectPath = property.get("cobjectPath");
-                if (cobjectPath != null) {
-                    pathMapping.put(cobjectPath, name);
-                }
+        ConfigView basicView = configFactory.getView();
+        Map<String, ComposedConfigProperty<String>> all = basicView.all();
+        for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
+            String name = entry.getKey();
+            ComposedConfigProperty<String> property = entry.getValue();
+            String cobjectPath = property.get("cobjectPath");
+            if (cobjectPath != null) {
+                pathMapping.put(cobjectPath, name);
             }
-
-        } catch (OXException e) {
-            throw new OXException(e);
         }
-
     }
 
 }

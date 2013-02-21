@@ -51,8 +51,6 @@ package com.openexchange.loxandra.json.action;
 import java.util.UUID;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
@@ -68,11 +66,11 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  *
  */
-@Action(method = RequestMethod.GET, name = "get", description = "Get an EAV Contact.", parameters = { 
-		@Parameter(name = "uuid"), 
+@Action(method = RequestMethod.GET, name = "get", description = "Get an EAV Contact.", parameters = {
+		@Parameter(name = "uuid"),
 		@Parameter(name = "limited") })
 public class GetAction extends AbstractAction {
-	
+
 	private static Log log = com.openexchange.log.Log.loggerFor(GetAction.class);
 
 	/**
@@ -90,7 +88,7 @@ public class GetAction extends AbstractAction {
 	public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
 		UUID u = UUID.fromString(requestData.getParameter("uuid"));
 		boolean limited = Boolean.parseBoolean(requestData.getParameter("limited"));
-		
+
 		EAVContact c = getContactService().getEAVContactService().getContact(u, limited);
 		EAVContactParser parser = new EAVContactParser();
 		return new AJAXRequestResult(parser.parse(c));

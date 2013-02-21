@@ -73,7 +73,7 @@ import com.openexchange.documentation.descriptions.ParameterDescription;
 
 /**
  * {@link DocumentationBuilder} - The documentation builder.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -86,7 +86,7 @@ public class DocumentationBuilder {
     private String moduleName;
     private String moduleDescription;
     private final DescriptionFactory factory;
-	
+
     /**
      * Initializes a new {@link DocumentationBuilder}.
      */
@@ -94,7 +94,7 @@ public class DocumentationBuilder {
         super();
         this.factory = factory;
         this.knownActions = new ArrayList<ActionDescription>();
-        this.knownContainers = new ArrayList<ContainerDescription>();        
+        this.knownContainers = new ArrayList<ContainerDescription>();
     }
 
     /**
@@ -104,7 +104,7 @@ public class DocumentationBuilder {
      * <li><tt><b>com.openexchange.documentation.annotations.Container</b></tt></li>
      * <li><tt><b>com.openexchange.documentation.annotations.Module</b></tt></li>
      * </ul>
-     * 
+     *
      * @param c The class to add
      * @return This documentation builder with specified classes added
      */
@@ -112,7 +112,7 @@ public class DocumentationBuilder {
     	this.addAnnotations(clazz);
     	return this;
     }
-    
+
     /**
      * Adds specified collection objects' classes annotations to this documentation builder considering the annotation types:
      * <ul>
@@ -120,7 +120,7 @@ public class DocumentationBuilder {
      * <li><tt><b>com.openexchange.documentation.annotations.Container</b></tt></li>
      * <li><tt><b>com.openexchange.documentation.annotations.Module</b></tt></li>
      * </ul>
-     * 
+     *
      * @param collection The collection objects' classes to add
      * @return This documentation builder with specified classes added
      */
@@ -135,7 +135,7 @@ public class DocumentationBuilder {
 
     /**
      * Adds annotation of specified class to this documentation builder
-     * 
+     *
      * @param clazz The class
      */
     protected void addAnnotations(final Class<?> clazz) {
@@ -207,7 +207,7 @@ public class DocumentationBuilder {
      * <li><tt>com.openexchange.documentation.annotations.Container</tt></li>
      * <li><tt>com.openexchange.documentation.annotations.Module</tt></li>
      * </ul>
-     * 
+     *
      * @param element The annotated element
      */
     protected void addAnnotations(final AnnotatedElement element) {
@@ -225,10 +225,10 @@ public class DocumentationBuilder {
                 this.knownActions.add(this.getAction((Action)annotation));
             } else if (Actions.class.isInstance(annotation)) {
                 this.knownActions.addAll(this.getActions((Actions)annotation));
-            } 
+            }
         }
     }
-    
+
     protected ContainerDescription getContainer(final Container container) {
     	return factory.container(container.name(), container.description(), this.getAttributes(container.attributes()));
     }
@@ -236,7 +236,7 @@ public class DocumentationBuilder {
     protected AttributeDescription getAttribute(final Attribute attribute) {
     	return factory.attribute(attribute.name(), attribute.description(), attribute.type(), attribute.mandatory());
     }
-    
+
     protected AttributeDescription[] getAttributes(final Attribute[] attributes) {
     	final AttributeDescription[] attributeDescriptions = new AttributeDescription[attributes.length];
     	for (int i = 0; i < attributes.length; i++) {
@@ -244,11 +244,11 @@ public class DocumentationBuilder {
 		}
     	return attributeDescriptions;
     }
-    
+
     protected ParameterDescription getParameter(final Parameter parameter) {
     	return factory.parameter(parameter.name(), parameter.description(), parameter.type(), parameter.optional());
     }
-    
+
     protected ParameterDescription[] getParameters(final Parameter[] parameters) {
     	final ParameterDescription[] parameterDescriptions = new ParameterDescription[parameters.length];
     	for (int i = 0; i < parameters.length; i++) {
@@ -256,12 +256,12 @@ public class DocumentationBuilder {
 		}
     	return parameterDescriptions;
     }
-    
+
     protected ActionDescription getAction(final Action action) {
         return factory.action(action.name(), action.description(), action.method(), action.defaultFormat(),
                 action.requestBody(), action.responseDescription(), action.deprecated(), getParameters(action.parameters()));
     }
-    
+
     protected Collection<ActionDescription> getActions(final Actions actions) {
         final Collection<ActionDescription> actionDescriptions = new ArrayList<ActionDescription>();
         if (null != actions.value()) {
@@ -271,7 +271,7 @@ public class DocumentationBuilder {
         }
         return actionDescriptions;
     }
-    
+
     public boolean hasModule() {
     	return null != this.moduleName;
     }
@@ -279,17 +279,17 @@ public class DocumentationBuilder {
     public ContainerDescription[] getContainerDescriptions() {
     	return this.knownContainers.toArray(new ContainerDescription[knownContainers.size()]);
     }
-    
+
     public ActionDescription[] getActionDescriptions() {
     	return this.knownActions.toArray(new ActionDescription[knownActions.size()]);
     }
-    
+
     public ModuleDescription getModuleDescription() {
     	if (this.hasModule()) {
     		return factory.module(moduleName, moduleDescription, getContainerDescriptions(), getActionDescriptions());
     	} else {
-    		return null;    		
-    	}    	
+    		return null;
+    	}
     }
-    
+
 }

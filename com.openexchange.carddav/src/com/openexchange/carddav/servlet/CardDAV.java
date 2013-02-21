@@ -50,11 +50,9 @@
 package com.openexchange.carddav.servlet;
 
 import java.io.IOException;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import com.openexchange.carddav.servlet.CarddavPerformer.Action;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -72,7 +70,7 @@ import com.openexchange.tools.webdav.OXServlet;
 
 /**
  * The {@link CalDAV} servlet. It delegates all calls to the CaldavPerformer
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CardDAV extends OXServlet {
@@ -80,9 +78,9 @@ public class CardDAV extends OXServlet {
 	private static final long serialVersionUID = -6381396333467867154L;
 
 	private static final transient Log LOG = com.openexchange.log.Log.loggerFor(CardDAV.class);
-    
+
     private static volatile ServiceLookup services;
-    
+
     public static void setServiceLookup(ServiceLookup serviceLookup) {
         services = serviceLookup;
     }
@@ -163,21 +161,21 @@ public class CardDAV extends OXServlet {
     }
 
     private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action) throws ServletException, IOException {
-        ServerSession session;
+        ServerSession session = null;
         try {
-            session = ServerSessionAdapter.valueOf(getSession(req));
-            if (!checkPermission(session)) {
-                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            try {
+                session = ServerSessionAdapter.valueOf(getSession(req));
+                if (!checkPermission(session)) {
+                    resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    return;
+                }
+            } catch (final OXException exc) {
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 return;
             }
-        } catch (final OXException exc) {
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return;
-        }
-        try {
             CarddavPerformer.getInstance().doIt(req, resp, action, session);
         } finally {
-            if (mustLogOut(req)) {
+            if (null != session && mustLogOut(req)) {
                 logout(session, req, resp);
             }
         }
@@ -228,9 +226,9 @@ public class CardDAV extends OXServlet {
         // Nothing to do
     }
 
-    
+
     private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();
-    
+
     @Override
     protected LoginCustomizer getLoginCustomizer() {
         return ALLOW_ASTERISK;

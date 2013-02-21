@@ -116,7 +116,7 @@ public abstract class AbstractIndexAction implements AJAXActionService {
 
     /**
      * Gets the action string.
-     * 
+     *
      * @return The action string.
      */
     public abstract String getAction();
@@ -146,6 +146,18 @@ public abstract class AbstractIndexAction implements AJAXActionService {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    protected static String tryCast(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+
+        if (obj instanceof String) {
+            return (String) obj;
+        }
+
+        return null;
     }
 
 }

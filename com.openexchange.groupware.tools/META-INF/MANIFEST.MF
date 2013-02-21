@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Groupware Tools
 Bundle-SymbolicName: com.openexchange.groupware.tools
-Bundle-Version: 7.0.0
+Bundle-Version: 7.0.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.openexchange.groupware.tools.chunk,
@@ -12,5 +12,5 @@ Export-Package: com.openexchange.groupware.tools.chunk,
 Import-Package: com.openexchange.exception,
  com.openexchange.log,
  com.openexchange.session,
- org.apache.commons.logging;version="1.0.4",
+ org.apache.commons.logging,
  org.json

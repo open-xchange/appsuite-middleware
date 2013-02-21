@@ -73,11 +73,11 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link AvailabilityImpl}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class AvailabilityImpl extends Common implements Availability {
-    
+
     private static final SerializableTimeZone LEGACY_TIMEZONE;
     static {
         SerializableTimeZoneTime standardTime = new SerializableTimeZoneTime();
@@ -98,13 +98,13 @@ public class AvailabilityImpl extends Common implements Availability {
     @Override
     public List<FreeBusyResponseType> getFreeBusy(List<String> emailAddresses, Date from, Date until, boolean detailed) throws OXException {
         GetUserAvailabilityResponseType userAvailibility = getUserAvailibility(emailAddresses, from, until, detailed);
-        if (null == userAvailibility || null == userAvailibility.getFreeBusyResponseArray() || 
-            null == userAvailibility.getFreeBusyResponseArray().getFreeBusyResponse()) { 
+        if (null == userAvailibility || null == userAvailibility.getFreeBusyResponseArray() ||
+            null == userAvailibility.getFreeBusyResponseArray().getFreeBusyResponse()) {
             throw EWSExceptionCodes.NO_RESPONSE.create();
         }
         return userAvailibility.getFreeBusyResponseArray().getFreeBusyResponse();
     }
-    
+
     private GetUserAvailabilityResponseType getUserAvailibility(List<String> emailAddresses, Date from, Date until, boolean detailed) {
         Holder<GetUserAvailabilityResponseType> responseHolder = new Holder<GetUserAvailabilityResponseType>();
         GetUserAvailabilityRequestType request = createAvailabilityRequest(emailAddresses, from, until, detailed);
@@ -118,8 +118,8 @@ public class AvailabilityImpl extends Common implements Availability {
         getUserAvailabilityRequestType.setFreeBusyViewOptions(getFreebusyViewOptions(from, until, detailed));
         getUserAvailabilityRequestType.setMailboxDataArray(getMailboxData(emailAddresses));
         return getUserAvailabilityRequestType;
-    }   
-    
+    }
+
     private static ArrayOfMailboxData getMailboxData(List<String> emailAddresses) {
         ArrayOfMailboxData mailboxData = new ArrayOfMailboxData();
         for (String address : emailAddresses) {
@@ -132,7 +132,7 @@ public class AvailabilityImpl extends Common implements Availability {
         }
         return mailboxData;
     }
-        
+
     private static FreeBusyViewOptionsType getFreebusyViewOptions(Date from, Date until, boolean detailed) {
         FreeBusyViewOptionsType freeBusyViewOptionsType = new FreeBusyViewOptionsType();
         Duration duration = new Duration();

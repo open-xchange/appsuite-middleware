@@ -50,6 +50,7 @@
 package com.openexchange.mail.dataobjects.compose;
 
 import static com.openexchange.mail.utils.MessageUtility.readStream;
+import static com.openexchange.server.services.ServerServiceRegistry.getInstance;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,7 +68,6 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 /**
@@ -101,25 +101,30 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
         super();
         IDBasedFileAccess fileAccess = null;
         try {
-            final IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class, true);
+            final IDBasedFileAccessFactory fileAccessFactory = getInstance().getService(IDBasedFileAccessFactory.class, true);
             fileAccess = fileAccessFactory.createAccess(session);
             final File fileMetadata = fileAccess.getFileMetadata(documentId, FileStorageFileAccess.CURRENT_VERSION);
             setSize(fileMetadata.getFileSize());
             final String docMIMEType = fileMetadata.getFileMIMEType();
             setContentType(docMIMEType == null || docMIMEType.length() == 0 ? MimeTypes.MIME_APPL_OCTET : fileMetadata.getFileMIMEType());
-            try {
-                setFileName(MimeUtility.encodeText(fileMetadata.getFileName(), MailProperties.getInstance().getDefaultMimeCharset(), "Q"));
-            } catch (final UnsupportedEncodingException e) {
-                setFileName(fileMetadata.getFileName());
+            {
+                final String fileName = fileMetadata.getFileName();
+                if (!isEmpty(fileName)) {
+                    try {
+                        setFileName(MimeUtility.encodeText(fileName, MailProperties.getInstance().getDefaultMimeCharset(), "Q"));
+                    } catch (final UnsupportedEncodingException e) {
+                        setFileName(fileName);
+                    }
+                }
             }
             final DocumentInputStreamProvider tmp = new DocumentInputStreamProvider(fileAccess, documentId);
             tmp.setName(getFileName());
             inputStreamProvider = tmp;
-        } finally{
-            if(fileAccess != null) {
+        } finally {
+            if (fileAccess != null) {
                 try {
                     fileAccess.finish();
-                } catch (final OXException e) {
+                } catch (final Exception e) {
                     // IGNORE
                 }
             }
@@ -153,6 +158,9 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
             } catch (final FileNotFoundException e) {
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             } catch (final IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             } finally {
                 if (docInputSream != null) {
@@ -189,16 +197,21 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
         try {
             return inputStreamProvider.getInputStream();
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
     @Override
     public void prepareForCaching() {
+        // Nope
     }
 
     @Override
     public void loadContent() {
+        // Nope
     }
 
 
@@ -210,9 +223,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
     private static final class DocumentInputStreamProvider implements StreamDataSource.InputStreamProvider {
 
         private final IDBasedFileAccess fileAccess;
-
         private final String documentId;
-
         private String name;
 
         public DocumentInputStreamProvider(final IDBasedFileAccess fileAccess, final String documentId) {
@@ -240,6 +251,18 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
         public String getName() {
             return name;
         }
+    } // End of DocumentInputStreamProvider class
 
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
+
 }

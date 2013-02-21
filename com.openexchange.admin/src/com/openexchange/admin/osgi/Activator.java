@@ -71,6 +71,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
+import com.openexchange.version.Version;
 
 public class Activator extends HousekeepingActivator {
 
@@ -85,6 +86,7 @@ public class Activator extends HousekeepingActivator {
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
         track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
         track(MailAccountStorageService.class, new RegistryServiceTrackerCustomizer<MailAccountStorageService>(context, AdminServiceRegistry.getInstance(), MailAccountStorageService.class));
+        AdminCache.compareAndSetBundleContext(null, context);
         final ConfigurationService configurationService = getService(ConfigurationService.class);
         AdminCache.compareAndSetConfigurationService(null, configurationService);
         AdminServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
@@ -113,7 +115,7 @@ public class Activator extends HousekeepingActivator {
             final Dictionary<?, ?> headers = context.getBundle().getHeaders();
             log.info("Version: " + headers.get("Bundle-Version"));
             log.info("Name: " + headers.get("Bundle-SymbolicName"));
-            log.info("Build: " + headers.get("OXVersion") + " Rev" + headers.get("OXRevision"));
+            log.info("Build: " + Version.getInstance().getVersionString());
         }
         log.info("Admindaemon successfully started.");
 

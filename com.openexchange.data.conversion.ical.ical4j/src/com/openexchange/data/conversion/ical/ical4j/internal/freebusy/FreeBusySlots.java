@@ -66,9 +66,9 @@ import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link FreeBusyIntervals}
- * 
+ *
  * Emits free-busy intervals.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class FreeBusySlots extends AbstractVerifyingAttributeConverter<VFreeBusy, FreeBusyInformation> {
@@ -93,8 +93,8 @@ public final class FreeBusySlots extends AbstractVerifyingAttributeConverter<VFr
 	}
 
 	/**
-	 * Gets the suitable free/busy-type from the supplied free/busy-interval. 
-	 * 
+	 * Gets the suitable free/busy-type from the supplied free/busy-interval.
+	 *
 	 * @param interval The interval to get the free/busy type from
 	 * @return The free/busy-type
 	 */
@@ -108,7 +108,7 @@ public final class FreeBusySlots extends AbstractVerifyingAttributeConverter<VFr
             return FbType.BUSY_TENTATIVE;
         default:
             return FbType.BUSY;
-            
+
 	    }
 	}
 

@@ -68,7 +68,7 @@ import com.openexchange.java.Streams;
 
 /**
  * {@link ReadFileFormat}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ReadFileFormat {
@@ -79,7 +79,7 @@ public class ReadFileFormat {
 
     private final StringBuilder textBuffer;
 
-    
+
     /**
      * Initializes a new {@link ReadFileFormat}.
      */
@@ -91,7 +91,7 @@ public class ReadFileFormat {
 
     /**
      * Expects the input to be a MS document.
-     * 
+     *
      * @param in The input stream
      * @return The extracted text or <code>null</code>
      * @throws IOException If an I/O error occurs
@@ -114,8 +114,8 @@ public class ReadFileFormat {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @param is
      * @return
      * @throws Exception

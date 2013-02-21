@@ -63,6 +63,7 @@ import javax.crypto.spec.SecretKeySpec;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.internal.GenericProperty;
@@ -104,7 +105,7 @@ public final class MailPasswordUtil {
      * Mail account secret encryption strategy.
      */
     public static final SecretEncryptionStrategy<GenericProperty> STRATEGY = new SecretEncryptionStrategy<GenericProperty>() {
-        
+
         @Override
         public void update(final String recrypted, final GenericProperty customizationNote) throws OXException {
             final int contextId = customizationNote.session.getContextId();
@@ -178,7 +179,7 @@ public final class MailPasswordUtil {
      * @param session The session
      * @return The decrypted password
      * @throws GeneralSecurityException If password decryption fails
-     * @throws OXException 
+     * @throws OXException
      */
     public static String decrypt(final String encryptedPassword, final Session session, final int accountId, final String login, final String server) throws OXException {
         final SecretEncryptionService<GenericProperty> encryptionService = ServerServiceRegistry.getInstance().getService(SecretEncryptionFactoryService.class).createService(STRATEGY);
@@ -249,7 +250,7 @@ public final class MailPasswordUtil {
          * requirements a binary transport encoding for mail must meet.
          *
          */
-        return new String(org.apache.commons.codec.binary.Base64.encodeBase64(outputBytes), com.openexchange.java.Charsets.US_ASCII);
+        return Charsets.toAsciiString(org.apache.commons.codec.binary.Base64.encodeBase64(outputBytes));
     }
 
     /**
@@ -284,7 +285,7 @@ public final class MailPasswordUtil {
              * requirements a binary transport encoding for mail must meet.
              *
              */
-            encrypted = org.apache.commons.codec.binary.Base64.decodeBase64(encryptedPassword.getBytes(com.openexchange.java.Charsets.US_ASCII));
+            encrypted = org.apache.commons.codec.binary.Base64.decodeBase64(Charsets.toAsciiBytes(encryptedPassword));
         }
 
         final Cipher cipher = Cipher.getInstance(CIPHER_TYPE);

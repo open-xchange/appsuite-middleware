@@ -67,7 +67,7 @@ import com.openexchange.file.storage.TypeAware;
 
 /**
  * {@link CIFSFolder}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CIFSFolder extends DefaultFileStorageFolder implements TypeAware {
@@ -104,7 +104,7 @@ public final class CIFSFolder extends DefaultFileStorageFolder implements TypeAw
 
     /**
      * Sets the type.
-     * 
+     *
      * @param type The type to set
      * @return This folder with type applied
      */
@@ -120,14 +120,14 @@ public final class CIFSFolder extends DefaultFileStorageFolder implements TypeAw
 
     /**
      * Parses specified CIFS/SMB file.
-     * 
-     * @param smbFile The CIFS/SMB file denoting the directory
+     *
+     * @param smbFolder The CIFS/SMB file denoting the directory
      * @throws OXException If parsing CIFS/SMB file property set fails
      */
-    public void parseSmbFolder(final SmbFile smbFile) throws OXException {
-        if (null != smbFile) {
+    public void parseSmbFolder(final SmbFile smbFolder) throws OXException {
+        if (null != smbFolder) {
             try {
-                final String path = smbFile.getPath();
+                final String path = smbFolder.getPath();
                 id = Utils.checkFolderId(path);
                 {
                     if (rootUrl.equals(path)) {
@@ -136,19 +136,28 @@ public final class CIFSFolder extends DefaultFileStorageFolder implements TypeAw
                         parentId = null;
                     } else {
                         rootFolder = false;
-                        final String sParent = Utils.checkFolderId(smbFile.getParent());
+                        final String sParent = Utils.checkFolderId(smbFolder.getParent());
                         parentId = rootUrl.equals(sParent) ? FileStorageFolder.ROOT_FULLNAME : sParent;
                     }
                     b_rootFolder = true;
                 }
-                creationDate = new Date(smbFile.createTime());
-                lastModifiedDate = new Date(smbFile.getIfModifiedSince());
-                final String name = smbFile.getName();
+                creationDate = new Date(smbFolder.createTime());
+                lastModifiedDate = new Date(smbFolder.getIfModifiedSince());
+                final String name = smbFolder.getName();
                 this.name = name.endsWith("/") ? name.substring(0, name.length() - 1) : name;
+                /*
+                 * Check permission
+                 */
+                if (!smbFolder.canRead()) {
+                    ownPermission.setReadPermission(FileStoragePermission.NO_PERMISSIONS);
+                }
+                if (!smbFolder.canWrite()) {
+                    ownPermission.setReadPermission(FileStoragePermission.NO_PERMISSIONS);
+                }
                 /*
                  * Iterate headers
                  */
-                final Map<String, List<String>> headerFields = smbFile.getHeaderFields();
+                final Map<String, List<String>> headerFields = smbFolder.getHeaderFields();
                 if (null != headerFields) {
                     final Map<String, Object> props = new HashMap<String, Object>(headerFields.size());
                     for (final Entry<String, List<String>> entry : headerFields.entrySet()) {

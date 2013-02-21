@@ -68,6 +68,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.versit.VersitDefinition;
@@ -109,12 +110,7 @@ public final class ContactJSONDataHandler implements DataHandler {
 
     @Override
     public Object processData(final Data<?> data, final DataArguments dataArguments, final Session session) throws OXException {
-        final Context ctx;
-        try {
-            ctx = ContextStorage.getStorageContext(session);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Context ctx = ContextStorage.getStorageContext(session);
         /*
          * Parse input stream
          */
@@ -172,11 +168,7 @@ public final class ContactJSONDataHandler implements DataHandler {
             throw DataExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             converter.close();
-            try {
-                inputStream.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            Streams.close(inputStream);
         }
     }
 }

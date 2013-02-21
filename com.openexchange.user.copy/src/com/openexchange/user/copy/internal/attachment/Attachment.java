@@ -52,21 +52,21 @@ package com.openexchange.user.copy.internal.attachment;
 import java.util.Date;
 
 public class Attachment {
-    
+
     private int id;
 
 	private Date creationDate;
-	
+
 	private int createdBy;
 
 	private int attachedId;
-	
+
 	private int moduleId;
 
 	private String filename;
-	
+
 	private String fileMIMEType;
-	
+
 	private long filesize;
 
 	private int rtfFlag;

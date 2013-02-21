@@ -62,7 +62,7 @@ public class ListContextByDatabase extends ContextAbstraction {
         setDefaultCommandLineOptionsWithoutContextID(parser);
         setDatabaseIDOption(parser);
         setDatabaseNameOption(parser, NeededQuadState.eitheror);
-        
+
         setCSVOutputOption(parser);
     }
 
@@ -71,7 +71,7 @@ public class ListContextByDatabase extends ContextAbstraction {
         final AdminParser parser = new AdminParser("listcontext");
 
         setOptions(parser);
-        
+
         String successtext = null;
         try {
             parser.ownparse(args2);
@@ -103,7 +103,7 @@ public class ListContextByDatabase extends ContextAbstraction {
     public static void main(final String args[]) {
         new ListContextByDatabase(args);
     }
-    
+
     @Override
     protected final String getObjectName() {
         return "contexts for database";

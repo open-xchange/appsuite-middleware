@@ -69,6 +69,8 @@ import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.servlet.ServletConfigLoader;
 import com.openexchange.ajp13.servlet.http.HttpManagersInit;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.events.CacheEventService;
+import com.openexchange.caching.events.internal.CacheEventServiceImpl;
 import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
 import com.openexchange.calendar.CalendarReminderDelete;
@@ -184,6 +186,8 @@ import com.openexchange.user.UserService;
 import com.openexchange.user.internal.UserServiceImpl;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
+import com.openexchange.version.Version;
+import com.openexchange.version.internal.Numbers;
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.jdom.impl.JDOMParserImpl;
 import com.openexchange.xml.spring.SpringParser;
@@ -336,6 +340,7 @@ public final class Init {
         // we'll have to do the service wiring differently.
         // This method duplicates statically what the OSGi container
         // handles dynamically
+        startVersionBundle();
         startAndInjectIDGeneratorService();
         startAndInjectConfigBundle();
         startAndInjectThreadPoolBundle();
@@ -369,6 +374,11 @@ public final class Init {
         startAndInjectContactCollector();
         startAndInjectImportExportServices();
 
+    }
+
+    private static void startVersionBundle() throws Exception {
+        // Using some static version because access to c.o.version bundle manifest is not possible currently.
+        Version.getInstance().setNumbers(new Numbers("0.0.0", "0"));
     }
 
     public static void startAndInjectConfigBundle() {
@@ -793,7 +803,11 @@ public final class Init {
 
     public static void startAndInjectCache() throws OXException {
         if (null == TestServiceRegistry.getInstance().getService(CacheService.class)) {
+            CacheEventService cacheEventService = new CacheEventServiceImpl();
+            services.put(CacheEventService.class, cacheEventService);
+            TestServiceRegistry.getInstance().addService(CacheEventService.class, cacheEventService);
             JCSCacheServiceInit.initInstance();
+            JCSCacheServiceInit.getInstance().setCacheEventService((CacheEventService)services.get(CacheEventService.class));
             JCSCacheServiceInit.getInstance().start((ConfigurationService) services.get(ConfigurationService.class));
             final CacheService cache = JCSCacheService.getInstance();
             services.put(CacheService.class, cache);

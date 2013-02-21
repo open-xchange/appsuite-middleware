@@ -53,7 +53,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link SubscriptionJSONExceptionMessage}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class SubscriptionJSONExceptionMessage implements LocalizableStrings {
@@ -78,7 +78,7 @@ public class SubscriptionJSONExceptionMessage implements LocalizableStrings {
     public final static String THROWABLE_MSG = "Got Exception %s";
 
     public final static String UNKNOWN_COLUMN_MSG = "Unknown column: %s";
-    
+
     public final static String MISSING_PARAMETER_HELP = "";
 
     public final static String UNKNOWN_ACTION_HELP = "";

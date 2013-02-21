@@ -56,14 +56,14 @@ import com.openexchange.mq.MQTransactional;
 
 /**
  * {@link MQQueueSender} - A queue sender intended to be re-used. Invoke {@link #close()} method when done.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MQQueueSender extends MQCloseable, MQTransactional {
 
     /**
      * Sends a message containing a <code>java.lang.String</code>.
-     * 
+     *
      * @param text The <code>java.lang.String</code> to send
      * @throws OXException If send operation fails
      */
@@ -71,7 +71,7 @@ public interface MQQueueSender extends MQCloseable, MQTransactional {
 
     /**
      * Sends a message containing a <code>java.lang.String</code>.
-     * 
+     *
      * @param text The <code>java.lang.String</code> to send
      * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
      * @throws OXException If send operation fails
@@ -80,7 +80,7 @@ public interface MQQueueSender extends MQCloseable, MQTransactional {
 
     /**
      * Sends a message containing a {@link Serializable serializable} Java object.
-     * 
+     *
      * @param object The serializable object to send
      * @throws OXException If send operation fails
      */
@@ -88,7 +88,7 @@ public interface MQQueueSender extends MQCloseable, MQTransactional {
 
     /**
      * Sends a message containing a {@link Serializable serializable} Java object.
-     * 
+     *
      * @param object The serializable object to send
      * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
      * @throws OXException If send operation fails
@@ -97,7 +97,7 @@ public interface MQQueueSender extends MQCloseable, MQTransactional {
 
     /**
      * Sends a message containing <code>byte</code>s.
-     * 
+     *
      * @param bytes The <code>byte</code> array to send
      * @throws OXException If send operation fails
      */
@@ -105,7 +105,7 @@ public interface MQQueueSender extends MQCloseable, MQTransactional {
 
     /**
      * Sends a message containing <code>byte</code>s.
-     * 
+     *
      * @param bytes The <code>byte</code> array to send
      * @param priority The priority (<code>4</code> is default); range from 0 (lowest) to 9 (highest)
      * @throws OXException If send operation fails

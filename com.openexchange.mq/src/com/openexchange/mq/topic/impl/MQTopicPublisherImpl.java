@@ -66,7 +66,7 @@ import com.openexchange.mq.topic.MQTopicPublisher;
 
 /**
  * {@link MQTopicPublisherImpl} - A topic publisher intended to be re-used. Invoke {@link #close()} method when done.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MQTopicPublisherImpl extends MQTopicResource implements MQTopicPublisher {
@@ -81,7 +81,7 @@ public class MQTopicPublisherImpl extends MQTopicResource implements MQTopicPubl
 
     /**
      * Initializes a new {@link MQTopicPublisherImpl}.
-     * 
+     *
      * @param topicName The name of topic to publish to
      * @throws OXException If initialization fails
      */
@@ -231,7 +231,7 @@ public class MQTopicPublisherImpl extends MQTopicResource implements MQTopicPubl
 
     /**
      * Checks proper priority range.
-     * 
+     *
      * @param priority The priority to check
      * @return The checked priority
      */

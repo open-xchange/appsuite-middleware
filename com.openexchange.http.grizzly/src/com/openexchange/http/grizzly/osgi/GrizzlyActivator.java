@@ -51,13 +51,13 @@ package com.openexchange.http.grizzly.osgi;
 
 import java.util.concurrent.ExecutorService;
 import org.glassfish.grizzly.comet.CometAddOn;
+import org.glassfish.grizzly.http.ajp.AjpAddOn;
 import org.glassfish.grizzly.http.HttpRequestPacket;
-import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
+import org.glassfish.grizzly.http.server.OXHttpServer;
 import org.glassfish.grizzly.http.server.ServerConfiguration;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
-import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
@@ -69,7 +69,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.GrizzlyExceptionCode;
-import com.openexchange.http.grizzly.addon.GrizzlOXAddOn;
 import com.openexchange.http.grizzly.service.atmosphere.AtmosphereService;
 import com.openexchange.http.grizzly.service.atmosphere.AtmosphereServiceImpl;
 import com.openexchange.http.grizzly.service.http.HttpServiceFactory;
@@ -82,14 +81,14 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link GrizzlyActivator}
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class GrizzlyActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(GrizzlyActivator.class));
 
-    private HttpServer grizzly;
+    private OXHttpServer grizzly;
 
     private HttpServiceFactory serviceFactory;
 
@@ -144,20 +143,27 @@ public class GrizzlyActivator extends HousekeepingActivator {
              */
             initializeServiceRegistry(grizzlyServiceRegistry);
 
-            
+
             GrizzlyConfig grizzlyConfig = GrizzlyConfig.getInstance();
             grizzlyConfig.start();
 
             /*
              * create, configure and start server
              */
-            grizzly = new HttpServer();
-            
+            grizzly = new OXHttpServer();
+
             ServerConfiguration serverConfiguration = grizzly.getServerConfiguration();
             serverConfiguration.setMaxRequestParameters(grizzlyConfig.getMaxRequestParameters());
 
             final NetworkListener networkListener = new NetworkListener("http-listener", grizzlyConfig.getHttpHost(), grizzlyConfig.getHttpPort());
-            // networkListener.setChunkingEnabled(false);
+
+            if (grizzlyConfig.isAJPEnabled()) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Enabling AJP for Grizzly server.");
+                }
+                networkListener.registerAddOn(new AjpAddOn());
+            }
+
             TCPNIOTransport configuredTcpNioTransport = buildTcpNioTransport();
             networkListener.setTransport(configuredTcpNioTransport);
 
@@ -253,7 +259,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
     /**
      * Initialize the package wide service registry with the services we declared as needed.
-     * 
+     *
      * @param serviceRegistry the registry to fill
      */
     private void initializeServiceRegistry(final GrizzlyServiceRegistry serviceRegistry) {
@@ -269,7 +275,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
     /**
      * Build a TCPNIOTransport using {c.o].threadpool
-     * 
+     *
      * @return The configure TCPNIOTransport
      * @throws OXException If the Transport can't be build
      */

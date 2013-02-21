@@ -51,7 +51,7 @@ package com.openexchange.realtime.payload;
 
 /**
  * {@link VisitablePayload} - VisitablePayloads have to accept the PayloadVisitor
- * 
+ *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public interface VisitablePayload {

@@ -74,34 +74,34 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Languages implements ComputedServerConfigValueService {
-	
+
 	private static final Log LOG = LogFactory.getLog(Languages.class);
-	
+
 	private JSONObject allLanguages;
-	
+
 	public Languages(ServiceLookup services) {
 		super();
 
 		ConfigurationService config = services.getService(ConfigurationService.class);
 		Properties properties = config.getPropertiesInFolder("languages/appsuite");
-		final Map<String, String> languageMap = new HashMap<String, String>(); 
-		
+		final Map<String, String> languageMap = new HashMap<String, String>();
+
 		for(Object key: properties.keySet()) {
 			String propName = (String) key;
 			String languageName = properties.getProperty(propName);
-			
+
 			int index = propName.lastIndexOf('/');
 			if (index > 0) {
 				propName = propName.substring(index + 1);
 			}
 			languageMap.put(propName, languageName);
 		}
-		
+
 		if (languageMap.isEmpty()) {
 			// Assume american english
 			languageMap.put("en_US", "English");
 		}
-		
+
 		// Sort it alphabetically
 		SortedSet<String> keys = new TreeSet<String>(new Comparator<String>() {
 
@@ -111,11 +111,11 @@ public class Languages implements ComputedServerConfigValueService {
 				arg1 = languageMap.get(arg1);
 				return arg0.compareTo(arg1);
 			}
-			
+
 		});
-		
+
 		keys.addAll(languageMap.keySet());
-		
+
 		allLanguages = new JSONObject();
 		try {
 			for(String key: keys) {
@@ -130,7 +130,7 @@ public class Languages implements ComputedServerConfigValueService {
 	@Override
 	public void addValue(JSONObject serverConfig, AJAXRequestData request,
 			ServerSession session) throws OXException, JSONException {
-		
+
 		Object languages = serverConfig.opt("languages");
 		if (languages == null || languages.equals("all")) {
 			serverConfig.put("languages", allLanguages);

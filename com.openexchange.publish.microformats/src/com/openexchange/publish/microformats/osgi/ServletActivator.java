@@ -50,12 +50,9 @@
 package com.openexchange.publish.microformats.osgi;
 
 import javax.servlet.ServletException;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
@@ -63,6 +60,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.microformats.ContactPictureServlet;
@@ -83,19 +81,23 @@ public class ServletActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletActivator.class));
 
-    private final PublicationServicesActivator activator = new PublicationServicesActivator();
+    private final PublicationServicesActivator activator;
+    private volatile boolean registered;
+    private volatile I18nServiceTrackerCustomizer customizer;
 
-    private boolean registered;
-
-    private I18nServiceTrackerCustomizer customizer;
-
-    private static final Class<?>[] NEEDED_SERVICES = {
-        HttpService.class, PublicationDataLoaderService.class, ContextService.class, TemplateService.class, ContactService.class, 
-        UserConfigurationService.class, UserService.class, InfostoreFacade.class, ConfigurationService.class, HtmlService.class, ImageTransformationService.class};
+    /**
+     * Initializes a new {@link ServletActivator}.
+     */
+    public ServletActivator() {
+        super();
+        activator = new PublicationServicesActivator();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] {
+            HttpService.class, PublicationDataLoaderService.class, ContextService.class, TemplateService.class, ContactService.class,
+            UserConfigurationService.class, UserService.class, InfostoreFacade.class, ConfigurationService.class, HtmlService.class, ImageTransformationService.class};
     }
 
     @Override
@@ -111,7 +113,8 @@ public class ServletActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         activator.start(context);
-        customizer = new I18nServiceTrackerCustomizer(context);
+        final I18nServiceTrackerCustomizer customizer = new I18nServiceTrackerCustomizer(context);
+        this.customizer = customizer;
         track(I18nService.class, customizer);
         openTrackers();
         registerServlet();
@@ -159,12 +162,12 @@ public class ServletActivator extends HousekeepingActivator {
         InfostoreFileServlet.setUserConfigs(userConfigs);
         InfostoreFileServlet.setUsers(users);
         InfostoreFileServlet.setInfostore(infostore);
-        
-        FileResponseRenderer renderer = new FileResponseRenderer();
+
+        final FileResponseRenderer renderer = new FileResponseRenderer();
         renderer.setScaler(imageScalingService);
 		InfostoreFileServlet.setFileResponseRenderer(renderer);
         ContactPictureServlet.setFileResponseRenderer(renderer);
-		
+
         registered = true;
         try {
             httpService.registerServlet("/publications", microformatServlet, null, null);

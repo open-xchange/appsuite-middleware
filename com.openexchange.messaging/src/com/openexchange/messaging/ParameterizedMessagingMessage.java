@@ -53,7 +53,7 @@ import java.util.Map;
 
 /**
  * {@link ParameterizedMessagingMessage} - Extends {@link MessagingMessage} by the capability to carry parameters.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ParameterizedMessagingMessage extends MessagingMessage {
@@ -62,14 +62,14 @@ public interface ParameterizedMessagingMessage extends MessagingMessage {
      * Gets all parameters of this message as a map.
      * <p>
      * Note: Any modifications applied to returned map will also be reflected in message's parameters.
-     * 
+     *
      * @return The parameters as a map
      */
     Map<String, Object> getParameters();
 
     /**
      * Gets the associated parameter value.
-     * 
+     *
      * @param name The parameter name
      * @return The parameter value or <code>null</code> if absent
      */
@@ -77,7 +77,7 @@ public interface ParameterizedMessagingMessage extends MessagingMessage {
 
     /**
      * Puts specified parameter (and thus overwrites any existing parameter)
-     * 
+     *
      * @param name The parameter name
      * @param value The parameter value
      */
@@ -85,7 +85,7 @@ public interface ParameterizedMessagingMessage extends MessagingMessage {
 
     /**
      * Puts specified parameter if not already present.
-     * 
+     *
      * @param name The parameter name
      * @param value The parameter value
      * @return <code>true</code> if parameter has been put; otherwise <code>false</code> if already present
@@ -99,7 +99,7 @@ public interface ParameterizedMessagingMessage extends MessagingMessage {
 
     /**
      * Checks if this message contains denoted parameter.
-     * 
+     *
      * @param name The parameter name
      * @return <code>true</code> if such a parameter exists; <code>false</code> if absent
      */

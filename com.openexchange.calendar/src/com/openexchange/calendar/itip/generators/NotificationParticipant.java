@@ -69,7 +69,7 @@ import com.openexchange.groupware.ldap.User;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class NotificationParticipant implements Cloneable {
-        
+
     private Set<ITipRole> roles;
     private boolean external;
     private String email;
@@ -85,14 +85,14 @@ public class NotificationParticipant implements Cloneable {
 	private TimeZone tz;
 	private int folderId;
 	private boolean virtual;
-    
+
     public NotificationParticipant(ITipRole role, boolean external, String email) {
         super();
         this.roles = EnumSet.of(role);
         this.external = external;
         this.email = email;
     }
-    
+
     public NotificationParticipant(Set<ITipRole> roles, boolean external, String email) {
         super();
         this.roles = roles;
@@ -107,7 +107,7 @@ public class NotificationParticipant implements Cloneable {
         this.email = email;
         this.identifier = identifier;
     }
-    
+
     public NotificationParticipant(Set<ITipRole> roles, boolean external, String email, int identifier) {
         super();
         this.roles = roles;
@@ -115,7 +115,7 @@ public class NotificationParticipant implements Cloneable {
         this.email = email;
         this.identifier = identifier;
     }
-    
+
     public String getDisplayName() {
         if (displayName == null) {
             return email;
@@ -123,7 +123,7 @@ public class NotificationParticipant implements Cloneable {
         return displayName;
     }
 
-    
+
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
@@ -131,31 +131,31 @@ public class NotificationParticipant implements Cloneable {
     public boolean hasRole(ITipRole role) {
     	return roles.contains(role);
     }
-        
+
     public boolean isExternal() {
         return external;
     }
 
-    
+
     public void setExternal(boolean external) {
         this.external = external;
     }
 
-    
+
     public String getEmail() {
         return email;
     }
 
-    
+
     public void setEmail(String email) {
         this.email = email;
     }
-    
+
     public ConfirmStatus getConfirmStatus() {
         return confirmStatus;
     }
 
-    
+
     public void setConfirmStatus(ConfirmStatus confirmStatus) {
         this.confirmStatus = confirmStatus;
     }
@@ -207,22 +207,22 @@ public class NotificationParticipant implements Cloneable {
         return identifier;
     }
 
-    
+
     public String getComment() {
         return comment;
     }
 
-    
+
     public void setComment(String comment) {
         this.comment = comment;
     }
 
-    
+
     public User getUser() {
         return user;
     }
 
-    
+
     public void setUser(User user) {
         this.user = user;
     }
@@ -231,7 +231,7 @@ public class NotificationParticipant implements Cloneable {
     public void setContext(Context ctx) {
         this.ctx = ctx;
     }
-    
+
     public Context getContext() {
         return ctx;
     }
@@ -250,7 +250,7 @@ public class NotificationParticipant implements Cloneable {
 		}
 		return locale;
 	}
-	
+
 	public void setLocale(Locale locale) {
 		this.locale = locale;
 	}
@@ -258,7 +258,7 @@ public class NotificationParticipant implements Cloneable {
 	public void setResource(boolean b) {
 		this.resource = true;
 	}
-	
+
 	public boolean isResource() {
 		return resource;
 	}
@@ -269,7 +269,7 @@ public class NotificationParticipant implements Cloneable {
 		}
 		return tz;
 	}
-	
+
 	public void setTimezone(TimeZone tz) {
 		this.tz = tz;
 	}
@@ -284,11 +284,11 @@ public class NotificationParticipant implements Cloneable {
 	public int getFolderId() {
 		return folderId;
 	}
-	
+
 	public void setFolderId(int folderId) {
 		this.folderId = folderId;
 	}
-	
+
 	@Override
     public NotificationParticipant clone() {
 		NotificationParticipant clone = new NotificationParticipant(roles, external, comment);
@@ -307,16 +307,16 @@ public class NotificationParticipant implements Cloneable {
 		clone.tz = this.tz;
 		clone.folderId = this.folderId;
 		clone.virtual = this.virtual;
-		
+
 		return clone;
 	}
 
 	public void setVirtual(boolean b) {
 		this.virtual = b;
 	}
-	
+
 	public boolean isVirtual() {
 		return virtual;
 	}
-	
+
 }

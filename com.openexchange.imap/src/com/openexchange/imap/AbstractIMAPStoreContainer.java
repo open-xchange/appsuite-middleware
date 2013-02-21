@@ -79,7 +79,7 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
 
     /**
      * Gets a newly created & connected {@link IMAPStore} instance.
-     * 
+     *
      * @param server The host name
      * @param port The port
      * @param login The login
@@ -112,7 +112,7 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
 
     /**
      * Safely closes specified IMAP store.
-     * 
+     *
      * @param imapStore The IMAP store
      */
     protected static void closeSafe(final IMAPStore imapStore) {

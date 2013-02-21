@@ -12,17 +12,17 @@ import javax.xml.ws.WebFault;
 
 @WebFault(name = "NoSuchContextException", targetNamespace = "http://soap.reseller.admin.openexchange.com")
 public class NoSuchContextException_Exception extends java.lang.Exception {
-    
+
     private com.openexchange.admin.soap.reseller.group.reseller.soap.NoSuchContextException noSuchContextException;
 
     public NoSuchContextException_Exception() {
         super();
     }
-    
+
     public NoSuchContextException_Exception(String message) {
         super(message);
     }
-    
+
     public NoSuchContextException_Exception(String message, Throwable cause) {
         super(message, cause);
     }

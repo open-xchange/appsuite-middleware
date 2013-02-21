@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -89,9 +90,10 @@ import com.openexchange.ajp13.servlet.http.HttpDateFormatRegistry;
 import com.openexchange.ajp13.util.CharsetValidator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.java.AsciiWriter;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.server.impl.Version;
+import com.openexchange.version.Version;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
 
@@ -333,7 +335,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         /*-
          * Since PrintWriter simply delegates flush() invocation to underlying OutputStream,
          * we can safely call ServletOutputStream.flush() directly.
-         * 
+         *
          * See implementation of flush() inside PrintWriter:
          *    public void flush() {
          *        try {
@@ -454,9 +456,11 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
             outputSelection = OUTPUT_WRITER;
         }
         if (bufferSize > 0) {
-            writer = new PrintWriter(new OutputStreamWriter(servletOutputStream, characterEncoding), false);
+            final Writer w = Charsets.isAsciiCharset(characterEncoding) ? new AsciiWriter(servletOutputStream) : new OutputStreamWriter(servletOutputStream, characterEncoding);
+            writer = new PrintWriter(w, false);
         } else {
-            writer = new PrintWriter(new OutputStreamWriter(servletOutputStream, characterEncoding), false);
+            final Writer w = Charsets.isAsciiCharset(characterEncoding) ? new AsciiWriter(servletOutputStream) : new OutputStreamWriter(servletOutputStream, characterEncoding);
+            writer = new PrintWriter(w, false);
         }
         return writer;
     }
@@ -717,7 +721,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
                 // Already existing; decide which one to keep or to merge
                 // By now: Keep the newer one (cookies is a LinkedHashSet that keeps order)
                 /*-
-                 * 
+                 *
                 if (null != prev) {
                     if (0 == prev.getMaxAge()) {
                         // First indeciates delete
@@ -727,7 +731,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
                         }
                     } else {
                         // First i
-                        
+
                     }
                 }
                 */
@@ -978,11 +982,11 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         String errorMsgStr = ERROR_PAGE_TEMPL;
         errorMsgStr = errorMsgStr.replaceAll("#STATUS_CODE#", String.valueOf(this.status)).replaceAll(
             "#STATUS_MSG#",
-            Matcher.quoteReplacement(this.statusMsg)).replaceFirst("#STATUS_DESC#", desc);
+            com.openexchange.java.Strings.quoteReplacement(this.statusMsg)).replaceFirst("#STATUS_DESC#", com.openexchange.java.Strings.quoteReplacement(desc));
         synchronized (HEADER_DATE_FORMAT) {
             errorMsgStr = errorMsgStr.replaceFirst("#DATE#", HEADER_DATE_FORMAT.format(new Date(System.currentTimeMillis())));
         }
-        errorMsgStr = errorMsgStr.replaceFirst("#VERSION#", Version.getVersionString());
+        errorMsgStr = errorMsgStr.replaceFirst("#VERSION#", Version.getInstance().getVersionString());
         setContentType(new com.openexchange.java.StringAllocator("text/html; charset=").append(getCharacterEncoding()).toString());
         final byte[] errormessage = errorMsgStr.getBytes(Charsets.forName(getCharacterEncoding()));
         setContentLength(errormessage.length);
@@ -1015,7 +1019,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         synchronized (HEADER_DATE_FORMAT) {
             errorMsgStr = errorMsgStr.replaceFirst("#DATE#", HEADER_DATE_FORMAT.format(new Date(System.currentTimeMillis())));
         }
-        errorMsgStr = errorMsgStr.replaceFirst("#VERSION#", Version.getVersionString());
+        errorMsgStr = errorMsgStr.replaceFirst("#VERSION#", Version.getInstance().getVersionString());
         String encoding = getCharacterEncoding();
         if (null == encoding) {
             encoding = "UTF-8";

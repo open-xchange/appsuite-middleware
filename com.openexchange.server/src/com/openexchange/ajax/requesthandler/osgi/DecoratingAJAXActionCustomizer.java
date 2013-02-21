@@ -61,7 +61,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DecoratingAJAXActionCustomizer} - The {@link AJAXActionCustomizer customizer} applying {@link AJAXResultDecorator decorators}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DecoratingAJAXActionCustomizer implements AJAXActionCustomizer {
@@ -75,7 +75,7 @@ public final class DecoratingAJAXActionCustomizer implements AJAXActionCustomize
 
     /**
      * Gets the instance
-     * 
+     *
      * @return The instance
      */
     public static DecoratingAJAXActionCustomizer getInstance() {

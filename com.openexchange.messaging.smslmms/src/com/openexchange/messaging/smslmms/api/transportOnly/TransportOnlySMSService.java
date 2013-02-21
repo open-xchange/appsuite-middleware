@@ -61,7 +61,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link TransportOnlySMSService} - The transport-only {@link SMSService}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class TransportOnlySMSService extends AbstractSMSService {
@@ -90,7 +90,7 @@ public abstract class TransportOnlySMSService extends AbstractSMSService {
 
     /**
      * Gets the SMS/MMS configuration for the user associated with specified session.
-     * 
+     *
      * @param accountId The account identifier
      * @param session The session providing user data
      * @return The SMS/MMS configuration

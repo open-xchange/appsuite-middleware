@@ -51,77 +51,77 @@ package com.openexchange.json;
 
 /**
  * {@link JSONMBean} - The JSON MBean.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface JSONMBean {
 
     /**
      * Gets the number of total pooled small-sized character arrays.
-     * 
+     *
      * @return The number of total
      */
     public int getTotalSmall();
 
     /**
      * Gets the number of in-use pooled small-sized character arrays.
-     * 
+     *
      * @return The number of in-use pooled character arrays
      */
     public int getInUseSmall();
 
     /**
      * Gets the number of currently pooled small-sized character arrays.
-     * 
+     *
      * @return The number of currently pooled character arrays
      */
     public int getPooledSmall();
 
     /**
      * Gets the number of total pooled small-sized character arrays.
-     * 
+     *
      * @return The number of total
      */
     public int getTotalMedium();
 
     /**
      * Gets the number of in-use pooled small-sized character arrays.
-     * 
+     *
      * @return The number of in-use pooled character arrays
      */
     public int getInUseMedium();
 
     /**
      * Gets the number of currently pooled small-sized character arrays.
-     * 
+     *
      * @return The number of currently pooled character arrays
      */
     public int getPooledMedium();
 
     /**
      * Gets the number of total pooled small-sized character arrays.
-     * 
+     *
      * @return The number of total
      */
     public int getTotalLarge();
 
     /**
      * Gets the number of in-use pooled small-sized character arrays.
-     * 
+     *
      * @return The number of in-use pooled character arrays
      */
     public int getInUseLarge();
 
     /**
      * Gets the number of currently pooled small-sized character arrays.
-     * 
+     *
      * @return The number of currently pooled character arrays
      */
     public int getPooledLarge();
 
     /**
      * Gets the number of misses in character array pool.
-     * 
+     *
      * @return The number of misses
      */
     public long getMisses();

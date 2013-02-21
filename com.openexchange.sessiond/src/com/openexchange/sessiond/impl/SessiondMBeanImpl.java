@@ -59,14 +59,14 @@ import com.openexchange.sessionstorage.SessionStorageService;
 
 /**
  * {@link SessiondMBeanImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SessiondMBeanImpl extends StandardMBean implements SessiondMBean {
 
     /**
      * Initializes a new {@link SessiondMBeanImpl}
-     * 
+     *
      * @throws NotCompliantMBeanException If the mbeanInterface does not follow JMX design patterns for Management Interfaces, or if this
      *             does not implement the specified interface.
      */
@@ -76,26 +76,15 @@ public final class SessiondMBeanImpl extends StandardMBean implements SessiondMB
 
     @Override
     public int clearUserSessions(final int userId, final int contextId) {
-        return SessionHandler.removeUserSessions(userId, contextId, true).length;
+        return SessionHandler.removeUserSessions(userId, contextId).length;
     }
 
     @Override
     public void clearContextSessions(final int contextId) {
-        /*-
-         * TODO:
-         * Put invalidated-marker into session cache
-        try {
-            final Cache sessionCache = SessionCache.getInstance().getCache();
-            final Integer key = Integer.valueOf(contextId);
-            sessionCache.put(key, InvalidatedMarker.newInstance(key));
-        } catch (final OXException e) {
-            // Ignore
-        }
-         */
         /*
          * Clear context-associated sessions
          */
-        SessionHandler.removeContextSessions(contextId, true);
+        SessionHandler.removeContextSessions(contextId);
     }
 
     @Override

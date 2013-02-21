@@ -58,7 +58,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
 /**
- *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Tools {
@@ -70,31 +69,15 @@ public final class Tools {
         super();
     }
 
-    public static Context getContext(final int contextId)
-        throws OXException {
-        try {
-            return ContextStorage.getInstance().getContext(contextId);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+    public static Context getContext(final int contextId) throws OXException {
+        return ContextStorage.getInstance().getContext(contextId);
     }
 
-    public static User getUser(final Context ctx, final int userId)
-        throws OXException {
-        try {
-            return UserStorage.getInstance().getUser(userId, ctx);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+    public static User getUser(final Context ctx, final int userId) throws OXException {
+        return UserStorage.getInstance().getUser(userId, ctx);
     }
 
-    public static UserConfiguration getUserConfiguration(final Context ctx,
-        final int userId) throws OXException {
-        try {
-            return UserConfigurationStorage.getInstance().getUserConfiguration(
-                userId, ctx);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+    public static UserConfiguration getUserConfiguration(final Context ctx, final int userId) throws OXException {
+        return UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
     }
 }

@@ -64,7 +64,7 @@ import com.openexchange.user.copy.internal.usersettings.UserSettingsCopyTask;
 public class UserSettingsActivator implements BundleActivator {
 
     private ServiceRegistration<CopyUserTaskService> serviceRegistration = null;
-    
+
 
     /**
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)

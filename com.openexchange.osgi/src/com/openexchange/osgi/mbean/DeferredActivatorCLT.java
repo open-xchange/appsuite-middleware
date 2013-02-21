@@ -72,11 +72,12 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.osgi.console.JMXAuthenticatorImpl;
 
 /**
  * {@link DeferredActivatorCLT}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class DeferredActivatorCLT {
@@ -198,7 +199,7 @@ public class DeferredActivatorCLT {
                     }
                 }
             } finally {
-                jmxConnector.close();
+                Streams.close(jmxConnector);
             }
         } catch (final MalformedObjectNameException e) {
             // Cannot occur
@@ -247,7 +248,7 @@ public class DeferredActivatorCLT {
 
     /**
      * Creates an appropriate instance of {@link ObjectName} from specified class name and domain name.
-     * 
+     *
      * @param className The class name to use as object name
      * @param domain The domain name
      * @return An appropriate instance of {@link ObjectName}

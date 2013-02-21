@@ -36,7 +36,7 @@
  * and therefore, elected the GPL Version 2 license, then the option applies
  * only if the new code is made subject to such option by the copyright
  * holder.
- * 
+ *
  * Portions Copyright 2012 OPEN-XCHANGE, licensed under GPL Version 2.
  */
 
@@ -46,7 +46,9 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.logging.Level;
 import javax.servlet.Filter;
@@ -70,13 +72,12 @@ import org.glassfish.grizzly.servlet.ServletConfigImpl;
 import org.glassfish.grizzly.servlet.ServletHandler;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.osgi.service.http.HttpContext;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.tools.exceptions.ExceptionUtils;
 
 /**
  * OSGi customized {@link ServletHandler}.
- * 
+ *
  * @author Hubert Iwaniuk
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -90,14 +91,24 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
     private String servletPath;
 
-    private FilterChainImpl filterChain;
+    private CopyOnWriteArrayList<Filter> servletFilters;
 
+    private FilterChainFactory filterChainFactory;
+
+    /**
+     * Initializes a new {@link OSGiServletHandler}.
+     *
+     * @param servlet
+     * @param httpContext
+     * @param servletInitParams
+     */
     public OSGiServletHandler(final Servlet servlet, final HttpContext httpContext, final HashMap<String, String> servletInitParams) {
         super(createServletConfig(new OSGiServletContext(httpContext), servletInitParams));
         // noinspection AccessingNonPublicFieldOfAnotherObject
         super.servletInstance = servlet;
         this.httpContext = httpContext;
-        this.filterChain = new FilterChainImpl(servlet, (OSGiServletContext) getServletCtx());
+        servletFilters = new CopyOnWriteArrayList<Filter>();
+        this.filterChainFactory = new FilterChainFactory(servlet, (OSGiServletContext) getServletCtx());
     }
 
     private OSGiServletHandler(final ServletConfigImpl servletConfig) {
@@ -117,7 +128,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
     /**
      * Starts {@link Servlet} instance of this {@link OSGiServletHandler}.
-     * 
+     *
      * @throws ServletException If {@link Servlet} startup failed.
      */
     public void startServlet() throws ServletException {
@@ -163,17 +174,23 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
     @Override
     protected FilterChainInvoker getFilterChain(Request request) {
-        return filterChain;
+        return filterChainFactory.createFilterChain(servletFilters);
     }
 
+    /**
+     * Append a filter to the chain of Filters this ServletHandler manages.
+     *
+     * @param filter Instance of the Filter to add
+     * @param name Name of this Filter to add
+     * @param initParams Initparameters needed to create a FilterConfig
+     */
     protected void addFilter(final Filter filter, final String name, final Map<String, String> initParams) {
         try {
             filter.init(createFilterConfig(getServletCtx(), name, initParams));
-            filterChain.addFilter(filter);
+            servletFilters.add(filter);
         } catch (Exception e) {
             LOG.error(e.toString(), e);
         }
-
     }
 
     // @Override
@@ -229,6 +246,44 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
         }
     }
 
+    private static final class FilterChainFactory {
+
+        private final Servlet servlet;
+
+        private final OSGiServletContext servletContext;
+
+        /**
+         * Initializes a new {@link FilterChainFactory}.
+         *
+         * @param servlet
+         * @param servletContext
+         */
+        public FilterChainFactory(Servlet servlet, OSGiServletContext servletContext) {
+            super();
+            this.servlet = servlet;
+            this.servletContext = servletContext;
+        }
+
+        /**
+         * Construct and return a FilterChain implementation that will wrap the execution of the specified servlet instance. If we should
+         * not execute a filter chain at all, return <code>null</code>.
+         *
+         * @param request The servlet request we are processing
+         * @param servlet The servlet instance to be wrapped
+         */
+        public FilterChainImpl createFilterChain(List<Filter> servletFilters) {
+
+            if (servletFilters.isEmpty()) {
+                return null;
+            }
+            FilterChainImpl filterChain = new FilterChainImpl(servlet, servletContext);
+            for (Filter servletFilter : servletFilters) {
+                filterChain.addFilter(servletFilter);
+            }
+            return filterChain;
+        }
+    }
+
     private static final class FilterChainImpl implements FilterChain, FilterChainInvoker {
 
         private static final java.util.logging.Logger LOGGER = Grizzly.logger(FilterChainImpl.class);
@@ -276,7 +331,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
         /**
          * Invoke the next filter in this chain, passing the specified request and response. If there are no more filters in this chain,
          * invoke the <code>service()</code> method of the servlet itself.
-         * 
+         *
          * @param request The servlet request we are processing
          * @param response The servlet response we are creating
          * @throws java.io.IOException if an input/output error occurs
@@ -284,26 +339,22 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
          */
         @Override
         public void doFilter(ServletRequest request, ServletResponse response) {
-
-            // Call the next filter if there is one
             if (pos < n) {
-
                 Filter filter = filters[pos++];
-
-                try {
-                    filter.doFilter(request, response, this);
-                } catch (Throwable throwable) {
-                    handleThrowable(throwable, request, response);
+                if (filter != null) {
+                    try {
+                        filter.doFilter(request, response, this);
+                    } catch (Throwable throwable) {
+                        handleThrowable(throwable, request, response);
+                    }
+                    return;
                 }
-                return;
             }
 
             try {
                 if (servlet != null) {
-                    // TODO: wrap request! check cookies
                     servlet.service(request, response);
                 }
-
             } catch (Throwable throwable) {
                 handleThrowable(throwable, request, response);
             }
@@ -312,7 +363,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
         /**
          * Let the ExceptionUtils handle the Throwable for us and set a proper HttpStatus on the response.
-         * 
+         *
          * @param throwable The Throwable that needs to be handled.
          * @param request The request that couldn't be serviced because of throwable
          * @param response The associated Response
@@ -322,7 +373,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
             StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
             if (LogProperties.isEnabled()) {
-                logBuilder.append(LogProperties.getAndPrettyPrint());
+                logBuilder.append(LogProperties.getAndPrettyPrint(LogProperties.Name.SESSION_SESSION));
             }
 
             if (request instanceof HttpServletRequest && response instanceof HttpServletResponse) {
@@ -368,7 +419,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
         // --------------------------------------------------------- Private Methods
         /**
          * Add ServletName and Parameters of the request to the log string allocator.
-         * 
+         *
          * @param logBuilder The existing StringBuilder user for building the log message
          * @param request The Request that couldn't be executed successfully.
          */
@@ -399,7 +450,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
 
         /**
          * Add Uri and QueryString of the httpServletRequest to the log string allocator
-         * 
+         *
          * @param logBuilder The existing StringBuilder user for building the log message
          * @param httpServletRequest The HttpServletRequest that couldn't be executed successfully
          */

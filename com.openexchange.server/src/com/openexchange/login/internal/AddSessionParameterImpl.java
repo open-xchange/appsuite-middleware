@@ -49,29 +49,23 @@
 
 package com.openexchange.login.internal;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.sessiond.AddSessionParameter;
-import com.openexchange.sessiond.Parameterized;
 
 /**
  * Implements {@link AddSessionParameter}.
  */
-final class AddSessionParameterImpl implements AddSessionParameter, Parameterized {
+final class AddSessionParameterImpl implements AddSessionParameter {
 
     private final String username;
     private final LoginRequest request;
     private final User user;
     private final Context ctx;
-    private final Map<String, Object> parameters;
 
     AddSessionParameterImpl(final String username, final LoginRequest request, final User user, final Context ctx) {
         super();
-        parameters = new HashMap<String, Object>(4);
         this.username = username;
         this.request = request;
         this.user = user;
@@ -124,31 +118,13 @@ final class AddSessionParameterImpl implements AddSessionParameter, Parameterize
     }
 
     @Override
-    public Set<String> getParameterNames() {
-        return parameters.keySet();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <V> V getParameter(final String name) {
-        try {
-            return (V) parameters.get(name);
-        } catch (final Exception e) {
-            return null;
-        }
+    public String getClientToken() {
+        return request.getClientToken();
     }
 
     @Override
-    public void setParameter(final String name, final Object value) {
-        if (null == name) {
-            parameters.remove(name);
-        } else {
-            parameters.put(name, value);
-        }
+    public boolean isTransient() {
+        return request.isTransient();
     }
-
-    @Override
-    public Object removeParameter(final String name) {
-        return parameters.remove(name);
-    }
+    
 }

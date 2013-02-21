@@ -79,6 +79,8 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   public static final BiMap<Class<? extends Serializer>, String> DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING = new ImmutableBiMap.Builder<Class<? extends Serializer>, String>()
       .put(AsciiSerializer.class,
           AsciiSerializer.get().getComparatorType().getTypeName())
+      .put(ByteBufferSerializer.class,
+          ByteBufferSerializer.get().getComparatorType().getTypeName())
       .put(BigIntegerSerializer.class,
           BigIntegerSerializer.get().getComparatorType().getTypeName())
       .put(LongSerializer.class,

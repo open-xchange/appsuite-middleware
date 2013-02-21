@@ -67,7 +67,8 @@ import com.openexchange.index.IndexField;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.solr.internal.SolrIndexResult;
-import com.openexchange.index.solr.internal.SolrResultConverter;
+import com.openexchange.index.solr.internal.config.FieldConfiguration;
+import com.openexchange.index.solr.internal.converter.AbstractDocumentConverter;
 
 
 /**
@@ -75,63 +76,14 @@ import com.openexchange.index.solr.internal.SolrResultConverter;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SolrInfostoreDocumentConverter implements SolrResultConverter<DocumentMetadata> {
-    
-    public static SolrInputDocument convertStatic(int contextId, int userId, IndexDocument<DocumentMetadata> indexDocument) throws OXException {
-        DocumentMetadata file = indexDocument.getObject();
-        SolrInputDocument document = new SolrInputDocument();
-        GetSwitch getter = new GetSwitch(file);
-        for (SolrInfostoreField field : SolrInfostoreField.values()) {
-            InfostoreIndexField indexField = field.indexField();
-            Metadata metadataField = indexField.getMetadataField();
-            if (metadataField != null) {
-                Object value = metadataField.doSwitch(getter);
-                if (value != null) {
-                    if (metadataField.equals(Metadata.CREATION_DATE_LITERAL) || metadataField.equals(Metadata.LAST_MODIFIED_LITERAL)) {
-                        document.setField(field.solrName(), ((Date) value).getTime());
-                    } else {
-                        document.setField(field.solrName(), value);
-                    }
-                }
-            }
-        }
+public class SolrInfostoreDocumentConverter extends AbstractDocumentConverter<DocumentMetadata> {
 
-        document.setField(SolrInfostoreField.UUID.solrName(), InfostoreUUID.newUUID(contextId, userId, indexDocument.getObject()));        
-        return document;
-    }
-
-    @Override
-    public IndexDocument<DocumentMetadata> convert(SolrDocument document) throws OXException {
-        DocumentMetadata converted = convertStatic(document);
-        IndexDocument<DocumentMetadata> indexDocument = new StandardIndexDocument<DocumentMetadata>(converted);
-        
-        return indexDocument;
-    }
-    
-    public static DocumentMetadata convertStatic(SolrDocument document) {
-        DocumentMetadata file = new SolrDocumentMetadata();
-        SetSwitch setter = new SetSwitch(file);
-        for (Entry<String, Object> field : document) {
-            String name = field.getKey();
-            Object value = field.getValue();
-            SolrInfostoreField solrField = SolrInfostoreField.getBySolrName(name);
-            if (solrField != null && value != null) {
-                InfostoreIndexField indexField = solrField.indexField();
-                Metadata metadataField = indexField.getMetadataField();
-                if (metadataField != null) {
-                    if (metadataField.equals(Metadata.CREATION_DATE_LITERAL) || metadataField.equals(Metadata.LAST_MODIFIED_LITERAL)) {
-                        setter.setValue(new Date((Long) value));
-                    } else {
-                        setter.setValue(value);
-                    }
-                    
-                    metadataField.doSwitch(setter);
-                    setter.setValue(null);
-                }
-            }
-        }
-        
-        return file;
+    /**
+     * Initializes a new {@link SolrInfostoreDocumentConverter}.
+     * @param fieldConfig
+     */
+    public SolrInfostoreDocumentConverter(FieldConfiguration fieldConfig) {
+        super(fieldConfig);
     }
 
     @Override
@@ -139,4 +91,65 @@ public class SolrInfostoreDocumentConverter implements SolrResultConverter<Docum
         return new SolrIndexResult<DocumentMetadata>(documents.size(), documents, facetCounts);
     }
 
+    @Override
+    public IndexDocument<DocumentMetadata> convert(SolrDocument document) throws OXException {
+        return convertInternal(document);
+    }
+
+    @Override
+    public IndexDocument<DocumentMetadata> convert(SolrDocument document, Map<String, List<String>> highlightedFields) throws OXException {
+        StandardIndexDocument<DocumentMetadata> indexDocument = convertInternal(document);
+        addHighlighting(indexDocument, highlightedFields);
+
+        return indexDocument;
+    }
+
+    public SolrInputDocument convert(int contextId, int userId, IndexDocument<DocumentMetadata> indexDocument) throws OXException {
+        DocumentMetadata file = indexDocument.getObject();
+        SolrInputDocument document = new SolrInputDocument();
+        GetSwitch getter = new GetSwitch(file);
+        for (InfostoreIndexField indexField : InfostoreIndexField.values()) {
+            Metadata metadataField = indexField.getMetadataField();
+            if (metadataField != null) {
+                Object value = metadataField.doSwitch(getter);
+                String solrName = fieldConfig.getRawField(indexField);
+                if (value != null && solrName != null) {
+                    if (metadataField.equals(Metadata.CREATION_DATE_LITERAL) || metadataField.equals(Metadata.LAST_MODIFIED_LITERAL)) {
+                        document.setField(solrName, ((Date) value).getTime());
+                    } else {
+                        document.setField(solrName, value);
+                    }
+                }
+            }
+        }
+
+        document.setField(fieldConfig.getUUIDField(), InfostoreUUID.newUUID(contextId, userId, indexDocument.getObject()));
+        return document;
+    }
+
+    private StandardIndexDocument<DocumentMetadata> convertInternal(SolrDocument document) throws OXException {
+        DocumentMetadata file = new SolrDocumentMetadata();
+        SetSwitch setter = new SetSwitch(file);
+        for (Entry<String, Object> field : document) {
+            String name = field.getKey();
+            Object value = field.getValue();
+            IndexField indexField = fieldConfig.getIndexField(name);
+            if (indexField != null && value != null && indexField instanceof InfostoreIndexField) {
+                Metadata metadataField = ((InfostoreIndexField) indexField).getMetadataField();
+                if (metadataField != null) {
+                    if (metadataField.equals(Metadata.CREATION_DATE_LITERAL) || metadataField.equals(Metadata.LAST_MODIFIED_LITERAL)) {
+                        setter.setValue(new Date((Long) value));
+                    } else {
+                        setter.setValue(value);
+                    }
+
+                    metadataField.doSwitch(setter);
+                    setter.setValue(null);
+                }
+            }
+        }
+
+        StandardIndexDocument<DocumentMetadata> indexDocument = new StandardIndexDocument<DocumentMetadata>(file);
+        return indexDocument;
+    }
 }

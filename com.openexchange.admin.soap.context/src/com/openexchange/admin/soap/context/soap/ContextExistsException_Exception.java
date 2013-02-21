@@ -12,17 +12,17 @@ import javax.xml.ws.WebFault;
 
 @WebFault(name = "ContextExistsException", targetNamespace = "http://soap.admin.openexchange.com")
 public class ContextExistsException_Exception extends java.lang.Exception {
-    
+
     private com.openexchange.admin.soap.context.soap.ContextExistsException contextExistsException;
 
     public ContextExistsException_Exception() {
         super();
     }
-    
+
     public ContextExistsException_Exception(String message) {
         super(message);
     }
-    
+
     public ContextExistsException_Exception(String message, Throwable cause) {
         super(message, cause);
     }

@@ -65,7 +65,7 @@ public class BundleAccessExceptionMessage implements LocalizableStrings {
     private BundleAccessExceptionMessage() {
         super();
     }
-    
+
     // Access to bundle %1$s is not permitted
     public final static String ACCESS_DENIED = "Access to bundle %1$s is not permitted";
 

@@ -52,6 +52,7 @@ package com.openexchange.subscribe.secret;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.subscribe.SubscribeService;
@@ -65,15 +66,15 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SubscriptionSecretHandling implements EncryptedItemDetectorService, SecretMigrator {
-    
+public class SubscriptionSecretHandling implements EncryptedItemDetectorService, SecretMigrator, EncryptedItemCleanUpService {
+
     private SubscriptionSourceDiscoveryService discovery = null;
-    
+
     public SubscriptionSecretHandling(final SubscriptionSourceDiscoveryService discovery) {
         super();
         this.discovery = discovery;
     }
-    
+
     @Override
     public boolean hasEncryptedItems(final ServerSession session) throws OXException {
         final List<SubscriptionSource> sources = discovery.getSources();
@@ -99,7 +100,7 @@ public class SubscriptionSecretHandling implements EncryptedItemDetectorService,
             if(passwordFields.isEmpty()) {
                 continue;
             }
-            
+
             final SubscribeService subscribeService = subscriptionSource.getSubscribeService();
             if (null != subscribeService) {
                 subscribeService.migrateSecret(session, oldSecret, newSecret);
@@ -107,6 +108,20 @@ public class SubscriptionSecretHandling implements EncryptedItemDetectorService,
         }
     }
 
+    @Override
+    public void cleanUpEncryptedItems(String secret, ServerSession session) throws OXException {
+        final List<SubscriptionSource> sources = discovery.getSources();
+        for (final SubscriptionSource subscriptionSource : sources) {
+            final Set<String> passwordFields = subscriptionSource.getPasswordFields();
+            if(passwordFields.isEmpty()) {
+                continue;
+            }
 
+            final SubscribeService subscribeService = subscriptionSource.getSubscribeService();
+            if (null != subscribeService) {
+                subscribeService.cleanUp(secret, session);
+            }
+        }
+    }
 
 }

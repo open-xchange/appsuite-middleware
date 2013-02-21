@@ -97,7 +97,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link CMISFileAccess}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CMISFileAccess extends AbstractCMISAccess implements FileStorageFileAccess {
@@ -148,7 +148,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
     }
 
     @Override
-    public boolean exists(final String folderId, final String id, final int version) throws OXException {
+    public boolean exists(final String folderId, final String id, final String version) throws OXException {
         try {
             /*
              * Check
@@ -194,7 +194,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
     }
 
     @Override
-    public File getFileMetadata(final String folderId, final String id, final int version) throws OXException {
+    public File getFileMetadata(final String folderId, final String id, final String version) throws OXException {
         if (version != CURRENT_VERSION) {
             throw CMISExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
         }
@@ -279,9 +279,9 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
                     document = (Document) object;
                 }
             }
-            String name = file.getTitle();
+            String name = file.getFileName();
             if (isEmpty(name)) {
-                name = file.getFileName();
+                name = file.getTitle();
                 if (null == name) {
                     throw CMISExceptionCodes.MISSING_FILE_NAME.create();
                 }
@@ -292,9 +292,17 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
             final Map<String, Object> properties = new HashMap<String, Object>(4);
             properties.put(PropertyIds.OBJECT_TYPE_ID, ObjectType.DOCUMENT_BASETYPE_ID);
             properties.put(PropertyIds.NAME, name);
-            if (null != contentStream) {
-                properties.put(PropertyIds.CONTENT_STREAM_FILE_NAME, contentStream.getFileName());
-                properties.put(PropertyIds.CONTENT_STREAM_MIME_TYPE, contentStream.getMimeType());
+            ContentStreamImpl csi = contentStream;
+            if (null == csi) {
+                final String description = file.getDescription();
+                if (!isEmpty(description)) {
+                    csi = new ContentStreamImpl(name, "text/plain; charset=\"UTF-8\"", description);
+                    properties.put(PropertyIds.CONTENT_STREAM_FILE_NAME, csi.getFileName());
+                    properties.put(PropertyIds.CONTENT_STREAM_MIME_TYPE, csi.getMimeType());
+                }
+            } else {
+                properties.put(PropertyIds.CONTENT_STREAM_FILE_NAME, csi.getFileName());
+                properties.put(PropertyIds.CONTENT_STREAM_MIME_TYPE, csi.getMimeType());
             }
             //properties.put(PropertyIds.PATH, parent.getPath());
             /*
@@ -302,18 +310,18 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
              */
             if (null != document) {
                 document.updateProperties(properties, true);
-                if (null != contentStream) {
-                    final InputStream stream = contentStream.getStream();
+                if (null != csi) {
+                    final InputStream stream = csi.getStream();
                     if (null != stream) {
                         // Returning data as Base64 is needed for MS Sharepoint
-                        contentStream.setStream(new Base64InputStream(stream, true));
+                        csi.setStream(new Base64InputStream(stream, true));
                     }
-                    document.setContentStream(contentStream, true, true);
+                    document.setContentStream(csi, true, true);
                 }
                 // Reload & return document
                 return (Document) cmisSession.getObject(documentId);
             }
-            return parent.createDocument(properties, contentStream, VersioningState.NONE);
+            return parent.createDocument(properties, csi, VersioningState.NONE);
         } catch (final CmisBaseException e) {
             throw handleCmisException(e);
         } catch (final RuntimeException e) {
@@ -403,7 +411,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
     }
 
     @Override
-    public InputStream getDocument(final String folderId, final String id, final int version) throws OXException {
+    public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
         try {
             final ObjectId folderObjectId;
             CmisObject object;
@@ -557,8 +565,8 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
     }
 
     @Override
-    public int[] removeVersion(final String folderId, final String id, final int[] versions) throws OXException {
-        for (final int version : versions) {
+    public String[] removeVersion(final String folderId, final String id, final String[] versions) throws OXException {
+        for (final String version : versions) {
             if (version != CURRENT_VERSION) {
                 throw CMISExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
             }
@@ -595,7 +603,7 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
             /*
              * Return empty array
              */
-            return new int[0];
+            return new String[0];
         } catch (final CmisBaseException e) {
             throw handleCmisException(e);
         } catch (final RuntimeException e) {
@@ -854,7 +862,6 @@ public final class CMISFileAccess extends AbstractCMISAccess implements FileStor
          * Consider start/end index
          */
         if (start != NOT_SET && end != NOT_SET && end > start) {
-
             final int fromIndex = start;
             int toIndex = end;
             if ((fromIndex) > results.size()) {

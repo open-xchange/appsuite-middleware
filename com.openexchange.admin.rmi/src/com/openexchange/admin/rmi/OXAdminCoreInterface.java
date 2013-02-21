@@ -52,26 +52,26 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 /**
- * 
+ *
  * This interface defines a method for checking loaded plugins in the Open-Xchange Admin Daemon.<br><br>
- * 
+ *
  * <b>Example:</b>
  * <pre>
  * final OXAdminCoreInterface iface = (OXAdminCoreInterface)Naming.lookup("rmi:///oxhost/"+OXAdminCoreInterface.RMI_NAME);
- * 
+ *
  * if (iface.allPluginsLoaded()) {
  *	System.out.println("All plugins loaded");
  * }
  * </pre
- * 
- * 
+ *
+ *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
  */
 public interface OXAdminCoreInterface extends Remote {
-    
+
     /**
      * RMI name to be used in the naming lookup.
      */
@@ -79,9 +79,9 @@ public interface OXAdminCoreInterface extends Remote {
 
     /**
      * This methods checks if all plugins have been loaded successfully
-     * 
+     *
      * @return true if all plugins are loaded successfully, false if not
-     * @throws RemoteException 
+     * @throws RemoteException
      */
     public boolean allPluginsLoaded() throws RemoteException;
 }

@@ -56,7 +56,7 @@ import java.io.Serializable;
  * {@link KryoWrapper} - Wraps any arbitrary object intend to be serialzed/deserialized using <a
  * href="http://code.google.com/p/kryo/">Kryo</a>.<br>
  * <img src="http://kryo.googlecode.com/svn/wiki/kryo-logo.jpg" width="88" height="37">
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class KryoWrapper implements Serializable {
@@ -65,7 +65,7 @@ public final class KryoWrapper implements Serializable {
 
     /**
      * Sets thread-local class loader.
-     * 
+     *
      * @param classLoader The class loader
      */
     public static void setClassLoader(final Class<?> clazz) {
@@ -74,7 +74,7 @@ public final class KryoWrapper implements Serializable {
 
     /**
      * Sets thread-local class loader.
-     * 
+     *
      * @param classLoader The class loader
      */
     public static void setClassLoader(final ClassLoader classLoader) {
@@ -94,7 +94,7 @@ public final class KryoWrapper implements Serializable {
 
     /**
      * Initializes a new {@link KryoWrapper}.
-     * 
+     *
      * @param target The object to serialize with Kryo
      */
     public KryoWrapper(final Object target) {
@@ -105,11 +105,11 @@ public final class KryoWrapper implements Serializable {
     /**
      * Classes that need to designate a replacement when an instance of it is read from the stream should implement this special method with
      * the exact signature.
-     * 
+     *
      * <PRE>
      * ANY-ACCESS-MODIFIER Object readResolve() throws ObjectStreamException;
      * </PRE>
-     * 
+     *
      * @return The deserialized object
      * @throws ObjectStreamException If deserialization fails
      */

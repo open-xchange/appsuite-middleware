@@ -64,7 +64,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link JSlobJSONResultConverter} - The result converter for JSlob module.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class JSlobJSONResultConverter implements ResultConverter {

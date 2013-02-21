@@ -83,7 +83,7 @@ public class LabelHelper {
 	private TimeZone timezone;
 	private DelegationState delegationState;
 	private final ServiceLookup services;
-	
+
 	private static final String fallbackHostname;
 	static {
 	    String fbHostname;
@@ -94,7 +94,7 @@ public class LabelHelper {
         }
 	    fallbackHostname = fbHostname;
     }
-	
+
     public LabelHelper(final DateHelper dateHelper, final TimeZone timezone, final NotificationMail mail, final Locale locale, final Context ctx, final TypeWrapper wrapper, final ServiceLookup services) {
         super();
         this.services = services;
@@ -109,7 +109,7 @@ public class LabelHelper {
         if (timezone == null) {
         	this.timezone = TimeZone.getDefault(); // Fallback
         }
-        
+
         if (mail.actionIsDoneOnMyBehalf()) {
         	delegationState = new OnMyBehalf();
         } else if (mail.actionIsDoneOnBehalfOfAnother()) {
@@ -118,8 +118,8 @@ public class LabelHelper {
         	delegationState = new OnNoOnesBehalf();
         }
     }
-   
-    
+
+
     public String getShowAs() {
         final Appointment appointment = mail.getAppointment();
         switch(appointment.getShownAs()) {
@@ -130,7 +130,7 @@ public class LabelHelper {
         }
     	return new Sentence(Messages.FREE).getMessage(locale);
     }
-    
+
     public String getShowAsClass() {
         final Appointment appointment = mail.getAppointment();
         switch(appointment.getShownAs()) {
@@ -141,7 +141,7 @@ public class LabelHelper {
         }
         return "free";
     }
-    
+
     public String getNoteAsHTML() {
         final String note = mail.getAppointment().getNote();
         if (note == null) {
@@ -149,8 +149,8 @@ public class LabelHelper {
         }
         return html.htmlFormat(note);
     }
-    
-    
+
+
     // Sentences
     public String getAcceptIntroduction() {
     	if (mail.getActor().isVirtual()) {
@@ -166,7 +166,7 @@ public class LabelHelper {
     	}
         return delegationState.statusChange(mail.getActor(), ConfirmStatus.DECLINE);
     }
-    
+
     public String getTentativeIntroduction() {
     	if (mail.getActor().isVirtual()) {
     		return "";
@@ -181,35 +181,35 @@ public class LabelHelper {
         return delegationState.statusChange(mail.getActor(), ConfirmStatus.NONE);
     }
 
-    
+
     public String getCounterOrganizerIntroduction() {
     	if (mail.getActor().isVirtual()) {
     		return "";
     	}
         return new Sentence(Messages.COUNTER_ORGANIZER_INTRO).add(mail.getSender().getDisplayName(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
     }
-    
+
     public String getCounterParticipantIntroduction() {
     	if (mail.getActor().isVirtual()) {
     		return "";
     	}
         return new Sentence(Messages.COUNTER_PARTICIPANT_INTRO).add(mail.getSender().getDisplayName(), ArgumentType.PARTICIPANT).add(mail.getOrganizer().getDisplayName(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
     }
-    
+
     public String getCreateIntroduction() {
     	if (mail.getActor().isVirtual()) {
     		return "";
     	}
     	return delegationState.getCreateIntroduction();
     }
-    
+
     public String getCreateExceptionIntroduction() {
     	if (mail.getActor().isVirtual()) {
     		return "";
     	}
     	return new Sentence(Messages.CREATE_EXCEPTION_INTRO).add(mail.getSender().getDisplayName(), ArgumentType.PARTICIPANT).add(dateHelper.getRecurrenceDatePosition(), ArgumentType.UPDATED).getMessage(wrapper, locale);
     }
-    
+
     public String getRefreshIntroduction() {
     	if (mail.getActor().isVirtual()) {
     		return "";
@@ -224,14 +224,14 @@ public class LabelHelper {
     	return delegationState.getDeclineCounterIntroduction();
     }
 
-    
+
     public String getUpdateIntroduction() {
     	if (mail.getActor().isVirtual()) {
     		return "";
     	}
     	return delegationState.getUpdateIntroduction();
     }
-    
+
     public String getDirectLink() {
     	if (mail.getRecipient().isExternal() || mail.getRecipient().isResource()) {
     		return "";
@@ -245,24 +245,24 @@ public class LabelHelper {
     	if (folder == 0) {
     		folder = mail.getAppointment().getParentFolderID();
     	}
-    	
-    	
+
+
     	String hostname = null;
-    	
+
     	final HostnameService hostnameService = services.getOptionalService(HostnameService.class);
     	if (hostnameService != null) {
     		hostname = hostnameService.getHostname(mail.getRecipient().getIdentifier(), ctx.getContextId());
-    	} 
-    	
+    	}
+
     	if (hostname == null) {
     		hostname = fallbackHostname;
     	}
-    	
-    	
-    	
+
+
+
     	return template.replaceAll("\\[hostname\\]", hostname).replaceAll("\\[uiwebpath\\]", webpath).replaceAll("\\[module\\]", module).replaceAll("\\[object\\]", objectId+"").replaceAll("\\[folder\\]", folder+"");
     }
-    
+
     public String getAttachmentNote() {
     	if (mail.getAttachments().isEmpty() || mail.getRecipient().isExternal()) {
     		return "";
@@ -270,18 +270,18 @@ public class LabelHelper {
     	final String directLink = getDirectLink();
     	return new Sentence(Messages.HAS_ATTACHMENTS).add(directLink, ArgumentType.REFERENCE).getMessage(wrapper, locale);
     }
-    
 
-    
-    
+
+
+
     public String getWhenLabel() {
         return new Sentence(Messages.LABEL_WHEN).getMessage(wrapper, locale);
     }
-    
+
     public String getWhereLabel() {
         return new Sentence(Messages.LABEL_WHERE).getMessage(wrapper, locale);
     }
-    
+
     public String getParticipantsLabel() {
         return new Sentence(Messages.LABEL_PARTICIPANTS).getMessage(wrapper, locale);
     }
@@ -289,47 +289,47 @@ public class LabelHelper {
     public String getResourcesLabel() {
         return new Sentence(Messages.LABEL_RESOURCES).getMessage(wrapper, locale);
     }
-    
+
     public String getDetailsLabel() {
         return new Sentence(Messages.LABEL_DETAILS).getMessage(wrapper, locale);
     }
-    
+
     public String getShowAsLabel() {
         return new Sentence(Messages.LABEL_SHOW_AS).getMessage(wrapper, locale);
     }
-    
+
     public String getCreatedLabel() {
         return new Sentence(Messages.LABEL_CREATED).getMessage(wrapper, locale);
     }
-    
+
     public String getDirectLinkLabel() {
         return new Sentence(Messages.LINK_LABEL).getMessage(wrapper, locale);
     }
 
-    
+
     public String getModifiedLabel() {
         return new Sentence(Messages.LABEL_MODIFIED).getMessage(wrapper, locale);
     }
-    
+
     public String getDeleteIntroduction() {
     	return delegationState.getDeleteIntroduction();
     }
-    
+
     public String getCreator() throws OXException {
     	return mail.getOrganizer().getDisplayName();
     }
-    
+
     public String getModifier() throws OXException {
         if (mail.getAppointment().getModifiedBy() == 0) {
             return "Unknown";
         }
         return users.getUser(mail.getAppointment().getModifiedBy(), ctx).getDisplayName();
     }
-    
+
     public String getTimezoneInfo() {
     	return new Sentence(Messages.TIMEZONE).add(timezone.getDisplayName(locale), ArgumentType.EMPHASIZED).getMessage(wrapper, locale);
     }
-    
+
     public String getJustification() {
     	final NotificationParticipant recipient = mail.getRecipient();
     	if (recipient.hasRole(ITipRole.PRINCIPAL)) {
@@ -341,9 +341,9 @@ public class LabelHelper {
     	}
     	return null;
     }
-    
+
     // Utilities
-    
+
     protected interface DelegationState {
 
 		String statusChange(NotificationParticipant actor, ConfirmStatus none);
@@ -355,15 +355,15 @@ public class LabelHelper {
 		String getDeclineCounterIntroduction();
 
 		String getCreateIntroduction();
-    	
+
     }
-    
+
     protected class OnMyBehalf implements DelegationState {
 
 		@Override
         public String statusChange(final NotificationParticipant participant,
 				final ConfirmStatus status) {
-			
+
 			String msg = null;
 	        String statusString = null;
 	        switch (status) {
@@ -394,9 +394,9 @@ public class LabelHelper {
         public String getCreateIntroduction() {
             return new Sentence(Messages.CREATE_ON_YOUR_BEHALF_INTRO).add(mail.getActor().getDisplayName(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
 		}
-    	
+
     }
-    
+
     protected class OnBehalfOfAnother implements DelegationState {
 
 		@Override
@@ -431,9 +431,9 @@ public class LabelHelper {
         public String getCreateIntroduction() {
             return new Sentence(Messages.CREATE_ON_BEHALF_INTRO).add(mail.getActor().getDisplayName(), ArgumentType.PARTICIPANT).add(mail.getOnBehalfOf().getDisplayName()).getMessage(wrapper, locale);
 		}
-    	
+
     }
-    
+
     protected class OnNoOnesBehalf implements DelegationState {
 
 		@Override
@@ -469,8 +469,8 @@ public class LabelHelper {
         public String getCreateIntroduction() {
             return new Sentence(Messages.CREATE_INTRO).add(mail.getActor().getDisplayName(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
 		}
-    	
+
     }
-    
+
 
 }

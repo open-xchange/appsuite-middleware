@@ -55,18 +55,22 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.json.Capability2JSON;
 import com.openexchange.capabilities.json.CapabilityActionFactory;
 
+/**
+ * {@link CapabilitiesJSONActivator}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
 public class CapabilitiesJSONActivator extends AJAXModuleActivator {
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class<?>[]{CapabilityService.class};
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { CapabilityService.class };
+    }
 
-	@Override
-	protected void startBundle() throws Exception {
-		registerService(ResultConverter.class, new Capability2JSON());
-		registerModule(new CapabilityActionFactory(this), "capabilities");
-	}
-
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(ResultConverter.class, new Capability2JSON());
+        registerModule(new CapabilityActionFactory(this), "capabilities");
+    }
 
 }

@@ -12,9 +12,9 @@ import com.openexchange.admin.soap.user.dataobjects.UserModuleAccess;
 
 /**
  * <p>Java-Klasse f\u00fcr anonymous complex type.
- * 
+ *
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -29,8 +29,8 @@ import com.openexchange.admin.soap.user.dataobjects.UserModuleAccess;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -53,11 +53,11 @@ public class ChangeModuleAccessGlobal {
 
     /**
      * Ruft den Wert der filter-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getFilter() {
         return filter;
@@ -65,11 +65,11 @@ public class ChangeModuleAccessGlobal {
 
     /**
      * Legt den Wert der filter-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setFilter(String value) {
         this.filter = value;
@@ -77,11 +77,11 @@ public class ChangeModuleAccessGlobal {
 
     /**
      * Ruft den Wert der addAccess-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UserModuleAccess }
-     *     
+     *
      */
     public UserModuleAccess getAddAccess() {
         return addAccess;
@@ -89,11 +89,11 @@ public class ChangeModuleAccessGlobal {
 
     /**
      * Legt den Wert der addAccess-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UserModuleAccess }
-     *     
+     *
      */
     public void setAddAccess(UserModuleAccess value) {
         this.addAccess = value;
@@ -101,11 +101,11 @@ public class ChangeModuleAccessGlobal {
 
     /**
      * Ruft den Wert der removeAccess-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link UserModuleAccess }
-     *     
+     *
      */
     public UserModuleAccess getRemoveAccess() {
         return removeAccess;
@@ -113,11 +113,11 @@ public class ChangeModuleAccessGlobal {
 
     /**
      * Legt den Wert der removeAccess-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link UserModuleAccess }
-     *     
+     *
      */
     public void setRemoveAccess(UserModuleAccess value) {
         this.removeAccess = value;
@@ -125,11 +125,11 @@ public class ChangeModuleAccessGlobal {
 
     /**
      * Ruft den Wert der auth-Eigenschaft ab.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Credentials }
-     *     
+     *
      */
     public Credentials getAuth() {
         return auth;
@@ -137,11 +137,11 @@ public class ChangeModuleAccessGlobal {
 
     /**
      * Legt den Wert der auth-Eigenschaft fest.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Credentials }
-     *     
+     *
      */
     public void setAuth(Credentials value) {
         this.auth = value;

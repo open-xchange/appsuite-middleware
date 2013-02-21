@@ -74,14 +74,14 @@ public class ReferencingGenerator implements ITipMessageGenerator {
     public ITipMessage generate(Appointment original, Appointment updated, Session session) {
         ITipMessage message = new ITipMessage();
         message.setMethod(method);
-        
+
         CalendarDataObject address = new CalendarDataObject();
         address.setUid(updated.getUid());
         if (updated.isException()) {
             address.setRecurrenceDatePosition(updated.getRecurrenceDatePosition());
             address.setRecurrencePosition(updated.getRecurrencePosition());
         }
-        
+
         message.setAppointment(address);
         return message;
     }

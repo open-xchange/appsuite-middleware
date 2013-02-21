@@ -29,14 +29,14 @@ public class CarddavActivator extends HousekeepingActivator {
         try {
             CardDAV.setServiceLookup(this);
             CarddavPerformer.setServices(this);
-            
+
             getService(HttpService.class).registerServlet("/servlet/dav/carddav", new CardDAV(), null, null);
-            
+
             CarddavPerformer performer = CarddavPerformer.getInstance();
             final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
             this.mixin = mixin;
-            
+
             registerService(PathRegistration.class, new PathRegistration("carddav"));
 
             openTrackers();
@@ -44,7 +44,7 @@ public class CarddavActivator extends HousekeepingActivator {
             LOG.error(t.getMessage(), t);
         }
     }
-    
+
     @Override
     protected void stopBundle() throws Exception {
         final OSGiPropertyMixin mixin = this.mixin;

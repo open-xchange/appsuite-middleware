@@ -178,13 +178,8 @@ public class FolderParser {
                 if (null == userConfig) {
                     throw e;
                 }
-                try {
-                    final String entityStr = elem.getString(FolderFields.ENTITY);
-                    entity = UserStorage.getInstance().getUserId(entityStr, userConfig.getContext());
-                } catch (final OXException e1) {
-                    LOG.error(e.getMessage(), e);
-                    throw new OXException(e1);
-                }
+                final String entityStr = elem.getString(FolderFields.ENTITY);
+                entity = UserStorage.getInstance().getUserId(entityStr, userConfig.getContext());
             }
             final OCLPermission oclPerm = new OCLPermission();
             oclPerm.setEntity(entity);

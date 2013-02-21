@@ -51,11 +51,14 @@ package com.openexchange.imap.util;
 
 import java.util.Locale;
 import javax.mail.MessagingException;
+import javax.mail.Store;
+import com.openexchange.java.StringAllocator;
 import com.sun.mail.iap.Response;
+import com.sun.mail.imap.IMAPFolder;
 
 /**
  * {@link ImapUtility} - IMAP utility class.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ImapUtility {
@@ -68,8 +71,59 @@ public final class ImapUtility {
     }
 
     /**
+     * Appends command information to given information string.
+     *
+     * @param info The information
+     * @param imapFolder The optional IMAP folder
+     * @return The command with optional information appended
+     */
+    public static String appendCommandInfo(final String info, final IMAPFolder imapFolder) {
+        if (null == imapFolder) {
+            return info;
+        }
+        final StringAllocator sb = new StringAllocator(info);
+        sb.append(" (folder=\"").append(imapFolder.getFullName()).append('"');
+        final Store store = imapFolder.getStore();
+        if (null != store) {
+            sb.append(", store=\"").append(store.toString()).append('"');
+        }
+        sb.append(')');
+        return sb.toString();
+    }
+
+    /**
+     * Appends command information to given information string.
+     *
+     * @param info The information
+     * @param fullName The optional full name of associated folder
+     * @param store The optional description of connected IMAP store
+     * @return The command with optional information appended
+     */
+    public static String appendCommandInfo(final String info, final String fullName, final String store) {
+        final StringAllocator sb = new StringAllocator(info);
+        boolean parenthesis = true;
+        if (!isEmpty(fullName)) {
+            sb.append(" (folder=\"").append(fullName).append('"');
+            parenthesis = false;
+        }
+        if (!isEmpty(store)) {
+            if (parenthesis) {
+                sb.append(" (");
+                parenthesis = false;
+            } else {
+                sb.append(", ");
+            }
+            sb.append("store=\"").append(store).append('"');
+        }
+        if (!parenthesis) {
+            sb.append(')');
+        }
+        return sb.toString();
+    }
+
+    /**
      * Checks if given <code>MessagingException</code> indicates "Invalid messageset" or "Invalid uidset" error.
-     * 
+     *
      * @param response The IMAP response to check
      * @return <code>true</code> if given <code>MessagingException</code> indicates "Invalid messageset" or "Invalid uidset" error; otherwise <code>false</code>
      */
@@ -86,7 +140,7 @@ public final class ImapUtility {
 
     /**
      * Checks if given <code>BadCommandException</code> indicates "Invalid messageset" or "Invalid uidset" error.
-     * 
+     *
      * @param response The IMAP response to check
      * @return <code>true</code> if given <code>BadCommandException</code> indicates "Invalid messageset" or "Invalid uidset" error; otherwise <code>false</code>
      */
@@ -105,7 +159,7 @@ public final class ImapUtility {
 
     /**
      * Checks if given response indicates "Invalid messageset" or "Invalid uidset" IMAP error.
-     * 
+     *
      * @param response The IMAP response to check
      * @return <code>true</code> if given response indicates "Invalid messageset" or "Invalid uidset" IMAP error; otherwise <code>false</code>
      */
@@ -120,6 +174,18 @@ public final class ImapUtility {
         }
         sResponse = sResponse.toLowerCase(Locale.US);
         return sResponse.indexOf("invalid messageset") >= 0 || sResponse.indexOf("invalid uidset") >= 0;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

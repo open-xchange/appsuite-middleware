@@ -83,7 +83,7 @@ public interface SessionThreadCounter {
 
     /**
      * Gets those sessions' available threads whose total number is equal to or greater than specified threshold at invocation time.
-     * 
+     *
      * @param threshold The threshold
      * @return The available sessions' threads exceeding respectively equal to given threshold
      */
@@ -91,7 +91,7 @@ public interface SessionThreadCounter {
 
     /**
      * (Atomically) Increments the tracked thread count for denoted session.
-     * 
+     *
      * @param sessionId The session identifier
      * @return The updated value
      */
@@ -99,7 +99,7 @@ public interface SessionThreadCounter {
 
     /**
      * (Atomically) Decrements the tracked thread count for denoted session.
-     * 
+     *
      * @param sessionId The session identifier
      * @return The updated value
      */
@@ -112,9 +112,9 @@ public interface SessionThreadCounter {
 
     /**
      * Removes the tracked thread count for denoted session.
-     * 
+     *
      * @param sessionId The session identifier
      */
     void remove(String sessionId);
-    
+
 }

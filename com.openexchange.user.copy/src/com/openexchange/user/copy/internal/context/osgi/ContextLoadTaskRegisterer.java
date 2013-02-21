@@ -65,11 +65,11 @@ import com.openexchange.user.copy.internal.context.ContextLoadTask;
 public class ContextLoadTaskRegisterer implements ServiceTrackerCustomizer<ContextService, ContextService> {
 
     private final BundleContext context;
-    
+
     private ContextLoadTask task;
-    
+
     private ServiceRegistration<CopyUserTaskService> registration;
-    
+
 
     public ContextLoadTaskRegisterer(final BundleContext context) {
         super();
@@ -80,7 +80,7 @@ public class ContextLoadTaskRegisterer implements ServiceTrackerCustomizer<Conte
         final ContextService service = context.getService(reference);
         task = new ContextLoadTask(service);
         registration = context.registerService(CopyUserTaskService.class, task, null);
-        
+
         return service;
     }
 

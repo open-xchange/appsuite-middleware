@@ -89,7 +89,7 @@ public final class DuplicateCleaner {
 
     /**
      * Cleans duplicates from virtual tree.
-     * 
+     *
      * @param treeId The virtual tree identifier
      * @param storageParameters The storage parameters
      * @throws OXException If cleaning fails
@@ -100,7 +100,7 @@ public final class DuplicateCleaner {
 
     /**
      * Cleans duplicates from virtual tree.
-     * 
+     *
      * @param treeId The virtual tree identifier
      * @param storageParameters The storage parameters
      * @param lookUp The optional look-up identifier possibly contained in deleted duplicates

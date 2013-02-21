@@ -88,7 +88,7 @@ public class InfostoreActivator implements BundleActivator {
 
     /**
      * A flag that indicates whether InfoStore file storage bundle is available or not.
-     * 
+     *
      * @see InfostoreFacades#isInfoStoreAvailable()
      */
     public static final AtomicReference<InfostoreAvailable> INFOSTORE_FILE_STORAGE_AVAILABLE = new AtomicReference<InfostoreAvailable>();

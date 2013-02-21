@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
@@ -63,6 +62,8 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.subscribe.helpers.DocumentMetadataHolder;
 import com.openexchange.subscribe.helpers.HTTPToolkit;
@@ -72,12 +73,10 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 
-
 /**
  * {@link DocumentMetadataHolderFolderUpdaterStrategy}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
 public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdaterStrategy<DocumentMetadataHolder> {
 
@@ -86,8 +85,6 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
     private final UserService users;
     private final UserConfigurationService userConfigs;
     private final InfostoreFacade infostore;
-
-
 
     public DocumentMetadataHolderFolderUpdaterStrategy(final UserService users, final UserConfigurationService userConfigs, final InfostoreFacade infostore) {
         super();
@@ -119,7 +116,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
 
     @Override
     public void closeSession(final Object session) throws OXException {
-
+        // Nothing to do
     }
 
     @Override
@@ -129,7 +126,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
 
         final SearchIterator<DocumentMetadata> documents = infostore.getDocuments(target.getFolderIdAsInt(), target.getContext(), sess.user, sess.userConfig).results();
         try {
-            while(documents.hasNext()) {
+            while (documents.hasNext()) {
                 list.add(new DocumentMetadataHolder(null, documents.next()));
             }
         } finally {
@@ -146,7 +143,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
 
     @Override
     public boolean handles(final FolderObject folder) {
-        return folder.getModule() == FolderObject.INFOSTORE;
+        return FolderObject.INFOSTORE == folder.getModule();
     }
 
     @Override
@@ -157,27 +154,24 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
         newElement.documentMetadata.setFolderId(sess.folderId);
         newElement.documentMetadata.setVersion(InfostoreFacade.NEW);
 
-        if(file == null) {
+        if (file == null) {
             infostore.saveDocumentMetadata(newElement.documentMetadata, InfostoreFacade.NEW, sess.serverSession);
         } else {
             try {
                 infostore.saveDocument(newElement.documentMetadata, file, InfostoreFacade.NEW, sess.serverSession);
             } finally {
-                try {
-                    file.close();
-                } catch (final IOException e) {
-                    LOG.debug(e.getMessage(), e);
-                }
+                Streams.close(file);
             }
         }
     }
 
-    private InputStream grabFile(final DocumentMetadataHolder newElement) {
-        if(newElement.dataLink == null) {
+    private static InputStream grabFile(final DocumentMetadataHolder newElement) {
+        final String dataLink = newElement.dataLink;
+        if (dataLink == null) {
             return null;
         }
         try {
-            return HTTPToolkit.grabStream(newElement.dataLink, false);
+            return HTTPToolkit.grabStream(dataLink, false);
         } catch (final IOException e) {
             LOG.debug(e.getMessage(), e);
         }
@@ -191,7 +185,8 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
 
     @Override
     public void update(final DocumentMetadataHolder original, final DocumentMetadataHolder update, final Object session) throws OXException {
-        if(null != update.documentMetadata.getLastModified() && original.documentMetadata.getLastModified().after(update.documentMetadata.getLastModified())) {
+        if (null != update.documentMetadata.getLastModified() && original.documentMetadata.getLastModified().after(
+            update.documentMetadata.getLastModified())) {
             return;
         }
         final InfostoreSession sess = (InfostoreSession) session;
@@ -201,7 +196,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
         update.documentMetadata.setFolderId(sess.folderId);
         update.documentMetadata.setVersion(InfostoreFacade.NEW);
 
-        if(file == null) {
+        if (file == null) {
             infostore.saveDocumentMetadata(update.documentMetadata, original.documentMetadata.getSequenceNumber(), sess.serverSession);
         } else {
             try {
@@ -218,6 +213,7 @@ public class DocumentMetadataHolderFolderUpdaterStrategy implements FolderUpdate
     }
 
     private class InfostoreSession {
+
         public int folderId;
         public User user;
         public UserConfiguration userConfig;

@@ -254,4 +254,10 @@ public class MailAccountGetSwitch implements AttributeSwitch {
     public Object pop3Storage() {
         return account.getProperties().get("pop3.storage");
     }
+
+    @Override
+    public Object addresses() {
+        return account.getProperties().get("addresses");
+    }
+
 }

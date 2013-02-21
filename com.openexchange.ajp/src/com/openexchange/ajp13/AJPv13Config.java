@@ -50,11 +50,8 @@
 package com.openexchange.ajp13;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.config.ConfigurationService;
@@ -62,18 +59,18 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link AJPv13Config} - The AJPv13 configuration
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public final class AJPv13Config implements Initialization {
 
     // Final static fields
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(AJPv13Config.class));
-
-    private static final String AJP_PROP_FILE_NAME = "ajp.properties";
 
     private static final AJPv13Config instance = new AJPv13Config();
 
@@ -124,7 +121,7 @@ public final class AJPv13Config implements Initialization {
     }
 
     @Override
-    public void stop() throws OXException {
+    public void stop() {
         if (!started.compareAndSet(true, false)) {
             LOG.error(this.getClass().getName() + " cannot be stopped since it has no been started before");
             return;
@@ -150,139 +147,58 @@ public final class AJPv13Config implements Initialization {
         logForwardRequest = false;
     }
 
-    private void init() throws AJPv13Exception {
-        final Properties ajpProperties = new Properties();
-        final ConfigurationService configurationService = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if (configurationService == null) {
-            LOG.warn("Missing configuration service.", new Throwable());
-            return;
+    private void init() throws OXException {
+        ConfigurationService configService = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (configService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getSimpleName());
         }
         try {
-            FileInputStream fis = null;
-            try {
-                fis = new FileInputStream(configurationService.getFileByName(AJP_PROP_FILE_NAME));
-                ajpProperties.load(fis);
-            } finally {
-                if (fis != null) {
-                    fis.close();
-                }
-            }
-            final String falseStr = "false";
-            final String trueStr = "true";
-            /*
-             * AJP_PORT
-             */
-            port = Integer.parseInt(ajpProperties.getProperty("AJP_PORT", "8009").trim());
-            /*
-             * AJP_SERVER_THREAD_SIZE
-             */
-            serverThreadSize = Integer.parseInt(ajpProperties.getProperty("AJP_SERVER_THREAD_SIZE", "20").trim());
-            if (serverThreadSize < 0) {
-                /*
-                 * At least one server thread should accept opened sockets
-                 */
-                serverThreadSize = 1;
-            }
-            /*
-             * AJP_LISTENER_POOL_SIZE
-             */
-            listenerPoolSize = Integer.parseInt(ajpProperties.getProperty("AJP_LISTENER_POOL_SIZE", "20").trim());
-            if (listenerPoolSize < 0) {
-                listenerPoolSize = 0;
-            }
-            /*
-             * AJP_LISTENER_READ_TIMEOUT
-             */
-            listenerReadTimeout = Integer.parseInt(ajpProperties.getProperty("AJP_LISTENER_READ_TIMEOUT", "60000").trim());
-            if (listenerReadTimeout < 0) {
-                listenerReadTimeout = 0;
-            }
-            /*
-             * AJP_KEEP_ALIVE_TIME
-             */
-            keepAliveTime = Integer.parseInt(ajpProperties.getProperty("AJP_KEEP_ALIVE_TIME", "20000").trim());
-            if (keepAliveTime < 0) {
-                keepAliveTime = 0;
-            }
-            /*
-             * AJP_MAX_REQUEST_PARAMETER_COUNT
-             */
-            maxRequestParameterCount = Integer.parseInt(ajpProperties.getProperty("AJP_MAX_REQUEST_PARAMETER_COUNT", "30").trim());
-            if (maxRequestParameterCount < 0) {
-                maxRequestParameterCount = 0;
-            }
-            /*
-             * AJP_WATCHER_ENABLED
-             */
-            watcherEnabled = trueStr.regionMatches(true, 0, ajpProperties.getProperty("AJP_WATCHER_ENABLED", falseStr).trim(), 0, 4);
-            /*
-             * AJP_WATCHER_PERMISSION
-             */
-            watcherPermission = trueStr.regionMatches(
-                true,
-                0,
-                ajpProperties.getProperty("AJP_WATCHER_PERMISSION", falseStr).trim(),
-                0,
-                4);
-            /*
-             * AJP_WATCHER_MAX_RUNNING_TIME
-             */
-            watcherMaxRunningTime = Integer.parseInt(ajpProperties.getProperty("AJP_WATCHER_MAX_RUNNING_TIME", "30000").trim());
-            if (watcherMaxRunningTime < 0) {
-                watcherMaxRunningTime = 30000;
-            }
-            /*
-             * AJP_WATCHER_FREQUENCY
-             */
-            watcherFrequency = Integer.parseInt(ajpProperties.getProperty("AJP_WATCHER_FREQUENCY", "30000").trim());
-            if (watcherFrequency < 0) {
-                watcherFrequency = 30000;
-            }
-            /*
-             * SERVLET_POOL_SIZE
-             */
-            servletPoolSize = Integer.parseInt(ajpProperties.getProperty("SERVLET_POOL_SIZE", "50").trim());
-            if (servletPoolSize < 0) {
-                servletPoolSize = 1;
-            }
-            /*
-             * AJP_JVM_ROUTE
-             */
-            jvmRoute = ajpProperties.getProperty("AJP_JVM_ROUTE");
-            if (jvmRoute == null) {
-                LOG.error(AJPv13Exception.AJPCode.MISSING_JVM_ROUTE.getMessage());
-            } else {
-                jvmRoute = jvmRoute.trim();
-            }
-            /*
-             * AJP_SERVLET_CONFIG_DIR
-             */
-            servletConfigs = ajpProperties.getProperty("AJP_SERVLET_CONFIG_DIR");
-            if (servletConfigs == null || "null".equalsIgnoreCase((servletConfigs = servletConfigs.trim()))) {
+            // ajp.properties
+            this.serverThreadSize = configService.getIntProperty("AJP_SERVER_THREAD_SIZE", 1);
+
+            this.listenerPoolSize = configService.getIntProperty("AJP_LISTENER_POOL_SIZE", 1);
+
+            this.listenerReadTimeout = configService.getIntProperty("AJP_LISTENER_READ_TIMEOUT", 60000);
+
+            this.keepAliveTime = configService.getIntProperty("AJP_KEEP_ALIVE_TIME", 20000);
+
+            this.servletPoolSize = configService.getIntProperty("SERVLET_POOL_SIZE", 1);
+
+            this.servletConfigs = configService.getProperty("AJP_SERVLET_CONFIG_DIR");
+            if (servletConfigs == null || "null".equalsIgnoreCase(servletConfigs)) {
                 servletConfigs = "servletConfig";
             }
-            final File servletConfigsFile = configurationService.getDirectory(servletConfigs);
+            final File servletConfigsFile = configService.getDirectory(servletConfigs);
             final boolean nonExisting = (null == servletConfigsFile) || !servletConfigsFile.exists() || !servletConfigsFile.isDirectory();
             if (LOG.isTraceEnabled() && nonExisting) {
                 LOG.trace(servletConfigsFile + " does not exist or is not a directory");
             }
-            /*
-             * AJP_BIND_ADDR
-             */
-            final String bindAddr = ajpProperties.getProperty("AJP_BIND_ADDR", "localhost").trim();
-            ajpBindAddr = bindAddr.charAt(0) == '*' ? null : InetAddress.getByName(bindAddr);
-            /*
-             * AJP_LOG_FORWARD_REQUEST
-             */
-            logForwardRequest = trueStr.equalsIgnoreCase(ajpProperties.getProperty("AJP_LOG_FORWARD_REQUEST", falseStr).trim());
-            /*
-             * Log info
-             */
+
+            this.logForwardRequest = configService.getBoolProperty("AJP_LOG_FORWARD_REQUEST", false);
+
+            // server.properties
+            String bindAddr = configService.getProperty("com.openexchange.connector.networkListenerHost", "127.0.0.1");
+            this.ajpBindAddr = bindAddr.equals("*") ? null : InetAddress.getByName(bindAddr);
+
+            this.port = configService.getIntProperty("com.openexchange.connector.networkListenerPort", 8009);
+
+            this.maxRequestParameterCount = configService.getIntProperty("com.openexchange.connector.maxRequestParameters", 30);
+
+            this.jvmRoute = configService.getProperty("com.openexchange.server.backendRoute", "OX0");
+
+            // requestwatcher.properties
+            this.watcherEnabled = configService.getBoolProperty("com.openexchange.requestwatcher.isEnabled", true);
+
+            this.watcherPermission = configService.getBoolProperty("com.openexchange.requestwatcher.restartPermission", false);
+
+            this.watcherMaxRunningTime = configService.getIntProperty("com.openexchange.requestwatcher.maxRequestAge", 60000);
+
+            this.watcherFrequency = configService.getIntProperty("com.openexchange.requestwatcher.frequency", 30000);
+
             logInfo(nonExisting ? " (non-existing)" : " (exists)");
-        } catch (final FileNotFoundException e) {
-            throw new AJPv13Exception(AJPv13Exception.AJPCode.FILE_NOT_FOUND, true, e, AJP_PROP_FILE_NAME);
-        } catch (final IOException e) {
-            throw new AJPv13Exception(AJPv13Exception.AJPCode.IO_ERROR, true, e, e.getMessage());
+
+        } catch (IOException ioEx) {
+            throw new AJPv13Exception(AJPv13Exception.AJPCode.IO_ERROR, true, ioEx, ioEx.getMessage());
         }
     }
 
@@ -346,7 +262,7 @@ public final class AJPv13Config implements Initialization {
 
     /**
      * Gets the max. request parameter count allowed.
-     * 
+     *
      * @return The max. request parameter count
      */
     public static int getMaxRequestParameterCount() {

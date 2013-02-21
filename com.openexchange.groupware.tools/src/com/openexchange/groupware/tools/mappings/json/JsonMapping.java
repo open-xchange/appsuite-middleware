@@ -57,7 +57,7 @@ import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.session.Session;
 
 /**
- * {@link JsonMapping} - Extends the generic mapping by JSON specific 
+ * {@link JsonMapping} - Extends the generic mapping by JSON specific
  * operations.
  *
  * @param <T> the type of the property
@@ -65,69 +65,69 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface JsonMapping<T, O> extends Mapping<T, O> {
-	
+
 	/**
 	 * Gets the Ajax name of the mapped property.
-	 *  
+	 *
 	 * @return the readable name
 	 */
 	String getAjaxName();
-	
+
 	/**
 	 * Gets the column ID of the mapped property.
-	 *  
+	 *
 	 * @return the column ID
 	 */
 	int getColumnID();
-	
+
 	/**
 	 * Serializes the value of the mapped property from an object and sets it
 	 * in the supplied JSON object.
-	 * 
+	 *
 	 * @param object the object to read the value from
 	 * @param jsonObject the JSON object to populate
-	 * @throws JSONException 
+	 * @throws JSONException
 	 */
 	void serialize(O from, JSONObject to) throws JSONException;
 
 	/**
 	 * Serializes the value of the mapped property from an object and sets it
 	 * in the supplied JSON object.
-	 * 
+	 *
 	 * @param object the object to read the value from
 	 * @param jsonObject the JSON object to populate
 	 * @param timeZone the client time zone to consider
-	 * @throws JSONException 
+	 * @throws JSONException
 	 */
 	void serialize(O from, JSONObject to, TimeZone timeZone) throws JSONException;
 
 	/**
 	 * Serializes the value of the mapped property from an object and sets it
 	 * in the supplied JSON object.
-	 * 
+	 *
 	 * @param object the object to read the value from
 	 * @param jsonObject the JSON object to populate
 	 * @param timeZone the client time zone to consider
 	 * @param session the underlying session
-	 * @throws JSONException 
+	 * @throws JSONException
 	 */
 	void serialize(O from, JSONObject to, TimeZone timeZone, Session session) throws JSONException;
 
     /**
-     * Deserializes the value of the mapped property from a JSON object and 
+     * Deserializes the value of the mapped property from a JSON object and
      * sets it in the supplied object.
-     * 
+     *
      * @param from the JSON object to read the value from
      * @param to the object to populate
-     * @throws JSONException 
-     * @throws OXException 
+     * @throws JSONException
+     * @throws OXException
      */
     void deserialize(JSONObject from, O to) throws JSONException, OXException;
 
     /**
-     * Deserializes the value of the mapped property from a JSON object and 
+     * Deserializes the value of the mapped property from a JSON object and
      * sets it in the supplied object.
-     * 
+     *
      * @param from the JSON object to read the value from
      * @param to the object to populate
      * @param timeZone the client time zone to consider, or <code>null</code> if not relevant
@@ -138,13 +138,13 @@ public interface JsonMapping<T, O> extends Mapping<T, O> {
 
 	/**
 	 * Serializes the value of the mapped property from an object into JSON.
-	 * 
+	 *
 	 * @param object the object to read the value from
 	 * @param timeZone the client time zone to consider
 	 * @param session the underlying session
 	 * @return the serialized value
-	 * @throws JSONException 
+	 * @throws JSONException
 	 */
 	Object serialize(O from, TimeZone timeZone, Session session) throws JSONException;
-	
+
 }

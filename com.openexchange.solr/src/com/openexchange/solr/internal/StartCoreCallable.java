@@ -61,12 +61,12 @@ import com.openexchange.solr.SolrCoreIdentifier;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class StartCoreCallable implements Callable<String>, Serializable {
-    
+
     private static final long serialVersionUID = 6374396689822777915L;
-    
+
     private final SolrCoreIdentifier identifier;
-    
-    
+
+
     public StartCoreCallable(SolrCoreIdentifier identifier, String ownerAddress) {
         super();
         this.identifier = identifier;
@@ -75,9 +75,9 @@ public class StartCoreCallable implements Callable<String>, Serializable {
     @Override
     public String call() throws Exception {
         DelegationSolrAccessImpl accessService = (DelegationSolrAccessImpl) Services.getService(SolrAccessService.class);
-        EmbeddedSolrAccessImpl embeddedAccess = accessService.getEmbeddedServerAccess();                
+        EmbeddedSolrAccessImpl embeddedAccess = accessService.getEmbeddedServerAccess();
         embeddedAccess.startCore(identifier);
-        
+
         return null;
     }
 

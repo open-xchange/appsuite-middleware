@@ -180,7 +180,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             if (LogProperties.isEnabled()) {
                 final Props logProperties = LogProperties.optLogProperties();
                 if (null != logProperties) {
-                    for (final String name : ALL_LOG_PROPERTIES) {
+                    for (final LogProperties.Name name : ALL_LOG_PROPERTIES) {
                         logProperties.remove(name);
                     }
                 }
@@ -344,7 +344,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
          * Resolve "From" to proper mail account to select right transport server
          */
         int accountId;
-        try {
+        {
             final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
                 MailAccountStorageService.class,
                 true);
@@ -372,8 +372,6 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                     }
                 }
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
         if (accountId == -1) {
             if (checkFrom && null != from) {
@@ -400,24 +398,20 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     }
 
     protected static String getDefaultSendAddress(final ServerSession session) throws OXException {
-        try {
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
-                MailAccountStorageService.class,
-                true);
-            return storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()).getPrimaryAddress();
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(
+            MailAccountStorageService.class,
+            true);
+        return storageService.getDefaultMailAccount(session.getUserId(), session.getContextId()).getPrimaryAddress();
     }
 
     protected static boolean isEmpty(final String string) {
         if (null == string) {
             return true;
         }
-        final char[] chars = string.toCharArray();
+        final int len = string.length();
         boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < chars.length; i++) {
-            isWhitespace = Character.isWhitespace(chars[i]);
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

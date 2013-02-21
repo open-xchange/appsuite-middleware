@@ -51,7 +51,6 @@ package com.openexchange.user.copy.internal.attachment;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.sql.Connection;
@@ -63,7 +62,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
@@ -72,6 +70,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.file.external.QuotaFileStorage;
 import com.openexchange.tools.file.external.QuotaFileStorageFactory;
 import com.openexchange.tools.sql.DBUtils;
@@ -94,10 +94,10 @@ import com.openexchange.user.copy.internal.user.UserCopyTask;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class AttachmentCopyTask implements CopyUserTaskService {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AttachmentCopyTask.class));
-    
-    private static final String SELECT_ATTACHMENTS = 
+
+    private static final String SELECT_ATTACHMENTS =
         "SELECT " +
             "id, created_by, creation_date, file_mimetype, " +
             "file_size, filename, attached, " +
@@ -110,7 +110,7 @@ public class AttachmentCopyTask implements CopyUserTaskService {
             "module = ? " +
         "AND " +
             "attached IN (#IDS#)";
-    
+
     private static final String INSERT_ATTACHMENTS =
         "INSERT INTO " +
             "prg_attachment " +
@@ -119,9 +119,9 @@ public class AttachmentCopyTask implements CopyUserTaskService {
             "rtf_flag, comment, file_id) " +
         "VALUES " +
             "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    
+
     private final QuotaFileStorageFactory qfsf;
-    
+
 
     public AttachmentCopyTask(final QuotaFileStorageFactory qfsf) {
         super();
@@ -167,13 +167,13 @@ public class AttachmentCopyTask implements CopyUserTaskService {
         QuotaFileStorage dstFileStorage = null;
         try {
             final URI srcFilestoreUri = FilestoreStorage.createURI(srcCtx);
-            final URI dstFilestoreUri = FilestoreStorage.createURI(dstCtx);            
+            final URI dstFilestoreUri = FilestoreStorage.createURI(dstCtx);
             srcFileStorage = qfsf.getQuotaFileStorage(srcCtx, srcFilestoreUri);
             dstFileStorage = qfsf.getQuotaFileStorage(dstCtx, dstFilestoreUri);
         } catch (final OXException e) {
             throw UserCopyExceptionCodes.FILE_STORAGE_PROBLEM.create(e);
         }
-        
+
         final ObjectMapping<Integer> appointmentMapping = copyTools.checkAndExtractGenericMapping(Appointment.class.getName());
         final ObjectMapping<Integer> contactMapping = copyTools.checkAndExtractGenericMapping(Contact.class.getName());
         final ObjectMapping<Integer> taskMapping = copyTools.checkAndExtractGenericMapping(Task.class.getName());
@@ -183,11 +183,11 @@ public class AttachmentCopyTask implements CopyUserTaskService {
         final List<Attachment> attachments = loadAttachmentsFromDB(srcCon, i(srcCtxId), appointmentIds, contactIds, taskIds);
         copyFiles(attachments, srcFileStorage, dstFileStorage);
         exchangeIds(dstCon, attachments, appointmentMapping, contactMapping, taskMapping, i(dstUsrId), i(dstCtxId));
-        writeAttachmentsToDB(dstCon, attachments, dstCtxId);        
-        
+        writeAttachmentsToDB(dstCon, attachments, dstCtxId);
+
         return null;
     }
-    
+
     void writeAttachmentsToDB(final Connection con, final List<Attachment> attachments, final int cid) throws OXException {
         PreparedStatement stmt = null;
         try {
@@ -206,10 +206,10 @@ public class AttachmentCopyTask implements CopyUserTaskService {
                 CopyTools.setIntOrNull(i++, stmt, attachment.getRtfFlag());
                 CopyTools.setStringOrNull(i++, stmt, attachment.getComment());
                 stmt.setString(i++, attachment.getFileId());
-                
+
                 stmt.addBatch();
             }
-            
+
             stmt.executeBatch();
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
@@ -217,35 +217,35 @@ public class AttachmentCopyTask implements CopyUserTaskService {
             DBUtils.closeSQLStuff(stmt);
         }
     }
-    
+
     void exchangeIds(final Connection con, final List<Attachment> attachments, final ObjectMapping<Integer> appointmentMapping, final ObjectMapping<Integer> contactMapping, final ObjectMapping<Integer> taskMapping, final int uid, final int cid) throws OXException {
         for (final Attachment attachment : attachments) {
             final int oldAttachedId = attachment.getAttachedId();
-            final int module = attachment.getModuleId();            
-            final ObjectMapping<Integer> mapping;            
-            switch (module) {            
+            final int module = attachment.getModuleId();
+            final ObjectMapping<Integer> mapping;
+            switch (module) {
                 case Types.APPOINTMENT:
                 mapping = appointmentMapping;
                 break;
-                
+
                 case Types.CONTACT:
                 mapping = contactMapping;
                 break;
-                
+
                 case Types.TASK:
                 mapping = taskMapping;
                 break;
-                
+
                 default:
                 mapping = null;
                 break;
             }
-            
+
             if (mapping == null) {
                 LOG.warn("Unknown module " + module + " for attachment (" + attachment.getId() + "). Skipping ID exchange!");
-                continue;              
-            }            
-            
+                continue;
+            }
+
             try {
                 final int newAttachedId = i(mapping.getDestination(I(oldAttachedId)));
                 final int newId = IDGenerator.getId(cid, Types.ATTACHMENT, con);
@@ -255,45 +255,44 @@ public class AttachmentCopyTask implements CopyUserTaskService {
             } catch (final SQLException e) {
                 throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
             }
-            
+
         }
     }
-    
+
     void copyFiles(final List<Attachment> attachments, final QuotaFileStorage srcFileStorage, final QuotaFileStorage dstFileStorage) throws OXException {
         for (final Attachment attachment : attachments) {
+            InputStream is = null;
             try {
-                final InputStream is = srcFileStorage.getFile(attachment.getFileId());
+                is = srcFileStorage.getFile(attachment.getFileId());
                 if (is == null) {
                     LOG.warn("Did not find file for attachment " + attachment.getId() + " (" + attachment.getFileId() + ").");
                     continue;
                 }
-                
+
                 final String newFileId = dstFileStorage.saveNewFile(is);
                 attachment.setFileId(newFileId);
-                
-                is.close();
             } catch (final OXException e) {
                 throw UserCopyExceptionCodes.FILE_STORAGE_PROBLEM.create(e);
-            } catch (final IOException e) {
-                LOG.warn("Could not close input stream.", e);
+            } finally {
+                Streams.close(is);
             }
         }
     }
-    
+
     List<Attachment> loadAttachmentsFromDB(final Connection con, final int cid, final List<Integer> appointmentIds, final List<Integer> contactIds, final List<Integer> taskIds) throws OXException {
         final List<Attachment> attachments = new ArrayList<Attachment>();
         attachments.addAll(loadAttachmentsForModule(con, appointmentIds, Types.APPOINTMENT, cid));
         attachments.addAll(loadAttachmentsForModule(con, contactIds, Types.CONTACT, cid));
         attachments.addAll(loadAttachmentsForModule(con, taskIds, Types.TASK, cid));
-        
+
         return attachments;
     }
-    
+
     List<Attachment> loadAttachmentsForModule(final Connection con, final List<Integer> ids, final int module, final int cid) throws OXException {
         final List<Attachment> attachments = new ArrayList<Attachment>();
-        
+
         PreparedStatement stmt = null;
-        ResultSet rs = null;        
+        ResultSet rs = null;
         if (!ids.isEmpty()) {
             try {
                 final String sql = CopyTools.replaceIdsInQuery("#IDS#", SELECT_ATTACHMENTS, ids);
@@ -325,7 +324,7 @@ public class AttachmentCopyTask implements CopyUserTaskService {
                 DBUtils.closeSQLStuff(rs, stmt);
             }
         }
-        
+
         return attachments;
     }
 

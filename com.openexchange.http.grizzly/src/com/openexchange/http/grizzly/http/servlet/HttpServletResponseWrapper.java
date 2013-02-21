@@ -64,7 +64,7 @@ import org.glassfish.grizzly.servlet.ServletUtils;
  * {@link HttpServletResponseWrapper} - Wraps an HttpServletResponse and delegates all calls that we don't need to
  * modify to the response object. Other methods are modified to keep compatibility to the old
  * {@link com.openexchange.http.grizzly.wrapper.ajp13.servlet.http.HttpServletResponseWrapper} as good as we can using Grizzly.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class HttpServletResponseWrapper implements HttpServletResponse {
@@ -212,7 +212,7 @@ public class HttpServletResponseWrapper implements HttpServletResponse {
 
     /**
      * Set a header to a specified value or remove a header from this response.
-     * 
+     *
      * @param headerName The name of the header that should be set or removed
      * @param headerValue If the value is null then the header will be removed, otherwise the header will be set to the specified value
      * @throws IllegalStateException if the underlying Response is already committed
@@ -221,8 +221,9 @@ public class HttpServletResponseWrapper implements HttpServletResponse {
     public void setHeader(String headerName, String headerValue) {
         Response internalResponse = ServletUtils.getInternalResponse(httpServletResponse);
 
-        if (httpServletResponse.isCommitted())
+        if (httpServletResponse.isCommitted()) {
             throw new IllegalStateException("Respone is already committed");
+        }
 
         if (headerValue == null) {
             HttpResponsePacket httpResponsePacket = internalResponse.getResponse();

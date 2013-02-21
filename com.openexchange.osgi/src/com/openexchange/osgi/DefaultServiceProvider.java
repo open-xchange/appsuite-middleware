@@ -54,7 +54,7 @@ import java.util.TreeSet;
 
 /**
  * {@link DefaultServiceProvider}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class DefaultServiceProvider<S> implements ServiceProvider<S> {

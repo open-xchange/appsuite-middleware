@@ -54,7 +54,6 @@ import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -69,7 +68,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.parser.HtmlHandler;
 import com.openexchange.html.services.ServiceRegistry;
-import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 
 /**
  * {@link HTMLFilterHandler} - The HTML white-list filter.
@@ -284,7 +283,7 @@ public final class HTMLFilterHandler implements HtmlHandler {
                     } else {
                         BufferedReader reader = null;
                         try {
-                            reader = new BufferedReader(new InputStreamReader(new FileInputStream(whitelist), Charsets.US_ASCII));
+                            reader = new BufferedReader(new com.openexchange.java.AsciiReader(new FileInputStream(whitelist)));
                             final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator();
                             String line = null;
                             while ((line = reader.readLine()) != null) {
@@ -302,13 +301,7 @@ public final class HTMLFilterHandler implements HtmlHandler {
                             }
                             mapStr = new String(DEFAULT_WHITELIST);
                         } finally {
-                            if (null != reader) {
-                                try {
-                                    reader.close();
-                                } catch (final Exception e) {
-                                    LOG.error(e.getMessage(), e);
-                                }
-                            }
+                            Streams.close(reader);
                         }
                     }
                 }

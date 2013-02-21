@@ -54,10 +54,11 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.indexedSearch.json.IndexActionFactory;
 import com.openexchange.indexedSearch.json.ResultConverters;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link IndexJSONActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class IndexJSONActivator extends AJAXModuleActivator {
@@ -73,7 +74,7 @@ public class IndexJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { IndexFacadeService.class, DatabaseService.class };
+        return new Class<?>[] { IndexFacadeService.class, DatabaseService.class, ThreadPoolService.class };
     }
 
     @Override

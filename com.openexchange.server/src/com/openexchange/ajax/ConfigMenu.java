@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.config.json.actions.PUTAction.sanitizeJsonSetting;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -154,8 +155,9 @@ public class ConfigMenu extends SessionServlet {
                 retval = array;
             }
         } else {
-            final JSONObject json = new JSONObject();
-            for (final Setting subSetting : setting.getElements()) {
+            final Setting[] elements = setting.getElements();
+            final JSONObject json = new JSONObject(elements.length);
+            for (final Setting subSetting : elements) {
                 json.put(subSetting.getName(), convert2JS(subSetting));
             }
             retval = json;
@@ -229,16 +231,20 @@ public class ConfigMenu extends SessionServlet {
     private void saveSettingWithSubs(final SettingStorage storage, final Setting setting) throws OXException, JSONException {
         if (setting.isLeaf()) {
             final String value = (String) setting.getSingleValue();
-            if (null != value && value.length() > 0 && '[' == value.charAt(0)) {
-                final JSONArray array = new JSONArray(value);
-                if(array.length() == 0) {
-                    setting.setEmptyMultiValue();
-                } else {
-                    for (int i = 0; i < array.length(); i++) {
-                        setting.addMultiValue(array.getString(i));
+            if (null != value && value.length() > 0) {
+                if ('[' == value.charAt(0)) {
+                    final JSONArray array = new JSONArray(value);
+                    if(array.length() == 0) {
+                        setting.setEmptyMultiValue();
+                    } else {
+                        for (int i = 0; i < array.length(); i++) {
+                            setting.addMultiValue(array.getString(i));
+                        }
                     }
+                    setting.setSingleValue(null);
+                } else if ('{' == value.charAt(0)) {
+                    sanitizeJsonSetting(setting);
                 }
-                setting.setSingleValue(null);
             }
             storage.save(setting);
         } else {

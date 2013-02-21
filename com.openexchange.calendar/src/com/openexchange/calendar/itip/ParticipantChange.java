@@ -63,47 +63,47 @@ public class ParticipantChange {
     private String comment;
 
     private boolean partyCrasher;
-    
+
     private String delegateeOf;
 
     public ConfirmStatus getConfirmStatusUpdate() {
         return confirmStatusUpdate;
     }
 
-    
+
     public void setConfirmStatusUpdate(ConfirmStatus confirmStatusUpdate) {
         this.confirmStatusUpdate = confirmStatusUpdate;
     }
 
-    
+
     public String getComment() {
         return comment;
     }
 
-    
+
     public void setComment(String comment) {
         this.comment = comment;
     }
 
-    
+
     public boolean isPartyCrasher() {
         return partyCrasher;
     }
 
-    
+
     public void setPartyCrasher(boolean partyCrasher) {
         this.partyCrasher = partyCrasher;
     }
 
-    
+
     public String getDelegateeOf() {
         return delegateeOf;
     }
 
-    
+
     public void setDelegateeOf(String delegateeOf) {
         this.delegateeOf = delegateeOf;
     }
 
-    
+
 }

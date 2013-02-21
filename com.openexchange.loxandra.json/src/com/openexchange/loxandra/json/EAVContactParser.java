@@ -55,7 +55,6 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -69,20 +68,20 @@ import com.openexchange.loxandra.helpers.EAVContactHelper;
  *
  */
 public class EAVContactParser {
-	
+
 	private static Log log = com.openexchange.log.Log.loggerFor(EAVContactParser.class);
-	
+
 	/**
-	 * Parse a {@link JSONObject} and creates an {@link EAVContact} 
-	 * 
+	 * Parse a {@link JSONObject} and creates an {@link EAVContact}
+	 *
 	 * @param json
 	 * @return an {@link EAVContact}
 	 */
 	public EAVContact parse(final JSONObject json) {
 		EAVContact c = new EAVContact();
-		
+
 		for (final int column : Contact.JSON_COLUMNS) {
-			
+
 			final ContactField field = ContactField.getByValue(column);
 			if (field != null && field.isDBField()) {
 				final String key = field.getAjaxName();
@@ -99,30 +98,31 @@ public class EAVContactParser {
 				}
 			}
 		}
-		
+
 		try {
 			if (json.has("folderUUID")) {
                 c.addFolderUUID(UUID.fromString(json.getString("folderUUID")));
             }
-			
-			if (json.has("uuid"))
-				c.setUUID(UUID.fromString(json.getString("uuid")));
-			
+
+			if (json.has("uuid")) {
+                c.setUUID(UUID.fromString(json.getString("uuid")));
+            }
+
 			JSONObject unnamedPropsJSON = json.getJSONObject("unnamed");
 			Iterator<String> iter = unnamedPropsJSON.keys();
-			
+
 			while (iter.hasNext()) {
 				String string = iter.next();
 				c.addUnnamedProperty(string, unnamedPropsJSON.getString(string));
 			}
-			
+
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		
+
 		return c;
 	}
-	
+
 	public JSONObject parse(final EAVContact c) {
 		JSONObject json = new JSONObject();
 		final EAVContactWriter contactWriter = new EAVContactWriter(TimeZone.getTimeZone("UTC"));
@@ -131,19 +131,19 @@ public class EAVContactParser {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		
+
 		return json;
 	}
-	
+
 	public JSONObject parseList(final List<EAVContact> list) {
 		JSONObject json = new JSONObject();
 		final EAVContactWriter contactWriter = new EAVContactWriter(TimeZone.getTimeZone("UTC"));
-		
+
 		Iterator<EAVContact> it = list.iterator();
 		while (it.hasNext()) {
 			EAVContact c = it.next();
 			JSONObject j = new JSONObject();
-			
+
 			try {
 				contactWriter.writeContact(c, j);
 				json.put(c.getUUID().toString(), j);
@@ -151,8 +151,8 @@ public class EAVContactParser {
 				e.printStackTrace();
 			}
 		}
-		
-		
+
+
 		return json;
 	}
 }

@@ -379,7 +379,7 @@ public class DefaultSnippet implements Snippet {
 
     /**
      * Adds specified attachment.
-     * 
+     *
      * @param attachment The attachment
      * @return This snippet with attachment added
      */

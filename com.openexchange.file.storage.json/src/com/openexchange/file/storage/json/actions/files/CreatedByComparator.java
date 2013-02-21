@@ -66,7 +66,7 @@ import com.openexchange.tools.iterator.SearchIteratorDelegator;
 
 /**
  * {@link CreatedByComparator} - Comparator for "created-by" field.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CreatedByComparator implements Comparator<File> {
@@ -81,7 +81,7 @@ public class CreatedByComparator implements Comparator<File> {
 
     /**
      * Initializes a new {@link CreatedByComparator}.
-     * 
+     *
      * @param locale The session user's locale
      * @param context The associated context
      */
@@ -95,7 +95,7 @@ public class CreatedByComparator implements Comparator<File> {
 
     /**
      * Sets whether descending sorting shall be performed.
-     * 
+     *
      * @param desc <code>true</code> for descending order; otherwise <code>false</code> to ascending
      * @return This comparator with new behavior applied
      */
@@ -134,7 +134,7 @@ public class CreatedByComparator implements Comparator<File> {
 
     /**
      * Re-Sorts specified iterator according to given comparator
-     * 
+     *
      * @param iter The iterator
      * @param comparator The comparator
      * @return The re-sorted view of given {@link SearchIterator}

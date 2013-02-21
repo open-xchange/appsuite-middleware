@@ -89,7 +89,7 @@ public class HTMLWrapper extends PassthroughWrapper {
     public String updated(Object argument) {
         return wrap("updated", argument);
     }
-    
+
     @Override
     public String emphasiszed(Object argument) {
         if (argument == null) {
@@ -97,12 +97,12 @@ public class HTMLWrapper extends PassthroughWrapper {
         }
         return "<em>"+argument.toString()+"</em>";
     }
-    
+
     @Override
     public String shownAs(Object argument, int shownAs) {
         return wrap("shown_as_label "+shownAsCssClass(shownAs), argument);
     }
-    
+
     private String shownAsCssClass(int shownAs) {
     	switch(shownAs) {
         case Appointment.RESERVED: return "reserved";
@@ -119,7 +119,7 @@ public class HTMLWrapper extends PassthroughWrapper {
         }
         return "<span class='"+string+"'>"+argument.toString()+"</span>";
     }
-    
+
     @Override
     public String reference(Object argument) {
         if (argument == null) {

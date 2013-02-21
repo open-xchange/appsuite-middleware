@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.dataobjects.compose;
 
-import static com.openexchange.mail.utils.CharsetDetector.detectCharset;
+import static com.openexchange.java.CharsetDetector.detectCharset;
 import static com.openexchange.mail.utils.MessageUtility.readStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -70,7 +70,7 @@ import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
-import com.openexchange.mail.utils.CharsetDetector;
+import com.openexchange.java.CharsetDetector;
 
 /**
  * {@link UploadFileMailPart} - A {@link MailPart} implementation that keeps a reference to a temporary uploaded file that shall be added as
@@ -218,6 +218,9 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
             } catch (final FileNotFoundException e) {
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             } catch (final IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             } finally {
                 if (fis != null) {

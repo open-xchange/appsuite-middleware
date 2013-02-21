@@ -56,7 +56,7 @@ import java.util.Enumeration;
 
 /**
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * 
+ *
  */
 public class NetUtils {
 
@@ -64,11 +64,11 @@ public class NetUtils {
 	 * Prints out a list with all network interfaces (both virtual and real)
 	 */
 	public static void getNetworkInterfaces() {
-		
+
 		try {
 			Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();
 			for (NetworkInterface iface : Collections.list(ifaces)) {
-				
+
 				Enumeration<NetworkInterface> virtualIfaces = iface.getSubInterfaces();
 				for (NetworkInterface viface : Collections.list(virtualIfaces)) {
 					System.out.println(iface.getDisplayName() + " VIRT " + viface.getDisplayName());
@@ -77,7 +77,7 @@ public class NetUtils {
 						System.out.println("\t" + vaddr.toString());
 					}
 				}
-				
+
 				System.out.println("Real iface addresses: " + iface.getDisplayName());
 				Enumeration<InetAddress> raddrs = iface.getInetAddresses();
 				for (InetAddress raddr : Collections.list(raddrs)) {

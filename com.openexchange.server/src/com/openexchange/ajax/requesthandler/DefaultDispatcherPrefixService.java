@@ -54,16 +54,16 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 
 /**
  * {@link DefaultDispatcherPrefixService} - The default {@link DispatcherPrefixService}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DefaultDispatcherPrefixService implements DispatcherPrefixService {
-	
+
     private static final DefaultDispatcherPrefixService INSTANCE = new DefaultDispatcherPrefixService();
 
     /**
      * Gets the instance
-     * 
+     *
      * @return The instance
      */
     public static DefaultDispatcherPrefixService getInstance() {

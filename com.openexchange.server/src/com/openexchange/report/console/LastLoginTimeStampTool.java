@@ -70,6 +70,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import com.openexchange.java.Streams;
 import com.openexchange.management.console.JMXAuthenticatorImpl;
 import com.openexchange.report.Constants;
 
@@ -219,7 +220,7 @@ public final class LastLoginTimeStampTool {
                     }
                 }
             } finally {
-                jmxConnector.close();
+                Streams.close(jmxConnector);
             }
         } catch (final ParseException e) {
             System.err.println("Unable to parse command line: " + e.getMessage());

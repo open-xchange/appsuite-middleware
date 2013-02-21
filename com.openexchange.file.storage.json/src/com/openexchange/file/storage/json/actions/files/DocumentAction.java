@@ -62,6 +62,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -86,15 +87,15 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         final IDBasedFileAccess fileAccess = request.getFileAccess();
 
         final File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
-        
-        
+
+
         final InputStream documentData = new BufferedInputStream(fileAccess.getDocument(request.getId(), request.getVersion()));
 
         final FileHolder fileHolder = new FileHolder(documentData, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
 
         AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
         createAndSetETag(fileMetadata, request, result);
-        
+
 		return result;
     }
 
@@ -103,7 +104,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
 	}
 
 	private String getETag(File fileMetadata) {
-		return "http://www.open-xchange.com/infostore/"+fileMetadata.getId()+"/"+fileMetadata.getVersion();
+		return new StringAllocator("http://www.open-xchange.com/infostore/").append(fileMetadata.getId()).append('/').append(fileMetadata.getVersion()).toString();
 	}
 
 	@Override

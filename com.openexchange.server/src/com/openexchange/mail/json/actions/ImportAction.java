@@ -79,6 +79,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -97,7 +98,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ImportAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(method = RequestMethod.POST, name = "import", description = "Import mail as MIME data block (RFC822)", parameters = {
@@ -113,7 +114,7 @@ public final class ImportAction extends AbstractMailAction {
 
     /**
      * Initializes a new {@link ImportAction}.
-     * 
+     *
      * @param services
      */
     public ImportAction(final ServiceLookup services) {
@@ -178,11 +179,7 @@ public final class ImportAction extends AbstractMailAction {
                             message = new MimeMessage(defaultSession, is);
                             message.removeHeader("x-original-headers");
                         } finally {
-                            try {
-                                is.close();
-                            } catch (final Exception e) {
-                                LOG.error("Closing file item stream failed.", e);
-                            }
+                            Streams.close(is);
                         }
                         final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
                         if (isEmpty(fromAddr)) {
@@ -280,6 +277,9 @@ public final class ImportAction extends AbstractMailAction {
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);

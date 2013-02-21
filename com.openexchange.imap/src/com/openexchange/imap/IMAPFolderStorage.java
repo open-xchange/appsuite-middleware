@@ -52,7 +52,6 @@ package com.openexchange.imap;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.utils.MailFolderUtility.isEmpty;
-import static java.util.regex.Matcher.quoteReplacement;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -349,7 +348,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 // Supports SPECIAL-USE capability
                 checker = new SpecialUseDefaultFolderChecker(accountId, session, ctx, imapStore, imapConfig);
             } else {
-                checker = new IMAPDefaultFolderChecker(accountId, session, ctx, imapStore, imapConfig);                
+                checker = new IMAPDefaultFolderChecker(accountId, session, ctx, imapStore, imapConfig);
             }
         }
         return checker;
@@ -1179,11 +1178,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 if (null == mass) {
                     name = MailFolder.DEFAULT_FOLDER_NAME;
                 } else {
-                    try {
-                        name = mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getName();
-                    } catch (final OXException e) {
-                        throw new OXException(e);
-                    }
+                    name = mass.getMailAccount(accountId, session.getUserId(), session.getContextId()).getName();
                 }
 
             }
@@ -2362,10 +2357,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     @Override
     public com.openexchange.mail.Quota[] getQuotas(final String folder, final com.openexchange.mail.Quota.Type[] types) throws OXException {
         try {
-            final IMAPFolder f;
             final String fullName = folder == null ? STR_INBOX : folder;
             final boolean isDefaultFolder = fullName.equals(DEFAULT_FOLDER_ID);
-            f = (IMAPFolder) (isDefaultFolder ? imapStore.getDefaultFolder() : imapStore.getFolder(fullName));
+            final IMAPFolder f = (IMAPFolder) (isDefaultFolder ? imapStore.getDefaultFolder() : imapStore.getFolder(fullName));
             /*
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
@@ -2393,7 +2387,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 } catch (final MessagingException e) {
                     throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, fullName);
                 }
-                f.open(Folder.READ_ONLY);
+                // f.open(Folder.READ_ONLY);
                 if (!imapConfig.getImapCapabilities().hasQuota()) {
                     return com.openexchange.mail.Quota.getUnlimitedQuotas(types);
                 }
@@ -2569,7 +2563,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 getSubscriptionStatus(m, (IMAPFolder) folders[i], oldFullName, newFullName);
             }
         }
-        m.put(f.getFullName().replaceFirst(oldFullName, quoteReplacement(newFullName)), Boolean.valueOf(f.isSubscribed()));
+        m.put(f.getFullName().replaceFirst(oldFullName, com.openexchange.java.Strings.quoteReplacement(newFullName)), Boolean.valueOf(f.isSubscribed()));
     }
 
     private void setFolderSubscription(final IMAPFolder f, final boolean subscribed) throws MessagingException {
@@ -2860,9 +2854,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     private static String stripPOSTRight(final String rights) {
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(rights.length());
-        final char[] chars = rights.toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            final char c = chars[i];
+        final int length = rights.length();
+        for (int i = 0; i < length; i++) {
+            final char c = rights.charAt(i);
             if ('p' != c && 'P' != c) {
                 sb.append(c);
             }
@@ -2956,7 +2950,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
      */
     private static boolean checkFolderNameValidity(final String name, final char separator, final boolean mboxEnabled) {
         WILDCARDS.forEach(new TIntProcedure() {
-            
+
             @Override
             public boolean execute(final int value) {
                 return name.indexOf(value) < 0;

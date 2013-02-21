@@ -54,7 +54,7 @@ import java.util.Map;
 
 /**
  * {@link DefaultLoginInfo} - The default login info.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DefaultLoginInfo implements LoginInfo {
@@ -67,7 +67,7 @@ public final class DefaultLoginInfo implements LoginInfo {
 
     /**
      * Initializes a new {@link DefaultLoginInfo}.
-     * 
+     *
      * @param userName The user name
      * @param password The password
      */
@@ -77,7 +77,7 @@ public final class DefaultLoginInfo implements LoginInfo {
 
     /**
      * Initializes a new {@link DefaultLoginInfo}.
-     * 
+     *
      * @param userName The user name
      * @param password The password
      * @param properties The optional properties; may be <code>null</code>

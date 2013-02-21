@@ -97,6 +97,7 @@ import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.links.Links;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -574,12 +575,16 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     wc = DBPool.pickupWriteable(ctx);
                 }
                 if (FolderCacheManager.isEnabled()) {
-                    fo.fill(FolderCacheManager.getInstance().getFolderObject(fo.getObjectID(), false, ctx, wc));
-                    if (fo.getParentFolderID() > 0) {
+                    final FolderCacheManager cacheManager = FolderCacheManager.getInstance();
+                    cacheManager.removeFolderObject(fo.getObjectID(), ctx);
+                    fo.fill(cacheManager.getFolderObject(fo.getObjectID(), false, ctx, wc));
+                    final int parentFolderID = fo.getParentFolderID();
+                    if (parentFolderID > 0) {
                         /*
                          * Update parent, too
                          */
-                        FolderCacheManager.getInstance().loadFolderObject(fo.getParentFolderID(), ctx, wc);
+                        cacheManager.removeFolderObject(parentFolderID, ctx);
+                        cacheManager.loadFolderObject(parentFolderID, ctx, wc);
                     }
                 } else {
                     fo.fill(FolderObject.loadFolderObjectFromDB(fo.getObjectID(), ctx, wc));
@@ -1550,6 +1555,16 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      */
     @Override
     public void deleteValidatedFolder(final int folderID, final long lastModified, final int type, final boolean hardDelete) throws OXException {
+        final FolderObject storageFolder;
+        try {
+            storageFolder = getFolderFromMaster(folderID, false);
+        } catch (final OXException e) {
+            if (!OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
+                throw e;
+            }
+            // Already deleted
+            return;
+        }
         if (hardDelete) {
             /*
              * Delete contained items
@@ -1658,6 +1673,23 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 }
             }
             /*
+             * Publications
+             */
+            {
+                PreparedStatement stmt = null;
+                try {
+                    stmt = wc.prepareStatement("DELETE FROM publications WHERE cid=? AND entity=? AND module=?");
+                    stmt.setInt(1, ctx.getContextId());
+                    stmt.setInt(2, folderID);
+                    stmt.setString(3, Module.getModuleString(storageFolder.getModule(), folderID));
+                    stmt.executeUpdate();
+                } catch (final SQLException e) {
+                    throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+                } finally {
+                    DBUtils.closeSQLStuff(stmt);
+                }
+            }
+            /*
              * Propagate
              */
             if (!hardDelete) {
@@ -1726,8 +1758,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             try {
                 wc = DBPool.pickupWriteable(ctx);
                 tasks.deleteTasksInFolder(session, wc, folderID);
-            } catch (final OXException e) {
-                throw new OXException(e);
             } finally {
                 if (null != wc) {
                     DBPool.closeWriterSilent(ctx, wc);
@@ -1751,27 +1781,23 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             infostoreFacade.setCommitsTransaction(false);
         }
         infostoreFacade.setTransactional(true);
+        infostoreFacade.startTransaction();
         try {
-            infostoreFacade.startTransaction();
-            try {
-                infostoreFacade.removeDocument(folderID, System.currentTimeMillis(), ServerSessionAdapter.valueOf(session, ctx));
-                infostoreFacade.commit();
-            } catch (final OXException x) {
-                infostoreFacade.rollback();
-                if (InfostoreExceptionCodes.ALREADY_LOCKED.equals(x)) {
-                    throw OXFolderExceptionCode.DELETE_FAILED_LOCKED_DOCUMENTS.create(x,
-                        OXFolderUtility.getFolderName(folderID, ctx),
-                        Integer.valueOf(ctx.getContextId()));
-                }
-                throw x;
-            } catch (final RuntimeException x) {
-                infostoreFacade.rollback();
-                throw OXFolderExceptionCode.RUNTIME_ERROR.create(x, Integer.valueOf(ctx.getContextId()));
-            } finally {
-                infostoreFacade.finish();
+            infostoreFacade.removeDocument(folderID, System.currentTimeMillis(), ServerSessionAdapter.valueOf(session, ctx));
+            infostoreFacade.commit();
+        } catch (final OXException x) {
+            infostoreFacade.rollback();
+            if (InfostoreExceptionCodes.ALREADY_LOCKED.equals(x)) {
+                throw OXFolderExceptionCode.DELETE_FAILED_LOCKED_DOCUMENTS.create(x,
+                    OXFolderUtility.getFolderName(folderID, ctx),
+                    Integer.valueOf(ctx.getContextId()));
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
+            throw x;
+        } catch (final RuntimeException x) {
+            infostoreFacade.rollback();
+            throw OXFolderExceptionCode.RUNTIME_ERROR.create(x, Integer.valueOf(ctx.getContextId()));
+        } finally {
+            infostoreFacade.finish();
         }
     }
 
@@ -1798,7 +1824,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
     /**
      * Gathers all folders which are allowed to be deleted in a recursive manner
-     * @param specials 
+     * @param specials
      */
     private void gatherDeleteableSubfoldersRecursively(final int folderID, final int userId, final UserConfiguration userConfig, final String permissionIDs, final TIntObjectMap<TIntObjectMap<?>> deleteableIDs, final int initParent, final Integer[] specials) throws OXException, OXException, SQLException {
         final FolderObject delFolder = getOXFolderAccess().getFolderObject(folderID);

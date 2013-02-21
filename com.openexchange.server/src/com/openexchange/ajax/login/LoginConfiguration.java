@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.login;
 
-import java.util.Queue;
+import java.util.List;
 import com.openexchange.configuration.ClientWhitelist;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.sessiond.impl.IPRange;
@@ -74,9 +74,10 @@ public final class LoginConfiguration {
     private final boolean ipCheck;
     private final ClientWhitelist ipCheckWhitelist;
     private final boolean redirectIPChangeAllowed;
-    private final Queue<IPRange> ranges;
+    private final List<IPRange> ranges;
+    private final boolean disableTrimLogin;
 
-    public LoginConfiguration(String uiWebPath, boolean sessiondAutoLogin, CookieHashSource hashSource, String httpAuthAutoLogin, String defaultClient, String clientVersion, String errorPageTemplate, int cookieExpiry, boolean cookieForceHTTPS, boolean insecure, boolean ipCheck, ClientWhitelist ipCheckWhitelist, boolean redirectIPChangeAllowed, Queue<IPRange> ranges) {
+    public LoginConfiguration(String uiWebPath, boolean sessiondAutoLogin, CookieHashSource hashSource, String httpAuthAutoLogin, String defaultClient, String clientVersion, String errorPageTemplate, int cookieExpiry, boolean cookieForceHTTPS, boolean insecure, boolean ipCheck, ClientWhitelist ipCheckWhitelist, boolean redirectIPChangeAllowed, List<IPRange> ranges, boolean disableTrimLogin) {
         super();
         this.uiWebPath = uiWebPath;
         this.sessiondAutoLogin = sessiondAutoLogin;
@@ -92,6 +93,7 @@ public final class LoginConfiguration {
         this.ipCheckWhitelist = ipCheckWhitelist;
         this.redirectIPChangeAllowed = redirectIPChangeAllowed;
         this.ranges = ranges;
+        this.disableTrimLogin = disableTrimLogin;
     }
 
     public String getUiWebPath() {
@@ -146,7 +148,11 @@ public final class LoginConfiguration {
         return redirectIPChangeAllowed;
     }
 
-    public Queue<IPRange> getRanges() {
+    public List<IPRange> getRanges() {
         return ranges;
+    }
+
+    public boolean isDisableTrimLogin() {
+        return disableTrimLogin;
     }
 }

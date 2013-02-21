@@ -374,7 +374,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     public boolean isDropReplyForwardPrefix() {
         return dropReplyForwardPrefix;
     }
-    
+
     /**
      * Sets the dropReplyForwardPrefix.
      *

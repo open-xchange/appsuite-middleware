@@ -52,7 +52,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.UUID;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -69,8 +68,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  *
  */
-@Action(method = RequestMethod.PUT, name = "addProperties", description = "Add unnamed properties to an already existing EAV Contact.", parameters = { 
-		@Parameter(name = "uuid"), 
+@Action(method = RequestMethod.PUT, name = "addProperties", description = "Add unnamed properties to an already existing EAV Contact.", parameters = {
+		@Parameter(name = "uuid"),
 		@Parameter(name = "props", description = "JSONObject with unnamed properties to add to the EAV Contact" )})
 public class AddPropertiesAction extends AbstractAction {
 
@@ -92,9 +91,9 @@ public class AddPropertiesAction extends AbstractAction {
 			uuid = UUID.fromString(json.getString("uuid"));
 			jsonProps = json.getJSONObject("props");
 			Iterator<String> iter = jsonProps.keys();
-			
+
 			props = new HashMap<String, String>();
-			
+
 			while (iter.hasNext()) {
 				String key = iter.next();
 				props.put(key, jsonProps.getString(key));
@@ -102,8 +101,8 @@ public class AddPropertiesAction extends AbstractAction {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		
+
 		getContactService().getEAVContactService().addProperties(uuid, props);
 		return new AJAXRequestResult();
 	}
-} 
+}

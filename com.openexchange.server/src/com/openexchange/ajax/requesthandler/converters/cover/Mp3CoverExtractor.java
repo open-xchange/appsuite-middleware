@@ -88,7 +88,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link Mp3CoverExtractor} - The {@link CoverExtractor} for MP3 files.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Mp3CoverExtractor implements CoverExtractor {
@@ -232,7 +232,7 @@ public final class Mp3CoverExtractor implements CoverExtractor {
 
     /**
      * Tests for a supported file extension.
-     * 
+     *
      * @param fileName The file name
      * @return <code>true</code> if supported; otherwise <code>false</code>
      */
@@ -250,7 +250,7 @@ public final class Mp3CoverExtractor implements CoverExtractor {
 
     /**
      * Tests for a MP3 file extension.
-     * 
+     *
      * @param fileName The file name
      * @return <code>true</code> if MP3; otherwise <code>false</code>
      */
@@ -271,7 +271,7 @@ public final class Mp3CoverExtractor implements CoverExtractor {
 
     /**
      * Tests for MP3 MIME type.
-     * 
+     *
      * @param mimeType The MIME type
      * @return <code>true</code> if MP3; otherwise <code>false</code>
      */
@@ -303,7 +303,7 @@ public final class Mp3CoverExtractor implements CoverExtractor {
 
     /**
      * Tests for a supported MIME type.
-     * 
+     *
      * @param mimeType The MIME type
      * @return <code>true</code> if supported; otherwise <code>false</code>
      */

@@ -85,7 +85,7 @@ public final class ThreadPools {
 
     /**
      * Gets registered thread pool.
-     * 
+     *
      * @return The thread pool or <code>null</code>
      */
     public static ThreadPoolService getThreadPool() {
@@ -94,7 +94,7 @@ public final class ThreadPools {
 
     /**
      * Gets registered timer service.
-     * 
+     *
      * @return The timer service or <code>null</code>
      */
     public static TimerService getTimerService() {
@@ -103,7 +103,7 @@ public final class ThreadPools {
 
     /**
      * Handles specified unexpectedly interrupted thread.
-     * 
+     *
      * @param t The unexpectedly interrupted thread
      */
     public static void unexpectedlyInterrupted(final Thread t) {
@@ -121,7 +121,7 @@ public final class ThreadPools {
 
     /**
      * Appends specified stack trace to given {@link StringBuilder} instance.
-     * 
+     *
      * @param trace The stack trace
      * @param sb The string builder to write to
      */
@@ -130,10 +130,11 @@ public final class ThreadPools {
             sb.append("<missing stack trace>\n");
             return;
         }
+        final String lineSeparator = System.getProperty("line.separator");
         for (final StackTraceElement ste : trace) {
             final String className = ste.getClassName();
             if (null != className) {
-                sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                sb.append("    at ").append(className).append('.').append(ste.getMethodName());
                 if (ste.isNativeMethod()) {
                     sb.append("(Native Method)");
                 } else {
@@ -149,14 +150,14 @@ public final class ThreadPools {
                         sb.append(')');
                     }
                 }
-                sb.append('\n');
+                sb.append(lineSeparator);
             }
         }
     }
 
     /**
      * Appends current thread's stack trace to given {@link StringBuilder} instance.
-     * 
+     *
      * @param sb The string builder to write to
      */
     public static void appendCurrentStackTrace(final StringBuilder sb) {
@@ -534,7 +535,7 @@ public final class ThreadPools {
         TrackableTaskAdapter(final Callable<V> callable) {
             super(callable);
             final Props props = LogProperties.optLogProperties(Thread.currentThread());
-            this.props = null == props ? null : Collections.unmodifiableMap(props.getMap());
+            this.props = null == props ? null : Collections.unmodifiableMap(props.asMap());
         }
 
         @Override
@@ -586,7 +587,7 @@ public final class ThreadPools {
         TrackableRenamingTaskAdapter(final Callable<V> callable, final String prefix) {
             super(callable, prefix);
             final Props props = LogProperties.optLogProperties(Thread.currentThread());
-            this.props = null == props ? null : Collections.unmodifiableMap(props.getMap());
+            this.props = null == props ? null : Collections.unmodifiableMap(props.asMap());
         }
 
         @Override

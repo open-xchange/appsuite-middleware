@@ -12,17 +12,17 @@ import javax.xml.ws.WebFault;
 
 @WebFault(name = "OXContextException", targetNamespace = "http://soap.reseller.admin.openexchange.com")
 public class OXContextException_Exception extends java.lang.Exception {
-    
+
     private com.openexchange.admin.soap.reseller.context.reseller.soap.OXContextException oxContextException;
 
     public OXContextException_Exception() {
         super();
     }
-    
+
     public OXContextException_Exception(String message) {
         super(message);
     }
-    
+
     public OXContextException_Exception(String message, Throwable cause) {
         super(message, cause);
     }

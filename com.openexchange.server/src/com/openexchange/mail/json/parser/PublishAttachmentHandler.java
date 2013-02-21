@@ -53,7 +53,6 @@ import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
 import static com.openexchange.mail.mime.converters.MimeMessageConverter.convertPart;
 import static com.openexchange.mail.text.HtmlProcessing.getConformHTML;
 import static com.openexchange.mail.text.HtmlProcessing.htmlFormat;
-import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -85,6 +84,7 @@ import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -176,21 +176,20 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                         e);
                 }
                 exceeded = true;
-            } else {
-                /*
-                 * Add current file size
-                 */
-                consumed += size;
-                if (uploadQuota > 0 && consumed > uploadQuota) {
-                    if (LOG.isDebugEnabled()) {
-                        final OXException e = MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(Long.valueOf(uploadQuota));
-                        LOG.debug(
-                            new com.openexchange.java.StringAllocator(64).append("Overall quota (").append(getSize(uploadQuota, 2, false, true)).append(
-                                ") exceeded. Message is going to be sent with links to publishing infostore folder.").toString(),
-                            e);
-                    }
-                    exceeded = true;
+            }
+            /*
+             * Add current file size
+             */
+            consumed += size;
+            if (uploadQuota > 0 && consumed > uploadQuota) {
+                if (LOG.isDebugEnabled()) {
+                    final OXException e = MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(Long.valueOf(uploadQuota));
+                    LOG.debug(
+                        new com.openexchange.java.StringAllocator(64).append("Overall quota (").append(getSize(uploadQuota, 2, false, true)).append(
+                            ") exceeded. Message is going to be sent with links to publishing infostore folder.").toString(),
+                        e);
                 }
+                exceeded = true;
             }
         }
         attachments.add(attachment);
@@ -371,22 +370,14 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getContext();
         }
-        try {
-            return ContextStorage.getStorageContext(session.getContextId());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return ContextStorage.getStorageContext(session.getContextId());
     }
 
     private User getSessionUser() throws OXException {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser();
         }
-        try {
-            return UserStorage.getInstance().getUser(session.getUserId(), getContext());
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return UserStorage.getInstance().getUser(session.getUserId(), getContext());
     }
 
     private static final Pattern PATTERN_DATE = Pattern.compile(Pattern.quote("#DATE#"));
@@ -592,7 +583,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                         throw x;
                     }
                     if (441 != x.getCode()) {
-                        throw new OXException(x);
+                        throw x;
                     }
                     /*
                      * Duplicate document name, thus retry with a new name
@@ -615,11 +606,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
                     fileAccess.finish();
                 }
             } finally {
-                try {
-                    in.close();
-                } catch (final IOException e) {
-                    LOG.error(e.getMessage(), e);
-                }
+                Streams.close(in);
             }
         }
         /*
@@ -726,9 +713,6 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             if (this == obj) {
                 return true;
             }
-            if (obj == null) {
-                return false;
-            }
             if (!(obj instanceof LinkAndNamePair)) {
                 return false;
             }
@@ -755,10 +739,9 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
     private static final class PublicationAndInfostoreID {
 
         final Publication publication;
-
         final String infostoreId;
 
-        public PublicationAndInfostoreID(final Publication publication, final String infostoreId) {
+        PublicationAndInfostoreID(final Publication publication, final String infostoreId) {
             super();
             this.publication = publication;
             this.infostoreId = infostoreId;

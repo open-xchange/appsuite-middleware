@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.settings.tree;
 
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -98,12 +97,8 @@ public final class MaxUploadIdleTimeout implements PreferencesItemService {
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
                 final Setting setting) throws OXException {
-                try {
                     setting.setSingleValue(Integer.valueOf(ServerConfig
                         .getInt(ServerConfig.Property.MaxUploadIdleTimeMillis)));
-                } catch (final ConfigurationException e) {
-                    throw new OXException(e);
-                }
             }
         };
     }

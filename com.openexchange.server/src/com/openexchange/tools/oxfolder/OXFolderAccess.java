@@ -460,8 +460,6 @@ public class OXFolderAccess {
                     try {
                         rc = DBPool.pickup(ctx);
                         return tasks.containsNotSelfCreatedTasks(session, rc, fo.getObjectID());
-                    } catch (final OXException e) {
-                        throw new OXException(e);
                     } finally {
                         if (null != rc) {
                             DBPool.closeReaderSilent(ctx, rc);

@@ -1812,7 +1812,7 @@ public final class OXFolderSQL {
                 /*
                  * Check if admin already holds permission on current folder
                  */
-                stmt = rc.prepareStatement(SQL_REASSIGN_SEL_PERM.replaceFirst(TMPL_PERM_TABLE, permTable));
+                stmt = rc.prepareStatement("SELECT 1 FROM " + permTable + " WHERE cid = ? AND permission_id = ? AND fuid = ?");
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, mailAdmin);
                 stmt.setInt(3, fuid);

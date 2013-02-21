@@ -50,22 +50,129 @@
 package com.openexchange.http.deferrer.servlet;
 
 import java.io.IOException;
-import java.net.URLEncoder;
+import java.util.BitSet;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.codec.net.URLCodec;
+import org.apache.commons.logging.Log;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
+import com.openexchange.java.Charsets;
 
 /**
  * {@link DeferrerServlet}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DeferrerServlet extends HttpServlet {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DeferrerServlet.class);
+
+    /**
+     * BitSet of www-form-url safe characters.
+     */
+    protected static final BitSet WWW_FORM_URL;
+
+    /**
+     * BitSet of www-form-url safe characters including safe characters for an anchor.
+     */
+    protected static final BitSet WWW_FORM_URL_ANCHOR;
+
+    // Static initializer for www_form_url
+    static {
+        {
+            final BitSet bitSet = new BitSet(256);
+            // alpha characters
+            for (int i = 'a'; i <= 'z'; i++) {
+                bitSet.set(i);
+            }
+            for (int i = 'A'; i <= 'Z'; i++) {
+                bitSet.set(i);
+            }
+            // numeric characters
+            for (int i = '0'; i <= '9'; i++) {
+                bitSet.set(i);
+            }
+            // special chars
+            bitSet.set('-');
+            bitSet.set('_');
+            bitSet.set('.');
+            bitSet.set('*');
+            // blank to be replaced with +
+            bitSet.set(' ');
+            WWW_FORM_URL = bitSet;
+        }
+        {
+            final BitSet bitSet = new BitSet(256);
+            // alpha characters
+            for (int i = 'a'; i <= 'z'; i++) {
+                bitSet.set(i);
+            }
+            for (int i = 'A'; i <= 'Z'; i++) {
+                bitSet.set(i);
+            }
+            // numeric characters
+            for (int i = '0'; i <= '9'; i++) {
+                bitSet.set(i);
+            }
+            // special chars
+            bitSet.set('-');
+            bitSet.set('_');
+            bitSet.set('.');
+            bitSet.set('*');
+            // blank to be replaced with +
+            bitSet.set(' ');
+            // Anchor characters
+            bitSet.set('/');
+            bitSet.set('#');
+            bitSet.set('%');
+            bitSet.set('?');
+            bitSet.set('&');
+            WWW_FORM_URL_ANCHOR = bitSet;
+        }
+    }
+
+    /**
+     * URL encodes given string.
+     * <p>
+     * Using <code>org.apache.commons.codec.net.URLCodec</code>.
+     */
+    private String encodeUrl(final String s) {
+        return encodeUrl(s, false);
+    }
+
+    private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n|(?:%0[aA])?%0[dD]");
+
+    /**
+     * URL encodes given string.
+     * <p>
+     * Using <code>org.apache.commons.codec.net.URLCodec</code>.
+     */
+    private String encodeUrl(final String s, final boolean forAnchor) {
+        if (isEmpty(s)) {
+            return s;
+        }
+        try {
+            if (!forAnchor) {
+                return Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL, s.getBytes(Charsets.ISO_8859_1)));
+            }
+            // Prepare for being used as anchor/link
+            final String ascii = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL_ANCHOR, s.getBytes(Charsets.ISO_8859_1)));
+            // Strip possible "\r?\n" and/or "%0A?%0D"
+            if (ascii.indexOf('\n') < 0 && ascii.indexOf("%0") < 0) {
+                return ascii;
+            }
+            return PATTERN_CRLF.matcher(ascii).replaceAll("");
+        } catch (final RuntimeException e) {
+            LOG.error("A runtime error occurred.", e);
+            return s;
+        }
+    }
 
     public static final List<CustomRedirectURLDetermination> CUSTOM_HANDLERS = new CopyOnWriteArrayList<CustomRedirectURLDetermination>();
 
@@ -81,7 +188,7 @@ public class DeferrerServlet extends HttpServlet {
             return;
         }
         char concat = '?';
-        if (redirectURL.contains("?")) {
+        if (redirectURL.indexOf('?') >= 0) {
             concat = '&';
         }
         Enumeration parameterNames = req.getParameterNames();
@@ -95,7 +202,7 @@ public class DeferrerServlet extends HttpServlet {
             String parameter = req.getParameter(name);
             builder.append(concat);
             concat = '&';
-            builder.append(name).append('=').append(URLEncoder.encode(parameter, "UTF-8"));
+            builder.append(name).append('=').append(encodeUrl(parameter));
         }
         resp.sendRedirect(builder.toString());
 
@@ -109,5 +216,17 @@ public class DeferrerServlet extends HttpServlet {
             }
         }
         return req.getParameter("redirect");
+    }
+
+    private boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 }

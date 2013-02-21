@@ -57,16 +57,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.openexchange.ajax.fields.AppointmentFields;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Change;
 import com.openexchange.groupware.container.Differ;
 import com.openexchange.groupware.container.Difference;
 
 /**
  * An {@link AppointmentDiff} contains the update to an appointment
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
@@ -83,15 +83,15 @@ public class AppointmentDiff {
             specialDiffer.put(differ.getColumn(), differ);
         }
     }
-    
+
     public static AppointmentDiff compare(final Appointment original, final Appointment update, final int...skip) {
         final Set<Integer> skipList = new HashSet<Integer>(skip.length);
         for (final int columnToSkip : skip) {
             skipList.add(columnToSkip);
         }
         final AppointmentDiff retval = new AppointmentDiff();
-        
-        
+
+
         for (final int column : Appointment.ALL_COLUMNS) {
             if (skipList.contains(column)) {
                 continue;
@@ -117,7 +117,51 @@ public class AppointmentDiff {
             }
         }
 
+        ensureReccuringInformation(original, update, retval);
+
         return retval;
+    }
+
+    private static void ensureReccuringInformation(Appointment original, Appointment update, AppointmentDiff retval) {
+        if (!containsRecurrenceInformation(retval)) {
+            return;
+        }
+
+        addMissingRecurringInformation(original, retval, Appointment.RECURRENCE_TYPE);
+        addMissingRecurringInformation(original, retval, Appointment.INTERVAL);
+
+        int recurrenceType = update.containsRecurrenceType() ? update.getRecurrenceType() : original.getRecurrenceType();
+
+        switch (recurrenceType) {
+        case Appointment.YEARLY:
+            addMissingRecurringInformation(original, retval, Appointment.MONTH);
+        case Appointment.MONTHLY:
+            addMissingRecurringInformation(original, retval, Appointment.DAY_IN_MONTH);
+        case Appointment.WEEKLY:
+            addMissingRecurringInformation(original, retval, Appointment.DAYS);
+            break;
+        default:
+            break;
+        }
+    }
+
+    private static void addMissingRecurringInformation(Appointment original, AppointmentDiff retval, int column) {
+        if (!retval.anyFieldChangedOf(column) && original.contains(column)) {
+            FieldUpdate u = retval.new FieldUpdate();
+            u.setFieldNumber(column);
+            u.setFieldName(CalendarField.getByColumn(column).getJsonName());
+            u.setOriginalValue(original.get(column));
+            u.setNewValue(original.get(column));
+            retval.addUpdate(u);
+        }
+    }
+
+    /**
+     * @param retval
+     * @return
+     */
+    private static boolean containsRecurrenceInformation(AppointmentDiff retval) {
+        return retval.anyFieldChangedOf(CalendarObject.INTERVAL, CalendarObject.DAYS, CalendarObject.DAY_IN_MONTH, CalendarObject.MONTH, CalendarObject.RECURRENCE_COUNT, CalendarObject.UNTIL);
     }
 
     public AppointmentDiff() {
@@ -132,7 +176,7 @@ public class AppointmentDiff {
     public List<FieldUpdate> getUpdates() {
         return updates;
     }
-    
+
     public void addUpdate(final FieldUpdate fieldUpdate) {
         updates.add(fieldUpdate);
         differingFieldNames.add(fieldUpdate.getFieldName());
@@ -146,7 +190,7 @@ public class AppointmentDiff {
         }
         return false;
     }
-    
+
 	public boolean anyFieldChangedOf(Collection<String> fields) {
         for (String field : fields) {
             if (differingFieldNames.contains(field)) {
@@ -156,7 +200,7 @@ public class AppointmentDiff {
         return false;
 	}
 
-    
+
 
 	public boolean anyFieldChangedOf(final int...fields) {
 		for (final int field : fields) {
@@ -169,7 +213,7 @@ public class AppointmentDiff {
 		return false;
 	}
 
-    
+
     public boolean onlyTheseChanged(final String...fields) {
         if (differingFieldNames.size() > fields.length) {
             return false;
@@ -180,7 +224,7 @@ public class AppointmentDiff {
         }
         return copy.isEmpty();
     }
-    
+
     public boolean exactlyTheseChanged(String... fields) {
         if (!onlyTheseChanged(fields)) {
             return false;
@@ -194,7 +238,7 @@ public class AppointmentDiff {
         return true;
     }
 
-    
+
     public FieldUpdate getUpdateFor(final String field) {
         for (final FieldUpdate update : updates) {
             if (update.getFieldName().equals(field)) {
@@ -249,35 +293,35 @@ public class AppointmentDiff {
             this.newValue = newValue;
         }
 
-        
+
         public Object getExtraInfo() {
             return extraInfo;
         }
 
-        
+
         public void setExtraInfo(final Object extraInfo) {
             this.extraInfo = extraInfo;
         }
-        
-        
+
+
 
     }
-    
-    
+
+
     // Diagnostic Methods
-    
+
     public boolean isAboutStateChangesOnly() {
-        
+
         // First, let's see if any fields besides the state tracking fields have changed
         HashSet<String> differing = new HashSet<String>(differingFieldNames);
-        
+
         for(String field: new String[]{CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS}) {
             differing.remove(field);
         }
         if (!differing.isEmpty()) {
             return false;
         }
-        
+
         // Hm, okay, so now let's see if any participants were added or removed. That also means this mail is not only about state changes.
         for(String field: new String[]{CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS}) {
             FieldUpdate update = getUpdateFor(field);
@@ -293,7 +337,7 @@ public class AppointmentDiff {
             }
 
         }
-        
+
         return true;
     }
 
@@ -301,7 +345,7 @@ public class AppointmentDiff {
 		if (!isAboutStateChangesOnly()) {
 			return false;
 		}
-		
+
         for(String field: new String[]{CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS}) {
             FieldUpdate update = getUpdateFor(field);
             if (update == null) {
@@ -317,13 +361,13 @@ public class AppointmentDiff {
 				return false;
 			}
         }
-        return true;		
+        return true;
 	}
 
 	public boolean isAboutDetailChangesOnly() {
 		HashSet<String> differing = new HashSet<String>(differingFieldNames);
-        
-		
+
+
         for(String field: new String[]{CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS}) {
             differing.remove(field);
         }
@@ -331,7 +375,7 @@ public class AppointmentDiff {
         if (!differing.isEmpty() && !anyFieldChangedOf(CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS)) {
             return true;
         }
-        
+
         // Hm, okay, so now let's see if any participants state has changed. That means, that something other than a detail field has changed
         for(String field: new String[]{CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS}) {
             FieldUpdate update = getUpdateFor(field);
@@ -345,7 +389,7 @@ public class AppointmentDiff {
             }
 
         }
-        
+
         return true;
 	}
 

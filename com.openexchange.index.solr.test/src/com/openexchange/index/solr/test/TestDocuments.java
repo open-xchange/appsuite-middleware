@@ -59,12 +59,12 @@ import java.io.InputStream;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class TestDocuments {
-    
-    public static final byte[] DOC1 = new byte[] { 
-        84, 104, 105, 115, 32, 105, 115, 32, 97, 32, 115, 97, 109, 112, 108, 101, 32, 100, 111, 99, 
-        117, 109, 101, 110, 116, 32, 99, 111, 110, 116, 97, 105, 110, 105, 110, 103, 32, 115, 111, 109, 
+
+    public static final byte[] DOC1 = new byte[] {
+        84, 104, 105, 115, 32, 105, 115, 32, 97, 32, 115, 97, 109, 112, 108, 101, 32, 100, 111, 99,
+        117, 109, 101, 110, 116, 32, 99, 111, 110, 116, 97, 105, 110, 105, 110, 103, 32, 115, 111, 109,
         101, 32, 116, 101, 120, 116, 46, 10 };
-    
+
     public static InputStream toInputStream(byte[] byteArray) {
         return new ByteArrayInputStream(byteArray);
     }

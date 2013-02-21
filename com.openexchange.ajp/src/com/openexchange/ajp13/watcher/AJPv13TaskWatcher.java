@@ -101,7 +101,7 @@ public class AJPv13TaskWatcher {
         if (null != timer) {
             scheduledTimerTask =
                 timer.scheduleWithFixedDelay(
-                    new TimerTaskRunnable(tasks.values(), threadPoolService, LOG),
+                    new TimerTaskRunnable(tasks.values(), threadPoolService, System.getProperty("line.separator"), LOG),
                     1000,
                     AJPv13Config.getAJPWatcherFrequency(),
                     TimeUnit.MILLISECONDS);
@@ -156,10 +156,14 @@ public class AJPv13TaskWatcher {
         private static final long MAX_PROC_TIME = 0L;
 
         private final Collection<com.openexchange.ajp13.watcher.Task> tasks;
-
         private final org.apache.commons.logging.Log log;
-
         private final ThreadPoolService threadPoolService;
+
+        /**
+         * Line separator string.  This is the value of the line.separator
+         * property at the moment that the task was created.
+         */
+        private final String lineSeparator;
 
         /**
          * Initializes a new {@link TimerTaskRunnable}
@@ -168,8 +172,9 @@ public class AJPv13TaskWatcher {
          * @param threadPoolService The thread pool service
          * @param log The logger instance to use
          */
-        public TimerTaskRunnable(final Collection<com.openexchange.ajp13.watcher.Task> tasks, final ThreadPoolService threadPoolService, final org.apache.commons.logging.Log log) {
+        public TimerTaskRunnable(final Collection<com.openexchange.ajp13.watcher.Task> tasks, final ThreadPoolService threadPoolService, final String lineSeparator, final org.apache.commons.logging.Log log) {
             super();
+            this.lineSeparator = lineSeparator;
             this.tasks = tasks;
             this.log = log;
             this.threadPoolService = threadPoolService;
@@ -195,7 +200,7 @@ public class AJPv13TaskWatcher {
                     final long maxLogTime = now - AJPv13Config.getAJPWatcherMaxRunningTime();
                     final long max = MAX_PROC_TIME > 0 ? now - MAX_PROC_TIME : 0L;
                     for (final com.openexchange.ajp13.watcher.Task ajPv13Task : this.tasks) {
-                        tasks.add(new TaskRunCallable(maxLogTime, max, ajPv13Task, countWaiting, countProcessing, countExceeded, log));
+                        tasks.add(new TaskRunCallable(now, maxLogTime, max, ajPv13Task, countWaiting, countProcessing, countExceeded, lineSeparator, log));
                     }
                     /*
                      * Invoke all and wait for being executed
@@ -247,18 +252,14 @@ public class AJPv13TaskWatcher {
     private static final class TaskRunCallable implements com.openexchange.threadpool.Task<Object> {
 
         private final com.openexchange.ajp13.watcher.Task task;
-
         private final long maxLogTime;
-
         private final long max;
-
         private final AtomicInteger waiting;
-
         private final AtomicInteger processing;
-
         private final AtomicInteger exceeded;
-
+        private final String lineSeparator;
         private final org.apache.commons.logging.Log log;
+        private final long now;
 
         /**
          * Initializes a new {@link TaskRunCallable} fully tracking given AJP task.
@@ -270,8 +271,10 @@ public class AJPv13TaskWatcher {
          * @param logExceededTasks Whether to log exceeded tasks
          * @param log The logger
          */
-        public TaskRunCallable(final long maxLogTime, final long max, final com.openexchange.ajp13.watcher.Task task, final AtomicInteger waiting, final AtomicInteger processing, final AtomicInteger exceeded, final org.apache.commons.logging.Log log) {
+        public TaskRunCallable(final long now, final long maxLogTime, final long max, final com.openexchange.ajp13.watcher.Task task, final AtomicInteger waiting, final AtomicInteger processing, final AtomicInteger exceeded, final String lineSeparator, final org.apache.commons.logging.Log log) {
             super();
+            this.lineSeparator = lineSeparator;
+            this.now = now;
             this.maxLogTime = maxLogTime;
             this.max = max;
             this.task = task;
@@ -313,15 +316,15 @@ public class AJPv13TaskWatcher {
                 final Map<String, Object> taskProperties;
                 {
                     final Props taskProps = LogProperties.optLogProperties(task.getThread());
-                    taskProperties = null == taskProps ? null : taskProps.getMap();
+                    taskProperties = null == taskProps ? null : taskProps.asMap();
                 }
                 if (null == taskProperties) {
                     final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(196).append("AJP Listener \"").append(task.getThreadName());
                     logBuilder.append("\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime());
-                    logBuilder.append("msec -> Processing time: ").append(System.currentTimeMillis() - task.getProcessingStartTime());
+                    logBuilder.append("msec -> Processing time: ").append(now - task.getProcessingStartTime());
                     logBuilder.append("msec");
-                    logBuilder.append('\n');
-                    appendStackTrace(task.getStackTrace(), logBuilder);
+                    logBuilder.append(lineSeparator);
+                    appendStackTrace(task.getStackTrace(), lineSeparator, logBuilder);
                     log.info(logBuilder);
                 } else {
                     final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(2048);
@@ -334,15 +337,15 @@ public class AJPv13TaskWatcher {
                         }
                     }
                     for (final Map.Entry<String, String> entry : sorted.entrySet()) {
-                        logBuilder.append(entry.getKey()).append('=').append(entry.getValue()).append('\n');
+                        logBuilder.append(entry.getKey()).append('=').append(entry.getValue()).append(lineSeparator);
                     }
-                    logBuilder.append('\n');
+                    logBuilder.append(lineSeparator);
                     logBuilder.append("AJP Listener \"").append(task.getThreadName());
                     logBuilder.append("\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime());
-                    logBuilder.append("msec -> Processing time: ").append(System.currentTimeMillis() - task.getProcessingStartTime());
+                    logBuilder.append("msec -> Processing time: ").append(now - task.getProcessingStartTime());
                     logBuilder.append("msec");
-                    logBuilder.append('\n');
-                    appendStackTrace(task.getStackTrace(), logBuilder);
+                    logBuilder.append(lineSeparator);
+                    appendStackTrace(task.getStackTrace(), lineSeparator, logBuilder);
                     log.info(logBuilder);
                 }
             }
@@ -353,7 +356,7 @@ public class AJPv13TaskWatcher {
 
         private static final int MAX_STACK_TRACE_ELEMENTS = 1000;
 
-        private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb) {
+        private static void appendStackTrace(final StackTraceElement[] trace, final String lineSeparator, final com.openexchange.java.StringAllocator sb) {
             if (null == trace) {
                 return;
             }
@@ -361,7 +364,7 @@ public class AJPv13TaskWatcher {
                 final StackTraceElement ste = trace[i];
                 final String className = ste.getClassName();
                 if (null != className) {
-                    sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                    sb.append("    at ").append(className).append('.').append(ste.getMethodName());
                     if (ste.isNativeMethod()) {
                         sb.append("(Native Method)");
                     } else {
@@ -377,7 +380,7 @@ public class AJPv13TaskWatcher {
                             sb.append(')');
                         }
                     }
-                    sb.append('\n');
+                    sb.append(lineSeparator);
                 }
             }
         }

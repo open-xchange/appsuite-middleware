@@ -51,12 +51,16 @@ package com.openexchange.caching.internal;
 
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.apache.jcs.JCS;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheExceptionCode;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.DefaultCacheKeyService;
+import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link JCSCacheService} - Cache service implementation through JCS cache.
@@ -77,10 +81,16 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
     }
 
     /**
+     * Holds references to already initialized caches
+     */
+    private final ConcurrentMap<String, Cache> caches;
+
+    /**
      * Initializes a new {@link JCSCacheService}
      */
     private JCSCacheService() {
         super();
+        this.caches = new ConcurrentHashMap<String, Cache>();
     }
 
     @Override
@@ -100,6 +110,7 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
             return;
         }
         JCSCacheServiceInit.getInstance().freeCache(name);
+        this.caches.remove(name);
         /*-
          * try {
         	final Cache c = getCache(name);
@@ -114,20 +125,38 @@ public final class JCSCacheService extends DefaultCacheKeyService implements Cac
 
     @Override
     public Cache getCache(final String name) throws OXException {
-        try {
-            /*
-             * The JCS cache manager already tracks initialized caches though the same region name always points to the same cache
-             */
-            return new JCSCache(JCS.getInstance(name));
-        } catch (final org.apache.jcs.access.exception.CacheException e) {
-            throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
-        } catch (final NullPointerException npe) {
-            /*
-             * Can't use JCS without a configuration file or to be more precise a configuration file which lacks a region of the specified
-             * name. It should fail more gracefully, but that's a minor concern in the eyes of JCS developer.
-             */
-            throw CacheExceptionCode.MISSING_CACHE_REGION.create(npe, name);
+        Cache cache = caches.get(name);
+        if (null == cache) {
+            try {
+                /*
+                 * The JCS cache manager already tracks initialized caches though the same region name always points to the same cache
+                 */
+                cache = new JCSCache(JCS.getInstance(name));
+                /*
+                 * Wrap with notifying cache if configured
+                 */
+                if (JCSCacheServiceInit.getInstance().isEventInvalidation()) {
+                    CacheEventService eventService = JCSCacheServiceInit.getInstance().getCacheEventService();
+                    if (null == eventService) {
+                        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CacheEventService.class.getName());
+                    }
+                    cache = new NotifyingCache(name, cache, eventService);
+                }
+            } catch (final org.apache.jcs.access.exception.CacheException e) {
+                throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
+            } catch (final NullPointerException npe) {
+                /*
+                 * Can't use JCS without a configuration file or to be more precise a configuration file which lacks a region of the specified
+                 * name. It should fail more gracefully, but that's a minor concern in the eyes of JCS developer.
+                 */
+                throw CacheExceptionCode.MISSING_CACHE_REGION.create(npe, name);
+            }
+            Cache existingCache = caches.putIfAbsent(name, cache);
+            if (null != existingCache) {
+                cache = existingCache;
+            }
         }
+        return cache;
     }
 
     @Override

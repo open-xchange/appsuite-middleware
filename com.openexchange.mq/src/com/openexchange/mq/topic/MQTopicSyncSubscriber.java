@@ -63,7 +63,7 @@ public interface MQTopicSyncSubscriber extends MQCloseable {
      * Receives the next text message produced for this receiver.
      * <p>
      * This call blocks indefinitely until a message is produced or until this receiver is closed.
-     * 
+     *
      * @return The next text produced for this receiver, or <code>null</code> if this receiver is concurrently closed
      * @exception OXException If receiver fails to receive the next text
      */
@@ -74,7 +74,7 @@ public interface MQTopicSyncSubscriber extends MQCloseable {
      * <p>
      * This call blocks until a message arrives, the timeout expires, or this receiver is closed. A timeout of zero never expires, and the
      * call blocks indefinitely.
-     * 
+     *
      * @param timeout The timeout value in milliseconds
      * @return The next text produced for this receiver, or null if the timeout expires or this receiver is concurrently closed
      * @throws OXException If receiver fails to receive the next text
@@ -83,7 +83,7 @@ public interface MQTopicSyncSubscriber extends MQCloseable {
 
     /**
      * Receives the next text if one is immediately available.
-     * 
+     *
      * @return The next text produced for this message consumer, or null if one is not available
      * @throws OXException If the receiver fails to receive the next text
      */
@@ -93,7 +93,7 @@ public interface MQTopicSyncSubscriber extends MQCloseable {
      * Receives the next Java object produced for this receiver.
      * <p>
      * This call blocks indefinitely until a Java object is produced or until this receiver is closed.
-     * 
+     *
      * @return The next Java object produced for this receiver, or <code>null</code> if this receiver is concurrently closed
      * @exception OXException If receiver fails to receive the next Java object
      */
@@ -104,7 +104,7 @@ public interface MQTopicSyncSubscriber extends MQCloseable {
      * <p>
      * This call blocks until a Java object arrives, the timeout expires, or this receiver is closed. A timeout of zero never expires, and
      * the call blocks indefinitely.
-     * 
+     *
      * @param timeout The timeout value in milliseconds
      * @return The next Java object produced for this receiver, or <code>null</code> if the timeout expires or this receiver is concurrently
      *         closed
@@ -114,7 +114,7 @@ public interface MQTopicSyncSubscriber extends MQCloseable {
 
     /**
      * Receives the next Java object if one is immediately available.
-     * 
+     *
      * @return The next Java object produced for this receiver, or <code>null</code> if one is not available
      * @throws OXException If the receiver fails to receive the next Java object
      */
@@ -124,7 +124,7 @@ public interface MQTopicSyncSubscriber extends MQCloseable {
      * Receives the next bytes produced for this receiver.
      * <p>
      * This call blocks indefinitely until bytes are produced or until this receiver is closed.
-     * 
+     *
      * @return The next bytes produced for this receiver, or <code>null</code> if this receiver is concurrently closed
      * @exception OXException If receiver fails to receive the next bytes
      */
@@ -135,7 +135,7 @@ public interface MQTopicSyncSubscriber extends MQCloseable {
      * <p>
      * This call blocks until bytes arrive, the timeout expires, or this receiver is closed. A timeout of zero never expires, and the call
      * blocks indefinitely.
-     * 
+     *
      * @param timeout The timeout value in milliseconds
      * @return The next bytes produced for this receiver, or <code>null</code> if the timeout expires or this receiver is concurrently
      *         closed
@@ -145,7 +145,7 @@ public interface MQTopicSyncSubscriber extends MQCloseable {
 
     /**
      * Receives the next bytes if one is immediately available.
-     * 
+     *
      * @return The next bytes produced for this receiver, or <code>null</code> if one is not available
      * @throws OXException If the receiver fails to receive the next bytes
      */

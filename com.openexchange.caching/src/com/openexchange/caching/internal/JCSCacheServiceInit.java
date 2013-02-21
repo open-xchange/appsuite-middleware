@@ -53,9 +53,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
@@ -64,6 +68,7 @@ import org.apache.jcs.access.exception.CacheException;
 import org.apache.jcs.engine.control.CompositeCacheConfigurator;
 import org.apache.jcs.engine.control.CompositeCacheManager;
 import com.openexchange.caching.CacheExceptionCode;
+import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
@@ -84,6 +89,8 @@ public final class JCSCacheServiceInit {
     private static final String REGION_PREFIX = "jcs.region.";
 
     private static final String AUX_PREFIX = "jcs.auxiliary.";
+
+    private static final String[] AUX_TYPES = { "LTCP", "SessionLTCP" };
 
     private static JCSCacheServiceInit SINGLETON;
 
@@ -114,6 +121,11 @@ public final class JCSCacheServiceInit {
      * The configuration service
      */
     private ConfigurationService configurationService;
+
+    /**
+     * The cache event service
+     */
+    private CacheEventService cacheEventService;
 
     /**
      * The cache manager instance
@@ -151,12 +163,23 @@ public final class JCSCacheServiceInit {
     private Set<String> defaultCacheRegions;
 
     /**
+     * Holds all cache region names with their defined cache type
+     */
+    private final Map<String, String> cacheRegionTypes;
+
+    /**
+     * The cache type of the default region (holding the value of the "jcs.default" property)
+     */
+    private String defaultRegionType;
+
+    /**
      * Initializes a new {@link JCSCacheServiceInit}
      */
     private JCSCacheServiceInit() {
         super();
         started = new AtomicBoolean();
         auxiliaryNames = new HashSet<String>(4);
+        cacheRegionTypes = new HashMap<String, String>();
     }
 
     private static Properties loadProperties(final String cacheConfigFile) throws OXException {
@@ -189,8 +212,11 @@ public final class JCSCacheServiceInit {
                 /*
                  * This should be the initial configuration with cache.ccf
                  */
+                checkDefaultAuxiliary(properties);
+                if (isEventInvalidation()) {
+                    preProcessAuxiliaries(properties, AUX_TYPES);
+                }
                 props = properties;
-                checkDefaultAuxiliary();
                 auxiliaryProps = getAuxiliaryProps(properties);
                 configurator = ccmInstance.configure(props, false);
             } else {
@@ -202,6 +228,9 @@ public final class JCSCacheServiceInit {
                      * Nothing to do.
                      */
                     return;
+                }
+                if (isEventInvalidation()) {
+                    preProcessAuxiliaries(properties, AUX_TYPES);
                 }
                 final Properties additionalProps = new Properties();
                 boolean addAuxProps = false;
@@ -245,6 +274,20 @@ public final class JCSCacheServiceInit {
             return;
         }
         ccmInstance.freeCache(cacheName);
+    }
+
+    /**
+     * Gets a value indicating whether the supplied cache region was configured to use an auxiliary cache or not.
+     *
+     * @param cacheName The name of the cache region
+     * @return <code>true</code>, if the region has an auxiliary cache, <code>false</code>, otherwise
+     */
+    public boolean hasAuxiliary(String cacheName) {
+        String cacheType = cacheRegionTypes.get(cacheName);
+        if (null == cacheType) {
+            cacheType = defaultRegionType;
+        }
+        return contains(cacheType, AUX_TYPES);
     }
 
     private void initializeCompositeCacheManager(final boolean obtainMutex) {
@@ -357,7 +400,6 @@ public final class JCSCacheServiceInit {
             final Properties properties = loadProperties(new FileInputStream(configurationService.getFileByName(cacheConfigFileName)));
             initializeCompositeCacheManager(obtainMutex);
             configure(properties);
-            checkDefaultAuxiliary();
             defaultCacheRegions = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(ccmInstance.getCacheNames())));
         } catch (final IOException e) {
             throw CacheExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -369,11 +411,11 @@ public final class JCSCacheServiceInit {
      *
      * @throws CacheException If default auxiliary is missing
      */
-    private void checkDefaultAuxiliary() throws OXException {
+    private static void checkDefaultAuxiliary(Properties properties) throws OXException {
         /*
          * Ensure an auxiliary cache is present
          */
-        final String value = props.getProperty(DEFAULT_REGION);
+        final String value = properties.getProperty(DEFAULT_REGION);
         if (null == value || 0 == value.length()) {
             throw CacheExceptionCode.MISSING_DEFAULT_AUX.create();
         }
@@ -400,6 +442,33 @@ public final class JCSCacheServiceInit {
      */
     public void setConfigurationService(final ConfigurationService configurationService) {
         this.configurationService = configurationService;
+    }
+
+    /**
+     * Sets the cache event service to specified reference.
+     *
+     * @param eventService The cache event service to set
+     */
+    public void setCacheEventService(final CacheEventService eventService) {
+        this.cacheEventService = eventService;
+    }
+
+    /**
+     * Gets the cache event service
+     *
+     * @return The event service
+     */
+    public CacheEventService getCacheEventService() {
+        return this.cacheEventService;
+    }
+
+    /**
+     * Gets a value indicating whether remote cache invalidations should be performed using the internal cache event service or not.
+     *
+     * @return <code>true</code> if cache events should be performed via the cache event messaging service, <code>false</code>, otherwise
+     */
+    public boolean isEventInvalidation() {
+        return configurationService.getBoolProperty("com.openexchange.caching.jcs.eventInvalidation", true);
     }
 
     /**
@@ -447,6 +516,68 @@ public final class JCSCacheServiceInit {
             }
         }
         return ret;
+    }
+
+    /**
+     * Pre-processes the supplied JCS properties and stores all regions with their cache type definitions in the {@link #cacheRegionTypes}
+     * map, the default cache region type is stored in {@link #defaultRegionType}. Then, all cache region references to the supplied
+     * auxiliaries are removed from the properties.
+     *
+     * @param properties The properties to pre-process
+     * @param auxiliaries The name of the auxiliary caches to remove
+     */
+    private void preProcessAuxiliaries(Properties properties, String...auxiliaries) {
+        if (null != properties) {
+            List<Object> propertiesToClear = new ArrayList<Object>();
+            for (Entry<Object, Object> property : properties.entrySet()) {
+                /*
+                 * check for cache type definition
+                 */
+                String key = (String)property.getKey();
+                if (key.equals(DEFAULT_REGION)) {
+                    /*
+                     * remember original default cache region type
+                     */
+                    String value = (String)property.getValue();
+                    LOG.debug("Original default cache region type: " + value);
+                    defaultRegionType = value;
+                    if (contains(value, auxiliaries)) {
+                        propertiesToClear.add(property.getKey());
+                    }
+                } else if (key.startsWith(REGION_PREFIX)) {
+                    String regionName = key.substring(REGION_PREFIX.length());
+                    if (false == regionName.contains("attributes")) {
+                        /*
+                         * remember original cache region type
+                         */
+                        String value = (String)property.getValue();
+                        LOG.debug("Original cache region type for '" + regionName + "': " + value);
+                        cacheRegionTypes.put(regionName, value);
+                        if (contains(value, auxiliaries)) {
+                            propertiesToClear.add(property.getKey());
+                        }
+                    }
+                }
+            }
+            /*
+             * clear properties referencing the auxiliaries
+             */
+            for (Object key : propertiesToClear) {
+                LOG.debug("Clearing cache region type property: " + key);
+                properties.put(key, "");
+            }
+        }
+    }
+
+    private static boolean contains(String value, String[] array) {
+        if (null != array) {
+            for (String string : array) {
+                if (null != string && string.equals(value)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

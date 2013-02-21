@@ -74,6 +74,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.config.MailProperties;
@@ -224,13 +225,13 @@ public class IMAPAuthentication implements AuthenticationService {
             boolean USE_IMAPS = false;
             if ("true".equalsIgnoreCase(props.getProperty(PropertyNames.USE_MULTIPLE.name))) {
 	            final ContextService contextService = getServiceRegistry().getService(ContextService.class, true);
-	
+
 	            final int ctxId = contextService.getContextId(splitted[0]);
 	            if (ContextStorage.NOT_FOUND == ctxId) {
 	                throw INVALID_CREDENTIALS.create();
 	            }
 	            final Context ctx = contextService.getContext(ctxId);
-	
+
 	            final UserService userService = getServiceRegistry().getService(UserService.class, true);
 	            final int userId;
 	            try {
@@ -239,7 +240,7 @@ public class IMAPAuthentication implements AuthenticationService {
 	                throw INVALID_CREDENTIALS.create();
 	            }
 	            // final User user2 = userService.getUser(userId, ctx);
-	            
+
 	            /*
 	             * Load primary account and check its protocol to be IMAP
 	             */
@@ -251,7 +252,7 @@ public class IMAPAuthentication implements AuthenticationService {
 	                    "IMAP authentication failed: Primary account's protocol is not IMAP but ").append(mailProtocol).append(
 	                    " for user ").append(userId).append(" in context ").append(ctxId).toString());
 	            }
-	
+
 	            /*
 	             * Set user according to configured login source if different from LoginSource.USER_NAME
 	             */
@@ -262,7 +263,7 @@ public class IMAPAuthentication implements AuthenticationService {
 	            if (LoginSource.PRIMARY_EMAIL.equals(loginSource)) {
 	                user = defaultMailAccount.getPrimaryAddress();
 	            }
-	
+
 	            /*
 	             * Get IMAP server from primary account
 	             */
@@ -386,13 +387,7 @@ public class IMAPAuthentication implements AuthenticationService {
                 } catch (final IOException e) {
                     throw com.openexchange.configuration.ConfigurationExceptionCodes.NOT_READABLE.create(file.getAbsolutePath());
                 } finally {
-                    if (null != fis) {
-                        try {
-                            fis.close();
-                        } catch (final IOException e) {
-                            LOG.error("Error closing file inputstream for file " + IMAP_AUTH_PROPERTY_FILE + " ", e);
-                        }
-                    }
+                    Streams.close(fis);
                 }
             }
         }
@@ -400,7 +395,7 @@ public class IMAPAuthentication implements AuthenticationService {
 
     /**
      * Splits user name and context.
-     * 
+     *
      * @param loginInfo combined information separated by an @ sign.
      * @return a string array with context and user name (in this order).
      */
@@ -410,7 +405,7 @@ public class IMAPAuthentication implements AuthenticationService {
 
     /**
      * Splits user name and context.
-     * 
+     *
      * @param loginInfo combined information separated by an @ sign.
      * @param separator for splitting user name and context.
      * @return a string array with context and user name (in this order).

@@ -67,7 +67,7 @@ public abstract class AbstractFileStorageAccountAccess implements FileStorageAcc
 
     /**
      * Initializes a new {@link AbstractFileStorageAccountAccess}.
-     * 
+     *
      * @param factory The factory
      * @param session The session
      * @param accountId The account identifier

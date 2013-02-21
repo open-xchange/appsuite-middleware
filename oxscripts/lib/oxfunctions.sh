@@ -236,28 +236,38 @@ foreach my $line (@LINES) {
   $count++;
 }
 
-$back  = 1;
+$back  = 0;
 $count = 0;
 my $start = 0;
 my $end = 0;
+my $found = 0;
 foreach my $line (@OUTLINES) {
   if ( $line =~ /^$opt\s*[:=]/ ) {
+    $found=1;
     $end=$count;
-    while ( $OUTLINES[$count-$back++] =~ /^#/ ) {
+    while ( $OUTLINES[$count-++$back] =~ /^#/ ) {
     }
     ;
-    $start=$count-$back;
+    if ( $count > 0 && $back > 1 ) {
+       $start=$count-$back+1;
+    } else {
+       $start=$end;
+    }
   }
   $count++;
 }
 
-if ( $end > 0 ) {
+if ( length($out) == 0 ) {
+   $out=$opt."=".$val."\n";
+}
+
+if ( $found ) {
   for (my $i=0; $i<=$#OUTLINES; $i++) {
-    if ( $i <= $start+1 || $i > $end ) {
-      print $OUTLINES[$i];
-      print "\n" if( substr($OUTLINES[$i],-1) ne "\n" );
+    if ( $i < $start || $i > $end ) {
+        print $OUTLINES[$i];
+        print "\n" if( substr($OUTLINES[$i],-1) ne "\n" );
     }
-    if ( $i == $start+1 ) {
+    if ( $i == $start ) {
       print $out;
       print "\n" if( substr($out,-1) ne "\n" );
     }

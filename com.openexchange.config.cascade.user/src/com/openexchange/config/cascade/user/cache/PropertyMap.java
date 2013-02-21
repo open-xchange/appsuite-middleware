@@ -62,7 +62,7 @@ import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link PropertyMap} - An in-memory property map with LRU eviction policy.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PropertyMap {
@@ -72,7 +72,7 @@ public final class PropertyMap {
 
     /**
      * Initializes a new {@link PropertyMap}.
-     * 
+     *
      * @param maxCapacity the max capacity
      * @param maxLifeUnits the max life units
      * @param unit the unit
@@ -85,7 +85,7 @@ public final class PropertyMap {
 
     /**
      * Initializes a new {@link PropertyMap}.
-     * 
+     *
      * @param maxCapacity the max capacity
      * @param maxLifeMillis the max life milliseconds
      */
@@ -110,7 +110,7 @@ public final class PropertyMap {
 
     /**
      * Put if absent.
-     * 
+     *
      * @param propertyName the property name
      * @param property the property
      * @return The property
@@ -123,21 +123,23 @@ public final class PropertyMap {
             return null;
         }
         if (prev.elapsed(maxLifeMillis)) {
-            synchronized (map) {
-                prev = map.get(propertyName);
-                if (prev.elapsed(maxLifeMillis)) {
-                    ThreadPools.getThreadPool().submit(new Shrinker(this));
-                    map.put(propertyName, wrapper);
-                    return null;
-                }
+            if (map.replace(propertyName, prev, wrapper)) {
+                // Successfully replaced with elapsed one
+                return null;
             }
+            prev = map.get(propertyName);
+            if (null == prev) {
+                prev = map.putIfAbsent(propertyName, wrapper);
+                return null == prev ? null : prev.getValue();
+            }
+            return prev.getValue();
         }
         return prev.getValue();
     }
 
     /**
      * Gets the size.
-     * 
+     *
      * @return The size
      */
     public int size() {
@@ -146,7 +148,7 @@ public final class PropertyMap {
 
     /**
      * Checks if empty flag is set.
-     * 
+     *
      * @return <code>true</code> if empty flag is set; otherwise <code>false</code>
      */
     public boolean isEmpty() {
@@ -155,7 +157,7 @@ public final class PropertyMap {
 
     /**
      * Contains.
-     * 
+     *
      * @param propertyName the property name
      * @return <code>true</code> if successful; otherwise <code>false</code>
      */
@@ -165,7 +167,7 @@ public final class PropertyMap {
 
     /**
      * Gets the property.
-     * 
+     *
      * @param propertyName the property name
      * @return The property or <code>null</code> if absent
      */
@@ -176,7 +178,7 @@ public final class PropertyMap {
         }
         if (wrapper.elapsed(maxLifeMillis)) {
             map.remove(propertyName);
-            ThreadPools.getThreadPool().submit(new Shrinker(this));
+            ThreadPools.getThreadPool().submit(new ShrinkerTask(this));
             return null;
         }
         return wrapper.getValue();
@@ -184,7 +186,7 @@ public final class PropertyMap {
 
     /**
      * Puts specified property.
-     * 
+     *
      * @param propertyName the property name
      * @param property the property
      * @return The previous property or <code>null</code>
@@ -196,7 +198,7 @@ public final class PropertyMap {
         }
         if (wrapper.elapsed(maxLifeMillis)) {
             map.remove(propertyName);
-            ThreadPools.getThreadPool().submit(new Shrinker(this));
+            ThreadPools.getThreadPool().submit(new ShrinkerTask(this));
             return null;
         }
         return wrapper.getValue();
@@ -204,7 +206,7 @@ public final class PropertyMap {
 
     /**
      * Removes the property.
-     * 
+     *
      * @param propertyName the property name
      * @return The removed property or <code>null</code>
      */
@@ -215,7 +217,7 @@ public final class PropertyMap {
         }
         if (wrapper.elapsed(maxLifeMillis)) {
             map.remove(propertyName);
-            ThreadPools.getThreadPool().submit(new Shrinker(this));
+            ThreadPools.getThreadPool().submit(new ShrinkerTask(this));
             return null;
         }
         return wrapper.getValue();
@@ -239,7 +241,7 @@ public final class PropertyMap {
 
     private static final class Wrapper {
 
-        private final BasicProperty value;
+        final BasicProperty value;
         private final long stamp;
 
         public Wrapper(final BasicProperty value) {
@@ -271,11 +273,11 @@ public final class PropertyMap {
 
     } // End of class Wrapper
 
-    private static final class Shrinker extends AbstractTask<Object> {
+    private static final class ShrinkerTask extends AbstractTask<Object> {
 
         private final PropertyMap propertyMap;
 
-        Shrinker(PropertyMap propertyMap) {
+        ShrinkerTask(PropertyMap propertyMap) {
             super();
             this.propertyMap = propertyMap;
         }

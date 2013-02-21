@@ -49,7 +49,7 @@
 
 package com.openexchange.messaging.facebook;
 
-import static com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.fireFQLQuery;
+import static com.openexchange.messaging.facebook.utility.FacebookMessagingUtility.fireFQLJsonQuery;
 import gnu.trove.iterator.TLongIterator;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
@@ -64,14 +64,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
 import org.scribe.model.Verb;
 import org.w3c.dom.Element;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.log.LogFactory;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAddressHeader;
@@ -85,10 +87,12 @@ import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.OrderDirection;
 import com.openexchange.messaging.SearchTerm;
 import com.openexchange.messaging.StringContent;
-import com.openexchange.messaging.facebook.parser.group.FacebookFQLGroupParser;
-import com.openexchange.messaging.facebook.parser.page.FacebookFQLPageParser;
+import com.openexchange.messaging.facebook.parser.group.FacebookFQLGroupJsonParser;
+import com.openexchange.messaging.facebook.parser.page.FacebookFQLPageJsonParser;
+import com.openexchange.messaging.facebook.parser.stream.FacebookFQLStreamJsonParser;
 import com.openexchange.messaging.facebook.parser.stream.FacebookFQLStreamParser;
-import com.openexchange.messaging.facebook.parser.user.FacebookFQLUserParser;
+import com.openexchange.messaging.facebook.parser.user.FacebookFQLUserJsonParser;
+import com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry;
 import com.openexchange.messaging.facebook.session.FacebookOAuthAccess;
 import com.openexchange.messaging.facebook.utility.FacebookGroup;
 import com.openexchange.messaging.facebook.utility.FacebookMessagingMessage;
@@ -101,7 +105,6 @@ import com.openexchange.messaging.facebook.utility.FacebookUser;
 import com.openexchange.messaging.generic.AttachmentFinderHandler;
 import com.openexchange.messaging.generic.MessageParser;
 import com.openexchange.messaging.generic.MessagingComparator;
-import com.openexchange.messaging.generic.Utility;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
 import com.openexchange.session.Session;
 
@@ -114,6 +117,24 @@ import com.openexchange.session.Session;
 public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess implements MessagingMessageAccess {
 
     private static final String FROM = MessagingHeader.KnownHeader.FROM.toString();
+
+    private static final String FB_IN_FEED = "fb_in_feed";
+
+    private static Boolean ignoreFbInFeed;
+    private static boolean ignoreFbInFeed() {
+        Boolean tmp = ignoreFbInFeed;
+        if (null == tmp) {
+            synchronized (FacebookMessagingMessageAccess.class) {
+                tmp = ignoreFbInFeed;
+                if (null == tmp) {
+                    final ConfigurationService service = FacebookMessagingServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+                    tmp = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.messaging.facebook.ignoreFbInFeed", true));
+                    ignoreFbInFeed = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
 
     private boolean retrySafetyCheck;
 
@@ -214,8 +235,8 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
              */
             final FQLQuery query =
                 FacebookMessagingUtility.composeFQLStreamQueryFor(FQLQueryType.queryTypeFor(folder), SET_FULL, facebookUserId);
-            final List<Element> results = fireFQLQuery(query.getCharSequence(), facebookOAuthAccess);
-            message = FacebookFQLStreamParser.parseStreamDOMElement(results.iterator().next(), getUserLocale(), session);
+            final List<JSONObject> results = fireFQLJsonQuery(query.getCharSequence(), facebookOAuthAccess);
+            message = FacebookFQLStreamJsonParser.parseStreamJsonElement(results.iterator().next(), getUserLocale(), session);
             if (null == message) {
                 throw MessagingExceptionCodes.MESSAGE_NOT_FOUND.create(id, folder);
             }
@@ -230,14 +251,14 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
          * Replace from with proper user name
          */
         if (message.isGroup()) {
-            final List<Element> results =
-                fireFQLQuery(new StringBuilder("SELECT name FROM group WHERE gid = ").append(message.getFromId()), facebookOAuthAccess);
-            final FacebookGroup facebookGroup = FacebookFQLGroupParser.parseGroupDOMElement(results.iterator().next());
+            final List<JSONObject> results =
+                fireFQLJsonQuery(new StringBuilder("SELECT name FROM group WHERE gid = ").append(message.getFromId()), facebookOAuthAccess);
+            final FacebookGroup facebookGroup = FacebookFQLGroupJsonParser.parseGroupJsonElement(results.iterator().next());
             message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, facebookGroup.getName(), Long.toString(facebookGroup.getGid())));
         } else {
-            final List<Element> results =
-                fireFQLQuery(new StringBuilder("SELECT name FROM user WHERE uid = ").append(message.getFromId()), facebookOAuthAccess);
-            final FacebookUser facebookUser = FacebookFQLUserParser.parseUserDOMElement(results.iterator().next());
+            final List<JSONObject> results =
+                fireFQLJsonQuery(new StringBuilder("SELECT name FROM user WHERE uid = ").append(message.getFromId()), facebookOAuthAccess);
+            final FacebookUser facebookUser = FacebookFQLUserJsonParser.parseUserJsonElement(results.iterator().next());
             message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, facebookUser.getName(), Long.toString(facebookUser.getUid())));
         }
         return message;
@@ -297,7 +318,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             final TLongSet safetyCheckUser;
             final TLongSet safetyCheckGroup;
             {
-                final List<Element> results = FacebookMessagingUtility.fireFQLQuery(query.getCharSequence(), facebookOAuthAccess);
+                final List<JSONObject> results = FacebookMessagingUtility.fireFQLJsonQuery(query.getCharSequence(), facebookOAuthAccess);
                 final int size = results.size();
                 if (size != messageIds.length) {
                     final OXException warning =
@@ -306,7 +327,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                             Integer.valueOf(messageIds.length));
                     com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(FacebookMessagingMessageAccess.class)).warn(warning.getMessage(), warning);
                 }
-                final Iterator<Element> iterator = results.iterator();
+                final Iterator<JSONObject> iterator = results.iterator();
                 final Map<String, FacebookMessagingMessage> orderMap = new HashMap<String, FacebookMessagingMessage>(size);
                 if (entityFieldSet.isEmpty()) {
                     mUser = new TLongObjectHashMap<List<FacebookMessagingMessage>>(0);
@@ -371,16 +392,17 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                 /*
                  * Fire FQL query
                  */
-                final List<Element> results = FacebookMessagingUtility.fireFQLQuery(userQuery.getCharSequence(), facebookOAuthAccess);
-                final Iterator<Element> iterator = results.iterator();
+                final List<JSONObject> results = FacebookMessagingUtility.fireFQLJsonQuery(userQuery.getCharSequence(), facebookOAuthAccess);
+                final Iterator<JSONObject> iterator = results.iterator();
                 final int resSize = results.size();
                 for (int i = 0; i < resSize; i++) {
-                    final FacebookUser facebookUser = FacebookFQLUserParser.parseUserDOMElement(iterator.next());
+                    final FacebookUser facebookUser = FacebookFQLUserJsonParser.parseUserJsonElement(iterator.next());
+                    final String name = facebookUser.getName();
                     final long facebookUserId = facebookUser.getUid();
                     final String userIdStr = Long.toString(facebookUserId);
                     final String picSmall = facebookUser.getPicSmall();
                     for (final FacebookMessagingMessage message : mUser.get(facebookUserId)) {
-                        message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, facebookUser.getName(), userIdStr));
+                        message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, name, userIdStr));
                         message.setPicture(picSmall);
                     }
                     /*
@@ -401,16 +423,17 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                 /*
                  * Fire FQL query
                  */
-                final List<Element> results = FacebookMessagingUtility.fireFQLQuery(userQuery.getCharSequence(), facebookOAuthAccess);
-                final Iterator<Element> iterator = results.iterator();
+                final List<JSONObject> results = FacebookMessagingUtility.fireFQLJsonQuery(userQuery.getCharSequence(), facebookOAuthAccess);
+                final Iterator<JSONObject> iterator = results.iterator();
                 final int resSize = results.size();
                 for (int i = 0; i < resSize; i++) {
-                    final FacebookGroup facebookGroup = FacebookFQLGroupParser.parseGroupDOMElement(iterator.next());
+                    final FacebookGroup facebookGroup = FacebookFQLGroupJsonParser.parseGroupJsonElement(iterator.next());
+                    final String name = facebookGroup.getName();
                     final long facebookGroupId = facebookGroup.getGid();
                     final String groupIdStr = Long.toString(facebookGroupId);
                     final String picSmall = facebookGroup.getPicSmall();
                     for (final FacebookMessagingMessage message : mGroup.get(facebookGroupId)) {
-                        message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, facebookGroup.getName(), groupIdStr));
+                        message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, name, groupIdStr));
                         message.setPicture(picSmall);
                     }
                     /*
@@ -432,6 +455,16 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
 
     private FacebookMessagingMessage parseFromElement(final List<StaticFiller> staticFillers, final Element element) throws OXException {
         final FacebookMessagingMessage message = FacebookFQLStreamParser.parseStreamDOMElement(element, getUserLocale(), session);
+        if (null != message) {
+            for (final StaticFiller filler : staticFillers) {
+                filler.fill(message);
+            }
+        }
+        return message;
+    }
+
+    private FacebookMessagingMessage parseFromElement(final List<StaticFiller> staticFillers, final JSONObject element) throws OXException {
+        final FacebookMessagingMessage message = FacebookFQLStreamJsonParser.parseStreamJsonElement(element, getUserLocale(), session);
         if (null != message) {
             for (final StaticFiller filler : staticFillers) {
                 filler.fill(message);
@@ -496,7 +529,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                     final JSONObject error = result.getJSONObject("error");
                     final String type = error.optString("type");
                     final String msg = error.optString("message");
-                    if ("OXException".equals(type)) {
+                    if ("OAuthException".equals(type)) {
                         throw FacebookMessagingExceptionCodes.OAUTH_ERROR.create(null == msg ? "" : msg);
                     }
                     throw FacebookMessagingExceptionCodes.FQL_ERROR.create(null == type ? "<unknown>" : type, null == msg ? "" : msg);
@@ -534,8 +567,15 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             return Collections.emptyList();
         }
         final EnumSet<MessagingField> fieldSet = EnumSet.copyOf(Arrays.asList(fields));
-        final EnumSet<MessagingField> entityFieldSet = EnumSet.copyOf(fieldSet);
-        entityFieldSet.retainAll(FacebookMessagingUtility.getEntityQueryableFields());
+        // Always request user/group to ignore advertisement "FB_In_Feed"
+        final boolean ignoreFbInFeed = ignoreFbInFeed();
+        final EnumSet<MessagingField> entityFieldSet;
+        if (ignoreFbInFeed) {
+            entityFieldSet = FacebookMessagingUtility.getEntityQueryableFields();
+        } else {
+            entityFieldSet = EnumSet.copyOf(fieldSet);
+            entityFieldSet.retainAll(FacebookMessagingUtility.getEntityQueryableFields());
+        }
         if (null != searchTerm) {
             searchTerm.addMessagingField(fieldSet);
         }
@@ -567,12 +607,12 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         final TLongSet safetyCheckGroup;
         long oldestCreatedTime = Long.MAX_VALUE;
         {
-            final List<Element> results = FacebookMessagingUtility.fireFQLQuery(query.getCharSequence(), facebookOAuthAccess);
+            final List<JSONObject> results = FacebookMessagingUtility.fireFQLJsonQuery(query.getCharSequence(), facebookOAuthAccess);
             final int size = results.size();
             if (size <= 0) {
                 return Collections.<MessagingMessage> emptyList();
             }
-            final Iterator<Element> iterator = results.iterator();
+            final Iterator<JSONObject> iterator = results.iterator();
             messages = new ArrayList<MessagingMessage>(size);
             if (entityFieldSet.isEmpty()) {
                 mUser = new TLongObjectHashMap<List<FacebookMessagingMessage>>(0);
@@ -654,17 +694,25 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             /*
              * Fire FQL query
              */
-            final List<Element> results = FacebookMessagingUtility.fireFQLQuery(userQuery.getCharSequence(), facebookOAuthAccess);
-            final Iterator<Element> iterator = results.iterator();
+            final List<JSONObject> results = FacebookMessagingUtility.fireFQLJsonQuery(userQuery.getCharSequence(), facebookOAuthAccess);
+            final Iterator<JSONObject> iterator = results.iterator();
             final int resSize = results.size();
             for (int i = 0; i < resSize; i++) {
-                final FacebookUser facebookUser = FacebookFQLUserParser.parseUserDOMElement(iterator.next());
+                final FacebookUser facebookUser = FacebookFQLUserJsonParser.parseUserJsonElement(iterator.next());
+                final String name = facebookUser.getName();
                 final long facebookUserId = facebookUser.getUid();
-                final String userIdStr = Long.toString(facebookUserId);
-                final String picSmall = facebookUser.getPicSmall();
-                for (final FacebookMessagingMessage message : mUser.get(facebookUserId)) {
-                    message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, facebookUser.getName(), userIdStr));
-                    message.setPicture(picSmall);
+                if (ignoreFbInFeed && FB_IN_FEED.equals(toLowerCase(name))) {
+                    // Drop messages from results list
+                    for (final FacebookMessagingMessage message : mUser.get(facebookUserId)) {
+                        messages.remove(message);
+                    }
+                } else {
+                    final String userIdStr = Long.toString(facebookUserId);
+                    final String picSmall = facebookUser.getPicSmall();
+                    for (final FacebookMessagingMessage message : mUser.get(facebookUserId)) {
+                        message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, name, userIdStr));
+                        message.setPicture(picSmall);
+                    }
                 }
                 /*
                  * Remove from safety check
@@ -684,17 +732,25 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
             /*
              * Fire FQL query
              */
-            final List<Element> results = FacebookMessagingUtility.fireFQLQuery(groupQuery.getCharSequence(), facebookOAuthAccess);
-            final Iterator<Element> iterator = results.iterator();
+            final List<JSONObject> results = FacebookMessagingUtility.fireFQLJsonQuery(groupQuery.getCharSequence(), facebookOAuthAccess);
+            final Iterator<JSONObject> iterator = results.iterator();
             final int resSize = results.size();
             for (int i = 0; i < resSize; i++) {
-                final FacebookGroup facebookGroup = FacebookFQLGroupParser.parseGroupDOMElement(iterator.next());
+                final FacebookGroup facebookGroup = FacebookFQLGroupJsonParser.parseGroupJsonElement(iterator.next());
+                final String name = facebookGroup.getName();
                 final long facebookGroupId = facebookGroup.getGid();
-                final String groupIdStr = Long.toString(facebookGroupId);
-                final String picSmall = facebookGroup.getPicSmall();
-                for (final FacebookMessagingMessage message : mGroup.get(facebookGroupId)) {
-                    message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, facebookGroup.getName(), groupIdStr));
-                    message.setPicture(picSmall);
+                if (ignoreFbInFeed && FB_IN_FEED.equals(toLowerCase(name))) {
+                    // Drop messages from results list
+                    for (final FacebookMessagingMessage message : mGroup.get(facebookGroupId)) {
+                        messages.remove(message);
+                    }
+                } else {
+                    final String groupIdStr = Long.toString(facebookGroupId);
+                    final String picSmall = facebookGroup.getPicSmall();
+                    for (final FacebookMessagingMessage message : mGroup.get(facebookGroupId)) {
+                        message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, name, groupIdStr));
+                        message.setPicture(picSmall);
+                    }
                 }
                 /*
                  * Remove from safety check
@@ -760,15 +816,15 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
              */
             entityFieldSet.add(MessagingField.FROM); // Ensure FROM is contained
             {
-                final List<Element> results =
-                    FacebookMessagingUtility.fireFQLQuery(
+                final List<JSONObject> results =
+                    FacebookMessagingUtility.fireFQLJsonQuery(
                         FacebookMessagingUtility.composeFQLPageQueryFor(entityFieldSet, safetyCheck.toArray()).getCharSequence(),
                         facebookOAuthAccess);
                 if (!results.isEmpty()) {
-                    final Iterator<Element> iterator = results.iterator();
+                    final Iterator<JSONObject> iterator = results.iterator();
                     final int resSize = results.size();
                     for (int i = 0; i < resSize; i++) {
-                        final FacebookPage fbPage = FacebookFQLPageParser.parsePageDOMElement(iterator.next());
+                        final FacebookPage fbPage = FacebookFQLPageJsonParser.parsePageJsonElement(iterator.next());
                         final long pageId = fbPage.getPageId();
                         safetyCheck.remove(pageId);
                         final String pageIdStr = Long.toString(pageId);
@@ -783,18 +839,15 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
              * Check group table if non-group
              */
             if (!safetyCheck.isEmpty() && !group) {
-                final long s = System.currentTimeMillis();
-                final List<Element> results =
-                    FacebookMessagingUtility.fireFQLQuery(
+                final List<JSONObject> results =
+                    FacebookMessagingUtility.fireFQLJsonQuery(
                         FacebookMessagingUtility.composeFQLGroupQueryFor(entityFieldSet, safetyCheck.toArray()).getCharSequence(),
                         facebookOAuthAccess);
-                System.out.println("Group query took " + (System.currentTimeMillis() - s) + "msec");
-
                 if (!results.isEmpty()) {
-                    final Iterator<Element> iterator = results.iterator();
+                    final Iterator<JSONObject> iterator = results.iterator();
                     final int resSize = results.size();
                     for (int i = 0; i < resSize; i++) {
-                        final FacebookGroup fbGroup = FacebookFQLGroupParser.parseGroupDOMElement(iterator.next());
+                        final FacebookGroup fbGroup = FacebookFQLGroupJsonParser.parseGroupJsonElement(iterator.next());
                         final long groupId = fbGroup.getGid();
                         safetyCheck.remove(groupId);
                         final String groupIdStr = Long.toString(groupId);
@@ -830,7 +883,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                     } else {
                         fqlQuery = FacebookMessagingUtility.composeFQLUserQueryFor(entityFieldSet, missingId);
                     }
-                    final List<Element> results = FacebookMessagingUtility.fireFQLQuery(fqlQuery.getCharSequence(), facebookOAuthAccess);
+                    final List<JSONObject> results = FacebookMessagingUtility.fireFQLJsonQuery(fqlQuery.getCharSequence(), facebookOAuthAccess);
                     if (results.isEmpty()) {
                         /*
                          * Entity not visible
@@ -846,11 +899,11 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                         /*
                          * Add missing user data to appropriate messages
                          */
-                        final Iterator<Element> iterator = results.iterator();
+                        final Iterator<JSONObject> iterator = results.iterator();
                         final int resSize = results.size();
                         if (group) {
                             for (int i = 0; i < resSize; i++) {
-                                final FacebookGroup fbGroup = FacebookFQLGroupParser.parseGroupDOMElement(iterator.next());
+                                final FacebookGroup fbGroup = FacebookFQLGroupJsonParser.parseGroupJsonElement(iterator.next());
                                 final long facebookGroupId = fbGroup.getGid();
                                 final String groupIdStr = Long.toString(facebookGroupId);
                                 for (final FacebookMessagingMessage message : m.get(facebookGroupId)) {
@@ -860,7 +913,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                             }
                         } else {
                             for (int i = 0; i < resSize; i++) {
-                                final FacebookUser fbUser = FacebookFQLUserParser.parseUserDOMElement(iterator.next());
+                                final FacebookUser fbUser = FacebookFQLUserJsonParser.parseUserJsonElement(iterator.next());
                                 final long facebookUserId = fbUser.getUid();
                                 final String userIdStr = Long.toString(facebookUserId);
                                 for (final FacebookMessagingMessage message : m.get(facebookUserId)) {
@@ -885,17 +938,17 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                      * Remove corresponding messages.
                      */
 
-                    {
-                        System.out.println("-- Affected Messages:");
-                        final List<FacebookMessagingMessage> list = m.get(missingUserId);
-                        for (final FacebookMessagingMessage fbMessagingMessage : list) {
-                            final FQLQuery fqlQuery =
-                                FacebookMessagingUtility.composeFQLStreamQueryFor(SET_FULL, fbMessagingMessage.getId());
-                            final List<Element> results =
-                                FacebookMessagingUtility.fireFQLQuery(fqlQuery.getCharSequence(), facebookOAuthAccess);
-                            System.out.println(Utility.prettyPrintXML(results.get(0)));
-                        }
-                    }
+                    // {
+                    // System.out.println("-- Affected Messages:");
+                    // final List<FacebookMessagingMessage> list = m.get(missingUserId);
+                    // for (final FacebookMessagingMessage fbMessagingMessage : list) {
+                    // final FQLQuery fqlQuery =
+                    // FacebookMessagingUtility.composeFQLStreamQueryFor(SET_FULL, fbMessagingMessage.getId());
+                    // final List<Element> results =
+                    // FacebookMessagingUtility.fireFQLQuery(fqlQuery.getCharSequence(), facebookOAuthAccess);
+                    // System.out.println(Utility.prettyPrintXML(results.get(0)));
+                    // }
+                    // }
 
                     messages.removeAll(m.remove(missingUserId));
                 }
@@ -926,9 +979,9 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
     }
 
     /**
-     * Gets the facebook user identifier.
+     * Gets the Facebook user identifier.
      *
-     * @return The facebook user identifier
+     * @return The Facebook user identifier
      */
     public String getFacebookUserId() {
         return facebookUserId;
@@ -947,6 +1000,20 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
     private void updateQueryTimestamp(final FQLQueryType queryType, final long timestamp) throws OXException {
         messagingAccount.getConfiguration().put(queryType.toString(), Long.toString(timestamp));
         messagingAccount.getMessagingService().getAccountManager().updateAccount(messagingAccount, session);
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

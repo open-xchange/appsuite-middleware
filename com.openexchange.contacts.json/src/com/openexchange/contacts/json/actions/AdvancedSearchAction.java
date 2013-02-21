@@ -85,14 +85,14 @@ public class AdvancedSearchAction extends ContactAction {
     public AdvancedSearchAction(ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
-    
+
     @Override
     protected AJAXRequestResult perform(ContactRequest request) throws OXException {
         List<Contact> contacts = new ArrayList<Contact>();
         Date lastModified = addContacts(contacts, getContactService().searchContacts(
-            request.getSession(), request.getSearchFilter(), request.getFields(), request.getSortOptions())); 
+            request.getSession(), request.getSearchFilter(), request.getFields(), request.getSortOptions()));
         request.sortInternalIfNeeded(contacts);
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
-    
+
 }

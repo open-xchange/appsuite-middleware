@@ -60,7 +60,7 @@ import com.openexchange.groupware.tools.mappings.Mapper;
 import com.openexchange.session.Session;
 
 /**
- * {@link JsonMapper} - Generic JSON mapper definition for field-wise 
+ * {@link JsonMapper} - Generic JSON mapper definition for field-wise
  * operations on objects
  *
  * @param <O> the type of the object
@@ -68,21 +68,21 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
-	
+
 	@Override
 	JsonMapping<? extends Object, O> get(E field) throws OXException;
 
 	/**
-	 * Gets the field whose mapping denotes the supplied column ID. 
-	 * 
+	 * Gets the field whose mapping denotes the supplied column ID.
+	 *
 	 * @param columnID the column ID
 	 * @return the field, or <code>null</code> if no such field was found
 	 */
 	E getMappedField(int columnID);
 
     /**
-     * Gets the field whose mapping denotes the supplied ajax name. 
-     * 
+     * Gets the field whose mapping denotes the supplied ajax name.
+     *
      * @param ajaxName the ajax name
      * @return the field, or <code>null</code> if no such field was found
      */
@@ -90,7 +90,7 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 
 	/**
 	 * Gets an int array of column IDs from the supplied fields.
-	 * 
+	 *
 	 * @param fields the fields
 	 * @return the column IDs in an array
 	 * @throws OXException
@@ -98,9 +98,9 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	int[] getColumnIDs(E[] fields) throws OXException;
 
 	/**
-	 * Gets the fields whose mappings denotes the supplied column IDs. The 
+	 * Gets the fields whose mappings denotes the supplied column IDs. The
 	 * field order is preserved.
-	 *  
+	 *
 	 * @param columnIDs the column IDs
 	 * @return the fields
 	 * @throws OXException if there is no mapping for a columnID
@@ -108,11 +108,11 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	E[] getFields(int[] columnIDs) throws OXException;
 
 	/**
-	 * Gets the fields whose mappings denotes the supplied column IDs and 
-	 * optionally adds mandatory fields to the result if not yet present. The 
-	 * field order is preserved, while the not yet defined mandatory fields 
+	 * Gets the fields whose mappings denotes the supplied column IDs and
+	 * optionally adds mandatory fields to the result if not yet present. The
+	 * field order is preserved, while the not yet defined mandatory fields
 	 * are appended at the end of the array.
-	 * 
+	 *
 	 * @param columnIDs the column IDs
 	 * @param mandatoryFields the mandatory fields
 	 * @return the fields
@@ -121,11 +121,11 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
     E[] getFields(int[] columnIDs, E... mandatoryFields) throws OXException;
 
 	/**
-	 * Gets the fields whose mappings denotes the supplied column IDs, 
-	 * optionally removes illegal fields and adds mandatory fields to the 
-	 * result if not yet present. The field order is preserved, while the not 
+	 * Gets the fields whose mappings denotes the supplied column IDs,
+	 * optionally removes illegal fields and adds mandatory fields to the
+	 * result if not yet present. The field order is preserved, while the not
 	 * yet defined mandatory fields are appended at the end of the array.
-	 * 
+	 *
 	 * @param columnIDs the column IDs
 	 * @param illegalFields the illegal fields
 	 * @param mandatoryFields the mandatory fields
@@ -136,8 +136,8 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 
 	/**
 	 * Deserializes an object from JSON.
-	 * 
-	 * @param jsonObject the JSON object to create the object from 
+	 *
+	 * @param jsonObject the JSON object to create the object from
 	 * @param fields the fields present in the object
 	 * @return the object
 	 * @throws OXException
@@ -147,8 +147,8 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 
     /**
      * Deserializes an object from JSON.
-     * 
-     * @param jsonObject the JSON object to create the object from 
+     *
+     * @param jsonObject the JSON object to create the object from
      * @param fields the fields present in the object
      * @param timeZone the client time zone to consider, or <code>null</code> if not relevant
      * @return the object
@@ -159,8 +159,8 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 
     /**
      * Deserializes an object from JSON.
-     * 
-     * @param jsonObject the JSON object to create the object from 
+     *
+     * @param jsonObject the JSON object to create the object from
      * @param fields the fields present in the object
      * @param timeZoneID the client time zone identifier to consider, or <code>null</code> if not relevant
      * @return the object
@@ -171,7 +171,7 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 
 	/**
 	 * Serializes the supplied object to JSON.
-	 * 
+	 *
 	 * @param object the object to read the values from
 	 * @param fields the fields to be set
 	 * @return the JSON object
@@ -179,10 +179,10 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	 * @throws OXException
 	 */
 	JSONObject serialize(O object, E[] fields) throws JSONException, OXException;
-	
+
 	/**
 	 * Serializes the supplied object to JSON.
-	 * 
+	 *
 	 * @param object the object to read the values from
 	 * @param fields the fields to be set
 	 * @param timeZone the client time zone to consider
@@ -191,10 +191,10 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	 * @throws OXException
 	 */
 	JSONObject serialize(O object, E[] fields, TimeZone timeZone) throws JSONException, OXException;
-	
+
 	/**
 	 * Serializes the supplied object to JSON.
-	 * 
+	 *
 	 * @param object the object to read the values from
 	 * @param fields the fields to be set
 	 * @param timeZoneID the client time zone identifier to consider
@@ -203,10 +203,10 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	 * @throws OXException
 	 */
 	JSONObject serialize(O object, E[] fields, String timeZoneID) throws JSONException, OXException;
-	
+
 	/**
 	 * Serializes the supplied object to JSON.
-	 * 
+	 *
 	 * @param object the object to read the values from
 	 * @param fields the fields to be set
 	 * @param timeZoneID the client time zone identifier to consider
@@ -216,10 +216,10 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	 * @throws OXException
 	 */
 	JSONObject serialize(O object, E[] fields, String timeZoneID, Session session) throws JSONException, OXException;
-	
+
 	/**
 	 * Serializes the supplied object to JSON.
-	 * 
+	 *
 	 * @param object the object to read the values from
 	 * @param fields the fields to be set
 	 * @param timeZone the client time zone to consider
@@ -232,7 +232,7 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 
 	/**
 	 * Serializes the supplied object to JSON.
-	 * 
+	 *
 	 * @param object the object to read the values from
 	 * @param to the JSONObject to serialize into
 	 * @param fields the fields to be set
@@ -244,7 +244,7 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 
 	/**
 	 * Serializes the supplied object to JSON.
-	 * 
+	 *
 	 * @param object the object to read the values from
 	 * @param to the JSONObject to serialize into
 	 * @param fields the fields to be set
@@ -257,7 +257,7 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 
 	/**
 	 * Serializes the supplied object to JSON.
-	 * 
+	 *
 	 * @param object the object to read the values from
 	 * @param to the JSONObject to serialize into
 	 * @param fields the fields to be set
@@ -266,10 +266,10 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	 * @throws OXException
 	 */
 	void serialize(O object, JSONObject to, E[] fields, String timeZoneID) throws JSONException, OXException;
-	
+
 	/**
 	 * Serializes the supplied objects to JSON arrays inside a JSON array.
-	 * 
+	 *
 	 * @param objects the object to read the values from
 	 * @param fields the fields to set in the arrays, in the expected order
 	 * @param timeZoneID the client time zone identifier to consider
@@ -279,10 +279,10 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	 * @throws OXException
 	 */
 	JSONArray serialize(List<O> objects, E[] fields, String timeZoneID, Session session) throws JSONException, OXException;
-	
+
 	/**
 	 * Serializes the supplied objects to JSON arrays inside a JSON array.
-	 * 
+	 *
 	 * @param objects the object to read the values from
 	 * @param fields the fields to set in the arrays, in the expected order
 	 * @param timeZone the client time zone to consider
@@ -292,5 +292,5 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	 * @throws OXException
 	 */
 	JSONArray serialize(List<O> objects, E[] fields, TimeZone timeZone, Session session) throws JSONException, OXException;
-	
+
 }

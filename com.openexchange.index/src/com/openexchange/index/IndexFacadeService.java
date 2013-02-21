@@ -54,7 +54,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link IndexFacadeService} - Provides appropriate {@link IndexAccess} instances.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -66,7 +66,7 @@ public interface IndexFacadeService {
      * <p>
      * Convenience method for:<br>
      * {@link #acquireIndexAccess(int, int, int) aquireIndexAccess(module, session.getUserId(), session.getContextId()}.
-     * 
+     *
      * @param module The module
      * @param session The session providing the user for whom to acquire the index access
      * @return The acquired index access.
@@ -77,7 +77,7 @@ public interface IndexFacadeService {
     /**
      * Acquires an appropriate {@link IndexAccess} instance.
      * If the according index is locked, {@link IndexExceptionCodes#INDEX_LOCKED} is thrown.
-     * 
+     *
      * @param module The module
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -88,7 +88,7 @@ public interface IndexFacadeService {
 
     /**
      * Releases specified {@link IndexAccess} instance.
-     * 
+     *
      * @param indexAccess The index access to release
      * @throws OXException If releasing specified index access fails
      */

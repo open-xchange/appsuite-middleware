@@ -53,7 +53,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link RealtimeExceptionMessages} - Translatable error messages.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
@@ -64,8 +64,11 @@ public class RealtimeExceptionMessages implements LocalizableStrings {
 
     /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
     public static final String NO_APPROPRIATE_CHANNEL = "No appropriate channel found for recipient %1$s with payload namespace %2$s";
-    
+
     /** The following needed service is missing: \"%1$s\" */
     public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
+
+    // Unexpected error: %1$s
+    public static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
 
 }

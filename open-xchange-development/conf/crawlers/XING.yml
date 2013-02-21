@@ -25,3 +25,4 @@ workflowString: |
       urlBeforeOffset: "https://www.xing.com/app/contact?notags_filter=0;card_mode=0;search_filter=;tags_filter=;offset="
     - !com.openexchange.subscribe.crawler.ContactObjectsByVcardTextPagesStep {}
   
+  

@@ -5,18 +5,18 @@ import javax.xml.bind.annotation.XmlRegistry;
 
 
 /**
- * This object contains factory methods for each 
- * Java content interface and Java element interface 
- * generated in the com.openexchange.admin.soap.util.soap package. 
- * <p>An ObjectFactory allows you to programatically 
- * construct new instances of the Java representation 
- * for XML content. The Java representation of XML 
- * content can consist of schema derived interfaces 
- * and classes representing the binding of schema 
- * type definitions, element declarations and model 
- * groups.  Factory methods for each of these are 
+ * This object contains factory methods for each
+ * Java content interface and Java element interface
+ * generated in the com.openexchange.admin.soap.util.soap package.
+ * <p>An ObjectFactory allows you to programatically
+ * construct new instances of the Java representation
+ * for XML content. The Java representation of XML
+ * content can consist of schema derived interfaces
+ * and classes representing the binding of schema
+ * type definitions, element declarations and model
+ * groups.  Factory methods for each of these are
  * provided in this class.
- * 
+ *
  */
 @XmlRegistry
 public class ObjectFactory {
@@ -24,14 +24,14 @@ public class ObjectFactory {
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: com.openexchange.admin.soap.util.soap
-     * 
+     *
      */
     public ObjectFactory() {
     }
 
     /**
      * Create an instance of {@link ListAllFilestore }
-     * 
+     *
      */
     public ListAllFilestore createListAllFilestore() {
         return new ListAllFilestore();
@@ -39,7 +39,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListMaintenanceReason }
-     * 
+     *
      */
     public ListMaintenanceReason createListMaintenanceReason() {
         return new ListMaintenanceReason();
@@ -47,7 +47,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link InvalidDataException }
-     * 
+     *
      */
     public InvalidDataException createInvalidDataException() {
         return new InvalidDataException();
@@ -55,7 +55,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link RegisterFilestoreResponse }
-     * 
+     *
      */
     public RegisterFilestoreResponse createRegisterFilestoreResponse() {
         return new RegisterFilestoreResponse();
@@ -63,7 +63,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CreateMaintenanceReasonResponse }
-     * 
+     *
      */
     public CreateMaintenanceReasonResponse createCreateMaintenanceReasonResponse() {
         return new CreateMaintenanceReasonResponse();
@@ -71,7 +71,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link RegisterFilestore }
-     * 
+     *
      */
     public RegisterFilestore createRegisterFilestore() {
         return new RegisterFilestore();
@@ -79,7 +79,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link RegisterDatabaseResponse }
-     * 
+     *
      */
     public RegisterDatabaseResponse createRegisterDatabaseResponse() {
         return new RegisterDatabaseResponse();
@@ -87,7 +87,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link CreateMaintenanceReason }
-     * 
+     *
      */
     public CreateMaintenanceReason createCreateMaintenanceReason() {
         return new CreateMaintenanceReason();
@@ -95,7 +95,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListAllServerResponse }
-     * 
+     *
      */
     public ListAllServerResponse createListAllServerResponse() {
         return new ListAllServerResponse();
@@ -103,7 +103,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListFilestoreResponse }
-     * 
+     *
      */
     public ListFilestoreResponse createListFilestoreResponse() {
         return new ListFilestoreResponse();
@@ -111,7 +111,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ChangeDatabase }
-     * 
+     *
      */
     public ChangeDatabase createChangeDatabase() {
         return new ChangeDatabase();
@@ -119,7 +119,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListAllDatabase }
-     * 
+     *
      */
     public ListAllDatabase createListAllDatabase() {
         return new ListAllDatabase();
@@ -127,7 +127,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link StorageException }
-     * 
+     *
      */
     public StorageException createStorageException() {
         return new StorageException();
@@ -135,7 +135,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListAllFilestoreResponse }
-     * 
+     *
      */
     public ListAllFilestoreResponse createListAllFilestoreResponse() {
         return new ListAllFilestoreResponse();
@@ -143,7 +143,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListAllMaintenanceReasonResponse }
-     * 
+     *
      */
     public ListAllMaintenanceReasonResponse createListAllMaintenanceReasonResponse() {
         return new ListAllMaintenanceReasonResponse();
@@ -151,7 +151,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListDatabaseResponse }
-     * 
+     *
      */
     public ListDatabaseResponse createListDatabaseResponse() {
         return new ListDatabaseResponse();
@@ -159,7 +159,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListMaintenanceReasonResponse }
-     * 
+     *
      */
     public ListMaintenanceReasonResponse createListMaintenanceReasonResponse() {
         return new ListMaintenanceReasonResponse();
@@ -167,7 +167,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link RemoteException }
-     * 
+     *
      */
     public RemoteException createRemoteException() {
         return new RemoteException();
@@ -175,7 +175,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link UnregisterFilestore }
-     * 
+     *
      */
     public UnregisterFilestore createUnregisterFilestore() {
         return new UnregisterFilestore();
@@ -183,7 +183,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListFilestore }
-     * 
+     *
      */
     public ListFilestore createListFilestore() {
         return new ListFilestore();
@@ -191,7 +191,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListDatabase }
-     * 
+     *
      */
     public ListDatabase createListDatabase() {
         return new ListDatabase();
@@ -199,7 +199,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListAllMaintenanceReason }
-     * 
+     *
      */
     public ListAllMaintenanceReason createListAllMaintenanceReason() {
         return new ListAllMaintenanceReason();
@@ -207,7 +207,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link UnregisterDatabase }
-     * 
+     *
      */
     public UnregisterDatabase createUnregisterDatabase() {
         return new UnregisterDatabase();
@@ -215,7 +215,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListAllDatabaseResponse }
-     * 
+     *
      */
     public ListAllDatabaseResponse createListAllDatabaseResponse() {
         return new ListAllDatabaseResponse();
@@ -223,7 +223,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link UnregisterServer }
-     * 
+     *
      */
     public UnregisterServer createUnregisterServer() {
         return new UnregisterServer();
@@ -231,7 +231,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListAllServer }
-     * 
+     *
      */
     public ListAllServer createListAllServer() {
         return new ListAllServer();
@@ -239,7 +239,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link DeleteMaintenanceReason }
-     * 
+     *
      */
     public DeleteMaintenanceReason createDeleteMaintenanceReason() {
         return new DeleteMaintenanceReason();
@@ -247,7 +247,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListServerResponse }
-     * 
+     *
      */
     public ListServerResponse createListServerResponse() {
         return new ListServerResponse();
@@ -255,7 +255,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link RegisterDatabase }
-     * 
+     *
      */
     public RegisterDatabase createRegisterDatabase() {
         return new RegisterDatabase();
@@ -263,7 +263,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ListServer }
-     * 
+     *
      */
     public ListServer createListServer() {
         return new ListServer();
@@ -271,7 +271,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link RegisterServerResponse }
-     * 
+     *
      */
     public RegisterServerResponse createRegisterServerResponse() {
         return new RegisterServerResponse();
@@ -279,7 +279,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link ChangeFilestore }
-     * 
+     *
      */
     public ChangeFilestore createChangeFilestore() {
         return new ChangeFilestore();
@@ -287,7 +287,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link RegisterServer }
-     * 
+     *
      */
     public RegisterServer createRegisterServer() {
         return new RegisterServer();
@@ -295,7 +295,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link InvalidCredentialsException }
-     * 
+     *
      */
     public InvalidCredentialsException createInvalidCredentialsException() {
         return new InvalidCredentialsException();
@@ -303,7 +303,7 @@ public class ObjectFactory {
 
     /**
      * Create an instance of {@link Exception }
-     * 
+     *
      */
     public Exception createException() {
         return new Exception();

@@ -70,7 +70,7 @@ public class SessionBasedTrackingConfiguration implements ScopedTrackingConfigur
 	private final SessionHolderExtended sh;
 	private final TrackingConfiguration config;
 	private final String[] className;
-	
+
 	public SessionBasedTrackingConfiguration(final String className, final TrackingConfiguration config, final SessionHolder sh) {
 	    super();
 		this.sh = (sh instanceof SessionHolderExtended ? (SessionHolderExtended) sh : new DelegateSessionHolder(sh));
@@ -107,7 +107,7 @@ public class SessionBasedTrackingConfiguration implements ScopedTrackingConfigur
 	}
 
 	private static final class DelegateSessionHolder implements SessionHolderExtended {
-	    
+
 	    private final SessionHolder sessionHolder;
 
         protected DelegateSessionHolder(final SessionHolder sessionHolder) {

@@ -12,17 +12,17 @@ import javax.xml.ws.WebFault;
 
 @WebFault(name = "DatabaseUpdateException", targetNamespace = "http://soap.reseller.admin.openexchange.com")
 public class DatabaseUpdateException_Exception extends java.lang.Exception {
-    
+
     private com.openexchange.admin.soap.reseller.user.reseller.soap.DatabaseUpdateException databaseUpdateException;
 
     public DatabaseUpdateException_Exception() {
         super();
     }
-    
+
     public DatabaseUpdateException_Exception(String message) {
         super(message);
     }
-    
+
     public DatabaseUpdateException_Exception(String message, Throwable cause) {
         super(message, cause);
     }

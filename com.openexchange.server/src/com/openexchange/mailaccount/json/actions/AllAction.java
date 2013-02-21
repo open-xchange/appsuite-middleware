@@ -52,6 +52,7 @@ package com.openexchange.mailaccount.json.actions;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
+import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -74,7 +75,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 @Action(method = RequestMethod.GET, name = "all", description = "Get all mail accounts", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for mail account's are defined in mail account data.") 
+    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for mail account's are defined in mail account data.")
 }, responseDescription = "An array with attachment data. Each array element describes one mail account and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class AllAction extends AbstractMailAccountAction {
 
@@ -88,7 +89,7 @@ public final class AllAction extends AbstractMailAccountAction {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+    protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jVoid) throws OXException {
         final String colString = requestData.getParameter(AJAXServlet.PARAMETER_COLUMNS);
 
         final List<Attribute> attributes = getColumns(colString);
@@ -109,7 +110,7 @@ public final class AllAction extends AbstractMailAccountAction {
         }
         userMailAccounts = tmp.toArray(new MailAccount[tmp.size()]);
 
-        final JSONArray jsonArray = MailAccountWriter.writeArray(userMailAccounts, attributes);
+        final JSONArray jsonArray = MailAccountWriter.writeArray(userMailAccounts, attributes, session);
         return new AJAXRequestResult(jsonArray);
     }
 

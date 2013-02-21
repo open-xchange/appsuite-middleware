@@ -135,7 +135,7 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 					}
 				}
 			}
- 
+
 			getService(HttpService.class).registerServlet(getService(DispatcherPrefixService.class).getPrefix() + SERVLET_PATH_APPENDIX, new MobilityProvisioningServlet(), null, null);
 
             track(ActionService.class, new ActionServiceListener(context));

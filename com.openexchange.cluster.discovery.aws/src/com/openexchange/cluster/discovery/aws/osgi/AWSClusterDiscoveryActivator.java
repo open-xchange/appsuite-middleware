@@ -61,7 +61,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link AWSClusterDiscoveryActivator}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class AWSClusterDiscoveryActivator extends HousekeepingActivator {

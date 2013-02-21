@@ -99,7 +99,7 @@ public class SearchAction extends ContactAction {
     	JSONObject jsonObject = request.getJSONData();
         ContactSearchObject contactSearch = createContactSearchObject(jsonObject);
         List<Contact> contacts = new ArrayList<Contact>();
-        Date lastModified = addContacts(contacts, getContactService().searchContacts(request.getSession(), contactSearch, request.getFields(), 
+        Date lastModified = addContacts(contacts, getContactService().searchContacts(request.getSession(), contactSearch, request.getFields(),
             request.getSortOptions()));
         request.sortInternalIfNeeded(contacts);
         return new AJAXRequestResult(contacts, lastModified, "contact");
@@ -129,6 +129,9 @@ public class SearchAction extends ContactAction {
             }
             if (json.has("orSearch") && json.getBoolean("orSearch")) {
                 searchObject.setOrSearch(true);
+            }
+            if (json.has("exactMatch") && json.getBoolean("exactMatch")) {
+                searchObject.setExactMatch(true);
             }
 
             searchObject.setSurname(DataParser.parseString(json, ContactFields.LAST_NAME));

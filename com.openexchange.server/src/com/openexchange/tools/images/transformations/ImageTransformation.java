@@ -55,33 +55,33 @@ import com.openexchange.tools.images.impl.ImageInformation;
 
 /**
  * {@link ImageTransformation}
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface ImageTransformation {
-    
+
     /**
      * Performs the image transformation.
-     * 
+     *
      * @param sourceImage The source image
      * @param imageInformation The additionl image information, or <code>null</code> if not needed
      * @return The resulting image
      */
     BufferedImage perform(BufferedImage sourceImage, ImageInformation imageInformation) throws IOException;
-    
+
     /**
      * Gets a value indicating whether the supplied image format is supported by the transformation or not.
-     * 
+     *
      * @param formatName The image format name, e.g. <code>jpeg</code> or <code>tiff</code>
      * @return <code>true</code>, if the format is supported, <code>false</code>, otherwise
      */
     boolean supports(String formatName);
-    
+
     /**
      * Gets a value indicating whether the transformation needs additional image information or not.
-     * 
+     *
      * @return <code>true</code>, if additional information is required, <code>false</code>, otherwise
      */
     boolean needsImageInformation();
-    
+
 }

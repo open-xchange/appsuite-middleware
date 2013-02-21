@@ -59,39 +59,39 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface Mapper<O, E extends Enum<E>> extends Factory<O>, ArrayFactory<E> {
-	
+
 	/**
 	 * Gets a mapping for the supplied field.
-	 * 
+	 *
 	 * @param field the field
 	 * @return the mapping
 	 * @throws OXException
 	 */
 	Mapping<? extends Object, O> get(E field) throws OXException;
-	
+
 	/**
      * Gets an optional mapping for the supplied field.
-	 * 
+	 *
 	 * @param field the field
 	 * @return the mapping, or <code>null</code> if no mapping is available
 	 */
     Mapping<? extends Object, O> opt(final E field);
 
 	/**
-	 * Merges all differences that are set in the updated object into the 
+	 * Merges all differences that are set in the updated object into the
 	 * original one.
-	 * 
+	 *
 	 * @param original the object to merge the differences into
 	 * @param update the {@link O} containing the changes
 	 * @throws OXException
 	 */
 	void mergeDifferences(final O original, final O update) throws OXException;
-	
+
 	/**
-	 * Creates a new object and sets all those properties that are different 
-	 * in the supplied object to the values from the second one, thus, 
+	 * Creates a new object and sets all those properties that are different
+	 * in the supplied object to the values from the second one, thus,
 	 * generating some kind of a 'delta' object.
-	 * 
+	 *
 	 * @param original the original object
 	 * @param update the updated object
 	 * @return an object containing the properties that are different
@@ -101,10 +101,10 @@ public interface Mapper<O, E extends Enum<E>> extends Factory<O>, ArrayFactory<E
 
 	/**
 	 * Gets an array of all mapped fields that are set in the supplied object.
-	 * 
-	 * @param object the object 
+	 *
+	 * @param object the object
 	 * @return the set fields
 	 */
 	E[] getAssignedFields(O object);
-	
+
 }

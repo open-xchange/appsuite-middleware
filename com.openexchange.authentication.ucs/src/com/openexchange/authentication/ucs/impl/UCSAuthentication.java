@@ -22,7 +22,6 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.security.auth.login.LoginException;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -30,7 +29,7 @@ import com.openexchange.authentication.LoginInfo;
 import com.openexchange.exception.OXException;
 
 /**
- * 
+ *
  * Authentication Plugin for the UCS Server Product.
  * This Class implements the needed Authentication against an UCS LDAP Server:
  * 1. User enters following information on Loginscreen: username and password (NO CONTEXT, will be resolved by the LDAP Attribute)
@@ -39,7 +38,7 @@ import com.openexchange.exception.OXException;
  * 3. If BIND successfull, fetch the configured "context" Attribute and parse out the context name.
  * 4. Return context name and username to OX API!
  * 5. User is logged in!
- * 
+ *
  * @author Manuel Kraft
  *
  */
@@ -296,7 +295,7 @@ public class UCSAuthentication implements AuthenticationService {
 
     /**
      * Splits user name and context.
-     * 
+     *
      * @param loginInfo
      * combined information seperated by an @ sign.
      * @return a string array with context and user name (in this order).
@@ -309,7 +308,7 @@ public class UCSAuthentication implements AuthenticationService {
 
     /**
      * Splits user name and context.
-     * 
+     *
      * @param loginInfo
      * combined information seperated by an @ sign.
      * @param separator

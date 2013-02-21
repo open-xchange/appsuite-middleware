@@ -53,7 +53,7 @@ package com.openexchange.admin.rmi.exceptions;
  * to the outside world. For example if you run a task from a plugin and this task throws an exception
  * which is only known by that plugin. In this case you can not throw the exception due to unmarshalling
  * errors which might occur
- * 
+ *
  * @author d7
  *
  */
@@ -65,7 +65,7 @@ public class TaskExecutionException extends Exception {
     private static final long serialVersionUID = 251101713294471782L;
 
     /**
-     * 
+     *
      */
     public TaskExecutionException() {
 

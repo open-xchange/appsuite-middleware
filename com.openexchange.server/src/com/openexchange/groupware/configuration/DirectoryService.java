@@ -58,10 +58,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.java.Streams;
+import com.openexchange.log.LogFactory;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * This class contains the methods for reading all configurations for
@@ -183,12 +184,14 @@ public final class DirectoryService {
                         LOG.fatal("Config file ldap.properties is not set in " + "ComfireConfig.");
                     }
                     tmp = new Properties();
+                    FileInputStream fis = null;
                     try {
-                        final FileInputStream fis = new FileInputStream(propfile);
+                        fis = new FileInputStream(propfile);
                         tmp.load(fis);
-                        fis.close();
                     } catch (final IOException e) {
                         LOG.error("Cannot load properties for ldap!", e);
+                    } finally {
+                        Streams.close(fis);
                     }
                     props = tmp;
                 }
@@ -355,37 +358,40 @@ public final class DirectoryService {
     * an entry doesn't exist. The order is BASE, HOST, PORT, URI.
     * @throws IOException if an error occurs while reading the file.
     */
-   private static String[] loadLdapConf(final File ldapConfFile)
-      throws IOException {
-      final BufferedReader br = new BufferedReader(new FileReader(ldapConfFile));
-      String line = null;
-      final String[] retval = new String[6];
-      while ((line = br.readLine()) != null) {
-         final String detectable = line.trim().toLowerCase();
-         if (detectable.startsWith(BASE)) {
-            retval[0] = line.substring(BASE.length()).trim();
-         }
-         if (detectable.startsWith(HOST)) {
-            retval[1] = line.substring(HOST.length()).trim();
-            if (retval[1].indexOf(' ') != -1) {
-                retval[1] = retval[1].substring(0, retval[1].indexOf(' '));
+    private static String[] loadLdapConf(final File ldapConfFile) throws IOException {
+        final BufferedReader br = new BufferedReader(new FileReader(ldapConfFile));
+        final String[] retval;
+        try {
+            String line = null;
+            retval = new String[6];
+            while ((line = br.readLine()) != null) {
+                final String detectable = line.trim().toLowerCase();
+                if (detectable.startsWith(BASE)) {
+                    retval[0] = line.substring(BASE.length()).trim();
+                }
+                if (detectable.startsWith(HOST)) {
+                    retval[1] = line.substring(HOST.length()).trim();
+                    if (retval[1].indexOf(' ') != -1) {
+                        retval[1] = retval[1].substring(0, retval[1].indexOf(' '));
+                    }
+                }
+                if (detectable.startsWith(URI)) {
+                    retval[3] = line.substring(URI.length()).trim();
+                }
+                if (detectable.startsWith(PORT)) {
+                    retval[2] = line.substring(PORT.length()).trim();
+                }
+                if (detectable.startsWith(BINDDN)) {
+                    retval[4] = line.substring(BINDDN.length()).trim();
+                }
+                if (detectable.startsWith(BINDPW)) {
+                    retval[5] = line.substring(BINDPW.length()).trim();
+                }
             }
-         }
-         if (detectable.startsWith(URI)) {
-            retval[3] = line.substring(URI.length()).trim();
-         }
-         if (detectable.startsWith(PORT)) {
-            retval[2] = line.substring(PORT.length()).trim();
-         }
-         if (detectable.startsWith(BINDDN)) {
-            retval[4] = line.substring(BINDDN.length()).trim();
-         }
-         if (detectable.startsWith(BINDPW)) {
-            retval[5] = line.substring(BINDPW.length()).trim();
-         }
-      }
-      br.close();
-      return retval;
-   }
+        } finally {
+            Streams.close(br);
+        }
+        return retval;
+    }
 
 }

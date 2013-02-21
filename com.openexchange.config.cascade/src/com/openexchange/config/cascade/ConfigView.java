@@ -54,14 +54,15 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link ConfigView} - A configuration view.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added JavaDoc
  */
 public interface ConfigView {
 
     /**
      * Sets denoted property
-     * 
+     *
      * @param scope The property's scope
      * @param property The property's name
      * @param value The property's value
@@ -71,7 +72,7 @@ public interface ConfigView {
 
     /**
      * Gets coerced property value.
-     * 
+     *
      * @param property The property name
      * @param coerceTo The type to coerce to
      * @return The coerced value
@@ -81,7 +82,7 @@ public interface ConfigView {
 
     /**
      * (Optionally) Gets coerced property value.
-     * 
+     *
      * @param property The property name
      * @param coerceTo The type to coerce to
      * @param defaultValue The default value
@@ -92,7 +93,7 @@ public interface ConfigView {
 
     /**
      * Gets coerced property.
-     * 
+     *
      * @param scope The property's scope
      * @param property The property's name
      * @param coerceTo The type to coerce to
@@ -103,7 +104,7 @@ public interface ConfigView {
 
     /**
      * Gets coerced composed property (all scopes combined).
-     * 
+     *
      * @param property The property's name
      * @param coerceTo The type to coerce to
      * @return The coerced composed property
@@ -113,7 +114,7 @@ public interface ConfigView {
 
     /**
      * Gets all available properties.
-     * 
+     *
      * @return All available properties
      * @throws OXException If operation fails
      */

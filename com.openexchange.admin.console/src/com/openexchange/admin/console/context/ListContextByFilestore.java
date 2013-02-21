@@ -60,7 +60,7 @@ public class ListContextByFilestore extends ContextAbstraction {
     protected void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
         setFilestoreIdOption(parser);
-        
+
         setCSVOutputOption(parser);
     }
 
@@ -69,7 +69,7 @@ public class ListContextByFilestore extends ContextAbstraction {
         final AdminParser parser = new AdminParser("listcontext");
 
         setOptions(parser);
-        
+
         try {
             parser.ownparse(args2);
 
@@ -99,7 +99,7 @@ public class ListContextByFilestore extends ContextAbstraction {
     public static void main(final String args[]) {
         new ListContextByFilestore(args);
     }
-    
+
     @Override
     protected final String getObjectName() {
         return "contexts for filestore";

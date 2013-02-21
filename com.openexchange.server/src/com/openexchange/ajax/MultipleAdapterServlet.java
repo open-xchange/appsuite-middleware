@@ -64,11 +64,13 @@ import org.json.JSONTokener;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Streams;
 import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.log.LogFactory;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -101,7 +103,7 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
     }
 
 
-    protected void handle(final HttpServletRequest req, final HttpServletResponse resp) {
+    protected void handle(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
         Tools.disableCaching(resp);
@@ -110,6 +112,12 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             return;
         }
         final ServerSession session = getSessionObject(req);
+        if (null == session) {
+            final OXException e = SessionExceptionCodes.WRONG_SESSION_SECRET.create();
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+            return;
+        }
+        final User user = session.getUser();
         try {
             final String action = req.getParameter(PARAMETER_ACTION);
             final JSONObject request = toJSON(req, action);
@@ -120,11 +128,11 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             }
             final Object response = handler.performRequest(action, request, session, Tools.considerSecure(req));
             final Date timestamp = handler.getTimestamp();
-            writeResponseSafely(response, session.getUser().getLocale(), timestamp, handler.getWarnings(), resp, session);
+            writeResponseSafely(response, null == user ? localeFrom(session) : user.getLocale(), timestamp, handler.getWarnings(), resp, session);
         } catch (final OXException x) {
-            writeException(x, session.getUser().getLocale(), resp, session);
+            writeException(x, null == user ? localeFrom(session) : user.getLocale(), resp, session);
         } catch (final Throwable t) {
-            writeException(wrap(t), session.getUser().getLocale(), resp, session);
+            writeException(wrap(t), null == user ? localeFrom(session) : user.getLocale(), resp, session);
         }
     }
 
@@ -195,7 +203,11 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             final char c = (char) read;
             reader.unread(c);
             if ('[' == c || '{' == c) {
-                return JSONObject.parse(reader);
+                try {
+                    return JSONObject.parse(reader);
+                } catch (final JSONException e) {
+                    return new JSONTokener(AJAXServlet.readFrom(reader)).nextValue();
+                }
             }
             return new JSONTokener(AJAXServlet.readFrom(reader)).nextValue();
         } finally {

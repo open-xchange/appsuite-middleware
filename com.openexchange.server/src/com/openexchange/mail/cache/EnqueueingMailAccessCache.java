@@ -166,20 +166,16 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
     private EnqueueingMailAccessCache(final int queueCapacity) throws OXException {
         super();
         this.queueCapacity = queueCapacity;
-        try {
-            map = new NonBlockingHashMap<Key, MailAccessQueue>();
-            final int configuredIdleSeconds = MailProperties.getInstance().getMailAccessCacheIdleSeconds();
-            defaultIdleSeconds = configuredIdleSeconds <= 0 ? 7 : configuredIdleSeconds;
-            /*
-             * Add timer task
-             */
-            final TimerService service = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
-            final int configuredShrinkerSeconds = MailProperties.getInstance().getMailAccessCacheShrinkerSeconds();
-            final int shrinkerMillis = (configuredShrinkerSeconds <= 0 ? 3 : configuredShrinkerSeconds) * 1000;
-            timerTask = service.scheduleWithFixedDelay(new PurgeExpiredRunnable(map), shrinkerMillis, shrinkerMillis);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        map = new NonBlockingHashMap<Key, MailAccessQueue>();
+        final int configuredIdleSeconds = MailProperties.getInstance().getMailAccessCacheIdleSeconds();
+        defaultIdleSeconds = configuredIdleSeconds <= 0 ? 7 : configuredIdleSeconds;
+        /*
+         * Add timer task
+         */
+        final TimerService service = ServerServiceRegistry.getInstance().getService(TimerService.class, true);
+        final int configuredShrinkerSeconds = MailProperties.getInstance().getMailAccessCacheShrinkerSeconds();
+        final int shrinkerMillis = (configuredShrinkerSeconds <= 0 ? 3 : configuredShrinkerSeconds) * 1000;
+        timerTask = service.scheduleWithFixedDelay(new PurgeExpiredRunnable(map), shrinkerMillis, shrinkerMillis);
     }
 
     /**

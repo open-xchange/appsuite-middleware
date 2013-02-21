@@ -69,31 +69,31 @@ import com.openexchange.webdav.protocol.WebdavPath;
 
 /**
  * {@link Tools}
- * 
+ *
  * Provides some utility functions.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Tools {
-	
+
     /**
-     * Extracts the UID part from the supplied {@link WebdavPath}, i.e. the 
+     * Extracts the UID part from the supplied {@link WebdavPath}, i.e. the
      * path's name without the <code>.vcf</code> extension.
-     *   
-     * @param path the path 
+     *
+     * @param path the path
      * @return the name
      */
     public static String extractUID(WebdavPath path) {
     	if (null == path) {
     		throw new IllegalArgumentException("path");
-    	} 
+    	}
     	return extractUID(path.name());
     }
-	
+
     /**
-     * Extracts the UID part from the supplied resource name, i.e. the 
+     * Extracts the UID part from the supplied resource name, i.e. the
      * resource name without the <code>.vcf</code> extension.
-     *   
+     *
      * @param name the name
      * @return the UID
      */
@@ -103,21 +103,21 @@ public class Tools {
     	}
     	return name;
     }
-	
+
     public static Date getLatestModified(final Date lastModified1, final Date lastModified2) {
     	return lastModified1.after(lastModified2) ? lastModified1 : lastModified2;
     }
-    
+
     public static Date getLatestModified(final Date lastModified, final Contact contact) {
     	return getLatestModified(lastModified, contact.getLastModified());
     }
-    
+
     public static Date getLatestModified(Date lastModified, UserizedFolder folder) {
     	return getLatestModified(lastModified, folder.getLastModifiedUTC());
     }
-    
+
     public static boolean isImageProblem(final OXException e) {
-    	return ContactExceptionCodes.IMAGE_BROKEN.equals(e) || 
+    	return ContactExceptionCodes.IMAGE_BROKEN.equals(e) ||
     			ContactExceptionCodes.IMAGE_DOWNSCALE_FAILED.equals(e) ||
     			ContactExceptionCodes.IMAGE_SCALE_PROBLEM.equals(e) ||
     			ContactExceptionCodes.IMAGE_TOO_LARGE.equals(e) ||
@@ -128,11 +128,11 @@ public class Tools {
     public static boolean isDataTruncation(final OXException e) {
     	return ContactExceptionCodes.DATA_TRUNCATION.equals(e);
     }
-	
+
 	/**
-	 * Parses a numerical identifier from a string, wrapping a possible 
+	 * Parses a numerical identifier from a string, wrapping a possible
 	 * NumberFormatException into an OXException.
-	 * 
+	 *
 	 * @param id the id string
 	 * @return the parsed identifier
 	 * @throws OXException
@@ -141,7 +141,7 @@ public class Tools {
 		try {
 			return Integer.parseInt(id);
 		} catch (final NumberFormatException e) {
-			throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, id); 
+			throw ContactExceptionCodes.ID_PARSING_FAILED.create(e, id);
 		}
 	}
 
@@ -164,15 +164,15 @@ public class Tools {
 				andTerm.addSearchTerm(foldersTerm);
 			}
 			return andTerm;
-		}	
+		}
 	}
-	
+
 	private static SingleSearchTerm getSingleSearchTerm(ContactField field, String value) {
 		SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
 		term.addOperand(new ContactFieldOperand(field));
 		term.addOperand(new ConstantOperand<String>(value));
 		return term;
 	}
-	 
+
 }
- 
+

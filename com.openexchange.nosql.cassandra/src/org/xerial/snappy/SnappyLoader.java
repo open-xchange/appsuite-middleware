@@ -19,7 +19,7 @@
 // SnappyLoader.java
 // Since: 2011/03/29
 //
-// $URL$ 
+// $URL$
 // $Author$
 //--------------------------------------
 package org.xerial.snappy;
@@ -49,10 +49,10 @@ import java.util.Properties;
  * user platform (<i>os.name</i> and <i>os.arch</i>). The natively compiled
  * libraries bundled to snappy-java contain the codes of the original snappy and
  * JNI programs to access Snappy.
- * 
+ *
  * In default, no configuration is required to use snappy-java, but you can load
  * your own native library created by 'make native' command.
- * 
+ *
  * This SnappyLoader searches for native libraries (snappyjava.dll,
  * libsnappy.so, etc.) in the following order:
  * <ol>
@@ -66,23 +66,23 @@ import java.util.Properties;
  * <i>org.xerial.snappy.tempdir</i> is set, use this folder instead of
  * <i>java.io.tempdir</i>.
  * </ol>
- * 
+ *
  * <p>
  * If you do not want to use folder <i>java.io.tempdir</i>, set the System
  * property <i>org.xerial.snappy.tempdir</i>. For example, to use
  * <i>/tmp/leo</i> as a temporary folder to copy native libraries, use -D option
  * of JVM:
- * 
+ *
  * <pre>
  * <code>
  * java -Dorg.xerial.snappy.tempdir="/tmp/leo" ...
  * </code>
  * </pre>
- * 
+ *
  * </p>
- * 
+ *
  * @author leo
- * 
+ *
  */
 public class SnappyLoader
 {
@@ -107,7 +107,7 @@ public class SnappyLoader
 
             if (is == null)
              {
-                return; // no configuration file is found 
+                return; // no configuration file is found
             }
 
             // Load property file
@@ -179,12 +179,12 @@ public class SnappyLoader
      * Load SnappyNative and its JNI native implementation using the root class
      * loader. This hack is for avoiding the JNI multi-loading issue when the
      * same JNI library is loaded by different class loaders.
-     * 
+     *
      * In order to load native code in the root class loader, this method first
      * inject SnappyNativeLoader class into the root class loader, because
      * {@link System#load(String)} method uses the class loader of the caller
      * class when loading native libraries.
-     * 
+     *
      * <pre>
      * (root class loader) -> [SnappyNativeLoader (load JNI code), SnappyNative (has native methods), SnappyNativeAPI, SnappyErrorCode]  (injected by this method)
      *    |
@@ -192,21 +192,21 @@ public class SnappyLoader
      * (child class loader) -> Sees the above classes loaded by the root class loader.
      *   Then creates SnappyNativeAPI implementation by instantiating SnappyNaitive class.
      * </pre>
-     * 
-     * 
+     *
+     *
      * <pre>
-     * (root class loader) -> [SnappyNativeLoader, SnappyNative ...]  -> native code is loaded by once in this class loader 
+     * (root class loader) -> [SnappyNativeLoader, SnappyNative ...]  -> native code is loaded by once in this class loader
      *   |   \
-     *   |    (child2 class loader)      
+     *   |    (child2 class loader)
      * (child1 class loader)
-     * 
+     *
      * child1 and child2 share the same SnappyNative code loaded by the root class loader.
      * </pre>
-     * 
+     *
      * Note that Java's class loader first delegates the class lookup to its
      * parent class loader. So once SnappyNativeLoader is loaded by the root
      * class loader, no child class loader initialize SnappyNativeLoader again.
-     * 
+     *
      * @return
      */
     static synchronized Object load() {
@@ -217,7 +217,7 @@ public class SnappyLoader
 
         try {
             if (!hasInjectedNativeLoader()) {
-                // Inject SnappyNativeLoader (src/main/resources/org/xerial/snappy/SnappyNativeLoader.bytecode) to the root class loader  
+                // Inject SnappyNativeLoader (src/main/resources/org/xerial/snappy/SnappyNativeLoader.bytecode) to the root class loader
                 Class< ? > nativeLoader = injectSnappyNativeLoader();
                 // Load the JNI code using the injected loader
                 loadNativeLibrary(nativeLoader);
@@ -238,7 +238,7 @@ public class SnappyLoader
 
     /**
      * Inject SnappyNativeLoader class to the root class loader
-     * 
+     *
      * @return native code loader class initialized in the root class loader
      */
     private static Class< ? > injectSnappyNativeLoader() {
@@ -248,7 +248,7 @@ public class SnappyLoader
 
             final String nativeLoaderClassName = "org.xerial.snappy.SnappyNativeLoader";
             ClassLoader rootClassLoader = getRootClassLoader();
-            // Load a byte code 
+            // Load a byte code
             byte[] byteCode = getByteCode("/org/xerial/snappy/SnappyNativeLoader.bytecode");
             // In addition, we need to load the other dependent classes (e.g., SnappyNative and SnappyException) using the system class loader
             final String[] classesToPreload = new String[] { "org.xerial.snappy.SnappyNativeAPI",
@@ -296,7 +296,7 @@ public class SnappyLoader
     /**
      * Load snappy-java's native code using load method of the
      * SnappyNativeLoader class injected to the root class loader.
-     * 
+     *
      * @param loaderClass
      * @throws SecurityException
      * @throws NoSuchMethodException
@@ -312,12 +312,12 @@ public class SnappyLoader
 
         File nativeLib = findNativeLibrary();
         if (nativeLib != null) {
-            // Load extracted or specified snappyjava native library. 
+            // Load extracted or specified snappyjava native library.
             Method loadMethod = loaderClass.getDeclaredMethod("load", new Class[] { String.class });
             loadMethod.invoke(null, nativeLib.getAbsolutePath());
         }
         else {
-            // Load preinstalled snappyjava (in the path -Djava.library.path) 
+            // Load preinstalled snappyjava (in the path -Djava.library.path)
             Method loadMethod = loaderClass.getDeclaredMethod("loadLibrary", new Class[] { String.class });
             loadMethod.invoke(null, "snappyjava");
         }
@@ -325,7 +325,7 @@ public class SnappyLoader
 
     /**
      * Computes the MD5 value of the input stream
-     * 
+     *
      * @param input
      * @return
      * @throws IOException
@@ -353,7 +353,7 @@ public class SnappyLoader
 
     /**
      * Extract the specified library file to the target folder
-     * 
+     *
      * @param libFolderForCurrentOS
      * @param libraryFileName
      * @param targetFolder
@@ -430,7 +430,7 @@ public class SnappyLoader
         String snappyNativeLibraryPath = System.getProperty(KEY_SNAPPY_LIB_PATH);
         String snappyNativeLibraryName = System.getProperty(KEY_SNAPPY_LIB_NAME);
 
-        // Resolve the library file name with a suffix (e.g., dll, .so, etc.) 
+        // Resolve the library file name with a suffix (e.g., dll, .so, etc.)
         if (snappyNativeLibraryName == null) {
             snappyNativeLibraryName = System.mapLibraryName("snappyjava");
         }
@@ -463,7 +463,7 @@ public class SnappyLoader
      * Get the snappy-java version by reading pom.properties embedded in jar.
      * This version data is used as a suffix of a dll file extracted from the
      * jar.
-     * 
+     *
      * @return the version string
      */
     public static String getVersion() {

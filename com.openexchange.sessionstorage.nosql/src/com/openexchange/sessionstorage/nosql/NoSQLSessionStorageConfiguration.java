@@ -49,12 +49,11 @@
 
 package com.openexchange.sessionstorage.nosql;
 
-import com.openexchange.crypto.CryptoService;
 import com.openexchange.timer.TimerService;
 
 /**
  * {@link NoSQLSessionStorageConfiguration}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class NoSQLSessionStorageConfiguration {
@@ -69,24 +68,18 @@ public class NoSQLSessionStorageConfiguration {
 
     private final int defaultLifetime;
 
-    private final String encryptionKey;
-
-    private final CryptoService cryptoService;
-
     private final TimerService timerService;
 
     /**
      * Initializes a new {@link NoSQLSessionStorageConfiguration}.
      */
-    public NoSQLSessionStorageConfiguration(String host, int port, String keyspace, String cf_name, int defaultLifetime, String encryptionKey, CryptoService cryptoService, TimerService timerService) {
+    public NoSQLSessionStorageConfiguration(String host, int port, String keyspace, String cf_name, int defaultLifetime, TimerService timerService) {
         super();
         this.host = host;
         this.port = port;
         this.keyspace = keyspace;
         this.cf_name = cf_name;
         this.defaultLifetime = defaultLifetime;
-        this.encryptionKey = encryptionKey;
-        this.cryptoService = cryptoService;
         this.timerService = timerService;
     }
 
@@ -108,14 +101,6 @@ public class NoSQLSessionStorageConfiguration {
 
     public int getDefaultLifeTime() {
         return defaultLifetime;
-    }
-
-    public String getEncryptionKey() {
-        return encryptionKey;
-    }
-
-    public CryptoService getCryptoService() {
-        return cryptoService;
     }
 
     public TimerService getTimerService() {

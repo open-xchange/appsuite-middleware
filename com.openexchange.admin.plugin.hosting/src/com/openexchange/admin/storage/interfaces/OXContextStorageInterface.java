@@ -70,9 +70,9 @@ import com.openexchange.tools.pipesnfilters.Filter;
 /**
  * This interface provides an abstraction to the storage of the context
  * information
- * 
+ *
  * @author d7
- * 
+ *
  */
 public abstract class OXContextStorageInterface {
 
@@ -82,7 +82,7 @@ public abstract class OXContextStorageInterface {
     private static Class<? extends OXContextStorageInterface> implementingClass;
 
     private static final Log log = LogFactory.getLog(OXContextStorageInterface.class);
-    
+
     protected static final AdminCacheExtended cache = ClientAdminThreadExtended.cache;
 
     protected static final PropertyHandlerExtended prop = cache.getProperties();
@@ -137,7 +137,7 @@ public abstract class OXContextStorageInterface {
 
     /**
      * Move data of context to target database
-     * 
+     *
      * @param ctx
      * @param target_database_id
      * @param reason
@@ -173,13 +173,13 @@ public abstract class OXContextStorageInterface {
      * @throws StorageException
      */
     public abstract Context[] getData(final Context[] ctx) throws StorageException;
-    
+
     /**
      * @param ctx
      * @throws StorageException
      */
     public abstract void change(final Context ctx) throws StorageException;
-    
+
     /**
      * @param ctx
      * @param admin_user
@@ -188,7 +188,7 @@ public abstract class OXContextStorageInterface {
      */
     public abstract Context create(final Context ctx, final User admin_user, final UserModuleAccess access) throws StorageException, InvalidDataException;
 
-    
+
     /**
      * @param ctx
      * @throws StorageException

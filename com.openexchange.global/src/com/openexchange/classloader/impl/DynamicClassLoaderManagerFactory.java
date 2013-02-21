@@ -52,7 +52,7 @@ public class DynamicClassLoaderManagerFactory implements ServiceFactory<DynamicC
 
     /**
      * Create a new service instance
-     * 
+     *
      * @param ctx The bundle context.
      * @param pckAdmin The package admin.
      */
@@ -80,7 +80,7 @@ public class DynamicClassLoaderManagerFactory implements ServiceFactory<DynamicC
 
     /**
      * Check if a bundle has been used for class loading.
-     * 
+     *
      * @param bundleId The bundle id.
      * @return <code>true</code> if the bundle has been used.
      */
@@ -90,7 +90,7 @@ public class DynamicClassLoaderManagerFactory implements ServiceFactory<DynamicC
 
     /**
      * Notify that a bundle is used as a source for class loading.
-     * 
+     *
      * @param bundle The bundle.
      */
     public void addUsedBundle(final Bundle bundle) {
@@ -100,7 +100,7 @@ public class DynamicClassLoaderManagerFactory implements ServiceFactory<DynamicC
 
     /**
      * Notify that a package is not found during class loading.
-     * 
+     *
      * @param pckName The package name.
      */
     public void addUnresolvedPackage(final String pckName) {
@@ -109,7 +109,7 @@ public class DynamicClassLoaderManagerFactory implements ServiceFactory<DynamicC
 
     /**
      * Check if an exported package from the bundle has not been found during previous class loading attempts.
-     * 
+     *
      * @param bundle The bundle to check
      * @return <code>true</code> if a package has not be found before
      */

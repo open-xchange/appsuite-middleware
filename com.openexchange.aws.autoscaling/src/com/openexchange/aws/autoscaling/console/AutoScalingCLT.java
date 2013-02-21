@@ -99,7 +99,7 @@ import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancingCli
 
 /**
  * {@link AutoScalingCLT}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class AutoScalingCLT {
@@ -238,7 +238,7 @@ public class AutoScalingCLT {
         boolean deleteOnly = false;
         Properties props = new Properties();
         try {
-            props.load(new FileInputStream("conf/awsautoscaling.properties"));
+            props.load(new FileInputStream("/opt/open-xchange/etc/awsautoscaling.properties"));
             final CommandLine cmd = parser.parse(toolkitOptions, args);
             if (cmd.hasOption('h')) {
                 printHelp();

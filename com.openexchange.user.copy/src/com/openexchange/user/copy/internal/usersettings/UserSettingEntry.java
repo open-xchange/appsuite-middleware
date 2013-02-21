@@ -56,11 +56,11 @@ package com.openexchange.user.copy.internal.usersettings;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class UserSettingEntry {
-    
+
     private int pathId;
-    
+
     private String value;
-    
+
 
     /**
      * Initializes a new {@link UserSettingEntry}.

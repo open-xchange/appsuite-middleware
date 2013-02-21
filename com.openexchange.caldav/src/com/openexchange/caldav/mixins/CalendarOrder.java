@@ -56,7 +56,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
 /**
- * {@link CalendarOrder} 
+ * {@link CalendarOrder}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
@@ -64,9 +64,9 @@ public class CalendarOrder extends SingleXMLPropertyMixin {
 
     public static final String PROPERTY_NAME = "calendar-order";
     public static final Namespace NAMESPACE = CaldavProtocol.APPLE_NS;
-    
+
     private final int order;
-    
+
     public CalendarOrder(final int order) {
         super(NAMESPACE.getURI(), PROPERTY_NAME);
         this.order = order;

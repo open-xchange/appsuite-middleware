@@ -74,7 +74,7 @@ public class POTranslationsDiscoverer extends FileDiscoverer {
 
     /**
      * Initializes a new {@link POTranslationsDiscoverer}.
-     * 
+     *
      * @param dir The directory
      * @throws FileNotFoundException If directory could not be found
      */
@@ -84,7 +84,7 @@ public class POTranslationsDiscoverer extends FileDiscoverer {
 
     /**
      * Gets the translations available by <code>.po</code> files.
-     * 
+     *
      * @return The translations
      */
     public List<Translations> getTranslations() {

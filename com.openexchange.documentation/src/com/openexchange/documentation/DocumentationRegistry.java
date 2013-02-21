@@ -63,39 +63,39 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface DocumentationRegistry {
-	
+
     /**
      * Gets the module descriptions contained in this registry.
-     * 
+     *
      * @return the module descriptions
      * @throws OXException If module descriptions cannot be returned
      */
 	Collection<ModuleDescription> getModules() throws OXException;
-	
+
     /**
      * Gets the module description associated with given name.
-     * 
+     *
      * @param name The name of the module description
      * @return the module description associated with given name
      * @throws OXException if module description cannot be returned
      */
 	ModuleDescription getModule(String name) throws OXException;
-	
+
     /**
      * Gets the container descriptions contained in this registry.
-     * 
+     *
      * @return the container descriptions
      * @throws OXException if container descriptions cannot be returned
      */
 	Collection<ContainerDescription> getContainers() throws OXException;
-	
+
     /**
      * Gets the container description associated with given name.
-     * 
+     *
      * @param name the name of the container description
      * @return the container description associated with given name
      * @throws OXException if container description cannot be returned
      */
 	ContainerDescription getContainer(String name) throws OXException;
-	
+
 }

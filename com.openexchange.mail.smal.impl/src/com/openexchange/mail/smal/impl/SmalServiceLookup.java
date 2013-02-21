@@ -56,7 +56,7 @@ import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link SmalServiceLookup}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SmalServiceLookup implements ServiceLookup {
@@ -65,7 +65,7 @@ public final class SmalServiceLookup implements ServiceLookup {
 
     /**
      * Gets the instance
-     * 
+     *
      * @return The instance
      */
     public static SmalServiceLookup getInstance() {
@@ -74,7 +74,7 @@ public final class SmalServiceLookup implements ServiceLookup {
 
     /**
      * Gets the thread pool service
-     * 
+     *
      * @return The thread pool or <code>null</code>
      */
     public static ThreadPoolService getThreadPool() {
@@ -83,7 +83,7 @@ public final class SmalServiceLookup implements ServiceLookup {
 
     /**
      * Gets the service of specified type
-     * 
+     *
      * @param clazz The service's class
      * @return The service or <code>null</code> is absent
      * @throws IllegalStateException If an error occurs while returning the demanded service
@@ -104,7 +104,7 @@ public final class SmalServiceLookup implements ServiceLookup {
 
     /**
      * Gets the service of specified type
-     * 
+     *
      * @param clazz The service's class
      * @return The service or <code>null</code> is absent
      * @throws IllegalStateException If an error occurs while returning the demanded service
@@ -129,7 +129,7 @@ public final class SmalServiceLookup implements ServiceLookup {
 
     /**
      * Sets the service look-up
-     * 
+     *
      * @param serviceLookup The service look-up to set
      */
     public void setServiceLookup(final ServiceLookup serviceLookup) {
@@ -138,7 +138,7 @@ public final class SmalServiceLookup implements ServiceLookup {
 
     /**
      * Gets the service look-up
-     * 
+     *
      * @return The service look-up
      */
     public ServiceLookup getServiceLookup() {

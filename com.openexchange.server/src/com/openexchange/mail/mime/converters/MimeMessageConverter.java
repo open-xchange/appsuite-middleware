@@ -392,6 +392,9 @@ public final class MimeMessageConverter {
                             fos = null;
                             file = newTempFile;
                         } catch (final IOException e) {
+                            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                            }
                             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                         } finally {
                             Streams.close(fos);
@@ -401,6 +404,9 @@ public final class MimeMessageConverter {
                         mimeMessage = new ManagedMimeMessage(MimeDefaultSession.getDefaultSession(), file);
                         mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
                     } catch (final IOException e) {
+                        if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                        }
                         throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                     }
                 }
@@ -474,6 +480,9 @@ public final class MimeMessageConverter {
         } catch (final MessagingException e) {
             throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -511,13 +520,55 @@ public final class MimeMessageConverter {
         } catch (final MessagingException e) {
             throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
     /**
      * Performs {@link MimeMessage#saveChanges() saveChanges()} on specified message with sanitizing for a possibly corrupt/wrong Content-Type header.
-     * 
+     * <p>
+     * Aligns <i>Message-Id</i> header to given host name.
+     *
+     * @param mimeMessage The MIME message
+     * @param hostName The host name
+     * @throws OXException If operation fails
+     */
+    public static void saveChanges(final MimeMessage mimeMessage, final String hostName) throws OXException {
+        try {
+            saveChanges(mimeMessage);
+            /*
+             * Change Message-Id header appropriately
+             */
+            if (null != hostName) {
+                final String name = "Message-ID";
+                final String messageId = mimeMessage.getHeader(name, null);
+                if (null != messageId) {
+                    /*
+                     * Somewhat of: <744810669.1.1314981157714.JavaMail.username@host.com>
+                     */
+                    final int pos = messageId.indexOf('@');
+                    if (pos > 0) {
+                        final StringBuilder mid = new StringBuilder(messageId.substring(0, pos + 1)).append(hostName);
+                        if (messageId.charAt(0) == '<') {
+                            mid.append('>');
+                        }
+                        mimeMessage.setHeader(name, mid.toString());
+                    } else {
+                        mimeMessage.setHeader(name, messageId + hostName);
+                    }
+                }
+            }
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
+     * Performs {@link MimeMessage#saveChanges() saveChanges()} on specified message with sanitizing for a possibly corrupt/wrong Content-Type header.
+     *
      * @param mimeMessage The message
      * @throws OXException If an error occurs
      */
@@ -595,6 +646,9 @@ public final class MimeMessageConverter {
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -1415,6 +1469,9 @@ public final class MimeMessageConverter {
                             ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
                         mailMessage.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                     } catch (final IOException e) {
+                        if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                        }
                         throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                     }
                 }
@@ -1734,15 +1791,14 @@ public final class MimeMessageConverter {
             }
             {
                 final ContentType ct = mail.getContentType();
+                final Object content = msg.getContent();
                 try {
-                    mail.setHasAttachment(ct.startsWith(MULTI_PRIMTYPE) && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) || hasAttachments(
-                        (Multipart) msg.getContent(),
-                        ct.getSubType())));
+                    mail.setHasAttachment(ct.startsWith(MULTI_PRIMTYPE) && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) || hasAttachments((Multipart) content, ct.getSubType())));
                 } catch (final ClassCastException e) {
                     // Cast to javax.mail.Multipart failed
                     LOG.warn(new com.openexchange.java.StringAllocator(256).append(
                         "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
-                        e.getMessage()).append(
+                        content.getClass().getName()).append(
                         ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
                     mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                 } catch (final MessagingException e) {
@@ -1864,6 +1920,9 @@ public final class MimeMessageConverter {
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -2083,11 +2142,7 @@ public final class MimeMessageConverter {
             }
             return in.available();
         } finally {
-            try {
-                in.close();
-            } catch (final IOException e) {
-                LOG.error(e.getMessage(), e);
-            }
+            Streams.close(in);
         }
     }
 

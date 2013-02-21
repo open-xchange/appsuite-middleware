@@ -374,10 +374,10 @@ public final class MemorizerWorker {
         }
     }
 
-    private static final ContactField[] FIELDS = { 
+    private static final ContactField[] FIELDS = {
     	ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, ContactField.USE_COUNT };
 
-	private static final ContactField[] SEARCH_FIELDS = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 }; 
+	private static final ContactField[] SEARCH_FIELDS = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 };
 
     private static int memorizeContact(final InternetAddress address, final Session session, final Context ctx, final UserConfiguration userConfig) throws OXException {
         /*
@@ -402,7 +402,7 @@ public final class MemorizerWorker {
         final Contact foundContact;
         {
         	final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-        	for (final ContactField field : SEARCH_FIELDS) {        		
+        	for (final ContactField field : SEARCH_FIELDS) {
         		final SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
         		term.addOperand(new ContactFieldOperand(field));
         		term.addOperand(new ConstantOperand<String>(contact.getEmail1()));
@@ -445,7 +445,7 @@ public final class MemorizerWorker {
             final OCLPermission perm =
                 new OXFolderAccess(ctx).getFolderPermission(foundContact.getParentFolderID(), session.getUserId(), userConfig);
             if (perm.canWriteAllObjects()) {
-                contactService.updateContact(session, Integer.toString(foundContact.getParentFolderID()), 
+                contactService.updateContact(session, Integer.toString(foundContact.getParentFolderID()),
                 		Integer.toString(foundContact.getObjectID()), foundContact, foundContact.getLastModified());
             }
             retval = foundContact.getObjectID();
@@ -515,7 +515,7 @@ public final class MemorizerWorker {
             int lastMatch = 0;
             do {
                 sa.append(val.substring(lastMatch, m.start()));
-                sa.append(Matcher.quoteReplacement(MimeUtility.decodeWord(m.group())));
+                sa.append(com.openexchange.java.Strings.quoteReplacement(MimeUtility.decodeWord(m.group())));
                 lastMatch = m.end();
             } while (m.find());
             sa.append(val.substring(lastMatch));

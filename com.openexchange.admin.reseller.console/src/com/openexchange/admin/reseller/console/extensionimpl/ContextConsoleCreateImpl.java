@@ -67,17 +67,17 @@ import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
-    
+
     public enum ResellerConstants implements CSVConstants {
         ADD_RESTRICTION(ResellerAbstraction.OPT_ADD_RESTRICTION_LONG, false),
         CUSTOMID(ResellerAbstraction.OPT_CUSTOMID_LONG, false);
-        
+
         private final String string;
-        
+
         private int index;
-        
+
         private boolean required;
-        
+
         private ResellerConstants(final String string, final boolean required) {
             this.string = string;
             this.required = required;
@@ -108,14 +108,14 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
         }
 
     }
-    
+
     protected CLIOption addRestrictionsOption = null;
     protected CLIOption customidOption = null;
 
     @Override
     public void addExtensionOptions(final AdminParser parser) throws OXConsolePluginException {
         addRestrictionsOption = parser.addOption(ResellerAbstraction.OPT_ADD_RESTRICTION_SHORT, ResellerAbstraction.OPT_ADD_RESTRICTION_LONG, ResellerAbstraction.OPT_ADD_RESTRICTION_LONG, "Restriction to add (can be specified multiple times)", NeededQuadState.notneeded, true);
-        customidOption = parser.addOption(ResellerAbstraction.OPT_CUSTOMID_SHORT, ResellerAbstraction.OPT_CUSTOMID_LONG, ResellerAbstraction.OPT_CUSTOMID_LONG, "Custom Context ID", NeededQuadState.notneeded, true); 
+        customidOption = parser.addOption(ResellerAbstraction.OPT_CUSTOMID_SHORT, ResellerAbstraction.OPT_CUSTOMID_LONG, ResellerAbstraction.OPT_CUSTOMID_LONG, "Custom Context ID", NeededQuadState.notneeded, true);
     }
 
     @Override
@@ -165,7 +165,7 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
                         }
                     }
                 }
-                
+
             }
         } catch (final DuplicateExtensionException e) {
             // Throw this one, but this should never occur as we check beforehand
@@ -229,8 +229,8 @@ public class ContextConsoleCreateImpl implements ContextConsoleCreateInterface {
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @param addres
      * @return might return null
      * @throws InvalidDataException

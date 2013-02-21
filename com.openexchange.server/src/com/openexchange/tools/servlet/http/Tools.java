@@ -72,6 +72,7 @@ import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Charsets;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -80,7 +81,7 @@ import com.openexchange.tools.encoding.Helper;
 
 /**
  * Convenience methods for servlets.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Tools {
@@ -159,7 +160,7 @@ public final class Tools {
      * href="http://blog.http.net/code/gnu-libidn-eszett-hotfix/">http.net</a>!
      * <p>
      * <code>"someone@m&uuml;ller.de"</code> is converted to <code>"someone@xn--mller-kva.de"</code>
-     * 
+     *
      * @param idnAddress The unicode representation of an internet address
      * @return The ASCII-encoded (punycode) of given internet address or <code>null</code> if argument is <code>null</code>
      * @throws OXException If ASCII representation of given internet address cannot be created
@@ -180,7 +181,7 @@ public final class Tools {
      * href="http://blog.http.net/code/gnu-libidn-eszett-hotfix/">http.net</a>!
      * <p>
      * <code>"someone@xn--mller-kva.de"</code> is converted to <code>"someone@m&uuml;ller.de"</code>
-     * 
+     *
      * @param aceAddress The ASCII-encoded (punycode) address
      * @return The unicode representation of given internet address or <code>null</code> if argument is <code>null</code>
      */
@@ -191,7 +192,7 @@ public final class Tools {
     /**
      * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>,
      * <i>Cache-Control</i>, and <i>Pragma</i>)
-     * 
+     *
      * @param eTag The ETag value
      * @param resp The HTTP servlet response to apply to
      */
@@ -206,7 +207,7 @@ public final class Tools {
     /**
      * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>,
      * <i>Cache-Control</i>, and <i>Pragma</i>)
-     * 
+     *
      * @param eTag The ETag value
      * @param expires The optional expires date, pass <code>null</code> to set default expiry (+ 1 year)
      * @param resp The HTTP servlet response to apply to
@@ -246,7 +247,7 @@ public final class Tools {
     /**
      * The magic spell to disable caching. Do not use these headers if response is directly written into servlet's output stream to initiate
      * a download.
-     * 
+     *
      * @param resp the servlet response.
      * @see #removeCachingHeader(HttpServletResponse)
      */
@@ -259,7 +260,7 @@ public final class Tools {
     /**
      * Remove <tt>Pragma</tt> response header value if we are going to write directly into servlet's output stream cause then some browsers
      * do not allow this header.
-     * 
+     *
      * @param resp the servlet response.
      */
     public static void removeCachingHeader(final HttpServletResponse resp) {
@@ -270,7 +271,7 @@ public final class Tools {
 
     /**
      * Formats a date for HTTP headers.
-     * 
+     *
      * @param date date to format.
      * @return the string with the formated date.
      */
@@ -282,7 +283,7 @@ public final class Tools {
 
     /**
      * Parses a date from a HTTP date header.
-     * 
+     *
      * @param str The HTTP date header value
      * @return The parsed <code>java.util.Date</code> object
      * @throws ParseException If the date header value cannot be parsed
@@ -316,7 +317,7 @@ public final class Tools {
     /**
      * This method integrates interesting HTTP header values into a string for logging purposes. This is usefull if a client sent an illegal
      * request for discovering the cause of the illegal request.
-     * 
+     *
      * @param req the servlet request.
      * @return a string containing interesting HTTP headers.
      */
@@ -356,7 +357,7 @@ public final class Tools {
 
     /**
      * Deletes all OX specific cookies.
-     * 
+     *
      * @param req The HTTP servlet request.
      * @param resp The HTTP servlet response.
      */
@@ -366,7 +367,7 @@ public final class Tools {
 
     /**
      * Deletes all cookies which satisfy specified matcher.
-     * 
+     *
      * @param req The HTTP servlet request.
      * @param resp The HTTP servlet response.
      * @param matcher The cookie name matcher determining which cookie shall be deleted
@@ -445,7 +446,7 @@ public final class Tools {
 
         /**
          * Indicates if specified cookie name matches.
-         * 
+         *
          * @param cookieName The cookie name to check
          * @return <code>true</code> if specified cookie name matches; otherwise <code>false</code>
          */
@@ -456,7 +457,7 @@ public final class Tools {
      * Tries to determine the best protocol used for accessing this server instance. If the configuration property
      * com.openexchange.forceHTTPS is set to true, this will always be https://, otherwise the request will be used to determine the
      * protocol. https:// if it was a secure request, http:// otherwise
-     * 
+     *
      * @param req The HttpServletRequest used to contact this server
      * @return "http://" or "https://" depending on what was deemed more appropriate
      */
@@ -473,9 +474,16 @@ public final class Tools {
         return req.isSecure();
     }
 
+    public static boolean considerSecure(HttpServletRequest req, boolean force) {
+        if (force && !Cookies.isLocalLan(req)) {
+            return true;
+        }
+        return req.isSecure();
+    }
+
     /**
      * Gets the route for specified HTTP session identifier to be used along with <i>";jsessionid"</i> URL part.
-     * 
+     *
      * @param httpSessionId The HTTP session identifier
      * @return The route
      */
@@ -487,6 +495,33 @@ public final class Tools {
         return pos > 0 ? httpSessionId : httpSessionId + '.' + ServerServiceRegistry.getInstance().getService(SystemNameService.class).getSystemName();
     }
 
+    private static final String NAME_ACCEPT_LANGUAGE = "Accept-Language".intern();
+
+    /**
+     * Gets the locale by <i>Accept-Language</i> header.
+     *
+     * @param request The request
+     * @param defaultLocale The default locale to return if absent
+     * @return The parsed locale
+     */
+    public static Locale getLocaleByAcceptLanguage(final HttpServletRequest request, final Locale defaultLocale) {
+        if (null == request) {
+            return defaultLocale;
+        }
+        String header = request.getHeader(NAME_ACCEPT_LANGUAGE);
+        if (isEmpty(header)) {
+            return defaultLocale;
+        }
+        int pos = header.indexOf(';');
+        if (pos > 0) {
+            header = header.substring(0, pos);
+        }
+        header = header.trim();
+        pos = header.indexOf(',');
+        final Locale l = LocaleTools.getLocale(pos > 0 ? header.substring(0, pos) : header);
+        return null == l ? defaultLocale : l;
+    }
+
     /**
      * Part of HTTP content type header.
      */
@@ -494,7 +529,7 @@ public final class Tools {
 
     /**
      * Utility method that determines whether the request contains multipart content
-     * 
+     *
      * @param request The request to be evaluated.
      * @return <code>true</code> if the request is multipart; <code>false</code> otherwise.
      */
@@ -514,7 +549,7 @@ public final class Tools {
 
     /**
      * Copy headers from specified request to a newly generated map.
-     * 
+     *
      * @param req The request to copy headers from
      * @return The map containing the headers
      */
@@ -539,7 +574,7 @@ public final class Tools {
 
     /**
      * Gets the authentication Cookies from passed request.
-     * 
+     *
      * @param req The request
      * @return The authentication Cookies
      */
@@ -561,4 +596,17 @@ public final class Tools {
     private static com.openexchange.authentication.Cookie getCookie(final Cookie cookie) {
         return new AuthCookie(cookie);
     }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
 }

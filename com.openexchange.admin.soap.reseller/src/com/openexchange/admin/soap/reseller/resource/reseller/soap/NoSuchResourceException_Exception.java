@@ -12,17 +12,17 @@ import javax.xml.ws.WebFault;
 
 @WebFault(name = "NoSuchResourceException", targetNamespace = "http://soap.reseller.admin.openexchange.com")
 public class NoSuchResourceException_Exception extends java.lang.Exception {
-    
+
     private com.openexchange.admin.soap.reseller.resource.reseller.soap.NoSuchResourceException noSuchResourceException;
 
     public NoSuchResourceException_Exception() {
         super();
     }
-    
+
     public NoSuchResourceException_Exception(String message) {
         super(message);
     }
-    
+
     public NoSuchResourceException_Exception(String message, Throwable cause) {
         super(message, cause);
     }

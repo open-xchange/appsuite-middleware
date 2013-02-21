@@ -76,10 +76,10 @@ public class Context {
     private String name;
 
     private String[] login_mappings;
-    
+
     private SOAPStringMapMap userAttributes;
-    
-    
+
+
     /**
      * @return the userAttributes
      */
@@ -87,7 +87,7 @@ public class Context {
         return userAttributes;
     }
 
-    
+
     /**
      * @param userAttributes the userAttributes to set
      */
@@ -128,7 +128,7 @@ public class Context {
             this.setUserAttributes(SOAPStringMapMap.convertFromMapMap(userattrs));
         }
     }
-    
+
     public final Integer getId() {
         return this.id;
     }
@@ -170,7 +170,7 @@ public class Context {
     }
 
     /**
-     * 
+     *
      * @param maxQuota (in MB)
      */
     public final void setMaxQuota(final Long maxQuota) {

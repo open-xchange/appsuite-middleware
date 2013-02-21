@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link JSONPathElement} - A JSON path element.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONPathElement {
@@ -69,9 +69,9 @@ public final class JSONPathElement {
 
     /**
      * Parses specified path to a list of path elements.
-     * 
+     *
      * @param path The path to parse; e.g. <code>"ui/my/setting"</code>
-     * @return The parsed path 
+     * @return The parsed path
      * @throws OXException If parsing path fails
      */
     public static List<JSONPathElement> parsePath(final String path) throws OXException {
@@ -97,7 +97,7 @@ public final class JSONPathElement {
 
     /**
      * Gets the value associated with specified path in given JSlob.
-     * 
+     *
      * @param jPath The path
      * @param jslob The JSlob
      * @return The associated value or <code>null</code> if not present
@@ -108,7 +108,7 @@ public final class JSONPathElement {
 
     /**
      * Gets the value associated with specified path in given JSON object.
-     * 
+     *
      * @param jPath The path
      * @param jslob The JSON object
      * @return The associated value or <code>null</code> if not present
@@ -168,12 +168,12 @@ public final class JSONPathElement {
             return null;
         }
     }
-    
+
     private static final class Entry {
     	private Entry parent = null;
     	private final JSONObject object;
     	private final JSONPathElement name;
-    	
+
     	public Entry(JSONPathElement name, JSONObject object, Entry parent) {
     		this.name = name;
     		this.object = object;
@@ -200,7 +200,7 @@ public final class JSONPathElement {
 					return;
 				}
 			} catch (JSONException x) {
-				
+
 			}
 			if (parent != null) {
 				parent.removeIfEmpty();
@@ -211,7 +211,7 @@ public final class JSONPathElement {
 	public static Object remove(List<JSONPathElement> jPath, JSONObject jObject) {
 		JSONObject jCurrent = jObject;
 		Entry entry = new Entry(null, jObject, null);
-		
+
         final int msize = jPath.size() - 1;
         for (int i = 0; i < msize; i++) {
             final JSONPathElement jPathElement = jPath.get(i);
@@ -282,12 +282,12 @@ public final class JSONPathElement {
 				}
     		}
     	}
-    	
+
     	jsonArray.reset();
     	for(Object p: purged) {
     		jsonArray.put(p);
     	}
-    	
+
 	}
 
 	private static boolean isInstance(final String name, final Class<? extends JSONValue> clazz, final JSONObject jsonObject) {
@@ -307,7 +307,7 @@ public final class JSONPathElement {
 
     /**
      * Initializes a new {@link JSONPathElement}.
-     * 
+     *
      * @param name The field name
      */
     public JSONPathElement(final String name) {
@@ -316,7 +316,7 @@ public final class JSONPathElement {
 
     /**
      * Initializes a new {@link JSONPathElement}.
-     * 
+     *
      * @param name The field name
      * @param index The index in the JSON array denoted by field name
      */
@@ -328,7 +328,7 @@ public final class JSONPathElement {
 
     /**
      * Checks if this JSON field denotes a certain index in a JSON array.
-     * 
+     *
      * @return <code>true</code> if this JSON field has an index; otherwise <code>false</code>
      */
     public boolean hasIndex() {
@@ -345,7 +345,7 @@ public final class JSONPathElement {
 
     /**
      * Gets the name
-     * 
+     *
      * @return The name
      */
     public String getName() {
@@ -354,7 +354,7 @@ public final class JSONPathElement {
 
     /**
      * Gets the index
-     * 
+     *
      * @return The index
      */
     public int getIndex() {
@@ -372,7 +372,7 @@ public final class JSONPathElement {
 
     /**
      * Parses a positive <code>int</code> value from passed {@link String} instance.
-     * 
+     *
      * @param s The string to parse
      * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
      */

@@ -72,7 +72,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.utils.CharsetDetector;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -139,7 +139,7 @@ public class HeaderCollection implements Serializable {
 
     /**
      * Gets the case-sensitive header name as per RFC2822.
-     * 
+     *
      * @param name The header name to check
      * @return The case-sensitive header name
      */
@@ -254,6 +254,9 @@ public class HeaderCollection implements Serializable {
             }
             load(new String(buffer.toByteArray(), Charsets.ISO_8859_1));
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }

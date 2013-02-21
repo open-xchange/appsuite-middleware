@@ -52,6 +52,7 @@ package com.openexchange.index.solr;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.groupware.Types;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -60,55 +61,55 @@ import com.openexchange.groupware.Types;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ModuleSet {
-    
+
     private final Set<Integer> modules = new HashSet<Integer>();
-    
-    
+
+
     public ModuleSet() {
         super();
     }
-    
+
     public ModuleSet(String moduleStr) {
         super();
-        String[] split = moduleStr.split("\\s*,\\s*");
+        String[] split = Strings.splitByComma(moduleStr);
         for (String s : split) {
             try {
                 Integer module = new Integer(s.trim());
                 if (module.intValue() == Types.ATTACHMENT) {
                     continue;
                 }
-                
+
                 modules.add(module);
             } catch (NumberFormatException e) {
                 // ignore
             }
         }
     }
-    
+
     public boolean addModule(int module) {
         if (module == Types.ATTACHMENT) {
             return true;
         }
-        
+
         return modules.add(module);
     }
-    
+
     public boolean removeModule(int module) {
         if (module == Types.ATTACHMENT) {
             return false;
         }
-        
+
         return modules.remove(module);
     }
-    
+
     public boolean containsModule(int module) {
         if (module == Types.ATTACHMENT) {
             return true;
         }
-        
+
         return modules.contains(module);
     }
-    
+
     /**
      * Returns the string representation of this module set.
      */
@@ -117,7 +118,7 @@ public class ModuleSet {
         if (modules.isEmpty()) {
             return "";
         }
-        
+
         StringBuilder sb = new StringBuilder();
         for (Integer module : modules) {
             sb.append(module);

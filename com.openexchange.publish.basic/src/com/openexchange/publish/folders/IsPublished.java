@@ -49,6 +49,10 @@
 
 package com.openexchange.publish.folders;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -56,14 +60,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Entity;
 import com.openexchange.publish.PublicationStorage;
 import com.openexchange.publish.helpers.AbstractPublicationService;
@@ -72,135 +74,127 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link IsPublished}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
- *         Laguna</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class IsPublished implements AdditionalFolderField {
 
-	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory
-			.getLog(IsPublished.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IsPublished.class));
 
-	
-	private static final Set<Integer> ID_BLACKLIST = new HashSet<Integer>() {
+    private static final TIntSet ID_BLACKLIST;
+    static {
+        final TIntSet set = new TIntHashSet(10);
+        set.add(FolderObject.SYSTEM_GLOBAL_FOLDER_ID);
+        set.add(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+        set.add(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
+        set.add(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+        set.add(FolderObject.SYSTEM_SHARED_FOLDER_ID);
+        set.add(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
+        set.add(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+        set.add(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
+        set.add(FolderObject.SYSTEM_ROOT_FOLDER_ID);
+        set.add(-1);
+        ID_BLACKLIST = set;
+    }
 
-		{
-			add(FolderObject.SYSTEM_GLOBAL_FOLDER_ID);
-			add(FolderObject.SYSTEM_LDAP_FOLDER_ID);
-			add(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
-			add(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-			add(FolderObject.SYSTEM_SHARED_FOLDER_ID);
-			add(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
-			add(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
-			add(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
-			add(FolderObject.SYSTEM_ROOT_FOLDER_ID);
-			add(-1);
-		}
-	};
-	
-	@Override
+    @Override
     public int getColumnID() {
-		return 3010;
-	}
+        return 3010;
+    }
 
-	@Override
+    @Override
     public String getColumnName() {
-		return "com.openexchange.publish.publicationFlag";
-	}
+        return "com.openexchange.publish.publicationFlag";
+    }
 
-	@Override
-    public Object getValue(final FolderObject folder,
-			final ServerSession session) {
-		return getValues(Arrays.asList(folder), session).get(0);
-	}
+    @Override
+    public Object getValue(final FolderObject folder, final ServerSession session) {
+        return getValues(Arrays.asList(folder), session).get(0);
+    }
 
-	@Override
+    @Override
     public Object renderJSON(final Object value) {
-		return value;
-	}
+        return value;
+    }
 
-	@Override
-    public List<Object> getValues(List<FolderObject> folder,
-			ServerSession session) {
-		if (!session.getUserConfiguration().isPublication()) {
-			return allFalse(folder.size());
-		}
-		List<Entity> folderIdsToQuery = new ArrayList<Entity>(folder.size());
-		Map<Entity, Boolean> isPublished = new HashMap<Entity, Boolean>();
+    @Override
+    public List<Object> getValues(List<FolderObject> folder, ServerSession session) {
+        if (!session.getUserConfiguration().isPublication()) {
+            return allFalse(folder.size());
+        }
+        List<Entity> folderIdsToQuery = new ArrayList<Entity>(folder.size());
+        Map<Entity, Boolean> isPublished = new HashMap<Entity, Boolean>();
 
-		Set<String> skipList = new HashSet<String>();
-		Map<Integer, Entity> entityMap = new HashMap<Integer, Entity>();
+        Set<String> skipList = new HashSet<String>();
+        TIntObjectMap<Entity> entityMap = new TIntObjectHashMap<Entity>();
 
-		for (FolderObject f : folder) {
-			final String fn = f.getFullName();
-			String entityType = Module.getModuleString(f.getModule(),
-					f.getObjectID());
+        for (FolderObject f : folder) {
+            String entityType = Module.getModuleString(f.getModule(), f.getObjectID());
 
-			int entityId = -1;
+            int entityId = -1;
+            {
+                final String fn = f.getFullName();
+                try {
+                    entityId = (null == fn) ? f.getObjectID() : Integer.parseInt(fn);
+                } catch (NumberFormatException x) {
+                    skipList.add(fn);
+                    continue;
+                }
+            }
 
-			try {
-				entityId = (null == fn) ? f.getObjectID() : Integer
-						.parseInt(fn);
-			} catch (NumberFormatException x) {
-				skipList.add(fn);
-				continue;
-			}
+            Entity entity = new Entity(entityType, entityId);
 
-			Entity entity = new Entity(entityType, entityId);
+            entityMap.put(entityId, entity);
 
-			entityMap.put(entityId, entity);
+            if (f.getModule() != FolderObject.MAIL && !ID_BLACKLIST.contains(entityId)) {
+                folderIdsToQuery.add(entity);
+            } else {
+                isPublished.put(entity, Boolean.FALSE);
+            }
+        }
+        if (folderIdsToQuery.isEmpty()) {
+            return allFalse(folder.size());
+        }
+        try {
 
-			if (f.getModule() != FolderObject.MAIL
-					&& !ID_BLACKLIST.contains(entityId)) {
-				folderIdsToQuery.add(entity);
-			} else {
-				isPublished.put(entity, Boolean.FALSE);
-			}
-		}
-		if (folderIdsToQuery.isEmpty()) {
-			return allFalse(folder.size());
-		}
-		try {
+            isPublished.putAll(getStorage().isPublished(folderIdsToQuery, session.getContext()));
+            List<Object> retval = new ArrayList<Object>(folder.size());
+            for (FolderObject f : folder) {
+                Entity entity = entityMap.get(f.getObjectID());
+                if (entity == null) {
+                    String fullName = f.getFullName();
+                    if (skipList.contains(fullName)) {
+                        retval.add(Boolean.FALSE);
+                        continue;
+                    }
+                    entity = entityMap.get(Integer.parseInt(fullName));
+                    if (entity == null) {
+                        retval.add(Boolean.FALSE);
+                        continue;
+                    }
+                }
+                if (isPublished.get(entity).booleanValue()) {
+                    retval.add(Boolean.TRUE);
+                } else {
+                    retval.add(Boolean.FALSE);
+                }
+            }
+            return retval;
+        } catch (OXException e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return allFalse(folder.size());
+    }
 
-			isPublished.putAll(getStorage().isPublished(folderIdsToQuery,
-					session.getContext()));
-			List<Object> retval = new ArrayList<Object>(folder.size());
-			for (FolderObject f : folder) {
-				Entity entity = entityMap.get(f.getObjectID());
-				if (entity == null) {
-					String fullName = f.getFullName();
-					if (skipList.contains(fullName)) {
-						retval.add(Boolean.FALSE);
-						continue;
-					}
-					entity = entityMap.get(Integer.parseInt(fullName));
-					if (entity == null) {
-						retval.add(Boolean.FALSE);
-						continue;
-					}
-				}
-				if (isPublished.get(entity)) {
-					retval.add(Boolean.TRUE);
-				} else {
-					retval.add(Boolean.FALSE);
-				}
-			}
-			return retval;
-		} catch (OXException e) {
-			LOG.error(e.getMessage(), e);
-		}
-		return allFalse(folder.size());
-	}
+    private PublicationStorage getStorage() {
+        return AbstractPublicationService.getDefaultStorage();
+    }
 
-	private PublicationStorage getStorage() {
-		return AbstractPublicationService.getDefaultStorage();
-	}
-
-	private List<Object> allFalse(int size) {
-		List<Object> retval = new ArrayList<Object>(size);
-		for (int i = 0; i < size; i++) {
-			retval.add(Boolean.FALSE);
-		}
-		return retval;
-	}
+    private List<Object> allFalse(int size) {
+        List<Object> retval = new ArrayList<Object>(size);
+        for (int i = 0; i < size; i++) {
+            retval.add(Boolean.FALSE);
+        }
+        return retval;
+    }
 
 }

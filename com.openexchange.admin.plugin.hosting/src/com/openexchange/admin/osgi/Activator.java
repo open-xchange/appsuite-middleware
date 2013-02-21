@@ -74,6 +74,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
+        AdminCache.compareAndSetBundleContext(null, context);
         final ConfigurationService configurationService = getService(ConfigurationService.class);
         AdminCache.compareAndSetConfigurationService(null, configurationService);
         AdminServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);

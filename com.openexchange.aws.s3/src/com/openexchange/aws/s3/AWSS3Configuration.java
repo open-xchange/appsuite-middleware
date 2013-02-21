@@ -51,7 +51,7 @@ package com.openexchange.aws.s3;
 
 /**
  * {@link AWSS3Configuration}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class AWSS3Configuration {

@@ -63,7 +63,7 @@ import com.openexchange.admin.soap.dataobjects.Resource;
 
 /**
  * SOAP Service implementing RMI Interface OXResourceInterface
- * 
+ *
  * @author choeger
  *
  */
@@ -79,7 +79,7 @@ public class OXResource extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXResourceInterface#change(Context, Resource, Credentials)}
-     * 
+     *
      * @param ctx
      * @param res
      * @param auth
@@ -103,7 +103,7 @@ public class OXResource extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXResourceInterface#create(Context, Resource, Credentials)}
-     * 
+     *
      * @param ctx
      * @param res
      * @param auth
@@ -115,7 +115,7 @@ public class OXResource extends OXSOAPRMIMapper {
      * @throws InvalidDataException
      * @throws DatabaseUpdateException
      */
-    public Resource create(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {        
+    public Resource create(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {
             return new Resource(((OXResourceInterface)rmistub).create(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapResource2Resource(res), auth));
@@ -127,7 +127,7 @@ public class OXResource extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXResourceInterface#delete(Context, Resource, Credentials)}
-     * 
+     *
      * @param ctx
      * @param res
      * @param auth
@@ -151,7 +151,7 @@ public class OXResource extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXResourceInterface#getData(Context, Resource, Credentials)}
-     * 
+     *
      * @param ctx
      * @param res
      * @param auth
@@ -176,7 +176,7 @@ public class OXResource extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXResourceInterface#getData(Context, Resource[], Credentials)}
-     * 
+     *
      * @param ctx
      * @param resources
      * @param auth
@@ -201,7 +201,7 @@ public class OXResource extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXResourceInterface#list(Context, String, Credentials)}
-     * 
+     *
      * @param ctx
      * @param pattern
      * @param auth
@@ -225,7 +225,7 @@ public class OXResource extends OXSOAPRMIMapper {
 
     /**
      * Same as {@link OXResourceInterface#listAll(Context, Credentials)}
-     * 
+     *
      * @param ctx
      * @param auth
      * @return

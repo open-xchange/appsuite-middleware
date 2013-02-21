@@ -45,6 +45,18 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Feb 19 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Fourth release candidate for 7.0.1
+* Tue Feb 19 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Third release candidate for 7.0.1
+* Thu Feb 14 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Second release candidate for 7.0.1
+* Fri Feb 01 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+First release candidate for 7.0.1
+* Tue Jan 15 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2013-01-23
+* Thu Jan 10 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+prepare for 7.0.1
 * Fri Dec 21 2012 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for public patch 2012-12-21
 * Tue Dec 18 2012 Tobias Friedrich <tobias.friedrich@open-xchange.com>

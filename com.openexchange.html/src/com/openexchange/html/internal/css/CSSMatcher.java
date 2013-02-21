@@ -49,7 +49,6 @@
 
 package com.openexchange.html.internal.css;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -59,6 +58,8 @@ import java.util.regex.Pattern;
 import com.openexchange.html.internal.MatcherReplacer;
 import com.openexchange.html.internal.RegexUtility;
 import com.openexchange.html.internal.RegexUtility.GroupType;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 
 /**
  * {@link CSSMatcher} - Provides several utility methods to check CSS content.
@@ -66,6 +67,9 @@ import com.openexchange.html.internal.RegexUtility.GroupType;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CSSMatcher {
+
+    /** Perform CSS sanitizing with respect to nested blocks */
+    private static final boolean CONSIDER_NESTED_BLOCKS = true;
 
     /**
      * Initializes a new {@link CSSMatcher}
@@ -168,7 +172,7 @@ public final class CSSMatcher {
         PAT_t = Pattern.compile(strTIME, Pattern.CASE_INSENSITIVE);
 
         PATTERN_IS_PATTERN = Pattern.compile("[unNcd*t]+");
-        
+
         PATTERN_COLOR_RGB = Pattern.compile(strCOLOR_RGB_FUNC, Pattern.CASE_INSENSITIVE);
     }
 
@@ -201,16 +205,15 @@ public final class CSSMatcher {
             final String allowedValue = allowedValues[i];
             if (PATTERN_IS_PATTERN.matcher(allowedValue).matches()) {
                 patIndices.add(Integer.valueOf(i));
-                final char[] chars = allowedValue.toCharArray();
-                Arrays.sort(chars);
-                if (Arrays.binarySearch(chars, 'd') >= 0) {
+                if (allowedValue.indexOf('d') >= 0) {
                     return false;
                 }
-                if (Arrays.binarySearch(chars, '*') >= 0) {
+                if (allowedValue.indexOf('*') >= 0) {
                     return true;
                 }
-                for (int j = 0; j < chars.length; j++) {
-                    if (matchesPattern(chars[j], value)) {
+                final int length = allowedValue.length();
+                for (int j = 0; j < length; j++) {
+                    if (matchesPattern(allowedValue.charAt(j), value)) {
                         return true;
                     }
                 }
@@ -256,7 +259,11 @@ public final class CSSMatcher {
         }
     }
 
+    /** Matches a starting CSS block */
+    private static final Pattern PATTERN_STYLE_STARTING_BLOCK = Pattern.compile("(?:#|\\.|@|[a-zA-Z])[^{]*?\\{");
+    /** Matches a complete CSS block, but not appropriate for possible nested blocks */
     private static final Pattern PATTERN_STYLE_BLOCK = Pattern.compile("((?:#|\\.|[a-zA-Z])[^{]*?\\{)([^}]+)\\}");
+    /** Matches a CR?LF plus indention */
     private static final Pattern CRLF = Pattern.compile("\r?\n( {2,})?");
 
     /**
@@ -279,28 +286,67 @@ public final class CSSMatcher {
             return checkCSSElements(cssBuilder, styleMap, true);
         }
         final String css = CRLF.matcher(cssBuilder).replaceAll(" ");
-        final StringBuilder cssElemsBuffer = new StringBuilder(css.length());
-        final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
+        final int length = css.length();
         cssBuilder.setLength(0);
-        int lastPos = 0;
-        while (m.find()) {
-            // Check prefix part
-            cssElemsBuffer.append(css.substring(lastPos, m.start()));
-            modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
-            final String prefix = cssElemsBuffer.toString();
-            cssElemsBuffer.setLength(0);
-            // Check block part
-            cssElemsBuffer.append(m.group(2));
-            modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
-            cssElemsBuffer.insert(0, prefixBlock(m.group(1), cssPrefix)).append('}').append('\n'); // Surround with block definition
-            final String block = cssElemsBuffer.toString();
-            cssElemsBuffer.setLength(0);
-            // Add to main builder
-            cssBuilder.append(prefix);
-            cssBuilder.append(block);
-            lastPos = m.end();
+        final StringBuilder cssElemsBuffer = new StringBuilder(length);
+        // Block-wise sanitizing
+        if (CONSIDER_NESTED_BLOCKS) {
+            int off = 0;
+            Matcher m;
+            while (off < length && (m = PATTERN_STYLE_STARTING_BLOCK.matcher(css.substring(off))).find()) {
+                final int end = m.end() + off;
+                int index = end;
+                int level = 1;
+                while (level > 0 && index < length) {
+                    final char c = css.charAt(index++);
+                    if ('{' == c) {
+                        level++;
+                    } else if ('}' == c) {
+                        level--;
+                    }
+                }
+                // Check prefix part
+                final int start = m.start() + off;
+                cssElemsBuffer.append(css.substring(off, start));
+                modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
+                final String prefix = cssElemsBuffer.toString();
+                cssElemsBuffer.setLength(0);
+                // Check block part
+                cssElemsBuffer.append(css.substring(end, index - 1));
+                modified |= checkCSS(cssElemsBuffer, styleMap, cssPrefix);
+                // Check selector part
+                cssElemsBuffer.insert(0, prefixBlock(css.substring(start, end - 1), cssPrefix)).append('}').append('\n'); // Surround with block definition
+                final String block = cssElemsBuffer.toString();
+                cssElemsBuffer.setLength(0);
+                // Add to main builder
+                cssBuilder.append(prefix);
+                cssBuilder.append(block);
+                off = index;
+            }
+            cssElemsBuffer.append(css.substring(off, css.length()));
+        } else {
+            final Matcher m = PATTERN_STYLE_BLOCK.matcher(css);
+            cssBuilder.setLength(0);
+            int lastPos = 0;
+            while (m.find()) {
+                // Check prefix part
+                cssElemsBuffer.append(css.substring(lastPos, m.start()));
+                modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
+                final String prefix = cssElemsBuffer.toString();
+                cssElemsBuffer.setLength(0);
+                // Check block part
+                cssElemsBuffer.append(m.group(2));
+                modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
+                cssElemsBuffer.insert(0, prefixBlock(m.group(1), cssPrefix)).append('}').append('\n'); // Surround with block definition
+                final String block = cssElemsBuffer.toString();
+                cssElemsBuffer.setLength(0);
+                // Add to main builder
+                cssBuilder.append(prefix);
+                cssBuilder.append(block);
+                lastPos = m.end();
+            }
+            cssElemsBuffer.append(css.substring(lastPos, css.length()));
         }
-        cssElemsBuffer.append(css.substring(lastPos, css.length()));
         modified |= checkCSSElements(cssElemsBuffer, styleMap, true);
         final String tail = cssElemsBuffer.toString();
         cssElemsBuffer.setLength(0);
@@ -310,6 +356,7 @@ public final class CSSMatcher {
 
     private static final Pattern SPLIT_LINES = Pattern.compile("\r?\n");
     private static final Pattern SPLIT_WORDS = Pattern.compile("\\s+");
+    private static final Pattern SPLIT_COMMA = Pattern.compile(",");
 
     private static String prefixBlock(final String match, final String cssPrefix) {
         if (isEmpty(match) || isEmpty(cssPrefix)) {
@@ -336,17 +383,17 @@ public final class CSSMatcher {
         final StringBuilder helper = new StringBuilder(length << 1);
         /*-
          * SIMPLE SELECTORS
-         * 
+         *
          * #id -> #prefix #prefix-id
          * .class -> #prefix .prefix-class
          * element -> #prefix element
-         * 
+         *
          * GROUPS (set of simple selectors; comma separated)
-         * 
+         *
          * #id, .class -> #prefix #prefix-id, #prefix .prefix-class
          * #id, element -> #prefix #prefix-id, #prefix element
          * .class-A, .class-B -> #prefix .prefix-class-A, #prefix .prefix-class-B
-         * 
+         *
          * Escape every ID, escape every class name, prefix every SIMPLE SELECTOR with #prefix,
          * every time when occurring within a line
          */
@@ -364,30 +411,42 @@ public final class CSSMatcher {
     }
 
     private static void handleLine(final String line, final String cssPrefix, final StringBuilder builder, final StringBuilder helper) {
+        if (line.charAt(0) == '@') {
+            builder.append(line);
+            return;
+        }
         final String[] words = SPLIT_WORDS.split(line, 0);
-        if (1 == words.length && "body".equalsIgnoreCase(words[0])) {
+        if (1 == words.length && toLowerCase(words[0]).indexOf("body") >= 0) {
             // Special treatment for "body" selector
             builder.append('#').append(cssPrefix).append(' ');
         } else {
-            for (final String word : words) {
-                if (isEmpty(word)) {
-                    builder.append(word);
+            for (final String wordi : words) {
+                if (isEmpty(wordi)) {
+                    builder.append(wordi);
                 } else {
-                    final char first = word.charAt(0);
-                    if ('.' == first) {
-                        // .class -> #prefix .prefix-class
-                        builder.append('#').append(cssPrefix).append(' ');
-                        builder.append('.').append(cssPrefix).append('-');
-                        builder.append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
-                    } else if ('#' == first) {
-                        // #id -> #prefix #prefix-id
-                        builder.append('#').append(cssPrefix).append(' ');
-                        builder.append('#').append(cssPrefix).append('-');
-                        builder.append(replaceDotsAndHashes(word.substring(1), cssPrefix, helper)).append(' ');
-                    } else {
-                        // element -> #prefix element
-                        builder.append('#').append(cssPrefix).append(' ');
-                        builder.append(replaceDotsAndHashes(word, cssPrefix, helper)).append(' ');
+                    boolean fst = true;
+                    for (final String selector : SPLIT_COMMA.split(wordi, 0)) {
+                        if (fst) {
+                            fst = false;
+                        } else {
+                            builder.append(',');
+                        }
+                        final char first = selector.charAt(0);
+                        if ('.' == first) {
+                            // .class -> #prefix .prefix-class
+                            builder.append('#').append(cssPrefix).append(' ');
+                            builder.append('.').append(cssPrefix).append('-');
+                            builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper)).append(' ');
+                        } else if ('#' == first) {
+                            // #id -> #prefix #prefix-id
+                            builder.append('#').append(cssPrefix).append(' ');
+                            builder.append('#').append(cssPrefix).append('-');
+                            builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper)).append(' ');
+                        } else {
+                            // element -> #prefix element
+                            builder.append('#').append(cssPrefix).append(' ');
+                            builder.append(replaceDotsAndHashes(selector, cssPrefix, helper)).append(' ');
+                        }
                     }
                 }
             }
@@ -572,7 +631,7 @@ public final class CSSMatcher {
                         elemBuilder.append(elementValues);
                         hasValues = true;
                     } else {
-                        final String[] tokens = elementValues.split("\\s+");
+                        final String[] tokens = Strings.splitByWhitespaces(elementValues);
                         for (int j = 0; j < tokens.length; j++) {
                             if (matches(tokens[j], allowedValuesSet)) {
                                 if (j > 0) {
@@ -632,6 +691,16 @@ public final class CSSMatcher {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private static String toLowerCase(final CharSequence chars) {
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

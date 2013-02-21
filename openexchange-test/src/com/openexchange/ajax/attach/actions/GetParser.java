@@ -72,7 +72,7 @@ public class GetParser extends AbstractAJAXParser<GetResponse> {
     @Override
     protected GetResponse createResponse(Response response) throws JSONException {
         GetResponse retval = new GetResponse(response);
-        AttachmentMetadata attachment = new AttachmentParser().getAttachmentMetadata(((JSONObject) response.getData()).toString());
+        AttachmentMetadata attachment = new AttachmentParser().getAttachmentMetadata(((JSONObject) response.getData()));
         retval.setAttachment(attachment);
         return retval;
     }

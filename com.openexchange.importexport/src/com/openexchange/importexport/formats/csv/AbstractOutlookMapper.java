@@ -81,7 +81,7 @@ public abstract class AbstractOutlookMapper implements ContactFieldMapper {
     public Collection<ContactField> getSupportedFields() {
         return outlook2ox.values();
     }
-    
+
 	@Override
 	public String getEncoding() {
 		return "cp1252";

@@ -30,21 +30,21 @@ public class ContactSearchtermLdapConverter implements ContactSearchTermConverte
     private String charset;
 
     private StringBuilder bob;
-    
+
     //private boolean foundAnd = false; // If an AND connection to a greater equal is found (normal GUI operation) used for LDAP workaround
-    
-    private int state = 0; // The fix state. If an AND connection to a greater equal is found (normal GUI operation) turns to 1, 
+
+    private int state = 0; // The fix state. If an AND connection to a greater equal is found (normal GUI operation) turns to 1,
                            // if a greater equal is found turns to 2. If a corresponding less is found turns to 3.
-    
+
     private char greaterChar;
-    
+
     private String greaterField; // What field is used for the greaterequal operation
 
-    private boolean distributionlistActive = false; // If distributionlists are activated or not. We need to remember this because 
+    private boolean distributionlistActive = false; // If distributionlists are activated or not. We need to remember this because
                                                     // otherwise distributionlists might appear after a search
-    
-    private int oldGreaterPos; // Stores the position where the last greater equals was found 
-    
+
+    private int oldGreaterPos; // Stores the position where the last greater equals was found
+
     private List<String> folders;
 
     public Mappings getMappings() {
@@ -103,19 +103,22 @@ public class ContactSearchtermLdapConverter implements ContactSearchTermConverte
 
         final List<String> ops = new LinkedList<String>();
         for (final Operand<?> o : operands) {
-            String value = (String) o.getValue();
+            String value = ContactField.class.isInstance(o.getValue()) ? ((ContactField)o.getValue()).getAjaxName() : (String)o.getValue();
             if (o.getType() == Operand.Type.COLUMN) {
-                nextIsFolder = FOLDER_AJAXNAME.equals(o.getValue());
+                nextIsFolder = FOLDER_AJAXNAME.equals(o.getValue()) || ContactField.FOLDER_ID.equals(o.getValue());
                 if (distributionlistActive) {
-                    nextIsDisplayName = DISPLAYNAME_AJAXNAME.equals(o.getValue()) || ContactField.GIVEN_NAME.getAjaxName().equals(
-                        o.getValue()) || ContactField.SUR_NAME.getAjaxName().equals(o.getValue());
+                    nextIsDisplayName = DISPLAYNAME_AJAXNAME.equals(value) || ContactField.GIVEN_NAME.getAjaxName().equals(value) ||
+                        ContactField.SUR_NAME.getAjaxName().equals(value);
                 }
                 value = translateFromJSONtoLDAP(value);
                 if (nextIsFolder) {
                     continue;
+                } else if (null == value || 0 == value.length()) {
+                    LOG.debug("Skipping search term '" + term + "' referencing unmapped contact property '" + o.getValue() + "'.");
+                    return "";
                 }
             } else if (nextIsFolder) {
-                folders.add((String) o.getValue());
+                folders.add(value);
                 continue;
             }
             ops.add(LdapContactInterface.escapeLDAPSearchFilter(value));
@@ -159,7 +162,7 @@ public class ContactSearchtermLdapConverter implements ContactSearchTermConverte
             greaterField = ops.get(0);
             state = 2;
         }
-        
+
         final StringBuilder str = new StringBuilder();
         String tmp = new Formatter().format(operation.getLdapRepresentation(), ops.toArray()).toString();
         str.append("(").append(tmp).append(")");
@@ -213,7 +216,7 @@ public class ContactSearchtermLdapConverter implements ContactSearchTermConverte
         }
         return mappings.get(field);
     }
-    
+
     private static List<String> allLettersBetween(final char string, final char string2) {
         final List<String> retval = new ArrayList<String>();
         if (string < string2) {

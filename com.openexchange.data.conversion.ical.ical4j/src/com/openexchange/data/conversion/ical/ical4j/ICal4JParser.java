@@ -94,6 +94,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
 import edu.emory.mathcs.backport.java.util.Arrays;
 
@@ -157,7 +158,7 @@ public class ICal4JParser implements ICalParser {
                 final net.fortuna.ical4j.model.Calendar calendar = parse(reader);
                 if(calendar == null) { break; }
                 ComponentList vevents = calendar.getComponents("VEVENT");
-                int myLimit = limit < 0 ? vevents.size() : limit < vevents.size() ? limit : vevents.size(); 
+                int myLimit = limit < 0 ? vevents.size() : limit < vevents.size() ? limit : vevents.size();
                 for(int i = 0; i < myLimit; i++) {
                 	final Object componentObj = vevents.get(i);
                     final Component vevent = (Component) componentObj;
@@ -200,8 +201,8 @@ public class ICal4JParser implements ICalParser {
             reader = new BufferedReader(new InputStreamReader(ical, UTF8));
             while (true) {
                 net.fortuna.ical4j.model.Calendar calendar = parse(reader);
-                if (null == calendar) { 
-                	break; 
+                if (null == calendar) {
+                	break;
                 }
                 ComponentList freebusies = calendar.getComponents("VFREEBUSY");
                 int myLimit = limit < 0 ? freebusies.size() : limit < freebusies.size() ? limit : freebusies.size();
@@ -224,7 +225,7 @@ public class ICal4JParser implements ICalParser {
         }
         return fbInfos;
 	}
-	
+
 	private FreeBusyInformation convertFreeBusy(int index, VFreeBusy freeBusy, TimeZone defaultTZ, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
         FreeBusyInformation fbInfo = new FreeBusyInformation();
         TimeZone tz = determineTimeZone(freeBusy, defaultTZ);
@@ -306,13 +307,7 @@ public class ICal4JParser implements ICalParser {
     }
 
     protected static void closeSafe(final Closeable closeable) {
-        if (closeable != null) {
-            try {
-                closeable.close();
-            } catch (final IOException e) {
-                // Ignore
-            }
-        }
+        Streams.close(closeable);
     }
 
     protected CalendarDataObject convertAppointment(int index, VEvent vevent, TimeZone defaultTZ, List<AttributeConverter<VEvent,Appointment>> all, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
@@ -328,7 +323,13 @@ public class ICal4JParser implements ICalParser {
             converter.verify(index, appointment, warnings);
         }
 
-        appointment.setTimezone(getTimeZoneID(defaultTZ));
+        /*
+         *  Very difficult to keep overview, which timezone has to be used here.
+         *  Last deciscion was to use the given timezone from the ical as we need to store it with the appointment
+         *  to avoid mix-ups in group-series-appointments passing the DST borders.
+         *  See bug 23586
+         */
+        appointment.setTimezone(tz.getID());
 
         return appointment;
     }
@@ -365,8 +366,8 @@ public class ICal4JParser implements ICalParser {
 
     private static final TimeZone chooseTimeZone(final DateProperty dateProperty, final TimeZone defaultTZ) {
         TimeZone tz = defaultTZ;
-        if (dateProperty.getParameter("TZID") == null 
-        || dateProperty.getParameter("TZID").getValue() == null){ 
+        if (dateProperty.getParameter("TZID") == null
+        || dateProperty.getParameter("TZID").getValue() == null){
                 return defaultTZ;
         }
         if(dateProperty.isUtc()) {
@@ -375,12 +376,12 @@ public class ICal4JParser implements ICalParser {
         Parameter tzid = dateProperty.getParameter("TZID");
 		String tzidName = tzid.getValue();
 		TimeZone inTZID = TimeZone.getTimeZone(tzidName);
-		
+
         /* now, if the Java core devs had been smart, they'd made TimeZone.getTimeZone(name,fallback) public. But they did not, so have to do this: */
 		if(inTZID.getID().equals("GMT") && ! tzidName.equals("GMT")){
 			inTZID = ParserTools.findTzidBySimilarity(tzidName);
 		}
-		
+
         if (null != inTZID) {
             tz = inTZID;
         }
@@ -531,26 +532,27 @@ public class ICal4JParser implements ICalParser {
     	char[] buf = line.toCharArray();
     	int length = buf.length;
 
-		if(length > 3) {
-            if(Character.getNumericValue(buf[0]) < 0 && Character.getNumericValue(buf[1]) < 0 && Character.getNumericValue(buf[2]) < 0 && Character.getNumericValue(buf[3]) < 0){
-				if(Character.getType(buf[0]) == 15 && Character.getType(buf[1]) == 15 && Character.getType(buf[2]) == 28 && Character.getType(buf[3]) == 28) {
+		final char first = buf[0];
+        if(length > 3) {
+            if(Character.getNumericValue(first) < 0 && Character.getNumericValue(buf[1]) < 0 && Character.getNumericValue(buf[2]) < 0 && Character.getNumericValue(buf[3]) < 0){
+				if(Character.getType(first) == 15 && Character.getType(buf[1]) == 15 && Character.getType(buf[2]) == 28 && Character.getType(buf[3]) == 28) {
                     return new String(Arrays.copyOfRange(buf, 3, length));
                 }
-				if(Character.getType(buf[0]) == 28 && Character.getType(buf[1]) == 28 && Character.getType(buf[2]) == 15 && Character.getType(buf[3]) == 15) {
+				if(Character.getType(first) == 28 && Character.getType(buf[1]) == 28 && Character.getType(buf[2]) == 15 && Character.getType(buf[3]) == 15) {
                     return new String(Arrays.copyOfRange(buf, 3, length));
                 }
 			}
         }
 		if(length > 1) {
-            if(Character.getNumericValue(buf[0]) < 0 && Character.getNumericValue(buf[1]) < 0) {
-                if(Character.getType(buf[0]) == 28 && Character.getType(buf[1]) == 28) {
+		    if(Character.getNumericValue(first) < 0 && Character.getNumericValue(buf[1]) < 0) {
+                if(Character.getType(first) == 28 && Character.getType(buf[1]) == 28) {
                     return new String(Arrays.copyOfRange(buf, 2, length));
                 }
             }
         }
 		if(length > 0) {
-            if(Character.getNumericValue(buf[0]) < 0) {
-                if(Character.getType(buf[0]) == 16) {
+            if(Character.getNumericValue(first) < 0) {
+                if(Character.getType(first) == 16) {
                     return new String(Arrays.copyOfRange(buf, 1, length));
                 }
             }

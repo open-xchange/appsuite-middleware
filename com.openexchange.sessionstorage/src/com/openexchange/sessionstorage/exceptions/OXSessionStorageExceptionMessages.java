@@ -53,12 +53,10 @@ import com.openexchange.i18n.LocalizableStrings;
 
 /**
  * {@link OXSessionStorageExceptionMessages}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class OXSessionStorageExceptionMessages implements LocalizableStrings {
-
-    public static final String SESSIONSTORAGE_NO_ENCRYPTION_KEY_MSG = "Could not find encryption key.";
 
     public final static String SESSIONSTORAGE_START_FAILED_MSG = "Start of SessionStorageService failed.";
 

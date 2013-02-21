@@ -49,9 +49,7 @@
 
 package com.openexchange.file.storage.cifs.cache;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import jcifs.smb.SmbFile;
@@ -73,7 +71,7 @@ public final class SmbFileMap {
 
     /**
      * Initializes a new {@link SmbFileMap}.
-     * 
+     *
      * @param maxCapacity the max capacity
      * @param maxLifeUnits the max life units
      * @param unit the unit
@@ -86,7 +84,7 @@ public final class SmbFileMap {
 
     /**
      * Initializes a new {@link SmbFileMap}.
-     * 
+     *
      * @param maxCapacity the max capacity
      * @param maxLifeMillis the max life millis
      */
@@ -98,20 +96,17 @@ public final class SmbFileMap {
      * Removes elapsed entries from map.
      */
     public void shrink() {
-        final List<String> removeKeys = new ArrayList<String>(16);
         final long minStamp = System.currentTimeMillis() - maxLifeMillis;
-        for (final Entry<String, Wrapper> entry : map.entrySet()) {
-            final Wrapper wrapper = entry.getValue();
-            if (wrapper.getStamp() < minStamp) {
-                removeKeys.add(entry.getKey());
+        for (final Iterator<Wrapper> it = map.values().iterator(); it.hasNext();) {
+            if (it.next().getStamp() < minStamp) {
+                it.remove();
             }
         }
-        map.keySet().removeAll(removeKeys);
     }
 
     /**
      * Put if absent.
-     * 
+     *
      * @param smbFile the SMB file
      * @return The SMB file
      */
@@ -121,35 +116,37 @@ public final class SmbFileMap {
 
     /**
      * Put if absent.
-     * 
+     *
      * @param path the SMB file path
      * @param treeId the tree id
      * @param smbFile the SMB file
      * @return The SMB file
      */
     public SmbFile putIfAbsent(final String path, final SmbFile smbFile) {
-        final Wrapper wrapper = wrapperOf(smbFile);
+        final Wrapper wrapper = wrapperFor(smbFile);
         Wrapper prev = map.putIfAbsent(path, wrapper);
         if (null == prev) {
             // Successfully put into map
             return null;
         }
         if (prev.elapsed(maxLifeMillis)) {
-            synchronized (map) {
-                prev = map.get(path);
-                if (prev.elapsed(maxLifeMillis)) {
-                    shrink();
-                    map.put(path, wrapper);
-                    return null;
-                }
+            if (map.replace(path, prev, wrapper)) {
+                // Successfully replaced with elapsed one
+                return null;
             }
+            prev = map.get(path);
+            if (null == prev) {
+                prev = map.putIfAbsent(path, wrapper);
+                return null == prev ? null : prev.getValue();
+            }
+            return prev.getValue();
         }
         return prev.getValue();
     }
 
     /**
      * Size.
-     * 
+     *
      * @return The size
      */
     public int size() {
@@ -158,7 +155,7 @@ public final class SmbFileMap {
 
     /**
      * Checks if empty flag is set.
-     * 
+     *
      * @return <code>true</code> if empty flag is set; otherwise <code>false</code>
      */
     public boolean isEmpty() {
@@ -167,7 +164,7 @@ public final class SmbFileMap {
 
     /**
      * Contains.
-     * 
+     *
      * @param path the SMB file path
      * @return <code>true</code> if successful; otherwise <code>false</code>
      */
@@ -177,7 +174,7 @@ public final class SmbFileMap {
 
     /**
      * Gets the SMB file.
-     * 
+     *
      * @param path the SMB file path
      * @return The SMB file
      */
@@ -196,7 +193,7 @@ public final class SmbFileMap {
 
     /**
      * Puts specified SMB file.
-     * 
+     *
      * @param smbFile the SMB file
      * @return The SMB file
      */
@@ -206,13 +203,13 @@ public final class SmbFileMap {
 
     /**
      * Puts specified SMB file.
-     * 
+     *
      * @param path the SMB file path
      * @param smbFile the SMB file
      * @return The SMB file
      */
     public SmbFile put(final String path, final SmbFile smbFile) {
-        final Wrapper wrapper = map.put(path, wrapperOf(smbFile));
+        final Wrapper wrapper = map.put(path, wrapperFor(smbFile));
         if (null == wrapper) {
             return null;
         }
@@ -226,16 +223,13 @@ public final class SmbFileMap {
 
     /**
      * Removes the SMB file.
-     * 
+     *
      * @param path the SMB file path
      * @return The SMB file
      */
     public SmbFile remove(final String path) {
         final Wrapper wrapper = map.remove(path);
-        if (null == wrapper) {
-            return null;
-        }
-        return wrapper.getIfNotElapsed(maxLifeMillis);
+        return null == wrapper ? null : wrapper.getIfNotElapsed(maxLifeMillis);
     }
 
     /**
@@ -250,13 +244,13 @@ public final class SmbFileMap {
         return map.toString();
     }
 
-    private Wrapper wrapperOf(final SmbFile smbFile) {
+    private Wrapper wrapperFor(final SmbFile smbFile) {
         return new Wrapper(smbFile);
     }
 
     private static final class Wrapper {
 
-        private final SmbFile value;
+        final SmbFile value;
         private volatile long stamp;
 
         public Wrapper(final SmbFile value) {

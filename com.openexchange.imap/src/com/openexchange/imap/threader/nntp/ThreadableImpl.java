@@ -56,7 +56,7 @@ import org.apache.commons.net.nntp.Threadable;
 /**
  * {@link ThreadableImpl} - Implements {@code org.apache.commons.net.nntp.Threadable};<br>
  * a placeholder interface for threadable message objects
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadableImpl implements Threadable, Iterable<ThreadableImpl> {
@@ -73,7 +73,7 @@ public final class ThreadableImpl implements Threadable, Iterable<ThreadableImpl
 
     /**
      * Gets the delegatee.
-     * 
+     *
      * @return The delegatee
      */
     public com.openexchange.imap.threader.Threadable getDelegatee() {
@@ -82,7 +82,7 @@ public final class ThreadableImpl implements Threadable, Iterable<ThreadableImpl
 
     /**
      * Gets the child
-     * 
+     *
      * @return The child
      */
     public Threadable getChild() {
@@ -91,7 +91,7 @@ public final class ThreadableImpl implements Threadable, Iterable<ThreadableImpl
 
     /**
      * Gets the next
-     * 
+     *
      * @return The next
      */
     public Threadable getNext() {

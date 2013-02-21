@@ -66,7 +66,7 @@ public class Delete extends ResellerAbstraction {
     }
 
     /**
-     * 
+     *
      */
     public Delete() {
     }
@@ -80,8 +80,8 @@ public class Delete extends ResellerAbstraction {
     }
 
     public void start(final String[] args) {
-        final AdminParser parser = new AdminParser("deleteadmin");    
-        
+        final AdminParser parser = new AdminParser("deleteadmin");
+
         setOptions(parser);
 
         String successtext = null;
@@ -94,12 +94,12 @@ public class Delete extends ResellerAbstraction {
 
             parseAndSetAdminId(parser, adm);
             parseAndSetAdminname(parser, adm);
-            
+
             successtext = nameOrIdSetInt(this.adminid, this.adminname, "admin");
-            
+
             final OXResellerInterface rsi = getResellerInterface();
             rsi.delete(adm, auth);
-            
+
             displayDeletedMessage(successtext, null, parser);
             sysexit(0);
         } catch (final Exception e) {

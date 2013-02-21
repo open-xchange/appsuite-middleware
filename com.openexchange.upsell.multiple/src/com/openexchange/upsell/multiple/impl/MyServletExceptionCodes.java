@@ -56,8 +56,8 @@ import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * {@link MyServletException}
- * 
- * 
+ *
+ *
  */
 public enum MyServletExceptionCodes implements OXExceptionCode {
 

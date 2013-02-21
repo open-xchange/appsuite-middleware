@@ -124,7 +124,7 @@ public interface HtmlService {
 
     /**
      * Sanitizes specified HTML content.
-     * 
+     *
      * @param htmlContent The HTML content to sanitize
      * @param optConfigName The optional configuration name to read whitelist from
      * @param dropExternalImages Whether to drop image URLs
@@ -207,7 +207,7 @@ public interface HtmlService {
      * @return The HTML content with <code>&lt;script&gt;</code> tags removed
      */
     String dropScriptTagsInHeader(String htmlContent);
-    
+
     /**
      * Extracts CSS-stylesheets from HTML header
      * @param htmlContent The HTML content

@@ -53,7 +53,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
-import com.openexchange.templating.TemplateServiceImpl;
 import com.openexchange.templating.TemplatingHelper;
 
 
@@ -85,10 +84,10 @@ public class TemplatingHelperImpl implements TemplatingHelper {
         } else {
             template = templateService.loadTemplate(templateName);
         }
-        
+
         AllocatingStringWriter writer = new AllocatingStringWriter();
         template.process(rootObject, writer);
-        
+
         return writer.toString();
     }
 

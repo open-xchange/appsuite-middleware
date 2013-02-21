@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link SolrCoreIdentifier}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrCoreIdentifier implements Serializable {
@@ -69,7 +69,7 @@ public class SolrCoreIdentifier implements Serializable {
 
     /**
      * Initializes a new {@link SolrCoreIdentifier}.
-     * 
+     *
      * @param contextId
      * @param userId
      * @param module
@@ -80,7 +80,7 @@ public class SolrCoreIdentifier implements Serializable {
         this.userId = userId;
         this.module = module;
     }
-    
+
     public SolrCoreIdentifier(final String identifier) throws OXException {
         super();
         final int i1 = identifier.indexOf("sc_c");
@@ -89,7 +89,7 @@ public class SolrCoreIdentifier implements Serializable {
         if (i1 == -1 || i2 == -1 || i3 == -1) {
             throw SolrExceptionCodes.IDENTIFIER_PARSE_ERROR.create(identifier);
         }
-            
+
         try {
             contextId = Integer.parseInt(identifier.substring(i1 + 4, i2));
             userId = Integer.parseInt(identifier.substring(i2 + 2, i3));
@@ -101,7 +101,7 @@ public class SolrCoreIdentifier implements Serializable {
 
     /**
      * Gets the contextId
-     * 
+     *
      * @return The contextId
      */
     public int getContextId() {
@@ -110,7 +110,7 @@ public class SolrCoreIdentifier implements Serializable {
 
     /**
      * Gets the userId
-     * 
+     *
      * @return The userId
      */
     public int getUserId() {
@@ -119,7 +119,7 @@ public class SolrCoreIdentifier implements Serializable {
 
     /**
      * Gets the module
-     * 
+     *
      * @return The module
      */
     public int getModule() {

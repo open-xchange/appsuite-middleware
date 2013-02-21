@@ -183,7 +183,13 @@ public class ListExecutedTasksCLT {
                 TabularData taskList = (TabularData) mbsc.invoke(Constants.OBJECT_NAME, "listExecutedTasks", new Object[] { schemaName }, null);
                 writeTasks(taskList);
             } finally {
-                jmxConnector.close();
+                if (null != jmxConnector) {
+                    try {
+                        jmxConnector.close();
+                    } catch (final Exception e) {
+                        // Ignore
+                    }
+                }
             }
         } catch (InstanceNotFoundException e) {
             System.err.println("Instance is not available: " + e.getMessage());

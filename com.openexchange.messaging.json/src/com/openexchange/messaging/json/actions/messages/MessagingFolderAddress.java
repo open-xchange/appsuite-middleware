@@ -67,7 +67,9 @@ public class MessagingFolderAddress {
         final MessagingFolderAddress address = new MessagingFolderAddress();
         int state = 0;
         final StringBuilder builder = new StringBuilder();
-        for (final char c : folderId.toCharArray()) {
+        final int length = folderId.length();
+        for (int i = 0; i < length; i++) {
+            final char c = folderId.charAt(i);
             switch (c) {
             case ':':
                 switch (state) {

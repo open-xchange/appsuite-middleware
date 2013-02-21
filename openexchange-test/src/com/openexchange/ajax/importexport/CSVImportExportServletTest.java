@@ -109,13 +109,13 @@ public class CSVImportExportServletTest extends AbstractManagedContactTest  {
 		final String insertedCSV = "bla1\nbla2,bla3";
 		
 		CSVImportResponse importResponse = client.execute(new CSVImportRequest(folderID, new ByteArrayInputStream(insertedCSV.getBytes()), false));
-		assertEquals("I_E-0804", importResponse.getException().getErrorCode());
+		assertEquals("Unexpected error code: " + importResponse.getException(), "I_E-0804", importResponse.getException().getErrorCode());
 	}
 
 	public void testEmptyFileUploaded() throws Exception{
-		final InputStream is = new ByteArrayInputStream("".getBytes());
+		final InputStream is = new ByteArrayInputStream("Given name,Email 1, Display name".getBytes());
 		CSVImportResponse importResponse = client.execute(new CSVImportRequest(folderID, is, false));
-		assertEquals("I_E-1314", importResponse.getException().getErrorCode());
+		assertEquals("Unexpected error code: " + importResponse.getException(), "I_E-1314", importResponse.getException().getErrorCode());
 	}
 
 	public void notestDoubleImport() throws Exception{

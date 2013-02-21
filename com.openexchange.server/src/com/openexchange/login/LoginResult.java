@@ -67,14 +67,14 @@ public interface LoginResult {
 
     /**
      * Get the cookies which should be set on the response
-     * 
-     * @return A {@link Cookie} object or null if the underlying implementation did not provide any cookies to set 
+     *
+     * @return A {@link Cookie} object or null if the underlying implementation did not provide any cookies to set
      */
     Cookie[] getCookies();
 
     /**
      * Get the headers which should be set on the response
-     * 
+     *
      * @return A {@link Header} object of null if the underlying implementation did not provide any headers to set
      */
     Header[] getHeaders();
@@ -149,4 +149,11 @@ public interface LoginResult {
      * @param warnings The warnings to add
      */
     void addWarnings(Collection<? extends OXException> warnings);
+
+    /**
+     * This method only returns not <code>null</code> if the token login request was used. Otherwise there will be no server side token.
+     *
+     * @return the server side token of the token login mechanism.
+     */
+    String getServerToken();
 }

@@ -54,7 +54,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -88,6 +87,7 @@ import javax.mail.internet.idn.IDNA;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
@@ -106,6 +106,8 @@ import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.HTMLDetector;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
@@ -136,7 +138,6 @@ import com.openexchange.mail.mime.utils.sourcedimage.SourcedImageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.impl.Version;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
@@ -148,6 +149,7 @@ import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.openexchange.user.UserService;
+import com.openexchange.version.Version;
 
 /**
  * {@link MimeMessageFiller} - Provides basic methods to fills an instance of {@link MimeMessage} with headers/contents given through an
@@ -191,17 +193,13 @@ public class MimeMessageFiller {
      * Fields
      */
     protected final Session session;
-
     protected final Context ctx;
-
     protected final UserSettingMail usm;
-
     protected int accountId;
 
     private Set<String> uploadFileIDs;
-
     private Set<String> contentIds;
-
+    private boolean discardReferencedInlinedImages;
     private final HtmlService htmlService;
 
     /**
@@ -223,22 +221,35 @@ public class MimeMessageFiller {
      */
     public MimeMessageFiller(final Session session, final Context ctx, final UserSettingMail usm) {
         super();
+        discardReferencedInlinedImages = true;
         htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
         this.session = session;
         this.ctx = ctx;
         this.usm = usm;
     }
-    
+
+    /**
+     * Sets whether to discard referenced inlined images.
+     *
+     * @param discardReferencedInlinedImages The flag to set
+     * @return This filler with new behavior applied
+     */
+    public MimeMessageFiller setDiscardReferencedInlinedImages(boolean discardReferencedInlinedImages) {
+        this.discardReferencedInlinedImages = discardReferencedInlinedImages;
+        return this;
+    }
+
     /**
      * Sets the account identifier
      *
      * @param accountId The account identifier to set
+     * @return This filler with account identifier set
      */
     public MimeMessageFiller setAccountId(final int accountId) {
         this.accountId = accountId;
         return this;
     }
-    
+
     /**
      * Gets the account identifier
      *
@@ -284,7 +295,7 @@ public class MimeMessageFiller {
         /*
          * Set mailer
          */
-        mimeMessage.setHeader(MessageHeaders.HDR_X_MAILER, "Open-Xchange Mailer v" + Version.getVersionString());
+        mimeMessage.setHeader(MessageHeaders.HDR_X_MAILER, "Open-Xchange Mailer v" + Version.getInstance().getVersionString());
         /*
          * Set organization to context-admin's company field setting
          */
@@ -340,7 +351,7 @@ public class MimeMessageFiller {
                 }
                 // Prefer request's remote address if local IP seems to denote local host
                 final Props logProperties = LogProperties.optLogProperties();
-                final String clientIp = null == logProperties ? null : logProperties.<String> get("com.openexchange.ajp13.requestIp");
+                final String clientIp = null == logProperties ? null : logProperties.<String> get(LogProperties.Name.AJP_REQUEST_IP);
                 mimeMessage.setHeader("X-Originating-IP", clientIp == null ? localIp : clientIp);
             } else {
                 mimeMessage.setHeader("X-Originating-IP", localIp);
@@ -740,7 +751,14 @@ public class MimeMessageFiller {
      * @throws OXException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    public void fillMailBody(final ComposedMailMessage mail, final MimeMessage mimeMessage, final ComposeType type) throws MessagingException, OXException, IOException {
+    public void fillMailBody(final ComposedMailMessage mail, final MimeMessage mimeMessage, ComposeType type) throws MessagingException, OXException, IOException {
+        /*
+         * Adopt Content-Type to ComposeType if necessary
+         */
+        if (ComposeType.NEW_SMS.equals(type)) {
+            final ContentType contentType = mail.getContentType();
+            contentType.setPrimaryType("text").setSubType("plain");
+        }
         /*
          * Store some flags
          */
@@ -854,8 +872,8 @@ public class MimeMessageFiller {
                          *
                          * Well-formed HTML
                          */
-                        final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
-                        primaryMultipart.addBodyPart(createTextBodyPart(toArray(wellFormedHTMLContent, content), charset, false, true, type), 0);
+                        // final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
+                        primaryMultipart.addBodyPart(createTextBodyPart(toArray(content, content), charset, false, true, type), 0);
                     } else {
                         primaryMultipart.addBodyPart(createTextBodyPart(toArray(plainText, plainText), charset, false, false, type), 0);
                     }
@@ -896,25 +914,30 @@ public class MimeMessageFiller {
                     List<String> cidList = null;
                     for (int i = 0; i < size; i++) {
                         if (null == contentIds) {
-                            final MailPart mailPart = mail.getEnclosedMailPart(i);
-                            boolean add = false;
-                            if (embeddedImages && mailPart.getContentType().startsWith("image/")) {
-                                final String contentId = mailPart.getContentId();
-                                if (null != contentId) {
-                                    // Check if image is already inlined inside HTML content
-                                    if (null == cidList) {
-                                        cidList = MimeMessageUtility.getContentIDs(content);
+                            if (discardReferencedInlinedImages) {
+                                final MailPart mailPart = mail.getEnclosedMailPart(i);
+                                boolean add = false;
+                                if (embeddedImages && mailPart.getContentType().startsWith("image/")) {
+                                    final String contentId = mailPart.getContentId();
+                                    if (null != contentId) {
+                                        // Check if image is already inlined inside HTML content
+                                        if (null == cidList) {
+                                            cidList = MimeMessageUtility.getContentIDs(content);
+                                        }
+                                        add = !MimeMessageUtility.containsContentId(contentId, cidList);
+                                    } else {
+                                        // A regular file-attachment image
+                                        add = true;
                                     }
-                                    add = !MimeMessageUtility.containsContentId(contentId, cidList);
                                 } else {
-                                    // A regular file-attachment image
                                     add = true;
                                 }
+                                if (add) {
+                                    addMessageBodyPart(primaryMultipart, mailPart, false);
+                                }
                             } else {
-                                add = true;
-                            }
-                            if (add) {
-                                addMessageBodyPart(primaryMultipart, mailPart, false);
+                                // A regular file-attachment image
+                                addMessageBodyPart(primaryMultipart, mail.getEnclosedMailPart(i), false);
                             }
                         } else {
                             final MailPart mailPart = mail.getEnclosedMailPart(i);
@@ -1007,10 +1030,11 @@ public class MimeMessageFiller {
         /*
          * Create a non-multipart message
          */
-        if (mail.getContentType().startsWith("text/")) {
-            final boolean isPlainText = mail.getContentType().startsWith(MimeTypes.MIME_TEXT_PLAIN);
-            if (mail.getContentType().getCharsetParameter() == null) {
-                mail.getContentType().setCharsetParameter(charset);
+        final ContentType contentType = mail.getContentType();
+        if (contentType.startsWith("text/")) {
+            final boolean isPlainText = contentType.startsWith(MimeTypes.MIME_TEXT_PLAIN);
+            if (contentType.getCharsetParameter() == null) {
+                contentType.setCharsetParameter(charset);
             }
             if (primaryMultipart == null) {
                 final String mailText;
@@ -1023,14 +1047,19 @@ public class MimeMessageFiller {
                     {
                         final String plainText = textBodyPart.getPlainText();
                         if (null == plainText) {
-                            isHtml = true;
                             /*-
-                             * Expect HTML content
+                             * Check for HTML content
                              *
                              * Well-formed HTML
                              */
-                            final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
-                            text = wellFormedHTMLContent;
+                            if (HTMLDetector.containsHTMLTags(content.getBytes(Charsets.ISO_8859_1))) {
+                                isHtml = true;
+                                final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
+                                text = wellFormedHTMLContent;                                
+                            } else {
+                                isHtml = false;
+                                text = content;
+                            }
                         } else {
                             isHtml = false;
                             text = plainText;
@@ -1042,21 +1071,21 @@ public class MimeMessageFiller {
                     if (text == null || text.length() == 0) {
                         mailText = "";
                     } else if (isHtml) {
-                        mailText = ComposeType.NEW_SMS.equals(type) ? text : performLineFolding(htmlService.html2text(text, true), usm.getAutoLinebreak());
+                        mailText = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(htmlService.html2text(text, true), usm.getAutoLinebreak());
                     } else {
-                        mailText = ComposeType.NEW_SMS.equals(type) ? text : performLineFolding(text, usm.getAutoLinebreak());
+                        mailText = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(text, usm.getAutoLinebreak());
                     }
                 } else {
-                    mailText = htmlService.getConformHTML(content, mail.getContentType().getCharsetParameter());
+                    mailText = htmlService.getConformHTML(content, contentType.getCharsetParameter());
                 }
-                mimeMessage.setContent(mailText, mail.getContentType().toString());
+                mimeMessage.setContent(mailText, contentType.toString());
                 mimeMessage.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-                mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(mail.getContentType().toString()));
+                mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
             } else {
                 final MimeBodyPart msgBodyPart = new MimeBodyPart();
-                msgBodyPart.setContent(mail.getContent(), mail.getContentType().toString());
+                msgBodyPart.setContent(mail.getContent(), contentType.toString());
                 msgBodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-                msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(mail.getContentType().toString()));
+                msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
                 primaryMultipart.addBodyPart(msgBodyPart);
             }
         } else {
@@ -1123,6 +1152,9 @@ public class MimeMessageFiller {
         } catch (final ConverterException e) {
             throw MailExceptionCode.VERSIT_ERROR.create(e, e.getMessage());
         } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
@@ -1266,7 +1298,7 @@ public class MimeMessageFiller {
             } else {
                 final DataSource dataSource;
                 if ("base64".equalsIgnoreCase(image.getTransferEncoding())) {
-                    dataSource = new MessageDataSource(Base64.decodeBase64(image.getData().getBytes(com.openexchange.java.Charsets.US_ASCII)), image.getContentType());
+                    dataSource = new MessageDataSource(Base64.decodeBase64(Charsets.toAsciiBytes(image.getData())), image.getContentType());
                 } else {
                     /*
                      * Expect quoted-printable instead
@@ -1310,7 +1342,7 @@ public class MimeMessageFiller {
             if (null != header && 0 < header.length && header[0].toLowerCase(Locale.US).startsWith("image/")) {
                 header = bodyPart.getHeader(MessageHeaders.HDR_CONTENT_ID);
                 if (null != header && 0 < header.length) {
-                    contentIds.add(header[0]);   
+                    contentIds.add(header[0]);
                 }
             }
         }
@@ -1395,7 +1427,7 @@ public class MimeMessageFiller {
                     out.write(bbuf, 0, len);
                 }
             } finally {
-                in.close();
+                Streams.close(in);
             }
             rfcBytes = out.toByteArray();
         }
@@ -1512,7 +1544,7 @@ public class MimeMessageFiller {
         // htmlContent), false, usm.getAutoLinebreak()),
         // MailConfig.getDefaultMimeCharset());
         text.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, Matcher.quoteReplacement(charset)));
+        text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, PAT_TEXT_CT.replaceFirst(REPLACE_CS, com.openexchange.java.Strings.quoteReplacement(charset)));
         return text;
     }
 
@@ -1527,7 +1559,7 @@ public class MimeMessageFiller {
      * @throws MessagingException If a messaging error occurs
      */
     protected final BodyPart createHtmlBodyPart(final String wellFormedHTMLContent, final String charset) throws MessagingException {
-        final String contentType = PAT_HTML_CT.replaceFirst(REPLACE_CS, Matcher.quoteReplacement(charset));
+        final String contentType = PAT_HTML_CT.replaceFirst(REPLACE_CS, com.openexchange.java.Strings.quoteReplacement(charset));
         final MimeBodyPart html = new MimeBodyPart();
         if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
             html.setContent(htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(HTML_SPACE, ""), contentType);
@@ -1720,7 +1752,7 @@ public class MimeMessageFiller {
                     /*
                      * Replace "src" attribute
                      */
-                    String iTag = imageTag.replaceFirst("(?i)src=\"[^\"]*\"", Matcher.quoteReplacement("src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, tmp, mp) + "\""));
+                    String iTag = imageTag.replaceFirst("(?i)src=\"[^\"]*\"", com.openexchange.java.Strings.quoteReplacement("src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, tmp, mp) + "\""));
                     iTag = iTag.replaceFirst("(?i)id=\"[^\"]*@" + VERSION_NAME + "\"", "");
                     m.appendLiteralReplacement(sb, iTag);
                 } else {
@@ -1737,8 +1769,8 @@ public class MimeMessageFiller {
 
     private static String urlDecode(final String s) {
         try {
-            return URLDecoder.decode(replaceURLCodePoints(s), "ISO-8859-1");
-        } catch (final UnsupportedEncodingException e) {
+            return AJAXServlet.decodeUrl(replaceURLCodePoints(s), "ISO-8859-1");
+        } catch (final RuntimeException e) {
             return s;
         }
     }
@@ -1750,7 +1782,7 @@ public class MimeMessageFiller {
         final StringBuffer buffer = new StringBuffer(s.length());
         while (m.find()) {
             final char[] chars = Character.toChars(Integer.parseInt(m.group(1), 16));
-            m.appendReplacement(buffer, Matcher.quoteReplacement(new String(chars)));
+            m.appendReplacement(buffer, com.openexchange.java.Strings.quoteReplacement(new String(chars)));
         }
         m.appendTail(buffer);
         return buffer.toString();
@@ -1951,6 +1983,9 @@ public class MimeMessageFiller {
             try {
                 return new MessageDataSource(data.getData(), contentType);
             } catch (final IOException e) {
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
         }

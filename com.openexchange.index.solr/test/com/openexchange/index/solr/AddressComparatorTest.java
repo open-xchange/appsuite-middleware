@@ -62,9 +62,9 @@ import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.index.solr.internal.Services;
 import com.openexchange.index.solr.internal.mail.AddressComparator;
-import com.openexchange.index.solr.internal.mail.SolrMailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
 
@@ -75,32 +75,32 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class AddressComparatorTest extends TestCase {
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        Services.setServiceLookup(new ServiceLookup() {            
+        Services.setServiceLookup(new ServiceLookup() {
             @Override
             public <S> S getService(Class<? extends S> clazz) {
                 return (S) new MockConfigurationService();
             }
-            
+
             @Override
             public <S> S getOptionalService(Class<? extends S> clazz) {
                 return null;
             }
         });
     }
-    
-    public void testCompare() throws Exception {    	
+
+    public void testCompare() throws Exception {
         IndexDocument<MailMessage> m1 = new StandardIndexDocument<MailMessage>(new MockMailMessage(new QuotedInternetAddress[] {
         		new QuotedInternetAddress("aaa@abc.de", "Aa, Aa"),
         		new QuotedInternetAddress("bbb@abc.de", "Bb, Bb"),
-        		new QuotedInternetAddress("iii@abc.de", "Ii, Ii")        		
+        		new QuotedInternetAddress("iii@abc.de", "Ii, Ii")
         		}));
         IndexDocument<MailMessage> m2 = new StandardIndexDocument<MailMessage>(new MockMailMessage(new QuotedInternetAddress[] {
         		new QuotedInternetAddress("hhh@abc.de", "Hh, Hh"),
-        		new QuotedInternetAddress("ccc@abc.de", "Cc, Cc"), 
+        		new QuotedInternetAddress("ccc@abc.de", "Cc, Cc"),
         		new QuotedInternetAddress("fff@abc.de", "Ff, Ff")
         		}));
         IndexDocument<MailMessage> m3 = new StandardIndexDocument<MailMessage>(new MockMailMessage(new QuotedInternetAddress[] {
@@ -112,26 +112,26 @@ public class AddressComparatorTest extends TestCase {
         documents.add(m1);
         documents.add(m2);
         documents.add(m3);
-        Collections.shuffle(documents);      
+        Collections.shuffle(documents);
 
-        AddressComparator comp = new AddressComparator(SolrMailField.FROM, Order.ASC);
+        AddressComparator comp = new AddressComparator(MailIndexField.FROM, Order.ASC);
         Collections.sort(documents, comp);
         assertTrue(documents.get(0) == m1);
         assertTrue(documents.get(1) == m2);
         assertTrue(documents.get(2) == m3);
-        
-        comp = new AddressComparator(SolrMailField.FROM, Order.DESC);
+
+        comp = new AddressComparator(MailIndexField.FROM, Order.DESC);
         Collections.sort(documents, comp);
         assertTrue(documents.get(0) == m1);
         assertTrue(documents.get(1) == m2);
         assertTrue(documents.get(2) == m3);
     }
-    
+
     public void testNull() throws Exception {
         IndexDocument<MailMessage> m1 = new StandardIndexDocument<MailMessage>(new MockMailMessage(new QuotedInternetAddress[] {
             new QuotedInternetAddress("aaa@abc.de", "Aa, Aa"),
             new QuotedInternetAddress("bbb@abc.de", "Bb, Bb"),
-            null               
+            null
             }));
         IndexDocument<MailMessage> m2 = new StandardIndexDocument<MailMessage>(new MockMailMessage(null));
         IndexDocument<MailMessage> m3 = new StandardIndexDocument<MailMessage>(new MockMailMessage(new QuotedInternetAddress[] {
@@ -139,31 +139,31 @@ public class AddressComparatorTest extends TestCase {
             new QuotedInternetAddress("eee@abc.de", "Ee, Ee"),
             new QuotedInternetAddress("ddd@abc.de", "Dd, Dd")
             }));
-    
+
         List<IndexDocument<MailMessage>> documents = new ArrayList<IndexDocument<MailMessage>>();
         documents.add(m1);
         documents.add(m2);
         documents.add(m3);
-        Collections.shuffle(documents);   
-        
-        AddressComparator comp = new AddressComparator(SolrMailField.FROM, Order.ASC);
+        Collections.shuffle(documents);
+
+        AddressComparator comp = new AddressComparator(MailIndexField.FROM, Order.ASC);
         Collections.sort(documents, comp);
         assertTrue(documents.get(0) == m1);
         assertTrue(documents.get(1) == m3);
         assertTrue(documents.get(2) == m2);
     }
-    
+
     private static final class MockMailMessage extends MailMessage {
 
 		private static final long serialVersionUID = -7674767132402239055L;
-        
+
         private final InternetAddress[] addrs;
 
         public MockMailMessage(final InternetAddress[] addrs) {
             super();
             this.addrs = addrs;
         }
-        
+
         @Override
         public InternetAddress[] getFrom() {
             return addrs;
@@ -178,7 +178,7 @@ public class AddressComparatorTest extends TestCase {
         @Override
         public void setMailId(final String id) {
             // Nothing to do
-            
+
         }
 
         @Override
@@ -190,7 +190,7 @@ public class AddressComparatorTest extends TestCase {
         @Override
         public void setUnreadMessages(final int unreadMessages) {
             // Nothing to do
-            
+
         }
 
         @Override
@@ -226,15 +226,15 @@ public class AddressComparatorTest extends TestCase {
         @Override
         public void loadContent() throws OXException {
             // Nothing to do
-            
+
         }
 
         @Override
         public void prepareForCaching() {
             // Nothing to do
-            
+
         }
-        
+
     }
 
 }

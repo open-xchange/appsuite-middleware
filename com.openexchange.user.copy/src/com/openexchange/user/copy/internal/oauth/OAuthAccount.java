@@ -51,7 +51,7 @@ package com.openexchange.user.copy.internal.oauth;
 
 /**
  * {@link OAuthAccount}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class OAuthAccount {
@@ -65,7 +65,7 @@ public class OAuthAccount {
     private String accessSecret;
 
     private String serviceId;
-    
+
 
     public OAuthAccount() {
         super();
@@ -164,7 +164,7 @@ public class OAuthAccount {
         }
         return true;
     }
-    
+
     /**
      * @see java.lang.Object#toString()
      */

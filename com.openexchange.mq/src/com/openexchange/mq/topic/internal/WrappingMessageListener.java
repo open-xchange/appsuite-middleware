@@ -63,7 +63,7 @@ import com.openexchange.mq.topic.MQTopicListener;
 
 /**
  * {@link WrappingMessageListener} - A {@link MessageListener} that wraps a given {@link MQTopicListener}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class WrappingMessageListener extends AbstractWrappingMessageListener implements MessageListener, ExceptionListener {
@@ -74,7 +74,7 @@ public final class WrappingMessageListener extends AbstractWrappingMessageListen
 
     /**
      * Initializes a new {@link WrappingMessageListener}.
-     * 
+     *
      * @param listener The topic listener to delegate the callbacks to
      */
     public WrappingMessageListener(final MQTopicListener listener) {

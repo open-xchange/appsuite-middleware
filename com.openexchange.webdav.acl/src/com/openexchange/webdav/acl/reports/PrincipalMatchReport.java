@@ -72,14 +72,14 @@ import com.openexchange.webdav.xml.resources.ResourceMarshaller;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class PrincipalMatchReport extends WebdavPropfindAction {
-    
+
     public static final String NAMESPACE = DAV_NS.getURI();
     public static final String NAME = "principal-match";
-    
+
     public PrincipalMatchReport(Protocol protocol) {
         super(protocol);
     }
-    
+
     @Override
     public void perform(WebdavRequest req, WebdavResponse res) throws WebdavProtocolException {
         if (0 != req.getDepth(0) || false == req.getResource().isCollection()) {
@@ -99,14 +99,14 @@ public class PrincipalMatchReport extends WebdavPropfindAction {
             response.addNamespaceDeclaration(namespace);
         }
         /*
-         * always marshal properties from current user: matches both if "self" is requested, and also any requested 
+         * always marshal properties from current user: matches both if "self" is requested, and also any requested
          * properties via the "principal-property" for the root principal collection of users.
          */
         PrincipalWebdavFactory factory = (PrincipalWebdavFactory)req.getFactory();
         User user = factory.getSessionHolder().getUser();
         UserPrincipalResource resource = new UserPrincipalResource(factory, user, new WebdavPath().append(user.getLoginInfo()));
         ResourceMarshaller marshaller = getMarshaller(req, forceAllProp, requestBody, null);
-        response.addContent(marshaller.marshal(resource));            
+        response.addContent(marshaller.marshal(resource));
 
         Document responseBody = new Document(response);
         try {
@@ -116,7 +116,7 @@ public class PrincipalMatchReport extends WebdavPropfindAction {
         } catch (IOException e) {
             // IGNORE
         }
-        
+
     }
-    
+
 }

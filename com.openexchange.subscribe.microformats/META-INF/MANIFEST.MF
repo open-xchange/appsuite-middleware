@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Microformats Subscription Plug-in
 Bundle-SymbolicName: com.openexchange.subscribe.microformats
-Bundle-Version: 7.0.0
+Bundle-Version: 7.0.1
 Bundle-Activator: com.openexchange.subscribe.microformats.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -21,6 +21,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.openexchange.server,
  com.openexchange.subscribe,
  com.openexchange.subscribe.helpers,
  com.openexchange.timer,
@@ -29,6 +30,8 @@ Import-Package: com.openexchange.config,
  com.openexchange.tools.ssl,
  com.openexchange.tools.stream,
  com.openexchange.tools.versit.converter,
+ gnu.trove.set,
+ gnu.trove.set.hash,
  javax.xml.stream,
  javax.xml.stream.events,
  javax.xml.stream.util,

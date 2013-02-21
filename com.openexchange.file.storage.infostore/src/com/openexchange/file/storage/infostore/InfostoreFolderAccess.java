@@ -57,6 +57,7 @@ import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.infostore.folder.FolderParser;
 import com.openexchange.file.storage.infostore.folder.FolderWriter;
 import com.openexchange.file.storage.infostore.folder.ParsedFolder;
+import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
@@ -71,6 +72,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class InfostoreFolderAccess implements FileStorageFolderAccess {
+
+    private static final String INFOSTORE_FOLDER_ID = "9";
 
     private static final String REAL_TREE_ID = FolderStorage.REAL_TREE_ID;
 
@@ -137,13 +140,13 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
     @Override
     public FileStorageFolder getFolder(final String folderId) throws OXException {
         final FolderService service = Services.getService(FolderService.class);
-        return FolderWriter.parseFolder(service.getFolder(REAL_TREE_ID, folderId, session, null));
+        return FolderWriter.writeFolder(service.getFolder(REAL_TREE_ID, folderId, session, null));
     }
 
     @Override
     public FileStorageFolder getPersonalFolder() throws OXException {
         final FolderService service = Services.getService(FolderService.class);
-        return FolderWriter.parseFolder(service.getDefaultFolder(
+        return FolderWriter.writeFolder(service.getDefaultFolder(
             UserStorage.getStorageUser(session.getUserId(), session.getContext()),
             REAL_TREE_ID,
             FolderParser.getContentType(),
@@ -157,7 +160,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
         final UserizedFolder[] subfolders = service.getSubfolders(REAL_TREE_ID, "15", true, session, null).getResponse();
         final FileStorageFolder[] ret = new FileStorageFolder[subfolders.length];
         for (int i = 0; i < ret.length; i++) {
-            ret[i] = FolderWriter.parseFolder(subfolders[i]);
+            ret[i] = FolderWriter.writeFolder(subfolders[i]);
         }
         return ret;
     }
@@ -168,26 +171,28 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
         final UserizedFolder[] folders = service.getPath(REAL_TREE_ID, folderId, session, null).getResponse();
         final FileStorageFolder[] ret = new FileStorageFolder[folders.length];
         for (int i = 0; i < ret.length; i++) {
-            ret[i] = FolderWriter.parseFolder(folders[i]);
+            ret[i] = FolderWriter.writeFolder(folders[i]);
         }
         return ret;
     }
 
     @Override
     public Quota[] getQuotas(final String folder, final Type[] types) throws OXException {
-        // Nothing to do
-        return null;
+        final Quota[] ret = new Quota[types.length];
+        for (int i = 0; i < types.length; i++) {
+            ret[i] = types[i].getUnlimited();
+        }
+        return ret;
     }
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        return getFolder("9");
+        return getFolder(INFOSTORE_FOLDER_ID);
     }
 
     @Override
     public Quota getStorageQuota(final String folderId) throws OXException {
-        // Nothing to do
-        return null;
+        return Type.STORAGE.getUnlimited();
     }
 
     @Override
@@ -196,7 +201,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
         final UserizedFolder[] subfolders = service.getSubfolders(REAL_TREE_ID, parentIdentifier, all, session, null).getResponse();
         final FileStorageFolder[] ret = new FileStorageFolder[subfolders.length];
         for (int i = 0; i < ret.length; i++) {
-            ret[i] = FolderWriter.parseFolder(subfolders[i]);
+            ret[i] = FolderWriter.writeFolder(subfolders[i]);
         }
         return ret;
     }
@@ -223,8 +228,10 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
 
     @Override
     public String updateFolder(final String identifier, final FileStorageFolder toUpdate) throws OXException {
-        // Nothing to do
-        return null;
+        final FolderService service = Services.getService(FolderService.class);
+        final Folder parsedFolder = FolderParser.parseFolder(toUpdate);
+        service.updateFolder(parsedFolder, null, session, null);
+        return parsedFolder.getNewID();
     }
 
 }

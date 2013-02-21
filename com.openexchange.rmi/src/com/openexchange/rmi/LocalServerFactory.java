@@ -57,7 +57,7 @@ import org.apache.commons.logging.Log;
 
 /**
  * {@link LocalServerFactory}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class LocalServerFactory implements RMIServerSocketFactory {

@@ -70,9 +70,9 @@ import com.openexchange.solr.rmi.RMISolrAccessService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrIndexEventHandler implements EventHandler {
-    
+
     private final DelegationSolrAccessImpl solrAccess;
-    
+
 
     public SolrIndexEventHandler(DelegationSolrAccessImpl solrAccess) {
         super();
@@ -96,7 +96,7 @@ public class SolrIndexEventHandler implements EventHandler {
                         solrAccess.freeResources(identifier);
                     } else {
                         ConfigurationService config = Services.getService(ConfigurationService.class);
-                        int rmiPort = config.getIntProperty("RMI_PORT", 1099);
+                        int rmiPort = config.getIntProperty("com.openexchange.rmi.port", 1099);
                         Registry registry = LocateRegistry.getRegistry(owner, rmiPort);
                         RMISolrAccessService rmiAccess = (RMISolrAccessService) registry.lookup(RMISolrAccessService.RMI_NAME);
                         rmiAccess.freeResources(identifier);

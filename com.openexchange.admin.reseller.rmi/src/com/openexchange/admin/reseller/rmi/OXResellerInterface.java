@@ -80,7 +80,7 @@ public interface OXResellerInterface extends Remote {
      *  HashSet<Restriction> rss = new HashSet<Restriction>();
      *  rss.add(new Restriction(Restriction.MAX_CONTEXT_PER_SUBADMIN, "100"));
      *  rss.add(new Restriction(Restriction.MAX_OVERALL_USER_PER_SUBADMIN,"1000"));
-     * 
+     *
      * @param adm {@link ResellerAdmin} object
      * @param creds {@link Credentials} of the master admin
      * @return {@link ResellerAdmin} object
@@ -94,7 +94,7 @@ public interface OXResellerInterface extends Remote {
 
     /**
      * Delete ResellerAdmin from database If any objects still belong to this subadmin, the deletion will fail
-     * 
+     *
      * @param adm {@link ResellerAdmin} object
      * @param creds {@link Credentials} of the master admin
      * @throws RemoteException
@@ -107,7 +107,7 @@ public interface OXResellerInterface extends Remote {
 
     /**
      * Change ResellerAdmin parameters
-     * 
+     *
      * @param adm {@link ResellerAdmin} object
      * @param creds {@link Credentials} of the master admin
      * @throws RemoteException
@@ -120,7 +120,7 @@ public interface OXResellerInterface extends Remote {
 
     /**
      * Search for specific or all subadmins in the database
-     * 
+     *
      * @param search_pattern search pattern like e.g. "*foo*"
      * @param creds {@link Credentials} of the master admin
      * @return {@link ResellerAdmin} array containing search result
@@ -134,7 +134,7 @@ public interface OXResellerInterface extends Remote {
     /**
      * Get complete data from all subadmin objects contained in array. It is required to
      * either specify subadmin objects name or id.
-     * 
+     *
      * @param Array containing {@link ResellerAdmin} objects
      * @param creds {@link Credentials} of the master admin
      * @return {@link ResellerAdmin} array containing complete data
@@ -148,7 +148,7 @@ public interface OXResellerInterface extends Remote {
 
     /**
      * Get complete data from subadmin object. It is required to either specify subadmin objects name or id.
-     * 
+     *
      * @param {@link ResellerAdmin} object
      * @param creds {@link Credentials} of the master admin
      * @return {@link ResellerAdmin} containing complete data
@@ -162,7 +162,7 @@ public interface OXResellerInterface extends Remote {
 
     /**
      * Retrieve a list of all currently available {@link Restriction} objects
-     * 
+     *
      * @param creds {@link Credentials} of the master admin
      * @return {@link HashSet} of available restrictions
      * @throws RemoteException
@@ -174,7 +174,7 @@ public interface OXResellerInterface extends Remote {
 
     /**
      * Retrieve a list of all restrictions applied to given {@link Context}
-     * 
+     *
      * @param {@link Context} object
      * @param creds {@link Credentials} of the master admin
      * @return {@link HashSet} of restrictions applied to context
@@ -191,7 +191,7 @@ public interface OXResellerInterface extends Remote {
      * There's a set of static restrictions (see {@link Restriction}) as
      * well as every such restriction per defined module access combination from
      * /opt/open-xchange/etc/admindaemon/ModuleAccessDefinitions.properties
-     * 
+     *
      * @param creds {@link Credentials} of the master admin
      * @throws StorageException
      * @throws InvalidCredentialsException
@@ -201,7 +201,7 @@ public interface OXResellerInterface extends Remote {
 
     /**
      * Remove all restrictions from database
-     * 
+     *
      * @param creds {@link Credentials} of the master admin
      * @throws RemoteException
      * @throws InvalidCredentialsException
@@ -213,7 +213,7 @@ public interface OXResellerInterface extends Remote {
     /**
      * Update all restrictions based on module access combinations in case of changes to
      * /opt/open-xchange/etc/admindaemon/ModuleAccessDefinitions.properties
-     * 
+     *
      * @param creds {@link Credentials} of the master admin
      * @throws RemoteException
      * @throws StorageException
@@ -221,11 +221,11 @@ public interface OXResellerInterface extends Remote {
      * @throws OXResellerException
      */
     public void updateDatabaseModuleAccessRestrictions(final Credentials creds) throws RemoteException, StorageException, InvalidCredentialsException, OXResellerException;
-    
+
     /**
      * Update list of restrictions. This is going to add new restrictions that might ship with
      * a newer version of the reseller plugin.
-     * 
+     *
      * @param creds {@link Credentials} of the master admin
      * @throws RemoteException
      * @throws StorageException

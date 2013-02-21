@@ -49,10 +49,14 @@
 
 package com.openexchange.groupware.tasks;
 
+import static java.util.Calendar.DECEMBER;
+import static java.util.Calendar.JANUARY;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import com.openexchange.groupware.calendar.TimeTools;
+import com.openexchange.java.util.TimeZones;
 
 /**
  * {@link TestTask}
@@ -190,6 +194,26 @@ public class TestTask extends Task {
             setStartDate(new Date());
         }
         setStartDate(setWeekOfMonth(getStartDate(), week));
+        return this;
+    }
+
+    public TestTask startsWeekOfMonthOnDay(int week, int dayOfWeek) {
+        if (!containsStartDate()) {
+            setStartDate(new Date());
+        }
+        Calendar cal = new GregorianCalendar(TimeZones.UTC);
+        cal.setTime(getStartDate());
+        int currentMonth = cal.get(Calendar.MONTH);
+        setStartDate(setWeekOfMonth(setWeekDay(getStartDate(), dayOfWeek), week));
+        cal.setTime(getStartDate());
+        int otherMonth = cal.get(Calendar.MONTH);
+        if (otherMonth != currentMonth) {
+            // applying week of month and day of week shifted appointment to another month.
+            if (otherMonth < currentMonth || (JANUARY == currentMonth && DECEMBER == otherMonth)) {
+                cal.add(Calendar.WEEK_OF_MONTH, 1);
+                setStartDate(cal.getTime());
+            }
+        }
         return this;
     }
 

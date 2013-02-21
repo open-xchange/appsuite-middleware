@@ -208,7 +208,7 @@ public final class SystemSharedFolder {
                     creatorDisplayName = us.getUser(sharedFolder.getCreatedBy(), ctx).getDisplayName();
                 } catch (final OXException e) {
                     if (sharedFolder.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
-                        throw new OXException(e);
+                        throw e;
                     }
                     creatorDisplayName = strHelper.getString(Groups.ALL_USERS);
                 }

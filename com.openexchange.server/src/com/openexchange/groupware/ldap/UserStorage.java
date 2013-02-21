@@ -50,13 +50,17 @@
 package com.openexchange.groupware.ldap;
 
 import java.sql.Connection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
+import com.damienmiller.BCrypt;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.log.LogFactory;
 
 /**
  * This interface provides methods to read data from users in the directory
@@ -188,7 +192,7 @@ public abstract class UserStorage {
 
     /**
      * Searches user(s) by mail login.
-     * 
+     *
      * @param login The mail login
      * @param context The associated context
      * @return The queried users or an empty array of none found
@@ -208,7 +212,7 @@ public abstract class UserStorage {
 
     /**
      * Searches a user by its login/display name.
-     * 
+     *
      * @param name The login/display name of the user.
      * @param context The context.
      * @param searchType The search type
@@ -268,39 +272,65 @@ public abstract class UserStorage {
 
     /**
      * Creates a user within the database.
-     * 
+     *
      * @param con The connection.
      * @param context The context.
      * @param user The user.
      * @return The ID of the created user.
      */
-    public abstract int createUser(final Context context, final User user) throws OXException;    
-    
+    public abstract int createUser(final Context context, final User user) throws OXException;
+
     /**
-     * 
+     *
      * @param con The database connection.
      * @param context The context.
      * @param user The user.
      * @return The ID of the created user.
      */
     public abstract int createUser(final Connection con, final Context context, final User user) throws OXException;
-    
+
     public final void invalidateUser(final Context ctx, final int[] userIds) throws OXException {
         for (final int member : userIds) {
             invalidateUser(ctx, member);
         }
     }
 
-    public static final boolean authenticate(final User user,
-        final String password) throws OXException {
-        boolean retval = false;
-        if ("{CRYPT}".equals(user.getPasswordMech())) {
-            retval = UnixCrypt.matches(user.getUserPassword(), password);
-        } else if ("{SHA}".equals(user.getPasswordMech())) {
-            retval = UserTools.hashPassword(password).equals(user
-                .getUserPassword());
-        }
-        return retval;
+    private static interface PasswordCheck {
+
+        boolean checkPassword(String candidate, String userHash) throws OXException;
+    }
+
+    private static final Map<String, PasswordCheck> CHECKERS;
+
+    static {
+        final Map<String, PasswordCheck> m = new HashMap<String, UserStorage.PasswordCheck>(3);
+        m.put("{CRYPT}", new PasswordCheck() {
+
+            @Override
+            public boolean checkPassword(final String candidate, final String userHash) throws OXException {
+                return UnixCrypt.matches(userHash, candidate);
+            }
+        });
+        m.put("{SHA}", new PasswordCheck() {
+
+            @Override
+            public boolean checkPassword(final String candidate, final String userHash) throws OXException {
+                return UserTools.hashPassword(candidate).equals(userHash);
+            }
+        });
+        m.put("{BCRYPT}", new PasswordCheck() {
+
+            @Override
+            public boolean checkPassword(final String candidate, final String userHash) throws OXException {
+                return BCrypt.checkpw(candidate, userHash);
+            }
+        });
+        CHECKERS = Collections.unmodifiableMap(m);
+    }
+
+    public static final boolean authenticate(final User user, final String password) throws OXException {
+        final PasswordCheck check = CHECKERS.get(user.getPasswordMech());
+        return null == check ? false : check.checkPassword(password, user.getUserPassword());
     }
 
     /**

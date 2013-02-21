@@ -293,7 +293,7 @@ public final class IMAPConfig extends MailConfig {
 
     /**
      * Sets the ACL flag.
-     * 
+     *
      * @param acl <code>true</code> if ACL extension is supported; otherwise <code>false</code>
      */
     public void setAcl(boolean acl) {
