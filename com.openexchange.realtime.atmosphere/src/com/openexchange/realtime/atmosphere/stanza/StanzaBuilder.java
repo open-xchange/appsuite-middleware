@@ -106,7 +106,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
 
     private void id() {
         if (json.has("id")) {
-            stanza.setId(json.optString("to"));
+            stanza.setId(json.optString("id"));
         }
     }
 
