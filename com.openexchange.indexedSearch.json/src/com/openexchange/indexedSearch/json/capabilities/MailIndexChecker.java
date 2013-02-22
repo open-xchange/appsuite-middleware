@@ -47,57 +47,64 @@
  *
  */
 
-package com.openexchange.indexedSearch.json.osgi;
+package com.openexchange.indexedSearch.json.capabilities;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityChecker;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
+import com.openexchange.index.IndexAccess;
+import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexFacadeService;
-import com.openexchange.indexedSearch.json.IndexActionFactory;
-import com.openexchange.indexedSearch.json.ResultConverters;
-import com.openexchange.indexedSearch.json.capabilities.MailIndexChecker;
-import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link IndexJSONActivator}
+ * {@link MailIndexChecker}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class IndexJSONActivator extends AJAXModuleActivator {
-
-    private ResultConverters registry;
-
-    /**
-     * Initializes a new {@link IndexJSONActivator}.
-     */
-    public IndexJSONActivator() {
+public class MailIndexChecker implements CapabilityChecker {
+    
+    public static final String CAPABILITY = "searchindex-mail";
+    
+    private final ServiceLookup serviceLookup;
+    
+    public MailIndexChecker(ServiceLookup serviceLookup) {
         super();
+        this.serviceLookup = serviceLookup;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CapabilityService.class, IndexFacadeService.class, DatabaseService.class, ThreadPoolService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registry = new ResultConverters();
-        registry.start(context);
-
-        registerModule(new IndexActionFactory(this, registry), "indexedSearch");
-        
-        getService(CapabilityService.class).declareCapability(MailIndexChecker.CAPABILITY);
-        registerService(CapabilityChecker.class, new MailIndexChecker(this));
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        if (null != registry) {
-            registry.stop();
-            registry = null;
+    public boolean isEnabled(String capability, ServerSession session) throws OXException {
+        if (capability.equals(CAPABILITY)) {
+            if (session.isAnonymous()) {
+                return false;
+            }
+            
+            IndexFacadeService indexFacade = serviceLookup.getOptionalService(IndexFacadeService.class);
+            if (indexFacade == null) {
+                return false;
+            }
+            
+            try {
+                IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, session);
+                try {
+                    return indexAccess.isIndexed("0", "INBOX");
+                } finally {
+                    indexFacade.releaseIndexAccess(indexAccess);
+                }
+            } catch (OXException e) {
+                if (IndexExceptionCodes.INDEXING_NOT_ENABLED.equals(e) || IndexExceptionCodes.INDEX_LOCKED.equals(e)) {
+                    return false;
+                }
+                
+                throw e;
+            }
         }
-        super.stopBundle();
+        
+        return true;
     }
 
 }

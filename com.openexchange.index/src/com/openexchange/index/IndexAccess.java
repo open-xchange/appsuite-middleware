@@ -62,7 +62,7 @@ import com.openexchange.exception.OXException;
 public interface IndexAccess<V> {
 
     /**
-     * Checks if a folder within an account is already indexed. If folder is <code>null</code>, the whole account is checked.
+     * Checks if a folder within an account is already indexed.
      *
      * @param accountId The account id.
      * @param folderId The folder id or <code>null</code>.
