@@ -152,9 +152,9 @@ public class PresenceStatusChangePublisher implements PresenceChangeListener {
         if (messageDispatcher == null) {
             throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(MessageDispatcher.class.getSimpleName());
         }
-        Presence updatePresence = new Presence();
-
-        messageDispatcher.send(presence, session);
+        Presence updatePresence = new Presence(presence);
+        updatePresence.setTo(contact);
+        messageDispatcher.send(updatePresence, session);
     }
 
 }
