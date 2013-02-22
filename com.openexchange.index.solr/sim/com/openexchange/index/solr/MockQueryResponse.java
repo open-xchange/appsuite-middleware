@@ -67,9 +67,12 @@ public class MockQueryResponse extends QueryResponse {
 
     private final Set<Map<String, Object>> entries;
 
+    private final long numFound;
 
-    public MockQueryResponse(Set<Map<String, Object>> entries) {
+
+    public MockQueryResponse(long numFound, Set<Map<String, Object>> entries) {
         super();
+        this.numFound = numFound;
         this.entries = entries;
     }
 
@@ -85,6 +88,7 @@ public class MockQueryResponse extends QueryResponse {
             documents.add(document);
         }
 
+        documents.setNumFound(numFound);
         return documents;
     }
 
