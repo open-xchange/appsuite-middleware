@@ -621,8 +621,7 @@ public class AdminCache {
     public String encryptPassword(final PasswordMechObject user) throws StorageException, NoSuchAlgorithmException, UnsupportedEncodingException {
         String passwordMech = user.getPasswordMech();
         if (isEmpty(passwordMech) || "null".equals(toLowerCase(passwordMech))) {
-            String pwmech = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
-            pwmech = "{" + pwmech + "}";
+            final String pwmech = "{" + getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA") + "}";
             if (pwmech.equalsIgnoreCase(PasswordMechObject.CRYPT_MECH)) {
                 passwordMech = PasswordMechObject.CRYPT_MECH;
             } else if (pwmech.equalsIgnoreCase(PasswordMechObject.SHA_MECH)) {
