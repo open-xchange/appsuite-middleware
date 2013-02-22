@@ -598,19 +598,22 @@ public class AdminCache {
      * @throws UnsupportedEncodingException
      */
     public String encryptPassword(final PasswordMechObject user) throws StorageException, NoSuchAlgorithmException, UnsupportedEncodingException {
-        final String passwordMech = user.getPasswordMech();
+        String passwordMech = user.getPasswordMech();
         if (isEmpty(passwordMech) || "null".equals(toLowerCase(passwordMech))) {
             String pwmech = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
             pwmech = "{" + pwmech + "}";
             if (pwmech.equalsIgnoreCase(PasswordMechObject.CRYPT_MECH)) {
-                user.setPasswordMech(PasswordMechObject.CRYPT_MECH);
+                passwordMech = PasswordMechObject.CRYPT_MECH;
             } else if (pwmech.equalsIgnoreCase(PasswordMechObject.SHA_MECH)) {
-                user.setPasswordMech(PasswordMechObject.SHA_MECH);
+                passwordMech = PasswordMechObject.SHA_MECH;
+            } else if (pwmech.equalsIgnoreCase(PasswordMechObject.BCRYPT_MECH)) {
+                passwordMech = PasswordMechObject.BCRYPT_MECH;
             } else {
                 log.warn("WARNING: unknown password mechanism " + pwmech + " using SHA");
-                user.setPasswordMech(PasswordMechObject.SHA_MECH);
+                passwordMech = PasswordMechObject.SHA_MECH;
             }
         }
+        user.setPasswordMech(passwordMech);
         final String passwd;
         if (PasswordMechObject.CRYPT_MECH.equals(passwordMech)) {
             passwd = UnixCrypt.crypt(user.getPassword());
