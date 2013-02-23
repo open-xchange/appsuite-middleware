@@ -1,3 +1,7 @@
+* 2013-02-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25054: Set proper folder identifier if mail resides in account's Sent folder
+
 * 2013-02-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 25094: Immediate abort on exceeded quota constraint
