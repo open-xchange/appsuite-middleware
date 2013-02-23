@@ -53,7 +53,7 @@ import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
 /**
- * {@link MessageInbox} - The (read-only) message Inbox for peer-to-peer messages.
+ * {@link MessageInbox} - The message Inbox for direct messages.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
