@@ -1,6 +1,7 @@
 * 2013-02-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 25054: Set proper folder identifier if mail resides in account's Sent folder
+ - Fix for bug 24970: Fail fast for "[INUSE]' IMAP errors
 
 * 2013-02-21 - thorben.betten@open-xchange.com
 
