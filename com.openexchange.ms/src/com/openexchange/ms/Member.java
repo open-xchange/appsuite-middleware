@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,54 +49,26 @@
 
 package com.openexchange.ms;
 
-import java.util.Set;
-import com.openexchange.exception.OXException;
+import java.net.InetSocketAddress;
 
 /**
- * {@link MsService} - The messaging service.
+ * {@link Member} - Represents a member.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MsService {
+public interface Member {
 
     /**
-     * Gets the distributed queue with the specified name.
+     * Returns the InetSocketAddress of this member.
      * 
-     * @param name The name of the distributed queue
-     * @return The distributed queue with the specified name
+     * @return InetSocketAddress of this member
      */
-    <E> Queue<E> getQueue(String name);
+    InetSocketAddress getInetSocketAddress();
 
     /**
-     * Returns the distributed topic with the specified name.
+     * Returns UUID of this member.
      * 
-     * @param name The name of the distributed topic
-     * @return The distributed topic with the specified name
+     * @return UUID of this member.
      */
-    <E> Topic<E> getTopic(String name);
-
-    /**
-     * Gets the (local) message Inbox.
-     * 
-     * @return The message Inbox
-     */
-    MessageInbox getMessageInbox();
-
-    /**
-     * Set of current members of the cluster. Returning set instance is not modifiable. Every member in the cluster has the same member list
-     * in the same order. First member is the oldest member.
-     * 
-     * @return The members
-     */
-    Set<Member> getMembers();
-
-    /**
-     * Transports a message to given member only.
-     * 
-     * @param message The message
-     * @param member The member to transfer to
-     * @throws OXException If transport attempt fails
-     */
-    void directMessage(final Message<?> message, final Member member) throws OXException;
-
+    public String getUuid();
 }

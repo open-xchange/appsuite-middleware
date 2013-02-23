@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,86 @@
  *
  */
 
-package com.openexchange.ms;
+package com.openexchange.ms.internal;
 
-import java.util.Set;
-import com.openexchange.exception.OXException;
+import java.util.Iterator;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import com.openexchange.ms.Message;
+import com.openexchange.ms.MessageInbox;
 
 /**
- * {@link MsService} - The messaging service.
+ * {@link MessageInboxImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MsService {
+public final class MessageInboxImpl implements MessageInbox {
+
+    private static final MessageInboxImpl INSTANCE = new MessageInboxImpl();
 
     /**
-     * Gets the distributed queue with the specified name.
+     * Gets the Inbox instance.
      * 
-     * @param name The name of the distributed queue
-     * @return The distributed queue with the specified name
+     * @return The instance
      */
-    <E> Queue<E> getQueue(String name);
+    public static MessageInboxImpl getInstance() {
+        return INSTANCE;
+    }
+
+    private final BlockingQueue<Message<?>> blockingQueue;
 
     /**
-     * Returns the distributed topic with the specified name.
-     * 
-     * @param name The name of the distributed topic
-     * @return The distributed topic with the specified name
+     * Initializes a new {@link MessageInboxImpl}.
      */
-    <E> Topic<E> getTopic(String name);
+    private MessageInboxImpl() {
+        super();
+        blockingQueue = new LinkedBlockingQueue<Message<?>>();
+    }
+
+    @Override
+    public Iterator<Message<?>> iterator() {
+        return blockingQueue.iterator();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return blockingQueue.isEmpty();
+    }
 
     /**
-     * Gets the (local) message Inbox.
+     * Inserts the specified message into this Inbox if it is possible to do so immediately. Returning <tt>true</tt> upon success.
      * 
-     * @return The message Inbox
+     * @param e The message to add
+     * @return <tt>true</tt> if the message was added to this Inbox, else <tt>false</tt>
      */
-    MessageInbox getMessageInbox();
+    public boolean offer(final Message<?> e) {
+        return blockingQueue.offer(e);
+    }
 
-    /**
-     * Set of current members of the cluster. Returning set instance is not modifiable. Every member in the cluster has the same member list
-     * in the same order. First member is the oldest member.
-     * 
-     * @return The members
-     */
-    Set<Member> getMembers();
+    @Override
+    public Message<?> poll() {
+        return blockingQueue.poll();
+    }
 
-    /**
-     * Transports a message to given member only.
-     * 
-     * @param message The message
-     * @param member The member to transfer to
-     * @throws OXException If transport attempt fails
-     */
-    void directMessage(final Message<?> message, final Member member) throws OXException;
+    @Override
+    public Message<?> peek() {
+        return blockingQueue.peek();
+    }
+
+    @Override
+    public Message<?> take() throws InterruptedException {
+        return blockingQueue.take();
+    }
+
+    @Override
+    public Message<?> poll(final long timeout, final TimeUnit unit) throws InterruptedException {
+        return blockingQueue.poll(timeout, unit);
+    }
+
+    @Override
+    public void clear() {
+        blockingQueue.clear();
+    }
 
 }

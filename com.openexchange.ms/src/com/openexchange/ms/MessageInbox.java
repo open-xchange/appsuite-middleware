@@ -49,54 +49,67 @@
 
 package com.openexchange.ms;
 
-import java.util.Set;
-import com.openexchange.exception.OXException;
+import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 /**
- * {@link MsService} - The messaging service.
+ * {@link MessageInbox} - The message Inbox for peer-to-peer messages.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MsService {
+public interface MessageInbox {
 
     /**
-     * Gets the distributed queue with the specified name.
+     * Returns an iterator over the messages in this Inbox.
+     * <p>
+     * There are no guarantees concerning the order in which the elements are returned.
      * 
-     * @param name The name of the distributed queue
-     * @return The distributed queue with the specified name
+     * @return An <tt>Iterator</tt> over the elements in this collection
      */
-    <E> Queue<E> getQueue(String name);
+    Iterator<Message<?>> iterator();
 
     /**
-     * Returns the distributed topic with the specified name.
+     * Checks if this Inbox is currently empty.
      * 
-     * @param name The name of the distributed topic
-     * @return The distributed topic with the specified name
+     * @return <code>true</code> if empty; otherwise <code>false</code>
      */
-    <E> Topic<E> getTopic(String name);
+    boolean isEmpty();
 
     /**
-     * Gets the (local) message Inbox.
+     * Retrieves and removes the first message in this Inbox, or returns <tt>null</tt> if empty.
      * 
-     * @return The message Inbox
+     * @return The first message, or <tt>null</tt> if this queue is empty
      */
-    MessageInbox getMessageInbox();
+    Message<?> poll();
 
     /**
-     * Set of current members of the cluster. Returning set instance is not modifiable. Every member in the cluster has the same member list
-     * in the same order. First member is the oldest member.
+     * Retrieves but does not remove the first message in this Inbox, or returns <tt>null</tt> if empty.
      * 
-     * @return The members
+     * @return The first message, or <tt>null</tt> if this queue is empty
      */
-    Set<Member> getMembers();
+    Message<?> peek();
 
     /**
-     * Transports a message to given member only.
+     * Retrieves and removes the first message in this Inbox, waiting if necessary until a message becomes arrives.
      * 
-     * @param message The message
-     * @param member The member to transfer to
-     * @throws OXException If transport attempt fails
+     * @return The first (incoming) message
+     * @throws InterruptedException If interrupted while waiting
      */
-    void directMessage(final Message<?> message, final Member member) throws OXException;
+    Message<?> take() throws InterruptedException;
+
+    /**
+     * Retrieves and removes the first message in this Inbox, waiting up to the specified wait time if necessary for a message to arrive.
+     * 
+     * @param timeout how long to wait before giving up, in units of <tt>unit</tt>
+     * @param unit a <tt>TimeUnit</tt> determining how to interpret the <tt>timeout</tt> parameter
+     * @return The first (incoming) message, or <tt>null</tt> if the specified waiting time elapses before a message arrived
+     * @throws InterruptedException If interrupted while waiting
+     */
+    Message<?> poll(long timeout, TimeUnit unit) throws InterruptedException;
+
+    /**
+     * Removes all of the messages from this Inbox.
+     */
+    void clear();
 
 }
