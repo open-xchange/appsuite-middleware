@@ -56,19 +56,18 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
+import java.util.Set;
 import javax.management.MBeanException;
 import org.apache.commons.logging.Log;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -80,8 +79,6 @@ import com.openexchange.tools.sql.DBUtils;
 public class LoginCounter implements LoginCounterMBean {
 
     private final Log logger;
-
-    private String wildcard;
 
     /**
      * Initializes a new {@link LoginCounter}.
@@ -143,25 +140,7 @@ public class LoginCounter implements LoginCounterMBean {
     }
 
     @Override
-    public int getNumberOfLogins(final Date startDate, final Date endDate) throws MBeanException {
-        /*
-         * Compile pattern
-         */
-        final Pattern pattern;
-        if (wildcard != null) {
-            try {
-                pattern = Pattern.compile(wildcardToRegex("client:" + wildcard));
-            } catch (final PatternSyntaxException e) {
-                logger.error(e.getMessage(), e);
-                throw new MBeanException(e, "Couldn't compile regex pattern.");
-            }
-        } else {
-            pattern = null;
-        }
-        /*
-         * Counter
-         */
-        int counter = 0;
+    public Map<String, Integer> getNumberOfLogins(final Date startDate, final Date endDate, boolean aggregate, String regex) throws MBeanException {
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         Map<String, Integer> schemaMap = null;
         try {
@@ -179,7 +158,10 @@ public class LoginCounter implements LoginCounterMBean {
         /*
          * Get all logins in every schema
          */
+        int sum = 0;
+        final Map<String, Integer> results = new HashMap<String, Integer>();
         for (final String schema : schemaMap.keySet()) {
+            final Set<UserContextId> countedUsers = new HashSet<UserContextId>();
             final int readPool = schemaMap.get(schema).intValue();
             final Connection connection;
             try {
@@ -191,21 +173,40 @@ public class LoginCounter implements LoginCounterMBean {
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                stmt = connection.prepareStatement("SELECT name, value FROM user_attribute WHERE name LIKE ?");
-                stmt.setString(1, StringCollection.prepareForSearch("client:*", false, true));
+                StringBuilder sb = new StringBuilder("SELECT cid, id, name, value FROM user_attribute WHERE name REGEXP ?");
+                if (regex == null) {
+                    regex = ".*";
+                }
+                stmt = connection.prepareStatement(sb.toString());
+                stmt.setString(1, "client:(" + regex + ")");
                 rs = stmt.executeQuery();
                 final Date lastLogin = new Date();
                 while (rs.next()) {
-                    final String name = rs.getString(1);
-                    if (pattern == null || (pattern.matcher(name).matches())) {
-                        try {
-                            lastLogin.setTime(Long.parseLong(rs.getString(2)));
-                            if (lastLogin.after(startDate) && lastLogin.before(endDate)) {
-                                counter++;
+                    final int contextId = rs.getInt(1);
+                    final int userId = rs.getInt(2);
+                    final String client = rs.getString(3);
+                    try {
+                        Long.parseLong(rs.getString(4));
+                        if (lastLogin.after(startDate) && lastLogin.before(endDate)) {
+                            if (aggregate) {
+                                UserContextId userContextId = new UserContextId(contextId, userId);
+                                if (!countedUsers.contains(userContextId)) {
+                                    countedUsers.add(userContextId);
+                                    ++sum;
+                                }
+                            } else {
+                                ++sum;
                             }
-                        } catch (final NumberFormatException e) {
-                            logger.warn("Client value is not a number.", e);
+                            
+                            Integer value = results.get(client);
+                            if (value == null) {
+                                results.put(client, 1);
+                            } else {
+                                results.put(client, value.intValue() + 1);
+                            }
                         }
+                    } catch (final NumberFormatException e) {
+                        logger.warn("Client value is not a number.", e);
                     }
                 }
             } catch (final SQLException e) {
@@ -216,44 +217,9 @@ public class LoginCounter implements LoginCounterMBean {
                 dbService.back(readPool, connection);
             }
         }
-        return counter;
-    }
 
-    @Override
-    public void setDeviceWildcard(final String wildcard) {
-        this.wildcard = wildcard;
-    }
-
-    @Override
-    public String getDeviceWildcard() {
-        return wildcard;
-    }
-
-    /**
-     * Converts specified wildcard string to a regular expression
-     *
-     * @param wildcard The wildcard string to convert
-     * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
-     */
-    private static String wildcardToRegex(final String wildcard) {
-        final StringAllocator s = new StringAllocator(wildcard.length());
-        s.append('^');
-        final int len = wildcard.length();
-        for (int i = 0; i < len; i++) {
-            final char c = wildcard.charAt(i);
-            if (c == '*') {
-                s.append(".*");
-            } else if (c == '?') {
-                s.append('.');
-            } else if (c == '+' || c == '(' || c == ')' || c == '[' || c == ']' || c == '$' || c == '^' || c == '.' || c == '{' || c == '}' || c == '|' || c == '\\') {
-                s.append('\\');
-                s.append(c);
-            } else {
-                s.append(c);
-            }
-        }
-        s.append('$');
-        return (s.toString());
+        results.put("sum", sum);
+        return results;
     }
 
     /**
@@ -293,6 +259,49 @@ public class LoginCounter implements LoginCounterMBean {
     private static void closeSQLStuff(final ResultSet result, final Statement stmt) {
         closeSQLStuff(result);
         closeSQLStuff(stmt);
+    }
+    
+    private static final class UserContextId {
+        
+        private final int contextId;
+        
+        private final int userId;
+
+        /**
+         * Initializes a new {@link UserContextId}.
+         * @param contextId
+         * @param userId
+         */
+        public UserContextId(int contextId, int userId) {
+            super();
+            this.contextId = contextId;
+            this.userId = userId;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + contextId;
+            result = prime * result + userId;
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            UserContextId other = (UserContextId) obj;
+            if (contextId != other.contextId)
+                return false;
+            if (userId != other.userId)
+                return false;
+            return true;
+        }
     }
 
 }

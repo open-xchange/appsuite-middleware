@@ -53,14 +53,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 import java.util.regex.Pattern;
-import javax.management.Attribute;
-import javax.management.AttributeNotFoundException;
-import javax.management.InstanceNotFoundException;
-import javax.management.InvalidAttributeValueException;
-import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
-import javax.management.ReflectionException;
+import javax.management.MBeanServerInvocationHandler;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -71,10 +67,10 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.report.Constants;
+import com.openexchange.report.internal.LoginCounterMBean;
 import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
- *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public final class LoginCounterTool {
@@ -90,6 +86,7 @@ public final class LoginCounterTool {
 
     /**
      * Main method for starting from console.
+     * 
      * @param args program arguments
      */
     public static void main(String[] args) {
@@ -150,6 +147,7 @@ public final class LoginCounterTool {
                     System.exit(0);
                 }
             }
+            
             // Invoke MBean
             JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:9999/server");
             JMXConnector jmxConnector = JMXConnectorFactory.connect(url, null);
@@ -160,7 +158,7 @@ public final class LoginCounterTool {
                     regex = cmd.getOptionValue('r');
                 }
 
-                writeNumberOfLogins(mbsc, startDate, endDate, regex);
+                writeNumberOfLogins(mbsc, startDate, endDate, cmd.hasOption('a'), regex);
             } finally {
                 jmxConnector.close();
             }
@@ -171,44 +169,46 @@ public final class LoginCounterTool {
             System.err.println("URL to connect to server is invalid: " + e.getMessage());
         } catch (IOException e) {
             System.err.println("Unable to communicate with the server: " + e.getMessage());
-        } catch (AttributeNotFoundException e) {
-            System.err.println("Attributes for reporting are not available: " + e.getMessage());
-        } catch (InstanceNotFoundException e) {
-            System.err.println("Instance for reporting is not available: " + e.getMessage());
-        } catch (MBeanException e) {
-            System.err.println("Problem on MBean connection: " + e.getMessage());
-        } catch (ReflectionException e) {
-            System.err.println("Problem with reflective type handling: " + e.getMessage());
-        } catch (InvalidAttributeValueException e) {
-            System.err.println("Problem with JMX attribute: " + e.getMessage());
         }
     }
 
-    private static void writeNumberOfLogins(MBeanServerConnection mbsc, Date startDate, Date endDate, String regex) throws InstanceNotFoundException, AttributeNotFoundException, InvalidAttributeValueException, MBeanException, ReflectionException, IOException {
+    private static void writeNumberOfLogins(MBeanServerConnection mbsc, Date startDate, Date endDate, boolean aggregate, String regex) {
         String withRegex = "";
         if (regex != null) {
             withRegex += "\nfor expression\n    '" + regex + "'";
         }
+        
+        String andAggregated = "\n";
+        if (aggregate) {
+            andAggregated += "with total logins aggregated by users\n";
+        }
 
-        int count = 0;
-        boolean err = false;
-        String errMsg = null;
         try {
-        	mbsc.setAttribute(Constants.OXTENDER_MONITOR_NAME, new Attribute("DeviceWildcard", regex));
-        	count = (Integer) mbsc.invoke(Constants.OXTENDER_MONITOR_NAME, "getNumberOfLogins", new Object[] {startDate, endDate}, new String[] {Date.class.getName(), Date.class.getName()});
+            LoginCounterMBean loginCounterProxy = loginCounterProxy(mbsc);
+            Map<String, Integer> logins = loginCounterProxy.getNumberOfLogins(startDate, endDate, aggregate, regex);
+
+            System.out.println("Number of logins between\n    " + 
+                startDate.toString() + 
+            "\nand\n    " + 
+                endDate.toString() + 
+            withRegex +
+            andAggregated);
+            
+            
+            for (String client : logins.keySet()) {
+                if (client.equals("sum")) {
+                    continue;
+                }
+                Integer number = logins.get(client);
+                System.out.println(client + ": " + number);
+            }
+            
+            Integer sum = logins.get("sum");
+            System.out.println("Total: " + sum);
         } catch (Exception e) {
-        	err = true;
-        	errMsg = e.getMessage();
+            String errMsg = e.getMessage();
+            System.out.println(errMsg != null ? errMsg : "An error occurred.");
         }
-
-        String output;
-        if (err) {
-        	output = errMsg != null ? errMsg : "An error occurred.";
-        } else {
-        	output= "Number of logins between\n    " + startDate.toString() + "\nand\n    " + endDate.toString() + withRegex + "\n\n    :    " + count;
-        }
-
-        System.out.println(output);
     }
 
     private static void printHelp() {
@@ -225,7 +225,7 @@ public final class LoginCounterTool {
         if ((c = retval.charAt(0)) == '"' || c == '\'') {
             retval = retval.substring(1);
         }
-        final int mlen = retval.length()-1;
+        final int mlen = retval.length() - 1;
         if ((c = retval.charAt(mlen)) == '"' || c == '\'') {
             retval = retval.substring(0, mlen);
         }
@@ -244,11 +244,17 @@ public final class LoginCounterTool {
         return isWhitespace;
     }
 
+    private static LoginCounterMBean loginCounterProxy(MBeanServerConnection mbsc) {
+        return MBeanServerInvocationHandler.newProxyInstance(mbsc, Constants.LOGIN_COUNTER_NAME, LoginCounterMBean.class, false);
+    }
+
     static {
         countingOptions = new Options();
         countingOptions.addOption("h", "help", false, "Prints a help text");
         countingOptions.addOption("s", "start", true, "Required. Sets the start date for the detecting range. Example: 2009-12-31 00:00:00");
         countingOptions.addOption("e", "end", true, "Required. Sets the end date for the detecting range. Example: 2010-01-1 23:59:59");
         countingOptions.addOption("r", "regex", true, "Optional. Limits the counter to login devices that match regex.");
+        countingOptions.addOption("a", "aggregate", false, "Optional. Aggregates the counts by users. " +
+        		"Only the total number of logins without duplicate counts (caused by multiple clients per user) is returned.");
     }
 }

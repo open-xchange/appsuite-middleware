@@ -64,7 +64,7 @@ public final class Constants {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Constants.class));
 
     public static final ObjectName REPORTING_NAME = initReportingName();
-    public static final ObjectName OXTENDER_MONITOR_NAME = initOxtenderMonitorName();
+    public static final ObjectName LOGIN_COUNTER_NAME = initOxtenderMonitorName();
 
     /**
      * Prevent instantiation.
