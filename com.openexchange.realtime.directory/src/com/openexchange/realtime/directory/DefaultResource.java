@@ -61,7 +61,7 @@ import com.openexchange.realtime.packet.PresenceState;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class DefaultResource implements Resource {
+public class DefaultResource implements Resource {
 
     private static final long serialVersionUID = -1140736920132224444L;
 
@@ -104,11 +104,7 @@ public abstract class DefaultResource implements Resource {
         return this.timestamp;
     }
 
-    /**
-     * Sets the timestamp.
-     *
-     * @param timestamp The timestamp to set
-     */
+    @Override
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
@@ -132,11 +128,7 @@ public abstract class DefaultResource implements Resource {
         return this.routingInfo;
     }
 
-    /**
-     * Sets the routing information
-     *
-     * @param routingInfo The routing information to set
-     */
+    @Override
     public void setRoutingInfo(Serializable routingInfo) {
         this.routingInfo = routingInfo;
     }
@@ -167,6 +159,49 @@ public abstract class DefaultResource implements Resource {
     @Override
     public String getMessage() {
         return this.message;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((message == null) ? 0 : message.hashCode());
+        result = prime * result + priority;
+        result = prime * result + ((routingInfo == null) ? 0 : routingInfo.hashCode());
+        result = prime * result + ((state == null) ? 0 : state.hashCode());
+        result = prime * result + ((timestamp == null) ? 0 : timestamp.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DefaultResource other = (DefaultResource) obj;
+        if (message == null) {
+            if (other.message != null)
+                return false;
+        } else if (!message.equals(other.message))
+            return false;
+        if (priority != other.priority)
+            return false;
+        if (routingInfo == null) {
+            if (other.routingInfo != null)
+                return false;
+        } else if (!routingInfo.equals(other.routingInfo))
+            return false;
+        if (state != other.state)
+            return false;
+        if (timestamp == null) {
+            if (other.timestamp != null)
+                return false;
+        } else if (!timestamp.equals(other.timestamp))
+            return false;
+        return true;
     }
 
 }

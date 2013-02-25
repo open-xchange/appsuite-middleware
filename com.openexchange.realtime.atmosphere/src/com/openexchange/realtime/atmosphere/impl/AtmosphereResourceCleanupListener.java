@@ -52,11 +52,8 @@ package com.openexchange.realtime.atmosphere.impl;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereResourceEventListener;
 import org.atmosphere.cpr.Broadcaster;
-import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
-import com.openexchange.realtime.ResourceRegistry;
-import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
 
 
 /**

@@ -61,6 +61,13 @@ import com.openexchange.realtime.packet.PresenceState;
 public interface Resource extends Serializable {
 
     /**
+     * Sets the timestamp.
+     *
+     * @param timestamp The timestamp to set
+     */
+    void setTimestamp(Date timestamp);
+
+    /**
      * Gets the time the resource data was last-updated or created.
      *
      * @return The timestamp
@@ -74,6 +81,13 @@ public interface Resource extends Serializable {
      * @return The priority, or <code>0</code> if not specified
      */
     byte getPriority();
+
+    /**
+     * Sets the routing information
+     *
+     * @param routingInfo The routing information to set
+     */
+    void setRoutingInfo(Serializable routingInfo);
 
     /**
      * Gets internal routing information inside the server, e.g. to specify a node in a cluster member the resource is physically

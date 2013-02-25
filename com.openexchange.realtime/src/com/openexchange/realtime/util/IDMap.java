@@ -65,7 +65,7 @@ import com.openexchange.realtime.packet.ID;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class IDMap<T> implements Map<ID, T> {
-
+    
     private final Map<ID, T> delegate;
 
     /**

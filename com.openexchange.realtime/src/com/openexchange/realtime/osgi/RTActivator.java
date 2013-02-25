@@ -59,9 +59,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.MessageDispatcher;
-import com.openexchange.realtime.ResourceRegistry;
 import com.openexchange.realtime.impl.MessageDispatcherImpl;
-import com.openexchange.realtime.impl.ResourceRegistryImpl;
 
 /**
  * {@link RTActivator} - The activator for realtime bundle.
@@ -101,7 +99,6 @@ public class RTActivator extends HousekeepingActivator {
         final MessageDispatcherImpl dispatcher = new MessageDispatcherImpl();
 
         registerService(MessageDispatcher.class, dispatcher);
-        registerService(ResourceRegistry.class, new ResourceRegistryImpl(getService(EventAdmin.class)));
 
         track(Channel.class, new SimpleRegistryListener<Channel>() {
 
