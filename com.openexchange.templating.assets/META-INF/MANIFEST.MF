@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Templating Assets Plug-in
+Bundle-SymbolicName: com.openexchange.templating.assets
+Bundle-Version: 7.2.0
+Bundle-Activator: com.openexchange.templating.assets.osgi.TemplatingAssetActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.config,
+ com.openexchange.documentation,
+ com.openexchange.exception,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.templating,
+ com.openexchange.tools.session,
+ org.osgi.framework;version="1.3.0"
+Bundle-ActivationPolicy: lazy
