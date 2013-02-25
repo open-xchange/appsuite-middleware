@@ -113,6 +113,8 @@ public class TemplatedResultConverter implements ResultConverter {
         rootObject.put("JSON", new JSONHelper());
         
         // TODO: Asset Helper
+        
+        
 
         rootObject.put("objects", new NativeBuilderFactory());
         rootObject.put("ox", new WhitelistedDispatcher(services.getService(Dispatcher.class), session, template.isTrusted()));
