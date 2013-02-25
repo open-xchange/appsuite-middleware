@@ -49,92 +49,98 @@
 
 package com.openexchange.templating.json.converter;
 
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.AJAXState;
 import com.openexchange.ajax.requesthandler.Dispatcher;
-import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
-import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.templating.OXTemplate;
-import com.openexchange.templating.TemplateService;
+import com.openexchange.templating.TemplateErrorMessage;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
- * {@link TemplatedResultConverter}
+ * {@link Request}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class TemplatedResultConverter implements ResultConverter {
-
-    private ServiceLookup services;
-
-    public TemplatedResultConverter(ServiceLookup services) {
-        super();
-        this.services = services;
-    }
-
-    @Override
-    public String getInputFormat() {
-        return "native";
-    }
-
-    @Override
-    public String getOutputFormat() {
-        return "template";
-    }
-
-    @Override
-    public Quality getQuality() {
-        return Quality.BAD;
-    }
-
-    @Override
-    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        
-        TemplateService templates = services.getService(TemplateService.class);
-        OXTemplate template = templates.loadTemplate(requestData.getParameter("template"), requestData.getParameter("template"), session, false);
-        
-        Map<String, Object> rootObject = new HashMap<String, Object>();
-        
-        rootObject.put("templates", templates.createHelper(rootObject, session, false));
-        rootObject.put("data", result.getResultObject());
-
-        StringHelper strings = StringHelper.valueOf(session.getUser().getLocale());
-        rootObject.put("strings", strings);
-        rootObject.put("locale", session.getUser().getLocale());
-        rootObject.put("dates", new Dates(session.getUser().getLocale()));
-        
-        rootObject.put("JSON", new JSONHelper());
-        
-        // TODO: Asset Helper
-
-        rootObject.put("objects", new NativeBuilderFactory());
-        rootObject.put("ox", new WhitelistedDispatcher(services.getService(Dispatcher.class), session, template.isTrusted()));
-        if (template.isTrusted()) {
-            rootObject.put("session", session.getSessionID());
-        }
-        
-        
-        rootObject.put("req", requestData);
-        
-        StringWriter writer = new StringWriter();
-        
-        template.process(rootObject, writer);
+public class Request {
+    private Dispatcher dispatcher;
+    private ServerSession session;
     
-        result.setResultObject(writer.toString(), "template");
-        result.setHeader("Content-Type", template.getProperty("contentType", "text/html"));
+    private boolean trusted;
+    
+    private String action;
+    private String module;
+    
+    private Map<String, String> parameters = new HashMap<String, String>();
+    
+    private Object body;
+    
+    public Request(Dispatcher dispatcher, ServerSession session, boolean trusted) {
+        this.dispatcher = dispatcher;
+        this.session = session;
+        this.trusted = trusted;
     }
     
-    private static final class NativeBuilderFactory {
-        public NativeBuilder build() {
-            return new NativeBuilder();
+    public Request action(String action) {
+        this.action = action;
+        return this;
+    }
+    
+    public Request module(String module) {
+        this.module = module;
+        return this;
+    }
+    
+    public Request param(String name, Object value) {
+        this.parameters.put(name, value.toString());
+        return this;
+    }
+    
+    public Request body(Object body) {
+        this.body = body;
+        return this;
+    }
+    
+    public Object perform() throws OXException {
+        if (!trusted) {
+            throw TemplateErrorMessage.AccessDenied.create();
+        }
+        
+        AJAXRequestData req = new AJAXRequestData();
+        
+        req.setHostname("localhost");
+        req.setAction(action);
+        req.setServletRequestURI("");
+        
+        for(Map.Entry<String, String> param : parameters.entrySet()) {
+            req.putParameter(param.getKey(), param.getValue());
+        }
+        req.setModule(module);
+        
+        try {
+            req.setData(JSONCoercion.coerceToJSON(body));
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.toString());
+        }
+        
+        AJAXState state = null;
+        try {
+            state = dispatcher.begin();
+            req.setFormat("native");
+            AJAXRequestResult result = dispatcher.perform(req, state, ServerSessionAdapter.valueOf(session));
+            
+            return result.getResultObject();
+            
+        } finally {
+            dispatcher.end(state);
         }
     }
-
 }

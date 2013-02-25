@@ -47,39 +47,49 @@
  *
  */
 
-package com.openexchange.templating.json.osgi;
+package com.openexchange.templating.json.converter;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-import com.openexchange.ajax.requesthandler.Dispatcher;
-=======
->>>>>>> added basic converter
-=======
-import com.openexchange.ajax.requesthandler.Dispatcher;
->>>>>>> more utilities
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
-import com.openexchange.templating.TemplateService;
-import com.openexchange.templating.json.TemplatingActionFactory;
-import com.openexchange.templating.json.converter.TemplatedResultConverter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 
 /**
- * {@link TemplatingJSONActivator}
+ * {@link Dates}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class TemplatingJSONActivator extends AJAXModuleActivator {
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { TemplateService.class, Dispatcher.class };
+public class Dates {
+    
+    private Locale locale;
+    
+    public Dates(Locale locale) {
+        this.locale = locale;
     }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerModule(new TemplatingActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "templating");
-        registerService(ResultConverter.class, new TemplatedResultConverter(this));
+    
+    public String format(Date d, String format) {
+        int style = 0;
+        if (format.equalsIgnoreCase("short")) {
+            style = SimpleDateFormat.SHORT;
+        } else if (format.equals("medium")) {
+            style = SimpleDateFormat.MEDIUM;
+        } else if (format.equals("long")) {
+            style = SimpleDateFormat.LONG;
+        } else if (format.equals("full")) {
+            style = SimpleDateFormat.FULL;
+        } else if (format.equals("default")) {
+            style = SimpleDateFormat.DEFAULT;
+        } else {
+            return new SimpleDateFormat(format, locale).format(d);
+        }
+        
+        
+        return SimpleDateFormat.getDateInstance(style, locale).format(d);
     }
-
+    
+    public String format(long d, String format) {
+        return format(new Date(d), format);
+    }
+    
+    
 }
