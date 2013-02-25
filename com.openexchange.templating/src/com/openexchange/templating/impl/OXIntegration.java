@@ -61,6 +61,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -155,11 +157,22 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
         }
         return null;
     }
+    
+    private static final Pattern EXPLICIT_ID = Pattern.compile("infostore://(\\d+)");
 
     @Override
     public String findTemplateInFolder(final ServerSession session, final FolderObject folder, final String name) throws OXException {
+        
+        if (name.startsWith("infostore://")) {
+            Matcher matcher = EXPLICIT_ID.matcher(name);
+            if (matcher.find()) {
+                String id = matcher.group(1);
+                final InputStream is = infostore.getDocument(Integer.parseInt(id), InfostoreFacade.CURRENT_VERSION, session.getContext(), session.getUser(), session.getUserConfiguration());
+                return asString(is);
+            }
+        }
+        
         final SearchIterator<DocumentMetadata> iterator = infostore.getDocuments(folder.getObjectID(), new Metadata[]{Metadata.ID_LITERAL, Metadata.TITLE_LITERAL, Metadata.FILENAME_LITERAL}, session.getContext(), session.getUser(), session.getUserConfiguration()).results();
-        BufferedReader reader = null;
         try {
             final DocumentMetadataMatcher matcher = new DocumentMetadataMatcher(name);
             while(iterator.hasNext() && !matcher.hasPerfectMatch()) {
@@ -172,7 +185,18 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
             }
 
             final InputStream is = infostore.getDocument(metadata.getId(), InfostoreFacade.CURRENT_VERSION, session.getContext(), session.getUser(), session.getUserConfiguration());
+            return asString(is);
+            
+        } finally {
+            if (iterator != null){
+                iterator.close();
+            }
+        }
+    }
 
+    private String asString(InputStream is) throws OXException {
+        BufferedReader reader = null;
+        try {
             reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
             final StringBuilder builder = new StringBuilder();
             String line = null;
@@ -180,18 +204,16 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
                 builder.append(line).append('\n');
             }
             return builder.toString();
+
         } catch (final UnsupportedEncodingException e) {
             LOG.fatal(e.getMessage(), e);
+            return null;
         } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
             throw TemplateErrorMessage.IOException.create(e);
         } finally {
             Streams.close(reader);
-            if (iterator != null){
-                iterator.close();
-            }
         }
-        return null;
     }
 
     @Override

@@ -23,6 +23,7 @@ modules/mail/defaultFolder > io.ox/mail//defaultFolder
 modules/mail/addresses > io.ox/mail//addresses
 mail/folder > io.ox/mail//folder
 mail/vcard > io.ox/mail//vcard
+ui/mail/replyTo > io.ox/mail//showReplyTo
 
 # CalDAV
 modules/caldav/active > io.ox/caldav//active
