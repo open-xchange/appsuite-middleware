@@ -75,13 +75,14 @@ import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.MessageDispatcher;
-import com.openexchange.realtime.ResourceRegistry;
 import com.openexchange.realtime.StanzaSender;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
 import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
+import com.openexchange.realtime.directory.DefaultResource;
+import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.server.ServiceExceptionCode;
@@ -169,8 +170,8 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     trackConnectedUsers(atmosphereState.id.toGeneralForm().toString(), broadcasterId);
 
                     // register the resource
-                    ResourceRegistry resourceRegistry = AtmosphereServiceRegistry.getInstance().getService(ResourceRegistry.class);
-                    resourceRegistry.register(atmosphereState.id);
+                    ResourceDirectory resourceDirectory = AtmosphereServiceRegistry.getInstance().getService(ResourceDirectory.class);
+                    resourceDirectory.set(atmosphereState.id, new DefaultResource());
 
                     // finally suspend the resource
                     resource.suspend();
@@ -295,9 +296,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * CleanUp callback used by AtmosphereResourceCleanupListener instances.
      */
     public void onDisconnect(RTAtmosphereState atmosphereState) {
-        ResourceRegistry resourceRegistry = AtmosphereServiceRegistry.getInstance().getService(ResourceRegistry.class);
+        ResourceDirectory resourceDirectory = AtmosphereServiceRegistry.getInstance().getService(ResourceDirectory.class);
         try {
-            resourceRegistry.unregister(atmosphereState.id);
+            resourceDirectory.remove(atmosphereState.id);
         } catch (OXException e) {
             LOG.error("Could not unregister resource " + atmosphereState.id.toString() + ".", e);
         }
