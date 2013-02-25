@@ -323,14 +323,12 @@ public abstract class OXToolStorageInterface {
     public abstract int getDatabaseIDByDatabasename(String dbName) throws StorageException, NoSuchObjectException;
 
     /**
-     * load Database with the given ID
-     * only sets id and readid, returns null if not found
-     * 
-     * @param id
-     * @return
-     * @throws StorageException
+     * Load database information with the given identifier.
+     * @param id the identifier of the database. It must be the identifier of the master.
+     * @return the database information with the given identifier.
+     * @throws StorageException if the database with the given identifier does not exist or a problem occurs when loading it.
      */
-    public abstract Database loadDatabaseById(final Integer id) throws StorageException;
+    public abstract Database loadDatabaseById(int id) throws StorageException;
 
     public abstract int getDefaultGroupForContext(final Context ctx, final Connection con) throws StorageException;
 

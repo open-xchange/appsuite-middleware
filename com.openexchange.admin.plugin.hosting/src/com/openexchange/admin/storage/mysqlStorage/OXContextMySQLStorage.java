@@ -134,7 +134,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * This class provides the implementation for the storage into a MySQL database
- * 
+ *
  * @author d7
  * @auhtor cutmasta
  */
@@ -1004,59 +1004,60 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         // Find filestore for context.
         ctx.setFilestore_name(ctx.getIdAsString() + "_ctx_store");
-        final Integer storeId = ctx.getFilestoreId();
-        if( null == storeId ) {
-            ctx.setFilestoreId(OXUtilStorageInterface.getInstance().findFilestoreForContext().getId());
+        Integer storeId = ctx.getFilestoreId();
+        if (null == storeId) {
+            storeId = OXUtilStorageInterface.getInstance().findFilestoreForContext().getId();
+            ctx.setFilestoreId(storeId);
         } else {
-            if( ! OXToolStorageInterface.getInstance().existsStore(storeId) ) {
-                StorageException e = new StorageException("Filestore with id " + storeId + " does not exist"); 
-                LOG.error(e);
-                throw e;
+            if (!OXToolStorageInterface.getInstance().existsStore(i(storeId))) {
+                throw new StorageException("Filestore with identifier " + storeId + " does not exist.");
             }
         }
 
         final Connection configCon;
         try {
             configCon = cache.getConnectionForConfigDB();
-        } catch (final PoolException e) {
-            LOG.error("Pool Error", e);
+        } catch (PoolException e) {
             throw new StorageException(e.getMessage(), e);
         }
         try {
             Integer dbId = null;
-            if( null != ctx.getWriteDatabase() ) {
+            if (null != ctx.getWriteDatabase()) {
                 dbId = ctx.getWriteDatabase().getId();
             }
             final Database db;
-            if( null == dbId ) {
-                db = getNextDBHandleByWeight(configCon);
-            } else {
-                db = OXToolStorageInterface.getInstance().loadDatabaseById(dbId);
-                if( null == db ) {
-                    StorageException e = new StorageException("Database with id " + dbId + " does not exist"); 
-                    LOG.error(e);
-                    throw e;
+            try {
+                if (null == dbId || i(dbId) <= 0) {
+                    db = getNextDBHandleByWeight(configCon);
+                } else {
+                    db = OXToolStorageInterface.getInstance().loadDatabaseById(i(dbId));
                 }
+            } catch (SQLException e) {
+                throw new StorageException(e.getMessage(), e);
+            } catch (OXContextException e) {
+                LOG.error(e.getMessage(), e);
+                throw new StorageException(e.getMessage());
             }
-            startTransaction(configCon);
-            findOrCreateSchema(configCon, db);
-            contextCommon.fillContextAndServer2DBPool(ctx, configCon, db);
-            contextCommon.fillLogin2ContextTable(ctx, configCon);
-            configCon.commit();
-            final Context retval = writeContext(configCon, ctx, adminUser, access);
-            LOG.info("Context " + retval.getId() + " created!");
-            return retval;
-        } catch (final SQLException e) {
-            LOG.error("SQL Error", e);
-            throw new StorageException(e.getMessage(), e);
-        } catch (final OXContextException e) {
-            LOG.error("Context Error", e);
-            throw new StorageException(e);
-        } catch (final StorageException e) {
-            rollback(configCon);
-            throw e;
+            // Two separate try-catch blocks are necessary because rollback only works after starting a transaction.
+            try {
+                startTransaction(configCon);
+                findOrCreateSchema(configCon, db);
+                contextCommon.fillContextAndServer2DBPool(ctx, configCon, db);
+                contextCommon.fillLogin2ContextTable(ctx, configCon);
+                configCon.commit();
+                final Context retval = writeContext(configCon, ctx, adminUser, access);
+                LOG.info("Context " + retval.getId() + " created!");
+                return retval;
+            } catch (SQLException e) {
+                rollback(configCon);
+                throw new StorageException(e.getMessage(), e);
+            } catch (StorageException e) {
+                rollback(configCon);
+                throw e;
+            } finally {
+                autocommit(configCon);
+            }
         } finally {
-            autocommit(configCon);
             pushConnectionToPoolConfigDB(configCon);
         }
     }
@@ -1155,8 +1156,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
         }
     }
-    
-    
+
+
     private void updateDynamicAttributes(final Connection oxCon, final Context ctx) throws SQLException {
         PreparedStatement stmtupdateattribute = null;
         PreparedStatement stmtinsertattribute = null;
@@ -1214,7 +1215,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     /**
      * Translate display name for context default group resolved via administrators language.
-     * 
+     *
      * @param administrator administrator user of the context.
      * @return the translated group name if a corresponding service is available.
      */
@@ -1320,22 +1321,17 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      * @param configCon a write connection to the configuration database that is already in a transaction.
      */
     private void findOrCreateSchema(final Connection configCon, final Database db) throws StorageException {
-        final OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
-        String schemaName;
-        if (this.CONTEXTS_PER_SCHEMA == 1 || (schemaName = getNextUnfilledSchemaFromDB(db.getId(), configCon)) == null) {
+        String schemaName = getNextUnfilledSchemaFromDB(db.getId(), configCon);
+        if (CONTEXTS_PER_SCHEMA == 1 || schemaName == null) {
             int schemaUnique;
             try {
                 schemaUnique = IDGenerator.getId(configCon);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw new StorageException(e.getMessage(), e);
             }
             schemaName = db.getName() + '_' + schemaUnique;
             db.setScheme(schemaName);
-            if (null == db.getDriver()) {
-                // Use default driver if missing
-                db.setDriver("com.mysql.jdbc.Driver");
-            }
-            oxu.createDatabase(db);
+            OXUtilStorageInterface.getInstance().createDatabase(db);
         } else {
             db.setScheme(schemaName);
         }
@@ -1892,7 +1888,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     /**
      * Determine the next database to use depending on database weight factor. Each database should be equal full according to their weight.
      * Additionally check each master for availability.
-     * 
+     *
      * @param con
      * @return Database handle containing information about database
      * @throws SQLException
@@ -1978,7 +1974,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     /**
      * count the number of contexts (or users) on the given database
-     * 
+     *
      * @param db
      * @param configdb_con
      * @return number of units (contexts/user depending on settings)
@@ -2209,7 +2205,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         // add always the context name
         if (ctx.getName() != null) {
-           // a new context Name has been specified 
+           // a new context Name has been specified
            loginMappings.add(ctx.getName());
         } else {
             // try to read context name from database
@@ -2260,7 +2256,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     /**
      * Check if no mapping which the client wants to add already exists for some context.
-     * 
+     *
      * @param con readable connection to the configuration database.
      * @param loginMappings login mappings to check for existance.
      */
