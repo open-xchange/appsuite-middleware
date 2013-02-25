@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.templating.json.converter;
+package com.openexchange.templating.converter;
 
 import java.util.ArrayList;
 import java.util.HashMap;

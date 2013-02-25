@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.templating.json.converter;
+package com.openexchange.templating.converter;
 
 import org.json.JSONException;
 import com.openexchange.ajax.tools.JSONCoercion;
