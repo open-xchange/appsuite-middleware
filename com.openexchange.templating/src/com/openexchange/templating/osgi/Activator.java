@@ -59,6 +59,7 @@ import com.openexchange.templating.TemplateService;
 import com.openexchange.templating.converter.TemplatedResultConverter;
 import com.openexchange.templating.impl.OXIntegration;
 import com.openexchange.templating.impl.TemplateServiceImpl;
+import com.openexchange.templating.json.converter.TemplatedResultConverter;
 import com.openexchange.tools.strings.StringParser;
 
 /**

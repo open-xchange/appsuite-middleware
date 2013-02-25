@@ -62,7 +62,6 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.templating.json.TemplatingActionFactory;
-import com.openexchange.templating.json.converter.TemplatedResultConverter;
 
 /**
  * {@link TemplatingJSONActivator}
@@ -79,7 +78,6 @@ public class TemplatingJSONActivator extends AJAXModuleActivator {
     @Override
     protected void startBundle() throws Exception {
         registerModule(new TemplatingActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "templating");
-        registerService(ResultConverter.class, new TemplatedResultConverter(this));
     }
 
 }
