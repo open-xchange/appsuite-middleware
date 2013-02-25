@@ -47,35 +47,100 @@
  *
  */
 
-package com.openexchange.templating.json.converter;
+package com.openexchange.templating.converter;
 
+import java.util.HashMap;
+import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.AJAXState;
 import com.openexchange.ajax.requesthandler.Dispatcher;
+import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.exception.OXException;
+import com.openexchange.templating.TemplateErrorMessage;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
- * {@link WhitelistedDispatcher}
+ * {@link Request}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class WhitelistedDispatcher {
+public class Request {
     private Dispatcher dispatcher;
     private ServerSession session;
     
-    private boolean trusted = false;
+    private boolean trusted;
     
-    public WhitelistedDispatcher(Dispatcher dispatcher, ServerSession session, boolean trusted) {
-        super();
+    private String action;
+    private String module;
+    
+    private Map<String, String> parameters = new HashMap<String, String>();
+    
+    private Object body;
+    
+    public Request(Dispatcher dispatcher, ServerSession session, boolean trusted) {
         this.dispatcher = dispatcher;
         this.session = session;
         this.trusted = trusted;
     }
-
-
-
-    public Request call(String module, String action) {
-        
-        return new Request(dispatcher, session, trusted);
+    
+    public Request action(String action) {
+        this.action = action;
+        return this;
     }
     
+    public Request module(String module) {
+        this.module = module;
+        return this;
+    }
+    
+    public Request param(String name, Object value) {
+        this.parameters.put(name, value.toString());
+        return this;
+    }
+    
+    public Request body(Object body) {
+        this.body = body;
+        return this;
+    }
+    
+    public Object perform() throws OXException {
+        if (!trusted) {
+            throw TemplateErrorMessage.AccessDenied.create();
+        }
+        
+        AJAXRequestData req = new AJAXRequestData();
+        
+        req.setHostname("localhost");
+        req.setAction(action);
+        req.setServletRequestURI("");
+        
+        for(Map.Entry<String, String> param : parameters.entrySet()) {
+            req.putParameter(param.getKey(), param.getValue());
+        }
+        req.setModule(module);
+        
+        try {
+            req.setData(JSONCoercion.coerceToJSON(body));
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.toString());
+        }
+        
+        AJAXState state = null;
+        try {
+            state = dispatcher.begin();
+            req.setFormat("native");
+            AJAXRequestResult result = dispatcher.perform(req, state, ServerSessionAdapter.valueOf(session));
+            
+            return result.getResultObject();
+            
+        } finally {
+            dispatcher.end(state);
+        }
+    }
 }
