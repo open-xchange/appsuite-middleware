@@ -86,7 +86,7 @@ public interface ResourceDirectory {
      * @return The resolved resources matching the supplied ID
      * @throws OXException
      */
-    IDMap<Resource> getStatus(ID id) throws OXException;
+    IDMap<Resource> get(ID id) throws OXException;
 
     /**
      * Gets all available resources for the supplied IDs, or an empty map if no matching resources are known. For each supplied ID, if
@@ -95,21 +95,20 @@ public interface ResourceDirectory {
      *
      * @param ids The IDs to lookup the status for
      * @return The resolved resources matching the supplied ID
-     * @return
      * @throws OXException
      */
-    IDMap<Resource> getStatus(Collection<ID> ids) throws OXException;
+    IDMap<Resource> get(Collection<ID> ids) throws OXException;
 
     /**
      * Sets or updates the presence data of a resource identified by the supplied ID.
      *
      * @param id The (concrete) resource ID to set the status for
-     * @param data The resource data to set
+     * @param resource The resource data to set
      * @return The previously associated resource of the ID in case of an update, <code>null</code> if there was no value associated
      *         with the ID before
      * @throws OXException
      */
-    Resource setStatus(ID id, Resource data) throws OXException;
+    Resource set(ID id, Resource resource) throws OXException;
 
     /**
      * Removes all available resources for the supplied ID. If the ID is in general form, all matching entries are removed from the

@@ -62,24 +62,25 @@ public interface ChangeListener {
      * Invoked when an entry is added to the directory.
      *
      * @param id The ID of the added resource
-     * @param data The associated presence data
+     * @param value The associated resource value
      */
-    void added(ID id, Resource data);
+    void added(ID id, Resource value);
 
     /**
      * Invoked when an entry is updated in the directory.
      *
      * @param id The ID of the updated resource
-     * @param data The associated presence data
+     * @param value The associated resource value
+     * @param previousValue The previously associated resource value
      */
-    void updated(ID id, Resource data);
+    void updated(ID id, Resource value, Resource previousValue);
 
     /**
      * Invoked when an entry is removed from the directory.
      *
      * @param id The ID of the removed resource
-     * @param data The associated presence data
+     * @param value The associated resource value
      */
-    void removed(ID id, Resource data);
+    void removed(ID id, Resource value);
 
 }
