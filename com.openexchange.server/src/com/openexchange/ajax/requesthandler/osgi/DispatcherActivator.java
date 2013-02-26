@@ -70,6 +70,7 @@ import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.converters.BasicTypeAPIResultConverter;
 import com.openexchange.ajax.requesthandler.converters.BasicTypeJsonConverter;
+import com.openexchange.ajax.requesthandler.converters.NativeConverter;
 import com.openexchange.ajax.requesthandler.converters.DebugConverter;
 import com.openexchange.ajax.requesthandler.converters.cover.CoverExtractor;
 import com.openexchange.ajax.requesthandler.converters.cover.CoverExtractorRegistry;
@@ -117,6 +118,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         registerService(Converter.class, defaultConverter);
 
         defaultConverter.addConverter(new DebugConverter());
+        defaultConverter.addConverter(new NativeConverter());
         /*
          * Add basic converters
          */

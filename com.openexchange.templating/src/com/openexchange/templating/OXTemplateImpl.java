@@ -51,19 +51,29 @@ package com.openexchange.templating;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.strings.StringParser;
 import freemarker.template.Template;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class OXTemplateImpl implements OXTemplate{
-
+    
+    public static ServiceLookup services = null;
+    
 	private static final Log LOG = com.openexchange.log.Log.loggerFor(OXTemplateImpl.class);
 
     private Template template;
     private TemplateLevel level = TemplateLevel.USER;
+    private boolean trusted;
+    private Map<String, String> properties = new HashMap<String, String>();
+    
 
     public Template getTemplate() {
         return template;
@@ -93,6 +103,50 @@ public class OXTemplateImpl implements OXTemplate{
 
     public void setLevel(final TemplateLevel level) {
         this.level = level;
+    }
+    
+    public void setTrusted(boolean trusted) {
+        this.trusted = trusted;
+    }
+    
+    @Override
+    public boolean isTrusted() {
+        return trusted;
+    }
+
+    @Override
+    public String getProperty(String name) {
+        return properties.get(name);
+    }
+
+    @Override
+    public <T> T getProperty(String name, Class<T> klass) {
+        return getProperty(name, klass, null);
+    }
+
+    @Override
+    public String getProperty(String name, String defaultValue) {
+        String string = properties.get(name);
+        if (string == null) {
+            return defaultValue;
+        }
+        return string;
+    }
+
+    @Override
+    public <T> T getProperty(String name, Class<T> klass, T defaultValue) {
+        String string = properties.get(name);
+        if (string == null) {
+            return defaultValue;
+        }
+        return services.getService(StringParser.class).parse(string, klass);
+    }
+
+    public void setProperties(Properties props) {
+        properties.clear();
+        for(Object key: props.keySet()) {
+            properties.put(key.toString(), props.getProperty(key.toString()));
+        }
     }
 
 }

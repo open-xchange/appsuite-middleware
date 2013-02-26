@@ -47,47 +47,35 @@
  *
  */
 
-package com.openexchange.templating.json;
+package com.openexchange.templating.converter;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.templating.json.actions.AssetProvideAction;
-import com.openexchange.templating.json.actions.NamesAction;
+import com.openexchange.ajax.requesthandler.Dispatcher;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link TemplatingActionFactory}
+ * {@link WhitelistedDispatcher}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class TemplatingActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions;
-
-    /**
-     * Initializes a new {@link TemplatingActionFactory}.
-     *
-     * @param services The service look-up
-     */
-    public TemplatingActionFactory(final ServiceLookup services) {
+public class WhitelistedDispatcher {
+    private Dispatcher dispatcher;
+    private ServerSession session;
+    
+    private boolean trusted = false;
+    
+    public WhitelistedDispatcher(Dispatcher dispatcher, ServerSession session, boolean trusted) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(2);
-        actions.put("names", new NamesAction(services));
-        actions.put("provide", new AssetProvideAction(services));
+        this.dispatcher = dispatcher;
+        this.session = session;
+        this.trusted = trusted;
     }
 
-    @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
-    }
 
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
 
+    public Request call(String module, String action) {
+        
+        return new Request(dispatcher, session, trusted);
+    }
+    
 }

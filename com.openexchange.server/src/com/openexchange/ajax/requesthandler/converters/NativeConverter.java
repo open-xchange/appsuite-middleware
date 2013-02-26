@@ -47,47 +47,49 @@
  *
  */
 
-package com.openexchange.templating.json;
+package com.openexchange.ajax.requesthandler.converters;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.ResultConverter.Quality;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.templating.json.actions.AssetProvideAction;
-import com.openexchange.templating.json.actions.NamesAction;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link TemplatingActionFactory}
+ * {@link NativeConverter}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class TemplatingActionFactory implements AJAXActionServiceFactory {
+public class NativeConverter implements ResultConverter {
 
-    private final Map<String, AJAXActionService> actions;
-
-    /**
-     * Initializes a new {@link TemplatingActionFactory}.
-     *
-     * @param services The service look-up
-     */
-    public TemplatingActionFactory(final ServiceLookup services) {
-        super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(2);
-        actions.put("names", new NamesAction(services));
-        actions.put("provide", new AssetProvideAction(services));
+    @Override
+    public String getInputFormat() {
+        return "json";
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    public String getOutputFormat() {
+        return "native";
     }
 
     @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    public Quality getQuality() {
+        return Quality.BAD;
+    }
+
+    @Override
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        try {
+            result.setResultObject(JSONCoercion.coerceToNative(result.getResultObject()), "native");
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.toString(), e);
+        }
     }
 
 }

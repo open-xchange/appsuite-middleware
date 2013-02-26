@@ -47,47 +47,53 @@
  *
  */
 
-package com.openexchange.templating.json;
+package com.openexchange.templating.json.actions;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.io.File;
+import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.templating.json.actions.AssetProvideAction;
-import com.openexchange.templating.json.actions.NamesAction;
+import com.openexchange.templating.TemplateErrorMessage;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link TemplatingActionFactory}
+ * {@link AssetProvideAction}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class TemplatingActionFactory implements AJAXActionServiceFactory {
+@DispatcherNotes(allowPublicSession = true)
+public class AssetProvideAction implements AJAXActionService {
 
-    private final Map<String, AJAXActionService> actions;
+    private ServiceLookup services;
 
-    /**
-     * Initializes a new {@link TemplatingActionFactory}.
-     *
-     * @param services The service look-up
-     */
-    public TemplatingActionFactory(final ServiceLookup services) {
-        super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(2);
-        actions.put("names", new NamesAction(services));
-        actions.put("provide", new AssetProvideAction(services));
+    public AssetProvideAction(ServiceLookup services) {
+        this.services = services;
     }
-
+    
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
+        String templateDirectory = services.getService(ConfigurationService.class).getProperty("com.openexchange.templating.assets.path");
+        
+        String requestedAsset = request.getParameter("name");
+        
+        File asset = new File(new File(templateDirectory), requestedAsset);
+        
+        // Check for directory traversal
+        if (!asset.getParent().equals(new File(templateDirectory))){
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("name", requestedAsset);
+        }
+        
+        if (!asset.exists()) {
+            throw TemplateErrorMessage.TemplateNotFound.create();
+        }
+        return new AJAXRequestResult(new FileHolder(asset), "file");
     }
 
 }

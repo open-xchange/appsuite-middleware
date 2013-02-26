@@ -47,47 +47,49 @@
  *
  */
 
-package com.openexchange.templating.json;
+package com.openexchange.templating.converter;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.templating.json.actions.AssetProvideAction;
-import com.openexchange.templating.json.actions.NamesAction;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 
 /**
- * {@link TemplatingActionFactory}
+ * {@link Dates}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class TemplatingActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions;
-
-    /**
-     * Initializes a new {@link TemplatingActionFactory}.
-     *
-     * @param services The service look-up
-     */
-    public TemplatingActionFactory(final ServiceLookup services) {
-        super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(2);
-        actions.put("names", new NamesAction(services));
-        actions.put("provide", new AssetProvideAction(services));
+public class Dates {
+    
+    private Locale locale;
+    
+    public Dates(Locale locale) {
+        this.locale = locale;
     }
-
-    @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    
+    public String format(Date d, String format) {
+        int style = 0;
+        if (format.equalsIgnoreCase("short")) {
+            style = SimpleDateFormat.SHORT;
+        } else if (format.equals("medium")) {
+            style = SimpleDateFormat.MEDIUM;
+        } else if (format.equals("long")) {
+            style = SimpleDateFormat.LONG;
+        } else if (format.equals("full")) {
+            style = SimpleDateFormat.FULL;
+        } else if (format.equals("default")) {
+            style = SimpleDateFormat.DEFAULT;
+        } else {
+            return new SimpleDateFormat(format, locale).format(d);
+        }
+        
+        
+        return SimpleDateFormat.getDateInstance(style, locale).format(d);
     }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    
+    public String format(long d, String format) {
+        return format(new Date(d), format);
     }
-
+    
+    
 }

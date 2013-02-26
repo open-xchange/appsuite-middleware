@@ -174,6 +174,8 @@ public class AJAXRequestData {
     /** The multipart flag. */
     private boolean multipart;
 
+    private String prefix;
+
     /**
      * Initializes a new {@link AJAXRequestData}.
      * 
@@ -1148,6 +1150,14 @@ public class AJAXRequestData {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+    
+    public String getPrefix() {
+        return prefix;
     }
 
 }

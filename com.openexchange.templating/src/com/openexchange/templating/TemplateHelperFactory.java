@@ -47,47 +47,25 @@
  *
  */
 
-package com.openexchange.templating.json;
+package com.openexchange.templating;
 
-import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.templating.json.actions.AssetProvideAction;
-import com.openexchange.templating.json.actions.NamesAction;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link TemplatingActionFactory}
+ * {@link TemplateHelperFactory}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class TemplatingActionFactory implements AJAXActionServiceFactory {
+public interface TemplateHelperFactory {
 
-    private final Map<String, AJAXActionService> actions;
+    public String getName();
 
-    /**
-     * Initializes a new {@link TemplatingActionFactory}.
-     *
-     * @param services The service look-up
-     */
-    public TemplatingActionFactory(final ServiceLookup services) {
-        super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(2);
-        actions.put("names", new NamesAction(services));
-        actions.put("provide", new AssetProvideAction(services));
-    }
-
-    @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
+    public Object create(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter, Map<String, Object> rootObject) throws OXException;
 
 }

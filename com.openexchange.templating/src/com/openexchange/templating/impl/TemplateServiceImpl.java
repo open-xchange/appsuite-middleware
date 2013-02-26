@@ -110,6 +110,7 @@ public class TemplateServiceImpl implements TemplateService {
 
     /** The property for whether user templates are enabled */
     public static final String USER_TEMPLATING_PROPERTY = "com.openexchange.templating.usertemplating";
+    public static final String TRUSTED_PROPERTY = "com.openexchange.templating.trusted";
 
     /** The map for cached tags */
     private static final Map<String, Map<String, Set<String>>> CACHED_TAGS = new ConcurrentHashMap<String, Map<String, Set<String>>>();
@@ -190,12 +191,75 @@ public class TemplateServiceImpl implements TemplateService {
 
         final OXTemplateImpl retval = new OXTemplateImpl();
         retval.setLevel(TemplateLevel.SERVER);
-        retval.setTemplate(loadTemplate(templatePath, templateName));
+        Properties properties = new Properties();
+        retval.setTemplate(loadTemplate(templatePath, templateName, properties));
+        checkTrustLevel(retval);
+        retval.setProperties(properties);
         return retval;
 
     }
+    
+    private void checkTrustLevel(OXTemplateImpl template) {
+        String trustExpression = config.getProperty(TRUSTED_PROPERTY);
+        if (trustExpression == null) {
+            template.setTrusted(template.getLevel() == TemplateLevel.SERVER);
+            return;
+        }
+        if (trustExpression.indexOf("true") != -1) {
+            template.setTrusted(true);
+            return;
+        }
+        
+        if (trustExpression.indexOf("server") != -1 && template.getLevel() == TemplateLevel.SERVER) {
+            template.setTrusted(true);
+            return;
+        }
+        
+        if (trustExpression.indexOf("user") != -1 && template.getLevel() == TemplateLevel.USER) {
+            template.setTrusted(true);
+            return;
+        }
+        
+        template.setTrusted(false);
+    }
+    
+    private String extractProperties(String text, Properties properties) throws OXException {
+        StringBuilder keep = new StringBuilder();
+        StringBuilder props = new StringBuilder();
+        int state = 0;
+        for(String line: text.split("\n")) {
+            switch (state) {
+            case 0:
+                if (line.startsWith("BEGIN")) {
+                    state = 1;
+                } else {
+                    keep.append(line).append('\n');
+                }
+                break;
+            case 1:
+                if (line.startsWith("END")) {
+                    state = 2;
+                } else {
+                    props.append(line).append('\n');
+                }
+                break;
+            case 2:
+                keep.append(line).append('\n');
+            }
+        }
+        
+        try {
+            if (state > 0) {
+                properties.load(new StringReader(props.toString()));                
+            }
+        } catch (IOException e) {
+            throw TemplateErrorMessage.IOException.create();
+        }
+        
+        return keep.toString();
+    }
 
-    protected Template loadTemplate(final String templatePath, final String templateName) throws OXException {
+    protected Template loadTemplate(final String templatePath, final String templateName, Properties properties) throws OXException {
         final File path = new File(templatePath);
         if (!path.exists() || !path.isDirectory() || !path.canRead()) {
             return null;
@@ -205,16 +269,19 @@ public class TemplateServiceImpl implements TemplateService {
         synchronized (lock) {
             Template retval = null;
             try {
-                final TemplateLoader templateLoader = new FileTemplateLoader(path);
-                final String userDir = System.getProperty("user.dir");
-                System.setProperty("user.dir", templatePath);
-                final Configuration config = new Configuration();
-                System.setProperty("user.dir", userDir);
-                config.setTemplateLoader(templateLoader);
-                if (exceptionHandler != null) {
-                    config.setTemplateExceptionHandler(exceptionHandler);
+                if (existsInFilesystem(templateName)) {
+                    final String userDir = System.getProperty("user.dir");
+                    System.setProperty("user.dir", templatePath);
+                    final Configuration config = new Configuration();
+                    System.setProperty("user.dir", userDir);
+                    if (exceptionHandler != null) {
+                        config.setTemplateExceptionHandler(exceptionHandler);
+                    }
+                    String templateText = loadFromFileSystem(templateName);
+                    templateText = extractProperties(templateText, properties);
+                    
+                    retval = new Template(templateName, new StringReader(templateText), config);
                 }
-                retval = config.getTemplate(templateName);
             } catch (final IOException e) {
                 throw IOException.create(e);
             }
@@ -247,7 +314,8 @@ public class TemplateServiceImpl implements TemplateService {
                     global = true;
                 }
                 String templateText = (folder == null) ? null : infostore.findTemplateInFolder(session, folder, templateName);
-
+                
+                
                 final String userDir = System.getProperty("user.dir");
                 final String templatePath = config.getProperty(PATH_PROPERTY);
                 System.setProperty("user.dir", templatePath);
@@ -258,8 +326,12 @@ public class TemplateServiceImpl implements TemplateService {
                 }
                 if (templateText != null) {
                     final OXTemplateImpl template = new OXTemplateImpl();
+                    Properties properties = new Properties();
+                    templateText = extractProperties(templateText, properties);
                     template.setTemplate(new Template(templateName, new StringReader(templateText), config));
                     template.setLevel(TemplateLevel.USER);
+                    checkTrustLevel(template);
+                    template.setProperties(properties);
                     return template;
                 }
 
@@ -275,8 +347,11 @@ public class TemplateServiceImpl implements TemplateService {
                     if (existsInFilesystem(templateName)) {
                         templateText = loadFromFileSystem(templateName);
                         final OXTemplateImpl template = new OXTemplateImpl();
+                        Properties properties = new Properties();
+                        templateText = extractProperties(templateText, properties);
                         template.setTemplate(new Template(templateName, new StringReader(templateText), config));
                         template.setLevel(TemplateLevel.SERVER);
+                        checkTrustLevel(template);
                         return template;
                     }
 
@@ -288,8 +363,11 @@ public class TemplateServiceImpl implements TemplateService {
                     infostore.storeTemplateInFolder(session, privateFolder, templateName, templateText);
                 }
                 final OXTemplateImpl template = new OXTemplateImpl();
+                Properties properties = new Properties();
+                templateText = extractProperties(templateText, properties);
                 template.setTemplate(new Template(templateName, new StringReader(templateText), config));
                 template.setLevel(TemplateLevel.USER);
+                checkTrustLevel(template);
                 return template;
             } catch (final IOException e) {
                 throw IOException.create(e);
