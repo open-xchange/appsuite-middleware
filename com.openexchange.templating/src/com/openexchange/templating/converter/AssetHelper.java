@@ -47,47 +47,42 @@
  *
  */
 
-package com.openexchange.templating.json;
+package com.openexchange.templating.converter;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.templating.json.actions.AssetProvideAction;
-import com.openexchange.templating.json.actions.NamesAction;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
 
 /**
- * {@link TemplatingActionFactory}
+ * {@link AssetHelper}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class TemplatingActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions;
-
+public class AssetHelper {
     /**
-     * Initializes a new {@link TemplatingActionFactory}.
-     *
-     * @param services The service look-up
+     * Initializes a new {@link AssetHelper}.
+     * @param string
      */
-    public TemplatingActionFactory(final ServiceLookup services) {
+    public AssetHelper(String prefix) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(2);
-        actions.put("names", new NamesAction(services));
-        actions.put("provide", new AssetProvideAction(services));
+        this.prefix = prefix;
     }
 
-    @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    private String prefix;
+    
+    public String getLinkTo(String asset) {
+        try {
+            return prefix + URLEncoder.encode(asset, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return prefix + asset;
+        }
     }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    
+    public String includeJS(String asset) {
+        return "<script type=\"text/javascript\" src=\"" + getLinkTo(asset) + "\"></script>";
     }
-
+    
+    public String includeCSS(String asset) {
+        return "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + getLinkTo(asset) + "\">";
+    }
 }

@@ -1,1 +1,2 @@
 com.openexchange.templating.path = @templatepath@
+com.openexchange.templating.assets.path = @templatepath@/assets/

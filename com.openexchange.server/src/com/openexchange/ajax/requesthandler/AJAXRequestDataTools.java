@@ -135,6 +135,7 @@ public class AJAXRequestDataTools {
         retval.setServletRequestURI(AJAXServlet.getServletSpecificURI(req));
         retval.setPathInfo(req.getPathInfo());
         retval.setAction(getAction(req));
+        retval.setPrefix(prefix);
         /*
          * Set the format
          */

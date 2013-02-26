@@ -49,14 +49,7 @@
 
 package com.openexchange.templating.json.osgi;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 import com.openexchange.ajax.requesthandler.Dispatcher;
-=======
->>>>>>> added basic converter
-=======
-import com.openexchange.ajax.requesthandler.Dispatcher;
->>>>>>> more utilities
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;

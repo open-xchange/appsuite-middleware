@@ -121,7 +121,8 @@ public class TemplatedResultConverter implements ResultConverter, SimpleRegistry
         
         rootObject.put("JSON", new JSONHelper());
         
-        // TODO: Asset Helper
+        rootObject.put("assets", new AssetHelper(requestData.constructURL(null, requestData.getPrefix() + "/templating", false, "action=provide&name=").toString()));
+        
         Map<String, Object> helper = new HashMap<String, Object>();
         rootObject.put("helper", helper);
         
