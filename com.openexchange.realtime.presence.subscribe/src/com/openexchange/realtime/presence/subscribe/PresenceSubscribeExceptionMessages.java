@@ -47,22 +47,19 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.presence.subscribe;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link StanzaSender} - Handles sending of Stanzas to the ID specified in the
- * stanza.
+ * {@link PresenceSubscribeExceptionMessages} - Translatable error messages.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
-public interface StanzaSender {
-    /**
-     * Send Stanzas to the ID specified in the Stanza.
-     * @param stanza the Stanza to send
-     * @throws OXException when sending of the Stanza fails
-     */
-	public void send(Stanza stanza) throws OXException;
+public class PresenceSubscribeExceptionMessages implements LocalizableStrings {
+
+    /** Invalid context ID. Couldn't find context for: %1$s */
+    public static final String INVALID_CONTEXT_ID = "Invalid context ID. Couldn't find context for: %1$s";
+
 }

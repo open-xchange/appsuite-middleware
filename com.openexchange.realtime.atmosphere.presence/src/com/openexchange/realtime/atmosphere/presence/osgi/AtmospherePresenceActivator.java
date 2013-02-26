@@ -55,15 +55,13 @@ import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.MessageDispatcher;
+import com.openexchange.realtime.atmosphere.payload.converter.AtmospherePayloadElementConverter;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.ByteToJSONConverter;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.JSONToByteConverter;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.JSONToStringConverter;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.StringToJSONConverter;
-import com.openexchange.realtime.atmosphere.payload.transformer.AtmospherePayloadElementTransformer;
 import com.openexchange.realtime.atmosphere.presence.converter.JSONToPresenceStateConverter;
 import com.openexchange.realtime.atmosphere.presence.converter.PresenceStateToJSONConverter;
-import com.openexchange.realtime.atmosphere.presence.handler.OXRTPresenceHandler;
-import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.presence.PresenceStatusService;
@@ -78,14 +76,6 @@ import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 public class AtmospherePresenceActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(AtmospherePresenceActivator.class);
-    private final OXRTPresenceHandler presenceHandler;
-
-    /**
-     * Initializes a new {@link AtmospherePresenceActivator}.
-     */
-    public AtmospherePresenceActivator() {
-        presenceHandler = new OXRTPresenceHandler();
-    }
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -143,19 +133,16 @@ public class AtmospherePresenceActivator extends HousekeepingActivator {
 
         // Add Transformers using Converters
         registerService(
-            AtmospherePayloadElementTransformer.class,
-            new AtmospherePayloadElementTransformer(PresenceState.class.getSimpleName(), Presence.STATUS_PATH));
-        registerService(AtmospherePayloadElementTransformer.class, new AtmospherePayloadElementTransformer(
+            AtmospherePayloadElementConverter.class,
+            new AtmospherePayloadElementConverter(PresenceState.class.getSimpleName(), Presence.STATUS_PATH));
+        registerService(AtmospherePayloadElementConverter.class, new AtmospherePayloadElementConverter(
             String.class.getSimpleName(),
             Presence.MESSAGE_PATH));
-        registerService(AtmospherePayloadElementTransformer.class, new AtmospherePayloadElementTransformer(
+        registerService(AtmospherePayloadElementConverter.class, new AtmospherePayloadElementConverter(
             Byte.class.getSimpleName(),
             Presence.PRIORITY_PATH));
         // registerService(AtmospherePayloadElementTransformer.class,
         // new AtmospherePayloadElementTransformer(Byte.class.getSimpleName(), Presence.ERROR_PATH));
-
-        // Add Presence specific handler
-        registerService(StanzaHandler.class, new OXRTPresenceHandler());
     }
 
     @Override

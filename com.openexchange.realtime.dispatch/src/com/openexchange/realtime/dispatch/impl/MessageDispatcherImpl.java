@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.realtime.impl;
+package com.openexchange.realtime.dispatch.impl;
 
 import java.util.Comparator;
 import java.util.HashSet;
@@ -64,7 +64,6 @@ import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MessageDispatcherImpl}
@@ -79,8 +78,8 @@ public class MessageDispatcherImpl implements MessageDispatcher {
     private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
 
     @Override
-    public void send(final Stanza stanza, final ServerSession session) throws OXException {
-        SortedSet<Channel> chosenChannels = chooseChannels(stanza, session);
+    public void send(final Stanza stanza) throws OXException {
+        SortedSet<Channel> chosenChannels = chooseChannels(stanza);
         if (chosenChannels.isEmpty()) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Couldn't find appropriate channel for sending stanza");
@@ -92,7 +91,7 @@ public class MessageDispatcherImpl implements MessageDispatcher {
 
         for (Channel channel : chosenChannels) {
             // TODO: It might not be correct to send the message to all channels. Maybe we have to decide this by Stanza.
-            channel.send(stanza, session);
+            channel.send(stanza);
         }
     }
 
@@ -105,11 +104,10 @@ public class MessageDispatcherImpl implements MessageDispatcher {
      * </ol>
      *
      * @param stanza The stanza to dispatch
-     * @param session The current session
      * @return Null or the chosen channel that is able to handle the stanza.
      * @throws OXException If the lookup of a channel fails for any reason
      */
-    protected SortedSet<Channel> chooseChannels(Stanza stanza, ServerSession session) throws OXException {
+    protected SortedSet<Channel> chooseChannels(Stanza stanza) throws OXException {
         ID to = stanza.getTo();
         Set<Channel> allChannels = new HashSet<Channel>(channels.values());
         
@@ -146,14 +144,14 @@ public class MessageDispatcherImpl implements MessageDispatcher {
         Set<ElementPath> namespaces = new HashSet<ElementPath>(stanza.getElementPaths());
         if (protocol != null) { // Choose channel based on protocol
             Channel channel = channels.get(protocol);
-            if (channel != null && channel.canHandle(namespaces, to, session)) {
+            if (channel != null && channel.canHandle(namespaces, to)) {
                 chosen.add(channel);
                 allChannels.remove(channel);
             }
         }
 
         for (Channel channel : allChannels) { // Choose channels based on priority
-            if (channel.canHandle(namespaces, to, session)) {
+            if (channel.canHandle(namespaces, to)) {
                 chosen.add(channel);
             }
         }
@@ -161,17 +159,19 @@ public class MessageDispatcherImpl implements MessageDispatcher {
         return chosen;
     }
 
+    @Override
     public void addChannel(final Channel channel) {
         channels.put(channel.getProtocol(), channel);
     }
 
+    @Override
     public void removeChannel(final Channel channel) {
         channels.remove(channel.getProtocol());
     }
 
     @Override
-    public boolean canDeliverInstantly(Stanza stanza, ServerSession session) throws OXException {
-        return !chooseChannels(stanza, session).isEmpty();
+    public boolean canDeliverInstantly(Stanza stanza) throws OXException {
+        return !chooseChannels(stanza).isEmpty();
     }
 
 }

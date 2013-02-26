@@ -65,22 +65,19 @@ public interface PresenceChangeListener {
      * Called when a client sends his initial Presence to the server iow. comes online.
      *
      * @param presence The initial Presence Stanza sent by the client.
-     * @param serveSession The associated ServerSession
      */
-    void initialPresence(Presence presence, ServerSession serveSession);
+    void initialPresence(Presence presence);
 
     /**
      * Called when a client changes his status between ONLINE, CHAT_ME_UP, AWAY or DO_NOT_DISTURB
      * @param presence The Presence Stanza sent by the client.
-     * @param serverSession The associated ServerSession
      */
-    void normalPresence(Presence presence, ServerSession serverSession);
+    void normalPresence(Presence presence);
 
     /**
      * Called when a client sends his final Presence to the server iow. goes offline.
      *
      * @param presence The final Presence Stanza sent by the client.
-     * @param serveSession The associated ServerSession
      */
-    void finalPresence(Presence presence, ServerSession serverSession);
+    void finalPresence(Presence presence);
 }

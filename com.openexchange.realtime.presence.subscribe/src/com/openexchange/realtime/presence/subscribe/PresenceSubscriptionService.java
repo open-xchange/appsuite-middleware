@@ -68,54 +68,52 @@ public interface PresenceSubscriptionService {
      *
      * @param subscription
      * @param message optional message
-     * @param session
      * @throws OXException
      */
-    public void subscribe(Presence subscription, String message, ServerSession session) throws OXException;
+    public void subscribe(Presence subscription, String message) throws OXException;
 
     /**
      * Allows a given user to see (or not to see) the current users presence status.
      *
      * @param id The user who is allowed to receive the presence status.
      * @param approval
-     * @param session
      * @throws OXException
      */
-    public void approve(Presence approval, ServerSession session) throws OXException;
+    public void approve(Presence approval) throws OXException;
 
     /**
      * Returns all active subscribers for the current user.
      *
-     * @param session
+     * @param id
      * @return
      * @throws OXException
      */
-    public List<ID> getSubscribers(ServerSession session) throws OXException;
+    public List<ID> getSubscribers(ID id) throws OXException;
 
     /**
-     * Returns all active subscriptions for the current user.
+     * Returns all active subscriptions for the user with given id.
      *
-     * @param session
+     * @param id
      * @return
      * @throws OXException
      */
-    public List<ID> getSubscriptions(ServerSession session) throws OXException;
+    public List<ID> getSubscriptions(ID id) throws OXException;
 
     /**
-     * Returns all pending requests for the current user.
+     * Returns all pending requests for the user with the given id.
      *
-     * @param session
+     * @param id
      * @return
      * @throws OXException
      */
-    public List<Presence> getPendingRequests(ServerSession session) throws OXException;
+    public List<Presence> getPendingRequests(ID id) throws OXException;
 
     /**
-     * Sends all pending reuqests for the current user.
+     * Sends all pending reuqests for the user with the given id.
      *
-     * @param session
+     * @param id
      * @throws OXException
      */
-    public void pushPendingRequests(ServerSession session) throws OXException;
+    public void pushPendingRequests(ID id) throws OXException;
 
 }

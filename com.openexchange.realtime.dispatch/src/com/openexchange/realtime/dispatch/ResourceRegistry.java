@@ -47,46 +47,69 @@
  *
  */
 
-package com.openexchange.realtime.payload.transformer;
+package com.openexchange.realtime.dispatch;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.payload.PayloadElement;
-import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.realtime.packet.ID;
+
 
 /**
- * {@link PayloadElementTransformer} Transform single PayloadElements found in a PayloadTreeNode by converting its data and adjusting the
- * format of the PayloadElement to reflect the conversion. Transformation happens when PayloadTrees of incoming Requests or outgoing
- * Responses have to be changed so that client/server can handle them.
+ * {@link ResourceRegistry}
  *
- * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface PayloadElementTransformer {
-
+public interface ResourceRegistry {
+    
     /**
-     * Get the complete path to an element in a namespace that this PayloadTransformer is able to process.
-     *
-     * @return the elementPath of elements this PayloadTransformer is able to process.
+     * The topic for events that notify about resource registrations.
      */
-    ElementPath getElementPath();
-
+    String TOPIC_REGISTERED = "com/openexchange/realtime/RESOURCE_REGISTERED";
+    
     /**
-     * Transform an incoming Payload.
-     *
-     * @param paylaod The incoming Payload to process
-     * @param session The currently active session
-     * @return
-     * @throws OXException When transformation fails
+     * The topic for events that notify about resource unregistrations.
      */
-    public PayloadElement incoming(PayloadElement payload, ServerSession session) throws OXException;
-
+    String TOPIC_UNREGISTERED = "com/openexchange/realtime/RESOURCE_UNREGISTERED";
+    
     /**
-     * Transform an outgoing Payload.
+     * The key to receive the affected ID from an events properties.
+     */
+    String ID_PROPERTY = "com.openexchange.realtime.ID";
+    
+    /**
+     * Registers a resource at the registry, so that the result of 
+     * {@link #contains(ID)} returns <code>true</code>.<br>
+     * <br>
+     * The given {@link ID} must contain a valid resource identifier.
      *
-     * @param payload The Payload to process
-     * @param session The currently active session
+     * @return <code>false</code> if the id was already registered, otherwise <code>true</code>.
+     * @param id The {@link ID} that identifies the resource.
      * @throws OXException
      */
-    public PayloadElement outgoing(PayloadElement payload, ServerSession session) throws OXException;
+    boolean register(ID id) throws OXException;
+    
+    /**
+     * Removes a resource from the registry. A subsequent call of 
+     * {@link #contains(ID)} will return <code>false</code>.<br>
+     * <br>
+     * The given {@link ID} must contain a valid resource identifier.
+     *
+     * @return <code>false</code> if the registry did not contain the given id. Otherwise <code>true</code>.
+     * @param id The {@link ID} that identifies the resource.
+     * @throws OXException
+     */
+    boolean unregister(ID id) throws OXException;
+    
+    /**
+     * Returns <code>true</code> if the given ID was registered at this registry.
+     * Otherwise <code>false</code> is returned.
+     *
+     * @param id The {@link ID} that identifies the resource.
+     */
+    boolean contains(ID id);
+    
+    /**
+     * Clears the whole registry.
+     */
+    void clear();
 
 }

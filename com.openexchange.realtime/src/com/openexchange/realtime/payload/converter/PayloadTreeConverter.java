@@ -47,69 +47,36 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.payload.converter;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.ID;
-
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ResourceRegistry}
+ * {@link PayloadTreeConverter} - Walks over a PayloadTree and converts PayloadElements contained in PayloadTreeNodes from the current
+ * to the desired representation. Conversion happens when PayloadTrees of incoming Requests or outgoing Responses have to be changed so
+ * that client/server can handle them.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface ResourceRegistry {
-    
+public interface PayloadTreeConverter {
+
     /**
-     * The topic for events that notify about resource registrations.
-     */
-    String TOPIC_REGISTERED = "com/openexchange/realtime/RESOURCE_REGISTERED";
-    
-    /**
-     * The topic for events that notify about resource unregistrations.
-     */
-    String TOPIC_UNREGISTERED = "com/openexchange/realtime/RESOURCE_UNREGISTERED";
-    
-    /**
-     * The key to receive the affected ID from an events properties.
-     */
-    String ID_PROPERTY = "com.openexchange.realtime.ID";
-    
-    /**
-     * Registers a resource at the registry, so that the result of 
-     * {@link #contains(ID)} returns <code>true</code>.<br>
-     * <br>
-     * The given {@link ID} must contain a valid resource identifier.
+     * Transform an incoming PayloadTree.
      *
-     * @return <code>false</code> if the id was already registered, otherwise <code>true</code>.
-     * @param id The {@link ID} that identifies the resource.
-     * @throws OXException
+     * @param payloadTree The incoming PayloadTree to process
+     * @return
+     * @throws OXException When transformation fails
      */
-    boolean register(ID id) throws OXException;
-    
+    public PayloadTree incoming(PayloadTree payloadTree) throws OXException;
+
     /**
-     * Removes a resource from the registry. A subsequent call of 
-     * {@link #contains(ID)} will return <code>false</code>.<br>
-     * <br>
-     * The given {@link ID} must contain a valid resource identifier.
+     * Transform an outgoing PayloadTree.
      *
-     * @return <code>false</code> if the registry did not contain the given id. Otherwise <code>true</code>.
-     * @param id The {@link ID} that identifies the resource.
-     * @throws OXException
+     * @param payloadTree The PayloadTree to process
+     * @throws OXException When transformation fails
      */
-    boolean unregister(ID id) throws OXException;
-    
-    /**
-     * Returns <code>true</code> if the given ID was registered at this registry.
-     * Otherwise <code>false</code> is returned.
-     *
-     * @param id The {@link ID} that identifies the resource.
-     */
-    boolean contains(ID id);
-    
-    /**
-     * Clears the whole registry.
-     */
-    void clear();
+    public PayloadTree outgoing(PayloadTree payloadTree) throws OXException;
 
 }

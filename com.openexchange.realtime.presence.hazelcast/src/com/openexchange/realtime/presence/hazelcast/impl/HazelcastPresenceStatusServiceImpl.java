@@ -119,9 +119,9 @@ public class HazelcastPresenceStatusServiceImpl implements PresenceStatusService
     }
 
     @Override
-    public void changePresenceStatus(Presence stanza, ServerSession serverSession) throws OXException {
-        if (stanza == null || serverSession == null) {
-            throw new IllegalStateException("Obligatory parameter missing.");
+    public void changePresenceStatus(Presence stanza) throws OXException {
+        if (stanza == null) {
+            throw new IllegalStateException("Obligatory parameter stanza missing.");
         }
         /*
          * update presence status in map
@@ -145,13 +145,13 @@ public class HazelcastPresenceStatusServiceImpl implements PresenceStatusService
         for (PresenceChangeListener listener : presenceChangeListeners) {
             switch (presenceChangeType) {
             case COMING_ONLINE:
-                listener.initialPresence(stanza, serverSession);
+                listener.initialPresence(stanza);
                 break;
             case ONLINE_CHANGE:
-                listener.normalPresence(stanza, serverSession);
+                listener.normalPresence(stanza);
                 break;
             case GOING_OFFLINE:
-                listener.finalPresence(stanza, serverSession);
+                listener.finalPresence(stanza);
                 break;
             }
         }

@@ -47,38 +47,17 @@
  *
  */
 
-package com.openexchange.realtime.payload.transformer;
+package com.openexchange.realtime.dispatch;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.payload.PayloadTree;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link PayloadTreeTransformer} - Walks over a PayloadTree and transforms PayloadElements contained in PayloadTreeNodes from the current
- * to the desired representation. Transformation happens when PayloadTrees of incoming Requests or outgoing Responses have to be changed so
- * that client/server can handle them.
+ * {@link DispatchExceptionMessage}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface PayloadTreeTransformer {
-
-    /**
-     * Transform an incoming PayloadTree.
-     *
-     * @param payloadTree The incoming PayloadTree to process
-     * @param session The currently active session
-     * @return
-     * @throws OXException When transformation fails
-     */
-    public PayloadTree incoming(PayloadTree payloadTree, ServerSession session) throws OXException;
-
-    /**
-     * Transform an outgoing PayloadTree.
-     *
-     * @param payloadTree The PayloadTree to process
-     * @param session The currently active session
-     * @throws OXException When transformation fails
-     */
-    public PayloadTree outgoing(PayloadTree payloadTree, ServerSession session) throws OXException;
-
+public class DispatchExceptionMessage implements LocalizableStrings {
+    /** Could not find a handler for the specified stanza */
+    public static final String MISSING_HANDLER_FOR_STANZA_MSG ="Could not find a handler for the given stanza: . \"%1$s\"";
 }

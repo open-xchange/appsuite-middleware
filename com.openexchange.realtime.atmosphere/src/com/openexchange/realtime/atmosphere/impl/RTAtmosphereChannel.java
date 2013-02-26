@@ -82,12 +82,12 @@ public class RTAtmosphereChannel implements Channel {
     }
 
     @Override
-    public boolean canHandle(Set<ElementPath> elementPaths, ID recipient, ServerSession session) {
-        if (!isConnected(recipient, session)) {
+    public boolean canHandle(Set<ElementPath> elementPaths, ID recipient) {
+        if (!isConnected(recipient)) {
             return false;
         }
 
-        if (!hasCapability(recipient, elementPaths, session)) {
+        if (!hasCapability(recipient, elementPaths)) {
             return false;
         }
 
@@ -98,7 +98,7 @@ public class RTAtmosphereChannel implements Channel {
         return true;
     }
 
-    public boolean hasCapability(ID recipient, Set<ElementPath> namespaces, ServerSession session) {
+    public boolean hasCapability(ID recipient, Set<ElementPath> namespaces) {
         return true; // TODO: Implement Capability Model
     }
 
@@ -108,12 +108,12 @@ public class RTAtmosphereChannel implements Channel {
     }
 
     @Override
-    public boolean isConnected(ID id, ServerSession session) {
+    public boolean isConnected(ID id) {
         return handler.isConnected(id);
     }
 
     @Override
-    public void send(Stanza stanza, ServerSession session) throws OXException {
-        handler.handleOutgoing(stanza, session);
+    public void send(Stanza stanza) throws OXException {
+        handler.handleOutgoing(stanza);
     }
 }

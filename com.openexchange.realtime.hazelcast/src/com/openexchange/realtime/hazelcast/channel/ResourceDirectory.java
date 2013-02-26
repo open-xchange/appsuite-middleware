@@ -63,7 +63,7 @@ import com.hazelcast.core.MultiMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.RealtimeExceptionCodes;
-import com.openexchange.realtime.ResourceRegistry;
+import com.openexchange.realtime.dispatch.ResourceRegistry;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.server.ServiceExceptionCode;
 

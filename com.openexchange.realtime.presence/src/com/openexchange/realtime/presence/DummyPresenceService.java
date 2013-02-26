@@ -58,7 +58,6 @@ import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.util.IDMap;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DummyPresenceService}
@@ -93,7 +92,7 @@ public class DummyPresenceService implements PresenceStatusService {
     }
 
     @Override
-    public void changePresenceStatus(Presence stanza, ServerSession session) throws OXException {
+    public void changePresenceStatus(Presence stanza) throws OXException {
         statusMap.put(stanza.getFrom().toGeneralForm(), new PresenceData(stanza.getState(), stanza.getMessage()));
 
         MessageDispatcher dispatcher = services.getService(MessageDispatcher.class);
@@ -105,7 +104,7 @@ public class DummyPresenceService implements PresenceStatusService {
             presence.setTo(subscriber);
             presence.setState(stanza.getState());
             presence.setMessage(stanza.getMessage());
-            dispatcher.send(presence, session);
+            dispatcher.send(presence);
         }
 
     }

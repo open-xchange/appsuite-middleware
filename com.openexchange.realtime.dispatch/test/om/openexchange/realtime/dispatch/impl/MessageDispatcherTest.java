@@ -47,100 +47,103 @@
  *
  */
 
-package com.openexchange.realtime.impl;
+package om.openexchange.realtime.dispatch.impl;
 
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
+import java.util.SortedSet;
+import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.RealtimeExceptionCodes;
-import com.openexchange.realtime.ResourceRegistry;
+import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.dispatch.impl.MessageDispatcherImpl;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.ElementPath;
 
 
 /**
- * {@link ResourceRegistryImpl}
+ * {@link MessageDispatcherTest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ResourceRegistryImpl implements ResourceRegistry {
+public class MessageDispatcherTest extends MessageDispatcherImpl {
     
-    private final EventAdmin eventAdmin;
-    
-    private final Set<ID> ids;
-    
-    public ResourceRegistryImpl(EventAdmin eventAdmin) {
-        super();
-        this.eventAdmin = eventAdmin;
-        ids = Collections.synchronizedSet(new HashSet<ID>());
-    }
+    @Test
+    public void testChannelChoosing() throws Exception {
+        Stanza stanza = new Stanza() {
+            @Override
+            public ID getTo() {
+                return new ID("ox", "some.body", "context", "resource");
+            }
 
-    @Override
-    public boolean register(ID id) throws OXException {
-        if (id == null) {
-            throw new IllegalArgumentException("id was null.");
-        }
+            @Override
+            public void initializeDefaults() throws OXException {
+                // TODO Auto-generated method stub
+            }
+        };
         
-        String resource = id.getResource();
-        if (isInvalid(resource)) {
-            throw RealtimeExceptionCodes.INVALID_ID.create();
-        }
+        Channel c1 = new MockChannel("nox", 25);
+        Channel c2 = new MockChannel("ox", 15);
+        Channel c3 = new MockChannel("ab", 15);
+        Channel c4 = new MockChannel("cd", 20);
+        Channel[] expected = new Channel[] { c2, c1, c4, c3 };
         
-        if (ids.add(id)) {
-            Event event = new Event(TOPIC_REGISTERED, Collections.singletonMap(ID_PROPERTY, id));
-            eventAdmin.postEvent(event);
+        addChannel(c1);
+        addChannel(c2);
+        addChannel(c3);
+        addChannel(c4);
+        
+        SortedSet<Channel> chosenChannels = chooseChannels(stanza);
+        Assert.assertEquals("Wrong set size.", expected.length, chosenChannels.size());
+        
+        Iterator<Channel> it = chosenChannels.iterator();
+        for (int i = 0; i < expected.length; i++) {
+            Channel channel = it.next();
+            Assert.assertEquals("Wrong channel", expected[i], channel);
+        }
+    }
+    
+    private static final class MockChannel implements Channel {
+        
+        private final String protocol;
+        
+        private final int priority;
+
+        /**
+         * Initializes a new {@link MockChannel}.
+         * @param protocol
+         * @param priority
+         */
+        public MockChannel(String protocol, int priority) {
+            super();
+            this.protocol = protocol;
+            this.priority = priority;
+        }
+
+        @Override
+        public String getProtocol() {
+            return protocol;
+        }
+
+        @Override
+        public boolean canHandle(Set<ElementPath> elementPaths, ID recipient) throws OXException {
             return true;
         }
-        
-        return false;
-    }
 
-    @Override
-    public boolean unregister(ID id) throws OXException {
-        if (id == null) {
-            throw new IllegalArgumentException("id was null.");
+        @Override
+        public int getPriority() {
+            return priority;
         }
-        
-        String resource = id.getResource();
-        if (isInvalid(resource)) {
-            throw RealtimeExceptionCodes.INVALID_ID.create();
-        }
-        
-        if (ids.remove(id)) {
-            Event event = new Event(TOPIC_UNREGISTERED, Collections.singletonMap(ID_PROPERTY, id));
-            eventAdmin.postEvent(event);
+
+        @Override
+        public boolean isConnected(ID id) throws OXException {
             return true;
         }
+
+        @Override
+        public void send(Stanza stanza) throws OXException { }
         
-        return false;
     }
 
-    @Override
-    public boolean contains(ID id) {
-        if (id == null) {
-            throw new IllegalArgumentException("id was null.");
-        }
-
-        return ids.contains(id);
-    }
-
-    @Override
-    public void clear() {
-        Set<ID> eventIDs = new HashSet<ID>(ids);
-        ids.clear();
-        for (ID id : eventIDs) {
-            Event event = new Event(TOPIC_UNREGISTERED, Collections.singletonMap(ID_PROPERTY, id));
-            eventAdmin.postEvent(event);
-        }
-    }
-    
-    private static boolean isInvalid(String resource) {
-        if (resource == null || resource.isEmpty()) {
-            return true;
-        }
-        
-        return false;
-    }
 }

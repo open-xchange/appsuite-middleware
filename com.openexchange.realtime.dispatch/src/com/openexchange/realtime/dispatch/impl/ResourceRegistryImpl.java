@@ -47,98 +47,100 @@
  *
  */
 
-package com.openexchange.realtime.impl;
+package com.openexchange.realtime.dispatch.impl;
 
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.SortedSet;
-import junit.framework.Assert;
-import org.junit.Test;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.RealtimeExceptionCodes;
+import com.openexchange.realtime.dispatch.ResourceRegistry;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link MessageDispatcherTest}
+ * {@link ResourceRegistryImpl}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class MessageDispatcherTest extends MessageDispatcherImpl {
+public class ResourceRegistryImpl implements ResourceRegistry {
     
-    @Test
-    public void testChannelChoosing() throws Exception {
-        Stanza stanza = new Stanza() {
-            @Override
-            public ID getTo() {
-                return new ID("ox", "some.body", "context", "resource");
-            }
-        };
+    private final EventAdmin eventAdmin;
+    
+    private final Set<ID> ids;
+    
+    public ResourceRegistryImpl(EventAdmin eventAdmin) {
+        super();
+        this.eventAdmin = eventAdmin;
+        ids = Collections.synchronizedSet(new HashSet<ID>());
+    }
+
+    @Override
+    public boolean register(ID id) throws OXException {
+        if (id == null) {
+            throw new IllegalArgumentException("id was null.");
+        }
         
-        Channel c1 = new MockChannel("nox", 25);
-        Channel c2 = new MockChannel("ox", 15);
-        Channel c3 = new MockChannel("ab", 15);
-        Channel c4 = new MockChannel("cd", 20);
-        Channel[] expected = new Channel[] { c2, c1, c4, c3 };
+        String resource = id.getResource();
+        if (isInvalid(resource)) {
+            throw RealtimeExceptionCodes.INVALID_ID.create();
+        }
         
-        addChannel(c1);
-        addChannel(c2);
-        addChannel(c3);
-        addChannel(c4);
+        if (ids.add(id)) {
+            Event event = new Event(TOPIC_REGISTERED, Collections.singletonMap(ID_PROPERTY, id));
+            eventAdmin.postEvent(event);
+            return true;
+        }
         
-        SortedSet<Channel> chosenChannels = chooseChannels(stanza, null);
-        Assert.assertEquals("Wrong set size.", expected.length, chosenChannels.size());
+        return false;
+    }
+
+    @Override
+    public boolean unregister(ID id) throws OXException {
+        if (id == null) {
+            throw new IllegalArgumentException("id was null.");
+        }
         
-        Iterator<Channel> it = chosenChannels.iterator();
-        for (int i = 0; i < expected.length; i++) {
-            Channel channel = it.next();
-            Assert.assertEquals("Wrong channel", expected[i], channel);
+        String resource = id.getResource();
+        if (isInvalid(resource)) {
+            throw RealtimeExceptionCodes.INVALID_ID.create();
+        }
+        
+        if (ids.remove(id)) {
+            Event event = new Event(TOPIC_UNREGISTERED, Collections.singletonMap(ID_PROPERTY, id));
+            eventAdmin.postEvent(event);
+            return true;
+        }
+        
+        return false;
+    }
+
+    @Override
+    public boolean contains(ID id) {
+        if (id == null) {
+            throw new IllegalArgumentException("id was null.");
+        }
+
+        return ids.contains(id);
+    }
+
+    @Override
+    public void clear() {
+        Set<ID> eventIDs = new HashSet<ID>(ids);
+        ids.clear();
+        for (ID id : eventIDs) {
+            Event event = new Event(TOPIC_UNREGISTERED, Collections.singletonMap(ID_PROPERTY, id));
+            eventAdmin.postEvent(event);
         }
     }
     
-    private static final class MockChannel implements Channel {
-        
-        private final String protocol;
-        
-        private final int priority;
-
-        /**
-         * Initializes a new {@link MockChannel}.
-         * @param protocol
-         * @param priority
-         */
-        public MockChannel(String protocol, int priority) {
-            super();
-            this.protocol = protocol;
-            this.priority = priority;
-        }
-
-        @Override
-        public String getProtocol() {
-            return protocol;
-        }
-
-        @Override
-        public boolean canHandle(Set<ElementPath> elementPaths, ID recipient, ServerSession session) throws OXException {
+    private static boolean isInvalid(String resource) {
+        if (resource == null || resource.isEmpty()) {
             return true;
         }
-
-        @Override
-        public int getPriority() {
-            return priority;
-        }
-
-        @Override
-        public boolean isConnected(ID id, ServerSession session) throws OXException {
-            return true;
-        }
-
-        @Override
-        public void send(Stanza stanza, ServerSession session) throws OXException { }
         
+        return false;
     }
-
 }

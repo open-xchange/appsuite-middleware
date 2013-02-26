@@ -49,6 +49,8 @@
 
 package com.openexchange.realtime.packet;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link IQ} - Used for command exchanges.
  * <p>
@@ -115,6 +117,11 @@ public class IQ extends Stanza {
      */
     public void setType(final Type type) {
         this.type = type;
+    }
+
+    @Override
+    public void initializeDefaults() throws OXException {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
 }

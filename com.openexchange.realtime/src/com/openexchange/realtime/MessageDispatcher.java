@@ -50,8 +50,8 @@
 package com.openexchange.realtime;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * The Message dispatcher chooses an appropriate {@link Channel} to push data (aka. a Stanza) to listening clients
@@ -63,22 +63,33 @@ import com.openexchange.tools.session.ServerSession;
 public interface MessageDispatcher {
 
     /**
+     * Add a Channel that can be used to send Stanzas to this MessageDispatcher
+     * @param channel a Channel that can be used to send Stanzas
+     */
+    public void addChannel(final Channel channel);
+
+    /**
+     * Remove a Channel that can be used to send Stanzas from this MessageDispatcher
+     * @param channel a Channel that can be used to send Stanzas
+     */
+    public void removeChannel(final Channel channel);
+    
+    /**
      * Push a {@link Stanza} to a given recipient. A stanza is one of its subclasses, usually a Message, Presence or Iq.
      *
      * @param stanza The stanza to send
-     * @param session The associated session
+     * @see 11: Server Rules for Handling XML Stanzas in rfc3291
      * @throws OXException If send operation fails for any reason
      */
-    public void send(Stanza stanza, ServerSession session) throws OXException;
+    public void send(Stanza stanza) throws OXException;
 
     /**
      * Determines if a {@link Stanza} can be delivered without delay. In other words: Is the recipient online?
      *
      * @param stanza
-     * @param session
      * @return
      * @throws OXException
      */
-    public boolean canDeliverInstantly(Stanza stanza, ServerSession session) throws OXException;
+    public boolean canDeliverInstantly(Stanza stanza) throws OXException;
 
 }

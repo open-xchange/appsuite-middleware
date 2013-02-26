@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.payload.transformer;
+package com.openexchange.realtime.atmosphere.payload.converter;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
@@ -55,43 +55,43 @@ import com.openexchange.realtime.atmosphere.osgi.ExtensionRegistry;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
-import com.openexchange.realtime.payload.transformer.PayloadTreeTransformer;
+import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
 import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AtmospherePayloadTreeTransformer} - Used to transform PayloadTrees of Stanzas transported via the Atmosphere Channel.
- * Makes use of the Atmosphere specific PayloadElementTransformers registered in the ExtensionRegistry.
+ * {@link AtmospherePayloadTreeConverterer} - Used to convert PayloadTrees of Stanzas transported via the Atmosphere Channel.
+ * Makes use of the Atmosphere specific PayloadElementConverters registered in the ExtensionRegistry.
  *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class AtmospherePayloadTreeTransformer implements PayloadTreeTransformer {
+public class AtmospherePayloadTreeConverterer implements PayloadTreeConverter {
 
-    private static ExtensionRegistry transformers = ExtensionRegistry.getInstance();
+    private static ExtensionRegistry converters = ExtensionRegistry.getInstance();
 
     @Override
-    public PayloadTree incoming(PayloadTree payloadTree, ServerSession session) throws OXException {
-        if(payloadTree == null || session == null) {
-            throw new IllegalStateException("Missing obligatory parameter");
+    public PayloadTree incoming(PayloadTree payloadTree) throws OXException {
+        if(payloadTree == null) {
+            throw new IllegalStateException("Missing obligatory parameter payloadTree");
         }
         PayloadTreeNode root = payloadTree.getRoot();
-        PayloadTreeNode transformedRoot = incoming(root, session);
+        PayloadTreeNode transformedRoot = incoming(root);
         PayloadTree transformedTree = new PayloadTree(transformedRoot);
         return transformedTree;
     }
 
-    private PayloadTreeNode incoming(PayloadTreeNode node, ServerSession session) throws OXException {
+    private PayloadTreeNode incoming(PayloadTreeNode node) throws OXException {
         ElementPath elementPath = node.getElementPath();
-        AtmospherePayloadElementTransformer transformer = transformers.getTransformerFor(elementPath);
-        if(transformer == null) {
+        AtmospherePayloadElementConverter converter = converters.getTransformerFor(elementPath);
+        if(converter == null) {
             throw AtmosphereExceptionCode.MISSING_TRANSFORMER_FOR_PAYLOADELEMENT.create(elementPath);
         }
-        PayloadElement transformedPayload = transformer.incoming(node.getPayloadElement(), session);
+        PayloadElement transformedPayload = converter.incoming(node.getPayloadElement());
         PayloadTreeNode resultNode = new PayloadTreeNode(transformedPayload);
 
         if(node.hasChildren()) {
             for (PayloadTreeNode child : node.getChildren()) {
-                PayloadTreeNode transformedChild = incoming(child, session);
+                PayloadTreeNode transformedChild = incoming(child);
                 resultNode.addChild(transformedChild);
             }
         }
@@ -99,28 +99,28 @@ public class AtmospherePayloadTreeTransformer implements PayloadTreeTransformer 
     }
 
     @Override
-    public PayloadTree outgoing(PayloadTree payloadTree, ServerSession session) throws OXException {
-        if(payloadTree == null || session == null) {
-            throw new IllegalStateException("Missing obligatory parameter");
+    public PayloadTree outgoing(PayloadTree payloadTree) throws OXException {
+        if(payloadTree == null) {
+            throw new IllegalStateException("Missing obligatory parameter payloadTree");
         }
         PayloadTreeNode root = payloadTree.getRoot();
-        PayloadTreeNode transformedRoot = outgoing(root, session);
+        PayloadTreeNode transformedRoot = outgoing(root);
         PayloadTree transformedTree = new PayloadTree(transformedRoot);
         return transformedTree;
     }
 
-    private PayloadTreeNode outgoing(PayloadTreeNode node, ServerSession session) throws OXException {
+    private PayloadTreeNode outgoing(PayloadTreeNode node) throws OXException {
         ElementPath elementPath = node.getElementPath();
-        AtmospherePayloadElementTransformer transformer = transformers.getTransformerFor(elementPath);
+        AtmospherePayloadElementConverter transformer = converters.getTransformerFor(elementPath);
         if(transformer == null) {
             throw AtmosphereExceptionCode.MISSING_TRANSFORMER_FOR_PAYLOADELEMENT.create(elementPath);
         }
-        PayloadElement transformedPayload = transformer.incoming(node.getPayloadElement(), session);
+        PayloadElement transformedPayload = transformer.outgoing(node.getPayloadElement());
         PayloadTreeNode resultNode = new PayloadTreeNode(transformedPayload);
 
         if(node.hasChildren()) {
             for (PayloadTreeNode child : node.getChildren()) {
-                PayloadTreeNode transformedChild = incoming(child, session);
+                PayloadTreeNode transformedChild = outgoing(child);
                 resultNode.addChild(transformedChild);
             }
         }

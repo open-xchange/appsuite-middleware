@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Realtime Dispatcher
+Bundle-SymbolicName: com.openexchange.realtime.dispatch
+Bundle-Version: 7.0.2.0
+Bundle-Activator: com.openexchange.realtime.dispatch.osgi.RealtimeDispatchActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.realtime,
+ com.openexchange.realtime.packet,
+ com.openexchange.realtime.payload,
+ com.openexchange.realtime.presence,
+ com.openexchange.realtime.presence.subscribe,
+ com.openexchange.realtime.util,
+ com.openexchange.server,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.service.event
+Export-Package: com.openexchange.realtime.dispatch

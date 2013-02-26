@@ -50,11 +50,10 @@
 package com.openexchange.realtime.atmosphere.iq.handler;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.StanzaSender;
-import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
+import com.openexchange.realtime.dispatch.StanzaHandler;
+import com.openexchange.realtime.dispatch.StanzaSender;
 import com.openexchange.realtime.packet.IQ;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link IQHandler} Handle incoming and outgoing IQ Stanzas.
@@ -69,7 +68,7 @@ public class IQHandler implements StanzaHandler {
     }
 
     @Override
-    public void incoming(Stanza stanza, ServerSession session) throws OXException {
+    public void incoming(Stanza stanza) throws OXException {
         /*
          * InitializingVisitor
          */
@@ -77,7 +76,7 @@ public class IQHandler implements StanzaHandler {
     }
 
     @Override
-    public void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException {
+    public void outgoing(Stanza stanza, StanzaSender sender) throws OXException {
         throw new UnsupportedOperationException("Not implemented yet!");
     }
 

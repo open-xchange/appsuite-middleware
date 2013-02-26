@@ -66,17 +66,17 @@ public class UndeliveredSubscriptionRequestJanitor implements PresenceChangeList
     public static final Log LOG = com.openexchange.log.Log.loggerFor(UndeliveredSubscriptionRequestJanitor.class);
 
     @Override
-    public void initialPresence(Presence presence, ServerSession serveSession) {
+    public void initialPresence(Presence presence) {
         LOG.info("\nHÄLP I NEED IMPLEMENTATION\n");
     }
 
     @Override
-    public void normalPresence(Presence presence, ServerSession serverSession) {
+    public void normalPresence(Presence presence) {
         LOG.info("\nHÄLP I NEED IMPLEMENTATION\n");
     }
 
     @Override
-    public void finalPresence(Presence presence, ServerSession serverSession) {
+    public void finalPresence(Presence presence) {
         LOG.info("\nHÄLP I NEED IMPLEMENTATION\n");
     }
 

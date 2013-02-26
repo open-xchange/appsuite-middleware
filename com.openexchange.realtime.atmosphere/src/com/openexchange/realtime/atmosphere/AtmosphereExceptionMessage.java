@@ -68,8 +68,6 @@ public class AtmosphereExceptionMessage implements LocalizableStrings {
     public static final String ERROR_WHILE_BUILDING_MSG = "Error while building Stanza: \"%1$s\"";
     /** Could not find a transformer for the PayloadElement: \"%1$s\" */
     public static final String MISSING_TRANSFORMER_FOR_PAYLOADELEMENT_MSG ="Could not find a transformer for the PayloadElement: \"%1$s\"";
-    /** Could not find a handler for the specified stanza */
-    public static final String MISSING_HANDLER_FOR_STANZA_MSG ="Could not find a handler for the given stanza: . \"%1$s\"";
     /** Could not find an initializer for the specified stanza */
     public static final String MISSING_INITIALIZER_FOR_STANZA_MSG ="Could not find an initializer for the given stanza: . \"%1$s\"";
     /** Error while transforming a PayloadElement: \"%1$s. %2$s\" */

@@ -68,7 +68,7 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.MessageDispatcher;
-import com.openexchange.realtime.ResourceRegistry;
+import com.openexchange.realtime.dispatch.ResourceRegistry;
 import com.openexchange.realtime.hazelcast.Services;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.channel.HazelcastChannel;

@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.google.common.base.Predicate;
+import com.openexchange.exception.OXException;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.util.ElementPath;
 
@@ -268,5 +269,11 @@ public abstract class Stanza implements Serializable {
         }
         return copiedPayloads;
     }
+    
+    /**
+     * Init default fields from values found in the PayloadTrees of the Stanza.
+     * @throws OXException when the Stanza couldn't be initialized
+     */
+    public abstract void initializeDefaults() throws OXException;
 
 }

@@ -91,7 +91,7 @@ public interface PresenceStatusService {
      * @param session   The associated ServerSession
      * @throws OXException If changing the PresenceStatus fails
      */
-    void changePresenceStatus(Presence stanza, ServerSession serverSession) throws OXException;
+    void changePresenceStatus(Presence stanza) throws OXException;
 
     /**
      * Get the current PresenceStatus of only one ID.

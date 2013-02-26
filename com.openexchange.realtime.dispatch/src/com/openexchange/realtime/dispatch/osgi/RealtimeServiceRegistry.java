@@ -47,34 +47,43 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl;
+package com.openexchange.realtime.dispatch.osgi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
-import com.openexchange.realtime.atmosphere.osgi.ExtensionRegistry;
-import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
-import com.openexchange.realtime.packet.Stanza;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link StanzaHandlerSelector} - Select a StanzaHandler suitable for the given type of Stanza.
+ * {@link AtmospherePresenceServiceRegistry} - Singleton that acts as central accesspoint for classes of the Atmosphere bundle.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class StanzaHandlerSelector {
+public class RealtimeServiceRegistry implements ServiceLookup {
+
+    private static final RealtimeServiceRegistry INSTANCE = new RealtimeServiceRegistry();
+    public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
 
     /**
-     * Select a StanzaHandler suitable for the given type of Stanza.
-     *
-     * @param stanza The Stanza that has to be handled
-     * @return a StanzaHandler suitable for the given type of Stanza
-     * @throws OXException If no suitable StanzaHandler can be found
+     * Encapsulated constructor.
      */
-    public static StanzaHandler getStanzaHandler(Stanza stanza) throws OXException {
-        StanzaHandler handler = ExtensionRegistry.getInstance().getHandlerFor(stanza);
-        if (handler == null) {
-            throw AtmosphereExceptionCode.MISSING_HANDLER_FOR_STANZA.create(stanza.getClass().getName());
-        }
-        return handler;
+    private RealtimeServiceRegistry() {
     }
 
+    /**
+     * Get the Registry singleton.
+     *
+     * @return the Registry singleton
+     */
+    public static RealtimeServiceRegistry getInstance() {
+        return INSTANCE;
+    }
+
+    @Override
+    public <S> S getService(Class<? extends S> clazz) {
+        return SERVICES.get().getService(clazz);
+    }
+
+    @Override
+    public <S> S getOptionalService(Class<? extends S> clazz) {
+        return SERVICES.get().getOptionalService(clazz);
+    }
 }

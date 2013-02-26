@@ -3,27 +3,16 @@ package com.openexchange.realtime.presence.subscribe.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
-import com.openexchange.authentication.Cookie;
-import com.openexchange.java.util.UUIDs;
-import com.openexchange.login.Interface;
-import com.openexchange.login.LoginRequest;
-import com.openexchange.login.LoginResult;
-import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Presence.Type;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.realtime.presence.subscribe.test.osgi.Activator;
 import com.openexchange.test.osgi.OSGiTest;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /*
  *
@@ -81,14 +70,6 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class IntegrationTest implements OSGiTest {
 
-    private static final String user1 = "martin.herfurth";
-
-    private static final String password1 = "netline";
-
-    private static final String user2 = "marcus";
-
-    private static final String password2 = "netline";
-
     public static PresenceSubscriptionService subscriptionService;
 
     @Before
@@ -106,155 +87,63 @@ public class IntegrationTest implements OSGiTest {
     public void testSubscribe() throws Exception {
         // marcus subscribes to martin
         Presence subscription = new Presence();
-        ID from = new ID(null, "marcus", "1337", null);
-        subscription.setFrom(from);
-        ID to = new ID(null, "martin.herfurth", "1337", null);
-        subscription.setTo(to);
+        ID marcus = new ID(null, "marcus", "1337", null);
+        subscription.setFrom(marcus);
+        ID martin = new ID(null, "martin.herfurth", "1337", null);
+        subscription.setTo(martin);
         subscription.setType(Presence.Type.UNSUBSCRIBED);
 
         // martin approves subscription request
         Presence approval = new Presence();
-        approval.setTo(from);
-        approval.setFrom(to);
+        approval.setTo(marcus);
+        approval.setFrom(martin);
         approval.setMessage("Sicher doch.");
         approval.setType(Type.SUBSCRIBED);
         try {
-            // subscribe
-            subscriptionService.subscribe(subscription, "bitte bitte", getSessionOne());
-            List<Presence> pendingRequests = subscriptionService.getPendingRequests(getSessionOne());
+            // marcus wants to subscribe to martin
+            subscriptionService.subscribe(subscription, "bitte bitte");
+
+            // martin should have on pending subscription but no subscriber, yet
+            List<Presence> pendingRequests = subscriptionService.getPendingRequests(martin);
             assertEquals("Wrong amount of pending requests.", 1, pendingRequests.size());
             assertEquals("Wrong or missing message.", "bitte bitte", pendingRequests.get(0).getMessage());
-            List<ID> subscribers = subscriptionService.getSubscribers(getSessionOne());
+            List<ID> subscribers = subscriptionService.getSubscribers(martin);
             assertEquals("No subscribers expected.", 0, subscribers.size());
 
-            List<ID> subscriptions = subscriptionService.getSubscriptions(getSessionTwo());
+            // marcus shouldn't have any subscriptions either
+            List<ID> subscriptions = subscriptionService.getSubscriptions(marcus);
             assertEquals("No subscriptions expected.", 0, subscriptions.size());
 
-            // approve
-            subscriptionService.approve(approval, getSessionOne());
-            subscribers = subscriptionService.getSubscribers(getSessionOne());
+            // martin approves marcus' subscription request
+            subscriptionService.approve(approval);
+
+            // this should result in marcus being the only one subscribed to martin
+            subscribers = subscriptionService.getSubscribers(martin);
             assertEquals("One subscriber expected.", 1, subscribers.size());
             ID id = subscribers.get(0);
-            assertEquals(from.getUser(), id.getUser());
-            assertEquals(from.getContext(), id.getContext());
+            assertEquals(marcus.getUser(), id.getUser());
+            assertEquals(marcus.getContext(), id.getContext());
 
-            subscriptions = subscriptionService.getSubscriptions(getSessionTwo());
+            // and marcus having only one subscription, the one to martin
+            subscriptions = subscriptionService.getSubscriptions(marcus);
             assertEquals("One subscription expected.", 1, subscriptions.size());
             id = subscriptions.get(0);
-            assertEquals("Subscribed user doesn't match initial subscription", to.getUser(), id.getUser());
-            assertEquals(to.getContext(), id.getContext());
+            assertEquals("Subscribed user doesn't match initial subscription", martin.getUser(), id.getUser());
+            assertEquals(martin.getContext(), id.getContext());
 
             // revoke subscription again
             approval.setMessage("Hau ab!");
             approval.setType(Type.UNSUBSCRIBED);
-            subscriptionService.approve(approval, getSessionOne());
-            subscribers = subscriptionService.getSubscribers(getSessionOne());
+            subscriptionService.approve(approval);
+
+            // this should result in zero people currently being subscribed to martin
+            subscribers = subscriptionService.getSubscribers(martin);
             assertEquals("No subscribers expected.", 0, subscribers.size());
-            pendingRequests = subscriptionService.getPendingRequests(getSessionOne());
+            pendingRequests = subscriptionService.getPendingRequests(martin);
             assertEquals("Wrong amount of pending requests.", 0, pendingRequests.size());
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private ServerSession getSessionOne() throws Exception {
-        return getSession(user1, password1);
-    }
-
-    private ServerSession getSessionTwo() throws Exception {
-        return getSession(user2, password2);
-    }
-
-    private ServerSession getSession(final String user, final String password) throws Exception {
-        LoginResult login = LoginPerformer.getInstance().doLogin(new LoginRequest() {
-
-            @Override
-            public String getVersion() {
-                return "";
-            }
-
-            @Override
-            public String getUserAgent() {
-                return "test";
-            }
-
-            @Override
-            public String getPassword() {
-                return password;
-            }
-
-            @Override
-            public String getLogin() {
-                return user;
-            }
-
-            @Override
-            public Interface getInterface() {
-                return Interface.HTTP_JSON;
-            }
-
-            @Override
-            public Map<String, List<String>> getHeaders() {
-                return Collections.emptyMap();
-            }
-
-            @Override
-            public String getHash() {
-                return "";
-            }
-
-            @Override
-            public Cookie[] getCookies() {
-                return new Cookie[0];
-            }
-
-            @Override
-            public String getClientIP() {
-                return "";
-            }
-
-            @Override
-            public String getClient() {
-                return "chat";
-            }
-
-            @Override
-            public String getAuthId() {
-                return UUIDs.getUnformattedString(UUID.randomUUID());
-            }
-
-            @Override
-            public boolean isSecure() {
-                return false;
-            }
-
-            @Override
-            public String getServerName() {
-                return "";
-            }
-
-            @Override
-            public int getServerPort() {
-                return 0;
-            }
-
-            @Override
-            public String getHttpSessionID() {
-                return "0123456789";
-            }
-
-            @Override
-            public String getClientToken() {
-                return null;
-            }
-
-            @Override
-            public boolean isTransient() {
-                return true;
-            }
-        });
-
-        return ServerSessionAdapter.valueOf(login.getSession());
     }
 
     /*
