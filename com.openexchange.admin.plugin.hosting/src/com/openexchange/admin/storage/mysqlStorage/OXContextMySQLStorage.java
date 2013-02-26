@@ -1021,10 +1021,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             throw new StorageException(e.getMessage(), e);
         }
         try {
-            Integer dbId = ctx.getWriteDatabase().getId();
+            Integer dbId = null;
+            if (null != ctx.getWriteDatabase()) {
+                dbId = ctx.getWriteDatabase().getId();
+            }
             final Database db;
             try {
-                if ((null == dbId) || (dbId.intValue() <= 0)) {
+                if (null == dbId || i(dbId) <= 0) {
                     db = getNextDBHandleByWeight(configCon);
                 } else {
                     db = OXToolStorageInterface.getInstance().loadDatabaseById(i(dbId));
