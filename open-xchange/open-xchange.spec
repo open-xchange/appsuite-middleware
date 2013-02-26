@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 7
+%define        ox_release 8
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -187,6 +187,8 @@ fi
 /sbin/rcopen-xchange
 
 %changelog
+* Tue Feb 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-02-22
 * Mon Jan 21 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-01-24
 * Thu Jan 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -213,5 +215,3 @@ Internal release build for EDP drop #2
 Internal release build for EDP drop #1
 * Wed Apr 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Internal release build for EDP drop #0
-* Wed Feb 01 2012 Marcus Klein <marcus.klein@open-xchange.com>
-Initial release
