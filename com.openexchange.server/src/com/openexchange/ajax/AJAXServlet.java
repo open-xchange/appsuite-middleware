@@ -58,6 +58,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLDecoder;
+import java.net.URISyntaxException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -67,6 +68,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -681,14 +683,26 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return encodeUrl(s, false);
     }
 
+    /**
+     * URL encodes given string.
+     * <p>
+     * Using <code>org.apache.commons.codec.net.URLCodec</code>.
+     * @throws IllegalArgumentException If URL is invalid
+     */
+    public static String encodeUrl(final String s, final boolean forAnchor) {
+        return encodeUrl(s, forAnchor, false);
+    }
+
     private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n|(?:%0[aA])?%0[dD]");
+    private static final Pattern PATTERN_DSLASH = Pattern.compile("(?:/|%2[fF]){2}");
 
     /**
      * URL encodes given string.
      * <p>
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
+     * @throws IllegalArgumentException If URL is invalid
      */
-    public static String encodeUrl(final String s, final boolean forAnchor) {
+    public static String encodeUrl(final String s, final boolean forAnchor, final boolean forLocation) {
         if (isEmpty(s)) {
             return s;
         }
@@ -701,10 +715,29 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 ascii = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL_ANCHOR, s.getBytes(Charsets.ISO_8859_1)));
             }
             // Strip possible "\r?\n" and/or "%0A?%0D"
-            if (ascii.indexOf('\n') < 0 && ascii.indexOf("%0") < 0) {
-                return ascii;
+            String retval = PATTERN_CRLF.matcher(ascii).replaceAll("");
+            // Check for a relative URI
+            if (forLocation) {
+                try {
+                    final java.net.URI uri = new java.net.URI(retval);
+                    if (uri.isAbsolute() || null != uri.getScheme() || null != uri.getHost()) {
+                        throw new IllegalArgumentException("Illegal Location value: " + s);
+                    }
+                } catch (final URISyntaxException e) {
+                    throw new IllegalArgumentException("Illegal Location value: " + s, e);
+                }
             }
-            return PATTERN_CRLF.matcher(ascii).replaceAll("");
+            // Replace double slashes with single one
+            {
+                Matcher matcher = PATTERN_DSLASH.matcher(retval);
+                while (matcher.find()) {
+                    retval = matcher.replaceAll("/");
+                    matcher = PATTERN_DSLASH.matcher(retval);
+                }
+            }
+            return retval;
+        } catch (final IllegalArgumentException e) {
+            throw e;
         } catch (final RuntimeException e) {
             LOG.error("A runtime error occurred.", e);
             return s;
@@ -712,6 +745,25 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     /**
+<<<<<<< HEAD
+=======
+     * Sanitizes specified parameter value.
+     */
+    public static String sanitizeParam(final String s) {
+        if (isEmpty(s)) {
+            return s;
+        }
+        try {
+            // Strip possible "\r?\n" and/or "%0A?%0D"
+            return PATTERN_CRLF.matcher(s).replaceAll("");
+        } catch (final RuntimeException e) {
+            LOG.error("A runtime error occurred.", e);
+            return s;
+        }
+    }
+
+    /**
+>>>>>>> fb731f9... Special check for "location" parameter
      * URL decodes given string.
      * <p>
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
