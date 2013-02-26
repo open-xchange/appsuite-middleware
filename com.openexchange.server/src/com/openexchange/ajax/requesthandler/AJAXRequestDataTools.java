@@ -50,6 +50,7 @@
 package com.openexchange.ajax.requesthandler;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -187,6 +188,19 @@ public class AJAXRequestDataTools {
                 final int read = reader.read();
                 if (read < 0) {
                     retval.setData(null);
+                    String data = req.getParameter("data");
+                    if (data != null && data.length() > 0) {
+                        try {
+                            char c = data.charAt(0);
+                            if ('[' == c || '{' == c) {
+                                retval.setData(JSONObject.parse(new StringReader(data)));
+                            } else {
+                                retval.setData(data);
+                            }
+                        } catch (JSONException e) {
+                            retval.setData(data);
+                        }
+                    }
                 } else {
                     final char c = (char) read;
                     reader.unread(c);
