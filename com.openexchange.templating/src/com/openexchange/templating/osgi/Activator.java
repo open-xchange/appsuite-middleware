@@ -52,6 +52,7 @@ package com.openexchange.templating.osgi;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.html.HtmlService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.templating.OXTemplateImpl;
 import com.openexchange.templating.TemplateHelperFactory;
@@ -98,7 +99,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, InfostoreFacade.class, StringParser.class };
+        return new Class[] { ConfigurationService.class, InfostoreFacade.class, StringParser.class, HtmlService.class };
     }
 
 }

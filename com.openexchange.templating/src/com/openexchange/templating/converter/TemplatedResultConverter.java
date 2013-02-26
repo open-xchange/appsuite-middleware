@@ -61,6 +61,7 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
+import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.ServiceLookup;
@@ -148,12 +149,16 @@ public class TemplatedResultConverter implements ResultConverter, SimpleRegistry
         StringWriter writer = new StringWriter();
         
         template.process(rootObject, writer);
+
+        String html = null;
         
         if (!template.isTrusted()) {
-            // TODO: Whitelisting
+            html = services.getService(HtmlService.class).sanitize(writer.toString(), "templating", false, null, null);
+        } else {
+            html = writer.toString();
         }
         
-        result.setResultObject(writer.toString(), "template");
+        result.setResultObject(html, "template");
         
         
         if (template.isTrusted()) {
