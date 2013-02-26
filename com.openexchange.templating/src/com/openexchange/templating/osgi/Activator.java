@@ -54,6 +54,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.templating.OXTemplateImpl;
+import com.openexchange.templating.TemplateHelperFactory;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.templating.converter.TemplatedResultConverter;
 import com.openexchange.templating.impl.OXIntegration;
@@ -87,7 +88,11 @@ public class Activator extends HousekeepingActivator {
             LOG.error(TemplateServiceImpl.PATH_PROPERTY + " is not set. Templating will remain inactive.", exception);
         }
         
-        registerService(ResultConverter.class, new TemplatedResultConverter(this));
+        TemplatedResultConverter converter = new TemplatedResultConverter(this, templates);
+        registerService(ResultConverter.class, converter);
+        track(TemplateHelperFactory.class, converter);
+        
+        openTrackers();
 
     }
 

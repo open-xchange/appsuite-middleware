@@ -51,7 +51,10 @@ package com.openexchange.templating.converter;
 
 import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import org.osgi.framework.ServiceReference;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -59,8 +62,10 @@ import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.templating.OXTemplate;
+import com.openexchange.templating.TemplateHelperFactory;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.session.ServerSession;
 
@@ -70,13 +75,16 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class TemplatedResultConverter implements ResultConverter {
+public class TemplatedResultConverter implements ResultConverter, SimpleRegistryListener<TemplateHelperFactory> {
 
     private ServiceLookup services;
-
-    public TemplatedResultConverter(ServiceLookup services) {
+    private List<TemplateHelperFactory> helperFactories = new LinkedList<TemplateHelperFactory>();
+    private TemplateService templates = null;
+    
+    public TemplatedResultConverter(ServiceLookup services, TemplateService templates) {
         super();
         this.services = services;
+        this.templates = templates;
     }
 
     @Override
@@ -97,7 +105,7 @@ public class TemplatedResultConverter implements ResultConverter {
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         
-        TemplateService templates = services.getService(TemplateService.class);
+        
         OXTemplate template = templates.loadTemplate(requestData.getParameter("template"), requestData.getParameter("template"), session, false);
         
         Map<String, Object> rootObject = new HashMap<String, Object>();
@@ -113,7 +121,19 @@ public class TemplatedResultConverter implements ResultConverter {
         rootObject.put("JSON", new JSONHelper());
         
         // TODO: Asset Helper
+        Map<String, Object> helper = new HashMap<String, Object>();
+        rootObject.put("helper", helper);
         
+        if (template.getProperty("requires") != null) {
+            String requires = template.getProperty("requires");
+            for (String require: requires.split(",\\s+")) {
+                for(TemplateHelperFactory factory: helperFactories) {
+                    if (factory.getName().equalsIgnoreCase(require)) {
+                        helper.put(require, factory.create(requestData, result, session, converter, rootObject));
+                    }
+                }
+            }
+        }
         
 
         rootObject.put("objects", new NativeBuilderFactory());
@@ -128,15 +148,35 @@ public class TemplatedResultConverter implements ResultConverter {
         StringWriter writer = new StringWriter();
         
         template.process(rootObject, writer);
-    
+        
+        if (!template.isTrusted()) {
+            // TODO: Whitelisting
+        }
+        
         result.setResultObject(writer.toString(), "template");
-        result.setHeader("Content-Type", template.getProperty("contentType", "text/html"));
+        
+        
+        if (template.isTrusted()) {
+            result.setHeader("Content-Type", template.getProperty("contentType", "text/html"));
+        } else {
+            result.setHeader("Content-Type", "text/html");
+        }
     }
     
     private static final class NativeBuilderFactory {
         public NativeBuilder build() {
             return new NativeBuilder();
         }
+    }
+
+    @Override
+    public void added(ServiceReference<TemplateHelperFactory> ref, TemplateHelperFactory service) {
+        helperFactories.add(service);
+    }
+
+    @Override
+    public void removed(ServiceReference<TemplateHelperFactory> ref, TemplateHelperFactory service) {
+        helperFactories.remove(service);
     }
 
 }

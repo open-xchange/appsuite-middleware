@@ -1,5 +1,5 @@
 BEGIN
-requires: datehelper
+	requires: calendarUtil
 END
 <html>
 	<head>
@@ -8,6 +8,7 @@ END
 		<h1>${data.title}</h1>
 		<script>
 			var data = ${JSON.serialize(data)};
+			var session = "${session}";
 		</script>
 	</body>
 </html>
