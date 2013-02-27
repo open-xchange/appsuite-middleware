@@ -76,7 +76,13 @@ public enum AtmosphereExceptionCode implements OXExceptionCode {
     /** Error while transforming a PayloadElement: \"%1$s, %2$s\" */
     ERROR_WHILE_TRANSFORMING(AtmosphereExceptionMessage.ERROR_WHILE_TRANSFORMING_MSG, CATEGORY_ERROR, 7),
     /** Error while converting PayloadElement data: \"%1$s\" */
-    ERROR_WHILE_CONVERTING(AtmosphereExceptionMessage.ERROR_WHILE_CONVERTING_MSG, CATEGORY_ERROR, 8)
+    ERROR_WHILE_CONVERTING(AtmosphereExceptionMessage.ERROR_WHILE_CONVERTING_MSG, CATEGORY_ERROR, 8),
+    /** The following obligatory element is missing: \"%1$s\" */
+    OBLIGATORY_ELEMENT_MISSING(AtmosphereExceptionMessage.OBLIGATORY_ELEMENT_MISSING_MSG, CATEGORY_ERROR, 9),
+    /** Malformed Presence Data \"%1$s\" */
+    PRESENCE_DATA_MALFORMED(AtmosphereExceptionMessage.PRESENCE_DATA_MALFORMED_MSG, CATEGORY_ERROR, 10),
+    /** Malformed Presence Element: \"%1$s\" */
+    PRESENCE_DATA_ELEMENT_MALFORMED(AtmosphereExceptionMessage.PRESENCE_DATA_ELEMENT_MALFORMED_MSG, CATEGORY_ERROR, 11)
     ;
 
     private final String message;

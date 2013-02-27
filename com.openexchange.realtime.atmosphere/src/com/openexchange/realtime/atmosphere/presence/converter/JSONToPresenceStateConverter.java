@@ -47,36 +47,42 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.message.handler;
+package com.openexchange.realtime.atmosphere.presence.converter;
 
+import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.dispatch.StanzaHandler;
-import com.openexchange.realtime.dispatch.StanzaSender;
-import com.openexchange.realtime.packet.Message;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
+import com.openexchange.realtime.atmosphere.payload.converter.AbstractJSONConverter;
+import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.packet.PresenceState;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link MessageHandler} Handle incoming and outgoing Message Stanzas.
+ * {@link JSONToPresenceStateConverter}
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class MessageHandler implements StanzaHandler {
+public class JSONToPresenceStateConverter extends AbstractJSONConverter {
 
     @Override
-    public void incoming(Stanza stanza) throws OXException {
-        throw new UnsupportedOperationException("Not implemented yet!");
+    public String getOutputFormat() {
+        return PresenceState.class.getSimpleName();
     }
 
     @Override
-    public void outgoing(Stanza stanza, StanzaSender sender) throws OXException {
-        /*
-         * InitializingVisitor
-         */
-        throw new UnsupportedOperationException("Not implemented yet!");
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+        String state = (String) data;
+        PresenceState presenceState = null;
+        for (PresenceState ps : PresenceState.values()) {
+            if (ps.name().equalsIgnoreCase(state)) {
+                presenceState = ps;
+                break;
+            }
+        }
+        if (presenceState == null) {
+            throw AtmosphereExceptionCode.PRESENCE_DATA_ELEMENT_MALFORMED.create(Presence.STATUS_PATH);
+        }
+        return presenceState;
     }
 
-    @Override
-    public Class<Message> getStanzaClass() {
-        return Message.class;
-    }
 }

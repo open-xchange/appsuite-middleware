@@ -74,4 +74,10 @@ public class AtmosphereExceptionMessage implements LocalizableStrings {
     public static final String ERROR_WHILE_TRANSFORMING_MSG = "Error while transforming a PayloadElement: \"%1$s, %2$s\"";
     /** Error while converting a PayloadElement: \"%1$s\" */
     public static final String ERROR_WHILE_CONVERTING_MSG = "Error while converting PayloadElement data: \"%1$s\"";
+    /** The following obligatory element is missing: \"%1$s\" */
+    public static final String OBLIGATORY_ELEMENT_MISSING_MSG = "The following obligatory element is missing: \"%1$s\"";
+    /** Malformed Presence Data */
+    public static final String PRESENCE_DATA_MALFORMED_MSG = "Malformed Presence Data";
+    /** Malformed Presence Element: \"%1$s\" */
+    public static final String PRESENCE_DATA_ELEMENT_MALFORMED_MSG = "Malformed Presence Element: \"%1$s\"";
 }
