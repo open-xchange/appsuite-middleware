@@ -1,3 +1,7 @@
+* 2013-02-27 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25142: Supply service info description in properties map
+   
 * 2013-02-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 25054: Set proper folder identifier if mail resides in account's Sent folder
