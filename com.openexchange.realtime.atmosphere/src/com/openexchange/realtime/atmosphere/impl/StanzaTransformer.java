@@ -52,7 +52,7 @@ package com.openexchange.realtime.atmosphere.impl;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.payload.transformer.AtmospherePayloadTreeTransformer;
+import com.openexchange.realtime.atmosphere.payload.converter.AtmospherePayloadTreeConverterer;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.tools.session.ServerSession;
@@ -71,17 +71,16 @@ public class StanzaTransformer {
      * Transform an incoming {@link Stanza} by transforming every PayloadTree of the Stanza.
      *
      * @param stanza The incoming stanza to process
-     * @param session The currently active session
      * @throws OXException When transformation of the Stanza fails
      */
-    public Stanza incoming(Stanza stanza, ServerSession session) throws OXException {
+    public Stanza incoming(Stanza stanza) throws OXException {
         List<PayloadTree> payloadTrees = new ArrayList<PayloadTree>(stanza.getPayloads());
         List<PayloadTree> transformedPayloadTrees = new ArrayList<PayloadTree>();
 
         for (PayloadTree tree : payloadTrees) {
             // TODO: Use ThreadService to transform trees in parallel
-            AtmospherePayloadTreeTransformer transformer = new AtmospherePayloadTreeTransformer();
-            PayloadTree transformedTree = transformer.incoming(tree, session);
+            AtmospherePayloadTreeConverterer transformer = new AtmospherePayloadTreeConverterer();
+            PayloadTree transformedTree = transformer.incoming(tree);
             transformedPayloadTrees.add(transformedTree);
         }
         stanza.setPayloads(transformedPayloadTrees);
@@ -92,17 +91,16 @@ public class StanzaTransformer {
      * Transform an outgoing {@link Stanza} by transforming every PayloadTree of the Stanza.
      *
      * @param stanza The outgoing stanza to process
-     * @param session The currently active session
      * @throws OXException When transformation of the Stanza fails
      */
-    public Stanza outgoing(Stanza stanza, ServerSession session) throws OXException {
+    public Stanza outgoing(Stanza stanza) throws OXException {
         List<PayloadTree> payloadTrees = new ArrayList<PayloadTree>(stanza.getPayloads());
         List<PayloadTree> transformedPayloadTrees = new ArrayList<PayloadTree>();
 
         for (PayloadTree tree : payloadTrees) {
             // TODO: Use ThreadService to transform trees in parallel
-            AtmospherePayloadTreeTransformer transformer = new AtmospherePayloadTreeTransformer();
-            PayloadTree transformedTree = transformer.incoming(tree, session);
+            AtmospherePayloadTreeConverterer transformer = new AtmospherePayloadTreeConverterer();
+            PayloadTree transformedTree = transformer.outgoing(tree);
             transformedPayloadTrees.add(transformedTree);
         }
         stanza.setPayloads(transformedPayloadTrees);

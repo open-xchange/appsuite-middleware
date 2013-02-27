@@ -49,76 +49,26 @@
 
 package com.openexchange.realtime.osgi;
 
-import org.apache.commons.logging.Log;
-import org.osgi.framework.FrameworkEvent;
-import org.osgi.framework.FrameworkListener;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.context.ContextService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.SimpleRegistryListener;
-import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.LocalMessageDispatcher;
-import com.openexchange.realtime.impl.LocalMessageDispatcherImpl;
+import com.openexchange.user.UserService;
+
 
 /**
- * {@link RTActivator} - The activator for realtime bundle.
+ * {@link RealtimeActivator} - Publish needed services and set the lookup in the RealtimeServiceRegistry.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class RTActivator extends HousekeepingActivator {
-
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(RTActivator.class);
+public class RealtimeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { SimpleConverter.class, EventAdmin.class };
+        return new Class[]{ ContextService.class, UserService.class };
     }
 
-    /*
-     * Register the MessageDispatcher as Service and listen for new Channels being added to the OSGi service registry. When new Channels are
-     * added/removed to/from the service registry inform the MessageDispatcher about it.
-     */
     @Override
     protected void startBundle() throws Exception {
-        context.addFrameworkListener(new FrameworkListener() {
-
-            @Override
-            public void frameworkEvent(FrameworkEvent event) {
-                if(event.getBundle().getSymbolicName().toLowerCase().startsWith("com.openexchange.realtime")) {
-                    int eventType = event.getType();
-                    if(eventType == FrameworkEvent.ERROR) {
-                        LOG.error(event.toString(), event.getThrowable());
-                    } else {
-                        LOG.info(event.toString(), event.getThrowable());
-                    }
-                }
-            }
-            });
-
-        final LocalMessageDispatcherImpl dispatcher = new LocalMessageDispatcherImpl();
-
-        registerService(LocalMessageDispatcher.class, dispatcher);
-
-        track(Channel.class, new SimpleRegistryListener<Channel>() {
-
-            @Override
-            public void added(final ServiceReference<Channel> ref, final Channel service) {
-                dispatcher.addChannel(service);
-            }
-
-            @Override
-            public void removed(final ServiceReference<Channel> ref, final Channel service) {
-                dispatcher.removeChannel(service);
-            }
-        });
-
-        openTrackers();
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
+        RealtimeServiceRegistry.SERVICES.set(this);
     }
 
 }

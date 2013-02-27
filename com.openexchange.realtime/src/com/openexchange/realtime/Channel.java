@@ -54,7 +54,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link Channel} - Represents a communication channel for transmitting messages.
@@ -77,11 +76,10 @@ public interface Channel {
 	 *
 	 * @param elementPaths The elementPaths of the payloads contained in the Stanza that has to be handled by this Channel.
 	 * @param recipient The recipient
-	 * @param session The session
 	 * @return <code>true</code> if this channel can dispatch messages to given recipient; otherwise <code>false</code>
 	 * @throws OXException If check fails for any reason
 	 */
-	public boolean canHandle(Set<ElementPath> elementPaths, ID recipient, ServerSession session) throws OXException;
+	public boolean canHandle(Set<ElementPath> elementPaths, ID recipient) throws OXException;
 
 	/**
 	 * Gets the priority used for building a ranking for concurrent channels.
@@ -94,18 +92,16 @@ public interface Channel {
 	 * Checks if this channel is connected to given end point identifier.
 	 *
 	 * @param id The end point identifier
-	 * @param session The session
 	 * @return <code>true</code> if this channel is connected to given end point identifier; otherwise <code>false</code>
 	 * @throws OXException If check fails for any reason
 	 */
-	public boolean isConnected(ID id, ServerSession session) throws OXException;
+	public boolean isConnected(ID id) throws OXException;
 
 	/**
 	 * Sends specified stanza.
 	 *
 	 * @param stanza The stanza to send
-	 * @param session The session
 	 * @throws OXException If send operation fails for any reason
 	 */
-	public void send(Stanza stanza, ServerSession session) throws OXException;
+	public void send(Stanza stanza) throws OXException;
 }

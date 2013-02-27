@@ -50,13 +50,13 @@
 package com.openexchange.realtime.payload;
 
 import java.io.Serializable;
-import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
+import com.openexchange.realtime.payload.converter.PayloadElementConverter;
 import com.openexchange.realtime.util.ElementPath;
 
 /**
  * {@link PayloadElement} - Represents a stanza's payload element that is any (POJO) object linked with its format identifier. Namespace and
  * elementName are used for unique identification (@see ElementPath) of payload elements and determine which
- * {@link PayloadElementTransformer} to use.
+ * {@link PayloadElementConverter} to use.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc

@@ -58,7 +58,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.RealtimeExceptionCodes;
+import com.openexchange.realtime.directory.Resource;
+import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Presence.Type;
@@ -66,6 +69,7 @@ import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.presence.PresenceChangeListener;
 import com.openexchange.realtime.presence.PresenceData;
 import com.openexchange.realtime.presence.PresenceStatusService;
+import com.openexchange.realtime.presence.hazelcast.osgi.RealtimeHazelcastPresenceActivator;
 import com.openexchange.realtime.util.IDMap;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.session.ServerSession;
@@ -73,17 +77,19 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link HazelcastPresenceStatusServiceImpl} - Hazelcast based PresenceStatusService that is implemented via a distributed Map containing
  * <ID, PresenceData> pairs.
- *
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 // TODO: PresenceService must honor priority
 public class HazelcastPresenceStatusServiceImpl implements PresenceStatusService {
 
+    private static final org.apache.commons.logging.Log LOG = LogFactory.getLog(HazelcastPresenceStatusServiceImpl.class);
+
     private static final AtomicReference<HazelcastInstance> REFERENCE = new AtomicReference<HazelcastInstance>();
 
     /**
      * Sets specified {@link HazelcastInstance}.
-     *
+     * 
      * @param hazelcast The {@link HazelcastInstance}
      */
     public static void setHazelcastInstance(HazelcastInstance hazelcast) {
@@ -95,17 +101,18 @@ public class HazelcastPresenceStatusServiceImpl implements PresenceStatusService
     }
 
     private final CopyOnWriteArrayList<PresenceChangeListener> presenceChangeListeners;
-    private final String statusMapName;
+
+    private final ResourceDirectory resourceDirectory;
 
     /**
      * Initializes a new {@link HazelcastPresenceStatusServiceImpl}.
-     *
+     * 
      * @param statusMapName The name of the distributed map to use
      */
-    public HazelcastPresenceStatusServiceImpl(String statusMapName) {
+    public HazelcastPresenceStatusServiceImpl(ResourceDirectory resourceDirectory) {
         super();
         this.presenceChangeListeners = new CopyOnWriteArrayList<PresenceChangeListener>();
-        this.statusMapName = statusMapName;
+        this.resourceDirectory = resourceDirectory;
     }
 
     @Override
@@ -119,9 +126,9 @@ public class HazelcastPresenceStatusServiceImpl implements PresenceStatusService
     }
 
     @Override
-    public void changePresenceStatus(Presence stanza, ServerSession serverSession) throws OXException {
-        if (stanza == null || serverSession == null) {
-            throw new IllegalStateException("Obligatory parameter missing.");
+    public void changePresenceStatus(Presence stanza) throws OXException {
+        if (stanza == null) {
+            throw new IllegalStateException("Obligatory parameter stanza missing.");
         }
         /*
          * update presence status in map
@@ -145,61 +152,95 @@ public class HazelcastPresenceStatusServiceImpl implements PresenceStatusService
         for (PresenceChangeListener listener : presenceChangeListeners) {
             switch (presenceChangeType) {
             case COMING_ONLINE:
-                listener.initialPresence(stanza, serverSession);
+                listener.initialPresence(stanza);
                 break;
             case ONLINE_CHANGE:
-                listener.normalPresence(stanza, serverSession);
+                listener.normalPresence(stanza);
                 break;
             case GOING_OFFLINE:
-                listener.finalPresence(stanza, serverSession);
+                listener.finalPresence(stanza);
                 break;
             }
         }
     }
 
+    /*
+     * http://xmpp.org/rfcs/rfc3921.html#presence-resp-probes
+     */
     @Override
     public PresenceData getPresenceStatus(ID id) throws OXException {
         if (id == null) {
             throw new IllegalStateException("Obligatory parameter missing.");
         }
         PresenceData presenceData = statusMap().get(key(id));
-        // id wasn't seen yet, no status saved, show as offline
-        if (presenceData == null) {
+        IDMap<Resource> idMap = resourceDirectory.get(id);
+        int mapSize = idMap.size();
+        
+        if(mapSize == 0) {
+            /*
+             * If the contact has no available resources, the server MUST either (1) reply to the presence probe by sending to the user the
+             * full content of the last presence stanza of type "unavailable" received by the server from the contact, or (2) not reply at all.
+             */
             presenceData = PresenceData.OFFLINE;
+        } else if (mapSize >=1) {
+            /*
+             * Else, if the contact has at least one available resource, the server MUST reply to the presence probe by sending to the user
+             * the full content of the last presence stanza with no 'to' attribute received by the server from each of the contact's
+             * available resources (again, subject to privacy lists in force for each session).
+             */
+            Entry<ID, Resource> mostRecentPresence = findMostRecentStatus(idMap.entrySet());
+            Entry<ID, Resource> firstEntry = idMap.entrySet().iterator().next();
+            Resource idResource = firstEntry.getValue();
+            new PresenceData(idResource.getPresenceState(), idResource.getMessage());
         }
         return presenceData;
     }
 
+    /**
+     * Find the most recent status the client sent to the server.
+     * @param idEntries a Set of Entrys containing ID and Resource which contans the status
+     * @return the entry with the most recent Status or null if no entry can be found. 
+     */
+    private Entry<ID, Resource> findMostRecentStatus(Set<Entry<ID, Resource>> idEntries) {
+        if(idEntries.isEmpty()) {
+            return null;
+        }
+        //TODO: sort set and return first entry
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+    
     @Override
     public IDMap<PresenceData> getPresenceStatus(Collection<ID> ids) throws OXException {
-        IDMap<PresenceData> results = new IDMap<PresenceData>();
-        for (Entry<String, PresenceData> entry : statusMap().getAll(keys(ids)).entrySet()) {
-            results.put(new ID(entry.getKey()), entry.getValue());
-        }
-        return results;
+//        IDMap<PresenceData> results = new IDMap<PresenceData>();
+//        for (Entry<String, PresenceData> entry : statusMap().getAll(keys(ids)).entrySet()) {
+//            results.put(new ID(entry.getKey()), entry.getValue());
+//        }
+//        return results;
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     /**
      * Gets the 'rtPresence' map that maps IDs to their presence states, throwing appropriate exceptions if the map can't be accessed.
-     *
+     * 
      * @return The 'sessions' map
      * @throws OXException
      */
     private IMap<String, PresenceData> statusMap() throws OXException {
-        try {
-            HazelcastInstance hazelcastInstance = REFERENCE.get();
-            if (null == hazelcastInstance || false == hazelcastInstance.getLifecycleService().isRunning()) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
-            }
-            return hazelcastInstance.getMap(statusMapName);
-        } catch (RuntimeException e) {
-            throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
+//        try {
+//            HazelcastInstance hazelcastInstance = REFERENCE.get();
+//            if (null == hazelcastInstance || false == hazelcastInstance.getLifecycleService().isRunning()) {
+//                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
+//            }
+//            return hazelcastInstance.getMap(statusMapName);
+//        } catch (RuntimeException e) {
+//            throw RealtimeExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+//        }
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
     /**
      * Creates a key for the supplied ID as used by the distributed maps.
-     *
+     * 
      * @param id The ID
      * @return The key
      */
@@ -209,7 +250,7 @@ public class HazelcastPresenceStatusServiceImpl implements PresenceStatusService
 
     /**
      * Creates a set of keys for the supplied IDs as used by the distributed maps.
-     *
+     * 
      * @param ids The IDs
      * @return The keys
      */

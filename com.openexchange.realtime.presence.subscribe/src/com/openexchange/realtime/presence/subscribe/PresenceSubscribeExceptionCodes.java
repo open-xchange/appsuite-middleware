@@ -47,43 +47,88 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.stanza;
+package com.openexchange.realtime.presence.subscribe;
 
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.StanzaSender;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link StanzaHandler} Interface for StanzaHandlers.
+ * {@link PresenceSubscribeExceptionCodes} - Error codes for message dispatcher.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface StanzaHandler {
+public enum PresenceSubscribeExceptionCodes implements OXExceptionCode {
+    /** Invalid context ID. Couldn't find context for: %1$s */
+    INVALID_CONTEXT_ID(PresenceSubscribeExceptionMessages.INVALID_CONTEXT_ID, CATEGORY_ERROR, 1),
+    ;
+
+    private int number;
+
+    private Category category;
+
+    private String message;
+
+    private PresenceSubscribeExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this.message = message;
+        this.number = detailNumber;
+        this.category = category;
+    }
+
+    @Override
+    public int getNumber() {
+        return number;
+    }
+
+    @Override
+    public Category getCategory() {
+        return category;
+    }
+
+    @Override
+    public String getPrefix() {
+        return "RT";
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public boolean equals(final OXException e) {
+        return OXExceptionFactory.getInstance().equals(this, e);
+    }
 
     /**
-     * Get the Stanza class that this StanzaHandler is able to handle.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      *
-     * @return The Stanza class that this StanzaHandler is able to handle.
+     * @return The newly created {@link OXException} instance
      */
-    public Class<? extends Stanza> getStanzaClass();
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
+    }
 
     /**
-     * Handle an incoming Stanza. Transform the Payloads, initialize the Stanza and handle it.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      *
-     * @param stanza The incoming Stanza
-     * @param session The associated ServerSession
-     * @throws OXException If handling fails
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    void incoming(Stanza stanza, ServerSession session) throws OXException;
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
 
     /**
-     * Handle an outgoing Stanza. Transform the payloads and hand it over to the StanzaSender.
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      *
-     * @param stanza    The outgoing Stanza
-     * @param session   The associated ServerSession
-     * @param sender    A Sender to to transport the handled and transformed Stanza
-     * @throws OXException If handling fails
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
      */
-    void outgoing(Stanza stanza, ServerSession session, StanzaSender sender) throws OXException;
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
+    }
+
 }

@@ -47,34 +47,36 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl;
+package com.openexchange.realtime.payload.converter;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
-import com.openexchange.realtime.atmosphere.osgi.ExtensionRegistry;
-import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link StanzaHandlerSelector} - Select a StanzaHandler suitable for the given type of Stanza.
+ * {@link PayloadTreeConverter} - Walks over a PayloadTree and converts PayloadElements contained in PayloadTreeNodes from the current
+ * to the desired representation. Conversion happens when PayloadTrees of incoming Requests or outgoing Responses have to be changed so
+ * that client/server can handle them.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class StanzaHandlerSelector {
+public interface PayloadTreeConverter {
 
     /**
-     * Select a StanzaHandler suitable for the given type of Stanza.
+     * Transform an incoming PayloadTree.
      *
-     * @param stanza The Stanza that has to be handled
-     * @return a StanzaHandler suitable for the given type of Stanza
-     * @throws OXException If no suitable StanzaHandler can be found
+     * @param payloadTree The incoming PayloadTree to process
+     * @return
+     * @throws OXException When transformation fails
      */
-    public static StanzaHandler getStanzaHandler(Stanza stanza) throws OXException {
-        StanzaHandler handler = ExtensionRegistry.getInstance().getHandlerFor(stanza);
-        if (handler == null) {
-            throw AtmosphereExceptionCode.MISSING_HANDLER_FOR_STANZA.create(stanza.getClass().getName());
-        }
-        return handler;
-    }
+    public PayloadTree incoming(PayloadTree payloadTree) throws OXException;
+
+    /**
+     * Transform an outgoing PayloadTree.
+     *
+     * @param payloadTree The PayloadTree to process
+     * @throws OXException When transformation fails
+     */
+    public PayloadTree outgoing(PayloadTree payloadTree) throws OXException;
 
 }

@@ -72,12 +72,12 @@ import com.openexchange.sql.grammar.Predicate;
 import com.openexchange.sql.grammar.SELECT;
 import com.openexchange.sql.grammar.Table;
 import com.openexchange.sql.grammar.UPDATE;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SubscriptionsSQL}
- *
+ * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class SubscriptionsSQL {
 
@@ -103,25 +103,17 @@ public class SubscriptionsSQL {
 
     // @formatter:off
 
-    private static final SELECT selectTo = new SELECT(ASTERISK).FROM(table)
-        .WHERE(new EQUALS(toCid, PLACEHOLDER)
-        .AND(new EQUALS(toUserId, PLACEHOLDER))
-    );
+    private static final SELECT selectTo = new SELECT(ASTERISK).FROM(table).WHERE(
+        new EQUALS(toCid, PLACEHOLDER).AND(new EQUALS(toUserId, PLACEHOLDER)));
 
-    private static final SELECT selectFromByCidAndUserId = new SELECT(ASTERISK).FROM(table)
-        .WHERE(new EQUALS(fromCid, PLACEHOLDER)
-        .AND(new EQUALS(fromUserId, PLACEHOLDER))
-    );
+    private static final SELECT selectFromByCidAndUserId = new SELECT(ASTERISK).FROM(table).WHERE(
+        new EQUALS(fromCid, PLACEHOLDER).AND(new EQUALS(fromUserId, PLACEHOLDER)));
 
-    private static final SELECT selectFromById = new SELECT(ASTERISK).FROM(table)
-        .WHERE(new EQUALS(fromId, PLACEHOLDER)
-    );
+    private static final SELECT selectFromById = new SELECT(ASTERISK).FROM(table).WHERE(new EQUALS(fromId, PLACEHOLDER));
 
-    private static final SELECT selectToByCidUserIdAndStatus = new SELECT(ASTERISK).FROM(table)
-        .WHERE(new EQUALS(toCid, PLACEHOLDER)
-        .AND(new EQUALS(toUserId, PLACEHOLDER)
-        .AND(new EQUALS(status, PLACEHOLDER)))
-    );
+    private static final SELECT selectToByCidUserIdAndStatus = new SELECT(ASTERISK).FROM(table).WHERE(
+        new EQUALS(toCid, PLACEHOLDER).AND(new EQUALS(toUserId, PLACEHOLDER).AND(new EQUALS(status, PLACEHOLDER))));
+
     // @formatter:on
 
     private final DatabaseService dbService;
@@ -131,7 +123,13 @@ public class SubscriptionsSQL {
         this.dbService = dbService;
     }
 
-    public void store(Subscription subscription, ServerSession session) throws OXException {
+    /**
+     * Persist a Subscription
+     * 
+     * @param subscription the Subscrption to persist
+     * @throws OXException
+     */
+    public void store(Subscription subscription) throws OXException {
         Predicate p = new EQUALS(toCid, PLACEHOLDER).AND(new EQUALS(toUserId, PLACEHOLDER));
 
         INSERT insert = new INSERT().INTO(table).SET(toCid, PLACEHOLDER).SET(toUserId, PLACEHOLDER);
@@ -145,7 +143,7 @@ public class SubscriptionsSQL {
             p = p.AND(new ISNULL(fromCid));
         } else {
             p = p.AND(new EQUALS(fromCid, PLACEHOLDER));
-            //update = update.SET(fromCid, PLACEHOLDER);
+            // update = update.SET(fromCid, PLACEHOLDER);
             insert = insert.SET(fromCid, PLACEHOLDER);
             values.add(subscription.getFrom().getCid());
         }
@@ -154,7 +152,7 @@ public class SubscriptionsSQL {
             p = p.AND(new ISNULL(fromUserId));
         } else {
             p = p.AND(new EQUALS(fromUserId, PLACEHOLDER));
-            //update = update.SET(fromUserId, PLACEHOLDER);
+            // update = update.SET(fromUserId, PLACEHOLDER);
             insert = insert.SET(fromUserId, PLACEHOLDER);
             values.add(subscription.getFrom().getUserId());
         }
@@ -163,7 +161,7 @@ public class SubscriptionsSQL {
             p = p.AND(new ISNULL(fromId));
         } else {
             p = p.AND(new EQUALS(fromId, PLACEHOLDER));
-            //update = update.SET(fromId, PLACEHOLDER);
+            // update = update.SET(fromId, PLACEHOLDER);
             insert = insert.SET(fromId, PLACEHOLDER);
             values.add(subscription.getFrom().getId());
         }
@@ -178,10 +176,10 @@ public class SubscriptionsSQL {
             insert = insert.SET(request, PLACEHOLDER);
             update = update.SET(request, PLACEHOLDER);
         }
-        
+
         update.WHERE(p);
 
-        Connection connection = dbService.getWritable(session.getContext());
+        Connection connection = dbService.getWritable(subscription.getFrom().getCid());
         StatementBuilder sb = null;
         ResultSet rs = null;
 
@@ -212,7 +210,7 @@ public class SubscriptionsSQL {
             if (sb != null) {
                 try {
                     sb.closePreparedStatement(null, rs);
-                    dbService.backWritable(session.getContext(), connection);
+                    dbService.backWritable(subscription.getFrom().getCid(), connection);
                 } catch (SQLException e1) {
                     throw new OXException(e1);
                 }
@@ -220,19 +218,26 @@ public class SubscriptionsSQL {
         }
     }
 
-    public List<Subscription> getTo(SubscriptionParticipant participant, ServerSession session) throws OXException {
+    /**
+     * Get a list of Subscriptions the SubscriptionParticipant sent TO others.
+     * 
+     * @param recipient the SubscriptionParticipant that sent the subscriptions
+     * @return a list of subscriptions the SubscriptionParticipant sent to others
+     * @throws OXException
+     */
+    public List<Subscription> getTo(SubscriptionParticipant sender) throws OXException {
         List<Object> values = new ArrayList<Object>();
         SELECT select;
-        if (participant.getId() != null && !participant.getId().trim().equals("")) {
+        if (sender.getId() != null && !sender.getId().trim().equals("")) {
             select = selectFromById;
-            values.add(participant.getId().trim());
+            values.add(sender.getId().trim());
         } else {
             select = selectFromByCidAndUserId;
-            values.add(participant.getCid());
-            values.add(participant.getUserId());
+            values.add(sender.getCid());
+            values.add(sender.getUserId());
         }
 
-        Connection connection = dbService.getWritable(session.getContext());
+        Connection connection = dbService.getWritable(sender.getCid());
         StatementBuilder sb = null;
         ResultSet rs = null;
 
@@ -247,7 +252,7 @@ public class SubscriptionsSQL {
             if (sb != null) {
                 try {
                     sb.closePreparedStatement(null, rs);
-                    dbService.backWritable(session.getContext(), connection);
+                    dbService.backWritable(sender.getCid(), connection);
                 } catch (SQLException e1) {
                     throw new OXException(e1);
                 }
@@ -255,12 +260,19 @@ public class SubscriptionsSQL {
         }
     }
 
-    public List<Subscription> getFrom(SubscriptionParticipant participant, ServerSession session) throws OXException {
+    /**
+     * Get a list of Subscriptions the SubscriptionParticipant received FROM others.
+     * 
+     * @param recipient the SubscriptionParticipant that received the subscriptions
+     * @return a list of subscriptions the SubscriptionParticipant received
+     * @throws OXException
+     */
+    public List<Subscription> getFrom(SubscriptionParticipant recipient) throws OXException {
         List<Object> values = new ArrayList<Object>();
-        values.add(participant.getCid());
-        values.add(participant.getUserId());
+        values.add(recipient.getCid());
+        values.add(recipient.getUserId());
 
-        Connection connection = dbService.getWritable(session.getContext());
+        Connection connection = dbService.getWritable(recipient.getCid());
         StatementBuilder sb = null;
         ResultSet rs = null;
 
@@ -275,7 +287,7 @@ public class SubscriptionsSQL {
             if (sb != null) {
                 try {
                     sb.closePreparedStatement(null, rs);
-                    dbService.backWritable(session.getContext(), connection);
+                    dbService.backWritable(recipient.getCid(), connection);
                 } catch (SQLException e1) {
                     throw new OXException(e1);
                 }
@@ -283,13 +295,21 @@ public class SubscriptionsSQL {
         }
     }
 
-    public List<Subscription> getPendingFor(SubscriptionParticipant participant, ServerSession session) throws OXException {
+    /**
+     * Get the pending Subscriptions for a SubscriptionParticipant. This will return all the subscriptions sent TO the recipient by others
+     * and haven't been approved or canceled by the recipient, yet.
+     * 
+     * @param recipient the SubscriptionParticipant
+     * @return the list of subscriptions that haven't been approved or canceled by the recipient and are in a pending state
+     * @throws OXException
+     */
+    public List<Subscription> getPendingFor(SubscriptionParticipant recipient) throws OXException {
         List<Object> values = new ArrayList<Object>();
-        values.add(participant.getCid());
-        values.add(participant.getUserId());
+        values.add(recipient.getCid());
+        values.add(recipient.getUserId());
         values.add(Presence.Type.PENDING.name());
 
-        Connection connection = dbService.getWritable(session.getContext());
+        Connection connection = dbService.getWritable(recipient.getCid());
         StatementBuilder sb = null;
         ResultSet rs = null;
 
@@ -304,7 +324,7 @@ public class SubscriptionsSQL {
             if (sb != null) {
                 try {
                     sb.closePreparedStatement(null, rs);
-                    dbService.backWritable(session.getContext(), connection);
+                    dbService.backWritable(recipient.getCid(), connection);
                 } catch (SQLException e1) {
                     throw new OXException(e1);
                 }

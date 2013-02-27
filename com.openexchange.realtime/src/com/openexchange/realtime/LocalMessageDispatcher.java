@@ -73,5 +73,17 @@ public interface LocalMessageDispatcher {
      * @throws OXException If send operation fails for any reason
      */
     public Set<ID> send(Stanza stanza, Set<ID> recipients) throws OXException;
+    
+    /**
+     * Add a Channel that can be used to send Stanzas to this MessageDispatcher
+     * @param channel a Channel that can be used to send Stanzas
+     */
+    public void addChannel(final Channel channel);
+
+    /**
+     * Remove a Channel that can be used to send Stanzas from this MessageDispatcher
+     * @param channel a Channel that can be used to send Stanzas
+     */
+    public void removeChannel(final Channel channel);
 
 }

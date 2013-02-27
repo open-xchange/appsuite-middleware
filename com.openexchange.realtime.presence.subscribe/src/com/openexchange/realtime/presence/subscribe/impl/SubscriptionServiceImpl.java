@@ -57,18 +57,22 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.realtime.MessageDispatcher;
+import com.openexchange.realtime.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.presence.subscribe.PresenceSubscribeExceptionCodes;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.realtime.presence.subscribe.database.SubscriptionsSQL;
+import com.openexchange.realtime.util.IdLookup;
+import com.openexchange.realtime.util.IdLookup.UserAndContext;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 /**
  * {@link SubscriptionServiceImpl}
- *
+ * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class SubscriptionServiceImpl implements PresenceSubscriptionService {
 
@@ -79,73 +83,75 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
     }
 
     @Override
-    public void subscribe(Presence subscription, String message, ServerSession session) throws OXException {
+    public void subscribe(Presence subscription, String message) throws OXException {
         SubscriptionParticipant from = createParticipant(subscription.getFrom());
         SubscriptionParticipant to = createParticipant(subscription.getTo());
 
         Subscription sub = new Subscription(from, to, Presence.Type.PENDING);
         sub.setRequest(message);
-
-        SubscriptionsSQL storage = new SubscriptionsSQL(services.getService(DatabaseService.class));
-        storage.store(sub, session);
-
+        DatabaseService databaseService = services.getService(DatabaseService.class);
+        if (databaseService == null) {
+            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(DatabaseService.class.getName());
+        }
+        SubscriptionsSQL storage = new SubscriptionsSQL(databaseService);
+        storage.store(sub);
         MessageDispatcher messageDispatcher = services.getService(MessageDispatcher.class);
-        messageDispatcher.send(subscription, session);
+        messageDispatcher.send(subscription);
     }
 
     @Override
-    public void approve(Presence approval, ServerSession session) throws OXException {
+    public void approve(Presence approval) throws OXException {
         SubscriptionParticipant from = createParticipant(approval.getTo()); // The subscriber (from) is the TO in this approval presence
-        SubscriptionParticipant to = new SubscriptionParticipant(session.getUserId(), session.getContextId());
-
+        SubscriptionParticipant to = new SubscriptionParticipant(from.getUserId(), from.getCid());
         // TODO: Check for valid types
         Subscription sub = new Subscription(from, to, approval.getType());
-
         SubscriptionsSQL storage = new SubscriptionsSQL(services.getService(DatabaseService.class));
-        storage.store(sub, session);
-
+        storage.store(sub);
         MessageDispatcher messageDispatcher = services.getService(MessageDispatcher.class);
-        messageDispatcher.send(approval, session);
+        messageDispatcher.send(approval);
     }
 
     @Override
-    public List<ID> getSubscribers(ServerSession session) throws OXException {
+    public List<ID> getSubscribers(ID id) throws OXException {
         SubscriptionsSQL storage = new SubscriptionsSQL(services.getService(DatabaseService.class));
-
-        SubscriptionParticipant to = new SubscriptionParticipant(session.getUserId(), session.getContextId());
-        List<Subscription> subscriptions = storage.getFrom(to, session);
+        UserAndContext userAndContextIds = IdLookup.getUserAndContextIDs(id);
+        SubscriptionParticipant to = new SubscriptionParticipant(userAndContextIds.getUserId(), userAndContextIds.getContextId());
+        List<Subscription> subscriptions = storage.getFrom(to);
         List<ID> subscribers = new ArrayList<ID>();
         for (Subscription subscription : subscriptions) {
             if (subscription.getState() == Presence.Type.SUBSCRIBED) {
-                ID id = createID(subscription.getFrom());
-                subscribers.add(id);
+                ID subscriberID = createID(subscription.getFrom());
+                subscribers.add(subscriberID);
             }
         }
         return subscribers;
     }
 
     @Override
-    public List<ID> getSubscriptions(ServerSession session) throws OXException {
+    public List<ID> getSubscriptions(ID id) throws OXException {
         SubscriptionsSQL storage = new SubscriptionsSQL(services.getService(DatabaseService.class));
-
-        SubscriptionParticipant from = new SubscriptionParticipant(session.getUserId(), session.getContextId());
-        List<Subscription> subscriptions = storage.getTo(from, session);
+        UserAndContext userAndContextIds = IdLookup.getUserAndContextIDs(id);
+        SubscriptionParticipant from = new SubscriptionParticipant(userAndContextIds.getUserId(), userAndContextIds.getContextId());
+        List<Subscription> subscriptions = storage.getTo(from);
         List<ID> subscribers = new ArrayList<ID>();
         for (Subscription subscription : subscriptions) {
             if (subscription.getState() == Presence.Type.SUBSCRIBED) {
-                ID id = createID(subscription.getTo());
-                subscribers.add(id);
+                ID subscribedID = createID(subscription.getTo());
+                subscribers.add(subscribedID);
             }
         }
         return subscribers;
     }
 
     @Override
-    public List<Presence> getPendingRequests(ServerSession session) throws OXException {
+    public List<Presence> getPendingRequests(ID id) throws OXException {
         SubscriptionsSQL storage = new SubscriptionsSQL(services.getService(DatabaseService.class));
+        /*
+         * Create Subscriptionparticipant by getting userid and contextID from realtimeID
+         */
+        UserAndContext userAndContextIDs = IdLookup.getUserAndContextIDs(id);
         List<Subscription> pendings = storage.getPendingFor(
-            new SubscriptionParticipant(session.getUserId(), session.getContextId()),
-            session);
+            new SubscriptionParticipant(userAndContextIDs.getUserId(), userAndContextIDs.getContextId()));
         List<Presence> presences = new ArrayList<Presence>();
         for (Subscription pending : pendings) {
             Presence presence = new Presence();
@@ -159,24 +165,19 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
     }
 
     @Override
-    public void pushPendingRequests(ServerSession session) throws OXException {
-        List<Presence> pendingRequests = getPendingRequests(session);
+    public void pushPendingRequests(ID id) throws OXException {
+        List<Presence> pendingRequests = getPendingRequests(id);
         MessageDispatcher messageDispatcher = services.getService(MessageDispatcher.class);
         for (Presence presence : pendingRequests) {
-            messageDispatcher.send(presence, session);
+            messageDispatcher.send(presence);
         }
     }
 
     private SubscriptionParticipant createParticipant(ID id) {
         id = id.toGeneralForm();
-        ContextService contextService = services.getService(ContextService.class);
-        UserService userService = services.getService(UserService.class);
-
         try {
-            int contextId = contextService.getContextId(id.getContext());
-            int userId = userService.getUserId(id.getUser(), contextService.getContext(contextId));
-
-            return new SubscriptionParticipant(userId, contextId);
+            UserAndContext userAndContextIDs = IdLookup.getUserAndContextIDs(id);
+            return new SubscriptionParticipant(userAndContextIDs.getUserId(), userAndContextIDs.getContextId());
         } catch (OXException e) {
             return new SubscriptionParticipant(id.toString());
         }

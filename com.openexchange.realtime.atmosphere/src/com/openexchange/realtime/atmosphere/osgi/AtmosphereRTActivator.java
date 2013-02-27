@@ -11,8 +11,8 @@ import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
-import com.openexchange.realtime.atmosphere.payload.transformer.AtmospherePayloadElementTransformer;
-import com.openexchange.realtime.atmosphere.stanza.StanzaHandler;
+import com.openexchange.realtime.atmosphere.payload.converter.AtmospherePayloadElementConverter;
+import com.openexchange.realtime.dispatch.StanzaHandler;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.sessiond.SessiondService;
 
@@ -28,31 +28,18 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         AtmosphereServiceRegistry.SERVICES.set(this);
-        AtmospherePayloadElementTransformer.SERVICES.set(this);
+        AtmospherePayloadElementConverter.SERVICES.set(this);
 
-        track(AtmospherePayloadElementTransformer.class, new SimpleRegistryListener<AtmospherePayloadElementTransformer>() {
+        track(AtmospherePayloadElementConverter.class, new SimpleRegistryListener<AtmospherePayloadElementConverter>() {
 
             @Override
-            public void added(final ServiceReference<AtmospherePayloadElementTransformer> ref, final AtmospherePayloadElementTransformer transformer) {
+            public void added(final ServiceReference<AtmospherePayloadElementConverter> ref, final AtmospherePayloadElementConverter transformer) {
                 extensions.addPayloadElementTransFormer(transformer);
             }
 
             @Override
-            public void removed(final ServiceReference<AtmospherePayloadElementTransformer> ref, final AtmospherePayloadElementTransformer transformer) {
+            public void removed(final ServiceReference<AtmospherePayloadElementConverter> ref, final AtmospherePayloadElementConverter transformer) {
                 extensions.removePayloadElementTransformer(transformer);
-            }
-        });
-
-        track(StanzaHandler.class, new SimpleRegistryListener<StanzaHandler>() {
-
-            @Override
-            public void added(final ServiceReference<StanzaHandler> ref, final StanzaHandler handler) {
-                extensions.addStanzaHandler(handler);
-            }
-
-            @Override
-            public void removed(final ServiceReference<StanzaHandler> ref, final StanzaHandler handler) {
-                extensions.removeStanzaHandler(handler);
             }
         });
 

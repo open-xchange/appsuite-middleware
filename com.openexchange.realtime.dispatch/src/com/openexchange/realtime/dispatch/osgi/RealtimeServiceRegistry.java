@@ -47,38 +47,43 @@
  *
  */
 
-package com.openexchange.realtime.payload.transformer;
+package com.openexchange.realtime.dispatch.osgi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.payload.PayloadTree;
-import com.openexchange.tools.session.ServerSession;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link PayloadTreeTransformer} - Walks over a PayloadTree and transforms PayloadElements contained in PayloadTreeNodes from the current
- * to the desired representation. Transformation happens when PayloadTrees of incoming Requests or outgoing Responses have to be changed so
- * that client/server can handle them.
+ * {@link AtmospherePresenceServiceRegistry} - Singleton that acts as central accesspoint for classes of the Atmosphere bundle.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface PayloadTreeTransformer {
+public class RealtimeServiceRegistry implements ServiceLookup {
+
+    private static final RealtimeServiceRegistry INSTANCE = new RealtimeServiceRegistry();
+    public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
 
     /**
-     * Transform an incoming PayloadTree.
-     *
-     * @param payloadTree The incoming PayloadTree to process
-     * @param session The currently active session
-     * @return
-     * @throws OXException When transformation fails
+     * Encapsulated constructor.
      */
-    public PayloadTree incoming(PayloadTree payloadTree, ServerSession session) throws OXException;
+    private RealtimeServiceRegistry() {
+    }
 
     /**
-     * Transform an outgoing PayloadTree.
+     * Get the Registry singleton.
      *
-     * @param payloadTree The PayloadTree to process
-     * @param session The currently active session
-     * @throws OXException When transformation fails
+     * @return the Registry singleton
      */
-    public PayloadTree outgoing(PayloadTree payloadTree, ServerSession session) throws OXException;
+    public static RealtimeServiceRegistry getInstance() {
+        return INSTANCE;
+    }
 
+    @Override
+    public <S> S getService(Class<? extends S> clazz) {
+        return SERVICES.get().getService(clazz);
+    }
+
+    @Override
+    public <S> S getOptionalService(Class<? extends S> clazz) {
+        return SERVICES.get().getOptionalService(clazz);
+    }
 }

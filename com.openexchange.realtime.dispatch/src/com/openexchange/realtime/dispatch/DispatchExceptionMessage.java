@@ -47,51 +47,17 @@
  *
  */
 
-package com.openexchange.realtime.impl;
+package com.openexchange.realtime.dispatch;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.exception.OXException;
-import com.openexchange.log.Log;
-import com.openexchange.log.LogFactory;
-import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.LocalMessageDispatcher;
-import com.openexchange.realtime.MessageDispatcher;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link LocalMessageDispatcherImpl}
+ * {@link DispatchExceptionMessage}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
-
-    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(MessageDispatcher.class));
-
-    private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
-    
-    @Override
-    public Set<ID> send(Stanza stanza, Set<ID> recipients) throws OXException {
-        // TODO: exception handling and maybe only a single id as recipient parameter
-        for (ID recipient : recipients) {
-            Channel channel = channels.get(recipient);
-            if (channel != null) {
-                channel.send(stanza, null);
-            }
-        }
-
-        return Collections.emptySet();
-    }
-
-    public void addChannel(final Channel channel) {
-        channels.put(channel.getProtocol(), channel);
-    }
-
-    public void removeChannel(final Channel channel) {
-        channels.remove(channel.getProtocol());
-    }
+public class DispatchExceptionMessage implements LocalizableStrings {
+    /** Could not find a handler for the specified stanza */
+    public static final String MISSING_HANDLER_FOR_STANZA_MSG ="Could not find a handler for the given stanza: . \"%1$s\"";
 }

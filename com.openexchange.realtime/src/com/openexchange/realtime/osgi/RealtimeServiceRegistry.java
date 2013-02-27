@@ -9,7 +9,7 @@
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
  *    trademarks of the Open-Xchange, Inc. group of companies.
- *    The use of the Logos is not covered by the GbsctracNU General Public License.
+ *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
  *    Non-commercial, ShareAlike, and the interpretation of the term
@@ -47,66 +47,43 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.payload.transformer;
+package com.openexchange.realtime.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.payload.PayloadElement;
-import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
-import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AtmospherePayloadElementTransformer} - Used to transform PayloadElements of Stanzas transported via the Atmosphere Channel.
+ * {@link RealtimeServiceRegistry} - Singleton that acts as central accesspoint for classes of this bundle.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class AtmospherePayloadElementTransformer implements PayloadElementTransformer {
+public class RealtimeServiceRegistry implements ServiceLookup {
 
-    /**
-     * The ServiceLookup reference.
-     */
+    private static final RealtimeServiceRegistry INSTANCE = new RealtimeServiceRegistry();
     public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
 
-    private static final String EXTERNAL_FORMAT = "json";
-
-    private final String INTERNAL_FORMAT;
-
-    private final ElementPath elementPath;
+    /**
+     * Encapsulated constructor.
+     */
+    private RealtimeServiceRegistry() {
+    }
 
     /**
-     * Initializes a new {@link AtmospherePayloadElementTransformer} for one special PayloadElement identified by an ElementPath.
+     * Get the Registry singleton.
      *
-     * @param internalFormat The internal Format this Transformer converts the PayloadElement to
-     * @param elementPath The ElementPath of the PayloadElement that this Transformer can handle
+     * @return the Registry singleton
      */
-    public AtmospherePayloadElementTransformer(String INTERNAL_FORMAT, ElementPath elementPath) {
-        this.INTERNAL_FORMAT = INTERNAL_FORMAT;
-        this.elementPath = elementPath;
+    public static RealtimeServiceRegistry getInstance() {
+        return INSTANCE;
     }
 
     @Override
-    public ElementPath getElementPath() {
-        return elementPath;
+    public <S> S getService(Class<? extends S> clazz) {
+        return SERVICES.get().getService(clazz);
     }
 
     @Override
-    public PayloadElement incoming(final PayloadElement payload, final ServerSession session) throws OXException {
-        Object data = payload.getData();
-        SimpleConverter simpleConverter = SERVICES.get().getService(SimpleConverter.class);
-        Object converted = simpleConverter.convert(payload.getFormat(), INTERNAL_FORMAT, data, session);
-        return new PayloadElement(converted, INTERNAL_FORMAT, payload.getNamespace(), payload.getElementName());
+    public <S> S getOptionalService(Class<? extends S> clazz) {
+        return SERVICES.get().getOptionalService(clazz);
     }
-
-    @Override
-    public PayloadElement outgoing(final PayloadElement payload, final ServerSession session) throws OXException {
-        Object data = payload.getData();
-        SimpleConverter simpleConverter = SERVICES.get().getService(SimpleConverter.class);
-        Object converted = simpleConverter.convert(payload.getFormat(), EXTERNAL_FORMAT, data, session);
-        return new PayloadElement(converted, Byte.class.getSimpleName(), payload.getNamespace(), payload.getElementName());
-    }
-
 }

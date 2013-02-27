@@ -68,7 +68,7 @@ import com.openexchange.realtime.util.ElementPath;
  * PayloadTrees. Extensions to Presence Stanza can be queried via the {@link Presence#getExtensions()} function and programmatically
  * extracted from the Stanza via {@link Stanza#getPayload(com.openexchange.realtime.util.ElementPath)} function.
  * </p>
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -90,7 +90,7 @@ public class Presence extends Stanza {
      * <li>none: is used for the initial presence message of a client to signal its availability for communications.</li>
      * <li>pending:</li>
      * </ol>
-     *
+     * 
      * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
      */
     public enum Type {
@@ -113,7 +113,7 @@ public class Presence extends Stanza {
 
     /** Predicate to filter default elements from {@link Stanza#payloads} */
     private transient Predicate<PayloadTree> extensionsPredicate = null;
-    
+
     private Predicate<PayloadTree> getDefaultsPredicate() {
         if (defaultsPredicate == null) {
             defaultsPredicate = new Predicate<PayloadTree>() {
@@ -124,10 +124,10 @@ public class Presence extends Stanza {
                 }
             };
         }
-        
+
         return defaultsPredicate;
     }
-    
+
     private Predicate<PayloadTree> getExtensionsPredicate() {
         if (extensionsPredicate == null) {
             extensionsPredicate = new Predicate<PayloadTree>() {
@@ -138,7 +138,7 @@ public class Presence extends Stanza {
                 }
             };
         }
-        
+
         return extensionsPredicate;
     }
 
@@ -156,7 +156,7 @@ public class Presence extends Stanza {
      * Initializes a new {@link Presence} based on another Presence. This will produce a deep copy up to the leafs of the PayloadTreeNode,
      * more exactly the data Portion of the PayloadElement in the PayloadTreeNode as we are dealing with Objects that must not neccessarily
      * implement Cloneable or Serializable.
-     *
+     * 
      * @param other The Presence to copy, must not be null
      * @throws IllegalArgumentException if the other Presence is null
      */
@@ -202,8 +202,8 @@ public class Presence extends Stanza {
 
     /**
      * Gets the type of Presence Stanza
-     *
-     * @return The state
+     * 
+     * @return The type
      */
     public Type getType() {
         return type;
@@ -211,7 +211,7 @@ public class Presence extends Stanza {
 
     /**
      * Sets the type of the Presence Stanza
-     *
+     * 
      * @param type The state to set
      */
     public void setType(Type type) {
@@ -220,7 +220,7 @@ public class Presence extends Stanza {
 
     /**
      * Gets the message.
-     *
+     * 
      * @return The message
      */
     public String getMessage() {
@@ -237,7 +237,7 @@ public class Presence extends Stanza {
 
     /**
      * Gets the state e.g. online or away
-     *
+     * 
      * @return The state
      */
     public PresenceState getState() {
@@ -246,7 +246,7 @@ public class Presence extends Stanza {
 
     /**
      * Sets the state e.g. online or away
-     *
+     * 
      * @param state The state
      */
     public void setState(PresenceState state) {
@@ -256,7 +256,7 @@ public class Presence extends Stanza {
 
     /**
      * Gets the priority.
-     *
+     * 
      * @return The priority
      */
     public byte getPriority() {
@@ -265,7 +265,7 @@ public class Presence extends Stanza {
 
     /**
      * Sets the priority.
-     *
+     * 
      * @param priority The priority to set
      */
     public void setPriority(byte priority) {
@@ -275,7 +275,7 @@ public class Presence extends Stanza {
 
     /**
      * Get the error element describing the error-type Stanza in more detail.
-     *
+     * 
      * @return Null or the OXException representing the error
      */
     public OXException getError() {
@@ -284,7 +284,7 @@ public class Presence extends Stanza {
 
     /**
      * Set the error element describing the error-type Stanza in more detail.
-     *
+     * 
      * @param error The OXException representing the error
      */
     public void setError(OXException error) {
@@ -294,7 +294,7 @@ public class Presence extends Stanza {
 
     /**
      * Get the default payloads.
-     *
+     * 
      * @return The default payloads as defined in the Presence specification.
      */
     public Collection<PayloadTree> getDefaultPayloads() {
@@ -303,7 +303,7 @@ public class Presence extends Stanza {
 
     /**
      * Get the extension payloads.
-     *
+     * 
      * @return Extension payloads that aren't defined in the Presence specification and not accessible via getters and setters.
      */
     public Collection<PayloadTree> getExtensions() {
@@ -313,7 +313,7 @@ public class Presence extends Stanza {
     /**
      * Write a payload to the PayloadTree identified by the ElementPath. There is only one tree for the default elements which only contains
      * one node so we can set the data by directly writing to the root node.
-     *
+     * 
      * @param path The ElementPath identifying the PayloadTree.
      * @param data The payload data to write into the root node.
      */
@@ -346,16 +346,118 @@ public class Presence extends Stanza {
 
     }
 
+    @Override
+    public void initializeDefaults() throws OXException {
+        Initializer initializer = new Initializer();
+        Collection<PayloadTree> defaultPayloads = getDefaultPayloads();
+        initializer.initializeFromDefaults(defaultPayloads);
+    }
+
+    /**
+     * {@link Initializer} - Is used to initialize the default Stanza fields from PayloadTrees contained in the Stanza.
+     * 
+     * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+     */
+    private final class Initializer {
+
+        /**
+         * Initializes a new {@link Initializer}.
+         */
+        public Initializer() {
+            super();
+        }
+
+        /**
+         * Initialize the default Stanza fields from PayloadTrees contained in the Stanza
+         * 
+         * @param defaultPayloads the PayloadTrees containing the PayloadElements needed to initialize the default Stanza fields
+         * @throws OXException when the Stanza couldn't be initialized
+         */
+        public void initializeFromDefaults(Collection<PayloadTree> defaultPayloads) throws OXException {
+            initShow(defaultPayloads);
+            initStatus(defaultPayloads);
+            initPriority(defaultPayloads);
+        }
+
+        /*
+         * The Status Message
+         */
+        private void initStatus(Collection<PayloadTree> trees) {
+            PayloadTree message = getSinglePayload(trees, Presence.MESSAGE_PATH);
+            if (message != null) {
+                Object data = message.getRoot().getPayloadElement().getData();
+                if (!(data instanceof String)) {
+                    throw new IllegalStateException("Payload not transformed yet");
+                }
+                setMessage((String) data);
+            }
+        }
+
+        /*
+         * The Status shown
+         */
+        private void initShow(Collection<PayloadTree> trees) {
+            // final UNAVAILABLE Presence means user goes offline
+            if (Presence.Type.UNAVAILABLE.equals(getType())) {
+                setState(PresenceState.OFFLINE);
+            } else {
+                PayloadTree show = getSinglePayload(trees, Presence.STATUS_PATH);
+                if (show != null) {
+                    Object data = show.getRoot().getPayloadElement().getData();
+                    if (!(data instanceof PresenceState)) {
+                        throw new IllegalStateException("Payload not transformed yet");
+                    }
+                    setState((PresenceState) data);
+                }
+            }
+        }
+
+        /*
+         * The Priority of the Stanza
+         */
+        private void initPriority(Collection<PayloadTree> trees) {
+            PayloadTree priority = getSinglePayload(trees, Presence.PRIORITY_PATH);
+            if (priority != null) {
+                Object data = priority.getRoot().getPayloadElement().getData();
+                if (!(data instanceof Byte)) {
+                    throw new IllegalStateException("Payload not transformed yet");
+                }
+                setPriority((Byte) data);
+            }
+        }
+
+        /**
+         * @param presence The Presence Stanza to search in
+         * @param elementPath The ElementPath of the PayloadTree we want
+         * @return Null or the PayloadTree matching the ElementPath
+         */
+        private PayloadTree getSinglePayload(Collection<PayloadTree> trees, ElementPath elementPath) {
+            PayloadTree candidate = null;
+            for (PayloadTree tree : trees) {
+                if (elementPath.equals(tree.getElementPath())) {
+                    candidate = tree;
+                    break;
+                }
+            }
+            return candidate;
+        }
+    }
+
+    /**
+     * Initialize a Presence Builder
+     * 
+     * @return the Presence Builder
+     */
     public static Builder builder() {
         return new Builder();
     }
 
     /**
      * Static {@link Builder} to create Presence Stanzas more fluently.
-     *
+     * 
      * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
      */
-    public static class Builder {
+    public final static class Builder {
 
         Presence presence;
 
@@ -368,7 +470,7 @@ public class Presence extends Stanza {
 
         /**
          * Set the sender of the Presence stanza.
-         *
+         * 
          * @param from the sender of the Presence stanza.
          * @return the builder for further modification or building of the current Presence
          */
@@ -379,7 +481,7 @@ public class Presence extends Stanza {
 
         /**
          * Set the recipient of the Presence stanza
-         *
+         * 
          * @param to the recipeint of the Presence stanza
          * @return the builder for further modification or building of the current Presence
          */
@@ -390,7 +492,7 @@ public class Presence extends Stanza {
 
         /**
          * Set the error of the Presence stanza.
-         *
+         * 
          * @param error the error of the Presence stanza.
          * @return the builder for further modification or building of the current Presence
          */
@@ -401,7 +503,7 @@ public class Presence extends Stanza {
 
         /**
          * Set the message of the Presence stanza.
-         *
+         * 
          * @param message the message of the Presence stanza.
          * @return the builder for further modification or building of the current Presence
          */
@@ -412,7 +514,7 @@ public class Presence extends Stanza {
 
         /**
          * Set the priority of the Presence stanza.
-         *
+         * 
          * @param priority the priority of the Presence stanza.
          * @return the builder for further modification or building of the current Presence
          */
@@ -423,7 +525,7 @@ public class Presence extends Stanza {
 
         /**
          * Set the state of the Presence stanza.
-         *
+         * 
          * @param state the state of the Presence stanza.
          * @return the builder for further modification or building of the current Presence
          */
@@ -434,7 +536,7 @@ public class Presence extends Stanza {
 
         /**
          * Set the type of the Presence stanza.
-         *
+         * 
          * @param type the tyoe of the Presence stanza.
          * @return the builder for further modification or building of the current Presence
          */
@@ -445,7 +547,7 @@ public class Presence extends Stanza {
 
         /**
          * A valid minimal Presence(Initial Presence when coming online) only has to contain a sender.
-         *
+         * 
          * @param presence The Presence to validate
          * @throws IllegalStateException when validation fails
          */
@@ -457,7 +559,7 @@ public class Presence extends Stanza {
 
         /**
          * Validate and return the constructed Presence stanza.
-         *
+         * 
          * @return the constructed Presence stanza
          * @throws IllegalStateException when validation of the configured presence object fails
          */

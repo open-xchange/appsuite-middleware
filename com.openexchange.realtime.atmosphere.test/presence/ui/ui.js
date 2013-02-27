@@ -29,7 +29,7 @@ define("ui/ui", function () {
         url: url,
         contentType : "application/json",
         logLevel : 'debug',
-        transport : 'websocket' ,
+        transport : 'long-polling' ,
         fallbackTransport: 'long-polling',
         timeout: 50000,
         maxRequests : 3,

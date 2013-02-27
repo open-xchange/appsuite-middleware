@@ -75,7 +75,6 @@ import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.IDMap;
 import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link GlobalMessageDispatcherImpl}
@@ -94,7 +93,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
     }
 
     @Override
-    public void send(Stanza stanza, ServerSession session) throws OXException {
+    public void send(Stanza stanza) throws OXException {
         ID to = stanza.getTo();
         if (to == null) {
             /*

@@ -49,12 +49,12 @@
 
 package com.openexchange.realtime.packet;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.realtime.util.ElementPath;
-
 
 /**
  * {@link Message} - A regular message associated with a certain {@link Type type}.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -78,7 +78,7 @@ public class Message extends Stanza {
     }
 
     private Type type;
-    
+
     public static final ElementPath BODY_PATH = new ElementPath("body");
 
     /**
@@ -90,7 +90,7 @@ public class Message extends Stanza {
 
     /**
      * Gets the type.
-     *
+     * 
      * @return The type
      */
     public Type getType() {
@@ -99,11 +99,16 @@ public class Message extends Stanza {
 
     /**
      * Sets the type.
-     *
+     * 
      * @param type The type
      */
     public void setType(final Type type) {
         this.type = type;
+    }
+
+    @Override
+    public void initializeDefaults() throws OXException {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 
 }
