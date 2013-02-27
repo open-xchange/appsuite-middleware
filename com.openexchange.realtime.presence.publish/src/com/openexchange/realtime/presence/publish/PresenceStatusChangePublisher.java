@@ -59,23 +59,22 @@ import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.presence.PresenceChangeListener;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PresenceStatusChangePublisher} - Listens for PresenceStatus changes at the PresenceStatusService and publishes the status change
  * via the MessageDispatcher to all clients that are subscribed to the client who just changed his staus.
- *
+ * 
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public class PresenceStatusChangePublisher implements PresenceChangeListener {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(PresenceStatusChangePublisher.class);
 
-    private final ServiceLookup serviceLookup;
+    private ServiceLookup serviceLookup;
 
     /**
      * Initializes a new {@link PresenceStatusChangePublisher}.
-     *
+     * 
      * @param serviceLookup The servicelookup to use.
      */
     public PresenceStatusChangePublisher(ServiceLookup serviceLookup) {
@@ -84,40 +83,40 @@ public class PresenceStatusChangePublisher implements PresenceChangeListener {
     }
 
     @Override
-    public void initialPresence(Presence presence, ServerSession serverSession) {
-        allPresence(presence, serverSession);
+    public void initialPresence(Presence presence) {
+        allPresence(presence);
 
     }
 
     @Override
-    public void normalPresence(Presence stanza, ServerSession session) {
-        allPresence(stanza, session);
+    public void normalPresence(Presence stanza) {
+        allPresence(stanza);
 
     }
 
     @Override
-    public void finalPresence(Presence stanza, ServerSession session) {
-        allPresence(stanza, session);
+    public void finalPresence(Presence stanza) {
+        allPresence(stanza);
     }
 
     /**
-     * Handles a presence by retriev
-     *
-     * @param stanza
-     * @param session
+     * Handles a presence by either sending a directed Presence if the incoming Presence contains a recipient ID or by retrieving the
+     * contacts that are subscribed to the presence of the sender.
+     * 
+     * @param stanza The incoming Presence Stanza
      */
-    private void allPresence(Presence stanza, ServerSession session) {
+    private void allPresence(Presence stanza) {
         try {
             PresenceSubscriptionService presenceSubscriptionService = serviceLookup.getService(PresenceSubscriptionService.class);
             if (presenceSubscriptionService == null) {
                 throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(PresenceSubscriptionService.class.getSimpleName());
             }
             if (isDirectedPresence(stanza)) {
-                sendPresenceUpdate(stanza.getTo(), stanza, session);
+                sendPresenceUpdate(stanza.getTo(), stanza);
             } else {
-                List<ID> subscribers = presenceSubscriptionService.getSubscribers(session);
+                List<ID> subscribers = presenceSubscriptionService.getSubscribers(stanza.getFrom().toGeneralForm());
                 for (ID id : subscribers) {
-                    sendPresenceUpdate(id, stanza, session);
+                    sendPresenceUpdate(id, stanza);
                 }
             }
         } catch (OXException e) {
@@ -128,12 +127,13 @@ public class PresenceStatusChangePublisher implements PresenceChangeListener {
 
     /**
      * Check if the Presence Stanza is directed to only one person.
+     * 
      * @param presence The Stanza to check
      * @return true if it is directed at one person, false if it's a global contact list update
      */
     private boolean isDirectedPresence(Presence presence) {
         ID to = presence.getTo();
-        if(to == null) {
+        if (to == null) {
             return false;
         }
         return true;
@@ -141,20 +141,20 @@ public class PresenceStatusChangePublisher implements PresenceChangeListener {
 
     /**
      * Send a Presence Stanza update to a contact.
-     *
+     * 
      * @param contact The contact that should receive the update
      * @param presence The Presence Stanza that caused the update.
-     * @param session The associated ServerSession
      * @throws OXException If sending the Presence update fails
      */
-    private void sendPresenceUpdate(ID contact, Presence presence, ServerSession session) throws OXException {
+    private void sendPresenceUpdate(ID contact, Presence presence) throws OXException {
         MessageDispatcher messageDispatcher = serviceLookup.getService(MessageDispatcher.class);
         if (messageDispatcher == null) {
             throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(MessageDispatcher.class.getSimpleName());
         }
         Presence updatePresence = new Presence(presence);
+        updatePresence.setFrom(presence.getFrom());
         updatePresence.setTo(contact);
-        messageDispatcher.send(updatePresence, session);
+        messageDispatcher.send(updatePresence);
     }
 
 }
