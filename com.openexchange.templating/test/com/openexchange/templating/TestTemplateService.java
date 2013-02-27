@@ -145,7 +145,7 @@ public class TestTemplateService extends TestCase {
         assertEquals(TemplateLevel.USER, template.getLevel());
         final StringWriter writer = new StringWriter();
         template.process(new HashMap<Object, Object>(), writer);
-        assertEquals("Template Content", writer.toString());
+        assertEquals("Template Content", writer.toString().trim());
 
         oxfolderHelperBuilder.assertAllWereCalled();
         infostoreBuilder.assertAllWereCalled();
@@ -167,7 +167,7 @@ public class TestTemplateService extends TestCase {
         assertEquals(TemplateLevel.USER, template.getLevel());
         final StringWriter writer = new StringWriter();
         template.process(new HashMap<Object, Object>(), writer);
-        assertEquals("Template Content", writer.toString());
+        assertEquals("Template Content", writer.toString().trim());
 
         oxfolderHelperBuilder.assertAllWereCalled();
         infostoreBuilder.assertAllWereCalled();
