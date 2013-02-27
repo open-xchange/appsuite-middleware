@@ -232,6 +232,7 @@ public class PresenceHandler implements StanzaHandler {
             throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(PresenceStatusService.class.getName());
         }
         // TODO: add delay from last statusChange to presenceStanza
+        // TODO: use ResourceDirectory service instead of PresenceStatusService
         // Change the status of the incoming Stanza's client
         presenceStatusService.changePresenceStatus(stanza);
     }

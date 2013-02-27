@@ -59,7 +59,6 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
-import com.openexchange.realtime.RealtimeExceptionCodes;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.packet.ID;
@@ -69,10 +68,7 @@ import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.presence.PresenceChangeListener;
 import com.openexchange.realtime.presence.PresenceData;
 import com.openexchange.realtime.presence.PresenceStatusService;
-import com.openexchange.realtime.presence.hazelcast.osgi.RealtimeHazelcastPresenceActivator;
 import com.openexchange.realtime.util.IDMap;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link HazelcastPresenceStatusServiceImpl} - Hazelcast based PresenceStatusService that is implemented via a distributed Map containing
