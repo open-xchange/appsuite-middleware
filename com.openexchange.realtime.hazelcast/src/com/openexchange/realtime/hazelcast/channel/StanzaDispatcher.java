@@ -50,9 +50,11 @@
 package com.openexchange.realtime.hazelcast.channel;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.concurrent.Callable;
-import com.openexchange.realtime.MessageDispatcher;
+import com.openexchange.realtime.LocalMessageDispatcher;
 import com.openexchange.realtime.hazelcast.Services;
+import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 
 /**
@@ -64,12 +66,13 @@ public class StanzaDispatcher implements Callable<Void>, Serializable {
 
     private static final long serialVersionUID = 7824598922472715144L;
     private final Stanza stanza;
+    private final ID target;
 
     /**
      * Initializes a new {@link StanzaDispatcher}.
      */
     public StanzaDispatcher() {
-        this(null);
+        this(null, null);
     }
 
     /**
@@ -77,14 +80,16 @@ public class StanzaDispatcher implements Callable<Void>, Serializable {
      *
      * @param stanza The stanza to dispatch
      */
-    public StanzaDispatcher(Stanza stanza) {
+    public StanzaDispatcher(Stanza stanza, ID target) {
         super();
+        this.target = target;
         this.stanza = stanza;
     }
 
     @Override
     public Void call() throws Exception {
-        Services.getService(MessageDispatcher.class).send(stanza, null);
+        LocalMessageDispatcher dispatcher = Services.getService(LocalMessageDispatcher.class);
+        dispatcher.send(stanza, Collections.singleton(target));
         return null;
     }
 

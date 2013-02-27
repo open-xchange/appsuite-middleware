@@ -49,26 +49,29 @@
 
 package com.openexchange.realtime;
 
+import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * The Message dispatcher chooses an appropriate {@link Channel} to push data (aka. a Stanza) to listening clients
+ * {@link StanzaRoutingService} - This service helps to find out to which recipients
+ * a {@link Stanza} can be delivered locally and offers a method to forward a Stanza
+ * for remote deliveries.
  *
- * @author francisco.laguna@open-xchange.com
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface MessageDispatcher {
-
+public interface StanzaRoutingService {
+    
     /**
-     * Push a {@link Stanza} to a given recipient. A stanza is one of its subclasses, usually a Message, Presence or Iq.
-     *
-     * @param stanza The stanza to send
-     * @param session The associated session
-     * @throws OXException If send operation fails for any reason
+     * Distributes this {@link Stanza} to all nodes that can reach one or more resources specified by the {@link Stanza}s recipient.
+     * Returns a set of {@link ID}s that can be handled locally.
+     * 
+     * @param stanza The {@link Stanza} to send.
+     * @return The set of {@link ID}s. May be empty but never <code>null</code>.
+     * @throws OXException
      */
-    public void send(Stanza stanza, ServerSession session) throws OXException;
+    Set<ID> sendRemotelyAndGetLocalRecipients(Stanza stanza) throws OXException;
 
 }

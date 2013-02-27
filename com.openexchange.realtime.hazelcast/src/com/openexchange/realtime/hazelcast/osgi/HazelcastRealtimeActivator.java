@@ -51,28 +51,22 @@ package com.openexchange.realtime.hazelcast.osgi;
 
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.LocalMessageDispatcher;
 import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.hazelcast.Services;
-import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
-import com.openexchange.realtime.hazelcast.channel.HazelcastChannel;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
+import com.openexchange.realtime.hazelcast.impl.GlobalMessageDispatcherImpl;
 
 /**
  * {@link HazelcastRealtimeActivator}
- *
+ * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class HazelcastRealtimeActivator extends HousekeepingActivator {
@@ -81,66 +75,18 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class, MessageDispatcher.class };
+        return new Class<?>[] { HazelcastInstance.class, LocalMessageDispatcher.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: " + getClass().getCanonicalName());
         Services.setServiceLookup(this);
-        HazelcastConfigurationService configService = getService(HazelcastConfigurationService.class);
-        if (configService.isEnabled()) {
-            /*
-             * channel registration is bound to hazelcast availability
-             */
-            final BundleContext context = this.context;
-            track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
 
-                private volatile ServiceRegistration<ResourceDirectory> directoryRegistration;
-                private volatile ServiceRegistration<Channel> channelRegistration;
-
-                @Override
-                public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
-                    HazelcastInstance hazelcastInstance = context.getService(reference);
-                    HazelcastAccess.setHazelcastInstance(hazelcastInstance);
-                    
-                    /*
-                     * create & register channel
-                     */
-                    HazelcastResourceDirectory directory = new HazelcastResourceDirectory();
-                    directoryRegistration = context.registerService(ResourceDirectory.class, directory, null);
-                    channelRegistration = context.registerService(Channel.class, new HazelcastChannel(directory), null);
-                    return hazelcastInstance;
-                }
-
-                @Override
-                public void modifiedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
-                    // ignore
-                }
-
-                @Override
-                public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
-                    /*
-                     * remove channel registration
-                     */
-                    ServiceRegistration<Channel> channelRegistration = this.channelRegistration;
-                    if (null != channelRegistration) {
-                        channelRegistration.unregister();
-                        this.channelRegistration = null;
-                    }
-                    
-                    ServiceRegistration<ResourceDirectory> directoryRegistration = this.directoryRegistration;
-                    if (null != directoryRegistration) {
-                        directoryRegistration.unregister();
-                        this.directoryRegistration = null;
-                    }
-
-                    context.ungetService(reference);
-                    HazelcastAccess.setHazelcastInstance(null);
-                }
-            });
-            openTrackers();
-        }
+        HazelcastResourceDirectory directory = new HazelcastResourceDirectory();
+        GlobalMessageDispatcherImpl globalDispatcher = new GlobalMessageDispatcherImpl(directory);
+        registerService(ResourceDirectory.class, directory, null);
+        registerService(MessageDispatcher.class, globalDispatcher);
     }
 
     @Override
@@ -152,7 +98,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
     /**
      * Discovers the rtResourceDirectory map name from the supplied hazelcast configuration.
-     *
+     * 
      * @param config The config object
      * @return The resourceDirectory map name
      * @throws IllegalStateException

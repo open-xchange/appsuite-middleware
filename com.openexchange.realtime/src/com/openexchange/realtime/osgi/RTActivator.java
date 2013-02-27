@@ -58,8 +58,8 @@ import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.MessageDispatcher;
-import com.openexchange.realtime.impl.MessageDispatcherImpl;
+import com.openexchange.realtime.LocalMessageDispatcher;
+import com.openexchange.realtime.impl.LocalMessageDispatcherImpl;
 
 /**
  * {@link RTActivator} - The activator for realtime bundle.
@@ -96,9 +96,9 @@ public class RTActivator extends HousekeepingActivator {
             }
             });
 
-        final MessageDispatcherImpl dispatcher = new MessageDispatcherImpl();
+        final LocalMessageDispatcherImpl dispatcher = new LocalMessageDispatcherImpl();
 
-        registerService(MessageDispatcher.class, dispatcher);
+        registerService(LocalMessageDispatcher.class, dispatcher);
 
         track(Channel.class, new SimpleRegistryListener<Channel>() {
 

@@ -49,96 +49,49 @@
 
 package com.openexchange.realtime.impl;
 
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
-import junit.framework.Assert;
-import org.junit.Test;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.Log;
+import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.LocalMessageDispatcher;
+import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.tools.session.ServerSession;
-
 
 /**
- * {@link MessageDispatcherTest}
+ * {@link LocalMessageDispatcherImpl}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class MessageDispatcherTest extends MessageDispatcherImpl {
+public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
+
+    private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(MessageDispatcher.class));
+
+    private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
     
-    @Test
-    public void testChannelChoosing() throws Exception {
-        Stanza stanza = new Stanza() {
-            @Override
-            public ID getTo() {
-                return new ID("ox", "some.body", "context", "resource");
+    @Override
+    public Set<ID> send(Stanza stanza, Set<ID> recipients) throws OXException {
+        // TODO: exception handling and maybe only a single id as recipient parameter
+        for (ID recipient : recipients) {
+            Channel channel = channels.get(recipient);
+            if (channel != null) {
+                channel.send(stanza, null);
             }
-        };
-        
-        Channel c1 = new MockChannel("nox", 25);
-        Channel c2 = new MockChannel("ox", 15);
-        Channel c3 = new MockChannel("ab", 15);
-        Channel c4 = new MockChannel("cd", 20);
-        Channel[] expected = new Channel[] { c2, c1, c4, c3 };
-        
-        addChannel(c1);
-        addChannel(c2);
-        addChannel(c3);
-        addChannel(c4);
-        
-        SortedSet<Channel> chosenChannels = chooseChannels(stanza, null);
-        Assert.assertEquals("Wrong set size.", expected.length, chosenChannels.size());
-        
-        Iterator<Channel> it = chosenChannels.iterator();
-        for (int i = 0; i < expected.length; i++) {
-            Channel channel = it.next();
-            Assert.assertEquals("Wrong channel", expected[i], channel);
-        }
-    }
-    
-    private static final class MockChannel implements Channel {
-        
-        private final String protocol;
-        
-        private final int priority;
-
-        /**
-         * Initializes a new {@link MockChannel}.
-         * @param protocol
-         * @param priority
-         */
-        public MockChannel(String protocol, int priority) {
-            super();
-            this.protocol = protocol;
-            this.priority = priority;
         }
 
-        @Override
-        public String getProtocol() {
-            return protocol;
-        }
-
-        @Override
-        public boolean canHandle(Set<ElementPath> elementPaths, ID recipient, ServerSession session) throws OXException {
-            return true;
-        }
-
-        @Override
-        public int getPriority() {
-            return priority;
-        }
-
-        @Override
-        public boolean isConnected(ID id, ServerSession session) throws OXException {
-            return true;
-        }
-
-        @Override
-        public void send(Stanza stanza, ServerSession session) throws OXException { }
-        
+        return Collections.emptySet();
     }
 
+    public void addChannel(final Channel channel) {
+        channels.put(channel.getProtocol(), channel);
+    }
+
+    public void removeChannel(final Channel channel) {
+        channels.remove(channel.getProtocol());
+    }
 }
