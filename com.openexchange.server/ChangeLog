@@ -1,3 +1,7 @@
+* 2013-02-27 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25142: Supply service info description in properties map   
+
 * 2013-02-25 - marcus.klein@open-xchange.com
 
  - Fix for bug 23666: Nearly all information of a database is necessary if a new schema needs to be created for the new context.
