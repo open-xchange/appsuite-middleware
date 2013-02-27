@@ -72,7 +72,7 @@ public class AJAXSession {
     private final DefaultHttpClient httpClient;
 
     private String id;
-    private boolean mustLogout = true;
+    private boolean mustLogout;
 
     public AJAXSession() {
         this(newWebConversation(), newHttpClient(), null);
@@ -87,7 +87,7 @@ public class AJAXSession {
         this.conversation = conversation;
         this.httpClient = httpClient;
         this.id = id;
-        this.mustLogout = id == null; // Don't auto logout when supplied with id.
+        this.mustLogout = id != null; // Don't auto logout when supplied with id.
     }
 
     /**
@@ -113,6 +113,7 @@ public class AJAXSession {
      */
     public void setId(final String id) {
         this.id = id;
+        mustLogout = id != null;
     }
 
     public boolean mustLogout() {
@@ -135,7 +136,7 @@ public class AJAXSession {
 
     public static DefaultHttpClient newHttpClient() {
         DefaultHttpClient retval = new DefaultHttpClient();
-        
+
         HttpParams params = retval.getParams();
         int minute = 1 * 60 * 1000;
         HttpConnectionParams.setConnectionTimeout(params, minute);

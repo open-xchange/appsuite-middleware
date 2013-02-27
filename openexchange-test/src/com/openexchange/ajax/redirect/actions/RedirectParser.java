@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,23 +47,23 @@
  *
  */
 
-package com.openexchange.ajax.session.actions;
+package com.openexchange.ajax.redirect.actions;
 
 import com.openexchange.ajax.framework.AbstractRedirectParser;
 
 /**
- * {@link HttpAuthParser}
+ * {@link RedirectParser}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class HttpAuthParser extends AbstractRedirectParser<HttpAuthResponse> {
+public final class RedirectParser extends AbstractRedirectParser<RedirectResponse> {
 
-    HttpAuthParser() {
-        super();
+    RedirectParser() {
+        super(false);
     }
 
     @Override
-    protected HttpAuthResponse createResponse(String location) {
-        return new HttpAuthResponse(location);
+    protected RedirectResponse createResponse(String location) {
+        return new RedirectResponse(location);
     }
 }

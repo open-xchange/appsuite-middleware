@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,23 +47,44 @@
  *
  */
 
-package com.openexchange.ajax.session.actions;
+package com.openexchange.ajax.redirect;
 
-import com.openexchange.ajax.framework.AbstractRedirectParser;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import java.io.IOException;
+import org.apache.http.client.params.ClientPNames;
+import org.json.JSONException;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.redirect.actions.RedirectRequest;
+import com.openexchange.ajax.redirect.actions.RedirectResponse;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link HttpAuthParser}
+ * {@link Bug25140Test}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class HttpAuthParser extends AbstractRedirectParser<HttpAuthResponse> {
+public final class Bug25140Test {
 
-    HttpAuthParser() {
+    private AJAXClient client;
+
+    public Bug25140Test() {
         super();
     }
 
-    @Override
-    protected HttpAuthResponse createResponse(String location) {
-        return new HttpAuthResponse(location);
+    @Before
+    public void setUp() throws OXException {
+        client = new AJAXClient();
+        client.getSession().getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
+    }
+
+    @Test
+    public void testForArbitraryURLRedirect() throws OXException, IOException, JSONException {
+        RedirectRequest request = new RedirectRequest("%0d/", "www.google.de");
+        RedirectResponse response = client.execute(request);
+        Assert.assertThat("", "//www.google.de", not(equalTo(response.getLocation())));
     }
 }

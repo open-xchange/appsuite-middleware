@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.session.actions;
+package com.openexchange.ajax.framework;
 
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
@@ -61,8 +61,6 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -74,11 +72,11 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
     private String location;
     private final boolean cookiesNeeded;
 
-    AbstractRedirectParser() {
+    protected AbstractRedirectParser() {
         this(true);
     }
 
-    AbstractRedirectParser(boolean cookiesNeeded) {
+    protected AbstractRedirectParser(boolean cookiesNeeded) {
         super(true);
         this.cookiesNeeded = cookiesNeeded;
     }

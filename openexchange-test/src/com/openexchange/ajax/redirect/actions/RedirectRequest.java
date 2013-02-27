@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,23 +47,59 @@
  *
  */
 
-package com.openexchange.ajax.session.actions;
+package com.openexchange.ajax.redirect.actions;
 
-import com.openexchange.ajax.framework.AbstractRedirectParser;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.framework.Header.SimpleHeader;
 
 /**
- * {@link HttpAuthParser}
+ * {@link RedirectRequest}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class HttpAuthParser extends AbstractRedirectParser<HttpAuthResponse> {
+public final class RedirectRequest implements AJAXRequest<RedirectResponse> {
 
-    HttpAuthParser() {
+    private final String referer;
+    private final String location;
+
+    public RedirectRequest(String referer, String location) {
         super();
+        this.referer = referer;
+        this.location = location;
     }
 
     @Override
-    protected HttpAuthResponse createResponse(String location) {
-        return new HttpAuthResponse(location);
+    public Method getMethod() {
+        return Method.GET;
+    }
+
+    @Override
+    public String getServletPath() {
+        return "/ajax/redirect";
+    }
+
+    @Override
+    public Parameter[] getParameters() {
+        return new Parameter[] {
+            new URLParameter("location", location)
+        };
+    }
+
+    @Override
+    public RedirectParser getParser() {
+        return new RedirectParser();
+    }
+
+    @Override
+    public Object getBody() {
+        return null;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return new Header[] {
+            new SimpleHeader("Referer", referer)
+        };
     }
 }

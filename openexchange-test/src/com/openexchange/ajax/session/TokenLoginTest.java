@@ -50,6 +50,7 @@
 package com.openexchange.ajax.session;
 
 import static com.openexchange.java.Autoboxing.I;
+import org.apache.http.client.params.ClientPNames;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -95,6 +96,7 @@ public class TokenLoginTest extends AbstractAJAXSession {
 
     public void testTokenLogin() throws Exception {
         final AJAXSession session = new AJAXSession();
+        session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
         final AJAXClient myClient = new AJAXClient(session);
         try {
             TokenLoginResponse response = myClient.execute(new TokenLoginRequest(login, password));
