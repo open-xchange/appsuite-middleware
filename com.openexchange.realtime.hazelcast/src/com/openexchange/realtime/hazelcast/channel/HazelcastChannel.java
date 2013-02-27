@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.hazelcast.channel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -63,9 +64,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.RealtimeExceptionCodes;
+import com.openexchange.realtime.directory.Resource;
+import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.ElementPath;
+import com.openexchange.realtime.util.IDMap;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -98,8 +102,8 @@ public class HazelcastChannel implements Channel {
     }
 
     @Override
-    public boolean canHandle(Set<ElementPath> elementPaths, ID recipient, ServerSession session) throws OXException {
-        return isConnected(recipient, session);
+    public boolean canHandle(Set<ElementPath> elementPaths, ID recipient) throws OXException {
+        return isConnected(recipient);
     }
 
     @Override
@@ -108,14 +112,14 @@ public class HazelcastChannel implements Channel {
     }
 
     @Override
-    public boolean isConnected(ID id, ServerSession session) throws OXException {
+    public boolean isConnected(ID id) throws OXException {
         //TODO: maybe too expensive, since it's repeated shortly afterwards in send
         Set<Member> receivers = getReceivers(id);
         return null != receivers && 0 < receivers.size();
     }
 
     @Override
-    public void send(Stanza stanza, ServerSession session) throws OXException {
+    public void send(Stanza stanza) throws OXException {
         List<FutureTask<Void>> futures = initiateSend(stanza);
         for (FutureTask<Void> future : futures) {
             try {
@@ -156,19 +160,14 @@ public class HazelcastChannel implements Channel {
      */
     private Set<Member> getReceivers(ID id) throws OXException {
         Set<Member> members = new HashSet<Member>();
-        Member localMember = HazelcastAccess.getHazelcastInstance().getCluster().getLocalMember();
-        if (id.isGeneralForm()) {
-            for (Member member : directory.getAll(id)) {
-                if (null != member && false == member.equals(localMember)) {
-                    members.add(member);
-                }
-            }
-        } else {
-            Member member = directory.get(id);
-            if (null != member && false == member.equals(localMember)) {
-                members.add(member);
+        IDMap<Resource> resources = directory.get(id);
+        for (Resource resource : resources.values()) {
+            Serializable routingInfo = resource.getRoutingInfo();
+            if (routingInfo != null && routingInfo instanceof Member) {
+                members.add((Member) routingInfo);
             }
         }
+
         return members;
     }
 

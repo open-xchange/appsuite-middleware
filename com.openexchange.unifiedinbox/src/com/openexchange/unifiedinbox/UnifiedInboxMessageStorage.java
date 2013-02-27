@@ -443,8 +443,9 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                         final List<MailMessage> messages = new ArrayList<MailMessage>(list2.size());
                                         for (final MailMessage accountMail : list2) {
                                             final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail, undelegatedAccountId);
-                                            umm.setMailId(helper.setUID(accountId, fn, accountMail.getMailId()).toString());
-                                            umm.setFolder(fullName);
+                                            final String accountMailFolder = accountMail.getFolder();
+                                            umm.setMailId(helper.setUID(accountId, accountMailFolder, accountMail.getMailId()).toString());
+                                            umm.setFolder(fn.equals(accountMailFolder) ? fullName : UnifiedInboxAccess.SENT);
                                             umm.setAccountId(accountId);
                                             messages.add(umm);
                                         }
@@ -526,8 +527,9 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 final List<MailMessage> messages = new ArrayList<MailMessage>(list2.size());
                                 for (final MailMessage accountMail : list2) {
                                     final UnifiedMailMessage umm = new UnifiedMailMessage(accountMail, undelegatedAccountId);
-                                    umm.setMailId(helper.setUID(accountId, fn, accountMail.getMailId()).toString());
-                                    umm.setFolder(fullName);
+                                    final String accountMailFolder = accountMail.getFolder();
+                                    umm.setMailId(helper.setUID(accountId, accountMailFolder, accountMail.getMailId()).toString());
+                                    umm.setFolder(fn.equals(accountMailFolder) ? fullName : UnifiedInboxAccess.SENT);
                                     umm.setAccountId(accountId);
                                     messages.add(umm);
                                 }

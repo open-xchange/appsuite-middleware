@@ -10,9 +10,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.MessageDispatcher;
-import com.openexchange.realtime.dispatch.ResourceRegistry;
 import com.openexchange.realtime.dispatch.impl.MessageDispatcherImpl;
-import com.openexchange.realtime.dispatch.impl.ResourceRegistryImpl;
 
 public class RealtimeDispatchActivator extends HousekeepingActivator {
 
@@ -43,11 +41,12 @@ public class RealtimeDispatchActivator extends HousekeepingActivator {
                 }
             }
         });
+        
+        RealtimeServiceRegistry.SERVICES.set(this);
 
         final MessageDispatcher dispatcher = new MessageDispatcherImpl();
 
         registerService(MessageDispatcher.class, dispatcher);
-        registerService(ResourceRegistry.class, new ResourceRegistryImpl(getService(EventAdmin.class)));
 
         track(Channel.class, new SimpleRegistryListener<Channel>() {
 

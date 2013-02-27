@@ -84,7 +84,7 @@ public class StanzaDispatcher implements Callable<Void>, Serializable {
 
     @Override
     public Void call() throws Exception {
-        Services.getService(MessageDispatcher.class).send(stanza, null);
+        Services.getService(MessageDispatcher.class).send(stanza);
         return null;
     }
 

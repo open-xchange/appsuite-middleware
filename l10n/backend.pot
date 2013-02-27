@@ -11434,6 +11434,16 @@ msgstr ""
 msgid "File access denied."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:88
+msgid ""
+"This template was not whitelisted in 'com.openexchange.templating."
+"templateWhitelist'."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:90
+msgid "This template was not whitelisted,"
+msgstr ""
+
 #. The consumer key/consumer secret pair is missing in configuration.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:72
 msgid "The consumer key/consumer secret pair is missing in configuration."

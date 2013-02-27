@@ -49,6 +49,8 @@
 
 package com.openexchange.templating.json.osgi;
 
+import com.openexchange.ajax.requesthandler.Dispatcher;
+import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.templating.TemplateService;
@@ -63,7 +65,7 @@ public class TemplatingJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { TemplateService.class };
+        return new Class[] { TemplateService.class, Dispatcher.class };
     }
 
     @Override

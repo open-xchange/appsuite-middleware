@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.templating.json.actions.AssetProvideAction;
 import com.openexchange.templating.json.actions.NamesAction;
 
 /**
@@ -76,6 +77,7 @@ public class TemplatingActionFactory implements AJAXActionServiceFactory {
         super();
         actions = new ConcurrentHashMap<String, AJAXActionService>(2);
         actions.put("names", new NamesAction(services));
+        actions.put("provide", new AssetProvideAction(services));
     }
 
     @Override

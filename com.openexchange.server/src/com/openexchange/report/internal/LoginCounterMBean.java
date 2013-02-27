@@ -51,6 +51,7 @@ package com.openexchange.report.internal;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import javax.management.MBeanException;
 
 /**
@@ -63,13 +64,20 @@ public interface LoginCounterMBean {
 
     /**
      * Gets the number of logins happened in specified range.
+     * This is a mapping "client identifier => number of logins in time range".
+     * The map always contains a key "sum" that sums up all logins. If the aggregate parameter
+     * is set to <code>true</code>, the map only contains the sum key.
      *
      * @param startDate The start time
      * @param endDate The end time
-     * @return The number of logins happened in specified range
+     * @param aggregate Set to <code>true</code> if you want to aggregate the sum of logins by users. 
+     * That means that the sum value does not contain duplicate logins caused by multiple clients of one user.
+     * This also means that the sum value likely does not match the addition of all single values.
+     * @param regex A regular expression to filter results by client identifiers. May be <code>null</code> to not filter clients at all.
+     * @return The number of logins happened in specified range by client identifier.
      * @throws MBeanException If an error occurs while counting
      */
-    public int getNumberOfLogins(Date startDate, Date endDate) throws MBeanException;
+    public Map<String, Integer> getNumberOfLogins(Date startDate, Date endDate, boolean aggregate, String regex) throws MBeanException;
 
     /**
      * Gets the time stamp of last login for specified user for given client.
@@ -85,18 +93,18 @@ public interface LoginCounterMBean {
      */
     List<Object[]> getLastLoginTimeStamp(int userId, int contextId, String client) throws MBeanException;
 
-    /**
-     * Sets the device wildcard to filter by; e.g. <code>"com.openexchange.*"</code>
-     *
-     * @param wildcard The device wildcard
-     */
-    public void setDeviceWildcard(String wildcard);
-
-    /**
-     * Gets the device wildcard to filter by; e.g. <code>"com.openexchange.*"</code>
-     *
-     * @return The device wildcard or <code>null</code>
-     */
-    public String getDeviceWildcard();
+//    /**
+//     * Sets the device wildcard to filter by; e.g. <code>"com.openexchange.*"</code>
+//     *
+//     * @param wildcard The device wildcard
+//     */
+//    public void setDeviceWildcard(String wildcard);
+//
+//    /**
+//     * Gets the device wildcard to filter by; e.g. <code>"com.openexchange.*"</code>
+//     *
+//     * @return The device wildcard or <code>null</code>
+//     */
+//    public String getDeviceWildcard();
 
 }

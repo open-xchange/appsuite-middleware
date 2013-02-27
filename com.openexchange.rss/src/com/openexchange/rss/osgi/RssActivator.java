@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.rss.osgi;
 
 import com.openexchange.ajax.requesthandler.ResultConverter;
@@ -57,11 +58,9 @@ import com.openexchange.rss.actions.RssActionFactory;
 
 public class RssActivator extends AJAXModuleActivator {
 
-    private static final Class<?>[] NEEDED_SERVICES = {HtmlService.class};
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] {HtmlService.class};
     }
 
     @Override

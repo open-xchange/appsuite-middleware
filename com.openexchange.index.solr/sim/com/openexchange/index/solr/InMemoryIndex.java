@@ -87,7 +87,7 @@ public class InMemoryIndex {
         int rows = Integer.parseInt(query.get("rows"));
         int end = start + rows;
         if (start > index.size()) {
-            return new MockQueryResponse(Collections.EMPTY_SET);
+            return new MockQueryResponse(index.size(), Collections.EMPTY_SET);
         }
 
         if (end > index.size()) {
@@ -97,7 +97,7 @@ public class InMemoryIndex {
         Set<Map<String, Object>> entries = new HashSet<Map<String, Object>>();
         List<Map<String, Object>> subList = index.subList(start, end);
         entries.addAll(subList);
-        return new MockQueryResponse(entries);
+        return new MockQueryResponse(index.size(), entries);
     }
 
     protected UpdateResponse addDocument(SolrInputDocument document) throws OXException {

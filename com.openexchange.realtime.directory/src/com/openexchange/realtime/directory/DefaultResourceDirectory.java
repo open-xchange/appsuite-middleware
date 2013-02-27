@@ -47,100 +47,91 @@
  *
  */
 
-package com.openexchange.realtime.dispatch.impl;
+package com.openexchange.realtime.directory;
 
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.Map.Entry;
 import java.util.Set;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
+import java.util.concurrent.CopyOnWriteArraySet;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.RealtimeExceptionCodes;
-import com.openexchange.realtime.dispatch.ResourceRegistry;
 import com.openexchange.realtime.packet.ID;
-
+import com.openexchange.realtime.util.IDMap;
 
 /**
- * {@link ResourceRegistryImpl}
+ * {@link DefaultResourceDirectory}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * Abstract {@link ResourceDirectory} implementation handling listener notifications.
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ResourceRegistryImpl implements ResourceRegistry {
-    
-    private final EventAdmin eventAdmin;
-    
-    private final Set<ID> ids;
-    
-    public ResourceRegistryImpl(EventAdmin eventAdmin) {
+public abstract class DefaultResourceDirectory implements ResourceDirectory {
+
+    private final Set<ChangeListener> listeners;
+
+    /**
+     * Initializes a new {@link DefaultResourceDirectory}.
+     */
+    public DefaultResourceDirectory() {
         super();
-        this.eventAdmin = eventAdmin;
-        ids = Collections.synchronizedSet(new HashSet<ID>());
+        this.listeners = new CopyOnWriteArraySet<ChangeListener>();
     }
 
     @Override
-    public boolean register(ID id) throws OXException {
-        if (id == null) {
-            throw new IllegalArgumentException("id was null.");
-        }
-        
-        String resource = id.getResource();
-        if (isInvalid(resource)) {
-            throw RealtimeExceptionCodes.INVALID_ID.create();
-        }
-        
-        if (ids.add(id)) {
-            Event event = new Event(TOPIC_REGISTERED, Collections.singletonMap(ID_PROPERTY, id));
-            eventAdmin.postEvent(event);
-            return true;
-        }
-        
-        return false;
+    public void addListener(ChangeListener listener) throws OXException {
+        this.listeners.add(listener);
     }
 
     @Override
-    public boolean unregister(ID id) throws OXException {
-        if (id == null) {
-            throw new IllegalArgumentException("id was null.");
-        }
-        
-        String resource = id.getResource();
-        if (isInvalid(resource)) {
-            throw RealtimeExceptionCodes.INVALID_ID.create();
-        }
-        
-        if (ids.remove(id)) {
-            Event event = new Event(TOPIC_UNREGISTERED, Collections.singletonMap(ID_PROPERTY, id));
-            eventAdmin.postEvent(event);
-            return true;
-        }
-        
-        return false;
+    public void removeListener(ChangeListener listener) throws OXException {
+        this.listeners.remove(listener);
     }
 
     @Override
-    public boolean contains(ID id) {
-        if (id == null) {
-            throw new IllegalArgumentException("id was null.");
+    public Resource set(ID id, Resource resource) throws OXException {
+        Resource previousResource = doSet(id, resource);
+        if (null == previousResource) {
+            notifyAdded(id, resource);
+        } else {
+            notifyUpdated(id, resource, previousResource);
         }
-
-        return ids.contains(id);
+        return previousResource;
     }
 
     @Override
-    public void clear() {
-        Set<ID> eventIDs = new HashSet<ID>(ids);
-        ids.clear();
-        for (ID id : eventIDs) {
-            Event event = new Event(TOPIC_UNREGISTERED, Collections.singletonMap(ID_PROPERTY, id));
-            eventAdmin.postEvent(event);
+    public IDMap<Resource> remove(ID id) throws OXException {
+        return notifyRemoved(doRemove(id));
+    }
+
+    @Override
+    public IDMap<Resource> remove(Collection<ID> ids) throws OXException {
+        return notifyRemoved(doRemove(ids));
+    }
+
+    private void notifyAdded(ID id, Resource addedResource) {
+        for (ChangeListener listener : listeners) {
+            listener.added(id, addedResource);
         }
     }
-    
-    private static boolean isInvalid(String resource) {
-        if (resource == null || resource.isEmpty()) {
-            return true;
+
+    private void notifyUpdated(ID id, Resource updatedResource, Resource previousResource) {
+        for (ChangeListener listener : listeners) {
+            listener.updated(id, updatedResource, previousResource);
         }
-        
-        return false;
     }
+
+    private IDMap<Resource> notifyRemoved(IDMap<Resource> removedResources) {
+        for (ChangeListener listener : listeners) {
+            for (Entry<ID, Resource> entry : removedResources.entrySet()) {
+                listener.removed(entry.getKey(), entry.getValue());
+            }
+        }
+        return removedResources;
+    }
+
+    protected abstract IDMap<Resource> doRemove(Collection<ID> ids) throws OXException;
+
+    protected abstract IDMap<Resource> doRemove(ID id) throws OXException;
+
+    protected abstract Resource doSet(ID id, Resource data) throws OXException;
+
 }

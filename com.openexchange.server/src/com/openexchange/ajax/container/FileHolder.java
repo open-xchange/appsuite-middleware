@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.container;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import com.openexchange.exception.OXException;
@@ -101,6 +103,31 @@ public class FileHolder implements IFileHolder {
         this.length = length;
         this.contentType = contentType;
         this.name = name;
+    }
+    
+    public FileHolder(final File file, String contentType) {
+        this.length = file.length();
+        
+        if (contentType == null){
+            contentType = javax.activation.MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(file);
+        }
+        
+        this.contentType = contentType;
+        
+        this.name = file.getName();
+        
+        this.isClosure = new InputStreamClosure() {
+            
+            @Override
+            public InputStream newStream() throws OXException, IOException {
+                return new FileInputStream(file);
+            }
+        };
+        
+    }
+    
+    public FileHolder(final File file) {
+        this(file, null);
     }
 
     @Override

@@ -205,7 +205,7 @@ public final class LastLoginTimeStampTool {
                 final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
                 final Object[] params = new Object[] { Integer.valueOf(userId), Integer.valueOf(contextId), client };
                 final String[] signature = new String[] { int.class.getName(), int.class.getName(), String.class.getName() };
-                final List<Object[]> ret = (List<Object[]>) mbsc.invoke(Constants.OXTENDER_MONITOR_NAME, "getLastLoginTimeStamp", params, signature);
+                final List<Object[]> ret = (List<Object[]>) mbsc.invoke(Constants.LOGIN_COUNTER_NAME, "getLastLoginTimeStamp", params, signature);
 
                 if (null == ret || ret.isEmpty()) {
                     System.out.println("No matching entry found.");

@@ -62,12 +62,13 @@ import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.presence.PresenceStatusService;
 import com.openexchange.realtime.presence.hazelcast.impl.HazelcastPresenceStatusServiceImpl;
 
 /**
  * {@link RealtimeHazelcastPresenceActivator}
- *
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class RealtimeHazelcastPresenceActivator extends HousekeepingActivator {
@@ -76,55 +77,53 @@ public class RealtimeHazelcastPresenceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class };
+        return new Class<?>[] { ResourceDirectory.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: " + getClass().getCanonicalName());
-        HazelcastConfigurationService configService = getService(HazelcastConfigurationService.class);
-        if (configService.isEnabled()) {
-            /*
-             * presence registration is bound to hazelcast availability
-             */
-            final BundleContext context = this.context;
-            track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
 
-                private volatile ServiceRegistration<PresenceStatusService> presenceStatusRegistration;
+        /*
+         * presence registration is bound to directory availability
+         */
+        final BundleContext context = this.context;
+        track(ResourceDirectory.class, new ServiceTrackerCustomizer<ResourceDirectory, ResourceDirectory>() {
 
-                @Override
-                public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
-                    HazelcastInstance hazelcastInstance = context.getService(reference);
-                    HazelcastPresenceStatusServiceImpl.setHazelcastInstance(hazelcastInstance);
-                    /*
-                     * create & register presence status service
-                     */
-                    presenceStatusRegistration = context.registerService(PresenceStatusService.class,
-                        new HazelcastPresenceStatusServiceImpl(discoverPresenceMapName(hazelcastInstance.getConfig())), null);
-                    return hazelcastInstance;
+            private volatile ServiceRegistration<PresenceStatusService> presenceStatusRegistration;
+
+            @Override
+            public ResourceDirectory addingService(ServiceReference<ResourceDirectory> reference) {
+                ResourceDirectory resourceDirectory = context.getService(reference);
+                /*
+                 * create & register presence status service
+                 */
+                presenceStatusRegistration = context.registerService(PresenceStatusService.class,
+                // new HazelcastPresenceStatusServiceImpl(discoverPresenceMapName(hazelcastInstance.getConfig())), null);
+                    new HazelcastPresenceStatusServiceImpl(resourceDirectory),
+                    null);
+                return resourceDirectory;
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<ResourceDirectory> reference, ResourceDirectory service) {
+                // ignore
+            }
+
+            @Override
+            public void removedService(ServiceReference<ResourceDirectory> reference, ResourceDirectory service) {
+                /*
+                 * remove channel registration
+                 */
+                ServiceRegistration<PresenceStatusService> presenceStatusRegistration = this.presenceStatusRegistration;
+                if (null != presenceStatusRegistration) {
+                    presenceStatusRegistration.unregister();
+                    this.presenceStatusRegistration = null;
                 }
-
-                @Override
-                public void modifiedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
-                    // ignore
-                }
-
-                @Override
-                public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
-                    /*
-                     * remove channel registration
-                     */
-                    ServiceRegistration<PresenceStatusService> presenceStatusRegistration = this.presenceStatusRegistration;
-                    if (null != presenceStatusRegistration) {
-                        presenceStatusRegistration.unregister();
-                        this.presenceStatusRegistration = null;
-                    }
-                    context.ungetService(reference);
-                    HazelcastPresenceStatusServiceImpl.setHazelcastInstance(null);
-                }
-            });
-            openTrackers();
-        }
+                context.ungetService(reference);
+            }
+        });
+        openTrackers();
     }
 
     @Override
@@ -132,26 +131,4 @@ public class RealtimeHazelcastPresenceActivator extends HousekeepingActivator {
         LOG.info("Stopping bundle: " + getClass().getCanonicalName());
         super.stopBundle();
     }
-
-    /**
-     * Discovers the rtPresence map name from the supplied hazelcast configuration.
-     *
-     * @param config The config object
-     * @return The rtPresence map name
-     * @throws IllegalStateException
-     */
-    private static String discoverPresenceMapName(Config config) throws IllegalStateException {
-        Map<String, MapConfig> mapConfigs = config.getMapConfigs();
-        if (null != mapConfigs && 0 < mapConfigs.size()) {
-            for (String mapName : mapConfigs.keySet()) {
-                if (mapName.startsWith("rtPresence-")) {
-                    LOG.info("Using distributed map '" + mapName + "'.");
-                    return mapName;
-                }
-            }
-        }
-        String msg = "No distributed rtPresence map found in hazelcast configuration";
-        throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR));
-    }
-
 }

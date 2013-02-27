@@ -25,6 +25,7 @@ modules/mail/defaultaddress > io.ox/mail//defaultaddress
 modules/mail/sendaddress > io.ox/mail//defaultSendAddress
 mail/folder > io.ox/mail//folder
 mail/vcard > io.ox/mail//vcard
+ui/mail/replyTo > io.ox/mail//showReplyTo
 
 # CalDAV
 modules/caldav/active > io.ox/caldav//active

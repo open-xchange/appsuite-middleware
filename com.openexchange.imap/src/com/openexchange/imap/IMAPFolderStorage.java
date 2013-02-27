@@ -367,6 +367,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             return new int[] { 0, 0 };
         }
         try {
+            IMAPFolderWorker.checkFailFast(imapStore, fullName);
             IMAPFolder f = getIMAPFolder(fullName);
             final ListLsubEntry entry = getLISTEntry(fullName, f);
             synchronized (f) {
@@ -399,6 +400,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             return 0;
         }
         try {
+            IMAPFolderWorker.checkFailFast(imapStore, fullName);
             IMAPFolder f = getIMAPFolder(fullName);
             final ListLsubEntry entry = getLISTEntry(fullName, f);
             synchronized (f) {
@@ -431,6 +433,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             return 0;
         }
         try {
+            IMAPFolderWorker.checkFailFast(imapStore, fullName);
             IMAPFolder f = getIMAPFolder(fullName);
             final ListLsubEntry entry = getLISTEntry(fullName, f);
             synchronized (f) {
@@ -463,6 +466,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             return 0;
         }
         try {
+            IMAPFolderWorker.checkFailFast(imapStore, fullName);
             IMAPFolder f = getIMAPFolder(fullName);
             final ListLsubEntry entry = getLISTEntry(fullName, f);
             synchronized (f) {
@@ -516,6 +520,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     @Override
     public MailFolder[] getSubfolders(final String parentFullName, final boolean all) throws OXException {
         try {
+            IMAPFolderWorker.checkFailFast(imapStore, parentFullName);
             if (DEFAULT_FOLDER_ID.equals(parentFullName)) {
                 final IMAPFolder parent = (IMAPFolder) imapStore.getDefaultFolder();
                 final boolean subscribed = (!MailProperties.getInstance().isIgnoreSubscription() && !all);
@@ -1357,6 +1362,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (DEFAULT_FOLDER_ID.equals(fullName)) {
                 throw MailExceptionCode.NO_ROOT_FOLDER_MODIFY_DELETE.create();
             }
+            IMAPFolderWorker.checkFailFast(imapStore, fullName);
             IMAPFolder moveMe = getIMAPFolder(fullName);
             if (!doesExist(moveMe, false)) {
                 moveMe = checkForNamespaceFolder(fullName);
@@ -1672,6 +1678,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (DEFAULT_FOLDER_ID.equals(fullName)) {
                 throw MailExceptionCode.NO_ROOT_FOLDER_MODIFY_DELETE.create();
             }
+            IMAPFolderWorker.checkFailFast(imapStore, fullName);
             IMAPFolder updateMe = getIMAPFolder(fullName);
             if (!doesExist(updateMe, true)) {
                 updateMe = checkForNamespaceFolder(fullName);
@@ -1842,6 +1849,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (DEFAULT_FOLDER_ID.equals(fullName)) {
                 throw MailExceptionCode.NO_ROOT_FOLDER_MODIFY_DELETE.create();
             }
+            IMAPFolderWorker.checkFailFast(imapStore, fullName);
             IMAPFolder deleteMe = getIMAPFolder(fullName);
             if (!doesExist(deleteMe, false)) {
                 deleteMe = checkForNamespaceFolder(fullName);
@@ -1929,6 +1937,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (DEFAULT_FOLDER_ID.equals(fullName)) {
                 return;
             }
+            IMAPFolderWorker.checkFailFast(imapStore, fullName);
             IMAPFolder f = getIMAPFolderWithRecentListener(fullName);
             if (!doesExist(f, true)) {
                 f = checkForNamespaceFolder(fullName);
@@ -2003,6 +2012,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (DEFAULT_FOLDER_ID.equals(fullName)) {
                 throw MailExceptionCode.NO_ROOT_FOLDER_MODIFY_DELETE.create();
             }
+            IMAPFolderWorker.checkFailFast(imapStore, fullName);
             IMAPFolder f = getIMAPFolderWithRecentListener(fullName);
             if (!doesExist(f, true)) {
                 f = checkForNamespaceFolder(fullName);

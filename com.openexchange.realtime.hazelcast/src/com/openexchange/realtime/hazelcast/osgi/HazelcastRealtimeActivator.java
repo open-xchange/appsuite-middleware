@@ -49,16 +49,12 @@
 
 package com.openexchange.realtime.hazelcast.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
@@ -68,11 +64,11 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.MessageDispatcher;
-import com.openexchange.realtime.dispatch.ResourceRegistry;
+import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.hazelcast.Services;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.channel.HazelcastChannel;
-import com.openexchange.realtime.hazelcast.channel.ResourceDirectory;
+import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
 
 /**
  * {@link HazelcastRealtimeActivator}
@@ -81,16 +77,11 @@ import com.openexchange.realtime.hazelcast.channel.ResourceDirectory;
  */
 public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
-    /**
-     * Name for the rtDirectory multi-map - no further configuration via config file needed
-     */
-    private static final String RT_DIRECTORY = "rtDirectory-0";
-
     private static Log LOG = LogFactory.getLog(HazelcastRealtimeActivator.class);
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class, MessageDispatcher.class, ResourceRegistry.class };
+        return new Class<?>[] { HazelcastConfigurationService.class, MessageDispatcher.class };
     }
 
     @Override
@@ -105,25 +96,19 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
             final BundleContext context = this.context;
             track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
 
+                private volatile ServiceRegistration<ResourceDirectory> directoryRegistration;
                 private volatile ServiceRegistration<Channel> channelRegistration;
-                private volatile ServiceRegistration<EventHandler> eventHandlerRegistration;
 
                 @Override
                 public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
                     HazelcastInstance hazelcastInstance = context.getService(reference);
                     HazelcastAccess.setHazelcastInstance(hazelcastInstance);
-                    /*
-                     * create & register event handler
-                     */
-                    Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
-                    properties.put(EventConstants.EVENT_TOPIC,
-                        new String[] { ResourceRegistry.TOPIC_REGISTERED, ResourceRegistry.TOPIC_UNREGISTERED });
-                    ResourceDirectory directory = new ResourceDirectory(
-                        RT_DIRECTORY, discoverResourceDirectoryName(hazelcastInstance.getConfig()));
-                    eventHandlerRegistration = context.registerService(EventHandler.class, directory, properties);
+                    
                     /*
                      * create & register channel
                      */
+                    HazelcastResourceDirectory directory = new HazelcastResourceDirectory();
+                    directoryRegistration = context.registerService(ResourceDirectory.class, directory, null);
                     channelRegistration = context.registerService(Channel.class, new HazelcastChannel(directory), null);
                     return hazelcastInstance;
                 }
@@ -143,14 +128,13 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
                         channelRegistration.unregister();
                         this.channelRegistration = null;
                     }
-                    /*
-                     * remove event handler registration
-                     */
-                    ServiceRegistration<EventHandler> eventHandlerRegistration = this.eventHandlerRegistration;
-                    if (null != eventHandlerRegistration) {
-                        eventHandlerRegistration.unregister();
-                        this.eventHandlerRegistration = null;
+                    
+                    ServiceRegistration<ResourceDirectory> directoryRegistration = this.directoryRegistration;
+                    if (null != directoryRegistration) {
+                        directoryRegistration.unregister();
+                        this.directoryRegistration = null;
                     }
+
                     context.ungetService(reference);
                     HazelcastAccess.setHazelcastInstance(null);
                 }
@@ -174,6 +158,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
      * @throws IllegalStateException
      */
     private static String discoverResourceDirectoryName(Config config) throws IllegalStateException {
+        // TODO: Probably reactivate for new resource directory collections
         Map<String, MapConfig> mapConfigs = config.getMapConfigs();
         if (null != mapConfigs && 0 < mapConfigs.size()) {
             for (String mapName : mapConfigs.keySet()) {

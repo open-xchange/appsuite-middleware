@@ -55,9 +55,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -68,6 +71,7 @@ import com.openexchange.imap.cache.ListLsubRuntimeException;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
+import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.api.enhanced.MailMessageStorageLong;
@@ -80,6 +84,7 @@ import com.openexchange.session.Session;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
+import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights.Right;
 
 /**
@@ -97,6 +102,55 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     protected static final String STR_FALSE = "false";
 
     protected static final Flags FLAGS_SEEN = new Flags(Flags.Flag.SEEN);
+
+    private static final class FailFastError {
+
+        final MessagingException error;
+        final long stamp;
+
+        FailFastError(final MessagingException e) {
+            super();
+            this.error = e;
+            this.stamp = System.currentTimeMillis();
+        }
+    }
+
+    private static final ConcurrentMap<String, FailFastError> FAIL_FAST = new NonBlockingHashMap<String, FailFastError>();
+
+    private static volatile Integer failFastTimeout;
+    private static int failFastTimeout() {
+        Integer tmp = failFastTimeout;
+        if (null == tmp) {
+            synchronized (IMAPFolderWorker.class) {
+                tmp = failFastTimeout;
+                if (null == tmp) {
+                    final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+                    tmp = Integer.valueOf(null == service ? 10000 : service.getIntProperty("com.openexchange.imap.failFastTimeout", 10000));
+                    failFastTimeout = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    /**
+     * Checks for possible fail-fast error.
+     * 
+     * @param imapStore The IMAP store to check
+     * @param fullName The mailbox full name
+     * @throws MessagingException If such a fail-fast error exists and has not elapsed, yet
+     */
+    public static void checkFailFast(final IMAPStore imapStore, final String fullName) throws MessagingException {
+        final String key = fullName + '@' + imapStore.toString();
+        final FailFastError failFastError = FAIL_FAST.get(key);
+        if (null == failFastError) {
+            return;
+        }
+        if ((System.currentTimeMillis() - failFastError.stamp) <= failFastTimeout()) {
+            throw failFastError.error;
+        }
+        FAIL_FAST.remove(key, failFastError);
+    }
 
     /*
      * Fields
@@ -142,6 +196,17 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         imapConfig = imapAccess.getIMAPConfig();
         aclExtension = imapConfig.getACLExtension();
         otherFolders = new HashSet<IMAPFolder>(4);
+    }
+
+    private void openFolder(final int desiredMode, final IMAPFolder imapFolder) throws MessagingException {
+        try {
+            imapFolder.open(desiredMode);
+        } catch (final MessagingException e) {
+            if (toUpperCase(e.getMessage()).indexOf("[INUSE]") >= 0) {
+                FAIL_FAST.put(imapFolder.getFullName() + '@' + imapStore.toString(), new FailFastError(e));
+            }
+            throw e;
+        }
     }
 
     @Override
@@ -287,6 +352,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         if (null == fullName) {
             throw MailExceptionCode.MISSING_FULLNAME.create();
         }
+        checkFailFast(imapStore, fullName);
         final boolean isDefaultFolder = DEFAULT_FOLDER_ID.equals(fullName);
         final boolean isIdenticalFolder;
         if (isDefaultFolder) {
@@ -369,7 +435,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                     /*
                      * Open identical folder in right mode
                      */
-                    imapFolder.open(desiredMode);
+                    openFolder(desiredMode, imapFolder);
                     return imapFolder;
                 }
             }
@@ -426,7 +492,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                     session,
                     isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
             }
-            retval.open(desiredMode);
+            openFolder(desiredMode, retval);
         }
         return retval;
     }
@@ -491,9 +557,23 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     protected static void clearCacheSafe(final IMAPFolder imapFolder) {
         try {
             clearCache(imapFolder);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             // Ignore
         }
+    }
+
+    /** ASCII-wise upper-case */
+    private static String toUpperCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+        }
+        return builder.toString();
     }
 
 }
