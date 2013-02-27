@@ -90,24 +90,30 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
 
     @Override
     public void handleLogin(final LoginResult login) throws OXException {
-        final int cid = login.getSession().getContextId();
-        DatabaseService databaseService = null;
-        Connection con = null;
+        Session session = login.getSession();
+        Context ctx = login.getContext();
+        DatabaseService databaseService = CCServiceRegistry.getInstance().getService(DatabaseService.class);
+        final String folderName = StringHelper.valueOf(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
+
+        Connection con = databaseService.getReadOnly(ctx);
         try {
-            databaseService = CCServiceRegistry.getInstance().getService(DatabaseService.class);
-            con = databaseService.getWritable(cid);
-            final String folderName = StringHelper.valueOf(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
+            if (exists(session, ctx, con)) {
+                return;
+            }
+        } finally {
+            databaseService.backReadOnly(ctx, con);
+        }
+        con = databaseService.getWritable(ctx);
+        try {
             create(login.getSession(), login.getContext(), folderName, con);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            if (databaseService != null && null != con) {
-                databaseService.backWritable(cid, con);
-            }
+            databaseService.backWritable(ctx, con);
         }
     }
 
-    public void create(final Session session, final Context ctx, final String folderName, final Connection con) throws OXException, SQLException {
+    public static boolean exists(Session session, Context ctx, Connection con) throws OXException {
         final int cid = session.getContextId();
         final int userId = session.getUserId();
 
@@ -116,22 +122,25 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         final Integer folderId = serverUserSetting.getContactCollectionFolder(cid, userId);
         final OXFolderAccess folderAccess = new OXFolderAccess(con, ctx);
         if (folderId != null && folderAccess.exists(folderId.intValue())) {
-            /*
-             * Folder already exists
-             */
-            return;
+            // Folder already exists
+            return true;
         }
         if (!serverUserSetting.isContactCollectionEnabled(cid, userId).booleanValue() && isConfigured(serverUserSetting, cid, userId)) {
-            /*
-             * Both - collect-on-mail-access and collect-on-mail-transport - disabled
-             */
+            // Both - collect-on-mail-access and collect-on-mail-transport - disabled
+            return true;
+        }
+        // Should collect, or not explicitly set, so create folder
+        return false;
+    }
+
+    public static void create(final Session session, final Context ctx, final String folderName, final Connection con) throws OXException, SQLException {
+        // Check again on the master if maybe another parallel request already created the folder.
+        if (exists(session, ctx, con)) {
             return;
         }
-        /*-
-         * Should collect, or not explicitly set, so create folder
-         *
-         * Create folder
-         */
+        final int cid = session.getContextId();
+        final int userId = session.getUserId();
+        final OXFolderAccess folderAccess = new OXFolderAccess(con, ctx);
         int collectFolderID = 0;
         final int parent = folderAccess.getDefaultFolder(userId, FolderObject.CONTACT).getObjectID();
         try {
@@ -149,6 +158,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         /*
          * Remember folder ID
          */
+        final ServerUserSetting serverUserSetting = ServerUserSetting.getInstance(con);
         serverUserSetting.setContactCollectionFolder(cid, userId, Integer.valueOf(collectFolderID));
         serverUserSetting.setContactCollectOnMailAccess(cid, userId, serverUserSetting.isContactCollectOnMailAccess(cid, userId).booleanValue());
         serverUserSetting.setContactCollectOnMailTransport(cid, userId, serverUserSetting.isContactCollectOnMailTransport(cid, userId).booleanValue());
@@ -158,11 +168,11 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         }
     }
 
-    private boolean isConfigured(final ServerUserSetting setting, final int cid, final int userId) throws OXException {
+    private static boolean isConfigured(final ServerUserSetting setting, final int cid, final int userId) throws OXException {
         return setting.getContactCollectionFolder(cid, userId) != null;
     }
 
-    private FolderObject createNewContactFolder(final int userId, final String name, final int parent) {
+    private static FolderObject createNewContactFolder(final int userId, final String name, final int parent) {
         final FolderObject newFolder = new FolderObject();
         newFolder.setFolderName(name);
         newFolder.setParentFolderID(parent);

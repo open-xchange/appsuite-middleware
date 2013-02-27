@@ -1,3 +1,7 @@
+* 2013-02-27 - marcus.klein@open-xchange.com
+
+ - Partly fix for bug 25100: First check on the slave if the contact collect folder needs to be created.
+
 * 2013-02-27 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 25142: Supply service info description in properties map   
