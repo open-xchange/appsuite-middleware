@@ -58,6 +58,8 @@ import com.meterware.httpunit.HttpUnitOptions;
 import com.meterware.httpunit.WebConversation;
 
 /**
+ * This class stores the HTTP client instance and the session identifier for an AJAX session. Additionally the fallback web conversation is
+ * stored here.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
@@ -72,7 +74,7 @@ public class AJAXSession {
     private final DefaultHttpClient httpClient;
 
     private String id;
-    private boolean mustLogout = true;
+    private boolean mustLogout;
 
     public AJAXSession() {
         this(newWebConversation(), newHttpClient(), null);
@@ -87,12 +89,9 @@ public class AJAXSession {
         this.conversation = conversation;
         this.httpClient = httpClient;
         this.id = id;
-        this.mustLogout = id == null; // Don't auto logout when supplied with id.
+        this.mustLogout = id != null;
     }
 
-    /**
-     * @return the conversation
-     */
     public WebConversation getConversation() {
         return conversation;
     }
@@ -101,18 +100,13 @@ public class AJAXSession {
         return httpClient;
     }
 
-    /**
-     * @return the sessionId
-     */
     public String getId() {
         return id;
     }
 
-    /**
-     * @param sessionId the sessionId to set
-     */
     public void setId(final String id) {
         this.id = id;
+        this.mustLogout = id != null;
     }
 
     public boolean mustLogout() {
@@ -135,7 +129,7 @@ public class AJAXSession {
 
     public static DefaultHttpClient newHttpClient() {
         DefaultHttpClient retval = new DefaultHttpClient();
-        
+
         HttpParams params = retval.getParams();
         int minute = 1 * 60 * 1000;
         HttpConnectionParams.setConnectionTimeout(params, minute);
