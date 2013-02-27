@@ -633,8 +633,8 @@ public class AdminCache {
                 log.warn("WARNING: unknown password mechanism " + pwmech + " using SHA");
                 passwordMech = PasswordMechObject.SHA_MECH;
             }
+            user.setPasswordMech(passwordMech);
         }
-        user.setPasswordMech(passwordMech);
         final String passwd;
         if (PasswordMechObject.CRYPT_MECH.equals(passwordMech)) {
             passwd = UnixCrypt.crypt(user.getPassword());
