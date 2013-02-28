@@ -129,6 +129,12 @@ public class CapabilityServiceImpl implements CapabilityService {
                 capabilities.add(getCapability(cap));
             }
         }
+        
+        if (!session.isAnonymous()) {
+            if (session.getUserConfiguration().hasPortal()) {
+                capabilities.add(getCapability("portal"));
+            }
+        }
 
         return capabilities;
     }

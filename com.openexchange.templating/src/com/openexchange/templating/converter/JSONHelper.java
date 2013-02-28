@@ -62,4 +62,8 @@ public class JSONHelper {
     public String serialize(Object o) throws JSONException {
         return JSONCoercion.coerceToJSON(o).toString();
     }
+    
+    public String stringify(Object o) throws JSONException {
+        return serialize(o);
+    }
 }
