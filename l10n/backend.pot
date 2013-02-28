@@ -3082,7 +3082,7 @@ msgstr ""
 
 #. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:66
 msgid "The following needed service is missing: \"%1$s\""
 msgstr ""
 
@@ -5058,18 +5058,23 @@ msgstr ""
 msgid "Could not find a handler for the given stanza: . \"%1$s\""
 msgstr ""
 
+#. * Could not send stanza to resource. Resource was offline: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:64
+msgid "Could not send stanza to resource. Resource was offline: %1$s"
+msgstr ""
+
+#. * Unknown channel %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:66
+msgid "Unknown channel %1$s"
+msgstr ""
+
 #. * Invalid context ID. Couldn't find context for: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.presence.subscribe/src/com/openexchange/realtime/presence/subscribe/PresenceSubscribeExceptionMessages.java:63
 msgid "Invalid context ID. Couldn't find context for: %1$s"
 msgstr ""
 
-#. * Unknown channel %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:63
-msgid "Unknown channel %1$s"
-msgstr ""
-
 #. * No appropriate channel found for recipient %1$s with payload namespace %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:63
 msgid ""
 "No appropriate channel found for recipient %1$s with payload namespace %2$s"
 msgstr ""
@@ -5082,7 +5087,7 @@ msgstr ""
 #. *
 #. * Unexpected error: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:151
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:120
@@ -5093,7 +5098,7 @@ msgid "Unexpected error: %1$s"
 msgstr ""
 
 #. * Invalid ID. Resource identifier is missing.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:72
 msgid "Invalid ID. Resource identifier is missing."
 msgstr ""
 
