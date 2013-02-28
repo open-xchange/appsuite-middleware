@@ -56,13 +56,15 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.RealtimeExceptionCodes;
+import com.openexchange.realtime.directory.Resource;
+import com.openexchange.realtime.directory.ResourceDirectory;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
-import com.openexchange.realtime.presence.subscribe.PresenceSubscribeExceptionCodes;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.realtime.presence.subscribe.database.SubscriptionsSQL;
+import com.openexchange.realtime.util.IDMap;
 import com.openexchange.realtime.util.IdLookup;
 import com.openexchange.realtime.util.IdLookup.UserAndContext;
 import com.openexchange.server.ServiceLookup;
@@ -96,7 +98,9 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
         SubscriptionsSQL storage = new SubscriptionsSQL(databaseService);
         storage.store(sub);
         MessageDispatcher messageDispatcher = services.getService(MessageDispatcher.class);
-        messageDispatcher.send(subscription);
+        ResourceDirectory resourceDirectory = services.getService(ResourceDirectory.class);
+        IDMap<Resource> idMap = resourceDirectory.get(subscription.getTo());
+        messageDispatcher.send(subscription, idMap);
     }
 
     @Override
@@ -108,7 +112,9 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
         SubscriptionsSQL storage = new SubscriptionsSQL(services.getService(DatabaseService.class));
         storage.store(sub);
         MessageDispatcher messageDispatcher = services.getService(MessageDispatcher.class);
-        messageDispatcher.send(approval);
+        ResourceDirectory resourceDirectory = services.getService(ResourceDirectory.class);
+        IDMap<Resource> idMap = resourceDirectory.get(approval.getTo());
+        messageDispatcher.send(approval, idMap);
     }
 
     @Override
@@ -168,8 +174,10 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
     public void pushPendingRequests(ID id) throws OXException {
         List<Presence> pendingRequests = getPendingRequests(id);
         MessageDispatcher messageDispatcher = services.getService(MessageDispatcher.class);
+        ResourceDirectory resourceDirectory = services.getService(ResourceDirectory.class);
         for (Presence presence : pendingRequests) {
-            messageDispatcher.send(presence);
+            IDMap<Resource> idMap = resourceDirectory.get(presence.getTo());
+            messageDispatcher.send(presence, idMap);
         }
     }
 

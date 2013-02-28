@@ -50,7 +50,8 @@
 package com.openexchange.realtime.presence.publish.osgi;
 
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.realtime.MessageDispatcher;
+import com.openexchange.realtime.directory.ResourceDirectory;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.presence.PresenceStatusService;
 import com.openexchange.realtime.presence.publish.PresenceStatusChangePublisher;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
@@ -67,7 +68,7 @@ public class PresencePublishActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { PresenceSubscriptionService.class, PresenceStatusService.class, MessageDispatcher.class };
+        return new Class<?>[] { PresenceSubscriptionService.class, PresenceStatusService.class, MessageDispatcher.class, ResourceDirectory.class };
     }
 
     @Override

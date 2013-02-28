@@ -64,6 +64,10 @@ public enum DispatchExceptionCode implements OXExceptionCode {
 
     /** Could not find a handler for the specified stanza: . \"%1$s\" */
     MISSING_HANDLER_FOR_STANZA(DispatchExceptionMessage.MISSING_HANDLER_FOR_STANZA_MSG, CATEGORY_ERROR, 1),
+    /** Could not send stanza to resource. Resource was offline: %1$s */
+    RESOURCE_OFFLINE(DispatchExceptionMessage.RESOURCE_OFFLINE_MSG, CATEGORY_ERROR, 2),
+    /** Unknown channel %1$s */
+    UNKNOWN_CHANNEL(DispatchExceptionMessage.UNKNOWN_CHANNEL, Category.EnumCategory.CONNECTIVITY, 3),
     ;
 
     private final String message;

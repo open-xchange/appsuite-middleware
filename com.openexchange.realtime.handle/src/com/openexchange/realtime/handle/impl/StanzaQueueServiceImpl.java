@@ -47,72 +47,58 @@
  *
  */
 
-package com.openexchange.realtime.presence.subscribe;
+package com.openexchange.realtime.handle.impl;
 
-import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.handle.StanzaQueueService;
+import com.openexchange.realtime.packet.IQ;
+import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.packet.Stanza;
+
 
 /**
- * {@link PresenceSubscriptionService}
+ * {@link StanzaQueueServiceImpl}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface PresenceSubscriptionService {
+public class StanzaQueueServiceImpl implements StanzaQueueService {
+    
+    private final BlockingQueue<Presence> presenceQueue = new ArrayBlockingQueue<Presence>(Integer.MAX_VALUE);
+    
+    private final BlockingQueue<Message> messageQueue = new ArrayBlockingQueue<Message>(Integer.MAX_VALUE);
+    
+    private final BlockingQueue<IQ> iqQueue = new ArrayBlockingQueue<IQ>(Integer.MAX_VALUE);
 
-    /**
-     * Sends a presence request to a specific user, defined in the Presence object. This request might be handled immediately if the
-     * recipient is available or is stored for later handling.
-     *
-     * @param subscription
-     * @param message optional message
-     * @throws OXException
-     */
-    public void subscribe(Presence subscription, String message) throws OXException;
+    @Override
+    public boolean enqueueStanza(Stanza stanza) throws OXException {
+        if (stanza == null) {
+            throw new IllegalArgumentException("Parameter 'stanza' must not be null!");
+        }
+        
+        if (stanza instanceof Presence) {
+            return presenceQueue.offer((Presence) stanza);
+        } else if (stanza instanceof Message) {
+            return messageQueue.offer((Message) stanza);
+        } else if (stanza instanceof IQ) {
+            return iqQueue.offer((IQ) stanza);
+        } else {
+            throw new IllegalArgumentException("Parameter 'stanza' must be of type Presence, Message or IQ!");
+        }
+    }
 
-    /**
-     * Allows a given user to see (or not to see) the current users presence status.
-     *
-     * @param id The user who is allowed to receive the presence status.
-     * @param approval
-     * @throws OXException
-     */
-    public void approve(Presence approval) throws OXException;
+    public BlockingQueue<Presence> getPresenceQueue() {
+        return presenceQueue;
+    }
 
-    /**
-     * Returns all active subscribers for the current user.
-     *
-     * @param id
-     * @return
-     * @throws OXException
-     */
-    public List<ID> getSubscribers(ID id) throws OXException;
+    public BlockingQueue<Message> getMessageQueue() {
+        return messageQueue;
+    }
 
-    /**
-     * Returns all active subscriptions for the user with given id.
-     *
-     * @param id
-     * @return
-     * @throws OXException
-     */
-    public List<ID> getSubscriptions(ID id) throws OXException;
-
-    /**
-     * Returns all pending requests for the user with the given id.
-     *
-     * @param id
-     * @return
-     * @throws OXException
-     */
-    public List<Presence> getPendingRequests(ID id) throws OXException;
-
-    /**
-     * Sends all pending reuqests for the user with the given id.
-     *
-     * @param id
-     * @throws OXException
-     */
-    public void pushPendingRequests(ID id) throws OXException;
+    public BlockingQueue<IQ> getIqQueue() {
+        return iqQueue;
+    }
 
 }

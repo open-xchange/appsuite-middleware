@@ -47,72 +47,29 @@
  *
  */
 
-package com.openexchange.realtime.presence.subscribe;
+package com.openexchange.realtime.dispatch;
 
-import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.IDMap;
 
 /**
- * {@link PresenceSubscriptionService}
+ * The Message dispatcher chooses an appropriate {@link Channel} to push data (aka. a Stanza) to listening clients
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface PresenceSubscriptionService {
-
+public interface MessageDispatcher {
+    
     /**
-     * Sends a presence request to a specific user, defined in the Presence object. This request might be handled immediately if the
-     * recipient is available or is stored for later handling.
+     * Delivers a {@link Stanza} to a list of given recipients.
      *
-     * @param subscription
-     * @param message optional message
-     * @throws OXException
+     * @param stanza The stanza to send
+     * @return A map of IDs that could not be reached because of an occurred exception.
+     * @throws OXException If send operation fails for any reason
      */
-    public void subscribe(Presence subscription, String message) throws OXException;
-
-    /**
-     * Allows a given user to see (or not to see) the current users presence status.
-     *
-     * @param id The user who is allowed to receive the presence status.
-     * @param approval
-     * @throws OXException
-     */
-    public void approve(Presence approval) throws OXException;
-
-    /**
-     * Returns all active subscribers for the current user.
-     *
-     * @param id
-     * @return
-     * @throws OXException
-     */
-    public List<ID> getSubscribers(ID id) throws OXException;
-
-    /**
-     * Returns all active subscriptions for the user with given id.
-     *
-     * @param id
-     * @return
-     * @throws OXException
-     */
-    public List<ID> getSubscriptions(ID id) throws OXException;
-
-    /**
-     * Returns all pending requests for the user with the given id.
-     *
-     * @param id
-     * @return
-     * @throws OXException
-     */
-    public List<Presence> getPendingRequests(ID id) throws OXException;
-
-    /**
-     * Sends all pending reuqests for the user with the given id.
-     *
-     * @param id
-     * @throws OXException
-     */
-    public void pushPendingRequests(ID id) throws OXException;
-
+    public Map<ID, OXException> send(Stanza stanza, IDMap<Resource> recipients) throws OXException;
 }

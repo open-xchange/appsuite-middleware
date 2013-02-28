@@ -1,30 +1,54 @@
 package com.openexchange.realtime.handle.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import java.util.concurrent.Future;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.realtime.directory.ResourceDirectory;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.handle.StanzaQueueService;
+import com.openexchange.realtime.handle.impl.StanzaQueueServiceImpl;
+import com.openexchange.realtime.handle.impl.iq.IQHandler;
+import com.openexchange.realtime.handle.impl.message.MessageHandler;
+import com.openexchange.realtime.handle.impl.presence.PresenceHandler;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 
-public class StanzaHandlerActivator implements BundleActivator {
+public class StanzaHandlerActivator extends HousekeepingActivator {
+    
+    private Future<Object> presenceFuture;
+    
+    private Future<Object> messageFuture;
+    
+    private Future<Object> iqFuture;
 
-	private static BundleContext context;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ResourceDirectory.class, MessageDispatcher.class, ThreadPoolService.class };
+    }
 
-	static BundleContext getContext() {
-		return context;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-	 */
-	public void start(BundleContext bundleContext) throws Exception {
-		StanzaHandlerActivator.context = bundleContext;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
-	public void stop(BundleContext bundleContext) throws Exception {
-		StanzaHandlerActivator.context = null;
-	}
+    @Override
+    protected void startBundle() throws Exception {
+        StanzaQueueServiceImpl queueService = new StanzaQueueServiceImpl();
+        ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
+        presenceFuture = threadPoolService.submit(ThreadPools.task(new PresenceHandler(queueService.getPresenceQueue())));
+        messageFuture = threadPoolService.submit(ThreadPools.task(new MessageHandler(queueService.getMessageQueue())));
+        iqFuture = threadPoolService.submit(ThreadPools.task(new IQHandler(queueService.getIqQueue())));
+        registerService(StanzaQueueService.class, queueService);
+    }
+    
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        if (presenceFuture != null) {
+            presenceFuture.cancel(true);
+        }
+        
+        if (messageFuture != null) {
+            messageFuture.cancel(true);
+        }
+        
+        if (iqFuture != null) {
+            iqFuture.cancel(true);
+        }
+    }
 
 }

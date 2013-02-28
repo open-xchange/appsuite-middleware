@@ -49,7 +49,7 @@
 
 package com.openexchange.realtime.dispatch.impl;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,8 +57,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.LocalMessageDispatcher;
-import com.openexchange.realtime.MessageDispatcher;
+import com.openexchange.realtime.dispatch.DispatchExceptionCode;
+import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 
@@ -75,16 +76,27 @@ public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
     private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
     
     @Override
-    public Set<ID> send(Stanza stanza, Set<ID> recipients) throws OXException {
-        // TODO: exception handling and maybe only a single id as recipient parameter
+    public Map<ID, OXException> send(Stanza stanza, Set<ID> recipients) throws OXException {
+        Map<ID, OXException> exceptions = new HashMap<ID, OXException>();
         for (ID recipient : recipients) {
-            Channel channel = channels.get(recipient);
-            if (channel != null) {
-                channel.send(stanza);
+            String protocol = recipient.getProtocol();
+            Channel channel = channels.get(protocol);
+            if (channel == null) {
+                exceptions.put(recipient, DispatchExceptionCode.UNKNOWN_CHANNEL.create(protocol));
+            } else {
+                if (channel.isConnected(recipient)) {
+                    try {
+                        channel.send(stanza);
+                    } catch (OXException e) {
+                        exceptions.put(recipient, e);
+                    }
+                } else {
+                    exceptions.put(recipient, DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString()));
+                }
             }
         }
-
-        return Collections.emptySet();
+        
+        return exceptions;
     }
 
     @Override

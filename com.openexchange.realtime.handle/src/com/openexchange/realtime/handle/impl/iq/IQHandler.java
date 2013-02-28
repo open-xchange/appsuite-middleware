@@ -47,43 +47,84 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.handle.impl.iq;
 
-import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.handle.impl.AbstractStrategyHandler;
+import com.openexchange.realtime.handle.impl.HandlerStrategy;
+import com.openexchange.realtime.handle.impl.HandlerUtils;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.packet.IQ;
+import com.openexchange.realtime.packet.IQ.Type;
 
 
 /**
- * {@link LocalMessageDispatcher}
+ * {@link IQHandler}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface LocalMessageDispatcher {
-    
-    /**
-     * Push a {@link Stanza} to a set of given recipients. The recipients must be reachable locally.
-     * That means the corresponding {@link ID} must have the resource field set and that resource must be
-     * registered on this node. If any resource is not reachable for delivery, it is returned within the result set.
-     *
-     * @param stanza The stanza to send
-     * @param recipients The local recipients for this stanza
-     * @return A set of IDs that could not be reached for delivery
-     * @throws OXException If send operation fails for any reason
-     */
-    public Set<ID> send(Stanza stanza, Set<ID> recipients) throws OXException;
-    
-    /**
-     * Add a Channel that can be used to send Stanzas to this MessageDispatcher
-     * @param channel a Channel that can be used to send Stanzas
-     */
-    public void addChannel(final Channel channel);
+public class IQHandler extends AbstractStrategyHandler<IQ> {
 
-    /**
-     * Remove a Channel that can be used to send Stanzas from this MessageDispatcher
-     * @param channel a Channel that can be used to send Stanzas
-     */
-    public void removeChannel(final Channel channel);
+    public IQHandler(BlockingQueue<IQ> queue) {
+        super(queue, new HandlerStrategy<IQ>());
+    }
+    
+    private void handleInbound(IQ iq) throws OXException {
+        if (HandlerUtils.applyPrivacyLists(iq)) {
+            ID to = iq.getTo();
+            if (to.isGeneralForm()) {
+                
+            } else {
+                
+            }
+        }
+    }
 
+    @Override
+    public void handleToIsNull(IQ stanza) throws OXException {
+        Type type = stanza.getType();
+        if (type == null) {
+            // TODO: throw Exception
+        }
+        
+        if (type == Type.GET || type == Type.SET) {
+            /*
+             * If the server receives an IQ stanza of type "get" or "set" with no 'to' attribute and
+             * it understands the namespace that qualifies the content of the stanza, it MUST either process the stanza on behalf of the
+             * sending entity (where the meaning of "process" is determined by the semantics of the qualifying namespace) or return an error
+             * to the sending entity.
+             */
+        }
+    }
+
+    @Override
+    public void handleAccountNotExists(IQ stanza) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void handleInboundStanzaWithGeneralRecipient(IQ stanza) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+    
+    @Override
+    public void handleInboundStanzaWithConcreteRecipient(IQ stanza) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void handleOutboundStanza(IQ stanza) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public boolean applyPrivacyLists(IQ stanza) throws OXException {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

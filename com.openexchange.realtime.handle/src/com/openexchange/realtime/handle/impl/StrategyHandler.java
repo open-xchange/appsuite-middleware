@@ -47,39 +47,29 @@
  *
  */
 
-package com.openexchange.realtime.dispatch;
+package com.openexchange.realtime.handle.impl;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.Stanza;
 
+
 /**
- * {@link StanzaHandler} Interface for StanzaHandlers.
+ * {@link StrategyHandler}
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface StanzaHandler {
+public interface StrategyHandler<T extends Stanza> {
+    
+    void handleToIsNull(T stanza) throws OXException;
+    
+    void handleAccountNotExists(T stanza) throws OXException;
+    
+    void handleInboundStanzaWithGeneralRecipient(T stanza) throws OXException;
+    
+    void handleInboundStanzaWithConcreteRecipient(T stanza) throws OXException;
+    
+    void handleOutboundStanza(T stanza) throws OXException;
+    
+    boolean applyPrivacyLists(T stanza) throws OXException;
 
-    /**
-     * Get the Stanza class that this StanzaHandler is able to handle.
-     *
-     * @return The Stanza class that this StanzaHandler is able to handle.
-     */
-    public Class<? extends Stanza> getStanzaClass();
-
-    /**
-     * Handle an incoming Stanza. Transform the Payloads, initialize the Stanza and handle it.
-     *
-     * @param stanza The incoming Stanza
-     * @throws OXException If handling fails
-     */
-    void incoming(Stanza stanza) throws OXException;
-
-    /**
-     * Handle an outgoing Stanza. Transform the payloads and hand it over to the StanzaSender.
-     *
-     * @param stanza    The outgoing Stanza
-     * @param sender    A Sender to to transport the handled and transformed Stanza
-     * @throws OXException If handling fails
-     */
-    void outgoing(Stanza stanza, StanzaSender sender) throws OXException;
 }

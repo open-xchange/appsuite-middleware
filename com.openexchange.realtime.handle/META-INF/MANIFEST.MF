@@ -6,4 +6,19 @@ Bundle-Version: 7.0.2.0
 Bundle-Activator: com.openexchange.realtime.handle.osgi.StanzaHandlerActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.osgi.framework;version="1.3.0"
+Import-Package: com.openexchange.exception,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.realtime,
+ com.openexchange.realtime.directory,
+ com.openexchange.realtime.dispatch,
+ com.openexchange.realtime.packet,
+ com.openexchange.realtime.presence,
+ com.openexchange.realtime.presence.subscribe,
+ com.openexchange.realtime.util,
+ com.openexchange.server,
+ com.openexchange.threadpool,
+ com.openexchange.threadpool.behavior,
+ org.apache.commons.logging;version="1.1.1",
+ org.osgi.framework;version="1.3.0"
+Export-Package: com.openexchange.realtime.handle

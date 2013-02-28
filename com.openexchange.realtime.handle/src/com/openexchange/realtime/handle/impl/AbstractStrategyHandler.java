@@ -47,72 +47,65 @@
  *
  */
 
-package com.openexchange.realtime.presence.subscribe;
+package com.openexchange.realtime.handle.impl;
 
-import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.RealtimeExceptionCodes;
+import com.openexchange.realtime.directory.ResourceDirectory;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.packet.Stanza;
+
 
 /**
- * {@link PresenceSubscriptionService}
+ * {@link AbstractStrategyHandler}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface PresenceSubscriptionService {
+public abstract class AbstractStrategyHandler<T extends Stanza> implements StrategyHandler<T>, Runnable {
+    
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractStrategyHandler.class);
+    
+    protected final BlockingQueue<T> queue;
+    
+    protected final HandlerStrategy<T> strategy;
+    
+    public AbstractStrategyHandler(BlockingQueue<T> queue, HandlerStrategy<T> strategy) {
+        super();
+        this.queue = queue;
+        this.strategy = strategy;
+    }
+    
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                T stanza = queue.take();
+                strategy.handleStanza(stanza, this);
+            } catch (InterruptedException e) {
+                return;
+            } catch (Throwable t) {
+                LOG.error("Error while handling stanza.", t);
+            }
+        }
+    }
+    
+    protected ResourceDirectory getResourceDirectory() throws OXException {
+        ResourceDirectory resourceDirectory = Services.optService(ResourceDirectory.class);
+        if (resourceDirectory == null) {
+            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ResourceDirectory.class.getName());
+        }
 
-    /**
-     * Sends a presence request to a specific user, defined in the Presence object. This request might be handled immediately if the
-     * recipient is available or is stored for later handling.
-     *
-     * @param subscription
-     * @param message optional message
-     * @throws OXException
-     */
-    public void subscribe(Presence subscription, String message) throws OXException;
+        return resourceDirectory;
+    }
 
-    /**
-     * Allows a given user to see (or not to see) the current users presence status.
-     *
-     * @param id The user who is allowed to receive the presence status.
-     * @param approval
-     * @throws OXException
-     */
-    public void approve(Presence approval) throws OXException;
+    protected MessageDispatcher getMessageDispatcher() throws OXException {
+        MessageDispatcher messageDispatcher = Services.optService(MessageDispatcher.class);
+        if (messageDispatcher == null) {
+            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(MessageDispatcher.class.getName());
+        }
 
-    /**
-     * Returns all active subscribers for the current user.
-     *
-     * @param id
-     * @return
-     * @throws OXException
-     */
-    public List<ID> getSubscribers(ID id) throws OXException;
-
-    /**
-     * Returns all active subscriptions for the user with given id.
-     *
-     * @param id
-     * @return
-     * @throws OXException
-     */
-    public List<ID> getSubscriptions(ID id) throws OXException;
-
-    /**
-     * Returns all pending requests for the user with the given id.
-     *
-     * @param id
-     * @return
-     * @throws OXException
-     */
-    public List<Presence> getPendingRequests(ID id) throws OXException;
-
-    /**
-     * Sends all pending reuqests for the user with the given id.
-     *
-     * @param id
-     * @throws OXException
-     */
-    public void pushPendingRequests(ID id) throws OXException;
-
+        return messageDispatcher;
+    }
 }

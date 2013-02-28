@@ -61,8 +61,6 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public enum RealtimeExceptionCodes implements OXExceptionCode {
-    /** Unknown channel %1$s */
-    UNKNOWN_CHANNEL(RealtimeExceptionMessages.UNKNOWN_CHANNEL, Category.EnumCategory.CONNECTIVITY, 1),
     /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
     NO_APPROPRIATE_CHANNEL(RealtimeExceptionMessages.NO_APPROPRIATE_CHANNEL, Category.EnumCategory.CONNECTIVITY, 2),
     /** The following needed service is missing: "%1$s" */

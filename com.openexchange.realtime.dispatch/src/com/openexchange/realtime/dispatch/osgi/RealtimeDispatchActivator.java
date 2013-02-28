@@ -9,7 +9,7 @@ import org.osgi.service.event.EventAdmin;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.LocalMessageDispatcher;
+import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.impl.LocalMessageDispatcherImpl;
 
 public class RealtimeDispatchActivator extends HousekeepingActivator {

@@ -57,9 +57,9 @@ import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.realtime.LocalMessageDispatcher;
-import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.directory.ResourceDirectory;
+import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.hazelcast.Services;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
 import com.openexchange.realtime.hazelcast.impl.GlobalMessageDispatcherImpl;
@@ -84,7 +84,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         Services.setServiceLookup(this);
 
         HazelcastResourceDirectory directory = new HazelcastResourceDirectory();
-        GlobalMessageDispatcherImpl globalDispatcher = new GlobalMessageDispatcherImpl(directory);
+        GlobalMessageDispatcherImpl globalDispatcher = new GlobalMessageDispatcherImpl();
         registerService(ResourceDirectory.class, directory, null);
         registerService(MessageDispatcher.class, globalDispatcher);
     }

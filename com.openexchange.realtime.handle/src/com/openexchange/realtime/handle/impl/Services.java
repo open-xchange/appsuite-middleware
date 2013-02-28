@@ -47,72 +47,68 @@
  *
  */
 
-package com.openexchange.realtime.presence.subscribe;
+package com.openexchange.realtime.handle.impl;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Presence;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
+
 
 /**
- * {@link PresenceSubscriptionService}
+ * {@link Services}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface PresenceSubscriptionService {
+public class Services {
+    
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+    
 
     /**
-     * Sends a presence request to a specific user, defined in the Presence object. This request might be handled immediately if the
-     * recipient is available or is stored for later handling.
+     * Sets the service lookup.
      *
-     * @param subscription
-     * @param message optional message
-     * @throws OXException
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    public void subscribe(Presence subscription, String message) throws OXException;
+    public static void setServiceLookup(ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
 
     /**
-     * Allows a given user to see (or not to see) the current users presence status.
+     * Gets the service lookup.
      *
-     * @param id The user who is allowed to receive the presence status.
-     * @param approval
-     * @throws OXException
+     * @return The service lookup or <code>null</code>
      */
-    public void approve(Presence approval) throws OXException;
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+    
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(Class<? extends S> clazz) {
+        com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException(
+                "Missing ServiceLookup instance. Bundle \"com.openexchange.realtime.handle\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
 
     /**
-     * Returns all active subscribers for the current user.
+     * (Optionally) Gets the service of specified type
      *
-     * @param id
-     * @return
-     * @throws OXException
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
      */
-    public List<ID> getSubscribers(ID id) throws OXException;
-
-    /**
-     * Returns all active subscriptions for the user with given id.
-     *
-     * @param id
-     * @return
-     * @throws OXException
-     */
-    public List<ID> getSubscriptions(ID id) throws OXException;
-
-    /**
-     * Returns all pending requests for the user with the given id.
-     *
-     * @param id
-     * @return
-     * @throws OXException
-     */
-    public List<Presence> getPendingRequests(ID id) throws OXException;
-
-    /**
-     * Sends all pending reuqests for the user with the given id.
-     *
-     * @param id
-     * @throws OXException
-     */
-    public void pushPendingRequests(ID id) throws OXException;
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
+    }
 
 }

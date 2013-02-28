@@ -47,40 +47,41 @@
  *
  */
 
-package com.openexchange.realtime.dispatch;
+package com.openexchange.realtime.handle.impl;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.dispatch.impl.PresenceHandler;
-import com.openexchange.realtime.packet.IQ;
-import com.openexchange.realtime.packet.Message;
-import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 
-/**
- * {@link StanzaHandlerSelector} - Select a StanzaHandler suitable for the given type of Stanza.
- *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- */
-public class StanzaHandlerSelector {
 
-    /**
-     * Select a StanzaHandler suitable for the given type of Stanza.
-     *
-     * @param stanza The Stanza that has to be handled
-     * @return a StanzaHandler suitable for the given type of Stanza
-     * @throws OXException If no suitable StanzaHandler can be found
-     */
-    public static StanzaHandler getStanzaHandler(Stanza stanza) throws OXException {
-        if(stanza instanceof Presence) {
-            return new PresenceHandler();
+/**
+ * {@link HandlerStrategy}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ */
+public class HandlerStrategy<T extends Stanza> {
+    
+    public void handleStanza(T stanza, StrategyHandler<T> handler) throws OXException {
+        ID to = stanza.getTo();
+        if (to == null) {
+            handler.handleToIsNull(stanza);
+        } else {
+            if (HandlerUtils.isInboundStanza(stanza)) {
+                if (HandlerUtils.addressesValidOXUser(stanza)) {
+                    if (handler.applyPrivacyLists(stanza)) {
+                        if (to.isGeneralForm()) {
+                            handler.handleInboundStanzaWithGeneralRecipient(stanza);
+                        } else {
+                            handler.handleInboundStanzaWithConcreteRecipient(stanza);
+                        }
+                    }
+                } else {
+                    handler.handleAccountNotExists(stanza);
+                }
+            } else {
+                handler.handleOutboundStanza(stanza);
+            }
         }
-        if(stanza instanceof Message) {
-            throw new UnsupportedOperationException("Not yet implemented");
-        }
-        if(stanza instanceof IQ) {
-            throw new UnsupportedOperationException("Not yet implemented");
-        }
-        throw DispatchExceptionCode.MISSING_HANDLER_FOR_STANZA.create(stanza.getClass().getName());
     }
 
 }

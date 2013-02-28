@@ -10,7 +10,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.realtime.MessageDispatcher;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.presence.PresenceStatusService;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.realtime.presence.subscribe.database.CreatePresenceSubscriptionDB;

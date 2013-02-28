@@ -52,12 +52,15 @@ package com.openexchange.realtime.presence.publish;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.RealtimeExceptionCodes;
+import com.openexchange.realtime.directory.Resource;
+import com.openexchange.realtime.directory.ResourceDirectory;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.presence.PresenceChangeListener;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
+import com.openexchange.realtime.util.IDMap;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -151,10 +154,17 @@ public class PresenceStatusChangePublisher implements PresenceChangeListener {
         if (messageDispatcher == null) {
             throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(MessageDispatcher.class.getSimpleName());
         }
+        
+        ResourceDirectory resourceDirectory = serviceLookup.getService(ResourceDirectory.class);
+        if (resourceDirectory == null) {
+            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ResourceDirectory.class.getSimpleName());
+        }
+        
         Presence updatePresence = new Presence(presence);
         updatePresence.setFrom(presence.getFrom());
         updatePresence.setTo(contact);
-        messageDispatcher.send(updatePresence);
+        IDMap<Resource> targets = resourceDirectory.get(contact);
+        messageDispatcher.send(updatePresence, targets);
     }
 
 }
