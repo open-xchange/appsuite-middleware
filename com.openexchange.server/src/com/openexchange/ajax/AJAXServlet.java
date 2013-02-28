@@ -60,6 +60,7 @@ import java.io.Writer;
 import java.net.URLDecoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -68,11 +69,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.codec.CharEncoding;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -645,6 +650,126 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return uri;
     }
 
+    private static final URLCodec URL_CODEC = new URLCodec(CharEncoding.ISO_8859_1);
+    
+    /**
+     * BitSet of www-form-url safe characters.
+     */
+    protected static final BitSet WWW_FORM_URL;
+
+    /**
+     * BitSet of www-form-url safe characters including safe characters for an anchor.
+     */
+    protected static final BitSet WWW_FORM_URL_ANCHOR;
+
+    // Static initializer for www_form_url
+    static {
+        {
+            final BitSet bitSet = new BitSet(256);
+            // alpha characters
+            for (int i = 'a'; i <= 'z'; i++) {
+                bitSet.set(i);
+            }
+            for (int i = 'A'; i <= 'Z'; i++) {
+                bitSet.set(i);
+            }
+            // numeric characters
+            for (int i = '0'; i <= '9'; i++) {
+                bitSet.set(i);
+            }
+            // special chars
+            bitSet.set('-');
+            bitSet.set('_');
+            bitSet.set('.');
+            bitSet.set('*');
+            // blank to be replaced with +
+            bitSet.set(' ');
+            WWW_FORM_URL = bitSet;
+        }
+        {
+            final BitSet bitSet = new BitSet(256);
+            // alpha characters
+            for (int i = 'a'; i <= 'z'; i++) {
+                bitSet.set(i);
+            }
+            for (int i = 'A'; i <= 'Z'; i++) {
+                bitSet.set(i);
+            }
+            // numeric characters
+            for (int i = '0'; i <= '9'; i++) {
+                bitSet.set(i);
+            }
+            // special chars
+            bitSet.set('-');
+            bitSet.set('_');
+            bitSet.set('.');
+            bitSet.set('*');
+            // blank to be replaced with +
+            bitSet.set(' ');
+            // Anchor characters
+            bitSet.set('/');
+            bitSet.set('#');
+            bitSet.set('%');
+            bitSet.set('?');
+            bitSet.set('&');
+            WWW_FORM_URL_ANCHOR = bitSet;
+        }
+    }
+
+    /**
+     * URL encodes given string.
+     * <p>
+     * Using <code>org.apache.commons.codec.net.URLCodec</code>.
+     */
+    public static String encodeUrl(final String s) {
+        return encodeUrl(s, false);
+    }
+
+    private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n|(?:%0[aA])?%0[dD]");
+
+    /**
+     * URL encodes given string.
+     * <p>
+     * Using <code>org.apache.commons.codec.net.URLCodec</code>.
+     */
+    public static String encodeUrl(final String s, final boolean forAnchor) {
+        if (isEmpty(s)) {
+            return s;
+        }
+        try {
+            final String ascii;
+            if (!forAnchor) {
+                ascii = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL, s.getBytes(Charsets.ISO_8859_1)));
+            } else {
+                // Prepare for being used as anchor/link
+                ascii = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL_ANCHOR, s.getBytes(Charsets.ISO_8859_1)));
+            }
+            // Strip possible "\r?\n" and/or "%0A?%0D"
+            if (ascii.indexOf('\n') < 0 && ascii.indexOf("%0") < 0) {
+                return ascii;
+            }
+            return PATTERN_CRLF.matcher(ascii).replaceAll("");
+        } catch (final RuntimeException e) {
+            LOG.error("A runtime error occurred.", e);
+            return s;
+        }
+    }
+
+    /**
+     * URL decodes given string.
+     * <p>
+     * Using <code>org.apache.commons.codec.net.URLCodec</code>.
+     */
+    public static String decodeUrl(final String s, final String charset) {
+        try {
+            return isEmpty(s) ? s : (isEmpty(charset) ? URL_CODEC.decode(s) : URL_CODEC.decode(s, charset));
+        } catch (final DecoderException e) {
+            return s;
+        } catch (final UnsupportedEncodingException e) {
+            return s;
+        }
+    }
+
     /**
      * Gets the action parameter ({@link #PARAMETER_ACTION}) from specified servlet request.
      *
@@ -749,7 +874,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
 	public static String substituteJS(final String json, final String action) {
-		return JS_FRAGMENT.replace("**json**", json).replace("**action**",
+		return JS_FRAGMENT.replace("**json**", json.replaceAll(Pattern.quote("</") , "<\\/")).replace("**action**",
 				action);
 	}
 

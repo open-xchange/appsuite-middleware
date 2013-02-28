@@ -50,6 +50,7 @@
 package com.openexchange.config.json.actions;
 
 import java.util.Iterator;
+import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,8 +63,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
+import com.openexchange.html.HtmlService;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.HTMLDetector;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -154,4 +159,58 @@ public final class PUTAction extends AbstractConfigAction {
         }
     }
 
+    private static final Pattern P_TAG_BODY = Pattern.compile("(?:\r?\n)?</?body[^<]*>(?:\r?\n)?", Pattern.CASE_INSENSITIVE);
+
+    /** Sanitizes possible JSON setting */
+    public static void sanitizeJsonSetting(final Setting setting) {
+        try {
+            final String value = (String) setting.getSingleValue();
+            boolean saveBack = false;
+            final JSONObject jConfig = new JSONObject(value);
+            final JSONObject jMailConfig = jConfig.optJSONObject("mail");
+            if (null != jMailConfig && jMailConfig.hasAndNotNull("signatures")) {
+                final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                if (null != htmlService) {
+                    final JSONArray jSignatures = jMailConfig.getJSONArray("signatures");
+                    final int length = jSignatures.length();
+                    for (int i = 0; i < length; i++) {
+                        final JSONObject jSignature = jSignatures.getJSONObject(i);
+                        String content = jSignature.optString("signature_text", null);
+                        if (null != content && HTMLDetector.containsHTMLTags(content.getBytes(Charsets.ISO_8859_1))) {
+                            content = htmlService.sanitize(content, null, false, null, null);
+                            content = P_TAG_BODY.matcher(content).replaceAll("");
+                            jSignature.put("signature_text", content);
+                            saveBack = true;
+                        }
+                    }
+                }
+                
+            }
+            if (saveBack) {
+                setting.setSingleValue(jConfig.toString());
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+    }
+
+    // ------------------------------------ HELPER ---------------------------------------
+
+    private static final Pattern SPLIT = Pattern.compile("\r?\n");
+
+    private static final Pattern SLASHES = Pattern.compile(Pattern.quote("//"));
+    private static String preparePath(final String path) {
+        if (null == path) {
+            return path;
+        }
+        return SLASHES.matcher(path.trim()).replaceAll("/");
+    }
+
+    private static final Pattern COMMENT = Pattern.compile("^\\s*[!#]");
+    private static boolean isComment(final String line) {
+        if (isEmpty(line)) {
+            return true;
+        }
+        return COMMENT.matcher(line).find();
+    }
 }

@@ -603,11 +603,11 @@ public class Infostore extends PermissionServlet {
                 String contentDisposition = null;
                 if (null == contentDisposition) {
                     final StringBuilder sb = new StringBuilder(32).append("attachment");
-                    DownloadUtility.appendFilenameParameter(metadata.getFileName(), SAVE_AS_TYPE, userAgent, sb);
+                    DownloadUtility.appendFilenameParameter(metadata.getFileName(), null, userAgent, sb);
                     res.setHeader("Content-Disposition", sb.toString());
                 } else {
                     final StringBuilder sb = new StringBuilder(32).append(contentDisposition);
-                    DownloadUtility.appendFilenameParameter(metadata.getFileName(), SAVE_AS_TYPE, userAgent, sb);
+                    DownloadUtility.appendFilenameParameter(metadata.getFileName(), null, userAgent, sb);
                     res.setHeader("Content-Disposition", sb.toString());
                     // Tools.setHeaderForFileDownload(userAgent, res, metadata.getFileName());
                 }

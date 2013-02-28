@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 13
+%define        ox_release 14
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -368,11 +368,13 @@ if ! ox_exists_property com.openexchange.contactcollector.folder.deleteDenied $p
    ox_set_property com.openexchange.contactcollector.folder.deleteDenied false $pfile
 fi
 
+PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
 ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
-ox_update_permissions "/opt/open-xchange/etc/configdb.properties" root:open-xchange 640
-ox_update_permissions "/opt/open-xchange/etc/mail.properties" root:open-xchange 640
+for FILE in $PROTECT
+do
+    ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
+done
 ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
-
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -399,6 +401,8 @@ ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Mon Feb 25 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-02-22
 * Fri Feb 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-02-13
 * Tue Jan 29 2013 Marcus Klein <marcus.klein@open-xchange.com>

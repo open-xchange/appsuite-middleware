@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 11
+%define        ox_release 12
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -41,6 +41,7 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc report
 if [ -e /opt/open-xchange/etc/common/licensekeys.properties ]; then
    mv /opt/open-xchange/etc/common/licensekeys.properties /opt/open-xchange/etc/licensekeys.properties
 fi
+ox_update_permissions /opt/open-xchange/etc/reportclient.properties root:open-xchange 640
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -55,6 +56,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Mon Feb 25 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-02-22
 * Fri Feb 15 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-02-13
 * Tue Jan 29 2013 Carsten Hoeger <choeger@open-xchange.com>

@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 11
+%define        ox_release 12
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -55,6 +55,13 @@ for FILE in ${CONFFILES}; do
     ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
 done
 
+PROTECT="facebookoauth.properties linkedinoauth.properties msnoauth.properties yahoooauth.properties"
+for FILE in $PROTECT
+do
+    ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
+done
+exit 0
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -65,9 +72,15 @@ done
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/facebookoauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/linkedinoauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/msnoauth.properties
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/yahoooauth.properties
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Mon Feb 25 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2013-02-22
 * Fri Feb 15 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2013-02-13
 * Tue Jan 29 2013 Steffen Templin <marcus.klein@open-xchange.com>

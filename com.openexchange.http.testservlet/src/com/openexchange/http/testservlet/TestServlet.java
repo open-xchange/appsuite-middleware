@@ -49,6 +49,7 @@
 
 package com.openexchange.http.testservlet;
 
+import static com.openexchange.http.testservlet.SaneScriptTags.saneScriptTags;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -59,6 +60,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.java.Streams;
 
 
 /**
@@ -75,6 +77,13 @@ public class TestServlet extends HttpServlet {
      */
     public TestServlet() {
         super();
+    }
+
+    @Override
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        // create a new HttpSession if it's missing
+        req.getSession(true);
+        super.service(req, resp);
     }
 
     /**
@@ -98,37 +107,24 @@ public class TestServlet extends HttpServlet {
         final StringBuilder page = new StringBuilder();
         page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
         page.append("<html>\n");
-        page.append("<head><title>TestServlet's doGet Page</title></head>\n");
+        page.append("<head><title>TestServlet's GET Page</title></head>\n");
         page.append("<body>\n");
         page.append("<h1>TestServlet's doGet Page</h1><hr/>\n");
         page.append("<p>This is a tiny paragraph with some text inside!</p>\n");
-        page.append("<p>Again a tiny paragraph with some text inside!</p>\n");
-        page.append("<ol><li>First list entry</li>");
-        page.append("<li>Sublist<ul><li>Foo</li><li>Bar</li></ul></li>");
-        page.append("<li>Third list entry</li></ol>\n");
-        page.append("<p><b>Parameters</b><br>");
-        Enumeration<?> paramEnum = req.getParameterNames();
-        while (paramEnum.hasMoreElements()) {
-            final String parameterName = (String) paramEnum.nextElement();
-            page.append(parameterName);
-            page.append(": ");
-            page.append(req.getParameter(parameterName));
-            page.append("<br>");
-        }
         page.append("</p><p><b>Headers</b><br>");
-        paramEnum = req.getHeaderNames();
+        final Enumeration<?> paramEnum = req.getHeaderNames();
         while (paramEnum.hasMoreElements()) {
             final String headerName = (String) paramEnum.nextElement();
             page.append(headerName);
             page.append(": ");
             final Enumeration<?> valueEnum = req.getHeaders(headerName);
             while (valueEnum.hasMoreElements()) {
-                page.append(valueEnum.nextElement());
+                page.append(saneScriptTags(valueEnum.nextElement().toString()));
                 page.append(valueEnum.hasMoreElements() ? ", " : "");
             }
             page.append("<br>");
         }
-        page.append("</p><p>The content: ").append(getBody(req));
+        page.append("</p><p>The content: ").append(saneScriptTags(getBody(req)));
         page.append("</p></body>\n</html>");
         resp.setContentType("text/html; charset=UTF-8");
         final byte[] output = page.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
@@ -167,35 +163,21 @@ public class TestServlet extends HttpServlet {
         page.append("<html>\n");
         page.append("<head><title>TestServlet's doGet Page</title></head>\n");
         page.append("<body>\n");
-        page.append("<h1><blink>TestServlet's doGet Page</blink></h1><hr/>\n");
+        page.append("<h1>TestServlet's doGet Page</h1><hr/>\n");
         page.append("<p>This is a tiny paragraph with some text inside!</p>\n");
-        page.append("<p>Again a tiny paragraph with some text inside!</p>\n");
-        page.append("<ol><li>First list entry</li>");
-        page.append("<li>Sublist<ul><li>Foo</li><li>Bar</li></ul></li>");
-        page.append("<li>Third list entry</li></ol>\n");
-        page.append("<p><b>Parameters</b><br>");
-        Enumeration<?> paramEnum = req.getParameterNames();
-        while (paramEnum.hasMoreElements()) {
-            final String parameterName = (String) paramEnum.nextElement();
-            page.append(parameterName);
-            page.append(": ");
-            page.append(req.getParameter(parameterName));
-            page.append("<br>");
-        }
-        page.append("</p><p><b>Headers</b><br>");
-        paramEnum = req.getHeaderNames();
+        final Enumeration<?> paramEnum = req.getHeaderNames();
         while (paramEnum.hasMoreElements()) {
             final String headerName = (String) paramEnum.nextElement();
             page.append(headerName);
             page.append(": ");
             final Enumeration<?> valueEnum = req.getHeaders(headerName);
             while (valueEnum.hasMoreElements()) {
-                page.append(valueEnum.nextElement());
+                page.append(saneScriptTags(valueEnum.nextElement().toString()));
                 page.append(valueEnum.hasMoreElements() ? ", " : "");
             }
             page.append("<br>");
         }
-        page.append("</p><p>The content: ").append(getBody(req));
+        page.append("</p><p>The content: ").append(saneScriptTags(getBody(req)));
         page.append("</p></body>\n</html>");
         resp.setContentType("text/html; charset=UTF-8");
         final byte[] output = page.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
@@ -229,16 +211,9 @@ public class TestServlet extends HttpServlet {
             /*
              * Should never occur
              */
-            // LOG.error("Unsupported encoding in request", e);
             return "";
         } finally {
-            if (null != isr) {
-                try {
-                    isr.close();
-                } catch (final IOException e) {
-                    // LOG.error(e.getMessage(), e);
-                }
-            }
+            Streams.close(isr);
         }
     }
 }

@@ -63,6 +63,7 @@ import com.openexchange.sim.SimBuilder;
 import com.openexchange.templating.OXTemplate.TemplateLevel;
 import com.openexchange.templating.impl.OXFolderHelper;
 import com.openexchange.templating.impl.OXInfostoreHelper;
+import com.openexchange.templating.impl.TemplateServiceImpl;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 

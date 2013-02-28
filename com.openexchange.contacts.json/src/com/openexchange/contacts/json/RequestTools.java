@@ -53,6 +53,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.TimeZone;
 import javax.activation.MimetypesFileTypeMap;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -60,13 +64,13 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contacts.json.actions.ContactAction;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 
 /**
@@ -76,7 +80,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public class RequestTools {
 
-    public static int[] getColumnsAsIntArray(final AJAXRequestData request, final String parameter) throws OXException {
+    public static int[] getColumnsAsIntArray(final AJAXRequestData request) throws OXException {
         final String valueStr = request.getParameter("columns");
         if (null == valueStr) {
         	return null;
@@ -107,9 +111,8 @@ public class RequestTools {
             intParam = request.getParameter(parameter, int.class);
             if (intParam == null) {
                 return 0;
-            } else {
-                return intParam.intValue();
             }
+            return intParam.intValue();
         } catch (final NumberFormatException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, parameter, intParam);
         }
@@ -131,6 +134,13 @@ public class RequestTools {
         return objectIdAndFolderId;
     }
 
+    /**
+     * Applies image data from request to given contact.
+     *
+     * @param request The request providing image data
+     * @param contact The contact
+     * @throws OXException If applying image data to contact fails
+     */
 	public static void setImageData(final ContactRequest request, final Contact contact) throws OXException {
 		UploadEvent uploadEvent = null;
 		try {
@@ -146,18 +156,34 @@ public class RequestTools {
 		    }
 		}
 	}
-    
+
+    /**
+     * Applies image data from file to given contact.
+     *
+     * @param contact The contact
+     * @param file The (uploaded) file providing image data
+     * @throws OXException If applying image data to contact fails
+     */
     public static void setImageData(final Contact contact, final UploadFile file) throws OXException {
         checkIsImageFile(file);
         FileInputStream fis = null;
-        ByteArrayOutputStream outputStream = null;
         try {
             fis = new FileInputStream(file.getTmpFile());
-            outputStream = new UnsynchronizedByteArrayOutputStream((int) file.getSize());
-            final byte[] buf = new byte[2048];
-            int len = -1;
-            while ((len = fis.read(buf)) != -1) {
-                outputStream.write(buf, 0, len);
+            final ByteArrayOutputStream outputStream = Streams.newByteArrayOutputStream((int) file.getSize());
+            final int buflen = 2048;
+            final byte[] buf = new byte[buflen];
+            int read;
+            // Examine first chunk
+            if ((read = fis.read(buf, 0, buflen)) > 0) {
+                final String mimeType = com.openexchange.java.ImageTypeDetector.getMimeType(buf, 0, read);
+                if (!toLowerCase(mimeType).startsWith("image/") || com.openexchange.java.HTMLDetector.containsHTMLTags(buf, 0, read)) {
+                    throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), mimeType);
+                }
+                outputStream.write(buf, 0, read);
+            }
+            // Read subsequent chunks
+            while ((read = fis.read(buf, 0, buflen)) > 0) {
+                outputStream.write(buf, 0, read);
             }
             contact.setImage1(outputStream.toByteArray());
             contact.setImageContentType(file.getContentType());
@@ -166,7 +192,6 @@ public class RequestTools {
         } catch (final IOException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, "I/O error while reading uploaded contact image.");
         } finally {
-            Streams.close(outputStream);
             Streams.close(fis);
         }
     }
@@ -175,7 +200,7 @@ public class RequestTools {
         if (null == file) {
             throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
         }
-        String contentType = file.getContentType();
+        final String contentType = file.getContentType();
         if (isImageContentType(contentType)) {
             return;            
         }
@@ -186,16 +211,81 @@ public class RequestTools {
                 return;
             }
         }
-        String readableType = null != contentType ? contentType : null != mimeType ? mimeType : "application/unknown";
-//        int idx = readableType.indexOf('/');
-//        if (-1 < idx && idx < readableType.length()) {
-//            readableType = readableType.substring(idx + 1);
-//        }
+        final String readableType = null == contentType ? (null == mimeType ? "application/unknown" : mimeType) : contentType;
         throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), readableType);
     }
     
     private static boolean isImageContentType(String contentType) {
-        return null != contentType && contentType.toLowerCase().startsWith("image");
+        return null != contentType && toLowerCase(contentType).startsWith("image/");
+    }
+
+    /**
+     * Gets a comparator to sort contacts by an upcoming annual date, relative to the supplied reference date. Only available for
+     * {@link ContactField#BIRTHDAY} and {@link ContactField#ANNIVERSARY}.
+     *
+     * @param dateField The annual date field to compare
+     * @param reference The reference date
+     * @return
+     */
+    public static Comparator<Contact> getAnnualDateComparator(final ContactField dateField, final Date reference) {
+        return new Comparator<Contact>() {
+
+            @Override
+            public int compare(Contact o1, Contact o2) {
+                Date date1, date2;
+                if (ContactField.BIRTHDAY.equals(dateField)) {
+                    date1 = o1.getBirthday();
+                    date2 = o2.getBirthday();
+                } else if (ContactField.ANNIVERSARY.equals(dateField)) {
+                    date1 = o1.getAnniversary();
+                    date2 = o2.getAnniversary();
+                } else {
+                    throw new UnsupportedOperationException("Unsupported field: " + dateField);
+                }
+                if (null == date1) {
+                    return null == date2 ? 0 : 1;
+                } else if (null == date2) {
+                    return -1;
+                } else {
+                    Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                    calendar.setTime(date1);
+                    int dayOfYear1 = calendar.get(Calendar.DAY_OF_YEAR);
+                    calendar.setTime(date2);
+                    int dayOfYear2 = calendar.get(Calendar.DAY_OF_YEAR);
+                    calendar.setTime(reference);
+                    int dayOfYearReference = calendar.get(Calendar.DAY_OF_YEAR);
+                    if (dayOfYear1 == dayOfYear2) {
+                        return 0;
+                    } else if (dayOfYear1 >= dayOfYearReference && dayOfYear2 >= dayOfYearReference) {
+                        // both after reference date, use default comparison
+                        return Integer.valueOf(dayOfYear1).compareTo(Integer.valueOf(dayOfYear2));
+                    } else if (dayOfYear1 < dayOfYearReference && dayOfYear2 < dayOfYearReference) {
+                        // both before reference date, use default comparison
+                        return Integer.valueOf(dayOfYear1).compareTo(Integer.valueOf(dayOfYear2));
+                    } else if (dayOfYear1 >= dayOfYearReference && dayOfYear2 < dayOfYearReference) {
+                        // first is next
+                        return -1;
+                    } else {
+                     // second is next
+                        return 1;
+                    }
+                }
+            }
+        };
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

@@ -53,12 +53,17 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Queue;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailInitialization;
@@ -741,25 +746,43 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return the trace of the thread that lastly obtained this access
      */
     public final String getTrace() {
-        final StringBuilder sBuilder = new StringBuilder(512);
+        final StringBuilder sBuilder = new StringBuilder(2048);
+        final String lineSeparator = System.getProperty("line.separator");
+        {
+            final Props taskProps = LogProperties.optLogProperties(usingThread);
+            if (null != taskProps) {
+                final Map<String, String> sorted = new TreeMap<String, String>();
+                for (final Entry<String, Object> entry : taskProps.getMap().entrySet()) {
+                    final String propertyName = entry.getKey();
+                    final Object value = entry.getValue();
+                    if (null != value) {
+                        sorted.put(propertyName, value.toString());
+                    }
+                }
+                for (final Map.Entry<String, String> entry : sorted.entrySet()) {
+                    sBuilder.append(entry.getKey()).append('=').append(entry.getValue()).append(lineSeparator);
+                }
+                sBuilder.append(lineSeparator);
+            }
+        }
         sBuilder.append(toString());
-        sBuilder.append("\nMail connection established (or fetched from cache) at: ").append('\n');
+        sBuilder.append(lineSeparator).append("IMAP connection established (or fetched from cache) at: ").append(lineSeparator);
         /*
          * Start at index 3
          */
         for (int i = 3; i < trace.length; i++) {
-            sBuilder.append("\tat ").append(trace[i]).append('\n');
+            sBuilder.append("    at ").append(trace[i]).append(lineSeparator);
         }
         if ((null != usingThread) && usingThread.isAlive()) {
-            sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append('\n');
+            sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append(lineSeparator);
             /*
              * Only possibility to get the current working position of a thread. This is only called if a thread is caught by
              * MailAccessWatcher.
              */
             final StackTraceElement[] trace = usingThread.getStackTrace();
-            sBuilder.append("\tat ").append(trace[0]);
+            sBuilder.append("    at ").append(trace[0]);
             for (int i = 1; i < trace.length; i++) {
-                sBuilder.append('\n').append("\tat ").append(trace[i]);
+                sBuilder.append(lineSeparator).append("    at ").append(trace[i]);
             }
         }
         return sBuilder.toString();

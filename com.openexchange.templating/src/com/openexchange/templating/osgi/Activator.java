@@ -53,8 +53,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.templating.TemplateService;
-import com.openexchange.templating.TemplateServiceImpl;
 import com.openexchange.templating.impl.OXIntegration;
+import com.openexchange.templating.impl.TemplateServiceImpl;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>

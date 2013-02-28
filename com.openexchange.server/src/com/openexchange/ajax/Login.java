@@ -86,6 +86,7 @@ import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.helper.Send;
 import com.openexchange.ajax.login.HashCalculator;
+import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -438,10 +439,10 @@ public class Login extends AJAXServlet {
                 }
                 writeSecretCookie(resp, session, hash, req.isSecure(), req.getServerName());
 
-                resp.sendRedirect(generateRedirectURL(
-                    req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
-                    req.getParameter("store"),
-                    session.getSessionID()));
+                resp.sendRedirect(LoginTools.generateRedirectURL(
+                    LoginTools.encodeUrl(req.getParameter(LoginFields.UI_WEB_PATH_PARAM), true),
+                    LoginTools.encodeUrl(req.getParameter("store"), true),
+                    session.getSessionID(), conf.uiWebPath));
             }
         });
         map.put(ACTION_CHANGEIP, new JSONRequestHandler() {

@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-eas-provisioning-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 11
+%define        ox_release 12
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -40,6 +40,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
 ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc mobile_configuration_action_sms.properties eas-provisioning-sms.properties
+ox_update_permissions /opt/open-xchange/etc/eas-provisioning-sms.properties root:open-xchange 640
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -51,9 +52,11 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc mobile
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/eas-provisioning-sms.properties
 
 %changelog
+* Mon Feb 25 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-02-22
 * Fri Feb 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-02-13
 * Tue Jan 29 2013 Marcus Klein <marcus.klein@open-xchange.com>

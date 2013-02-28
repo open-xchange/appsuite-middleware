@@ -53,16 +53,24 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.microformats.datasources.OXMFDataSource;
+import com.openexchange.subscribe.microformats.osgi.Services;
 import com.openexchange.subscribe.microformats.parser.ObjectParser;
 import com.openexchange.subscribe.microformats.transformers.MapToObjectTransformer;
 
@@ -74,18 +82,25 @@ import com.openexchange.subscribe.microformats.transformers.MapToObjectTransform
 public class MicroformatSubscribeService extends AbstractSubscribeService {
 
     private MapToObjectTransformer transformer;
-
     private OXMFParserFactoryService parserFactory;
-
     private OXMFDataSource mfSource;
-
     private final List<String> containers = new LinkedList<String>();
-
     private final List<String> prefixes = new LinkedList<String>();
-
     private SubscriptionSource source;
-
     private final List<ObjectParser> objectParsers = new LinkedList<ObjectParser>();
+
+    
+    /**
+     * Initializes a new {@link MicroformatSubscribeService}.
+     */
+    public MicroformatSubscribeService() {
+        super();
+    }
+
+    @Override
+    public void modifyIncoming(final Subscription subscription) throws OXException {
+        checkUrl((String) subscription.getConfiguration().get("url"));
+    }
 
     @Override
     public Collection getContent(Subscription subscription) throws OXException {
@@ -210,6 +225,120 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
 
     protected String getDisplayName(Subscription subscription) {
         return (String) subscription.getConfiguration().get("url");
+    }
+
+    private static volatile Set<Pattern> allowedHosts;
+    private static Set<Pattern> allowedHosts() {
+        Set<Pattern> tmp = allowedHosts;
+        if (null == allowedHosts) {
+            synchronized (MicroformatSubscribeService.class) {
+                tmp = allowedHosts;
+                if (null == allowedHosts) {
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
+                    final String sProp = null == service ? "" : service.getProperty("com.openexchange.subscribe.microformats.allowedHosts", "").trim();
+                    if (isEmpty(sProp)) {
+                        tmp = Collections.emptySet();
+                    } else {
+                        final String[] sPatterns = Strings.splitByComma(sProp);
+                        tmp = new HashSet<Pattern>(sPatterns.length);
+                        for (final String sPattern : sPatterns) {
+                            try {
+                                tmp.add(Pattern.compile(wildcardToRegex(sPattern)));
+                            } catch (final Exception x) {
+                                // Ignore
+                            }
+                        }
+                    }
+                    allowedHosts = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
+    /**
+     * Checks given URL string for syntactical correctness.
+     * 
+     * @param sUrl The URL string
+     * @throws OXException If URL string is invalid
+     */
+    private static void checkUrl(final String sUrl) throws OXException {
+        if (isEmpty(sUrl)) {
+            // Nothing to check
+            return;
+        }
+        try {
+            final java.net.URL url = new java.net.URL(sUrl);
+            final String protocol = url.getProtocol();
+            if (!"http".equals(protocol) && !"https".equals(protocol)) {
+                throw new MalformedURLException("Only http & https protocols supported.");
+            }
+            // Check host
+            final Set<Pattern> allowedHosts = allowedHosts();
+            if (!allowedHosts.isEmpty()) {
+                final String host = url.getHost();
+                for (final Pattern allowedHost : allowedHosts) {
+                    if (allowedHost.matcher(host).matches()) {
+                        return;
+                    }
+                }
+                throw new MalformedURLException("Host is not allowed: " + host);
+            }
+        } catch (final MalformedURLException e) {
+            throw OXMFSubscriptionErrorMessage.INVALID_URL.create(e, new Object[0]);
+        }
+    }
+
+    /** Checks for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    private static final gnu.trove.set.TIntSet SPECIALS = new gnu.trove.set.hash.TIntHashSet(new int[] {
+        '.', '+', '(', ')', '[', ']', '$', '^', '.', '{', '}', '|', '\\' });
+
+    /**
+     * Converts specified wild-card string to a regular expression
+     *
+     * @param wildcard The wild-card string to convert
+     * @return An appropriate regular expression ready for being used in a {@link Pattern#compile(String) pattern}
+     */
+    private static String wildcardToRegex(final String wildcard) {
+        if (null == wildcard) {
+            // Accept all if null
+            return "^.*$";
+        }
+        if (wildcard.indexOf('*') < 0 && wildcard.indexOf('?') < 0) {
+            // Literal pattern
+            return Pattern.quote(wildcard);
+        }
+        // Generate appropriate regex
+        final StringBuilder s = new StringBuilder(wildcard.length() << 1);
+        s.append('^');
+        final int len = wildcard.length();
+        for (int i = 0; i < len; i++) {
+            final char c = wildcard.charAt(i);
+            if (c == '*') {
+                s.append(".*");
+            } else if (c == '?') {
+                s.append('.');
+            } else if (SPECIALS.contains(c)) {
+                s.append('\\');
+                s.append(c);
+            } else {
+                s.append(c);
+            }
+        }
+        s.append('$');
+        return (s.toString());
     }
 
 }
