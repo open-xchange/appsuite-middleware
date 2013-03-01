@@ -67,11 +67,11 @@ import com.openexchange.realtime.packet.Stanza;
  */
 public class StanzaQueueServiceImpl implements StanzaQueueService {
 
-    private final BlockingQueue<Presence> presenceQueue = new ArrayBlockingQueue<Presence>(Integer.MAX_VALUE);
+    private final BlockingQueue<Presence> presenceQueue = new ArrayBlockingQueue<Presence>(1024);
 
-    private final BlockingQueue<Message> messageQueue = new ArrayBlockingQueue<Message>(Integer.MAX_VALUE);
+    private final BlockingQueue<Message> messageQueue = new ArrayBlockingQueue<Message>(2048);
 
-    private final BlockingQueue<IQ> iqQueue = new ArrayBlockingQueue<IQ>(Integer.MAX_VALUE);
+    private final BlockingQueue<IQ> iqQueue = new ArrayBlockingQueue<IQ>(2048);
 
     @Override
     public boolean enqueueStanza(Stanza stanza) throws OXException {
