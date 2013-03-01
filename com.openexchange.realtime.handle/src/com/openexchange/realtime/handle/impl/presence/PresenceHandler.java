@@ -52,6 +52,7 @@ package com.openexchange.realtime.handle.impl.presence;
 import java.util.concurrent.BlockingQueue;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.RealtimeExceptionCodes;
+import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
@@ -61,6 +62,7 @@ import com.openexchange.realtime.handle.impl.Services;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Presence.Type;
+import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.presence.PresenceStatusService;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.realtime.util.IDMap;
@@ -306,12 +308,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
     }
 
     /**
-     * Change the current Presence status.
-     * <ol>
-     * <li>Change the Status in the PresenceStatusService</li>
-     * <li>Check if the Status changes from offline to * and send status of the IDs contacts back to the ID</li>
-     * </ol>
-     * 
+     * Change the current Presence status of the client in the ResourceDirectory.
      * @param stanza Stanza containing the new Presence Status
      * @throws OXException If stanza conversion fails or the status can't be changed
      */
@@ -320,9 +317,9 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
         if (presenceStatusService == null) {
             throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(PresenceStatusService.class.getName());
         }
-        // TODO: add delay from last statusChange to presenceStanza
-        // TODO: use ResourceDirectory service instead of PresenceStatusService
-        // Change the status of the incoming Stanza's client
-        presenceStatusService.changePresenceStatus(stanza);
+        ResourceDirectory resourceDirectory = getResourceDirectory();
+        Resource resource = new DefaultResource(stanza.getState());
+        resourceDirectory.set(stanza.getFrom(), resource);
+        
     }
 }
