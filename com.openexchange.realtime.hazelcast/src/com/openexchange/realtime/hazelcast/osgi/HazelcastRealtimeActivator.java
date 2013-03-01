@@ -52,15 +52,18 @@ package com.openexchange.realtime.hazelcast.osgi;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.ServiceReference;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.hazelcast.Services;
+import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
 import com.openexchange.realtime.hazelcast.impl.GlobalMessageDispatcherImpl;
 
@@ -68,6 +71,7 @@ import com.openexchange.realtime.hazelcast.impl.GlobalMessageDispatcherImpl;
  * {@link HazelcastRealtimeActivator}
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
@@ -83,6 +87,24 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         LOG.info("Starting bundle: " + getClass().getCanonicalName());
         Services.setServiceLookup(this);
 
+        HazelcastInstance hazelcastInstance = getService(HazelcastInstance.class);
+        HazelcastAccess.setHazelcastInstance(hazelcastInstance);
+        
+        // either track Hazelcast for HazelcasAccess or get it via Services each time
+        track(HazelcastInstance.class, new SimpleRegistryListener<HazelcastInstance>() {
+
+            @Override
+            public void added(final ServiceReference<HazelcastInstance> ref, final HazelcastInstance hazelcastInstance) {
+                HazelcastAccess.setHazelcastInstance(hazelcastInstance);
+            }
+
+            @Override
+            public void removed(final ServiceReference<HazelcastInstance> ref, final HazelcastInstance hazelcastInstance) {
+                HazelcastAccess.setHazelcastInstance(null);
+            }
+        });
+        openTrackers();
+        
         HazelcastResourceDirectory directory = new HazelcastResourceDirectory();
         GlobalMessageDispatcherImpl globalDispatcher = new GlobalMessageDispatcherImpl();
         registerService(ResourceDirectory.class, directory, null);
