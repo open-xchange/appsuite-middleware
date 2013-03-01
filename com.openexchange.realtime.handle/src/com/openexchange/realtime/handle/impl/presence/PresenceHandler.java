@@ -313,10 +313,6 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
      * @throws OXException If stanza conversion fails or the status can't be changed
      */
     private void handlePresence(Presence stanza) throws OXException {
-        PresenceStatusService presenceStatusService = Services.getService(PresenceStatusService.class);
-        if (presenceStatusService == null) {
-            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(PresenceStatusService.class.getName());
-        }
         ResourceDirectory resourceDirectory = getResourceDirectory();
         Resource resource = new DefaultResource(stanza.getState());
         resourceDirectory.set(stanza.getFrom(), resource);
