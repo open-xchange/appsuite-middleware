@@ -58,18 +58,19 @@ import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Stanza;
 
-
 /**
- * {@link StanzaQueueServiceImpl}
- *
+ * {@link StanzaQueueServiceImpl} - Used by Channel dependend handlers after receiving and converting a Stanza from the Channel specific
+ * format to the internally used Stanza POJO. The StanzaQueueServiceImpl takes care of the Stanzas by sorting them into the proper Queue
+ * The designated StanzaHandler takes care of the Stanza by removing it from the Queue and handling it.
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class StanzaQueueServiceImpl implements StanzaQueueService {
-    
+
     private final BlockingQueue<Presence> presenceQueue = new ArrayBlockingQueue<Presence>(Integer.MAX_VALUE);
-    
+
     private final BlockingQueue<Message> messageQueue = new ArrayBlockingQueue<Message>(Integer.MAX_VALUE);
-    
+
     private final BlockingQueue<IQ> iqQueue = new ArrayBlockingQueue<IQ>(Integer.MAX_VALUE);
 
     @Override
@@ -77,7 +78,7 @@ public class StanzaQueueServiceImpl implements StanzaQueueService {
         if (stanza == null) {
             throw new IllegalArgumentException("Parameter 'stanza' must not be null!");
         }
-        
+
         if (stanza instanceof Presence) {
             return presenceQueue.offer((Presence) stanza);
         } else if (stanza instanceof Message) {
