@@ -37,6 +37,6 @@ Import-Package: com.openexchange.admin.console,
  com.openexchange.tools.sql,
  org.apache.commons.logging,
  org.osgi.framework,
- org.osgi.util.tracker;version="1.5.0"
+ org.osgi.util.tracker
 Require-Bundle: com.openexchange.admin,
  com.openexchange.admin.plugin.hosting

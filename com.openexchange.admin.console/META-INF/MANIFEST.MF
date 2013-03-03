@@ -13,7 +13,7 @@ Import-Package: com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.extensions,
  com.openexchange.tools.pipesnfilters,
  org.apache.commons.cli,
- org.apache.commons.logging;version="1.0.4",
+ org.apache.commons.logging,
  org.osgi.framework
 Export-Package: com.openexchange.admin.console,
  com.openexchange.admin.console.admincore,
