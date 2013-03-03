@@ -6,21 +6,21 @@ public class PreprocessorChainingTest extends TestCase {
 
 	class Pre1 extends AbstractPreprocessor {
 		@Override
-		public String process2(String payload) {
+		public String innerProcess(String payload) {
 			return payload + "A";
 		}
 	}
 
 	class Pre2 extends AbstractPreprocessor {
 		@Override
-		public String process2(String payload) {
+		public String innerProcess(String payload) {
 			return payload + "B";
 		}
 	}
 
 	class Pre3 extends AbstractPreprocessor {
 		@Override
-		public String process2(String payload) {
+		public String innerProcess(String payload) {
 			return payload + "C";
 		}
 	}

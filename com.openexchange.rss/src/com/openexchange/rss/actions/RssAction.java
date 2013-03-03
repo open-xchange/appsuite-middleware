@@ -68,9 +68,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.rss.FeedByDateSorter;
 import com.openexchange.rss.RssResult;
-import com.openexchange.rss.preprocessors.ImagePreprocessor;
 import com.openexchange.rss.preprocessors.RssPreprocessor;
-import com.openexchange.rss.preprocessors.WhitelistPreprocessor;
+import com.openexchange.rss.preprocessors.SanitizingPreprocessor;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.sun.syndication.feed.synd.SyndContent;
@@ -158,7 +157,7 @@ public class RssAction implements AJAXActionService {
 
                 results.add(result);
 
-                RssPreprocessor preprocessor = new ImagePreprocessor().chain(new WhitelistPreprocessor());
+                RssPreprocessor preprocessor = new SanitizingPreprocessor();
                 List<SyndContent> contents = entry.getContents();
                 boolean foundHtml = false;
                 for (SyndContent content : contents) {

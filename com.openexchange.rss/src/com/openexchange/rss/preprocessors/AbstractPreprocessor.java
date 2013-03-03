@@ -46,27 +46,36 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.rss.preprocessors;
 
+/**
+ * {@link AbstractPreprocessor} - The abstract pre-processor for RSS payload.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public abstract class AbstractPreprocessor implements RssPreprocessor {
 
-	private RssPreprocessor nextProcessor;
+    private RssPreprocessor nextProcessor;
 
-	@Override
-	public String process(String payload) {
-		payload = process2(payload);
-		if(nextProcessor != null) {
-            payload = nextProcessor.process(payload);
+    @Override
+    public String process(final String payload) {
+        String retval = innerProcess(payload);
+        if (nextProcessor != null) {
+            retval = nextProcessor.process(retval);
         }
-		return payload;
-	}
+        return retval;
+    }
 
-	@Override
-	public RssPreprocessor chain(RssPreprocessor nextInLine) {
-		nextProcessor = nextInLine;
-		return this;
-	}
+    @Override
+    public RssPreprocessor chain(final RssPreprocessor nextInLine) {
+        nextProcessor = nextInLine;
+        return this;
+    }
 
-	public abstract String process2(String payload);
+    /**
+     * Processes given payload.
+     */
+    protected abstract String innerProcess(String payload);
 
 }

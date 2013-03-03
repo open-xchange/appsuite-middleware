@@ -50,12 +50,16 @@ package com.openexchange.rss.preprocessors;
 
 import com.openexchange.rss.RssServices;
 
-public class ImagePreprocessor extends AbstractPreprocessor {
+/**
+ * {@link SanitizingPreprocessor} - Sanitizes HTML content.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class SanitizingPreprocessor extends AbstractPreprocessor {
 
 	@Override
-	public String process2(String payload) {
-		boolean[] isModified = {false};
-		return RssServices.getHtmlService().filterExternalImages(payload, isModified );
+	protected String innerProcess(String payload) {
+	    return RssServices.getHtmlService().sanitize(payload, null, true, null, null);
 	}
 
 }
