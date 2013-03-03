@@ -22,7 +22,7 @@ Import-Package: com.mysql.jdbc,
  com.openexchange.osgi,
  com.openexchange.server.impl,
  org.apache.commons.logging,
- org.osgi.framework;version="1.3.0"
+ org.osgi.framework
 Require-Bundle: com.openexchange.admin.plugin.hosting,
  com.openexchange.admin.rmi,
  com.openexchange.admin

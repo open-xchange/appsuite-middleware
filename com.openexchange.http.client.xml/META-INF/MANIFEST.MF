@@ -18,6 +18,6 @@ Import-Package: com.openexchange.exception,
  org.jdom2.input,
  org.joox,
  org.joox.selector,
- org.osgi.framework;version="1.3.0",
+ org.osgi.framework,
  org.w3c.dom,
  org.xml.sax
