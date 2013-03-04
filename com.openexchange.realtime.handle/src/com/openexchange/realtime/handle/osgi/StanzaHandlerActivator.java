@@ -5,6 +5,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.handle.StanzaQueueService;
+import com.openexchange.realtime.handle.impl.Services;
 import com.openexchange.realtime.handle.impl.StanzaQueueServiceImpl;
 import com.openexchange.realtime.handle.impl.iq.IQHandler;
 import com.openexchange.realtime.handle.impl.message.MessageHandler;
@@ -27,6 +28,7 @@ public class StanzaHandlerActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
         StanzaQueueServiceImpl queueService = new StanzaQueueServiceImpl();
         ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
         presenceFuture = threadPoolService.submit(ThreadPools.task(new PresenceHandler(queueService.getPresenceQueue())));
