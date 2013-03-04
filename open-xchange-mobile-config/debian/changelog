@@ -112,6 +112,18 @@ open-xchange-mobile-config (6.23.0-0) unstable; urgency=low
 
  -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Mon, 03 Sep 2012 13:46:40 +0200
 
+open-xchange-mobile-config (6.22.1-13) unstable; urgency=low
+
+  * Build for patch 2013-03-07
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Fri, 01 Mar 2013 15:23:38 +0100
+
+open-xchange-mobile-config (6.22.1-12) unstable; urgency=low
+
+  * Build for patch 2013-02-22
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Mon, 25 Feb 2013 16:55:10 +0100
+
 open-xchange-mobile-config (6.22.1-11) unstable; urgency=low
 
   * Build for patch 2013-02-13

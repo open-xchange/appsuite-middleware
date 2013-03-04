@@ -584,8 +584,12 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/requestwatcher.properties
 
 %changelog
+* Fri Mar 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-03-07
 * Wed Feb 27 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.2/7.0.2
+* Mon Feb 25 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-02-22
 * Tue Feb 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth release candidate for 7.0.1
 * Tue Feb 19 2013 Marcus Klein <marcus.klein@open-xchange.com>

@@ -62,6 +62,7 @@ do
     ox_update_permissions /opt/open-xchange/etc/$FILE root:open-xchange 640
     echo "done"
 done
+exit 0
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -85,8 +86,12 @@ done
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Fri Mar 01 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2013-03-07
 * Wed Feb 27 2013 Steffen Templin <marcus.klein@open-xchange.com>
 First release candidate for 6.22.2/7.0.2
+* Mon Feb 25 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2013-02-22
 * Tue Feb 19 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Fourth release candidate for 7.0.1
 * Tue Feb 19 2013 Steffen Templin <marcus.klein@open-xchange.com>
