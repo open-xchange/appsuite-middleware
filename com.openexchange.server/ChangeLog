@@ -1,3 +1,7 @@
+* 2013-03-04 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 24586: Enhanced error message for bad sieve filter position.
+
 * 2013-03-04 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 25180: Use 'allFoldersForAutoComplete' setting only for e-mail auto-complete   

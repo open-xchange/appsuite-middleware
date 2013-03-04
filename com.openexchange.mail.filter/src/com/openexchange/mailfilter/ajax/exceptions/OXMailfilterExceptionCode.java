@@ -44,9 +44,9 @@ public enum OXMailfilterExceptionCode implements OXExceptionCode {
      */
     SERVLET_REGISTRATION_FAILED("mail filter servlet cannot be registered: %s", CATEGORY_ERROR, 6),
     /**
-     * The position where the rule should be added is too big
+     * Bad rule position: %d
      */
-    POSITION_TOO_BIG("The position where the rule should be added is too big", CATEGORY_ERROR, 7),
+    BAD_POSITION("Bad rule position: %d", CATEGORY_ERROR, 7),
     /**
      * A rule with the id %1$s does not exist for user %2$s in context %3$s
      */
