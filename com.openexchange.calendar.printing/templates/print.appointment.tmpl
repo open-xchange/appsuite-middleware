@@ -1,0 +1,99 @@
+BEGIN
+requires: calendar
+END
+<html>
+	<head>
+		<title>${data.title}</title>
+		<style>
+		${templates.include( "print.appointment.css" )}
+		</style>
+	</head>
+	<body>
+		<div class="calendar-detail">
+		    <div class="date">
+		        <div class="interval">
+		            ${helper.calendar.formatters.interval}
+		        </div>
+		        <div class="day">
+		            ${helper.calendar.formatters.dateSpec}
+		        </div>
+		    </div>
+		    <div class="title clear-title">
+		        ${(data.title!"")?html}
+		    </div>
+		    <div class="location">
+		        ${(data.location!"")?html}
+		    </div>
+		    <div class="note">
+		        ${helper.calendar.labels.noteAsHTML}
+		    </div>
+		    <#if (helper.calendar.enhanced.hasParticipants())>
+		    <div class="participants">
+		    	<div class="label">
+		            ${helper.calendar.labels.participantsLabel}
+		        </div>
+		    	<#if (helper.calendar.enhanced.hasAccepted())>
+		        <div class="label2">
+		            ${helper.calendar.labels.acceptedLabel}
+		        </div>
+		        <div class="participant-list">
+		            <#list helper.calendar.enhanced.acceptedParticipants as participant>
+		            <span class="resource">${participant.displayName}</span>
+		            </#list>
+		        </div>
+		        <div class="participants-clear"></div>
+		        </#if>
+
+		        <#if (helper.calendar.enhanced.hasTentative())>
+		        <div class="label2">
+		            ${helper.calendar.labels.tentativeLabel}
+		        </div>
+		        <div class="participant-list">
+		            <#list helper.calendar.enhanced.tentativeParticipants as participant>
+		            <span class="resource">${participant.displayName}</span>
+		            </#list>
+		        </div>
+		        <div class="participants-clear"></div>
+		        </#if>
+
+		        <#if (helper.calendar.enhanced.hasDeclined())>
+		        <div class="label2">
+		            ${helper.calendar.labels.declinedLabel}
+		        </div>
+		        <div class="participant-list">
+		            <#list helper.calendar.enhanced.declinedParticipants as participant>
+		            <span class="resource">${participant.displayName}</span>
+		            </#list>
+		        </div>
+		        <div class="participants-clear"></div>
+		        </#if>
+
+		        <#if (helper.calendar.enhanced.hasUndecided())>
+		        <div class="label2">
+		            ${helper.calendar.labels.undecidedLabel}
+		        </div>
+		        <div class="participant-list">
+		            <#list helper.calendar.enhanced.undecidedParticipants as participant>
+		            <span class="resource">${participant.displayName}</span>
+		            </#list>
+		        </div>
+		        <div class="participants-clear"></div>
+		        </#if>
+		    </div>
+		    </#if>
+		    <#if (helper.calendar.enhanced.hasResources())>
+		    <div class="participants">
+		        <div class="label">
+		            ${helper.calendar.labels.resourcesLabel}
+		        </div>
+		        <div class="participant-list">
+		            <#list helper.calendar.enhanced.resources as participant>
+		            <span class="resource">${participant.displayName}</span>
+		            </#list>
+		        </div>
+		        <div class="participants-clear"></div>
+		    </div>
+		    </#if>
+		</div>
+	</body>
+</html>

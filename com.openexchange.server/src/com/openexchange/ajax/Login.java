@@ -384,7 +384,6 @@ public class Login extends AJAXServlet {
                     session.setHash(hash);
                 }
                 writeSecretCookie(resp, session, hash, req.isSecure(), req.getServerName(), conf);
-
                 resp.sendRedirect(LoginTools.generateRedirectURL(
                     req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
                     req.getParameter("store"),
