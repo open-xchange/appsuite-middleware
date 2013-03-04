@@ -152,6 +152,10 @@ public class MultipleAdapter implements MultipleHandler {
                 throw (OXException) cause;
             }
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (null != request) {
+                request.cleanUploads();
+            }
         }
         result.set(requestResult);
         return requestResult.getResultObject();

@@ -202,6 +202,8 @@ public class DefaultDispatcher implements Dispatcher {
                 throw (OXException) cause;
             }
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            modifiedRequestData.cleanUploads();
         }
         /*
          * Iterate customizers in reverse oder for request data and result pair
