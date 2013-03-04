@@ -64,6 +64,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1038,6 +1039,9 @@ public final class MimeMessageUtility {
     private static final Pattern SPLITS = Pattern.compile(" *, *");
 
     private static List<String> splitAddrs(final String addrs) {
+        if (isEmpty(addrs)) {
+            return Collections.<String> emptyList();
+        }
         final String[] sa = SPLITS.split(addrs, 0);
         final List<String> ret = new ArrayList<String>(sa.length);
         final StringBuilder tmp = new StringBuilder(24);
@@ -1088,6 +1092,9 @@ public final class MimeMessageUtility {
         } catch (final AddressException e) {
             // Retry with single parse
             final List<String> sAddrs = splitAddrs(al);
+            if (null == sAddrs || sAddrs.isEmpty()) {
+                return new InternetAddress[0];
+            }
             try {
                 final List<InternetAddress> addrList = new ArrayList<InternetAddress>(sAddrs.size());
                 for (final String sAddr : sAddrs) {
