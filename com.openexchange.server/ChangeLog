@@ -1,6 +1,7 @@
 * 2013-03-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 25186: Check for empty string when parsing addresses
+ - Fix for bug 25141: Added central clean-up for possibly uploaded files
 
 * 2013-03-04 - marcus.klein@open-xchange.com
 
