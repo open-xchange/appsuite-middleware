@@ -1,3 +1,7 @@
+* 2013-03-04 - marcus.klein@open-xchange.com
+
+ - Fix for bug 25168: Fix for bug 25168: Do not encode uiWebPath parameter provided in request. This breaks absolute Location headers
+
 * 2013-02-20 - marcus.klein@open-xchange.com
 
  - Fix for bug 24694: Setting file permissions for configuration files with sensitive content without read permission for all users in
