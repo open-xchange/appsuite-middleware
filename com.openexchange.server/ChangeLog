@@ -1,3 +1,7 @@
+* 2013-03-04 - marcus.klein@open-xchange.com
+
+ - Fix for bug 25168: Fix for bug 25168: Do not encode uiWebPath parameter provided in request. This breaks absolute Location headers
+
 * 2013-03-04 - martin.herfurth@open-xchange.com
 
  - Fix for bug 24586: Enhanced error message for bad sieve filter position.
