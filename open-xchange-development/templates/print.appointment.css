@@ -93,6 +93,12 @@ em {
     clear: both;
     padding: 1em 0 0.25em 0em;
     margin-bottom: 0.5em;
+    margin-left: 1em;
+    margin-right: 0.5em;
+}
+
+.calendar-detail .label2:first-child {
+    margin-left: 0;
 }
 
 
@@ -193,6 +199,6 @@ em {
 .calendar-action  .status.declined { color: #913F3F; } /* red */
 .calendar-action  .status.tentative { color: #c80; } /* orange */
 
-.calendar-detail .resource {
-    margin-left: 2em
+.calendar-detail .declined {
+    text-decoration: line-through;
 }

@@ -8,7 +8,7 @@ END
 		${templates.include( "print.appointment.css" )}
 		</style>
 	</head>
-	<body>
+	<body onload="window.print();">
 		<div class="calendar-detail">
 		    <div class="date">
 		        <div class="interval">
@@ -32,68 +32,53 @@ END
 		    	<div class="label">
 		            ${helper.calendar.labels.participantsLabel}
 		        </div>
-		    	<#if (helper.calendar.enhanced.hasAccepted())>
-		        <div class="label2">
-		            ${helper.calendar.labels.acceptedLabel}
-		        </div>
-		        <div class="participant-list">
-		            <#list helper.calendar.enhanced.acceptedParticipants as participant>
-		            <span class="resource">${participant.displayName}</span>
+		        <div>
+			    	<#if (helper.calendar.enhanced.hasAccepted())>
+			        <span class="label2">
+			            ${helper.calendar.labels.acceptedLabel}
+			        </span>
+		            <#list helper.calendar.enhanced.acceptedParticipants as p>
+		            <span class="resource">${p.displayName}<#if p_has_next>, </#if></span>
 		            </#list>
-		        </div>
-		        <div class="participants-clear"></div>
-		        </#if>
+			        </#if>
 
-		        <#if (helper.calendar.enhanced.hasTentative())>
-		        <div class="label2">
-		            ${helper.calendar.labels.tentativeLabel}
-		        </div>
-		        <div class="participant-list">
-		            <#list helper.calendar.enhanced.tentativeParticipants as participant>
-		            <span class="resource">${participant.displayName}</span>
+			        <#if (helper.calendar.enhanced.hasTentative())>
+			        <span class="label2">
+			            ${helper.calendar.labels.tentativeLabel}
+			        </span>
+		            <#list helper.calendar.enhanced.tentativeParticipants as p>
+		            <span class="resource">${p.displayName}<#if p_has_next>, </#if></span>
 		            </#list>
-		        </div>
-		        <div class="participants-clear"></div>
-		        </#if>
+			        </#if>
 
-		        <#if (helper.calendar.enhanced.hasDeclined())>
-		        <div class="label2">
-		            ${helper.calendar.labels.declinedLabel}
-		        </div>
-		        <div class="participant-list">
-		            <#list helper.calendar.enhanced.declinedParticipants as participant>
-		            <span class="resource">${participant.displayName}</span>
+			        <#if (helper.calendar.enhanced.hasUndecided())>
+			        <span class="label2">
+			            ${helper.calendar.labels.undecidedLabel}
+			        </span>
+		            <#list helper.calendar.enhanced.undecidedParticipants as p>
+		            <span class="resource">${p.displayName}<#if p_has_next>, </#if></span>
 		            </#list>
-		        </div>
-		        <div class="participants-clear"></div>
-		        </#if>
+			        </#if>
 
-		        <#if (helper.calendar.enhanced.hasUndecided())>
-		        <div class="label2">
-		            ${helper.calendar.labels.undecidedLabel}
-		        </div>
-		        <div class="participant-list">
-		            <#list helper.calendar.enhanced.undecidedParticipants as participant>
-		            <span class="resource">${participant.displayName}</span>
+			        <#if (helper.calendar.enhanced.hasDeclined())>
+			        <span class="label2">
+			            ${helper.calendar.labels.declinedLabel}
+			        </span>
+		            <#list helper.calendar.enhanced.declinedParticipants as p>
+		            <span class="resource declined">${p.displayName}<#if p_has_next>, </#if></span>
 		            </#list>
-		        </div>
-		        <div class="participants-clear"></div>
-		        </#if>
+			        </#if>
+			    </div>
 		    </div>
 		    </#if>
 		    <#if (helper.calendar.enhanced.hasResources())>
-		    <div class="participants">
-		        <div class="label">
-		            ${helper.calendar.labels.resourcesLabel}
-		        </div>
-		        <div class="participant-list">
-		            <#list helper.calendar.enhanced.resources as participant>
-		            <span class="resource">${participant.displayName}</span>
-		            </#list>
-		        </div>
-		        <div class="participants-clear"></div>
-		    </div>
-		    </#if>
+	        <span class="label2">
+	            ${helper.calendar.labels.resourcesLabel}
+	        </span>
+            <#list helper.calendar.enhanced.resources as p>
+            <span class="resource">${p.displayName}<#if p_has_next>, </#if></span>
+            </#list>
+	    </#if>
 		</div>
 	</body>
 </html>

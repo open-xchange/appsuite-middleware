@@ -203,7 +203,7 @@ public class EnhancedAppointment {
         String dname = (String) confirmation.get("display_name");
         String mail = (String) confirmation.get("mail");
         
-        String displayName = (dname != null) ? dname + ((mail != null) ? "&nbsp;&lt;" + mail + "&gt;" : "" ) : mail;
+        String displayName = (dname != null) ? dname : mail;
         
         return new SimpleParticipant()
             .setDisplayName(displayName);
