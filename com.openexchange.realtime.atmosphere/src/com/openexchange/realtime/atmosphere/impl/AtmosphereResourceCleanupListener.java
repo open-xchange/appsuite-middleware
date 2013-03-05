@@ -78,12 +78,16 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
 
     @Override
     public void onSuspend(AtmosphereResourceEvent event) {
-        // nothing to do, yet
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Suspending: "+event.broadcaster().getID());
+        }
     }
 
     @Override
     public void onResume(AtmosphereResourceEvent event) {
-     // nothing to do, yet
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Resuming: "+event.broadcaster().getID());
+        }
     }
 
     @Override
@@ -103,17 +107,23 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
 
     @Override
     public void onBroadcast(AtmosphereResourceEvent event) {
-     // nothing to do, yet
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Broadcasting: "+event.broadcaster().getID());
+        }
     }
 
     @Override
     public void onThrowable(AtmosphereResourceEvent event) {
-     // nothing to do, yet
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Throwing: "+event.broadcaster().getID());
+        }
     }
 
     @Override
-    public void onPreSuspend(AtmosphereResourceEvent arg0) {
-     // nothing to do, yet
+    public void onPreSuspend(AtmosphereResourceEvent event) {
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Pre Suspending: "+event.broadcaster().getID());
+        }
     }
 
 }
