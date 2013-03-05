@@ -76,13 +76,12 @@ public class XMPPPresence extends XMPPStanza {
 
     private int priority = -129;
 
-    public XMPPPresence(Type type, ServerSession session) {
-        super(session);
+    public XMPPPresence(Type type) {
         this.type = type;
     }
 
-    public XMPPPresence(ServerSession session) {
-        this(Type.none, session);
+    public XMPPPresence() {
+        this(Type.none);
     }
 
     public Type getType() {

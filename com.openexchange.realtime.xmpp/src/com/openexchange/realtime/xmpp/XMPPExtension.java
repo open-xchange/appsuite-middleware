@@ -87,7 +87,7 @@ public interface XMPPExtension {
      * @param session
      * @throws OXException
      */
-    public void handleOutgoing(Stanza stanza, XMPPDelivery delivery, ServerSession session) throws OXException;
+    public void handleOutgoing(Stanza stanza, XMPPDelivery delivery) throws OXException;
 
     /**
      * Handles a given XMPP Stanza 
@@ -96,7 +96,7 @@ public interface XMPPExtension {
      * @param session
      * @throws OXException
      */
-    public void handleIncoming(XMPPStanza xmpp, ServerSession session) throws OXException;
+    public void handleIncoming(XMPPStanza xmpp) throws OXException;
     
     /**
      * Returns a Set of components served by this Extension. 

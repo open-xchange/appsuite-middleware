@@ -106,7 +106,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         openTrackers();
         
         HazelcastResourceDirectory directory = new HazelcastResourceDirectory();
-        GlobalMessageDispatcherImpl globalDispatcher = new GlobalMessageDispatcherImpl();
+        GlobalMessageDispatcherImpl globalDispatcher = new GlobalMessageDispatcherImpl(directory);
         registerService(ResourceDirectory.class, directory, null);
         registerService(MessageDispatcher.class, globalDispatcher);
     }

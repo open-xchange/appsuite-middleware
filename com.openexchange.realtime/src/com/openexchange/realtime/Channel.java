@@ -98,10 +98,22 @@ public interface Channel {
 	public boolean isConnected(ID id) throws OXException;
 
 	/**
+	 * Have the channel try to create a recipient. If the channel can initiate a connection to the recipient, this method should do so and return true, if
+	 * it can not initiate a connection to the recipient it should return false.
+	 * 
+	 * @param id The id to try to connect to
+	 * @return true if the connection could be established, false otherwise
+	 * @throws OXException
+	 */
+	public boolean conjure(ID id) throws OXException;
+	
+	/**
 	 * Sends specified stanza.
 	 *
 	 * @param stanza The stanza to send
 	 * @throws OXException If send operation fails for any reason
 	 */
 	public void send(Stanza stanza) throws OXException;
+	
+	
 }

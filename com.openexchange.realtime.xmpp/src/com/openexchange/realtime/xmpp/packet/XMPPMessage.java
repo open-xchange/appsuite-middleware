@@ -55,7 +55,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
-import com.openexchange.realtime.payload.transformer.PayloadTreeTransformer;
 import com.openexchange.realtime.xmpp.transformer.XMPPPayloadTreeTransformer;
 import com.openexchange.tools.session.ServerSession;
 
@@ -78,14 +77,12 @@ public class XMPPMessage extends XMPPStanza {
 
     private String thread;
 
-    public XMPPMessage(Type type, ServerSession session) {
-        super(session);
+    public XMPPMessage(Type type) {
         this.type = type;
     }
 
-    public XMPPMessage(Match xml, ServerSession session) throws OXException {
-        super(session);
-        parseXml(xml, session);
+    public XMPPMessage(Match xml) throws OXException {
+        parseXml(xml);
     }
 
     public JID getFrom() {
@@ -133,9 +130,9 @@ public class XMPPMessage extends XMPPStanza {
             document.append($("thread", thread));
         }
         if (payloads != null) {
-            PayloadTreeTransformer transformer = new XMPPPayloadTreeTransformer();
+            XMPPPayloadTreeTransformer transformer = new XMPPPayloadTreeTransformer();
             for (PayloadTree payload : payloads) {
-                PayloadTree transformedTree = transformer.incoming(payload, session);
+                PayloadTree transformedTree = transformer.incoming(payload);
                 PayloadTreeNode root = transformedTree.getRoot();
                 document.append((String) root.getData());
             }
@@ -144,7 +141,7 @@ public class XMPPMessage extends XMPPStanza {
         return document.toString();
     }
 
-    private void parseXml(Match xml, ServerSession session) throws OXException {
+    private void parseXml(Match xml) throws OXException {
         setFrom(new JID(xml.attr("from")));
         setTo(new JID(xml.attr("to")));
         setType(Type.valueOf(xml.attr("type")));
@@ -156,12 +153,12 @@ public class XMPPMessage extends XMPPStanza {
 
         Match body = xml.find("body");
         if (body != null) {
-            PayloadTreeTransformer transformer = new XMPPPayloadTreeTransformer();
+            XMPPPayloadTreeTransformer transformer = new XMPPPayloadTreeTransformer();
             PayloadTree payloadTree = transformer.outgoing(new PayloadTree(new PayloadTreeNode(new PayloadElement(
                 body.content(),
                 "xml",
                 null,
-                "body"))), session);
+                "body"))));
             payloads.add(payloadTree);
         }
     }

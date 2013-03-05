@@ -116,4 +116,9 @@ public class RTAtmosphereChannel implements Channel {
     public void send(Stanza stanza) throws OXException {
         handler.handleOutgoing(stanza);
     }
+
+    @Override
+    public boolean conjure(ID id) throws OXException {
+        return false;
+    }
 }

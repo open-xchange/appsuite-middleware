@@ -72,4 +72,9 @@ public interface MessageDispatcher {
      * @throws OXException If send operation fails for any reason
      */
     public Map<ID, OXException> send(Stanza stanza, IDMap<Resource> recipients) throws OXException;
+    
+    /**
+     * Delivers a stanza using the resource directory to resolve the recipients
+     */
+    public Map<ID, OXException> send(Stanza stanza) throws OXException;
 }

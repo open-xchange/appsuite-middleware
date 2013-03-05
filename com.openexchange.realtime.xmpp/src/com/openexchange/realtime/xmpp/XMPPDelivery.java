@@ -60,6 +60,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface XMPPDelivery {
 
-    public void deliver(XMPPStanza stanza, ServerSession session) throws OXException;
+    public void deliver(XMPPStanza stanza) throws OXException;
 
 }

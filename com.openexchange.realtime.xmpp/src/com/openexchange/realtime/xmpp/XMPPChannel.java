@@ -83,27 +83,27 @@ public class XMPPChannel implements Channel {
     }
 
     @Override
-    public boolean canHandle(Set<ElementPath> elementPaths, ID recipient, ServerSession session) {
+    public boolean canHandle(Set<ElementPath> elementPaths, ID recipient) {
         throw new UnsupportedOperationException("Not implemented yet!");
     }
 
     @Override
-    public boolean isConnected(ID id, ServerSession session) throws OXException {
+    public boolean isConnected(ID id) throws OXException {
         return connections.containsKey(id);
     }
 
     @Override
-    public void send(Stanza stanza, ServerSession session) throws OXException {
+    public void send(Stanza stanza) throws OXException {
         XMPPDelivery recipient = connections.get(stanza.getTo());
         for (XMPPExtension extension : extensions) {
             if (extension.canHandle(stanza)) {
                 if (recipient == null) {
                     Set<Entry<ID, XMPPDelivery>> equivalents = connections.getEquivalents(stanza.getTo());
                     for (Entry<ID, XMPPDelivery> entry : equivalents) {
-                        extension.handleOutgoing(stanza, entry.getValue(), session);
+                        extension.handleOutgoing(stanza, entry.getValue());
                     }
                 } else {
-                    extension.handleOutgoing(stanza, recipient, session);
+                    extension.handleOutgoing(stanza, recipient);
                 }
             }
         }
@@ -124,5 +124,11 @@ public class XMPPChannel implements Channel {
     public void removeDelivery(ID id) {
         connections.remove(id);
     }
+
+    @Override
+    public boolean conjure(ID id) throws OXException {
+        return false;
+    }
+
 
 }

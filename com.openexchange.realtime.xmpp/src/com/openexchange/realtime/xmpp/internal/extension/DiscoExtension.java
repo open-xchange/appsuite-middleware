@@ -80,11 +80,11 @@ public class DiscoExtension implements XMPPExtension {
     }
 
     @Override
-    public void handleOutgoing(Stanza stanza, XMPPDelivery delivery, ServerSession session) throws OXException {
+    public void handleOutgoing(Stanza stanza, XMPPDelivery delivery) throws OXException {
     }
 
     @Override
-    public void handleIncoming(XMPPStanza xmpp, ServerSession session) throws OXException {
+    public void handleIncoming(XMPPStanza xmpp) throws OXException {
     }
 
     @Override

@@ -56,7 +56,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
-import com.openexchange.realtime.payload.transformer.PayloadTreeTransformer;
 import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -66,48 +65,46 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class XMPPPayloadTreeTransformer implements PayloadTreeTransformer {
+public class XMPPPayloadTreeTransformer {
 
     public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
 
     public static Map<ElementPath, XMPPPayloadElementTransformer> transformers = new HashMap<ElementPath, XMPPPayloadElementTransformer>();
 
-    @Override
-    public PayloadTree incoming(PayloadTree payloadTree, ServerSession session) throws OXException {
+    public PayloadTree incoming(PayloadTree payloadTree) throws OXException {
         PayloadTreeNode root = payloadTree.getRoot();
-        return new PayloadTree(incoming(session, root));
+        return new PayloadTree(incoming(root));
     }
 
-    private PayloadTreeNode incoming(ServerSession session, PayloadTreeNode root) throws OXException {
-        PayloadElement converted = transformers.get(root.getElementPath()).incoming(root.getPayloadElement(), session);
+    private PayloadTreeNode incoming(PayloadTreeNode root) throws OXException {
+        PayloadElement converted = transformers.get(root.getElementPath()).incoming(root.getPayloadElement());
         PayloadElement transformedElement = new PayloadElement(converted);
 
         PayloadTreeNode retval = new PayloadTreeNode(transformedElement);
 
         if (root.hasChildren()) {
             for (PayloadTreeNode child : root.getChildren()) {
-                retval.addChild(incoming(session, child));
+                retval.addChild(incoming(child));
             }
         }
 
         return retval;
     }
 
-    @Override
-    public PayloadTree outgoing(PayloadTree payloadTree, ServerSession session) throws OXException {
+    public PayloadTree outgoing(PayloadTree payloadTree) throws OXException {
         PayloadTreeNode root = payloadTree.getRoot();
-        return new PayloadTree(outgoing(session, root));
+        return new PayloadTree(outgoing(root));
     }
 
-    private PayloadTreeNode outgoing(ServerSession session, PayloadTreeNode root) throws OXException {
-        PayloadElement converted = transformers.get(root.getElementPath()).outgoing(root.getPayloadElement(), session);
+    private PayloadTreeNode outgoing(PayloadTreeNode root) throws OXException {
+        PayloadElement converted = transformers.get(root.getElementPath()).outgoing(root.getPayloadElement());
         PayloadElement transformedElement = new PayloadElement(converted);
 
         PayloadTreeNode retval = new PayloadTreeNode(transformedElement);
 
         if (root.hasChildren()) {
             for (PayloadTreeNode child : root.getChildren()) {
-                retval.addChild(outgoing(session, child));
+                retval.addChild(outgoing(child));
             }
         }
 
