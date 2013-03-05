@@ -73,8 +73,9 @@ public class IDTest {
 
     @Test
     public void testIDString() {
-        ID newID = new ID("ox://user@context/resource");
+        ID newID = new ID("ox:component://user@context/resource");
         assertEquals("ox",newID.getProtocol());
+        assertEquals("component", newID.getComponent());
         assertEquals("user",newID.getUser());
         assertEquals("context",newID.getContext());
         assertEquals("resource",newID.getResource());

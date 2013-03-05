@@ -510,7 +510,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         } else {
             resource = resource + serverSession.getSessionID();
         }
-        return new ID(RTAtmosphereChannel.PROTOCOL, userLogin, contextName, resource);
+        return new ID(RTAtmosphereChannel.PROTOCOL, null, userLogin, contextName, resource);
     }
 
     /**

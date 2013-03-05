@@ -24,12 +24,14 @@ public class ID implements Serializable {
     private String user;
     private String context;
     private String resource;
+    private String component;
+    private boolean internal;
 
     /**
      * Pattern to match IDs consisting of protocol, user, context and resource
      * e.g. xmpp://user@context/notebook
      * */
-    private static final Pattern PATTERN = Pattern.compile("(?:(\\w+)://)?([^@]+)@([^/]+)/?(.*)");
+    private static final Pattern PATTERN = Pattern.compile("(?:(\\w+?)(:\\w+)?://)?([^@]+)@([^/]+)/?(.*)");
 
     /**
      * Initializes a new {@link ID} by a String with the syntax "xmpp://user@context/resource".
@@ -42,20 +44,22 @@ public class ID implements Serializable {
             throw new IllegalArgumentException("Could not parse id: " + id + ". User and context are obligatory for ID creation.");
         }
         protocol = matcher.group(1);
-        user = matcher.group(2);
-        context = matcher.group(3);
-        resource = matcher.group(4);
+        component = matcher.group(2);
+        user = matcher.group(3);
+        context = matcher.group(4);
+        resource = matcher.group(5);
 
         sanitize();
         validate();
     }
 
-    public ID(final String protocol, final String user, final String context, final String resource) {
+    public ID(final String protocol, final String component, final String user, final String context, final String resource) {
         super();
         this.protocol = protocol;
         this.user = user;
         this.context = context;
         this.resource = resource;
+        this.component = component;
         sanitize();
         validate();
     }
@@ -71,6 +75,14 @@ public class ID implements Serializable {
 
         if (resource != null && isEmpty(resource)) {
             resource = null;
+        }
+        
+        if (component != null) {
+            if (isEmpty(component)) {
+                component = null;
+            } else {
+                component = component.substring(1);
+            }
         }
 
     }
@@ -137,6 +149,14 @@ public class ID implements Serializable {
         this.resource = resource;
         validate();
     }
+    
+    public String getComponent() {
+        return component;
+    }
+    
+    public void setComponent(String component) {
+        this.component = component;
+    }
 
     @Override
     public int hashCode() {
@@ -146,6 +166,7 @@ public class ID implements Serializable {
         result = prime * result + ((protocol == null) ? 0 : protocol.hashCode());
         result = prime * result + ((resource == null) ? 0 : resource.hashCode());
         result = prime * result + ((user == null) ? 0 : user.hashCode());
+        result = prime * result + ((component == null) ? 0 : component.hashCode());
         return result;
     }
 
@@ -186,14 +207,30 @@ public class ID implements Serializable {
         } else if (!user.equals(other.user)) {
             return false;
         }
+        if (component == null) {
+            if (other.component != null) {
+                return false;
+            }
+        } else if (!component.equals(other.component)) {
+            return false;
+        }
         return true;
     }
 
     @Override
     public String toString() {
         final StringBuilder b = new StringBuilder(32);
+        boolean needSep = false;
         if (protocol != null) {
-            b.append(protocol).append("://");
+            b.append(protocol);
+            needSep = true;
+        }
+        if (component != null) {
+            b.append(component).append(":");
+            needSep = true;
+        }
+        if(needSep) {
+            b.append("://");
         }
         b.append(user).append('@').append(context);
         if (resource != null) {
@@ -208,7 +245,7 @@ public class ID implements Serializable {
      * @return
      */
     public ID toGeneralForm() {
-        return new ID(null, user, context, null);
+        return new ID(null, component, user, context, null);
     }
 
     /**
@@ -219,5 +256,25 @@ public class ID implements Serializable {
      */
     public boolean isGeneralForm() {
         return null == protocol && null == resource;
+    }
+    
+    
+    /**
+     * Sets the whether this ID can be reached in this cluster
+     *
+     * @param internal The internal to set
+     */
+    public void setInternal(boolean internal) {
+        this.internal = internal;
+    }
+    
+    
+    /**
+     * Denotes whether this ID can be reached inside this cluster or external to it.
+     *
+     * @return The internal
+     */
+    public boolean isInternal() {
+        return internal;
     }
 }
