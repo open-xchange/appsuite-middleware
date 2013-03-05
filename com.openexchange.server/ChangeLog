@@ -1,3 +1,7 @@
+* 2013-03-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25206: Corrected check for empty distribution list   
+
 * 2013-03-04 - marcus.klein@open-xchange.com
 
  - Fix for bug 25168: Fix for bug 25168: Do not encode uiWebPath parameter provided in request. This breaks absolute Location headers

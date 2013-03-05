@@ -448,7 +448,7 @@ public class LdapContactStorage extends DefaultContactStorage {
         }
         if (contact.getMarkAsDistribtuionlist()) {
             resolveDistList(executor, idResolver, contact);
-            if (config.isExcludeEmptyLists() && null == contact.getDistributionList() || 0 == contact.getDistributionList().length) {
+            if (config.isExcludeEmptyLists() && (null == contact.getDistributionList() || 0 == contact.getDistributionList().length)) {
                 LOG.debug("Skipping empty distribution list '" + result + "'.");
                 return null;
             }
