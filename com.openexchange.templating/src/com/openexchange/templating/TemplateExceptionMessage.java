@@ -85,7 +85,7 @@ public class TemplateExceptionMessage implements LocalizableStrings {
 
     public static final String AccessDenied_MSG = "File access denied.";
 
-	public static final String TemplateNotWhitelisted_HELP = "This template was not whitelisted in 'com.openexchange.templating.templateWhitelist'.";
+    public static final String TemplateNotWhitelisted_HELP = "This template was not whitelisted in 'com.openexchange.templating.templateWhitelist'.";
 
-	public static final String TemplateNotWhitelisted_MSG = "This template was not whitelisted,";
+    public static final String TemplateNotWhitelisted_MSG = "This template was not whitelisted,";
 }

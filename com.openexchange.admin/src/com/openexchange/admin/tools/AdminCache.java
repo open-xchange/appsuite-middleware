@@ -621,7 +621,8 @@ public class AdminCache {
     public String encryptPassword(final PasswordMechObject user) throws StorageException, NoSuchAlgorithmException, UnsupportedEncodingException {
         String passwordMech = user.getPasswordMech();
         if (isEmpty(passwordMech) || "null".equals(toLowerCase(passwordMech))) {
-            final String pwmech = "{" + getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA") + "}";
+            String pwmech = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
+            pwmech = "{" + pwmech + "}";
             if (pwmech.equalsIgnoreCase(PasswordMechObject.CRYPT_MECH)) {
                 passwordMech = PasswordMechObject.CRYPT_MECH;
             } else if (pwmech.equalsIgnoreCase(PasswordMechObject.SHA_MECH)) {
@@ -632,8 +633,8 @@ public class AdminCache {
                 log.warn("WARNING: unknown password mechanism " + pwmech + " using SHA");
                 passwordMech = PasswordMechObject.SHA_MECH;
             }
+            user.setPasswordMech(passwordMech);
         }
-        user.setPasswordMech(passwordMech);
         final String passwd;
         if (PasswordMechObject.CRYPT_MECH.equals(passwordMech)) {
             passwd = UnixCrypt.crypt(user.getPassword());

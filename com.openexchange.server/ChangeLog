@@ -84,14 +84,11 @@
 
  - Fix for bug 23962: Adjusted server response handling
 
-<<<<<<< HEAD
 * 2013-02-12 - marcus.klein@open-xchange.com
 
  - Story 43545331: Added a hidden configuration property to make the authId parameter optional for the form login.
  - Story 43561133: Added an option to CLT listfilestore to not load the file store usage, which is an expensive operation.
 
-=======
->>>>>>> origin/release-7.0.1
 * 2013-02-12 - marc.arens@open-xchange.com
 
  - Fix for bug 24914: Exception at osgi log regarding push.mq

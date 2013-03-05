@@ -86,7 +86,7 @@ public class Streams {
         }
         final int buflen = 2048;
         final char[] cbuf = new char[buflen];
-        final StringAllocator builder = new StringAllocator(8192);
+        final StringBuilder builder = new StringBuilder(8192);
         for (int read = reader.read(cbuf, 0, buflen); read > 0; read = reader.read(cbuf, 0, buflen)) {
             builder.append(cbuf, 0, read);
         }
