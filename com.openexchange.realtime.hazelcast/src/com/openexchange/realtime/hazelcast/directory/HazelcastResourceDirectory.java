@@ -55,15 +55,18 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.apache.commons.logging.Log;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MultiMap;
 import com.hazelcast.core.Transaction;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.directory.*;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.util.IDMap;
 
 /**
@@ -72,6 +75,8 @@ import com.openexchange.realtime.util.IDMap;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class HazelcastResourceDirectory extends DefaultResourceDirectory {
+    
+    private static final Log LOG = LogFactory.getLog(HazelcastResourceDirectory.class);
 
     private static final String ID_MAP = "rtIDMapping-0";
 
@@ -97,12 +102,17 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
             Resource resource = allResources.get(id);
             if (resource != null) {
                 foundResources.put(id, resource);
+            } else {
+                resource = conjureResource(id);
+                if (resource != null) {
+                    foundResources.put(id, resource);
+                }
             }
         }
 
         return foundResources;
     }
-
+    
     @Override
     public IDMap<Resource> get(Collection<ID> ids) throws OXException {
         IDMap<Resource> foundResources = new IDMap<Resource>();
@@ -122,6 +132,13 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
             if (resources != null) {
                 for (Entry<ID, Resource> entry : resources.entrySet()) {
                     foundResources.put(entry.getKey(), entry.getValue());
+                }
+                resourceIds.removeAll(resources.keySet());
+                for (ID id : resourceIds) {
+                    Resource resource = conjureResource(id);
+                    if (resource != null) {
+                        foundResources.put(id, resource);
+                    }
                 }
             }
         }
@@ -259,6 +276,17 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
 
         return previous;
     }
+    
+    private Resource conjureResource(ID id) throws OXException {
+        if (conjure(id)) {
+            Resource res = new DefaultResource();
+            set(id, res);
+            id.on("dispose", CLEAN_UP);
+            return res;
+        } else {
+            return null;
+        }
+    }
 
     protected static MultiMap<ID, ID> getIDMapping() throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
@@ -279,5 +307,21 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
         return hazelcast.getCluster().getLocalMember();
     }
+    
+    private IDEventHandler CLEAN_UP = new IDEventHandler() {
+        
+        @Override
+        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
+            if (source != HazelcastResourceDirectory.this) {
+                try {
+                    removeWithoutDisposeEvent(id);
+                } catch (OXException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        }
+        
+        
+    };
 
 }

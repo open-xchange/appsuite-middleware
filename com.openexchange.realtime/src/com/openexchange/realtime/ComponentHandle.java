@@ -49,72 +49,17 @@
 
 package com.openexchange.realtime;
 
-import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.util.ElementPath;
+
 
 /**
- * {@link Channel} - Represents a communication channel for transmitting messages.
+ * {@link ComponentHandle}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface Channel {
+public interface ComponentHandle {
 
-	/**
-	 * Gets the protocol identifying this channel.
-	 *
-	 * @return The protocol name
-	 */
-	public String getProtocol();
+    void process(Stanza stanza) throws OXException;
 
-	/**
-	 * Checks if this channel can dispatch a specific Stanza class to a given recipient.
-	 *
-	 * @param elementPaths The elementPaths of the payloads contained in the Stanza that has to be handled by this Channel.
-	 * @param recipient The recipient
-	 * @return <code>true</code> if this channel can dispatch messages to given recipient; otherwise <code>false</code>
-	 * @throws OXException If check fails for any reason
-	 */
-	public boolean canHandle(Set<ElementPath> elementPaths, ID recipient) throws OXException;
-
-	/**
-	 * Gets the priority used for building a ranking for concurrent channels.
-	 *
-	 * @return The priority
-	 */
-	public int getPriority();
-
-	/**
-	 * Checks if this channel is connected to given end point identifier.
-	 *
-	 * @param id The end point identifier
-	 * @return <code>true</code> if this channel is connected to given end point identifier; otherwise <code>false</code>
-	 * @throws OXException If check fails for any reason
-	 */
-	public boolean isConnected(ID id) throws OXException;
-
-	/**
-	 * Have the channel try to create a recipient. If the channel can initiate a connection to the recipient, this method should do so and return true, if
-	 * it can not initiate a connection to the recipient it should return false. After a successful conjuration, {@link #isConnected(ID)} should return true and {@link #send(Stanza)} with
-	 * the given recipient should succeeed.
-	 * 
-	 * @param id The id to try to connect to
-	 * @return true if the connection could be established, false otherwise
-	 * @throws OXException
-	 */
-	public boolean conjure(ID id) throws OXException;
-	
-	/**
-	 * Sends specified stanza.
-	 *
-	 * @param stanza The stanza to send
-	 * @throws OXException If send operation fails for any reason
-	 */
-	public void send(Stanza stanza) throws OXException;
-	
-	
 }

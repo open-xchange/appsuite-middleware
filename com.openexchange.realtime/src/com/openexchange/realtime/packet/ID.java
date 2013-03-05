@@ -1,6 +1,11 @@
 package com.openexchange.realtime.packet;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,6 +25,8 @@ public class ID implements Serializable {
 
     private static final long serialVersionUID = -5237507998711320109L;
 
+    private static ConcurrentHashMap<ID, ConcurrentHashMap<String, List<IDEventHandler>>> listeners = new ConcurrentHashMap<ID, ConcurrentHashMap<String, List<IDEventHandler>>>();
+    
     private String protocol;
     private String user;
     private String context;
@@ -276,5 +283,70 @@ public class ID implements Serializable {
      */
     public boolean isInternal() {
         return internal;
+    }
+    
+    public void on(String event, IDEventHandler handler) {
+        handlerList(event).add(handler);
+    }
+    
+    public void one(String event, IDEventHandler handler) {
+        on(event, new OneOf(handler));
+    }
+    
+    public void off(String event, IDEventHandler handler) {
+        handlerList(event).remove(handler);
+    }
+    
+    public void clearListeners() {
+        listeners.put(this, null);
+    }
+    
+    public void trigger(String event, Object source, Map<String, Object> properties) {
+        for(IDEventHandler handler: handlerList(event)) {
+            handler.handle(event, this, source, properties);
+        }
+        if (event.equals("dispose")) {
+            clearListeners();
+        }
+    }
+    
+    public void trigger(String event, Object source) {
+        trigger(event, source, new HashMap<String, Object>());
+    }
+    
+    private List<IDEventHandler> handlerList(String event) {
+        ConcurrentHashMap<String, List<IDEventHandler>> events = listeners.get(this);
+        if (events == null) {
+            events = new ConcurrentHashMap<String, List<IDEventHandler>>();
+            listeners.put(this, events);
+        }
+        
+        List<IDEventHandler> list = events.get(events);
+        
+        if (list == null) {
+            list = new CopyOnWriteArrayList<IDEventHandler>();
+            events.put(event, list);
+        }
+        
+        return list;
+        
+    }
+    
+    private class OneOf implements IDEventHandler {
+        IDEventHandler delegate;
+        
+        public OneOf(IDEventHandler delegate) {
+            super();
+            this.delegate = delegate;
+        }
+
+
+
+        @Override
+        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
+            delegate.handle(event, id, source, properties);
+            id.off(event, this);
+        }
+        
     }
 }
