@@ -545,7 +545,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     }
 
     @Override
-    public Object clone() {
+    public UserConfiguration clone() {
         try {
             final UserConfiguration clone = (UserConfiguration) super.clone();
             if (groups != null) {

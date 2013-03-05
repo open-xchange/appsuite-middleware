@@ -140,7 +140,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         releaseCache();
     }
 
-    private final CacheKey getKey(final int userId, final Context ctx, final Cache cache) {
+    private final static CacheKey getKey(final int userId, final Context ctx, final Cache cache) {
         return cache.newCacheKey(ctx.getContextId(), userId);
     }
 
@@ -192,13 +192,14 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         final CacheKey key = getKey(userId, ctx, cache);
         UserConfiguration userConfig = (UserConfiguration) cache.get(key);
         if (null == userConfig) {
+            UserConfiguration tmp = delegateStorage.getUserConfiguration(userId, groups, ctx, initExtendedPermissions);
             cacheWriteLock.lock();
             try {
                 if (null == (userConfig = (UserConfiguration) cache.get(key))) {
-                    userConfig = delegateStorage.getUserConfiguration(userId, groups, ctx, initExtendedPermissions);
                     if (initExtendedPermissions) {
-                        cache.put(key, userConfig, false);
+                        cache.put(key, tmp, false);
                     }
+                    userConfig = tmp;
                 }
             } catch (final RuntimeException rte) {
                 return getFallback().getUserConfiguration(userId, groups, ctx, initExtendedPermissions);
@@ -206,7 +207,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
                 cacheWriteLock.unlock();
             }
         }
-        return (UserConfiguration) userConfig.clone();
+        return userConfig.clone();
     }
 
     @Override
@@ -222,20 +223,22 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
             if (null == userConfig) {
                 toLoad.add(user);
             } else {
-                retval.add((UserConfiguration) userConfig.clone());
+                retval.add(userConfig.clone());
             }
         }
         final UserConfiguration[] userConfigs = delegateStorage.getUserConfiguration(ctx, toLoad.toArray(new User[toLoad.size()]));
         for (final UserConfiguration userConfig : userConfigs) {
+            final int userId = userConfig.getUserId();
+            CacheKey key = getKey(userId, ctx, cache);
             cacheWriteLock.lock();
             try {
-                cache.put(getKey(userConfig.getUserId(), ctx, cache), userConfig, false);
+                cache.put(key, userConfig, false);
             } catch (final RuntimeException rte) {
-                return getFallback().getUserConfiguration(ctx, users);
+                LOG.warn("Failed to add user configuration for context " + ctx.getContextId() + " and user " + userId + " to cache.", rte);
             } finally {
                 cacheWriteLock.unlock();
             }
-            retval.add((UserConfiguration) userConfig.clone());
+            retval.add(userConfig.clone());
         }
         return retval.toArray(new UserConfiguration[retval.size()]);
     }
@@ -269,10 +272,7 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         try {
             cache.remove(getKey(userId, ctx, cache));
         } catch (final RuntimeException rte) {
-            /*
-             * Swallow
-             */
-            LOG.warn("A runtime error occurred.", rte);
+            LOG.warn("Failed to remove user configuration for context " + ctx.getContextId() + " and user " + userId + " to cache.", rte);
         } finally {
             cacheWriteLock.unlock();
         }
@@ -281,20 +281,6 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     @Override
     public void saveUserConfiguration(final int permissionBits, final int userId, final Context ctx) throws OXException {
         delegateStorage.saveUserConfiguration(permissionBits, userId, ctx);
-        final Cache cache = this.cache;
-        if (null != cache) {
-            cacheWriteLock.lock();
-            try {
-                cache.remove(getKey(userId, ctx, cache));
-            } catch (final RuntimeException rte) {
-                /*
-                 * Swallow
-                 */
-                LOG.warn("A runtime error occurred.", rte);
-            } finally {
-                cacheWriteLock.unlock();
-            }
-        }
+        removeUserConfiguration(userId, ctx);
     }
-
 }
