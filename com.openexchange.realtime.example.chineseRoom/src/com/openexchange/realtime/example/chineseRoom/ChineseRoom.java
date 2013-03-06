@@ -76,12 +76,15 @@ public class ChineseRoom extends GroupDispatcher implements ComponentHandle {
     private CopyOnWriteArrayList<LoggedMessage> messages = new CopyOnWriteArrayList<LoggedMessage>();
     
     
-    public ChineseRoom(ID id, ServiceLookup services) {
-        super(id, handler, services);
+    public ChineseRoom(ID id) {
+        super(id, handler);
     }
     
     // Say something in the chat room
     public void handleSay(Stanza stanza) throws OXException {
+        if (!isMember(stanza.getFrom())) {
+            return; // Discard
+        }
         StringBuilder message = new StringBuilder();
         for(PayloadTree messages: stanza.getPayloads(new ElementPath("china", "message"))){
             message.append(messages.getRoot().getData().toString());
@@ -94,6 +97,9 @@ public class ChineseRoom extends GroupDispatcher implements ComponentHandle {
     
     // Get a replay of old messages
     public void handleGetLog(Stanza stanza) throws OXException {
+        if (!isMember(stanza.getFrom())) {
+            return; // Discard
+        }
         Message message = new Message();
         message.setFrom(getId());
         message.setTo(stanza.getFrom());

@@ -76,7 +76,7 @@ public class ChineseRoomComponent implements Component{
 
     @Override
     public ComponentHandle create(ID id) {
-        return new ChineseRoom(id, services);
+        return new ChineseRoom(id);
     }
 
     @Override

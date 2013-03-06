@@ -75,7 +75,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class GroupDispatcher implements ComponentHandle {
     
-    private ServiceLookup services = null;
+    public static ServiceLookup services = null;
     
     private List<ID> ids = new CopyOnWriteArrayList<ID>();
     private Map<ID, String> stamps = new ConcurrentHashMap<ID, String>();
@@ -84,13 +84,12 @@ public class GroupDispatcher implements ComponentHandle {
     
     private ActionHandler handler = null;
     
-    public GroupDispatcher(ID id, ServiceLookup services) {
-        this(id, null, services);
+    public GroupDispatcher(ID id) {
+        this(id, null);
     }
     
-    public GroupDispatcher(ID id, ActionHandler handler, ServiceLookup services) {
+    public GroupDispatcher(ID id, ActionHandler handler) {
         this.id = id;
-        this.services = services;
         this.handler = handler;
     }
     
@@ -187,6 +186,10 @@ public class GroupDispatcher implements ComponentHandle {
     
     public ID getId() {
         return id;
+    }
+    
+    protected boolean isMember(ID id) {
+        return ids.contains(id);
     }
     
     protected Stanza copyFor(Stanza stanza, ID to) {
