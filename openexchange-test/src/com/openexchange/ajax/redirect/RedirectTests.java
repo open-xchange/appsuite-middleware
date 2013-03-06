@@ -54,7 +54,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ Bug25140Test.class })
+//@SuiteClasses({ Bug25140Test.class }) deactivated for release
 public class RedirectTests {
 
     private RedirectTests() {
