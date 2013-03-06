@@ -54,6 +54,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.payload.converter.impl.DefaultPayloadTreeConverter;
 import com.openexchange.realtime.util.ElementPath;
 
 /**
@@ -66,6 +68,8 @@ public class PayloadTreeNode implements VisitablePayload, Serializable {
 
     private static final long serialVersionUID = -4402820599792777503L;
 
+    public static volatile DefaultPayloadTreeConverter CONVERTER = null;
+    
     private PayloadTreeNode parent;
 
     /** The payloadElement representing the data of this node. Used as Delegate. */
@@ -338,6 +342,24 @@ public class PayloadTreeNode implements VisitablePayload, Serializable {
         for (PayloadTreeNode child : children) {
             child.accept(visitor);
         }
+    }
+    
+    public PayloadTreeNode toInternal() throws OXException {
+        if (CONVERTER != null) {
+            return CONVERTER.incoming(this);
+        }
+        throw new IllegalStateException("No Converter is set!");
+    }
+    
+    public PayloadTreeNode toExternal(String format) throws OXException {
+        if (CONVERTER != null) {
+            return CONVERTER.outgoing(this, format);
+        }
+        throw new IllegalStateException("No Converter is set!");
+    }
+    
+    public PayloadTreeNode internalClone() throws OXException {
+        return toExternal("native").toInternal();
     }
 
     @Override

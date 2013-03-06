@@ -8,6 +8,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.util.IdLookup;
+import com.openexchange.realtime.util.IdLookup.UserAndContext;
+import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * An ID describes a valid sender or recipient of a {@link Stanza}.
@@ -32,7 +39,6 @@ public class ID implements Serializable {
     private String context;
     private String resource;
     private String component;
-    private boolean internal;
 
     /**
      * Pattern to match IDs consisting of protocol, user, context and resource
@@ -285,42 +291,51 @@ public class ID implements Serializable {
         return null == protocol && null == resource;
     }
     
-    
-    /**
-     * Sets the whether this ID can be reached in this cluster
-     *
-     * @param internal The internal to set
-     */
-    public void setInternal(boolean internal) {
-        this.internal = internal;
+    public ServerSession toSession() throws OXException {
+        UserAndContext userAndContextIDs = IdLookup.getUserAndContextIDs(this);
+        if (userAndContextIDs != null) {
+            return ServerSessionAdapter.valueOf(SessionObjectWrapper.createSessionObject(userAndContextIDs.getUserId(), userAndContextIDs.getContextId(), (resource != null) ? resource : "rt"));
+        }
+        SessionObject sessionObject = new SessionObject("anonymous");
+        return ServerSessionAdapter.valueOf(sessionObject);
     }
     
     
-    /**
-     * Denotes whether this ID can be reached inside this cluster or external to it.
-     *
-     * @return The internal
-     */
-    public boolean isInternal() {
-        return internal;
-    }
     
+    
+    /**
+     * Execute the event handler when the "event" happens
+     */
     public void on(String event, IDEventHandler handler) {
         handlerList(event).add(handler);
     }
-    
+
+    /**
+     * Execute the event handler when the event happens, but only once
+     * @param event
+     * @param handler
+     */
     public void one(String event, IDEventHandler handler) {
         on(event, new OneOf(handler));
     }
     
+    /**
+     * Remove the event handler
+     */
     public void off(String event, IDEventHandler handler) {
         handlerList(event).remove(handler);
     }
     
+    /**
+     * Remove all event handlers for this ID
+     */
     public void clearListeners() {
         listeners.remove(this);
     }
     
+    /**
+     * Trigger an event on this ID, with the give properties
+     */
     public void trigger(String event, Object source, Map<String, Object> properties) {
         for(IDEventHandler handler: handlerList(event)) {
             handler.handle(event, this, source, properties);
@@ -330,6 +345,9 @@ public class ID implements Serializable {
         }
     }
     
+    /**
+     * Trigger an event on this ID.
+     */
     public void trigger(String event, Object source) {
         trigger(event, source, new HashMap<String, Object>());
     }

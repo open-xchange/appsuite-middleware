@@ -51,6 +51,8 @@ package com.openexchange.realtime.payload.converter;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
+import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -77,6 +79,29 @@ public interface PayloadTreeConverter {
      * @param payloadTree The PayloadTree to process
      * @throws OXException When transformation fails
      */
-    public PayloadTree outgoing(PayloadTree payloadTree) throws OXException;
+    public PayloadTree outgoing(PayloadTree payloadTree, String format) throws OXException;
+    
+    /**
+     * Declare a preferred format for a given element path
+     */
+    public void declarePreferredFormat(ElementPath path, String format);
+    
+    /**
+     * Transform an incoming PayloadTreeNode.
+     *
+     * @param node The incoming PayloadTreeNode to process
+     * @return
+     * @throws OXException When transformation fails
+     */
+    public PayloadTreeNode incoming(PayloadTreeNode node) throws OXException;
+
+    /**
+     * Transform an outgoing PayloadTreeNode.
+     *
+     * @param node The PayloadTreeNode to process
+     * @throws OXException When transformation fails
+     */
+    public PayloadTreeNode outgoing(PayloadTreeNode node, String format) throws OXException;
+    
 
 }

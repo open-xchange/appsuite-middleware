@@ -52,7 +52,6 @@ package com.openexchange.realtime.atmosphere.impl;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.payload.converter.AtmospherePayloadTreeConverterer;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.tools.session.ServerSession;
@@ -79,8 +78,7 @@ public class StanzaTransformer {
 
         for (PayloadTree tree : payloadTrees) {
             // TODO: Use ThreadService to transform trees in parallel
-            AtmospherePayloadTreeConverterer transformer = new AtmospherePayloadTreeConverterer();
-            PayloadTree transformedTree = transformer.incoming(tree);
+            PayloadTree transformedTree = tree.toInternal();
             transformedPayloadTrees.add(transformedTree);
         }
         stanza.setPayloads(transformedPayloadTrees);
@@ -99,8 +97,8 @@ public class StanzaTransformer {
 
         for (PayloadTree tree : payloadTrees) {
             // TODO: Use ThreadService to transform trees in parallel
-            AtmospherePayloadTreeConverterer transformer = new AtmospherePayloadTreeConverterer();
-            PayloadTree transformedTree = transformer.outgoing(tree);
+            
+            PayloadTree transformedTree = tree.toExternal("json");
             transformedPayloadTrees.add(transformedTree);
         }
         stanza.setPayloads(transformedPayloadTrees);

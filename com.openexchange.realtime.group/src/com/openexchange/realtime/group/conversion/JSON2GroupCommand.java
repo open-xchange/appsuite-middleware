@@ -47,12 +47,11 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.group.osgi;
+package com.openexchange.realtime.group.conversion;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
+import com.openexchange.conversion.simple.SimplePayloadConverter.Quality;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.group.GroupCommand;
 import com.openexchange.realtime.group.commands.JoinCommand;
@@ -75,7 +74,7 @@ public class JSON2GroupCommand implements SimplePayloadConverter {
 
     @Override
     public String getOutputFormat() {
-        return GroupCommand.class.getSimpleName();
+        return GroupCommand.class.getName();
     }
 
     @Override

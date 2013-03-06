@@ -86,9 +86,16 @@ public class IdLookup {
         }
 
         int contextId = contextService.getContextId(id.getContext());
+        if (contextId == -1) {
+            return null;
+        }
         Context context = contextService.getContext(contextId);
-        int userId = userService.getUserId(id.getUser(), context);
-        return new UserAndContext(contextId, userId);
+        try {
+            int userId = userService.getUserId(id.getUser(), context);
+            return new UserAndContext(contextId, userId);
+        } catch (OXException x) {
+            return null;
+        }
     }
 
     /**

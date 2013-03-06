@@ -3,6 +3,7 @@ package com.openexchange.realtime.atmosphere.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.http.grizzly.service.atmosphere.AtmosphereService;
@@ -11,7 +12,6 @@ import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
-import com.openexchange.realtime.atmosphere.payload.converter.AtmospherePayloadElementConverter;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.ByteToJSONConverter;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.JSONToByteConverter;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.JSONToStringConverter;
@@ -23,34 +23,19 @@ import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.handle.StanzaQueueService;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.PresenceState;
+import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
 import com.openexchange.sessiond.SessiondService;
 
 public class AtmosphereRTActivator extends HousekeepingActivator {
 
-    final ExtensionRegistry extensions = ExtensionRegistry.getInstance();
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SessiondService.class, AtmosphereService.class, MessageDispatcher.class, SimpleConverter.class, ResourceDirectory.class, StanzaQueueService.class };
+        return new Class<?>[] { SessiondService.class, AtmosphereService.class, MessageDispatcher.class, SimpleConverter.class, ResourceDirectory.class, StanzaQueueService.class, PayloadTreeConverter.class, CapabilityService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         AtmosphereServiceRegistry.SERVICES.set(this);
-        AtmospherePayloadElementConverter.SERVICES.set(this);
-
-        track(AtmospherePayloadElementConverter.class, new SimpleRegistryListener<AtmospherePayloadElementConverter>() {
-
-            @Override
-            public void added(final ServiceReference<AtmospherePayloadElementConverter> ref, final AtmospherePayloadElementConverter transformer) {
-                extensions.addPayloadElementTransFormer(transformer);
-            }
-
-            @Override
-            public void removed(final ServiceReference<AtmospherePayloadElementConverter> ref, final AtmospherePayloadElementConverter transformer) {
-                extensions.removePayloadElementTransformer(transformer);
-            }
-        });
 
         openTrackers();
 
@@ -74,15 +59,12 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
         registerService(SimplePayloadConverter.class, new PresenceStateToJSONConverter());
         
      // Add Transformers using Converters
-        registerService(
-            AtmospherePayloadElementConverter.class,
-            new AtmospherePayloadElementConverter(PresenceState.class.getSimpleName(), Presence.STATUS_PATH));
-        registerService(AtmospherePayloadElementConverter.class, new AtmospherePayloadElementConverter(
-            String.class.getSimpleName(),
-            Presence.MESSAGE_PATH));
-        registerService(AtmospherePayloadElementConverter.class, new AtmospherePayloadElementConverter(
-            Byte.class.getSimpleName(),
-            Presence.PRIORITY_PATH));
+        PayloadTreeConverter converter = getService(PayloadTreeConverter.class);
+        converter.declarePreferredFormat(Presence.STATUS_PATH, PresenceState.class.getSimpleName());
+        converter.declarePreferredFormat(Presence.MESSAGE_PATH, String.class.getSimpleName());
+        converter.declarePreferredFormat(Presence.PRIORITY_PATH, Byte.class.getSimpleName());
+        
+        getService(CapabilityService.class).declareCapability("rt");
 
     }
 
@@ -90,7 +72,6 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
     public void stop(BundleContext context) throws Exception {
         getService(AtmosphereService.class).unregister("rt");
         AtmosphereServiceRegistry.SERVICES.set(null);
-        ExtensionRegistry.getInstance().clearRegistry();
         super.stop(context);
     }
 

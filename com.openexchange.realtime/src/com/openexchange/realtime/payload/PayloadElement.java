@@ -50,7 +50,6 @@
 package com.openexchange.realtime.payload;
 
 import java.io.Serializable;
-import com.openexchange.realtime.payload.converter.PayloadElementConverter;
 import com.openexchange.realtime.util.ElementPath;
 
 /**

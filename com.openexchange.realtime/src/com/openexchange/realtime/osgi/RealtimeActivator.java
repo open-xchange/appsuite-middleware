@@ -52,10 +52,15 @@ package com.openexchange.realtime.osgi;
 import java.util.concurrent.TimeUnit;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.context.ContextService;
+import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.Component;
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
+import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
+import com.openexchange.realtime.payload.converter.impl.DefaultPayloadTreeConverter;
 import com.openexchange.realtime.synthetic.SyntheticChannel;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -70,7 +75,7 @@ public class RealtimeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{ ContextService.class, UserService.class, TimerService.class };
+        return new Class[]{ ContextService.class, UserService.class, TimerService.class, SimpleConverter.class };
     }
 
     @Override
@@ -96,6 +101,12 @@ public class RealtimeActivator extends HousekeepingActivator {
                 synth.removeComponent(service);
             }
         });
+        
+        DefaultPayloadTreeConverter converter = new DefaultPayloadTreeConverter(this);
+        PayloadTree.CONVERTER = converter;
+        PayloadTreeNode.CONVERTER = converter;
+        
+        registerService(PayloadTreeConverter.class, converter);
         
         openTrackers();
     }
