@@ -135,7 +135,7 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
         publication.getConfiguration().remove(SECRET);
         
         DocumentMetadata metadata = InfostorePublicationServlet.loadDocumentMetadata(publication);
-        publication.setDisplayName((metadata.getFileName() != null) ? metadata.getFileName() : metadata.getTitle());
+        publication.setDisplayName((metadata.getTitle() != null) ? metadata.getTitle() : metadata.getFileName());
         
         
     }
