@@ -106,7 +106,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
             }
             if (null != connection2) {
                 autocommit(connection2);
-                Database.back(poolId, connection2);
+                Database.back(true, connection2);
             }
         }
     }

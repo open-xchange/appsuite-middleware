@@ -1,3 +1,7 @@
+* 2013-03-06 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 22903: [L3] restorecontext fails
+
 * 2013-03-06 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 25213: Exclude configured local bind network interface from list of potential cluster members    
