@@ -76,7 +76,7 @@ case "$1" in
 	echo -n "Restarting $DESC: "
         read pid < /var/run/open-xchange.pid
         $0 stop
-        while ox_is_running open-xchange "/opt/open-xchange/sbin/open-xchange" $pid; do
+        while ox_is_running open-xchange "/opt/open-xchange/etc" $pid; do
              sleep 1
         done
         $0 start
