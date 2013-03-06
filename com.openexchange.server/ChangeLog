@@ -1,3 +1,7 @@
+* 2013-03-06 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 25023: Confusing mail regarding particpant removal.
+
 * 2013-03-06 - marcus.klein@open-xchange.com
 
  - Fix for bug 24576: Added links to the scripts to start the CLTs existscontext and existsuser.
