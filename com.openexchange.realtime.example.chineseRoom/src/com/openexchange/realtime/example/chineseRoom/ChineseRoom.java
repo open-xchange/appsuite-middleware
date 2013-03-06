@@ -101,7 +101,7 @@ public class ChineseRoom extends GroupDispatcher implements ComponentHandle {
             message.addPayload(new PayloadTree(
                 PayloadTreeNode.builder()
                 .withPayload(
-                    new PayloadElement(logged, LoggedMessage.class.getSimpleName(), "china", "replay")
+                    new PayloadElement(logged, LoggedMessage.class.getName(), "china", "replay")
                 )
             .build()
             ));
@@ -131,7 +131,7 @@ public class ChineseRoom extends GroupDispatcher implements ComponentHandle {
     }
     
     @Override
-    protected void dispose() {
+    protected void onDispose() {
         System.out.println("Persist data");
     }
 

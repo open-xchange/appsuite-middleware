@@ -209,7 +209,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         throw ex;
                     }
                     JSONObject json = new JSONObject(postData);
-                    StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(atmosphereState.id, json);
+                    StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(atmosphereState.id, atmosphereState.session, json);
                     handleIncoming(stanzaBuilder.build(), atmosphereState);
                     printBroadcasters("Broadcasters after POST Request");
                     printSessions("Sessions after POST Request");

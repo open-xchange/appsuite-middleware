@@ -80,6 +80,16 @@ public class IDTest {
         assertEquals("context",newID.getContext());
         assertEquals("resource",newID.getResource());
     }
+    
+    @Test
+    public void testDefaultContext() {
+        ID newID = new ID("ox.component://user/resource", "context");
+        assertEquals("ox",newID.getProtocol());
+        assertEquals("component", newID.getComponent());
+        assertEquals("user",newID.getUser());
+        assertEquals("context",newID.getContext());
+        assertEquals("resource",newID.getResource());
+    }
 
     @Test
     public void testIDStringObligatory() {

@@ -56,6 +56,7 @@ import com.openexchange.realtime.atmosphere.osgi.ExtensionRegistry;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link StanzaBuilderSelector} - Select and instantiate a new StanzaBuilder matching the client's message.
@@ -75,6 +76,7 @@ public class StanzaBuilderSelector {
      *  ...
      * };
      * </pre>
+     * @param session 
      *
      * @param json the JSONObject that has to be parsed.
      * @return a Builder adequate for the JSONObject that has to be transformed
@@ -82,7 +84,7 @@ public class StanzaBuilderSelector {
      * @throws OXException if the JSONObject doesn't contain a <code>element</code> key specifying the Stanza or no adequate
      *             StanzaBuilder can be found
      */
-    public static StanzaBuilder<? extends Stanza> getBuilder(ID from, JSONObject json) throws OXException {
+    public static StanzaBuilder<? extends Stanza> getBuilder(ID from, ServerSession session, JSONObject json) throws OXException {
         if (json == null) {
             throw new IllegalArgumentException();
         }
@@ -91,11 +93,11 @@ public class StanzaBuilderSelector {
             throw AtmosphereExceptionCode.MISSING_KEY.create("element");
         }
         if (element.equalsIgnoreCase("iq")) {
-            return new IQBuilder(from, json);
+            return new IQBuilder(from, json, session);
         } else if (element.equalsIgnoreCase("message")) {
-            return new MessageBuilder(from, json);
+            return new MessageBuilder(from, json, session);
         } else if (element.equalsIgnoreCase("presence")) {
-            return new PresenceBuilder(from, json);
+            return new PresenceBuilder(from, json, session);
         } else {
             throw AtmosphereExceptionCode.MISSING_BUILDER_FOR_ELEMENT.create(element);
         }

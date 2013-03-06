@@ -38,8 +38,28 @@ public class ID implements Serializable {
      * Pattern to match IDs consisting of protocol, user, context and resource
      * e.g. xmpp://user@context/notebook
      * */
-    private static final Pattern PATTERN = Pattern.compile("(?:(\\w+?)(\\.\\w+)?://)?([^@]+)@([^/]+)/?(.*)");
-
+    private static final Pattern PATTERN = Pattern.compile("(?:(\\w+?)(\\.\\w+)?://)?([^@/]+)@?([^/]+)?/?(.*)");
+    
+    public ID(final String id, String defaultContext) {
+        final Matcher matcher = PATTERN.matcher(id);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Could not parse id: " + id + ". User and context are obligatory for ID creation.");
+        }
+        protocol = matcher.group(1);
+        component = matcher.group(2);
+        user = matcher.group(3);
+        context = matcher.group(4);
+        resource = matcher.group(5);
+        
+        if (context == null) {
+            context = defaultContext;
+        }
+        
+        sanitize();
+        validate();
+        
+    }
+    
     /**
      * Initializes a new {@link ID} by a String with the syntax "xmpp://user@context/resource".
      * @param id String with the syntax "xmpp://user@context/resource".
@@ -233,7 +253,7 @@ public class ID implements Serializable {
             needSep = true;
         }
         if (component != null) {
-            b.append(component).append(":");
+            b.append(".").append(component);
             needSep = true;
         }
         if(needSep) {
@@ -298,7 +318,7 @@ public class ID implements Serializable {
     }
     
     public void clearListeners() {
-        listeners.put(this, null);
+        listeners.remove(this);
     }
     
     public void trigger(String event, Object source, Map<String, Object> properties) {

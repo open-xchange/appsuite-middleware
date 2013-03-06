@@ -49,6 +49,8 @@
 
 package com.openexchange.realtime.example.chineseRoom;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
@@ -62,40 +64,33 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class LoggedMessage2JSON implements SimplePayloadConverter {
 
-    /* (non-Javadoc)
-     * @see com.openexchange.conversion.simple.SimplePayloadConverter#getInputFormat()
-     */
     @Override
     public String getInputFormat() {
-        // TODO Auto-generated method stub
-        return null;
+        return LoggedMessage.class.getName();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.conversion.simple.SimplePayloadConverter#getOutputFormat()
-     */
     @Override
     public String getOutputFormat() {
-        // TODO Auto-generated method stub
-        return null;
+        return "json";
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.conversion.simple.SimplePayloadConverter#getQuality()
-     */
     @Override
     public Quality getQuality() {
-        // TODO Auto-generated method stub
-        return null;
+        return Quality.GOOD;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.conversion.simple.SimplePayloadConverter#convert(java.lang.Object, com.openexchange.tools.session.ServerSession, com.openexchange.conversion.simple.SimpleConverter)
-     */
     @Override
     public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        LoggedMessage msg = (LoggedMessage) data;
+        
+        JSONObject object = new JSONObject();
+        try {
+            object.put("message", msg.getMessage());
+            object.put("sender", msg.getSender().toString());
+        } catch (JSONException e) {
+        }
+        
+        return object;
     }
 
 }

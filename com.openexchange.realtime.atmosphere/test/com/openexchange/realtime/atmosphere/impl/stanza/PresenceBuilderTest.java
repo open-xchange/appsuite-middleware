@@ -110,7 +110,7 @@ public class PresenceBuilderTest {
      */
     @Test
     public void testBuildPresence() throws OXException {
-        StanzaBuilder<? extends Stanza> builder = StanzaBuilderSelector.getBuilder(new ID("ox://thorben.betten@premium"), presenceJSON);
+        StanzaBuilder<? extends Stanza> builder = StanzaBuilderSelector.getBuilder(new ID("ox://thorben.betten@premium"), null, presenceJSON);
         Stanza stanza = builder.build();
         assertEquals(4, stanza.getPayloads().size());
         ArrayList<PayloadTree> payloads = new ArrayList<PayloadTree>(stanza.getPayloads());

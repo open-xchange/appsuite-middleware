@@ -152,9 +152,13 @@ public class GroupDispatcher implements ComponentHandle {
     
 
     public void join(ID id, String stamp) throws OXException {
+        if (ids.contains(id)) {
+            return;
+        }
         ids.add(id);
         stamps.put(id, stamp);
         id.on("dispose", LEAVE);
+        onJoin(id);
     }
     
     public void leave(ID id) throws OXException {
@@ -162,9 +166,10 @@ public class GroupDispatcher implements ComponentHandle {
         ids.remove(id);
         stamps.remove(id);
         if (ids.isEmpty()) {
-            dispose();
+            onDispose();
             id.trigger("dispose", this);
         }
+        onLeave(id);
     }
     
     public String getStamp(ID id) {
@@ -197,7 +202,15 @@ public class GroupDispatcher implements ComponentHandle {
         copy.setPayloads(stanza.getPayloads()); // Maybe Deep-Copy?        
     }
     
-    protected void dispose() {
+    protected void onJoin(ID id) {
+        
+    }
+    
+    protected void onLeave(ID id) {
+        
+    }
+    
+    protected void onDispose() {
         
     }
     
