@@ -86,7 +86,7 @@ public final class GETAction extends AbstractConfigAction {
 
     @Override
     protected AJAXRequestResult perform(final ConfigAJAXRequest req) throws OXException, JSONException {
-        String path = req.getRequest().getSerlvetRequestURI();
+        String path = req.getRequest().getSerlvetRequestURI(); 
         if (path.length() > 0 && path.charAt(0) == '/') {
             path = path.substring(1);
         }

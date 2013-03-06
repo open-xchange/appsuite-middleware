@@ -117,6 +117,10 @@ public final class BasicTypeJsonConverter implements ResultConverter {
             @SuppressWarnings("unchecked")
             final Map<String, ? extends Object> map = (Map<String, ? extends Object>) resultObject;
             result.setResultObject(new JSONObject(map), JSON);
+        } else if (resultObject instanceof String) {
+            result.setResultObject(resultObject, JSON);
+        } else if (resultObject instanceof Number) {
+            result.setResultObject(resultObject, JSON);
         } else {
             result.setResultObject(asJSObject(resultObject.toString()), JSON);
         }

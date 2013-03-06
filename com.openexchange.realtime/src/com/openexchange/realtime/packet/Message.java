@@ -74,7 +74,7 @@ public class Message extends Stanza {
      * </ol>
      */
     public static enum Type {
-        chat, erorr, groupchat, headline, normal, error
+        chat, groupchat, headline, normal, error
     }
 
     private Type type;

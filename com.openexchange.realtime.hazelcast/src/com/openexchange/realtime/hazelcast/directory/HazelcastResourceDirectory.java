@@ -299,9 +299,9 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
     }
 
     protected static Transaction newTransaction() throws OXException {
-        HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
-        return hazelcast.getTransaction();
-        /*return new Transaction() {
+        /*HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
+        return hazelcast.getTransaction();*/
+        return new Transaction() {
             
             @Override
             public void rollback() throws IllegalStateException {
@@ -322,7 +322,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
             public void begin() throws IllegalStateException {
                 
             }
-        }; */
+        };
     }
 
     protected static Member getLocalMember() throws OXException {

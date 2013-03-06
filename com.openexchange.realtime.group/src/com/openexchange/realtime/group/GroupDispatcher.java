@@ -50,10 +50,12 @@
 package com.openexchange.realtime.group;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.ComponentHandle;
@@ -76,6 +78,7 @@ public class GroupDispatcher implements ComponentHandle {
     private ServiceLookup services = null;
     
     private List<ID> ids = new CopyOnWriteArrayList<ID>();
+    private Map<ID, String> stamps = new ConcurrentHashMap<ID, String>();
     
     private ID id;
     
@@ -128,7 +131,9 @@ public class GroupDispatcher implements ComponentHandle {
         for(ID id: ids) {
             if (!ex.contains(id)) {
                 // Send a copy of the stanza
-                dispatcher.send(copyFor(stanza, id));
+                Stanza copy = copyFor(stanza, id);
+                stamp(copy);
+                dispatcher.send(copy);
             }
         }
     }
@@ -138,6 +143,7 @@ public class GroupDispatcher implements ComponentHandle {
     }
     
     public void send(Stanza stanza) throws OXException {
+        stamp(stanza);
         MessageDispatcher dispatcher = services.getService(MessageDispatcher.class);
         
         dispatcher.send(stanza);
@@ -145,18 +151,28 @@ public class GroupDispatcher implements ComponentHandle {
     
     
 
-    public void join(ID id) throws OXException {
+    public void join(ID id, String stamp) throws OXException {
         ids.add(id);
+        stamps.put(id, stamp);
         id.on("dispose", LEAVE);
     }
     
     public void leave(ID id) throws OXException {
-        ids.remove(id);
         id.off("dispose", LEAVE);
+        ids.remove(id);
+        stamps.remove(id);
         if (ids.isEmpty()) {
             dispose();
             id.trigger("dispose", this);
         }
+    }
+    
+    public String getStamp(ID id) {
+        return stamps.get(id);
+    }
+    
+    public void stamp(Stanza s) {
+        s.setSelector(getStamp(s.getTo()));
     }
     
 

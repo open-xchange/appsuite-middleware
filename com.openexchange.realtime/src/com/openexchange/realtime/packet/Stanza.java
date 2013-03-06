@@ -82,9 +82,13 @@ public abstract class Stanza implements Serializable {
     // All 3 basic stanza types either have an optional or mandatory id field
     private String id = "";
 
+    private String selector = "default";
+    
     // Payloads carried by this Stanza as n-ary trees
     Map<ElementPath, List<PayloadTree>> payloads;
-
+    
+    
+    
     /**
      * Initializes a new {@link Stanza}.
      */
@@ -284,6 +288,15 @@ public abstract class Stanza implements Serializable {
         return copiedPayloads;
     }
     
+    public String getSelector() {
+        return selector;
+    }
+
+    
+    public void setSelector(String selector) {
+        this.selector = selector;
+    }
+
     /**
      * Init default fields from values found in the PayloadTrees of the Stanza.
      * @throws OXException when the Stanza couldn't be initialized

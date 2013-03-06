@@ -107,7 +107,7 @@ public class AtmospherePayloadElementConverter implements PayloadElementConverte
         SimpleConverter simpleConverter = SERVICES.get().getService(SimpleConverter.class);
         //Using null for session, might have to adapt converters or use DummySession
         Object converted = simpleConverter.convert(payload.getFormat(), EXTERNAL_FORMAT, data, null);
-        return new PayloadElement(converted, Byte.class.getSimpleName(), payload.getNamespace(), payload.getElementName());
+        return new PayloadElement(converted, EXTERNAL_FORMAT, payload.getNamespace(), payload.getElementName());
     }
 
 }

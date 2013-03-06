@@ -91,6 +91,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
         from();
         to();
         id();
+        selector();
         payloads();
     }
 
@@ -107,6 +108,12 @@ public abstract class StanzaBuilder<T extends Stanza> {
     private void id() {
         if (json.has("id")) {
             stanza.setId(json.optString("id"));
+        }
+    }
+    
+    private void selector() {
+        if (json.has("selector")) {
+            stanza.setSelector(json.optString("selector"));
         }
     }
 

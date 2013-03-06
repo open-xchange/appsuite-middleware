@@ -64,7 +64,7 @@ public class JoinCommand implements GroupCommand {
 
     @Override
     public void perform(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
-        groupDispatcher.join(stanza.getFrom());
+        groupDispatcher.join(stanza.getFrom(), stanza.getSelector());
     }
 
 }
