@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.group;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,6 +65,7 @@ import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadElement;
+import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.util.ActionHandler;
 import com.openexchange.server.ServiceLookup;
 
@@ -192,7 +194,7 @@ public class GroupDispatcher implements ComponentHandle {
         return ids.contains(id);
     }
     
-    protected Stanza copyFor(Stanza stanza, ID to) {
+    protected Stanza copyFor(Stanza stanza, ID to) throws OXException {
         Stanza copy = stanza.newInstance();
         copy.setTo(to);
         copy.setFrom(stanza.getFrom());
@@ -201,8 +203,12 @@ public class GroupDispatcher implements ComponentHandle {
         return copy;
     }
     
-    protected void copyPayload(Stanza stanza, Stanza copy) {
-        copy.setPayloads(stanza.getPayloads()); // Maybe Deep-Copy?        
+    protected void copyPayload(Stanza stanza, Stanza copy) throws OXException {
+        List<PayloadTree> copyList = new ArrayList<PayloadTree>(stanza.getPayloads().size());
+        for(PayloadTree tree: stanza.getPayloads()) {
+            copyList.add(tree.internalClone());
+        }
+        copy.setPayloads(copyList);
     }
     
     protected void onJoin(ID id) {

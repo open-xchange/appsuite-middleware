@@ -72,8 +72,9 @@ public class StanzaDispatcher implements Callable<Map<ID, OXException>>, Seriali
 
     /**
      * Initializes a new {@link StanzaDispatcher}.
+     * @throws OXException 
      */
-    public StanzaDispatcher() {
+    public StanzaDispatcher() throws OXException {
         this(null, null);
     }
 
@@ -81,11 +82,15 @@ public class StanzaDispatcher implements Callable<Map<ID, OXException>>, Seriali
      * Initializes a new {@link StanzaDispatcher}.
      *
      * @param stanza The stanza to dispatch
+     * @throws OXException 
      */
-    public StanzaDispatcher(Stanza stanza, Set<ID> targets) {
+    public StanzaDispatcher(Stanza stanza, Set<ID> targets) throws OXException {
         super();
         this.targets = targets;
         this.stanza = stanza;
+        if (stanza != null) {
+            stanza.transformPayloads("native");
+        }
     }
 
     @Override

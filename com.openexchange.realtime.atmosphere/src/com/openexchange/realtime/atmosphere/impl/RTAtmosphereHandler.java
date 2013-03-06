@@ -537,8 +537,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      */
     protected <T extends Stanza> void handleIncoming(T stanza, RTAtmosphereState atmosphereState) throws OXException {
         //Transform payloads
-        StanzaTransformer transformer = new StanzaTransformer();
-        transformer.incoming(stanza);
         //Initialize default fields after tranforming
         stanza.initializeDefaults();
         
@@ -571,8 +569,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @throws OXException if no transformer for the given Stanza can be found
      */
     public void handleOutgoing(Stanza stanza) throws OXException {
-        StanzaTransformer stanzaTransformer = new StanzaTransformer();
-        stanzaTransformer.outgoing(stanza);
+        stanza.transformPayloads("json");
         send(stanza);
     }
 

@@ -77,6 +77,7 @@ public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
     
     @Override
     public Map<ID, OXException> send(Stanza stanza, Set<ID> recipients) throws OXException {
+        stanza.transformPayloadsToInternal();
         Map<ID, OXException> exceptions = new HashMap<ID, OXException>();
         for (ID recipient : recipients) {
             String protocol = recipient.getProtocol();

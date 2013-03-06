@@ -296,6 +296,24 @@ public abstract class Stanza implements Serializable {
     public void setSelector(String selector) {
         this.selector = selector;
     }
+    
+    public void transformPayloads(String format) throws OXException {
+        List<PayloadTree> copy = new ArrayList<PayloadTree>(getPayloads().size());
+        for(PayloadTree tree: getPayloads()) {
+            tree = tree.toExternal(format);
+            copy.add(tree);
+        }
+        setPayloads(copy);
+    }
+    
+    public void transformPayloadsToInternal() throws OXException {
+        List<PayloadTree> copy = new ArrayList<PayloadTree>(getPayloads().size());
+        for(PayloadTree tree: getPayloads()) {
+            tree = tree.toInternal();
+            copy.add(tree);
+        }
+        setPayloads(copy);
+    }
 
     /**
      * Init default fields from values found in the PayloadTrees of the Stanza.
