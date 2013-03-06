@@ -8,8 +8,7 @@
 
 * 2013-03-06 - choeger@open-xchange.com
 
- - Fix for bug 25205: Restarting the groupware process leads to a 'Port already
-   in use: 9999' error
+ - Fix for bug 25205: Added missing PID to the method stopping the groupware process.
 
 * 2013-03-06 - martin.herfurth@open-xchange.com
 
@@ -20,6 +19,7 @@
  - Fix for bug 24576: Added links to the scripts to start the CLTs existscontext and existsuser.
  - Fix for bug 25162: Loading user configuration without acquired lock for the cache. Introduced cache for user configuration without
    extended permissions.
+ - Fix for bug 24990: Packaged backend extension for data retention into CSV files.
 
 * 2013-03-05 - tobias.friedrich@open-xchange.com
 
