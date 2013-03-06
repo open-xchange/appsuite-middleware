@@ -47,65 +47,46 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.example.chineseRoom;
 
 import java.util.concurrent.TimeUnit;
+import com.openexchange.realtime.Component;
+import com.openexchange.realtime.ComponentHandle;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link Component}
+ * {@link ChineseRoomComponent}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface Component {
-    
-    public interface EvictionPolicy {
-        
+public class ChineseRoomComponent implements Component{
+
+    private ServiceLookup services;
+
+    /**
+     * Initializes a new {@link ChineseRoomComponent}.
+     * @param chineseRoomActivator
+     */
+    public ChineseRoomComponent(ServiceLookup services) {
+        super();
+        this.services = services;
     }
-    
-    public class Timeout implements EvictionPolicy {
-        private long timeout;
-        private TimeUnit unit;
-        
-        public Timeout(long timeout, TimeUnit unit) {
-            super();
-            this.timeout = timeout;
-            this.unit = unit;
-        }
-        
-        public Timeout(long timeout) {
-            this(timeout, TimeUnit.MILLISECONDS);
-        }
 
-        public long getTimeout() {
-            return timeout;
-        }
-        
-        public TimeUnit getUnit() {
-            return unit;
-        }
-        
-        public void setUnit(TimeUnit unit) {
-            this.unit = unit;
-        }
-        
-        public void setTimeout(long timeout) {
-            this.timeout = timeout;
-        }
- 
-        public void onExpire() {
-            
-        }
+    @Override
+    public ComponentHandle create(ID id) {
+        return new ChineseRoom(id, services);
     }
-    
-    public EvictionPolicy NONE = new EvictionPolicy(){};
-    
 
-    ComponentHandle create(ID id);
+    @Override
+    public String getId() {
+        return "china";
+    }
 
-    String getId();
-    
-    public EvictionPolicy getEvictionPolicy();
+    @Override
+    public EvictionPolicy getEvictionPolicy() {
+        return new Timeout(5, TimeUnit.MINUTES);
+    }
 
 }

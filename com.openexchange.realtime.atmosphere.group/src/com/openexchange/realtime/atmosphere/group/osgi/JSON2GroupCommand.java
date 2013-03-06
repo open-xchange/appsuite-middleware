@@ -47,65 +47,53 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.atmosphere.group.osgi;
 
-import java.util.concurrent.TimeUnit;
-import com.openexchange.realtime.packet.ID;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.conversion.simple.SimplePayloadConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.group.GroupCommand;
+import com.openexchange.realtime.group.commands.JoinCommand;
+import com.openexchange.realtime.group.commands.LeaveCommand;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link Component}
+ * {@link JSON2GroupCommand}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface Component {
-    
-    public interface EvictionPolicy {
-        
+public class JSON2GroupCommand implements SimplePayloadConverter {
+
+    @Override
+    public String getInputFormat() {
+        return "json";
     }
-    
-    public class Timeout implements EvictionPolicy {
-        private long timeout;
-        private TimeUnit unit;
-        
-        public Timeout(long timeout, TimeUnit unit) {
-            super();
-            this.timeout = timeout;
-            this.unit = unit;
-        }
-        
-        public Timeout(long timeout) {
-            this(timeout, TimeUnit.MILLISECONDS);
-        }
 
-        public long getTimeout() {
-            return timeout;
-        }
-        
-        public TimeUnit getUnit() {
-            return unit;
-        }
-        
-        public void setUnit(TimeUnit unit) {
-            this.unit = unit;
-        }
-        
-        public void setTimeout(long timeout) {
-            this.timeout = timeout;
-        }
- 
-        public void onExpire() {
-            
-        }
+    @Override
+    public String getOutputFormat() {
+        return GroupCommand.class.getSimpleName();
     }
-    
-    public EvictionPolicy NONE = new EvictionPolicy(){};
-    
 
-    ComponentHandle create(ID id);
+    @Override
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
 
-    String getId();
-    
-    public EvictionPolicy getEvictionPolicy();
+    @Override
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+        String command = (String) data;
+        if (command.equalsIgnoreCase("join")) {
+            return new JoinCommand();
+        }
+        if (command.equalsIgnoreCase("leave")) {
+            return new LeaveCommand();
+        }
+        throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("command", command);
+    }
+
 
 }

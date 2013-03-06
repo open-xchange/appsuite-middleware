@@ -203,7 +203,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
             }
 
             tx.commit();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             tx.rollback();
             throw new OXException(e);
         }
@@ -231,7 +231,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
                 }
 
                 tx.commit();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 tx.rollback();
                 throw new OXException(e);
             }
@@ -246,7 +246,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
                 }
 
                 tx.commit();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 tx.rollback();
                 throw new OXException(e);
             }
@@ -269,7 +269,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
             idMapping.put(id.toGeneralForm(), id);
             previous = allResources.put(id, data);
             tx.commit();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             tx.rollback();
             throw new OXException(e);
         }
@@ -301,6 +301,28 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
     protected static Transaction newTransaction() throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
         return hazelcast.getTransaction();
+        /*return new Transaction() {
+            
+            @Override
+            public void rollback() throws IllegalStateException {
+                
+            }
+            
+            @Override
+            public int getStatus() {
+                return 0;
+            }
+            
+            @Override
+            public void commit() throws IllegalStateException {
+                
+            }
+            
+            @Override
+            public void begin() throws IllegalStateException {
+                
+            }
+        }; */
     }
 
     protected static Member getLocalMember() throws OXException {

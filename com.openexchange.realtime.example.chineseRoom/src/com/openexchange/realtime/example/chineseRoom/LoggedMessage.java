@@ -47,65 +47,41 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.example.chineseRoom;
 
-import java.util.concurrent.TimeUnit;
 import com.openexchange.realtime.packet.ID;
 
 
 /**
- * {@link Component}
+ * {@link LoggedMessage}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface Component {
+public class LoggedMessage {
+    private String message;
+    private ID sender;
     
-    public interface EvictionPolicy {
-        
+    public LoggedMessage(String message, ID sender) {
+        super();
+        this.message = message;
+        this.sender = sender;
+    }
+
+    public String getMessage() {
+        return message;
     }
     
-    public class Timeout implements EvictionPolicy {
-        private long timeout;
-        private TimeUnit unit;
-        
-        public Timeout(long timeout, TimeUnit unit) {
-            super();
-            this.timeout = timeout;
-            this.unit = unit;
-        }
-        
-        public Timeout(long timeout) {
-            this(timeout, TimeUnit.MILLISECONDS);
-        }
-
-        public long getTimeout() {
-            return timeout;
-        }
-        
-        public TimeUnit getUnit() {
-            return unit;
-        }
-        
-        public void setUnit(TimeUnit unit) {
-            this.unit = unit;
-        }
-        
-        public void setTimeout(long timeout) {
-            this.timeout = timeout;
-        }
- 
-        public void onExpire() {
-            
-        }
+    public void setMessage(String message) {
+        this.message = message;
     }
     
-    public EvictionPolicy NONE = new EvictionPolicy(){};
+    public ID getSender() {
+        return sender;
+    }
     
-
-    ComponentHandle create(ID id);
-
-    String getId();
+    public void setSender(ID sender) {
+        this.sender = sender;
+    }
     
-    public EvictionPolicy getEvictionPolicy();
-
+    
 }

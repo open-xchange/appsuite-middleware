@@ -108,7 +108,12 @@ public class Message extends Stanza {
 
     @Override
     public void initializeDefaults() throws OXException {
-        throw new UnsupportedOperationException("Not yet implemented");
+        //throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @Override
+    public Stanza newInstance() {
+        return new Message();
     }
 
 }

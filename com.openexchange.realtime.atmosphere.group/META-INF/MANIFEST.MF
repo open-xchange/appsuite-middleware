@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Atmosphere Group Adapters
+Bundle-SymbolicName: com.openexchange.realtime.atmosphere.group
+Bundle-Version: 7.1.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.conversion.simple,
+ com.openexchange.exception,
+ com.openexchange.osgi,
+ com.openexchange.realtime.atmosphere,
+ com.openexchange.realtime.atmosphere.payload.converter,
+ com.openexchange.realtime.group,
+ com.openexchange.realtime.group.commands,
+ com.openexchange.realtime.util,
+ com.openexchange.server,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.session,
+ org.json,
+ org.osgi.framework
+Bundle-Activator: com.openexchange.realtime.atmosphere.group.osgi.AtmosphereGroupActivator

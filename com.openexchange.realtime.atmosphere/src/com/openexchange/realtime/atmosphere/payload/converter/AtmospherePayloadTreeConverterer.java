@@ -84,7 +84,7 @@ public class AtmospherePayloadTreeConverterer implements PayloadTreeConverter {
         ElementPath elementPath = node.getElementPath();
         AtmospherePayloadElementConverter converter = converters.getTransformerFor(elementPath);
         if(converter == null) {
-            throw AtmosphereExceptionCode.MISSING_TRANSFORMER_FOR_PAYLOADELEMENT.create(elementPath);
+            converter = new AtmospherePayloadElementConverter(node.getFormat(), elementPath); // Default is to try and convert everything to JSON
         }
         PayloadElement transformedPayload = converter.incoming(node.getPayloadElement());
         PayloadTreeNode resultNode = new PayloadTreeNode(transformedPayload);
@@ -113,7 +113,7 @@ public class AtmospherePayloadTreeConverterer implements PayloadTreeConverter {
         ElementPath elementPath = node.getElementPath();
         AtmospherePayloadElementConverter transformer = converters.getTransformerFor(elementPath);
         if(transformer == null) {
-            throw AtmosphereExceptionCode.MISSING_TRANSFORMER_FOR_PAYLOADELEMENT.create(elementPath);
+            transformer = new AtmospherePayloadElementConverter(node.getFormat(), elementPath); // Default is to try and convert everything to JSON
         }
         PayloadElement transformedPayload = transformer.outgoing(node.getPayloadElement());
         PayloadTreeNode resultNode = new PayloadTreeNode(transformedPayload);

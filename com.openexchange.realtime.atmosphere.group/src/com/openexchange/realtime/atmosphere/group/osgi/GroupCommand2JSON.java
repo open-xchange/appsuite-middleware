@@ -47,65 +47,55 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.atmosphere.group.osgi;
 
-import java.util.concurrent.TimeUnit;
-import com.openexchange.realtime.packet.ID;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.conversion.simple.SimplePayloadConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.group.GroupCommand;
+import com.openexchange.realtime.group.commands.JoinCommand;
+import com.openexchange.realtime.group.commands.LeaveCommand;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link Component}
+ * {@link GroupCommand2JSON}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface Component {
-    
-    public interface EvictionPolicy {
-        
-    }
-    
-    public class Timeout implements EvictionPolicy {
-        private long timeout;
-        private TimeUnit unit;
-        
-        public Timeout(long timeout, TimeUnit unit) {
-            super();
-            this.timeout = timeout;
-            this.unit = unit;
-        }
-        
-        public Timeout(long timeout) {
-            this(timeout, TimeUnit.MILLISECONDS);
-        }
+public class GroupCommand2JSON implements SimplePayloadConverter {
 
-        public long getTimeout() {
-            return timeout;
-        }
-        
-        public TimeUnit getUnit() {
-            return unit;
-        }
-        
-        public void setUnit(TimeUnit unit) {
-            this.unit = unit;
-        }
-        
-        public void setTimeout(long timeout) {
-            this.timeout = timeout;
-        }
- 
-        public void onExpire() {
-            
+    @Override
+    public String getInputFormat() {
+        return GroupCommand.class.getSimpleName();
+    }
+
+    @Override
+    public String getOutputFormat() {
+        return "json";
+    }
+
+    @Override
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
+
+    @Override
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+        try {
+            if (JoinCommand.class.isInstance(data)) {
+                return new JSONObject("{command: 'join'}");
+            }
+            if (LeaveCommand.class.isInstance(data)) {
+                return new JSONObject("{command: 'leave'}");
+            }
+            return new JSONObject("{command: 'unknown '" + data.getClass().getSimpleName()+ "'");
+        } catch (JSONException x) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage(), x);
         }
     }
-    
-    public EvictionPolicy NONE = new EvictionPolicy(){};
-    
-
-    ComponentHandle create(ID id);
-
-    String getId();
-    
-    public EvictionPolicy getEvictionPolicy();
 
 }

@@ -47,65 +47,19 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.group;
 
-import java.util.concurrent.TimeUnit;
-import com.openexchange.realtime.packet.ID;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.packet.Stanza;
 
 
 /**
- * {@link Component}
+ * {@link GroupCommand}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface Component {
-    
-    public interface EvictionPolicy {
-        
-    }
-    
-    public class Timeout implements EvictionPolicy {
-        private long timeout;
-        private TimeUnit unit;
-        
-        public Timeout(long timeout, TimeUnit unit) {
-            super();
-            this.timeout = timeout;
-            this.unit = unit;
-        }
-        
-        public Timeout(long timeout) {
-            this(timeout, TimeUnit.MILLISECONDS);
-        }
+public interface GroupCommand {
 
-        public long getTimeout() {
-            return timeout;
-        }
-        
-        public TimeUnit getUnit() {
-            return unit;
-        }
-        
-        public void setUnit(TimeUnit unit) {
-            this.unit = unit;
-        }
-        
-        public void setTimeout(long timeout) {
-            this.timeout = timeout;
-        }
- 
-        public void onExpire() {
-            
-        }
-    }
-    
-    public EvictionPolicy NONE = new EvictionPolicy(){};
-    
-
-    ComponentHandle create(ID id);
-
-    String getId();
-    
-    public EvictionPolicy getEvictionPolicy();
+    public void perform(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException;
 
 }

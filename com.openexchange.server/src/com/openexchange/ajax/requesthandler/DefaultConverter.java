@@ -144,6 +144,9 @@ public class DefaultConverter implements Converter {
 
     @Override
     public void convert(final String fromFormat, final String toFormat, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
+        if (fromFormat.equals(toFormat)) {
+            return;
+        }
         if (result == AJAXRequestResult.EMPTY_REQUEST_RESULT) {
         	return;
         }

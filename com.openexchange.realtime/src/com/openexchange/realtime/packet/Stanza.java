@@ -55,12 +55,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.google.common.base.Predicate;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.util.ElementPath;
 
@@ -170,7 +172,19 @@ public abstract class Stanza implements Serializable {
         }
         return resultList;
     }
-
+    
+    /**
+     * A very common case: Get the single payload
+     * @return
+     */
+    public PayloadElement getPayload() {
+        Iterator<List<PayloadTree>> iterator = payloads.values().iterator();
+        if (iterator.hasNext()) {
+            return iterator.next().get(0).getRoot().getPayloadElement();
+        }
+        
+        return null;
+    }
     /**
      * Set all Payloads of this Stanza.
      *
@@ -275,5 +289,7 @@ public abstract class Stanza implements Serializable {
      * @throws OXException when the Stanza couldn't be initialized
      */
     public abstract void initializeDefaults() throws OXException;
+    
+    public abstract Stanza newInstance();
 
 }

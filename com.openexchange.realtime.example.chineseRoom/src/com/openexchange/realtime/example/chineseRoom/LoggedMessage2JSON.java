@@ -47,65 +47,55 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.example.chineseRoom;
 
-import java.util.concurrent.TimeUnit;
-import com.openexchange.realtime.packet.ID;
+import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.conversion.simple.SimplePayloadConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link Component}
+ * {@link LoggedMessage2JSON}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface Component {
-    
-    public interface EvictionPolicy {
-        
+public class LoggedMessage2JSON implements SimplePayloadConverter {
+
+    /* (non-Javadoc)
+     * @see com.openexchange.conversion.simple.SimplePayloadConverter#getInputFormat()
+     */
+    @Override
+    public String getInputFormat() {
+        // TODO Auto-generated method stub
+        return null;
     }
-    
-    public class Timeout implements EvictionPolicy {
-        private long timeout;
-        private TimeUnit unit;
-        
-        public Timeout(long timeout, TimeUnit unit) {
-            super();
-            this.timeout = timeout;
-            this.unit = unit;
-        }
-        
-        public Timeout(long timeout) {
-            this(timeout, TimeUnit.MILLISECONDS);
-        }
 
-        public long getTimeout() {
-            return timeout;
-        }
-        
-        public TimeUnit getUnit() {
-            return unit;
-        }
-        
-        public void setUnit(TimeUnit unit) {
-            this.unit = unit;
-        }
-        
-        public void setTimeout(long timeout) {
-            this.timeout = timeout;
-        }
- 
-        public void onExpire() {
-            
-        }
+    /* (non-Javadoc)
+     * @see com.openexchange.conversion.simple.SimplePayloadConverter#getOutputFormat()
+     */
+    @Override
+    public String getOutputFormat() {
+        // TODO Auto-generated method stub
+        return null;
     }
-    
-    public EvictionPolicy NONE = new EvictionPolicy(){};
-    
 
-    ComponentHandle create(ID id);
+    /* (non-Javadoc)
+     * @see com.openexchange.conversion.simple.SimplePayloadConverter#getQuality()
+     */
+    @Override
+    public Quality getQuality() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-    String getId();
-    
-    public EvictionPolicy getEvictionPolicy();
+    /* (non-Javadoc)
+     * @see com.openexchange.conversion.simple.SimplePayloadConverter#convert(java.lang.Object, com.openexchange.tools.session.ServerSession, com.openexchange.conversion.simple.SimpleConverter)
+     */
+    @Override
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

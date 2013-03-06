@@ -38,7 +38,7 @@ public class ID implements Serializable {
      * Pattern to match IDs consisting of protocol, user, context and resource
      * e.g. xmpp://user@context/notebook
      * */
-    private static final Pattern PATTERN = Pattern.compile("(?:(\\w+?)(:\\w+)?://)?([^@]+)@([^/]+)/?(.*)");
+    private static final Pattern PATTERN = Pattern.compile("(?:(\\w+?)(\\.\\w+)?://)?([^@]+)@([^/]+)/?(.*)");
 
     /**
      * Initializes a new {@link ID} by a String with the syntax "xmpp://user@context/resource".
