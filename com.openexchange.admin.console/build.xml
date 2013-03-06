@@ -57,9 +57,9 @@
     </target>
 
     <target name="createLinks">
-        <property name="contextLinks" value="changecontext,deletecontext,disablecontext,disableallcontext,enablecontext,enableallcontext,deleteinvisible,movecontextdatabase,movecontextfilestore,listcontext,listcontextsbydatabase,listcontextsbyfilestore,changefilestore,listdatabase,listfilestore,listserver,registerdatabase,registerfilestore,registerserver,unregisterdatabase,unregisterfilestore,unregisterserver,changedatabase,getaccesscombinationnameforcontext,getmoduleaccessforcontext,getadminid" />
+        <property name="contextLinks" value="changecontext,deletecontext,disablecontext,disableallcontext,enablecontext,enableallcontext,existscontext,deleteinvisible,movecontextdatabase,movecontextfilestore,listcontext,listcontextsbydatabase,listcontextsbyfilestore,changefilestore,listdatabase,listfilestore,listserver,registerdatabase,registerfilestore,registerserver,unregisterdatabase,unregisterfilestore,unregisterserver,changedatabase,getaccesscombinationnameforcontext,getmoduleaccessforcontext,getadminid" />
         <foreach list="${contextLinks}" target="createContextLink" param="linkName" />
-        <property name="userLinks" value="deleteuser,changeuser,listuser,creategroup,deletegroup,changegroup,listgroup,createresource,deleteresource,changeresource,listresource,getaccesscombinationnameforuser,changeaccessglobal" />
+        <property name="userLinks" value="deleteuser,changeuser,listuser,existsuser,creategroup,deletegroup,changegroup,listgroup,createresource,deleteresource,changeresource,listresource,getaccesscombinationnameforuser,changeaccessglobal" />
         <foreach list="${userLinks}" target="createUserLink" param="linkName" />
     </target>
 
