@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.userconfiguration;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.B;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -144,6 +146,10 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         return cache.newCacheKey(ctx.getContextId(), userId);
     }
 
+    private static final CacheKey getKey(Cache cache, Context ctx, int userId, boolean extendedPermissions) {
+        return cache.newCacheKey(ctx.getContextId(), I(userId), B(extendedPermissions));
+    }
+
     /**
      * Initializes cache reference
      *
@@ -183,26 +189,75 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         }
     }
 
+    /* The ConfigCascade adds an additional layer to the UserConfiguration. It is possible to modify the permissions through the
+     * ConfigCascade while the ConfigCascade itself needs the permissions from the database. To release this the ConfigCascade loads the
+     * UserConfiguration without initializing the extended permissions (initExtendedPermissions == false). Those loaded UserConfigurations
+     * have not been put into cache, because without extended permissions the UserConfiguration gives false answers.
+     * Unfortunately this does not scale out, so we have to cache UserConfigurations without extended permissions. Otherwise we have always
+     * an access to the database here.
+     */
     @Override
     public UserConfiguration getUserConfiguration(final int userId, final int[] groups, final Context ctx, final boolean initExtendedPermissions) throws OXException {
         final Cache cache = this.cache;
         if (cache == null) {
             return getFallback().getUserConfiguration(userId, groups, ctx, initExtendedPermissions);
         }
+        final UserConfiguration userConfig;
+        if (initExtendedPermissions) {
+            userConfig = getUserConfiguration(cache, ctx, userId, groups);
+        } else {
+            userConfig = getUserConfigurationWithoutExtended(cache, ctx, userId, groups);
+        }
+        return userConfig;
+    }
+
+    /**
+     * This method uses the {@link UserConfiguration} cached without extended permissions and adds to them the extended permissions.
+     * Afterwards puts the fully initialized {@link UserConfiguration} into the normal cache.
+     */
+    private UserConfiguration getUserConfiguration(Cache cache, Context ctx, int userId, int[] groups) throws OXException {
         final CacheKey key = getKey(userId, ctx, cache);
         UserConfiguration userConfig = (UserConfiguration) cache.get(key);
         if (null == userConfig) {
-            UserConfiguration tmp = delegateStorage.getUserConfiguration(userId, groups, ctx, initExtendedPermissions);
+            UserConfiguration tmp = getUserConfigurationWithoutExtended(cache, ctx, userId, groups);
+            tmp.setExtendedPermissions(tmp.calcExtendedPermissions());
             cacheWriteLock.lock();
             try {
                 if (null == (userConfig = (UserConfiguration) cache.get(key))) {
-                    if (initExtendedPermissions) {
-                        cache.put(key, tmp, false);
-                    }
+                    cache.put(key, tmp, false);
                     userConfig = tmp;
                 }
-            } catch (final RuntimeException rte) {
-                return getFallback().getUserConfiguration(userId, groups, ctx, initExtendedPermissions);
+            } catch (RuntimeException e) {
+                LOG.warn("Failed to add user configuration for context " + ctx.getContextId() + " and user " + userId + " to cache.", e);
+                userConfig = tmp;
+            } finally {
+                cacheWriteLock.unlock();
+            }
+        }
+        return userConfig.clone();
+    }
+
+    /**
+     * Loads a {@link UserConfiguration} without initializing the extended permissions. Initialization of extended permissions needs the
+     * ConfigCascade which itself needs again a {@link UserConfiguration} without extended permissions.
+     * This method should cache those {@link UserConfiguration}s without extended permissions otherwise loading the {@link UserConfiguration}
+     * with extended permissions does not scale well. See https://bugs.open-xchange.com/show_bug.cgi?id=25162#c4.
+     */
+    private UserConfiguration getUserConfigurationWithoutExtended(Cache cache, Context ctx, int userId, int[] groups) throws OXException {
+        final CacheKey key = getKey(cache, ctx, userId, false);
+        UserConfiguration userConfig = (UserConfiguration) cache.get(key);
+        if (null == userConfig) {
+            UserConfiguration tmp = delegateStorage.getUserConfiguration(userId, groups, ctx, false);
+            cacheWriteLock.lock();
+            try {
+                userConfig = (UserConfiguration) cache.get(key);
+                if (null == userConfig) {
+                    cache.put(key, tmp, false);
+                    userConfig = tmp;
+                }
+            } catch (RuntimeException e) {
+                LOG.warn("Failed to add user configuration for context " + ctx.getContextId() + " and user " + userId + " to cache.", e);
+                userConfig = tmp;
             } finally {
                 cacheWriteLock.unlock();
             }
@@ -268,11 +323,14 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         if (cache == null) {
             return;
         }
+        CacheKey key = getKey(userId, ctx, cache);
+        CacheKey keyWithoutExtended = getKey(cache, ctx, userId, false);
         cacheWriteLock.lock();
         try {
-            cache.remove(getKey(userId, ctx, cache));
-        } catch (final RuntimeException rte) {
-            LOG.warn("Failed to remove user configuration for context " + ctx.getContextId() + " and user " + userId + " to cache.", rte);
+            cache.remove(key);
+            cache.remove(keyWithoutExtended);
+        } catch (RuntimeException e) {
+            LOG.warn("Failed to remove user configuration for context " + ctx.getContextId() + " and user " + userId + " to cache.", e);
         } finally {
             cacheWriteLock.unlock();
         }
