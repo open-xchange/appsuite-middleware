@@ -141,6 +141,7 @@ public class SitePublicationService extends AbstractPublicationService {
     public void beforeUpdate(Publication publication) throws OXException {
         super.beforeUpdate(publication);
         Publication oldPublication = loadInternally(publication.getContext(), publication.getId());
+        publication.getConfiguration().remove(URL);
         addSecret(publication, oldPublication);
         removeSecret(publication);
     }
