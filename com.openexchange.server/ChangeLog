@@ -1,5 +1,7 @@
 * 2013-03-07 - marcus.klein@open-xchange.com
 
+ - Fix for bug 25238: Corrected order of returned UserConfiguration array and massively improved throughput of the UserConfiguration caching
+   layer.
  - Fix for bug 25219: User caching layer will not put objects again into cache if they are retrieved from cache.
 
 * 2013-03-07 - martin.herfurth@open-xchange.com

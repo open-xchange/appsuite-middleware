@@ -49,8 +49,12 @@
 
 package com.openexchange.groupware.userconfiguration;
 
-import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -211,30 +215,44 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         return userConfig;
     }
 
+    /* @see com.openexchange.groupware.userconfiguration.CachingUserConfigurationStorage.getUserConfiguration(int, int[], Context, boolean)
+     */
+    @Override
+    public UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws OXException {
+        final Cache cache = this.cache;
+        if (cache == null) {
+            return getFallback().getUserConfiguration(ctx, users);
+        }
+        int[] userIds = new int[users.length];
+        int[][] groups = new int[users.length][];
+        for (int i = 0; i < users.length; i++) {
+            userIds[i] = users[i].getId();
+            groups[i] = users[i].getGroups();
+        }
+        return getUserConfiguration(cache, ctx, userIds, groups);
+    }
+
+    @Override
+    UserConfiguration[] getUserConfigurationWithoutExtended(Context ctx, int[] userIds, int[][] groups) throws OXException {
+        final Cache cache = this.cache;
+        if (cache == null) {
+            return getFallback().getUserConfigurationWithoutExtended(ctx, userIds, groups);
+        }
+        return getUserConfigurationWithoutExtended(cache, ctx, userIds, groups);
+    }
+
     /**
-     * This method uses the {@link UserConfiguration} cached without extended permissions and adds to them the extended permissions.
-     * Afterwards puts the fully initialized {@link UserConfiguration} into the normal cache.
+     * Convenience method for calling the single array style implementation.
      */
     private UserConfiguration getUserConfiguration(Cache cache, Context ctx, int userId, int[] groups) throws OXException {
-        final CacheKey key = getKey(userId, ctx, cache);
-        UserConfiguration userConfig = (UserConfiguration) cache.get(key);
-        if (null == userConfig) {
-            UserConfiguration tmp = getUserConfigurationWithoutExtended(cache, ctx, userId, groups);
-            tmp.setExtendedPermissions(tmp.calcExtendedPermissions());
-            cacheWriteLock.lock();
-            try {
-                if (null == (userConfig = (UserConfiguration) cache.get(key))) {
-                    cache.put(key, tmp, false);
-                    userConfig = tmp;
-                }
-            } catch (RuntimeException e) {
-                LOG.warn("Failed to add user configuration for context " + ctx.getContextId() + " and user " + userId + " to cache.", e);
-                userConfig = tmp;
-            } finally {
-                cacheWriteLock.unlock();
-            }
-        }
-        return userConfig.clone();
+        return getUserConfiguration(cache, ctx, new int[] { userId }, new int[][] { groups })[0];
+    }
+
+    /**
+     * Convenience method for calling the single array style implementation.
+     */
+    private UserConfiguration getUserConfigurationWithoutExtended(Cache cache, Context ctx, int userId, int[] groups) throws OXException {
+        return getUserConfigurationWithoutExtended(cache, ctx, new int[] { userId }, new int[][] { groups })[0];
     }
 
     /**
@@ -243,57 +261,88 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
      * This method should cache those {@link UserConfiguration}s without extended permissions otherwise loading the {@link UserConfiguration}
      * with extended permissions does not scale well. See https://bugs.open-xchange.com/show_bug.cgi?id=25162#c4.
      */
-    private UserConfiguration getUserConfigurationWithoutExtended(Cache cache, Context ctx, int userId, int[] groups) throws OXException {
-        final CacheKey key = getKey(cache, ctx, userId, false);
-        UserConfiguration userConfig = (UserConfiguration) cache.get(key);
-        if (null == userConfig) {
-            UserConfiguration tmp = delegateStorage.getUserConfiguration(userId, groups, ctx, false);
+    private UserConfiguration[] getUserConfigurationWithoutExtended(Cache cache, Context ctx, int[] userIds, int[][] groups) throws OXException {
+        TIntObjectMap<UserConfiguration> map = new TIntObjectHashMap<UserConfiguration>(userIds.length, 1);
+        TIntList toLoad = new TIntArrayList(userIds.length);
+        List<int[]> groupsToLoad = new ArrayList<int[]>(userIds.length);
+        for (int i = 0; i < userIds.length; i++) {
+            UserConfiguration userConfig = (UserConfiguration) cache.get(getKey(cache, ctx, userIds[i], false));
+            if (null == userConfig) {
+                toLoad.add(userIds[i]);
+                groupsToLoad.add(groups[i]);
+            } else {
+                map.put(userIds[i], userConfig.clone());
+            }
+        }
+        final UserConfiguration[] loaded;
+        if (0 == toLoad.size()) {
+            loaded = new UserConfiguration[0];
+        } else {
+            loaded = delegateStorage.getUserConfigurationWithoutExtended(ctx, toLoad.toArray(), groupsToLoad.toArray(new int[groupsToLoad.size()][]));
+        }
+        for (UserConfiguration userConfig : loaded) {
+            int userId = userConfig.getUserId();
+            CacheKey key = getKey(cache, ctx, userId, false);
             cacheWriteLock.lock();
             try {
-                userConfig = (UserConfiguration) cache.get(key);
-                if (null == userConfig) {
-                    cache.put(key, tmp, false);
-                    userConfig = tmp;
-                }
+                cache.put(key, userConfig, false);
             } catch (RuntimeException e) {
                 LOG.warn("Failed to add user configuration for context " + ctx.getContextId() + " and user " + userId + " to cache.", e);
-                userConfig = tmp;
             } finally {
                 cacheWriteLock.unlock();
             }
+            map.put(userId, userConfig.clone());
         }
-        return userConfig.clone();
+        List<UserConfiguration> retval = new ArrayList<UserConfiguration>(userIds.length);
+        for (int userId : userIds) {
+            retval.add(map.get(userId));
+        }
+        return retval.toArray(new UserConfiguration[retval.size()]);
     }
 
-    @Override
-    public UserConfiguration[] getUserConfiguration(final Context ctx, final User[] users) throws OXException {
-        final Cache cache = this.cache;
-        if (cache == null) {
-            return getFallback().getUserConfiguration(ctx, users);
-        }
-        final List<User> toLoad = new ArrayList<User>(users.length);
-        final List<UserConfiguration> retval = new ArrayList<UserConfiguration>(users.length);
-        for (final User user : users) {
-            final UserConfiguration userConfig = (UserConfiguration) cache.get(getKey(user.getId(), ctx, cache));
+    /**
+     * This method uses the {@link UserConfiguration} cached without extended permissions and adds to them the extended permissions.
+     * Afterwards puts the fully initialized {@link UserConfiguration} into the normal cache.
+     */
+    private UserConfiguration[] getUserConfiguration(Cache cache, Context ctx, int[] userIds, int[][] groups) throws OXException {
+        TIntObjectMap<UserConfiguration> map = new TIntObjectHashMap<UserConfiguration>(userIds.length, 1);
+        TIntList toLoad = new TIntArrayList(userIds.length);
+        List<int[]> groupsToLoad = new ArrayList<int[]>(userIds.length);
+        for (int i = 0; i < userIds.length; i++) {
+            UserConfiguration userConfig = (UserConfiguration) cache.get(getKey(userIds[i], ctx, cache));
             if (null == userConfig) {
-                toLoad.add(user);
+                toLoad.add(userIds[i]);
+                groupsToLoad.add(groups[i]);
             } else {
-                retval.add(userConfig.clone());
+                map.put(userIds[i], userConfig.clone());
             }
         }
-        final UserConfiguration[] userConfigs = delegateStorage.getUserConfiguration(ctx, toLoad.toArray(new User[toLoad.size()]));
-        for (final UserConfiguration userConfig : userConfigs) {
-            final int userId = userConfig.getUserId();
+        // Load UserConfigurations without extended permissions and cache them.
+        final UserConfiguration[] loaded;
+        if (0 == toLoad.size()) {
+            loaded = new UserConfiguration[0];
+        } else {
+            loaded = getUserConfigurationWithoutExtended(cache, ctx, toLoad.toArray(), groupsToLoad.toArray(new int[groupsToLoad.size()][]));
+        }
+        for (UserConfiguration userConfig : loaded) {
+            int userId = userConfig.getUserId();
+            // Calculate extended permissions. Reading UserConfiguration by ConfigCascade will be fast now, because UserConfigurations
+            // without extended permissions are already cached.
+            userConfig.setExtendedPermissions(userConfig.calcExtendedPermissions());
             CacheKey key = getKey(userId, ctx, cache);
             cacheWriteLock.lock();
             try {
                 cache.put(key, userConfig, false);
-            } catch (final RuntimeException rte) {
-                LOG.warn("Failed to add user configuration for context " + ctx.getContextId() + " and user " + userId + " to cache.", rte);
+            } catch (RuntimeException e) {
+                LOG.warn("Failed to add user configuration for context " + ctx.getContextId() + " and user " + userId + " to cache.", e);
             } finally {
                 cacheWriteLock.unlock();
             }
-            retval.add(userConfig.clone());
+            map.put(userId, userConfig.clone());
+        }
+        List<UserConfiguration> retval = new ArrayList<UserConfiguration>(userIds.length);
+        for (int userId : userIds) {
+            retval.add(map.get(userId));
         }
         return retval.toArray(new UserConfiguration[retval.size()]);
     }
