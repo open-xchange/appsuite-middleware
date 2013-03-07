@@ -1,3 +1,7 @@
+* 2013-03-07 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 25228: Support backslashes in Folder Names.
+
 * 2013-03-07 - marc.arens@open-xchange.com
 
  - Fix for bug 23703: ManuallyCountedIMAPConnections and OpenFileDescriptorCount stats are broken
