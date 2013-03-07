@@ -76,7 +76,6 @@ import com.openexchange.realtime.hazelcast.channel.StanzaDispatcher;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.IDMap;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
 
 /**
@@ -87,7 +86,7 @@ import com.openexchange.threadpool.ThreadPools;
 public class GlobalMessageDispatcherImpl implements MessageDispatcher {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(GlobalMessageDispatcherImpl.class);
-    private ResourceDirectory directory;
+    private final ResourceDirectory directory;
     
     public GlobalMessageDispatcherImpl(ResourceDirectory directory) {
         super();
