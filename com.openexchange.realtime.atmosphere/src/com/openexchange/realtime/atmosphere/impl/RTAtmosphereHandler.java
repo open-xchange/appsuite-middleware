@@ -547,6 +547,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     protected <T extends Stanza> void handleIncoming(T stanza, RTAtmosphereState atmosphereState) throws OXException {
         //Transform payloads
         //Initialize default fields after tranforming
+        stanza.transformPayloadsToInternal();
         stanza.initializeDefaults();
 
         StanzaQueueService stanzaQueueService = AtmosphereServiceRegistry.getInstance().getService(StanzaQueueService.class);
