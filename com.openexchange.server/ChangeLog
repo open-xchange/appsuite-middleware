@@ -1,6 +1,7 @@
 * 2013-03-07 - marc.arens@open-xchange.com
 
  - Fix for bug 23703: ManuallyCountedIMAPConnections and OpenFileDescriptorCount stats are broken
+ - Fix for bug 23702: Java Heap stats broken
 
 * 2013-03-06 - dennis.sieben@open-xchange.com
 
