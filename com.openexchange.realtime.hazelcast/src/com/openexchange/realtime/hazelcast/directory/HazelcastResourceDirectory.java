@@ -55,26 +55,33 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.apache.commons.logging.Log;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MultiMap;
 import com.hazelcast.core.Transaction;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.directory.*;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.util.IDMap;
 
 /**
- * {@link HazelcastResourceDirectory}
+ * {@link HazelcastResourceDirectory} - Keeps mappings of general {@link ID}s to full {@link ID}s and full {@link ID}s to {@link Resource}.
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class HazelcastResourceDirectory extends DefaultResourceDirectory {
 
+    private static final Log LOG = LogFactory.getLog(HazelcastResourceDirectory.class);
+
+    /** Mapping of general IDs to full IDs e.q marc.arens@premium <-> ox://marc.arens@premuim/random. */
     private static final String ID_MAP = "rtIDMapping-0";
 
+    /** Mapping of full IDs to the Resource e.g. ox://marc.arens@premuim/random <-> Resource */
     private static final String RESOURCE_MAP = "rtResourceDirectory-0";
 
     @Override
@@ -160,8 +167,36 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
 
         MultiMap<ID, ID> idMapping = getIDMapping();
         IMap<ID, Resource> allResources = getResourceMap();
-        Transaction tx = newTransaction();
-        tx.begin();
+        // Transaction tx = newTransaction();
+        // tx.begin();
+        // try {
+        // if (!resourceIds.isEmpty()) {
+        // for (ID id : resourceIds) {
+        // idMapping.remove(id.toGeneralForm(), id);
+        // Resource resource = allResources.remove(id);
+        // if (resource != null) {
+        // removedResources.put(id, resource);
+        // }
+        // }
+        // }
+        //
+        // if (!generalIds.isEmpty()) {
+        // for (ID id : generalIds) {
+        // Collection<ID> toRemove = idMapping.remove(id);
+        // for (ID concreteId : toRemove) {
+        // Resource resource = allResources.remove(concreteId);
+        // if (resource != null) {
+        // removedResources.put(concreteId, resource);
+        // }
+        // }
+        // }
+        // }
+        //
+        // tx.commit();
+        // } catch (Exception e) {
+        // tx.rollback();
+        // throw new OXException(e);
+        // }
         try {
             if (!resourceIds.isEmpty()) {
                 for (ID id : resourceIds) {
@@ -184,10 +219,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
                     }
                 }
             }
-
-            tx.commit();
         } catch (Exception e) {
-            tx.rollback();
             throw new OXException(e);
         }
 
@@ -199,9 +231,43 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
         IDMap<Resource> removedResources = new IDMap<Resource>();
         MultiMap<ID, ID> idMapping = getIDMapping();
         IMap<ID, Resource> allResources = getResourceMap();
+        // if (id.isGeneralForm()) {
+        // Transaction tx = newTransaction();
+        // tx.begin();
+        // try {
+        // Collection<ID> toRemove = idMapping.remove(id);
+        // if (toRemove != null) {
+        // for (ID concreteId : toRemove) {
+        // Resource resource = allResources.remove(concreteId);
+        // if (resource != null) {
+        // removedResources.put(concreteId, resource);
+        // }
+        // }
+        // }
+        //
+        // tx.commit();
+        // } catch (Exception e) {
+        // tx.rollback();
+        // throw new OXException(e);
+        // }
+        // } else {
+        // Transaction tx = newTransaction();
+        // tx.begin();
+        // try {
+        // idMapping.remove(id.toGeneralForm(), id);
+        // Resource resource = allResources.remove(id);
+        // if (resource != null) {
+        // removedResources.put(id, resource);
+        // }
+        //
+        // tx.commit();
+        // } catch (Exception e) {
+        // tx.rollback();
+        // throw new OXException(e);
+        // }
+        // }
+
         if (id.isGeneralForm()) {
-            Transaction tx = newTransaction();
-            tx.begin();
             try {
                 Collection<ID> toRemove = idMapping.remove(id);
                 if (toRemove != null) {
@@ -212,25 +278,17 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
                         }
                     }
                 }
-
-                tx.commit();
             } catch (Exception e) {
-                tx.rollback();
                 throw new OXException(e);
             }
         } else {
-            Transaction tx = newTransaction();
-            tx.begin();
             try {
                 idMapping.remove(id.toGeneralForm(), id);
                 Resource resource = allResources.remove(id);
                 if (resource != null) {
                     removedResources.put(id, resource);
                 }
-
-                tx.commit();
             } catch (Exception e) {
-                tx.rollback();
                 throw new OXException(e);
             }
         }
@@ -239,32 +297,111 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
     }
 
     @Override
-    protected Resource doSet(ID id, Resource data) throws OXException {
-        data.setRoutingInfo(getLocalMember());
-        data.setTimestamp(new Date());
+    protected Resource doSet(ID id, Resource resource) throws OXException {
+        resource.setRoutingInfo(getLocalMember());
+        resource.setTimestamp(new Date());
 
         MultiMap<ID, ID> idMapping = getIDMapping();
         IMap<ID, Resource> allResources = getResourceMap();
-        Resource previous = null;
-        Transaction tx = newTransaction();
-        tx.begin();
-        try {
-            idMapping.put(id.toGeneralForm(), id);
-            previous = allResources.put(id, data);
-            tx.commit();
-        } catch (Exception e) {
-            tx.rollback();
-            throw new OXException(e);
-        }
+        Resource previousResource = null;
+        // Transaction tx = newTransaction();
+        // if (LOG.isDebugEnabled()) {
+        // LOG.debug(String.format(
+        // "Starting transaction: %1$s for resource: %2$s, %3$tT",
+        // tx,
+        // data.getPresenceState(),
+        // data.getTimestamp()));
+        // }
+        // tx.begin();
+        // try {
+        // idMapping.put(id.toGeneralForm(), id);
+        // previous = allResources.put(id, data);
+        // if (LOG.isDebugEnabled()) {
+        // LOG.debug(String.format(
+        // "Committing transaction %1$s for resource %2$s, %3$tT",
+        // tx,
+        // data.getPresenceState(),
+        // data.getTimestamp()));
+        // }
+        // tx.commit();
+        // } catch (Exception e) {
+        // if (LOG.isDebugEnabled()) {
+        // LOG.debug(String.format(
+        // "Rolling back transaction: %1$s for resource: %2$s, %3$tT",
+        // tx,
+        // data.getPresenceState(),
+        // data.getTimestamp()));
+        // }
+        // tx.rollback();
+        // throw new OXException(e);
+        // }
+        idMapping.put(id.toGeneralForm(), id);
+        // previousResource = allResources.put(id, data);
 
-        return previous;
+        // don't overwrite exisiting Presence Data
+        if (resource.getPresenceState() == null) {
+            previousResource = allResources.get(id);
+            if(previousResource != null) {
+                DefaultResource mergeResource = new DefaultResource();
+                mergeResource.setMessage(previousResource.getMessage());
+                mergeResource.setPresenceState(previousResource.getPresenceState());
+                mergeResource.setPriority(previousResource.getPriority());
+                mergeResource.setRoutingInfo(resource.getRoutingInfo());
+                mergeResource.setTimestamp(resource.getTimestamp());
+                allResources.put(id, mergeResource);
+            } else {
+                previousResource = allResources.put(id, resource);
+            }
+        } else {
+            previousResource = allResources.put(id, resource);
+        }
+        return previousResource;
     }
 
+    @Override
+    public Presence getPresence(ID id) throws OXException {
+        IDMap<Resource> resources = get(id.toGeneralForm());
+
+        Resource selectedResource = null;
+        for (Resource candidate : resources.values()) {
+            if (selectedResource == null) {
+                selectedResource = candidate;
+            } else {
+                int comparisonResult = selectedResource.getTimestamp().compareTo(candidate.getTimestamp());
+                if (comparisonResult < 0) {
+                    // selectedResult is older than candidate
+                    selectedResource = candidate;
+                }
+            }
+        }
+        // @formatter:off
+        Presence presence = Presence.builder()
+            .from(id)
+            .message(selectedResource.getMessage())
+            .priority(selectedResource.getPriority())
+            .state(selectedResource.getPresenceState())
+            .build();
+        // @formatter:off
+        return presence;
+    }
+
+    /**
+     * Get the mapping of general IDs to full IDs e.g. marc.arens@premium <-> ox://marc.arens@premuim/random.
+     * 
+     * @return the map used for mapping general IDs to full IDs.
+     * @throws OXException
+     */
     protected static MultiMap<ID, ID> getIDMapping() throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
         return hazelcast.getMultiMap(ID_MAP);
     }
 
+    /**
+     * Get the mapping of full IDs to the Resource e.g. ox://marc.arens@premuim/random <-> Resource.
+     * 
+     * @return the map used for mapping general IDs to full IDs.
+     * @throws OXException
+     */
     protected static IMap<ID, Resource> getResourceMap() throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
         return hazelcast.getMap(RESOURCE_MAP);
