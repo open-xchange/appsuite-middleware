@@ -1,6 +1,7 @@
-* 2013-03-05 - marcus.klein@open-xchange.com
+* 2013-03-06 - marcus.klein@open-xchange.com
 
- - Fix for bug 25162: Loading user configuration without aquired lock for the cache.
+ - Fix for bug 25162: Loading user configuration without acquired lock for the cache. Introduced cache for user configuration without
+   extended permissions.
 
 * 2013-03-04 - thorben.betten@open-xchange.com
 
