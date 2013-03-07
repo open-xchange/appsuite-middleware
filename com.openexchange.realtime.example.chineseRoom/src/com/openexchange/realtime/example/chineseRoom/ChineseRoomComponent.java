@@ -57,7 +57,7 @@ import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link ChineseRoomComponent}
+ * A very simple component that initializes a {@link ChineseRoom} as needed.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -73,17 +73,26 @@ public class ChineseRoomComponent implements Component{
         super();
         this.services = services;
     }
-
+    
+    /**
+     * Create the room, say synthetic.china://room1 . Why "synthetic.china"? Read on!
+     */
     @Override
     public ComponentHandle create(ID id) {
         return new ChineseRoom(id);
     }
 
+    /**
+     * Now we can address rooms as synthetic.china://room1 (for example
+     */
     @Override
     public String getId() {
         return "china";
     }
-
+    
+    /**
+     * Automatically shut down a room after five minutes of idling.
+     */
     @Override
     public EvictionPolicy getEvictionPolicy() {
         return new Timeout(5, TimeUnit.MINUTES);

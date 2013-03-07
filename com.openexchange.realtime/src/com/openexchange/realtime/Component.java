@@ -54,16 +54,29 @@ import com.openexchange.realtime.packet.ID;
 
 
 /**
- * {@link Component}
+ * A {@link Component} is a service that manages synthetic resources, i.e. addressees that represent a system component.
+ * It is a factory for {@link ComponentHandle}s and manages their state. 
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface Component {
     
+    /**
+     * 
+     * An {@link EvictionPolicy} determines how and when a ComponentHandle should be disposed of.
+     *
+     * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+     */
     public interface EvictionPolicy {
         
     }
     
+    /**
+     * 
+     * An eviction policy that closes the ComponentHandler after the {@link Timeout} has elapsed
+     *
+     * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+     */
     public class Timeout implements EvictionPolicy {
         private long timeout;
         private TimeUnit unit;
@@ -99,13 +112,26 @@ public interface Component {
         }
     }
     
+    /**
+     * Don't evict automatically
+     */
     public EvictionPolicy NONE = new EvictionPolicy(){};
     
-
+    
+    /**
+     * Create a component handle for the given ID. Can return null, if it doesn't want to create the handle. 
+     */
     ComponentHandle create(ID id);
-
+    
+    /**
+     * Get's the name of this component type. This is used along with the 'synthetic' protocol to construct a component handles ID. 
+     * The general form of a components ID is: synthetic.[name]://[restOfId]
+     */
     String getId();
     
+    /**
+     * Provide the eviction policy for the component handle
+     */
     public EvictionPolicy getEvictionPolicy();
 
 }

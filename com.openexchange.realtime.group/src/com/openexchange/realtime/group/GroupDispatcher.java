@@ -213,15 +213,18 @@ public class GroupDispatcher implements ComponentHandle {
         if (ids.contains(id)) {
             return;
         }
+        
         beforeJoin(id);
         
         if (!mayJoin(id)) {
             return;
         }
+        boolean first = ids.isEmpty();
         
         ids.add(id);
         stamps.put(id, stamp);
         id.on("dispose", LEAVE);
+        firstJoined(id);
         onJoin(id);
     }
     
@@ -333,6 +336,13 @@ public class GroupDispatcher implements ComponentHandle {
      * Callback that is called after a new member has joined the group. 
      */
     protected void onJoin(ID id) {
+        
+    }
+    
+    /**
+     * Callback for when the first used joined
+     */
+    protected void firstJoined(ID id) {
         
     }
     

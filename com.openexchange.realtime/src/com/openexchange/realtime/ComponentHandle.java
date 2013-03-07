@@ -54,12 +54,15 @@ import com.openexchange.realtime.packet.Stanza;
 
 
 /**
- * {@link ComponentHandle}
+ * A {@link ComponentHandle} is a recipient and handler of messages directed at a certain component.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ComponentHandle {
-
+    
+    /**
+     * Process the stanza that was received for this handle.
+     */
     void process(Stanza stanza) throws OXException;
 
 }
