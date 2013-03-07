@@ -67,7 +67,10 @@ public enum DispatchExceptionCode implements OXExceptionCode {
     /** Could not send stanza to resource. Resource was offline: %1$s */
     RESOURCE_OFFLINE(DispatchExceptionMessage.RESOURCE_OFFLINE_MSG, CATEGORY_ERROR, 2),
     /** Unknown channel %1$s */
-    UNKNOWN_CHANNEL(DispatchExceptionMessage.UNKNOWN_CHANNEL, Category.EnumCategory.CONNECTIVITY, 3),
+    UNKNOWN_CHANNEL(DispatchExceptionMessage.UNKNOWN_CHANNEL, CATEGORY_CONNECTIVITY, 3),
+    /** Unexpected error: %1$s */
+    UNEXPECTED_ERROR(DispatchExceptionMessage.UNEXPECTED_ERROR, CATEGORY_ERROR, 4),
+    
     ;
 
     private final String message;
