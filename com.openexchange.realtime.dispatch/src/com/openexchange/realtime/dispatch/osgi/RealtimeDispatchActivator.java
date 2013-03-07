@@ -115,6 +115,7 @@ public class RealtimeDispatchActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
+        RealtimeServiceRegistry.SERVICES.set(null);
     }
 
 }
