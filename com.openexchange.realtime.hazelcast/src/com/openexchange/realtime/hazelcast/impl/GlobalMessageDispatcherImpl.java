@@ -63,6 +63,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 import org.apache.commons.logging.Log;
 import com.hazelcast.core.DistributedTask;
+import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.RealtimeExceptionCodes;
@@ -134,14 +135,15 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
     }
     
     private Map<ID, OXException> deliver(Stanza stanza, Map<Member, Set<ID>> targets) throws OXException {
-        Member localMember = HazelcastAccess.getHazelcastInstance().getCluster().getLocalMember();
+        final HazelcastInstance hazelcastInstance = HazelcastAccess.getHazelcastInstance();
+        Member localMember = hazelcastInstance.getCluster().getLocalMember();
         Set<ID> localIds = targets.remove(localMember);
         if (localIds != null) {
             LocalMessageDispatcher dispatcher = Services.getService(LocalMessageDispatcher.class);
             dispatcher.send(stanza, localIds);
         }
         
-        ExecutorService executorService = HazelcastAccess.getHazelcastInstance().getExecutorService();
+        ExecutorService executorService = hazelcastInstance.getExecutorService();
         List<FutureTask<Map<ID, OXException>>> futures = new ArrayList<FutureTask<Map<ID, OXException>>>();
         for (Member receiver : targets.keySet()) {
             Set<ID> ids = targets.get(receiver);
