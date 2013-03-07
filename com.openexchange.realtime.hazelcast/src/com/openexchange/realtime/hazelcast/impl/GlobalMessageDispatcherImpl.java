@@ -153,7 +153,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
             executorService.execute(task);
             futures.add(task);
         }
-        
+        // Await completion of send requests and extract their exceptions (if any)
         Map<ID, OXException> exceptions = new HashMap<ID, OXException>();
         for (FutureTask<Map<ID, OXException>> future : futures) {
             try {
