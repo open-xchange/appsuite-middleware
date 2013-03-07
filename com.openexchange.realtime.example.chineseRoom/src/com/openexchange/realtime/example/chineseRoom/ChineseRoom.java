@@ -77,6 +77,7 @@ public class ChineseRoom extends GroupDispatcher implements ComponentHandle {
     
     
     public ChineseRoom(ID id) {
+        // synthetic.oxtext://4.12@1  Infostore: 12, Context: 1
         super(id, handler);
     }
     
