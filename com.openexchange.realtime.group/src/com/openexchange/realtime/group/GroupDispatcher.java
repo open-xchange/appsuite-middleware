@@ -156,6 +156,12 @@ public class GroupDispatcher implements ComponentHandle {
         if (ids.contains(id)) {
             return;
         }
+        beforeJoin(id);
+        
+        if (!mayJoin(id)) {
+            return;
+        }
+        
         ids.add(id);
         stamps.put(id, stamp);
         id.on("dispose", LEAVE);
@@ -163,6 +169,7 @@ public class GroupDispatcher implements ComponentHandle {
     }
     
     public void leave(ID id) throws OXException {
+        beforeLeave(id);
         id.off("dispose", LEAVE);
         ids.remove(id);
         stamps.remove(id);
@@ -211,7 +218,19 @@ public class GroupDispatcher implements ComponentHandle {
         copy.setPayloads(copyList);
     }
     
+    protected boolean mayJoin(ID id) {
+        return true;
+    }
+    
+    protected void beforeJoin(ID id) {
+        
+    }
+    
     protected void onJoin(ID id) {
+        
+    }
+    
+    protected void beforeLeave(ID id) {
         
     }
     
