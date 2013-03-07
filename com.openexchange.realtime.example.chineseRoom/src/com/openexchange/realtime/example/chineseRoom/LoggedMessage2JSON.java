@@ -83,7 +83,7 @@ public class LoggedMessage2JSON implements SimplePayloadConverter {
     public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
         LoggedMessage msg = (LoggedMessage) data;
         
-        JSONObject object = new JSONObject();
+        JSONObject object = new JSONObject(2);
         try {
             object.put("message", msg.getMessage());
             object.put("sender", msg.getSender().toString());
