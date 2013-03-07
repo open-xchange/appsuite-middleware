@@ -53,7 +53,7 @@ import com.openexchange.realtime.packet.ID;
 
 
 /**
- * {@link LoggedMessage}
+ * Represents a logged message
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
