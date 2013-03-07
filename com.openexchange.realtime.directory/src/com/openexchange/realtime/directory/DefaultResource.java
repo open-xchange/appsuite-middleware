@@ -53,34 +53,38 @@ import java.io.Serializable;
 import java.util.Date;
 import com.openexchange.realtime.packet.PresenceState;
 
-
 /**
- * {@link DefaultResource}
- *
- * Abstract {@link Resource} implementation.
- *
+ * {@link DefaultResource} Abstract {@link Resource} implementation.
+ * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+// TODO: add Presence field instead of timestamp, state, message, priority as Stanzas aren't restricted to the base set of fields.
 public class DefaultResource implements Resource {
 
     private static final long serialVersionUID = -1140736920132224444L;
 
     protected Date timestamp;
+
     protected PresenceState state;
+
     protected String message;
+
     protected byte priority;
+
     protected Serializable routingInfo;
 
     /**
      * Initializes a new {@link DefaultResource} with {@link PresenceState#ONLINE}.
      */
     public DefaultResource() {
-        this(PresenceState.ONLINE);
+        // don't set a PresenceState for DefaultResources so we can distinguish DefaultResources from the ones with a Presence associated
+        // see TODO
+        this(null);
     }
 
     /**
      * Initializes a new {@link DefaultResource} with the supplied presence state, assuming the current time as timestamp.
-     *
+     * 
      * @param state The presence state
      */
     public DefaultResource(PresenceState state) {
@@ -89,7 +93,7 @@ public class DefaultResource implements Resource {
 
     /**
      * Initializes a new {@link DefaultResource}.
-     *
+     * 
      * @param state The presence state
      * @param timestamp The timestamp
      */
@@ -116,7 +120,7 @@ public class DefaultResource implements Resource {
 
     /**
      * Sets the priority
-     *
+     * 
      * @param priority The priority to set
      */
     public void setPriority(byte priority) {
@@ -140,7 +144,7 @@ public class DefaultResource implements Resource {
 
     /**
      * Sets the presence state
-     *
+     * 
      * @param state the presence state to set
      */
     public void setPresenceState(PresenceState state) {
@@ -149,7 +153,7 @@ public class DefaultResource implements Resource {
 
     /**
      * Sets the message
-     *
+     * 
      * @param message The message
      */
     public void setMessage(String message) {

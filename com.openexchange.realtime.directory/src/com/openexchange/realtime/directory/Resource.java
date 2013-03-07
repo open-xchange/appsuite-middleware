@@ -54,7 +54,7 @@ import java.util.Date;
 import com.openexchange.realtime.packet.PresenceState;
 
 /**
- * {@link Resource}
+ * {@link Resource} - Combines Presence and RountingInfo.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */

@@ -133,5 +133,5 @@ public abstract class DefaultResourceDirectory implements ResourceDirectory {
     protected abstract IDMap<Resource> doRemove(ID id) throws OXException;
 
     protected abstract Resource doSet(ID id, Resource data) throws OXException;
-
+    
 }
