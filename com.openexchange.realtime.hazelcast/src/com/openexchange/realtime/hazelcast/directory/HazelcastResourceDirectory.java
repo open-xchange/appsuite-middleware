@@ -79,8 +79,6 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
     
     private static final Log LOG = LogFactory.getLog(HazelcastResourceDirectory.class);
 
-    private static final Log LOG = LogFactory.getLog(HazelcastResourceDirectory.class);
-
     /** Mapping of general IDs to full IDs e.q marc.arens@premium <-> ox://marc.arens@premuim/random. */
     private static final String ID_MAP = "rtIDMapping-0";
 
