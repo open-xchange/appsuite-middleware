@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.handle.impl.presence;
 
+import java.text.DateFormat;
 import java.util.concurrent.BlockingQueue;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.RealtimeExceptionCodes;
@@ -89,12 +90,9 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
     @Override
     public void handleToIsNull(Presence stanza) throws OXException {
         /*
-         * If the server receives a
-         * presence stanza with no 'to' attribute, the server SHOULD broadcast
-         * it to the entities that are subscribed to the sending entity's
-         * presence, if applicable (the semantics of presence broadcast for
-         * instant messaging and presence applications are defined in
-         * [XMPP-IM]).
+         * If the server receives a presence stanza with no 'to' attribute, the server SHOULD broadcast it to the entities that are
+         * subscribed to the sending entity's presence, if applicable (the semantics of presence broadcast for instant messaging and
+         * presence applications are defined in [XMPP-IM]).
          */
         Type type = stanza.getType();
         if (Type.SUBSCRIBE == type) {
@@ -115,10 +113,9 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
     @Override
     public void handleAccountNotExists(Presence stanza) throws OXException {
         /*
-         * Else if the JID is of the form <user@domain> or <user@domain/resource> and 
-         * the associated user account does not exist, the recipient's server (a) 
-         * SHOULD silently ignore the stanza (i.e., neither deliver it nor return an error) 
-         * if it is a presence stanza [...]
+         * Else if the JID is of the form <user@domain> or <user@domain/resource> and the associated user account does not exist, the
+         * recipient's server (a) SHOULD silently ignore the stanza (i.e., neither deliver it nor return an error) if it is a presence
+         * stanza [...]
          */
         return;
     }
@@ -130,9 +127,8 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
         IDMap<Resource> idMap = resourceDirectory.get(to);
         if (idMap.isEmpty()) {
             /*
-             * Else if the JID is of the form <user@domain/resource> and no available resource 
-             * matches the full JID, the recipient's server (a) SHOULD silently ignore the stanza 
-             * (i.e., neither deliver it nor return an error) if it is a presence stanza [...]
+             * Else if the JID is of the form <user@domain/resource> and no available resource matches the full JID, the recipient's server
+             * (a) SHOULD silently ignore the stanza (i.e., neither deliver it nor return an error) if it is a presence stanza [...]
              */
             return;
         }
@@ -148,37 +144,32 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
         IDMap<Resource> idMap = resourceDirectory.get(to);
         if (idMap.isEmpty()) {
             /*
-             * Else if the JID is of the form <user@domain> and there are no available resources 
-             * associated with the user, how the stanza is handled depends on the stanza type:
+             * Else if the JID is of the form <user@domain> and there are no available resources associated with the user, how the stanza is
+             * handled depends on the stanza type:
              */
             Type type = stanza.getType();
             if (type == Type.SUBSCRIBE || type == Type.SUBSCRIBED || type == Type.UNSUBSCRIBE || type == Type.UNSUBSCRIBED) {
                 /*
-                 * 1. For presence stanzas of type "subscribe", "subscribed", "unsubscribe", and "unsubscribed", 
-                 * the server MUST maintain a record of the stanza and deliver the stanza at least once 
-                 * (i.e., when the user next creates an available resource); in addition, the server MUST 
-                 * continue to deliver presence stanzas of type "subscribe" until the user either approves 
-                 * or denies the subscription request (see also Presence Subscriptions). 
+                 * 1. For presence stanzas of type "subscribe", "subscribed", "unsubscribe", and "unsubscribed", the server MUST maintain a
+                 * record of the stanza and deliver the stanza at least once (i.e., when the user next creates an available resource); in
+                 * addition, the server MUST continue to deliver presence stanzas of type "subscribe" until the user either approves or
+                 * denies the subscription request (see also Presence Subscriptions).
                  */
                 storeStanzaForDelayedDelivery(stanza);
             } else {
                 /*
-                 * 2. For all other presence stanzas, the server SHOULD silently ignore the stanza by not 
-                 * storing it for later delivery or replying to it on behalf of the user.
+                 * 2. For all other presence stanzas, the server SHOULD silently ignore the stanza by not storing it for later delivery or
+                 * replying to it on behalf of the user.
                  */
                 return;
             }
         } else {
             /*
-             * Else if the JID is of the form <user@domain> and there is at least one available resource 
-             * available for the user, the recipient's server MUST follow these rules:
-             * 
-             * For presence stanzas other than those of type "probe", the server MUST deliver the stanza 
-             * to all available resources; for presence probes, the server SHOULD reply based on the rules 
-             * defined in Presence Probes. In addition, the server MUST NOT rewrite the 'to' attribute 
-             * (i.e., it MUST leave it as <user@domain> rather than change it to <user@domain/resource>).
-             * 
-             * TODO: implement probe
+             * Else if the JID is of the form <user@domain> and there is at least one available resource available for the user, the
+             * recipient's server MUST follow these rules: For presence stanzas other than those of type "probe", the server MUST deliver
+             * the stanza to all available resources; for presence probes, the server SHOULD reply based on the rules defined in Presence
+             * Probes. In addition, the server MUST NOT rewrite the 'to' attribute (i.e., it MUST leave it as <user@domain> rather than
+             * change it to <user@domain/resource>). TODO: implement probe
              */
             MessageDispatcher messageDispatcher = getMessageDispatcher();
             messageDispatcher.send(stanza, idMap);
@@ -309,13 +300,26 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
 
     /**
      * Change the current Presence status of the client in the ResourceDirectory.
+     * 
      * @param stanza Stanza containing the new Presence Status
      * @throws OXException If stanza conversion fails or the status can't be changed
      */
     private void handlePresence(Presence stanza) throws OXException {
         ResourceDirectory resourceDirectory = getResourceDirectory();
-        Resource resource = new DefaultResource(stanza.getState());
-        resourceDirectory.set(stanza.getFrom(), resource);
-        
+        DefaultResource resource = new DefaultResource(stanza.getState());
+        resource.setMessage(stanza.getMessage());
+        resource.setPriority(stanza.getPriority());
+        Resource old = resourceDirectory.set(stanza.getFrom(), resource);
+        if (old != null) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format(
+                    "Update Presence: Old was: %1$s, %2$s, %3$d, %4$tT, %5$s",
+                    old.getPresenceState(),
+                    old.getMessage(),
+                    old.getPriority(),
+                    old.getTimestamp(),
+                    old.getRoutingInfo()));
+            }
+        }
     }
 }
