@@ -52,24 +52,23 @@ package com.openexchange.groupware.ldap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.logging.Log;
 import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.caching.dynamic.Refresher;
 import com.openexchange.exception.OXException;
 
 /**
- * This class is used overall behind the User interface and it manages to reload
- * the user object into the cache if the cache invalidated it.
+ * This class is used overall behind the User interface and it manages to reload the user object into the cache if the cache invalidates it.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 final class UserReloader extends Refresher<User> implements User {
 
-    /**
-     * For serialization.
-     */
+    private static final transient Log LOG = com.openexchange.log.Log.loggerFor(UserReloader.class);
+
     private static final long serialVersionUID = -2424522083743916869L;
 
     /**
-     * Cached delegate.
+     * Cached delegate. This must never be <code>null</code>.
      */
     private User delegate;
 
@@ -84,219 +83,149 @@ final class UserReloader extends Refresher<User> implements User {
         this.delegate = refresh();
     }
 
-    public UserReloader(final OXObjectFactory<User> factory, final User user, final String regionName) throws OXException {
+    public UserReloader(OXObjectFactory<User> factory, User user, String regionName, boolean doCache) throws OXException {
         super(factory, regionName, false);
         delegate = user;
-        cache(user);
+        if (doCache) {
+            cache(user);
+        }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean equals(final Object obj) {
         updateDelegate();
         return delegate.equals(obj);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int hashCode() {
         updateDelegate();
         return delegate.hashCode();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return "UserReloader: " + delegate.toString();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String[] getAliases() {
         updateDelegate();
         return delegate.getAliases();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Map<String, Set<String>> getAttributes() {
         updateDelegate();
         return delegate.getAttributes();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getContactId() {
         return delegate.getContactId();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getDisplayName() {
         updateDelegate();
         return delegate.getDisplayName();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getGivenName() {
         updateDelegate();
         return delegate.getGivenName();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int[] getGroups() {
         updateDelegate();
         return delegate.getGroups();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getId() {
         return delegate.getId();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getImapLogin() {
         updateDelegate();
         return delegate.getImapLogin();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getImapServer() {
         updateDelegate();
         return delegate.getImapServer();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Locale getLocale() {
         updateDelegate();
         return delegate.getLocale();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getLoginInfo() {
         updateDelegate();
         return delegate.getLoginInfo();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getMail() {
         updateDelegate();
         return delegate.getMail();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getMailDomain() {
         updateDelegate();
         return delegate.getMailDomain();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getPasswordMech() {
         updateDelegate();
         return delegate.getPasswordMech();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getPreferredLanguage() {
         updateDelegate();
         return delegate.getPreferredLanguage();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getShadowLastChange() {
         updateDelegate();
         return delegate.getShadowLastChange();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getSmtpServer() {
         updateDelegate();
         return delegate.getSmtpServer();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getSurname() {
         updateDelegate();
         return delegate.getSurname();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getTimeZone() {
         updateDelegate();
         return delegate.getTimeZone();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getUserPassword() {
         updateDelegate();
         return delegate.getUserPassword();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isMailEnabled() {
         updateDelegate();
@@ -312,8 +241,10 @@ final class UserReloader extends Refresher<User> implements User {
             if (null != tmp) {
                 this.delegate = tmp;
             }
-        } catch (final OXException e) {
-            throw new RuntimeException(e.getMessage(), e);
+        } catch (OXException e) {
+            // Refreshing the used object during normal processing of a single request might be risky. This may cause unexpected behavior if
+            // some code reads some attribute two times and gets two different values because of a value change meanwhile.
+            LOG.warn(e.getMessage(), e);
         }
     }
 }
