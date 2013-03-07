@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core
 BuildRequires:  java-devel >= 1.6.0
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -48,3 +48,9 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc datare
 /opt/open-xchange/bundles/*
 /opt/open-xchange/osgi/bundle.d/*
 %config(noreplace) /opt/open-xchange/etc/dataretention.properties
+
+%changelog
+* Thu Mar 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second release candidate for 6.22.2/7.0.2
+* Wed Mar 06 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.0.2 release
