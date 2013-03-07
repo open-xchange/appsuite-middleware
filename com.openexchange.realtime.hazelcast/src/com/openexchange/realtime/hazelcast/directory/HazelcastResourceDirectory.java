@@ -62,7 +62,6 @@ import com.hazelcast.core.Member;
 import com.hazelcast.core.MultiMap;
 import com.hazelcast.core.Transaction;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.directory.*;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.packet.ID;
@@ -77,9 +76,7 @@ import com.openexchange.realtime.util.IDMap;
  */
 public class HazelcastResourceDirectory extends DefaultResourceDirectory {
     
-    private static final Log LOG = LogFactory.getLog(HazelcastResourceDirectory.class);
-
-    private static final Log LOG = LogFactory.getLog(HazelcastResourceDirectory.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastResourceDirectory.class);
 
     /** Mapping of general IDs to full IDs e.q marc.arens@premium <-> ox://marc.arens@premuim/random. */
     private static final String ID_MAP = "rtIDMapping-0";
@@ -465,7 +462,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
         return hazelcast.getCluster().getLocalMember();
     }
     
-    private IDEventHandler CLEAN_UP = new IDEventHandler() {
+    private final IDEventHandler CLEAN_UP = new IDEventHandler() {
         
         @Override
         public void handle(String event, ID id, Object source, Map<String, Object> properties) {
