@@ -129,4 +129,9 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
     public void saveUserConfiguration(final int permissionBits, final int userId, final Context ctx) throws OXException {
         delegate.saveUserConfiguration(permissionBits, userId, ctx);
     }
+
+    @Override
+    UserConfiguration[] getUserConfigurationWithoutExtended(Context ctx, int[] userId, int[][] groups) throws OXException {
+        return delegate.getUserConfigurationWithoutExtended(ctx, userId, groups);
+    }
 }

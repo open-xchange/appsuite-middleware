@@ -90,6 +90,8 @@ public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
                         channel.send(stanza);
                     } catch (OXException e) {
                         exceptions.put(recipient, e);
+                    } catch (RuntimeException e) {
+                        exceptions.put(recipient, DispatchExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage()));
                     }
                 } else {
                     exceptions.put(recipient, DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString()));

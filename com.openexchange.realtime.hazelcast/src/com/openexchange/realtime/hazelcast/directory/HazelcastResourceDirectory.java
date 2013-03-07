@@ -62,7 +62,6 @@ import com.hazelcast.core.Member;
 import com.hazelcast.core.MultiMap;
 import com.hazelcast.core.Transaction;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.directory.*;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.packet.ID;
@@ -463,7 +462,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
         return hazelcast.getCluster().getLocalMember();
     }
     
-    private IDEventHandler CLEAN_UP = new IDEventHandler() {
+    private final IDEventHandler CLEAN_UP = new IDEventHandler() {
         
         @Override
         public void handle(String event, ID id, Object source, Map<String, Object> properties) {

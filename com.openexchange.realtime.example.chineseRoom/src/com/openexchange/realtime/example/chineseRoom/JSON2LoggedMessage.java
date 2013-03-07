@@ -58,7 +58,7 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link JSON2LoggedMessage}
+ * I take your JSON and turn it into a LoggedMessage!
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */

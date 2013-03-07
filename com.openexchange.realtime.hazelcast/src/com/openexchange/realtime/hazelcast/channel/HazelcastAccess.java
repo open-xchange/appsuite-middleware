@@ -54,24 +54,28 @@ import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 
-
 /**
- * {@link HazelcastAccess}
- *
+ * {@link HazelcastAccess} - Provides access to Hazelcast instance.
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class HazelcastAccess {
 
-    private static AtomicReference<HazelcastInstance> REFERENCE = new AtomicReference<HazelcastInstance>();
+    private static final AtomicReference<HazelcastInstance> REFERENCE = new AtomicReference<HazelcastInstance>();
 
+    /**
+     * Sets the Hazelcast instance to given value/reference.
+     * 
+     * @param hazelcast The Hazelcast instance
+     */
     public static void setHazelcastInstance(HazelcastInstance hazelcast) {
         REFERENCE.set(hazelcast);
     }
 
     /**
-     * Gets the hazelcast instance, throwing appropriate exceptions if it is not accessible.
-     *
-     * @return The hazelcast instance
+     * Gets the Hazelcast instance, throwing appropriate exceptions if it is not accessible.
+     * 
+     * @return The Hazelcast instance
      */
     public static HazelcastInstance getHazelcastInstance() throws OXException {
         HazelcastInstance hazelcastInstance = optHazelcastInstance();
@@ -82,8 +86,9 @@ public class HazelcastAccess {
     }
 
     /**
-     * Gets the (possibly <code>null</code> or not running) hazelcast instance.
-     * @return The hazelcast instance
+     * Gets the (possibly <code>null</code> or not running) Hazelcast instance.
+     * 
+     * @return The Hazelcast instance
      */
     public static HazelcastInstance optHazelcastInstance() {
         return REFERENCE.get();

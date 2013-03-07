@@ -1,3 +1,13 @@
+* 2013-03-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 25238: Corrected order of returned UserConfiguration array and massively improved throughput of the UserConfiguration caching
+   layer.
+
+* 2013-03-06 - marcus.klein@open-xchange.com
+
+ - Fix for bug 25162: Loading user configuration without acquired lock for the cache. Introduced cache for user configuration without
+   extended permissions.
+
 * 2013-03-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 25186: Check for empty string when parsing addresses

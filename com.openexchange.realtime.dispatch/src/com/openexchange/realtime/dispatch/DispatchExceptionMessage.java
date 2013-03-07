@@ -58,10 +58,16 @@ import com.openexchange.i18n.LocalizableStrings;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class DispatchExceptionMessage implements LocalizableStrings {
-    /** Could not find a handler for the specified stanza */
+
+    // Could not find a handler for the specified stanza
     public static final String MISSING_HANDLER_FOR_STANZA_MSG ="Could not find a handler for the given stanza: . \"%1$s\"";
-    /** Could not send stanza to resource. Resource was offline: %1$s */
+
+    // Could not send stanza to resource. Resource was offline: %1$s
     public static final String RESOURCE_OFFLINE_MSG = "Could not send stanza to resource. Resource was offline: %1$s";
-    /** Unknown channel %1$s */
+
+    // Unknown channel %1$s
     public static final String UNKNOWN_CHANNEL = "Unknown channel %1$s";
+
+    // Unexpected error: %1$s
+    public static final String UNEXPECTED_ERROR = "Unexpected error: %1$s";
 }

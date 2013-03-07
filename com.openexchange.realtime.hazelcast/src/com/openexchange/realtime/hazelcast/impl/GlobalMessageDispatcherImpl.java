@@ -63,6 +63,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 import org.apache.commons.logging.Log;
 import com.hazelcast.core.DistributedTask;
+import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.RealtimeExceptionCodes;
@@ -76,7 +77,6 @@ import com.openexchange.realtime.hazelcast.channel.StanzaDispatcher;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.IDMap;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
 
 /**
@@ -87,7 +87,7 @@ import com.openexchange.threadpool.ThreadPools;
 public class GlobalMessageDispatcherImpl implements MessageDispatcher {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(GlobalMessageDispatcherImpl.class);
-    private ResourceDirectory directory;
+    private final ResourceDirectory directory;
     
     public GlobalMessageDispatcherImpl(ResourceDirectory directory) {
         super();
@@ -135,14 +135,15 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
     }
     
     private Map<ID, OXException> deliver(Stanza stanza, Map<Member, Set<ID>> targets) throws OXException {
-        Member localMember = HazelcastAccess.getHazelcastInstance().getCluster().getLocalMember();
+        final HazelcastInstance hazelcastInstance = HazelcastAccess.getHazelcastInstance();
+        Member localMember = hazelcastInstance.getCluster().getLocalMember();
         Set<ID> localIds = targets.remove(localMember);
         if (localIds != null) {
-            LocalMessageDispatcher dispatcher = Services.getService(LocalMessageDispatcher.class);
-            dispatcher.send(stanza, localIds);
+            // Send via local message dispatcher to locally reachable receivers
+            Services.getService(LocalMessageDispatcher.class).send(stanza, localIds);
         }
-        
-        ExecutorService executorService = HazelcastAccess.getHazelcastInstance().getExecutorService();
+        // Sent to remote receivers
+        ExecutorService executorService = hazelcastInstance.getExecutorService();
         List<FutureTask<Map<ID, OXException>>> futures = new ArrayList<FutureTask<Map<ID, OXException>>>();
         for (Member receiver : targets.keySet()) {
             Set<ID> ids = targets.get(receiver);
@@ -152,7 +153,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
             executorService.execute(task);
             futures.add(task);
         }
-        
+        // Await completion of send requests and extract their exceptions (if any)
         Map<ID, OXException> exceptions = new HashMap<ID, OXException>();
         for (FutureTask<Map<ID, OXException>> future : futures) {
             try {

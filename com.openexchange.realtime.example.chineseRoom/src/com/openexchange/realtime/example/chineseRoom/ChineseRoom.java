@@ -65,61 +65,80 @@ import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link ChineseRoom}
+ * This is the nitty gritty. A {@link ChineseRoom} has members, keeps a log of messages (shared state of all members), allows members to speak {@link #handleSay(Stanza)} and
+ * thereby modify the shared state and allows members to retrieve the state {@link #handleGetLog(Stanza)}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ChineseRoom extends GroupDispatcher implements ComponentHandle {
-    
+    // An introspecting handler that allows clients to formulate stanzas that call all handle* methods
     private static final ActionHandler handler = new ActionHandler(ChineseRoom.class);
     
+    // Our simple minded shared state
     private CopyOnWriteArrayList<LoggedMessage> messages = new CopyOnWriteArrayList<LoggedMessage>();
     
-    
+    // Create a new chinese room instance
     public ChineseRoom(ID id) {
         super(id, handler);
     }
     
     // Say something in the chat room
     public void handleSay(Stanza stanza) throws OXException {
+        // We only allow members to say something in the chat room
         if (!isMember(stanza.getFrom())) {
             return; // Discard
         }
+        // Retrieve the message from the payloads
         StringBuilder message = new StringBuilder();
+        // We're iterating over all messages that are constructed with the china.message element path
         for(PayloadTree messages: stanza.getPayloads(new ElementPath("china", "message"))){
+            // Simply append all messages
             message.append(messages.getRoot().getData().toString());
         }
+        // Turn the message into pseudo chinese
         String chineseMessage = chineseVersionOf (message.toString());
         
+        // Modify the shared state
         messages.add(new LoggedMessage(chineseMessage, stanza.getFrom()));
+    
+        // Send the message to all participants in the chat (including the one who said it originally
         sendToAll( stanza, chineseMessage);
     }
     
     // Get a replay of old messages
     public void handleGetLog(Stanza stanza) throws OXException {
+        // Again, only members may retrieve the history
         if (!isMember(stanza.getFrom())) {
             return; // Discard
         }
+        // As an answer, we create a new message
+        // to the one who asked for the log containing all
+        // LoggedMessages
         Message message = new Message();
         message.setFrom(getId());
         message.setTo(stanza.getFrom());
         for(LoggedMessage logged: messages) {
+            // Add a payload entry for every logged message
+            // We can just throw in the LoggedMessage instances, because
+            // We have registered a JSON converter
             message.addPayload(new PayloadTree(
                 PayloadTreeNode.builder()
                 .withPayload(
-                    new PayloadElement(logged, LoggedMessage.class.getName(), "china", "replay")
+                    new PayloadElement(logged, LoggedMessage.class.getName(), "china", "replay") 
                 )
             .build()
             ));
         }
-        
+        // Send the message to the one who asked
         send(message);
     }
-
+    
+    // Droo Chonosen mot nom Kontrobo§, so§on oof dor Stro§o ond orzohtlon soch wos
     private String chineseVersionOf(String string) {
         return string.replaceAll("[aeiou]", "o");
     }
-
+    
+    // Build a message out of a string
     private void sendToAll(Stanza stanza, String chineseVersion) throws OXException {
         Message message = new Message();
         message.setFrom(stanza.getFrom());
@@ -137,7 +156,14 @@ public class ChineseRoom extends GroupDispatcher implements ComponentHandle {
     }
     
     @Override
+    protected void firstJoined(ID id) {
+        // Hooray! Someone joined! This could be a good place to initialise the shared state, if we'd save it externally
+        System.out.println("Load data");
+    }
+    
+    @Override
     protected void onDispose() {
+        // Seems we're being closed down, this would be the place to persist our shared state
         System.out.println("Persist data");
     }
 
