@@ -63,28 +63,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 public interface UserConfigurationService {
 
     /**
-     * A convenience method that invokes {@link #getUserConfigurationSafe(int, int[], Context)} with the group parameter set to
-     * <code>null</code>
-     *
-     * @param userId The user ID
-     * @param ctx The context
-     * @return The corresponding instance of {@link UserConfiguration} or <code>null</code> on exception
-     * @see #getUserConfigurationSafe(int, int[], Context)
-     */
-    public UserConfiguration getUserConfigurationSafe(final int userId, final Context ctx);
-
-    /**
-     * A convenience method that invokes {@link #getUserConfiguration(int, int[], Context)}. If an exception occurs <code>null</code> is
-     * returned
-     *
-     * @param userId The user ID
-     * @param groups The user's groups
-     * @param ctx The contexts
-     * @return The corresponding instance of {@link UserConfiguration} or <code>null</code> on exception
-     */
-    public UserConfiguration getUserConfigurationSafe(final int userId, final int[] groups, final Context ctx);
-
-    /**
      * Determines the instance of <code>UserConfiguration</code> that corresponds to given user ID.
      *
      * @param userId - the user ID
@@ -158,15 +136,5 @@ public interface UserConfigurationService {
      * @throws OXException If saving user configuration fails.
      */
     public void saveUserConfiguration(final UserConfiguration userConfiguration) throws OXException;
-
-    /**
-     * Saves specified user configuration.
-     *
-     * @param permissionBits The permission bits.
-     * @param userId The user ID.
-     * @param ctx The context the user belongs to.
-     * @throws OXException If saving user configuration fails.
-     */
-    public void saveUserConfiguration(int permissionBits, int userId, Context ctx) throws OXException;
 
 }

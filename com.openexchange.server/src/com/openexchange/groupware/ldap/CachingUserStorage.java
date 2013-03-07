@@ -205,7 +205,7 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
     public User[] getUser(final Context ctx, final int[] userIds) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
-            return delegate.getUser(ctx);
+            return delegate.getUser(ctx, userIds);
         }
         final Cache cache = cacheService.getCache(REGION_NAME);
         final Map<Integer, User> map = new HashMap<Integer, User>(userIds.length, 1);
