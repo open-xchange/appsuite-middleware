@@ -141,6 +141,9 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      * @throws MessagingException If such a fail-fast error exists and has not elapsed, yet
      */
     public static void checkFailFast(final IMAPStore imapStore, final String fullName) throws MessagingException {
+        if (null == imapStore || null == fullName) {
+            return;
+        }
         final String key = fullName + '@' + imapStore.toString();
         final FailFastError failFastError = FAIL_FAST.get(key);
         if (null == failFastError) {
