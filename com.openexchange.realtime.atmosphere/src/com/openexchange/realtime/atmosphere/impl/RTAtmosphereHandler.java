@@ -79,12 +79,14 @@ import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
 import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.directory.DefaultResource;
+import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.dispatch.StanzaSender;
 import com.openexchange.realtime.handle.StanzaQueueService;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.util.IDMap;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -96,7 +98,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 /**
  * {@link RTAtmosphereHandler} - Handler that gets associated with the {@link RTAtmosphereChannel} and does the main work of handling
  * incoming and outgoing Stanzas. Transformation of Stanzas is handed over to the proper OXRTHandler
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -118,7 +120,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     /**
      * Initializes a new {@link RTAtmosphereHandler}.
-     *
+     * 
      * @param library The library to use for OXRTHandler lookups needed for transformations of incoming and outgoing stanzas
      * @param services The service-lookup providing needed services
      */
@@ -163,13 +165,20 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     // Create new broadcaster for AtmosphereResource (if none already exists) Id will be formed like /context/user/resource
                     String broadcasterId = generateBroadcasterId(atmosphereState.id);
                     Broadcaster broadcaster = BroadcasterFactory.getDefault().lookup(broadcasterId, true);
-                    atmosphereState.atmosphereResource.addEventListener(new AtmosphereResourceCleanupListener(this, atmosphereState, broadcaster));
+                    atmosphereState.atmosphereResource.addEventListener(new AtmosphereResourceCleanupListener(
+                        this,
+                        atmosphereState,
+                        broadcaster));
                     broadcaster.addAtmosphereResource(atmosphereState.atmosphereResource);
 
                     // keep track of connected users
                     trackConnectedUsers(atmosphereState.id.toGeneralForm().toString(), broadcasterId);
 
-                    // register the resource
+                    /*
+                     * Register the atmosphere resource/connected user but don't overwrite an existing PresenceState. A GET is performed
+                     * every X seconds idle time or after every POST when a client is connected via long-polling. So a POST to set the
+                     * PresenceState would cause a GET that mustn't overwrite the PresenceState with a DefaultResource.
+                     */
                     ResourceDirectory resourceDirectory = AtmosphereServiceRegistry.getInstance().getService(ResourceDirectory.class);
                     resourceDirectory.set(atmosphereState.id, new DefaultResource());
 
@@ -180,7 +189,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 } catch (OXException e) {
                     // TODO:ExceptionHandling to connected clients
                     writeExceptionToResource(e, resource);
-                    LOG.error(e);
+                    LOG.error(e.getMessage(), e);
                 }
             } else {
                 response.getWriter().write("OK");
@@ -213,14 +222,14 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     handleIncoming(stanzaBuilder.build(), atmosphereState);
                     printBroadcasters("Broadcasters after POST Request");
                     printSessions("Sessions after POST Request");
-                } catch (JSONException illEx) {
-                    LOG.error(illEx);
-                    writeExceptionToResource(illEx, resource);
+                } catch (JSONException jsonEx) {
+                    LOG.error(jsonEx.getMessage(), jsonEx);
+                    writeExceptionToResource(jsonEx, resource);
                 } catch (IllegalArgumentException illEx) {
-                    LOG.error(illEx);
+                    LOG.error(illEx.getMessage(), illEx);
                     writeExceptionToResource(illEx, resource);
                 } catch (OXException e) {
-                    LOG.error(e);
+                    LOG.error(e.getMessage(), e);
                     writeExceptionToResource(e, resource);
                 }
             }
@@ -260,7 +269,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             sb.append("\n--------------------------------------------------------------------------------\n");
             sb.append(preString);
             sb.append(":\n");
-            Set<Entry<String,RTAtmosphereState>> sessionSet = sessionIdToState.entrySet();
+            Set<Entry<String, RTAtmosphereState>> sessionSet = sessionIdToState.entrySet();
             sb.append("\tSessions: " + sessionSet.size()).append('\n');
             for (Entry<String, RTAtmosphereState> entry : sessionSet) {
                 String session = entry.getKey();
@@ -278,7 +287,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     /**
      * Keep track of connected users by mapping user@context to /context/user/resource
-     *
+     * 
      * @param generalId id in form of user@context
      * @param broadcasterId one of the several possible broadcasterIds in the form of /context/user/resource
      */
@@ -291,7 +300,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             userToBroadcasterIDs.put(generalId, broadcasterIds);
         }
     }
-    
+
     /**
      * CleanUp callback used by AtmosphereResourceCleanupListener instances.
      */
@@ -302,14 +311,14 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         } catch (OXException e) {
             LOG.error("Could not unregister resource " + atmosphereState.id.toString() + ".", e);
         }
-        
+
         String generalId = atmosphereState.id.toGeneralForm().toString();
         String broadcasterId = generateBroadcasterId(atmosphereState.id);
         Set<String> broadcasterIds = userToBroadcasterIDs.get(generalId);
         if (broadcasterIds != null) {
             broadcasterIds.remove(broadcasterId);
         }
-        
+
         sessionIdToState.remove(atmosphereState.session.getSessionID());
     }
 
@@ -341,7 +350,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     /**
      * Write a simple JSON error to the client.
-     *
+     * 
      * @param exception the exception to send.
      * @param resource the resource representing the client
      * @throws IOException
@@ -358,7 +367,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     /**
      * Convert the session info into a ServerSession Object.
-     *
+     * 
      * @param sessionInfo The sessionInfo to convert
      * @return The ServerSession objectmatching the session infos
      * @throws IllegalArgumentException if the sessionInfo is null or empty
@@ -386,7 +395,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     /**
      * Inspect the request headers for session information and return it.
-     *
+     * 
      * @param request the request to inspect
      * @return null if no session info can be found, the session info otherwise
      */
@@ -396,7 +405,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     /**
      * Inspect the request parameters for session information and return it.
-     *
+     * 
      * @param request the request to inspect
      * @return null if no session info can be found, the session info otherwise
      */
@@ -406,7 +415,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     /**
      * Inspect the request's post data for session information and return it.
-     *
+     * 
      * @param postData the JSON String to inspect
      * @return null if no session info can be found, the session info otherwise
      * @throws OXException if the postData isn't valid JSON
@@ -426,7 +435,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     /**
      * Get a ServerSession object from a list of session infos submitted in the request. Fails on the first non-null sessionInfo parameter
      * that is invalid.
-     *
+     * 
      * @param sessionInfo a list of session infos, nulls are allowed
      * @return The Serversession that matches the first given session info
      * @throws OXException if no matching ServerSession can be found
@@ -444,7 +453,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     /**
      * Check if an entity is connected to the associated Channel.
-     *
+     * 
      * @param id the ID of the entity you are looking for.
      * @return true if the entity is connected via one or more resources, false otherwise
      */
@@ -470,7 +479,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     /**
      * Keep track of the sessionID -> RTAtmosphereState association. Checks the AtmosphereResource for the session header/parameter and adds
      * it to the sessionIdToState map that tracks Serversession <-> RTAtmosphereState
-     *
+     * 
      * @param atmosphereResource the AtmosphereResource
      * @return An RTAtmosphereState that assembles the AtmosphereResource, Serversession and ID
      * @throws OXException if the server session is missing from the AtmosphereResource
@@ -487,7 +496,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     /**
      * Build an unique {@link ID} <code>{"ox", userLogin, context, resource}</code> from the infos given by the AtmosphereResource and
      * ServerSession.
-     *
+     * 
      * @param atmosphereResource the current AtmosphereResource
      * @param serverSession the associated serverSession
      * @return the constructed unique ID
@@ -515,7 +524,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     /**
      * Get context string from login string
-     *
+     * 
      * @param login the login string
      * @return an empty string if no context can be found, the context oterwise
      */
@@ -530,18 +539,18 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     /**
      * Handle incoming Stanza and decide if they have an internal namespace and need to be handled by the Channel/Handler or if they should
      * be dispatched iow. transformed to POJOs and handed over to the MessageDispatcher.
-     *
+     * 
      * @param stanza The Stanza to handle
      * @param atmosphereState The associated state
      * @throws OXException
      */
     protected <T extends Stanza> void handleIncoming(T stanza, RTAtmosphereState atmosphereState) throws OXException {
-        //Transform payloads
+        // Transform payloads
         StanzaTransformer transformer = new StanzaTransformer();
         transformer.incoming(stanza);
-        //Initialize default fields after tranforming
+        // Initialize default fields after tranforming
         stanza.initializeDefaults();
-        
+
         StanzaQueueService stanzaQueueService = AtmosphereServiceRegistry.getInstance().getService(StanzaQueueService.class);
         if (!stanzaQueueService.enqueueStanza(stanza)) {
             // TODO: exception?
@@ -552,7 +561,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * Create a broadcaster id from a given {@link ID}. Creates broadcaster ids like : /context/user or /context/user/resource depending if
      * the given ID contains a resource. This way we can address: - single clients of a user identified by resource: /context/user/resource
      * - all clients of a user: /context/user/* - all clients of all users in a context: /context/* - all clients in all contexts: /*
-     *
+     * 
      * @param id the id to use for generating the broadcaster id
      * @return the generated broadcaster id
      */
@@ -564,9 +573,10 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         }
         return sb.toString();
     }
+
     /**
      * Handle outgoing Stanzas by transforming it into the proper representation and sending it to the addressed entity.
-     *
+     * 
      * @param stanza the Stanza to send
      * @throws OXException if no transformer for the given Stanza can be found
      */
