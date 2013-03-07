@@ -58,6 +58,10 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.helpers.AbstractPublicationService;
@@ -129,6 +133,11 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
         super.modifyOutgoing(publication);
         publication.getConfiguration().put(URL, PREFIX+"/"+publication.getContext().getContextId()+"/"+publication.getConfiguration().get(SECRET));
         publication.getConfiguration().remove(SECRET);
+        
+        DocumentMetadata metadata = InfostorePublicationServlet.loadDocumentMetadata(publication);
+        publication.setDisplayName((metadata.getTitle() != null) ? metadata.getTitle() : metadata.getFileName());
+        
+        
     }
 
     public Publication getPublication(Context ctx, String secret) throws OXException {

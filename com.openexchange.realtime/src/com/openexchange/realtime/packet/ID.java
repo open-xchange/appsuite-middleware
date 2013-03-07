@@ -1,8 +1,20 @@
 package com.openexchange.realtime.packet;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.util.IdLookup;
+import com.openexchange.realtime.util.IdLookup.UserAndContext;
+import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * An ID describes a valid sender or recipient of a {@link Stanza}.
@@ -20,17 +32,40 @@ public class ID implements Serializable {
 
     private static final long serialVersionUID = -5237507998711320109L;
 
+    private static ConcurrentHashMap<ID, ConcurrentHashMap<String, List<IDEventHandler>>> listeners = new ConcurrentHashMap<ID, ConcurrentHashMap<String, List<IDEventHandler>>>();
+    
     private String protocol;
     private String user;
     private String context;
     private String resource;
+    private String component;
 
     /**
      * Pattern to match IDs consisting of protocol, user, context and resource
      * e.g. xmpp://user@context/notebook
      * */
-    private static final Pattern PATTERN = Pattern.compile("(?:(\\w+)://)?([^@]+)@([^/]+)/?(.*)");
-
+    private static final Pattern PATTERN = Pattern.compile("(?:(\\w+?)(\\.\\w+)?://)?([^@/]+)@?([^/]+)?/?(.*)");
+    
+    public ID(final String id, String defaultContext) {
+        final Matcher matcher = PATTERN.matcher(id);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Could not parse id: " + id + ". User and context are obligatory for ID creation.");
+        }
+        protocol = matcher.group(1);
+        component = matcher.group(2);
+        user = matcher.group(3);
+        context = matcher.group(4);
+        resource = matcher.group(5);
+        
+        if (context == null) {
+            context = defaultContext;
+        }
+        
+        sanitize();
+        validate();
+        
+    }
+    
     /**
      * Initializes a new {@link ID} by a String with the syntax "xmpp://user@context/resource".
      * @param id String with the syntax "xmpp://user@context/resource".
@@ -42,20 +77,22 @@ public class ID implements Serializable {
             throw new IllegalArgumentException("Could not parse id: " + id + ". User and context are obligatory for ID creation.");
         }
         protocol = matcher.group(1);
-        user = matcher.group(2);
-        context = matcher.group(3);
-        resource = matcher.group(4);
+        component = matcher.group(2);
+        user = matcher.group(3);
+        context = matcher.group(4);
+        resource = matcher.group(5);
 
         sanitize();
         validate();
     }
 
-    public ID(final String protocol, final String user, final String context, final String resource) {
+    public ID(final String protocol, final String component, final String user, final String context, final String resource) {
         super();
         this.protocol = protocol;
         this.user = user;
         this.context = context;
         this.resource = resource;
+        this.component = component;
         sanitize();
         validate();
     }
@@ -71,6 +108,14 @@ public class ID implements Serializable {
 
         if (resource != null && isEmpty(resource)) {
             resource = null;
+        }
+        
+        if (component != null) {
+            if (isEmpty(component)) {
+                component = null;
+            } else {
+                component = component.substring(1);
+            }
         }
 
     }
@@ -137,6 +182,14 @@ public class ID implements Serializable {
         this.resource = resource;
         validate();
     }
+    
+    public String getComponent() {
+        return component;
+    }
+    
+    public void setComponent(String component) {
+        this.component = component;
+    }
 
     @Override
     public int hashCode() {
@@ -146,6 +199,7 @@ public class ID implements Serializable {
         result = prime * result + ((protocol == null) ? 0 : protocol.hashCode());
         result = prime * result + ((resource == null) ? 0 : resource.hashCode());
         result = prime * result + ((user == null) ? 0 : user.hashCode());
+        result = prime * result + ((component == null) ? 0 : component.hashCode());
         return result;
     }
 
@@ -186,14 +240,30 @@ public class ID implements Serializable {
         } else if (!user.equals(other.user)) {
             return false;
         }
+        if (component == null) {
+            if (other.component != null) {
+                return false;
+            }
+        } else if (!component.equals(other.component)) {
+            return false;
+        }
         return true;
     }
 
     @Override
     public String toString() {
         final StringBuilder b = new StringBuilder(32);
+        boolean needSep = false;
         if (protocol != null) {
-            b.append(protocol).append("://");
+            b.append(protocol);
+            needSep = true;
+        }
+        if (component != null) {
+            b.append(".").append(component);
+            needSep = true;
+        }
+        if(needSep) {
+            b.append("://");
         }
         b.append(user).append('@').append(context);
         if (resource != null) {
@@ -208,7 +278,7 @@ public class ID implements Serializable {
      * @return
      */
     public ID toGeneralForm() {
-        return new ID(null, user, context, null);
+        return new ID(null, component, user, context, null);
     }
 
     /**
@@ -219,5 +289,102 @@ public class ID implements Serializable {
      */
     public boolean isGeneralForm() {
         return null == protocol && null == resource;
+    }
+    
+    public ServerSession toSession() throws OXException {
+        UserAndContext userAndContextIDs = IdLookup.getUserAndContextIDs(this);
+        if (userAndContextIDs != null) {
+            return ServerSessionAdapter.valueOf(SessionObjectWrapper.createSessionObject(userAndContextIDs.getUserId(), userAndContextIDs.getContextId(), (resource != null) ? resource : "rt"));
+        }
+        SessionObject sessionObject = new SessionObject("anonymous");
+        return ServerSessionAdapter.valueOf(sessionObject);
+    }
+    
+    
+    
+    
+    /**
+     * Execute the event handler when the "event" happens
+     */
+    public void on(String event, IDEventHandler handler) {
+        handlerList(event).add(handler);
+    }
+
+    /**
+     * Execute the event handler when the event happens, but only once
+     * @param event
+     * @param handler
+     */
+    public void one(String event, IDEventHandler handler) {
+        on(event, new OneOf(handler));
+    }
+    
+    /**
+     * Remove the event handler
+     */
+    public void off(String event, IDEventHandler handler) {
+        handlerList(event).remove(handler);
+    }
+    
+    /**
+     * Remove all event handlers for this ID
+     */
+    public void clearListeners() {
+        listeners.remove(this);
+    }
+    
+    /**
+     * Trigger an event on this ID, with the give properties
+     */
+    public void trigger(String event, Object source, Map<String, Object> properties) {
+        for(IDEventHandler handler: handlerList(event)) {
+            handler.handle(event, this, source, properties);
+        }
+        if (event.equals("dispose")) {
+            clearListeners();
+        }
+    }
+    
+    /**
+     * Trigger an event on this ID.
+     */
+    public void trigger(String event, Object source) {
+        trigger(event, source, new HashMap<String, Object>());
+    }
+    
+    private List<IDEventHandler> handlerList(String event) {
+        ConcurrentHashMap<String, List<IDEventHandler>> events = listeners.get(this);
+        if (events == null) {
+            events = new ConcurrentHashMap<String, List<IDEventHandler>>();
+            listeners.put(this, events);
+        }
+        
+        List<IDEventHandler> list = events.get(events);
+        
+        if (list == null) {
+            list = new CopyOnWriteArrayList<IDEventHandler>();
+            events.put(event, list);
+        }
+        
+        return list;
+        
+    }
+    
+    private class OneOf implements IDEventHandler {
+        IDEventHandler delegate;
+        
+        public OneOf(IDEventHandler delegate) {
+            super();
+            this.delegate = delegate;
+        }
+
+
+
+        @Override
+        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
+            delegate.handle(event, id, source, properties);
+            id.off(event, this);
+        }
+        
     }
 }

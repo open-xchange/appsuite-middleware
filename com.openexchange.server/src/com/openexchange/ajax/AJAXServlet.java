@@ -1007,7 +1007,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      *
      * @return The {@link ServletFileUpload} instance
      */
-    private static ServletFileUpload getFileUploadBase() {
+    protected static ServletFileUpload getFileUploadBase() {
         ServletFileUpload tmp = servletFileUpload;
         if (null == tmp) {
             synchronized (AJAXServlet.class) {

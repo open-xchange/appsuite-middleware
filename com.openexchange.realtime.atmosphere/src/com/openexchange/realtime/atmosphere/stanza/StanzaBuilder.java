@@ -61,6 +61,7 @@ import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link StanzaBuilder} - Abstract StanzaBuilder class. StanzaBuilders take incoming AtmosphereRequest and are responsible for building the
@@ -82,6 +83,16 @@ public abstract class StanzaBuilder<T extends Stanza> {
 
     protected T stanza;
 
+    private ServerSession session;
+
+    /**
+     * Initializes a new {@link StanzaBuilder}.
+     * @param session
+     */
+    public StanzaBuilder(ServerSession session) {
+        this.session = session;
+    }
+
     /**
      * Set the obligatory {@link Stanza} elements.
      *
@@ -91,6 +102,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
         from();
         to();
         id();
+        selector();
         payloads();
     }
 
@@ -100,13 +112,23 @@ public abstract class StanzaBuilder<T extends Stanza> {
 
     private void to() {
         if (json.has("to")) {
-            stanza.setTo(new ID(json.optString("to")));
+            String defaultContext = null;
+            if (session != null) {
+                defaultContext = session.getContext().getName();
+            }
+            stanza.setTo(new ID(json.optString("to"), defaultContext));
         }
     }
 
     private void id() {
         if (json.has("id")) {
             stanza.setId(json.optString("id"));
+        }
+    }
+    
+    private void selector() {
+        if (json.has("selector")) {
+            stanza.setSelector(json.optString("selector"));
         }
     }
 

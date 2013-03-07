@@ -83,7 +83,9 @@ public class HandlerUtils {
         if (to == null) {
             return false;
         }
-        
+        if (to.getProtocol().equals("synthetic")) {
+            return true;
+        }
         try {
             UserAndContext userAndContextID = IdLookup.getUserAndContextIDs(to);
             return true;

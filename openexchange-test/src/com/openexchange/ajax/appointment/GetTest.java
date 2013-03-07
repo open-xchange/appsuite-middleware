@@ -69,6 +69,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.search.ContactSearchObject;
 
 public class GetTest extends AppointmentTest {
 
@@ -96,8 +97,12 @@ public class GetTest extends AppointmentTest {
 
     public void testGetWithParticipants() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testGetWithParticipants");
-
-        final int userParticipantId = ContactTest.searchContact(getWebConversation(), userParticipant3, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId())[0].getInternalUserId();
+        ContactSearchObject cso = new ContactSearchObject();
+        cso.setEmail1(userParticipant3);
+        Contact[] contacts = ContactTest.searchContactAdvanced(getWebConversation(), cso, FolderObject.SYSTEM_LDAP_FOLDER_ID, new int[] { Contact.INTERNAL_USERID }, PROTOCOL + getHostName(), getSessionId());
+        assertTrue(userParticipant3 + " not found", null != contacts && 0 < contacts.length);
+        assertTrue("multiple results for " + userParticipant3, 1 == contacts.length);
+        int userParticipantId = contacts[0].getInternalUserId();
         final int groupParticipantId = GroupTest.searchGroup(getWebConversation(), groupParticipant, PROTOCOL, getHostName(), getSessionId())[0].getIdentifier();
         final int resourceParticipantId = ResourceTest.searchResource(getWebConversation(), resourceParticipant, PROTOCOL + getHostName(), getSessionId())[0].getIdentifier();
 

@@ -1003,6 +1003,18 @@ public class AJAXRequestData {
     }
 
     /**
+     * Cleans-up any upload resources.
+     */
+    public void cleanUploads() {
+        synchronized (this.files) {
+            final UploadEvent ue = uploadEvent;
+            if (null != ue) {
+                ue.cleanUp();
+            }
+        }
+    }
+
+    /**
      * Gets the module, e.g. <code>"mail"</code>.
      * 
      * @return The module

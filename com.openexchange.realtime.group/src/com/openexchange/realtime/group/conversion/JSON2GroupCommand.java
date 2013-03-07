@@ -47,64 +47,52 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl;
+package com.openexchange.realtime.group.conversion;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.conversion.simple.SimplePayloadConverter;
+import com.openexchange.conversion.simple.SimplePayloadConverter.Quality;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.payload.converter.AtmospherePayloadTreeConverterer;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.group.GroupCommand;
+import com.openexchange.realtime.group.commands.JoinCommand;
+import com.openexchange.realtime.group.commands.LeaveCommand;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link StanzaTransformer} - Transforms a Stanza "from" one representation "to" another by transforming all the PayloadTrees found in the
- * Stanza.
+ * {@link JSON2GroupCommand}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
+public class JSON2GroupCommand implements SimplePayloadConverter {
 
-public class StanzaTransformer {
-
-    /**
-     * Transform an incoming {@link Stanza} by transforming every PayloadTree of the Stanza.
-     *
-     * @param stanza The incoming stanza to process
-     * @throws OXException When transformation of the Stanza fails
-     */
-    public Stanza incoming(Stanza stanza) throws OXException {
-        List<PayloadTree> payloadTrees = new ArrayList<PayloadTree>(stanza.getPayloads());
-        List<PayloadTree> transformedPayloadTrees = new ArrayList<PayloadTree>();
-
-        for (PayloadTree tree : payloadTrees) {
-            // TODO: Use ThreadService to transform trees in parallel
-            AtmospherePayloadTreeConverterer transformer = new AtmospherePayloadTreeConverterer();
-            PayloadTree transformedTree = transformer.incoming(tree);
-            transformedPayloadTrees.add(transformedTree);
-        }
-        stanza.setPayloads(transformedPayloadTrees);
-        return stanza;
+    @Override
+    public String getInputFormat() {
+        return "json";
     }
 
-    /**
-     * Transform an outgoing {@link Stanza} by transforming every PayloadTree of the Stanza.
-     *
-     * @param stanza The outgoing stanza to process
-     * @throws OXException When transformation of the Stanza fails
-     */
-    public Stanza outgoing(Stanza stanza) throws OXException {
-        List<PayloadTree> payloadTrees = new ArrayList<PayloadTree>(stanza.getPayloads());
-        List<PayloadTree> transformedPayloadTrees = new ArrayList<PayloadTree>();
-
-        for (PayloadTree tree : payloadTrees) {
-            // TODO: Use ThreadService to transform trees in parallel
-            AtmospherePayloadTreeConverterer transformer = new AtmospherePayloadTreeConverterer();
-            PayloadTree transformedTree = transformer.outgoing(tree);
-            transformedPayloadTrees.add(transformedTree);
-        }
-        stanza.setPayloads(transformedPayloadTrees);
-        return stanza;
+    @Override
+    public String getOutputFormat() {
+        return GroupCommand.class.getName();
     }
+
+    @Override
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
+
+    @Override
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+        String command = (String) data;
+        if (command.equalsIgnoreCase("join")) {
+            return new JoinCommand();
+        }
+        if (command.equalsIgnoreCase("leave")) {
+            return new LeaveCommand();
+        }
+        throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("command", command);
+    }
+
 
 }

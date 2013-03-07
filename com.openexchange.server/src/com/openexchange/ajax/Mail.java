@@ -3908,7 +3908,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             final BlockingQueue<MimeMessage> queue = new ArrayBlockingQueue<MimeMessage>(100);
             Future<Object> future = null;
             {
-                final ServletFileUpload servletFileUpload = new ServletFileUpload();
+                final ServletFileUpload servletFileUpload = getFileUploadBase();
                 if (!ServletFileUpload.isMultipartContent(req)) {
                     throw MailExceptionCode.UNSUPPORTED_MIME_TYPE.create(req.getContentType());
                 }

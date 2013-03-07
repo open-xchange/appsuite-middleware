@@ -123,6 +123,9 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
              * Serve with best-fit or delegate preview service
              */
             final PreviewService previewService = getBestFitOrDelegate(toLowerCase(mimeType), output);
+            if (previewService == null) {
+                throw new OXException();
+            }
             return previewService.getPreviewFor(arg, output, session, pages);
         } catch (final IOException e) {
             throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
@@ -135,6 +138,9 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
     public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session, int pages) throws OXException {
         final String mimeType = documentData.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);
         final PreviewService previewService = getBestFitOrDelegate(toLowerCase(mimeType), output);
+        if (previewService == null) {
+            throw new OXException();
+        }
         return previewService.getPreviewFor(documentData, output, session, pages);
     }
 
@@ -183,11 +189,11 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
     private PreviewService getBestFitOrDelegate(final String mimeType, final PreviewOutput output) {
         final Map<PreviewOutput, BlockingQueue<InternalPreviewService>> map = serviceMap.get(mimeType);
         if (map == null) {
-            return delegate;
+            return null;
         }
         final BlockingQueue<InternalPreviewService> queue = map.get(output);
         if (queue == null) {
-            return delegate;
+            return null;
         }
         return queue.peek();
     }

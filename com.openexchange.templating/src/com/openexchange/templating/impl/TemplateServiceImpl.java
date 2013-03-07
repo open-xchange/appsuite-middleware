@@ -351,6 +351,7 @@ public class TemplateServiceImpl implements TemplateService {
                         templateText = extractProperties(templateText, properties);
                         template.setTemplate(new Template(templateName, new StringReader(templateText), config));
                         template.setLevel(TemplateLevel.SERVER);
+                        template.setProperties(properties);
                         checkTrustLevel(template);
                         return template;
                     }
@@ -367,6 +368,7 @@ public class TemplateServiceImpl implements TemplateService {
                 templateText = extractProperties(templateText, properties);
                 template.setTemplate(new Template(templateName, new StringReader(templateText), config));
                 template.setLevel(TemplateLevel.USER);
+                template.setProperties(properties);
                 checkTrustLevel(template);
                 return template;
             } catch (final IOException e) {

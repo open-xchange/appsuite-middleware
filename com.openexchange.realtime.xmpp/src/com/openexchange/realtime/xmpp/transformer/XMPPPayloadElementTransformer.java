@@ -53,17 +53,15 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.payload.PayloadElement;
-import com.openexchange.realtime.payload.transformer.PayloadElementTransformer;
 import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link XMPPPayloadElementTransformer}
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class XMPPPayloadElementTransformer implements PayloadElementTransformer {
+public class XMPPPayloadElementTransformer {
 
     public static AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
 
@@ -78,24 +76,21 @@ public class XMPPPayloadElementTransformer implements PayloadElementTransformer 
         this.elementPath = elementPath;
     }
 
-    @Override
     public ElementPath getElementPath() {
         return elementPath;
     }
 
-    @Override
-    public PayloadElement incoming(PayloadElement payload, ServerSession session) throws OXException {
+    public PayloadElement incoming(PayloadElement payload) throws OXException {
         Object data = payload.getData();
         SimpleConverter simpleConverter = SERVICES.get().getService(SimpleConverter.class);
-        Object converted = simpleConverter.convert(payload.getFormat(), internalFormat, data, session);
+        Object converted = simpleConverter.convert(payload.getFormat(), internalFormat, data, null);
         return new PayloadElement(converted, internalFormat, payload.getNamespace(), payload.getElementName());
     }
 
-    @Override
-    public PayloadElement outgoing(PayloadElement payload, ServerSession session) throws OXException {
+    public PayloadElement outgoing(PayloadElement payload) throws OXException {
         Object data = payload.getData();
         SimpleConverter simpleConverter = SERVICES.get().getService(SimpleConverter.class);
-        Object converted = simpleConverter.convert(payload.getFormat(), EXTERNAL_FORMAT, data, session);
+        Object converted = simpleConverter.convert(payload.getFormat(), EXTERNAL_FORMAT, data, null);
         return new PayloadElement(converted, Byte.class.getSimpleName(), payload.getNamespace(), payload.getElementName());
     }
 }

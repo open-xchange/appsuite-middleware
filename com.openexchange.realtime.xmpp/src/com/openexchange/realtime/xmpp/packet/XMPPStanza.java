@@ -75,12 +75,9 @@ public abstract class XMPPStanza {
 
     private String id;
 
-    private ServerSession session;
-
     protected Collection<PayloadTree> payloads;
 
-    protected XMPPStanza(ServerSession session) {
-        this.session = session;
+    protected XMPPStanza() {
     }
 
     public JID getTo() {
@@ -99,14 +96,6 @@ public abstract class XMPPStanza {
         this.id = id;
     }
 
-    public ServerSession getSession() {
-        return session;
-    }
-
-    public void setSession(ServerSession session) {
-        this.session = session;
-    }
-
     protected void addAttributesAndElements(Match document) {
         document.attr("to", to.toString());
 
@@ -123,15 +112,15 @@ public abstract class XMPPStanza {
         this.payloads = payloads;
     }
 
-    public static XMPPStanza getStanza(Match xml, ServerSession session) throws OXException {
+    public static XMPPStanza getStanza(Match xml) throws OXException {
         String id = xml.id().trim().toLowerCase();
 
         if (id.equals("message")) {
-            return new XMPPMessage(xml, session);
+            return new XMPPMessage(xml);
         } else if (id.equals("presence")) {
-            return new XMPPPresence(session);
+            return new XMPPPresence();
         } else if (id.equals("iq")) {
-            return new XMPPIq(xml, session);
+            return new XMPPIq(xml);
         }
 
         return null;
@@ -151,7 +140,7 @@ public abstract class XMPPStanza {
 
     private Match writeNode(PayloadTreeNode rootNode) throws OXException {
         SimpleConverter simpleConverter = SERVICES.get().getService(SimpleConverter.class);
-        Object converted = simpleConverter.convert(rootNode.getFormat(), "xml", rootNode, session);
+        Object converted = simpleConverter.convert(rootNode.getFormat(), "xml", rootNode, null);
         return $(converted);
     }
 

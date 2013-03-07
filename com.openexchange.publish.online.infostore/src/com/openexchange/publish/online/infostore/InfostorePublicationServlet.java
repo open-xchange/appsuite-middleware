@@ -215,7 +215,7 @@ public class InfostorePublicationServlet extends HttpServlet {
         }
     }
 
-    private DocumentMetadata loadDocumentMetadata(final Publication publication) throws Exception {
+    public static DocumentMetadata loadDocumentMetadata(final Publication publication) throws OXException {
 
         final int id = Integer.parseInt(publication.getEntityId());
         final int version = InfostoreFacade.CURRENT_VERSION;
@@ -227,11 +227,11 @@ public class InfostorePublicationServlet extends HttpServlet {
         return document;
     }
 
-    private UserConfiguration loadUserConfig(final Publication publication) throws OXException {
+    private static UserConfiguration loadUserConfig(final Publication publication) throws OXException {
         return userConfigs.getUserConfiguration(publication.getUserId(), publication.getContext());
     }
 
-    private User loadUser(final Publication publication) throws OXException {
+    private static User loadUser(final Publication publication) throws OXException {
         return users.getUser(publication.getUserId(), publication.getContext());
     }
 

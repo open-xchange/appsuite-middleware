@@ -198,9 +198,7 @@ public abstract class AbstractFileAction implements AJAXActionService {
             after(req);
 
             // Delete tmp files
-            if (requestData.hasUploads()) {
-                requestData.getUploadEvent().cleanUp();
-            }
+            requestData.cleanUploads();
         }
     }
 

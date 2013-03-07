@@ -177,6 +177,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } finally {
+            requestData.cleanUploads();
             if (LogProperties.isEnabled()) {
                 final Props logProperties = LogProperties.optLogProperties();
                 if (null != logProperties) {

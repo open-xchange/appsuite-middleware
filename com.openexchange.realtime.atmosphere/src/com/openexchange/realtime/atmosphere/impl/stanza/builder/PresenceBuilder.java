@@ -56,6 +56,7 @@ import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Presence.Type;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PresenceBuilder} - Parse an atmosphere request and build a Presence Stanza from it by adding the recipients ID.
@@ -72,10 +73,12 @@ public class PresenceBuilder extends StanzaBuilder<Presence> {
      *
      * @param from The sender's ID, must not be null
      * @param json The sender's message, must not be null
+     * @param session 
      * @param serverSession The ServerSession associated with the incoming Stanza/Sender
      * @throws IllegalArgumentException if from or json are null
      */
-    public PresenceBuilder(ID from, JSONObject json) {
+    public PresenceBuilder(ID from, JSONObject json, ServerSession session) {
+        super(session);
         if (from == null || json == null) {
             throw new IllegalArgumentException();
         }

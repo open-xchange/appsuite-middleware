@@ -46,10 +46,12 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.importexport.actions.importer;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
+import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -66,43 +68,48 @@ import com.openexchange.tools.session.ServerSession;
 
 public abstract class AbstractImportAction implements AJAXActionService {
 
-	@Override
-	public AJAXRequestResult perform(AJAXRequestData requestData,
-			ServerSession session) throws OXException {
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
 
-		return perform(new ImportRequest(requestData, session));
-	}
+        return perform(new ImportRequest(requestData, session));
+    }
 
-	public abstract Format getFormat();
+    public abstract Format getFormat();
 
-	public abstract Importer getImporter();
+    public abstract Importer getImporter();
 
-	private AJAXRequestResult perform(ImportRequest req) throws OXException {
-		final List<ImportResult> importResult;
-
-		importResult = getImporter().importData(req.getSession(), getFormat(),
-				req.getImportFileAsStream(), req.getFolders(), null);
-
-		ImportWriter writer;
-		OXJSONWriter jsonWriter = new OXJSONWriter();
-		try {
-			writer = new ImportWriter(jsonWriter, req.getSession());
-			writer.writeObjects(importResult);
-		} catch (JSONException e1) {
-			e1.printStackTrace();
-		}
-		AJAXRequestResult result = new AJAXRequestResult(jsonWriter.getObject());
-        int num = 0;
-		for(ImportResult res: importResult){
-			if(res.getWarnings() != null && res.getWarnings().size() > 0){
-                num += res.getWarnings().size();
-			}
-		}
-        if (num > 0) {
-            result.setException(ImportExportExceptionCodes.WARNINGS.create(I(num)));
-		}
-		return result;
-
-	}
+    private AJAXRequestResult perform(ImportRequest req) throws OXException {
+        try {
+            final List<ImportResult> importResult =
+                getImporter().importData(req.getSession(), getFormat(), req.getImportFileAsStream(), req.getFolders(), null);
+            OXJSONWriter jsonWriter = new OXJSONWriter();
+            try {
+                new ImportWriter(jsonWriter, req.getSession()).writeObjects(importResult);
+            } catch (JSONException e1) {
+                final Log logger = com.openexchange.log.Log.loggerFor(AbstractImportAction.class);
+                logger.error("JSON error", e1);
+            }
+            AJAXRequestResult result = new AJAXRequestResult(jsonWriter.getObject());
+            int num = 0;
+            for (ImportResult res : importResult) {
+                if (res.getWarnings() != null && res.getWarnings().size() > 0) {
+                    num += res.getWarnings().size();
+                }
+            }
+            if (num > 0) {
+                result.setException(ImportExportExceptionCodes.WARNINGS.create(I(num)));
+            }
+            return result;
+        } finally {
+            final AJAXRequestData ajaxRequestData = req.getRequest();
+            if (null != ajaxRequestData) {
+                try {
+                    ajaxRequestData.cleanUploads();
+                } catch (final Exception e) {
+                    // Ignore
+                }
+            }
+        }
+    }
 
 }

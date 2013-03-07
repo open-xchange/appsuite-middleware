@@ -218,7 +218,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         throw ex;
                     }
                     JSONObject json = new JSONObject(postData);
-                    StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(atmosphereState.id, json);
+                    StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(atmosphereState.id, atmosphereState.session, json);
                     handleIncoming(stanzaBuilder.build(), atmosphereState);
                     printBroadcasters("Broadcasters after POST Request");
                     printSessions("Sessions after POST Request");
@@ -519,7 +519,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         } else {
             resource = resource + serverSession.getSessionID();
         }
-        return new ID(RTAtmosphereChannel.PROTOCOL, userLogin, contextName, resource);
+        return new ID(RTAtmosphereChannel.PROTOCOL, null, userLogin, contextName, resource);
     }
 
     /**
@@ -545,10 +545,8 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @throws OXException
      */
     protected <T extends Stanza> void handleIncoming(T stanza, RTAtmosphereState atmosphereState) throws OXException {
-        // Transform payloads
-        StanzaTransformer transformer = new StanzaTransformer();
-        transformer.incoming(stanza);
-        // Initialize default fields after tranforming
+        //Transform payloads
+        //Initialize default fields after tranforming
         stanza.initializeDefaults();
 
         StanzaQueueService stanzaQueueService = AtmosphereServiceRegistry.getInstance().getService(StanzaQueueService.class);
@@ -581,8 +579,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @throws OXException if no transformer for the given Stanza can be found
      */
     public void handleOutgoing(Stanza stanza) throws OXException {
-        StanzaTransformer stanzaTransformer = new StanzaTransformer();
-        stanzaTransformer.outgoing(stanza);
+        stanza.transformPayloads("json");
         send(stanza);
     }
 

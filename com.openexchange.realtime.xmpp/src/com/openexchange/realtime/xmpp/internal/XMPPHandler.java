@@ -80,9 +80,8 @@ public class XMPPHandler {
             service = "presence";
         }
 
-        ServerSession session = container.getSession();
-        XMPPStanza xmpp = XMPPStanza.getStanza(match, session);
-        String resource = getComponentResource(session, xmpp);
+        XMPPStanza xmpp = XMPPStanza.getStanza(match);
+        String resource = getComponentResource(xmpp);
         XMPPComponent xmppComponent = components.get(resource);
         if (xmppComponent == null) {
             // TODO: handle
@@ -93,7 +92,7 @@ public class XMPPHandler {
             // TODO: handle
         }
 
-        xmppExtension.handleIncoming(xmpp, session);
+        xmppExtension.handleIncoming(xmpp);
     }
 
     public void addComponent(XMPPComponent component) {
@@ -108,8 +107,8 @@ public class XMPPHandler {
         return this.components.get(resource);
     }
 
-    private String getComponentResource(ServerSession session, XMPPStanza xmpp) {
-        String[] split = xmpp.getTo().getDomain().split(session.getContext().getName());
+    private String getComponentResource(XMPPStanza xmpp) {
+        String[] split = xmpp.getTo().getDomain().split("TODO");
         return split.length == 0 ? "" : split[0];
     }
 }

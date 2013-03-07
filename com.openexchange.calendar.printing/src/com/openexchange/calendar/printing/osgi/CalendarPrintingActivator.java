@@ -53,14 +53,18 @@ import static com.openexchange.calendar.printing.CPServiceRegistry.getInstance;
 import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
 import com.openexchange.calendar.printing.CPServlet;
 import com.openexchange.calendar.printing.preferences.CalendarPrintingEnabled;
+import com.openexchange.calendar.printing.templating.CalendarTemplateHelperFactory;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.osgi.RegistryCustomizer;
+import com.openexchange.resource.ResourceService;
+import com.openexchange.templating.TemplateHelperFactory;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
 
@@ -86,6 +90,7 @@ public class CalendarPrintingActivator extends AbstractSessionServletActivator {
         openTrackers();
         register();
         registerService(PreferencesItemService.class, new CalendarPrintingEnabled());
+        registerService(TemplateHelperFactory.class, new CalendarTemplateHelperFactory(this));
     }
 
     private void register() {
@@ -106,6 +111,6 @@ public class CalendarPrintingActivator extends AbstractSessionServletActivator {
 
     @Override
     protected Class<?>[] getAdditionalNeededServices() {
-        return new Class<?>[] { TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, DispatcherPrefixService.class };
+        return new Class<?>[] { TemplateService.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, DispatcherPrefixService.class, HtmlService.class, UserService.class, ResourceService.class };
     }
 }

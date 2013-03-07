@@ -753,7 +753,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return the trace of the thread that lastly obtained this access
      */
     public final String getTrace() {
-        final com.openexchange.java.StringAllocator sBuilder = new com.openexchange.java.StringAllocator(2048);
+        final StringBuilder sBuilder = new StringBuilder(2048);
         {
             final Props taskProps = LogProperties.optLogProperties(usingThread);
             if (null != taskProps) {

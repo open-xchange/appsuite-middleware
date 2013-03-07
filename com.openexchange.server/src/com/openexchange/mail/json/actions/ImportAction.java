@@ -79,6 +79,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
@@ -127,6 +128,7 @@ public final class ImportAction extends AbstractMailAction {
     protected AJAXRequestResult perform(final MailRequest mailRequest) throws OXException {
         final AJAXRequestData request = mailRequest.getRequest();
         final List<OXException> warnings = new ArrayList<OXException>();
+        UploadEvent uploadEvent = null;
         try {
             final String folder = mailRequest.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
             final int flags;
@@ -167,6 +169,7 @@ public final class ImportAction extends AbstractMailAction {
                 try {
                     final Iterator<UploadFile> iter = request.getFiles().iterator();
                     if (iter.hasNext()) {
+                        uploadEvent = request.getUploadEvent();
                         future = service.submit(task);
                     }
                     final javax.mail.Session defaultSession = MimeDefaultSession.getDefaultSession();

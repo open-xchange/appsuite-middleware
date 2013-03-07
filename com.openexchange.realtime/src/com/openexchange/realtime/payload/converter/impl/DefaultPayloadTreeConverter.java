@@ -47,84 +47,110 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.payload.converter;
+package com.openexchange.realtime.payload.converter.impl;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
-import com.openexchange.realtime.atmosphere.osgi.ExtensionRegistry;
 import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
 import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link AtmospherePayloadTreeConverterer} - Used to convert PayloadTrees of Stanzas transported via the Atmosphere Channel.
- * Makes use of the Atmosphere specific PayloadElementConverters registered in the ExtensionRegistry.
- *
- * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
+ * {@link DefaultPayloadTreeConverter}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class AtmospherePayloadTreeConverterer implements PayloadTreeConverter {
+public class DefaultPayloadTreeConverter implements PayloadTreeConverter {
 
-    private static ExtensionRegistry converters = ExtensionRegistry.getInstance();
+    private Map<ElementPath, String> preferredFormats = new ConcurrentHashMap<ElementPath, String>();
+
+    private ServiceLookup services;
+
+    public DefaultPayloadTreeConverter(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
 
     @Override
     public PayloadTree incoming(PayloadTree payloadTree) throws OXException {
-        if(payloadTree == null) {
-            throw new IllegalStateException("Missing obligatory parameter payloadTree");
-        }
-        PayloadTreeNode root = payloadTree.getRoot();
-        PayloadTreeNode transformedRoot = incoming(root);
-        PayloadTree transformedTree = new PayloadTree(transformedRoot);
-        return transformedTree;
+
+        return new PayloadTree(incoming(payloadTree.getRoot()));
+
     }
 
-    private PayloadTreeNode incoming(PayloadTreeNode node) throws OXException {
+    public PayloadTreeNode incoming(PayloadTreeNode node) throws OXException {
         ElementPath elementPath = node.getElementPath();
-        AtmospherePayloadElementConverter converter = converters.getTransformerFor(elementPath);
-        if(converter == null) {
-            throw AtmosphereExceptionCode.MISSING_TRANSFORMER_FOR_PAYLOADELEMENT.create(elementPath);
+        String format = preferredFormats.get(elementPath);
+        if (format == null) {
+            format = "json";
         }
-        PayloadElement transformedPayload = converter.incoming(node.getPayloadElement());
+
+        PayloadElement payloadElement = node.getPayloadElement();
+
+        Object transformed = services.getService(SimpleConverter.class).convert(
+            payloadElement.getFormat(),
+            format,
+            payloadElement.getData(),
+            null);
+
+        PayloadElement transformedPayload = new PayloadElement(
+            transformed,
+            format,
+            payloadElement.getNamespace(),
+            payloadElement.getElementName());
+
         PayloadTreeNode resultNode = new PayloadTreeNode(transformedPayload);
 
-        if(node.hasChildren()) {
+        if (node.hasChildren()) {
             for (PayloadTreeNode child : node.getChildren()) {
                 PayloadTreeNode transformedChild = incoming(child);
                 resultNode.addChild(transformedChild);
             }
         }
         return resultNode;
+
     }
 
     @Override
-    public PayloadTree outgoing(PayloadTree payloadTree) throws OXException {
-        if(payloadTree == null) {
-            throw new IllegalStateException("Missing obligatory parameter payloadTree");
-        }
-        PayloadTreeNode root = payloadTree.getRoot();
-        PayloadTreeNode transformedRoot = outgoing(root);
-        PayloadTree transformedTree = new PayloadTree(transformedRoot);
-        return transformedTree;
+    public PayloadTree outgoing(PayloadTree payloadTree, String format) throws OXException {
+        return new PayloadTree(outgoing(payloadTree.getRoot(), format));
     }
 
-    private PayloadTreeNode outgoing(PayloadTreeNode node) throws OXException {
-        ElementPath elementPath = node.getElementPath();
-        AtmospherePayloadElementConverter transformer = converters.getTransformerFor(elementPath);
-        if(transformer == null) {
-            throw AtmosphereExceptionCode.MISSING_TRANSFORMER_FOR_PAYLOADELEMENT.create(elementPath);
-        }
-        PayloadElement transformedPayload = transformer.outgoing(node.getPayloadElement());
+    public PayloadTreeNode outgoing(PayloadTreeNode node, String format) throws OXException {
+       
+        PayloadElement payloadElement = node.getPayloadElement();
+
+        Object transformed = services.getService(SimpleConverter.class).convert(
+            payloadElement.getFormat(),
+            format,
+            payloadElement.getData(),
+            null);
+
+        PayloadElement transformedPayload = new PayloadElement(
+            transformed,
+            format,
+            payloadElement.getNamespace(),
+            payloadElement.getElementName());
+
         PayloadTreeNode resultNode = new PayloadTreeNode(transformedPayload);
 
-        if(node.hasChildren()) {
+        if (node.hasChildren()) {
             for (PayloadTreeNode child : node.getChildren()) {
-                PayloadTreeNode transformedChild = outgoing(child);
+                PayloadTreeNode transformedChild = outgoing(child, format);
                 resultNode.addChild(transformedChild);
             }
         }
         return resultNode;
+    }
+
+    @Override
+    public void declarePreferredFormat(ElementPath path, String format) {
+        preferredFormats.put(path, format);
     }
 
 }

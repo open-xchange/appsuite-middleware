@@ -164,16 +164,22 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             }
 
             final AJAXRequestData data = parseRequest(req, preferStream, isFileUpload, session);
-            if (handleIndividually(action, data, req, resp)) {
-                return;
-            }
+            try {
+                if (handleIndividually(action, data, req, resp)) {
+                    return;
+                }
 
-            final AJAXRequestResult result = factory.createActionService(action).perform(data, session);
-            response.setData(result.getResultObject());
-            response.setTimestamp(result.getTimestamp());
-            final Collection<OXException> warnings = result.getWarnings();
-            if (null != warnings && !warnings.isEmpty()) {
-                response.addWarnings(warnings);
+                final AJAXRequestResult result = factory.createActionService(action).perform(data, session);
+                response.setData(result.getResultObject());
+                response.setTimestamp(result.getTimestamp());
+                final Collection<OXException> warnings = result.getWarnings();
+                if (null != warnings && !warnings.isEmpty()) {
+                    response.addWarnings(warnings);
+                }
+            } finally {
+                if (null != data) {
+                    data.cleanUploads();
+                }
             }
         } catch (final OXException e) {
             if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {

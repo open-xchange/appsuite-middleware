@@ -59,6 +59,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
@@ -103,10 +104,23 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
                 HazelcastAccess.setHazelcastInstance(null);
             }
         });
-        openTrackers();
+        final HazelcastResourceDirectory directory = new HazelcastResourceDirectory();
+        GlobalMessageDispatcherImpl globalDispatcher = new GlobalMessageDispatcherImpl(directory);
         
-        HazelcastResourceDirectory directory = new HazelcastResourceDirectory();
-        GlobalMessageDispatcherImpl globalDispatcher = new GlobalMessageDispatcherImpl();
+        track(Channel.class, new SimpleRegistryListener<Channel>() {
+
+            @Override
+            public void added(ServiceReference<Channel> ref, Channel service) {
+                directory.addChannel(service);
+            }
+
+            @Override
+            public void removed(ServiceReference<Channel> ref, Channel service) {
+                directory.removeChannel(service);
+            }
+        });
+        
+        openTrackers();
         registerService(ResourceDirectory.class, directory, null);
         registerService(MessageDispatcher.class, globalDispatcher);
     }

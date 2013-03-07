@@ -47,44 +47,65 @@
  *
  */
 
-package com.openexchange.realtime.payload.converter;
+package com.openexchange.realtime;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.payload.PayloadElement;
-import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.tools.session.ServerSession;
+import java.util.concurrent.TimeUnit;
+import com.openexchange.realtime.packet.ID;
+
 
 /**
- * {@link PayloadElementConverter} Convert single PayloadElements found in a PayloadTreeNode by converting its data and adjusting the
- * format of the PayloadElement to reflect the conversion. Conversion happens when PayloadTrees of incoming Requests or outgoing
- * Responses have to be changed so that client/server can handle them.
+ * {@link Component}
  *
- * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface PayloadElementConverter {
+public interface Component {
+    
+    public interface EvictionPolicy {
+        
+    }
+    
+    public class Timeout implements EvictionPolicy {
+        private long timeout;
+        private TimeUnit unit;
+        
+        public Timeout(long timeout, TimeUnit unit) {
+            super();
+            this.timeout = timeout;
+            this.unit = unit;
+        }
+        
+        public Timeout(long timeout) {
+            this(timeout, TimeUnit.MILLISECONDS);
+        }
 
-    /**
-     * Get the complete path to an element in a namespace that this PayloadConverter is able to process.
-     *
-     * @return the elementPath of elements this PayloadConverter is able to process.
-     */
-    ElementPath getElementPath();
+        public long getTimeout() {
+            return timeout;
+        }
+        
+        public TimeUnit getUnit() {
+            return unit;
+        }
+        
+        public void setUnit(TimeUnit unit) {
+            this.unit = unit;
+        }
+        
+        public void setTimeout(long timeout) {
+            this.timeout = timeout;
+        }
+ 
+        public void onExpire() {
+            
+        }
+    }
+    
+    public EvictionPolicy NONE = new EvictionPolicy(){};
+    
 
-    /**
-     * Convert an incoming Payload.
-     *
-     * @param payload The incoming Payload to process
-     * @return
-     * @throws OXException When conversion fails
-     */
-    public PayloadElement incoming(PayloadElement payload) throws OXException;
+    ComponentHandle create(ID id);
 
-    /**
-     * Convert an outgoing Payload.
-     *
-     * @param payload The Payload to process
-     * @throws OXException
-     */
-    public PayloadElement outgoing(PayloadElement payload) throws OXException;
+    String getId();
+    
+    public EvictionPolicy getEvictionPolicy();
 
 }

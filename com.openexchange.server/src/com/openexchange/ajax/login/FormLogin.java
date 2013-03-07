@@ -116,8 +116,8 @@ public class FormLogin implements LoginRequestHandler {
         Tools.disableCaching(resp);
         Login.writeSecretCookie(resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
         resp.sendRedirect(generateRedirectURL(
-            LoginTools.encodeUrl(req.getParameter(LoginFields.UI_WEB_PATH_PARAM), true),
-            LoginTools.encodeUrl(req.getParameter(LoginFields.AUTOLOGIN_PARAM), true),
+            req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
+            req.getParameter(LoginFields.AUTOLOGIN_PARAM),
             session, user.getPreferredLanguage(), conf.getUiWebPath()));
     }
 

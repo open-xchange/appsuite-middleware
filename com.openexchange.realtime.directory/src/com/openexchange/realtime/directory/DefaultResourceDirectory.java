@@ -50,10 +50,14 @@
 package com.openexchange.realtime.directory;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.util.IDMap;
 
@@ -67,6 +71,7 @@ import com.openexchange.realtime.util.IDMap;
 public abstract class DefaultResourceDirectory implements ResourceDirectory {
 
     private final Set<ChangeListener> listeners;
+    private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
 
     /**
      * Initializes a new {@link DefaultResourceDirectory}.
@@ -99,33 +104,69 @@ public abstract class DefaultResourceDirectory implements ResourceDirectory {
 
     @Override
     public IDMap<Resource> remove(ID id) throws OXException {
-        return notifyRemoved(doRemove(id));
+        return notifyRemoved(doRemove(id), true);
+    }
+    
+    
+    public IDMap<Resource> removeWithoutDisposeEvent(ID id) throws OXException {
+        return notifyRemoved(doRemove(id), false);
     }
 
     @Override
     public IDMap<Resource> remove(Collection<ID> ids) throws OXException {
-        return notifyRemoved(doRemove(ids));
+        return notifyRemoved(doRemove(ids), true);
     }
 
     private void notifyAdded(ID id, Resource addedResource) {
+        id.trigger("add", this);
         for (ChangeListener listener : listeners) {
             listener.added(id, addedResource);
         }
     }
 
     private void notifyUpdated(ID id, Resource updatedResource, Resource previousResource) {
+        Map<String, Object> event = new HashMap<String, Object>();
+        event.put("updated", updatedResource);
+        event.put("previous", previousResource);
+        
+        id.trigger("update", this, event);
+
         for (ChangeListener listener : listeners) {
             listener.updated(id, updatedResource, previousResource);
         }
     }
 
-    private IDMap<Resource> notifyRemoved(IDMap<Resource> removedResources) {
+    private IDMap<Resource> notifyRemoved(IDMap<Resource> removedResources, boolean triggerDispose) {
         for (ChangeListener listener : listeners) {
             for (Entry<ID, Resource> entry : removedResources.entrySet()) {
+                if (triggerDispose) {
+                    entry.getKey().trigger("dispose", this);
+                }
                 listener.removed(entry.getKey(), entry.getValue());
             }
         }
         return removedResources;
+    }
+    
+    protected boolean conjure(ID id) throws OXException {
+        String protocol = id.getProtocol();
+        if (protocol == null) {
+            return false;
+        }
+        Channel channel = channels.get(protocol);
+        if (channel == null) {
+            return false;
+        }
+        
+        return channel.conjure(id);
+    }
+    
+    public void addChannel(Channel channel) {
+        channels.put(channel.getProtocol(), channel);
+    }
+    
+    public void removeChannel(Channel channel) {
+        channels.remove(channel.getProtocol());
     }
 
     protected abstract IDMap<Resource> doRemove(Collection<ID> ids) throws OXException;

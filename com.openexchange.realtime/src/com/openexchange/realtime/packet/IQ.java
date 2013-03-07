@@ -124,4 +124,9 @@ public class IQ extends Stanza {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
+    @Override
+    public Stanza newInstance() {
+        return new IQ();
+    }
+
 }

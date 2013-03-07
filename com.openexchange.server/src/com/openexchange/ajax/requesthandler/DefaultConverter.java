@@ -144,6 +144,9 @@ public class DefaultConverter implements Converter {
 
     @Override
     public void convert(final String fromFormat, final String toFormat, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
+        if (fromFormat.equals(toFormat)) {
+            return;
+        }
         if (result == AJAXRequestResult.EMPTY_REQUEST_RESULT) {
         	return;
         }
@@ -172,8 +175,9 @@ public class DefaultConverter implements Converter {
         List<Edge> edges = getInitialEdges(from);
         Mark currentMark = new Mark();
         currentMark.weight = 0;
-        Node currentNode = null;
-
+        Node currentNode = new Node();
+        currentNode.edges = edges;
+        
         while (true) {
             Mark nextMark = null;
             Node nextNode = null;
@@ -208,7 +212,7 @@ public class DefaultConverter implements Converter {
                 // This was a dead end
                 currentMark.weight = 100;
                 while (nextMark == null) {
-                    if (currentMark.previous == null) {
+                    if (currentMark == null || currentMark.previous == null) {
                         throw new IllegalArgumentException("Can't find path from " + from + " to " + to);
                     }
                     currentNode = currentMark.previous;
@@ -235,7 +239,7 @@ public class DefaultConverter implements Converter {
         Step current = new Step();
         current.converter = edge.node.converter;
 
-        while (currentMark.previous != null) {
+        while (currentMark != null && currentMark.previous != null && currentMark.previous.converter != null) {
             final Step step = new Step();
             step.converter = currentMark.previous.converter;
             step.next = current;

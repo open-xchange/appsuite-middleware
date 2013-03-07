@@ -596,11 +596,11 @@ public class Infostore extends PermissionServlet {
             if (SAVE_AS_TYPE.equals(contentType)) {
                 String contentDisposition = null;
                 if (null == contentDisposition) {
-                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32).append("attachment");
+                    final StringBuilder sb = new StringBuilder(32).append("attachment");
                     DownloadUtility.appendFilenameParameter(metadata.getFileName(), null, userAgent, sb);
                     res.setHeader("Content-Disposition", sb.toString());
                 } else {
-                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(32).append(contentDisposition);
+                    final StringBuilder sb = new StringBuilder(32).append(contentDisposition);
                     DownloadUtility.appendFilenameParameter(metadata.getFileName(), null, userAgent, sb);
                     res.setHeader("Content-Disposition", sb.toString());
                     // Tools.setHeaderForFileDownload(userAgent, res, metadata.getFileName());

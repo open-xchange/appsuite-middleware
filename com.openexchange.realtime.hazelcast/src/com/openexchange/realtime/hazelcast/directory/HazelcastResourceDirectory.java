@@ -67,6 +67,7 @@ import com.openexchange.realtime.directory.*;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
+import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.util.IDMap;
 
 /**
@@ -75,6 +76,8 @@ import com.openexchange.realtime.util.IDMap;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class HazelcastResourceDirectory extends DefaultResourceDirectory {
+    
+    private static final Log LOG = LogFactory.getLog(HazelcastResourceDirectory.class);
 
     private static final Log LOG = LogFactory.getLog(HazelcastResourceDirectory.class);
 
@@ -104,12 +107,17 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
             Resource resource = allResources.get(id);
             if (resource != null) {
                 foundResources.put(id, resource);
+            } else {
+                resource = conjureResource(id);
+                if (resource != null) {
+                    foundResources.put(id, resource);
+                }
             }
         }
 
         return foundResources;
     }
-
+    
     @Override
     public IDMap<Resource> get(Collection<ID> ids) throws OXException {
         IDMap<Resource> foundResources = new IDMap<Resource>();
@@ -129,6 +137,13 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
             if (resources != null) {
                 for (Entry<ID, Resource> entry : resources.entrySet()) {
                     foundResources.put(entry.getKey(), entry.getValue());
+                }
+                resourceIds.removeAll(resources.keySet());
+                for (ID id : resourceIds) {
+                    Resource resource = conjureResource(id);
+                    if (resource != null) {
+                        foundResources.put(id, resource);
+                    }
                 }
             }
         }
@@ -384,6 +399,17 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
         // @formatter:off
         return presence;
     }
+    
+    private Resource conjureResource(ID id) throws OXException {
+        if (conjure(id)) {
+            Resource res = new DefaultResource();
+            set(id, res);
+            id.on("dispose", CLEAN_UP);
+            return res;
+        } else {
+            return null;
+        }
+    }
 
     /**
      * Get the mapping of general IDs to full IDs e.g. marc.arens@premium <-> ox://marc.arens@premuim/random.
@@ -408,13 +434,51 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
     }
 
     protected static Transaction newTransaction() throws OXException {
-        HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
-        return hazelcast.getTransaction();
+        /*HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
+        return hazelcast.getTransaction();*/
+        return new Transaction() {
+            
+            @Override
+            public void rollback() throws IllegalStateException {
+                
+            }
+            
+            @Override
+            public int getStatus() {
+                return 0;
+            }
+            
+            @Override
+            public void commit() throws IllegalStateException {
+                
+            }
+            
+            @Override
+            public void begin() throws IllegalStateException {
+                
+            }
+        };
     }
 
     protected static Member getLocalMember() throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
         return hazelcast.getCluster().getLocalMember();
     }
+    
+    private IDEventHandler CLEAN_UP = new IDEventHandler() {
+        
+        @Override
+        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
+            if (source != HazelcastResourceDirectory.this) {
+                try {
+                    removeWithoutDisposeEvent(id);
+                } catch (OXException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        }
+        
+        
+    };
 
 }

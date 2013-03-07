@@ -74,7 +74,7 @@ public class Message extends Stanza {
      * </ol>
      */
     public static enum Type {
-        chat, erorr, groupchat, headline, normal, error
+        chat, groupchat, headline, normal, error
     }
 
     private Type type;
@@ -108,7 +108,12 @@ public class Message extends Stanza {
 
     @Override
     public void initializeDefaults() throws OXException {
-        throw new UnsupportedOperationException("Not yet implemented");
+        //throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @Override
+    public Stanza newInstance() {
+        return new Message();
     }
 
 }

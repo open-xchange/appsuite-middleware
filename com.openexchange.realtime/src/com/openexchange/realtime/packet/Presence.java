@@ -570,4 +570,9 @@ public class Presence extends Stanza {
 
     }
 
+    @Override
+    public Stanza newInstance() {
+        return new Presence();
+    }
+
 }

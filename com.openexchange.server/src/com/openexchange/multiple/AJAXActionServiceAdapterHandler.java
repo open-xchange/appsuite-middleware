@@ -131,6 +131,8 @@ public class AJAXActionServiceAdapterHandler implements MultipleHandler, Multipl
                 throw (OXException) cause;
             }
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            request.cleanUploads();
         }
         return result.getResultObject();
     }

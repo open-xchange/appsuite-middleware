@@ -203,7 +203,7 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
         Context context = contextService.getContext(participant.getCid());
         User user = userService.getUser(participant.getUserId(), context);
 
-        return new ID(null, user.getLoginInfo(), context.getName(), null);
+        return new ID(null, null, user.getLoginInfo(), context.getName(), null);
     }
 
 }

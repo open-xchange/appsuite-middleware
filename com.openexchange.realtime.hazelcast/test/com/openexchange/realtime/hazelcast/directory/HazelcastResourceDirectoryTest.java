@@ -179,8 +179,8 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         ID id1 = generateId();
         ID id2 = generateId();
         ID id3 = generateId();
-        ID id4 = new ID("ox", "another.user", "context", UUID.randomUUID().toString());
-        ID id5 = new ID("ox", "even.another", "context", UUID.randomUUID().toString());
+        ID id4 = new ID("ox", null, "another.user", "context", UUID.randomUUID().toString());
+        ID id5 = new ID("ox", null, "even.another", "context", UUID.randomUUID().toString());
         Resource r1 = generateResource();
         Resource r2 = generateResource();
         Resource r3 = generateResource();
@@ -223,7 +223,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
     }
     
     private ID generateId() {
-        return new ID("ox", "some.body", "context", UUID.randomUUID().toString());
+        return new ID("ox", "some.component", "some.body", "context", UUID.randomUUID().toString());
     }
     
     private Resource generateResource() {

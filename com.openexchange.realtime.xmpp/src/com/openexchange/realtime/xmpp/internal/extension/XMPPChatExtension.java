@@ -55,7 +55,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.MessageDispatcher;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
@@ -99,20 +99,20 @@ public class XMPPChatExtension implements XMPPExtension {
     }
 
     @Override
-    public void handleOutgoing(Stanza stanza, XMPPDelivery delivery, ServerSession session) throws OXException {
+    public void handleOutgoing(Stanza stanza, XMPPDelivery delivery) throws OXException {
         Message msg = (Message) stanza;
-        XMPPMessage xmpp = new XMPPMessage(XMPPMessage.Type.chat, session);
-        transform(msg, xmpp, session);
+        XMPPMessage xmpp = new XMPPMessage(XMPPMessage.Type.chat);
+        transform(msg, xmpp);
 
-        delivery.deliver(xmpp, session);
+        delivery.deliver(xmpp);
     }
 
     @Override
-    public void handleIncoming(XMPPStanza xmpp, ServerSession session) throws OXException {
+    public void handleIncoming(XMPPStanza xmpp) throws OXException {
         Message message = new Message();
         message.setType(Message.Type.chat);
-        transform((XMPPMessage) xmpp, message, session);
-        SERVICES.get().getService(MessageDispatcher.class).send(message, xmpp.getSession());
+        transform((XMPPMessage) xmpp, message);
+        SERVICES.get().getService(MessageDispatcher.class).send(message);
     }
 
     @Override
@@ -120,7 +120,7 @@ public class XMPPChatExtension implements XMPPExtension {
         return new HashSet<String>(Arrays.asList(""));
     }
 
-    private void transform(Message message, XMPPMessage xmpp, ServerSession session) throws OXException {
+    private void transform(Message message, XMPPMessage xmpp) throws OXException {
         ID from = message.getFrom();
         xmpp.setFrom(new JID(from.getUser(), from.getContext(), from.getResource()));
 
@@ -130,7 +130,7 @@ public class XMPPChatExtension implements XMPPExtension {
         XMPPPayloadTreeTransformer treeTransformer = new XMPPPayloadTreeTransformer();
         Collection<PayloadTree> payloads = new HashSet<PayloadTree>();
         for (PayloadTree payload : message.getPayloads()) {
-            PayloadTree transformedTree = treeTransformer.outgoing(payload, session);
+            PayloadTree transformedTree = treeTransformer.outgoing(payload);
             payloads.add(transformedTree);
         }
 
@@ -139,10 +139,10 @@ public class XMPPChatExtension implements XMPPExtension {
 
     private void transform(XMPPMessage xmpp, Message message, ServerSession session) throws OXException {
         JID from = xmpp.getFrom();
-        message.setFrom(new ID(null, from.getUser(), from.getDomain(), from.getResource()));
+        message.setFrom(new ID(null, null, from.getUser(), from.getDomain(), from.getResource()));
 
         JID to = xmpp.getTo();
-        message.setTo(new ID(null, to.getUser(), to.getDomain(), to.getResource()));
+        message.setTo(new ID(null, null, to.getUser(), to.getDomain(), to.getResource()));
 
         XMPPPayloadTreeTransformer treeTransformer = new XMPPPayloadTreeTransformer();
         Collection<PayloadTree> payloads = new HashSet<PayloadTree>();
