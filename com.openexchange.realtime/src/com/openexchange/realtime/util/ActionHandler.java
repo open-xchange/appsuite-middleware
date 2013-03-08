@@ -61,8 +61,32 @@ import com.openexchange.realtime.payload.PayloadTree;
 
 
 /**
- * {@link ActionHandler}
- *
+ * An {@link ActionHandler} inspects (via introspection) a class and looks for public methods in this form:
+ * 
+ * public void handleSomething(Stanza stanza) 
+ * or
+ * public void handleSomething(Stanza stanza, Map<String, Object> options)
+ * 
+ * these methods may also return a boolean if they like:
+ * 
+ * public void handleSomething(Stanza stanza) 
+ * or
+ * public void handleSomething(Stanza stanza, Map<String, Object> options)
+ * 
+ * "Something" being the variable part. Methods may then be referenced by a message that looks like this:
+ * {
+ *    element: "message",
+ *    payloads: [
+ *         { element: "action", data: "something" },
+ *          ...
+ *    ],
+ *    to: ...,
+ *    session: "...
+ *  }
+ *  
+ *  With "something" being the name of the method to call (or rather the name of the method is handle + the data of the "action" element of the stanza) 
+ *  The method may then use the Stanzas payload trees retrieval methods e.g. {@link Stanza#getPayloads(ElementPath)} to retrieve additional data
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ActionHandler {
@@ -89,10 +113,18 @@ public class ActionHandler {
         }
     }
     
+    /**
+     * Have the ActionHandler choose an appropriate method for the given stanza and calls it on the given handler.
+     * @return true when a method is found and it in turn didn't return true, false if either no matching method was found or the method returned false
+     */
     public boolean callMethod(Object handler, Stanza stanza) throws OXException {
         return callMethod(handler, stanza, null);
     }
-    
+    /**
+     * Have the ActionHandler choose an appropriate method for the given stanza and calls it on the given handler. You can pass additional options to the method
+     * via the options map
+     * @return true when a method is found and it in turn didn't return true, false if either no matching method was found or the method returned false
+     */
     public boolean callMethod(Object handler, Stanza stanza, Map<String, Object> options) throws OXException {
         Collection<PayloadTree> payloads = stanza.getPayloads(new ElementPath("action"));
         for (PayloadTree payloadTree : payloads) {

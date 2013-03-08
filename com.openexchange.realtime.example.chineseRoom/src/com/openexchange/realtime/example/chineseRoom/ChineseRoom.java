@@ -83,6 +83,16 @@ public class ChineseRoom extends GroupDispatcher implements ComponentHandle {
     }
     
     // Say something in the chat room
+    // Stanzas look like this:
+    // {
+    //    element: "message",
+    //    payloads: [
+    //      { element: "action", data: "say" },
+    //      { element: "message", namespace: "china",  data: "Hello World" }
+    //    ],
+    //    to: "synthetic.china://room1",
+    //    session: "72306eae544b4ca6aabab1485ec8a666"
+    //    }
     public void handleSay(Stanza stanza) throws OXException {
         // We only allow members to say something in the chat room
         if (!isMember(stanza.getFrom())) {
@@ -106,6 +116,14 @@ public class ChineseRoom extends GroupDispatcher implements ComponentHandle {
     }
     
     // Get a replay of old messages
+    // {
+    //    element: "message",
+    //    payloads: [
+    //      { element: "action", data: "getLog" }
+    //    ],
+    //    to: "synthetic.china://room1",
+    //    session: "72306eae544b4ca6aabab1485ec8a666"
+    //    }
     public void handleGetLog(Stanza stanza) throws OXException {
         // Again, only members may retrieve the history
         if (!isMember(stanza.getFrom())) {
@@ -134,8 +152,9 @@ public class ChineseRoom extends GroupDispatcher implements ComponentHandle {
     }
     
     // Droo Chonosen mot nom Kontrobo§, so§on oof dor Stro§o ond orzohtlon soch wos
+    // Do kom do Polozoo jo wos ost donn doss? Droo Chonoson mot nom Kontrobo§
     private String chineseVersionOf(String string) {
-        return string.replaceAll("[aeiou]", "o");
+        return string.replaceAll("[aeiouŠŸš]", "o");
     }
     
     // Build a message out of a string

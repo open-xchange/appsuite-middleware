@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.payload.converter;
 
+import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
@@ -58,7 +59,14 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link PayloadTreeConverter} - Walks over a PayloadTree and converts PayloadElements contained in PayloadTreeNodes from the current
  * to the desired representation. Conversion happens when PayloadTrees of incoming Requests or outgoing Responses have to be changed so
- * that client/server can handle them.
+ * that client/server can handle them. Users can register a preferred format for an element path and the framework will convert incoming stanzas payloads
+ * to that format. The common usage is to register two {@link SimplePayloadConverter}s, one to turn a regular Java Type (your own class that models the payloa data) into a JSON representation
+ * and one to turn JSON back into the custom type. Then you can register a preferred format for the framework by getting the PayloadTreeConverter out of the OSGi registry and declaring a preferred format:
+ * 
+ * getService(PayloadTreeConverter.class).declarePreferredFormat(new ElementPath("myNamespace", "myElementName"), InternalClass.class.getName()); 
+ * 
+ * which would turn a payload:
+ * { element: "myElementName", namespace: "myNamespace", data: ...} into an InternalClass instance.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
