@@ -66,13 +66,10 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * An ID describes a valid sender or recipient of a {@link Stanza}.
- * It consists of an optional channel, a mandatory user name and mandatory
- * context name and an optional resource.
- * Resources are arbitrary Strings that allow the user to specify how he is
- * currently connected to the service (e.g. one resource per client) and by
- * that enable multiple logins from different machines and locations.
- *
+ * An ID describes a valid sender or recipient of a {@link Stanza}. It consists of an optional channel, a mandatory user name and mandatory
+ * context name and an optional resource. Resources are arbitrary Strings that allow the user to specify how he is currently connected to
+ * the service (e.g. one resource per client) and by that enable multiple logins from different machines and locations.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -82,19 +79,22 @@ public class ID implements Serializable {
     private static final long serialVersionUID = -5237507998711320109L;
 
     private static ConcurrentHashMap<ID, ConcurrentHashMap<String, List<IDEventHandler>>> listeners = new ConcurrentHashMap<ID, ConcurrentHashMap<String, List<IDEventHandler>>>();
-    
+
     private String protocol;
+
     private String user;
+
     private String context;
+
     private String resource;
+
     private String component;
 
     /**
-     * Pattern to match IDs consisting of protocol, user, context and resource
-     * e.g. xmpp://user@context/notebook
-     * */
+     * Pattern to match IDs consisting of protocol, user, context and resource e.g. xmpp://user@context/notebook
+     */
     private static final Pattern PATTERN = Pattern.compile("(?:(\\w+?)(\\.\\w+)?://)?([^@/]+)@?([^/]+)?/?(.*)");
-    
+
     public ID(final String id, String defaultContext) {
         final Matcher matcher = PATTERN.matcher(id);
         if (!matcher.matches()) {
@@ -105,18 +105,19 @@ public class ID implements Serializable {
         user = matcher.group(3);
         context = matcher.group(4);
         resource = matcher.group(5);
-        
+
         if (context == null) {
             context = defaultContext;
         }
-        
+
         sanitize();
         validate();
-        
+
     }
-    
+
     /**
      * Initializes a new {@link ID} by a String with the syntax "xmpp://user@context/resource".
+     * 
      * @param id String with the syntax "xmpp://user@context/resource".
      * @throws IllegalArgumentException if the id doesn't follow the syntax convention.
      */
@@ -135,6 +136,16 @@ public class ID implements Serializable {
         validate();
     }
 
+    /**
+     * Initializes a new {@link ID}.
+     * 
+     * @param protocol The protocol of the ID, ox, xmpp ...
+     * @param component The component of the id (to address Files and so on)
+     * @param user The user represented by this ID
+     * @param context The context of the user represented by this ID
+     * @param resource The resource of the connected user eg. "desktop" or ontoher string identifying the connected client. Must be unique
+     *            to enable multiple logins.
+     */
     public ID(final String protocol, final String component, final String user, final String context, final String resource) {
         super();
         this.protocol = protocol;
@@ -147,8 +158,7 @@ public class ID implements Serializable {
     }
 
     /*
-     * Check optional id components for emtpy strings and sanitize by setting
-     * to null or default values.
+     * Check optional id components for emtpy strings and sanitize by setting to null or default values.
      */
     private void sanitize() {
         if (protocol != null && isEmpty(protocol)) {
@@ -158,7 +168,7 @@ public class ID implements Serializable {
         if (resource != null && isEmpty(resource)) {
             resource = null;
         }
-        
+
         if (component != null) {
             if (isEmpty(component)) {
                 component = null;
@@ -168,7 +178,6 @@ public class ID implements Serializable {
         }
 
     }
-
 
     private static boolean isEmpty(final String string) {
         if (null == string) {
@@ -231,11 +240,11 @@ public class ID implements Serializable {
         this.resource = resource;
         validate();
     }
-    
+
     public String getComponent() {
         return component;
     }
-    
+
     public void setComponent(String component) {
         this.component = component;
     }
@@ -311,7 +320,7 @@ public class ID implements Serializable {
             b.append(".").append(component);
             needSep = true;
         }
-        if(needSep) {
+        if (needSep) {
             b.append("://");
         }
         b.append(user).append('@').append(context);
@@ -322,8 +331,8 @@ public class ID implements Serializable {
     }
 
     /**
-     * Strip protocol and resource from this id so that it only contains
-     * user@context information.
+     * Strip protocol and resource from this id so that it only contains user@context information.
+     * 
      * @return
      */
     public ID toGeneralForm() {
@@ -331,27 +340,27 @@ public class ID implements Serializable {
     }
 
     /**
-     * Gets a value indicating whether this ID is in general form or not, i.e. if it only contains the mandatory parts and no protocol
-     * or concrete resource name.
-     *
+     * Gets a value indicating whether this ID is in general form or not, i.e. if it only contains the mandatory parts and no protocol or
+     * concrete resource name.
+     * 
      * @return <code>true</code> if the ID is in general form, <code>false</code>, otherwise
      */
     public boolean isGeneralForm() {
         return null == protocol && null == resource;
     }
-    
+
     public ServerSession toSession() throws OXException {
         UserAndContext userAndContextIDs = IdLookup.getUserAndContextIDs(this);
         if (userAndContextIDs != null) {
-            return ServerSessionAdapter.valueOf(SessionObjectWrapper.createSessionObject(userAndContextIDs.getUserId(), userAndContextIDs.getContextId(), (resource != null) ? resource : "rt"));
+            return ServerSessionAdapter.valueOf(SessionObjectWrapper.createSessionObject(
+                userAndContextIDs.getUserId(),
+                userAndContextIDs.getContextId(),
+                (resource != null) ? resource : "rt"));
         }
         SessionObject sessionObject = new SessionObject("anonymous");
         return ServerSessionAdapter.valueOf(sessionObject);
     }
-    
-    
-    
-    
+
     /**
      * Execute the event handler when the "event" happens
      */
@@ -361,79 +370,79 @@ public class ID implements Serializable {
 
     /**
      * Execute the event handler when the event happens, but only once
+     * 
      * @param event
      * @param handler
      */
     public void one(String event, IDEventHandler handler) {
         on(event, new OneOf(handler));
     }
-    
+
     /**
      * Remove the event handler
      */
     public void off(String event, IDEventHandler handler) {
         handlerList(event).remove(handler);
     }
-    
+
     /**
      * Remove all event handlers for this ID
      */
     public void clearListeners() {
         listeners.remove(this);
     }
-    
+
     /**
      * Trigger an event on this ID, with the give properties
      */
     public void trigger(String event, Object source, Map<String, Object> properties) {
-        for(IDEventHandler handler: handlerList(event)) {
+        for (IDEventHandler handler : handlerList(event)) {
             handler.handle(event, this, source, properties);
         }
         if (event.equals("dispose")) {
             clearListeners();
         }
     }
-    
+
     /**
      * Trigger an event on this ID.
      */
     public void trigger(String event, Object source) {
         trigger(event, source, new HashMap<String, Object>());
     }
-    
+
     private List<IDEventHandler> handlerList(String event) {
         ConcurrentHashMap<String, List<IDEventHandler>> events = listeners.get(this);
         if (events == null) {
             events = new ConcurrentHashMap<String, List<IDEventHandler>>();
             listeners.put(this, events);
         }
-        
+
         List<IDEventHandler> list = events.get(events);
-        
+
         if (list == null) {
             list = new CopyOnWriteArrayList<IDEventHandler>();
             events.put(event, list);
         }
-        
+
         return list;
-        
+
     }
-    
+
     private class OneOf implements IDEventHandler {
+
         IDEventHandler delegate;
-        
+
         public OneOf(IDEventHandler delegate) {
             super();
             this.delegate = delegate;
         }
-
-
 
         @Override
         public void handle(String event, ID id, Object source, Map<String, Object> properties) {
             delegate.handle(event, id, source, properties);
             id.off(event, this);
         }
-        
+
     }
 }

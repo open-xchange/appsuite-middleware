@@ -323,4 +323,61 @@ public abstract class Stanza implements Serializable {
     
     public abstract Stanza newInstance();
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((from == null) ? 0 : from.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + ((payloads == null) ? 0 : payloads.hashCode());
+        result = prime * result + ((selector == null) ? 0 : selector.hashCode());
+        result = prime * result + ((to == null) ? 0 : to.hashCode());
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof Stanza))
+            return false;
+        Stanza other = (Stanza) obj;
+        if (from == null) {
+            if (other.from != null)
+                return false;
+        } else if (!from.equals(other.from))
+            return false;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        if (payloads == null) {
+            if (other.payloads != null)
+                return false;
+        } else if (!payloads.equals(other.payloads))
+            return false;
+        if (selector == null) {
+            if (other.selector != null)
+                return false;
+        } else if (!selector.equals(other.selector))
+            return false;
+        if (to == null) {
+            if (other.to != null)
+                return false;
+        } else if (!to.equals(other.to))
+            return false;
+        return true;
+    }
+    
+    
+
 }
