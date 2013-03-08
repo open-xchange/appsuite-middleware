@@ -1,3 +1,7 @@
+* 2013-03-08 - marcus.klein@open-xchange.com
+
+ - Fix for bug 25244: SOAP attributes are not lower case.
+
 * 2013-03-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 25131: Avoid impossible WHERE in folder query

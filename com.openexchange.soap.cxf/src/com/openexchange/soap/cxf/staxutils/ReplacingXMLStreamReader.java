@@ -72,7 +72,6 @@ import org.apache.ws.commons.schema.XmlSchemaType;
  * {@link ReplacingXMLStreamReader}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ReplacingXMLStreamReader extends StreamReaderDelegate {
 
@@ -86,11 +85,6 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
         stack.push(method);
         method.setXmlSchema((XmlSchemaElement) bop.getOperationInfo().getInput().getMessagePart(0).getXmlSchema());
         current = null;
-    }
-
-    @Override
-    public String getAttributeLocalName(int index) {
-        return toLowerCase(super.getAttributeLocalName(index));
     }
 
     @Override
@@ -129,7 +123,7 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
 
     @Override
     public String getLocalName() {
-        return toLowerCase(null == current ? super.getLocalName() : current.getExpected().getLocalPart());
+        return null == current ? super.getLocalName() : current.getExpected().getLocalPart();
     }
 
     @Override
@@ -244,19 +238,5 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
 
     private static boolean isEmptyURI(QName name) {
         return XMLConstants.NULL_NS_URI.equals(name.getNamespaceURI());
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 }
