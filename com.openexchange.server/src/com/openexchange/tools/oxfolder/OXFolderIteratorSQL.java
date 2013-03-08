@@ -85,6 +85,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -2031,7 +2032,7 @@ public final class OXFolderIteratorSQL {
                 FolderObjectIterator.getFieldsForSQL(STR_OT),
                 permissionIds(userId, memberInGroups, ctx),
                 StringCollection.getSqlInString(accessibleModules),
-                new StringBuilder("AND (ot.module = ").append(module).append(')').toString(),
+                new StringAllocator("AND (ot.module = ").append(module).append(')').toString(),
                 getSubfolderOrderBy(STR_OT));
         final Connection readCon;
         final boolean closeReadCon = (readConArg == null);
