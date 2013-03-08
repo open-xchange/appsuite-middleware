@@ -69,7 +69,7 @@ public interface ResourceDirectory {
      *
      * @param listener The listener to add
      */
-    void addListener(ChangeListener listener) throws OXException;
+    void addListener(ChangeListener listener);
 
     /**
      * Removes a previously registered listener.
@@ -133,7 +133,7 @@ public interface ResourceDirectory {
     
     /**
      * Get the most recent PresenceState with a positive Priority iow. that wants to receive messages.
-     * @return the most recent PresenceState with a positive Priority
+     * @return null or the most recent PresenceState with a positive Priority
      * @throws OXException when the Presence lookup fails
      */
     Presence getPresence(ID id) throws OXException;

@@ -49,20 +49,49 @@
 
 package com.openexchange.realtime.presence.osgi;
 
+import org.apache.commons.logging.Log;
+import org.osgi.framework.ServiceReference;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.realtime.RealtimeExceptionCodes;
+import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.presence.publish.PresencePublisher;
+import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 
 public class PresenceActivator extends HousekeepingActivator {
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class[]{MessageDispatcher.class};
-	}
+    private final static Log LOG = com.openexchange.log.Log.loggerFor(PresenceActivator.class);
+    private PresencePublisher presencePublisher;
 
-	@Override
-	protected void startBundle() throws Exception {
-		//registerService(PresenceStatusService.class, new DummyPresenceService(this));
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { MessageDispatcher.class, ResourceDirectory.class, PresenceSubscriptionService.class };
+    }
 
+    @Override
+    protected void startBundle() throws Exception {
+        LOG.info("Starting bundle: " + getClass().getCanonicalName());
+        Services.setServiceLookup(this);
+        ResourceDirectory resourceDirectory = getService(ResourceDirectory.class);
+        if(resourceDirectory == null) {
+            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ResourceDirectory.class.getName());
+        }
+        presencePublisher = new PresencePublisher(resourceDirectory);
+        
+        track(ResourceDirectory.class, new SimpleRegistryListener<ResourceDirectory>() {
+
+            @Override
+            public void added(final ServiceReference<ResourceDirectory> ref, final ResourceDirectory resourceDirectory) {
+                presencePublisher.setResourceDirectory(resourceDirectory);
+            }
+
+            @Override
+            public void removed(final ServiceReference<ResourceDirectory> ref, final ResourceDirectory resourceDirectory) {
+                presencePublisher.setResourceDirectory(null);
+            }
+        });
+        
+    }
 
 }

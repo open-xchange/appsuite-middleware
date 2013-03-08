@@ -82,7 +82,7 @@ public abstract class DefaultResourceDirectory implements ResourceDirectory {
     }
 
     @Override
-    public void addListener(ChangeListener listener) throws OXException {
+    public void addListener(ChangeListener listener) {
         this.listeners.add(listener);
     }
 

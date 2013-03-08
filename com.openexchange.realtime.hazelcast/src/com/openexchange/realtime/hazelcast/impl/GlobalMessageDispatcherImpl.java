@@ -87,33 +87,33 @@ import com.openexchange.threadpool.ThreadPools;
 public class GlobalMessageDispatcherImpl implements MessageDispatcher {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(GlobalMessageDispatcherImpl.class);
+
     private final ResourceDirectory directory;
-    
+
     public GlobalMessageDispatcherImpl(ResourceDirectory directory) {
         super();
         this.directory = directory;
     }
-    
+
     @Override
     public Map<ID, OXException> send(Stanza stanza) throws OXException {
         return send(stanza, directory.get(stanza.getTo()));
     }
-
 
     @Override
     public Map<ID, OXException> send(Stanza stanza, IDMap<Resource> recipients) throws OXException {
         if (stanza == null) {
             throw new IllegalArgumentException("Parameter 'stanza' must not be null!");
         }
-        
+
         if (recipients == null) {
             throw new IllegalArgumentException("Parameter 'recipients' must not be null!");
         }
-        
+
         if (recipients.isEmpty()) {
             return Collections.emptyMap();
         }
-        
+
         Map<Member, Set<ID>> targets = new HashMap<Member, Set<ID>>();
         for (Entry<ID, Resource> recipient : recipients.entrySet()) {
             ID id = recipient.getKey();
@@ -126,14 +126,14 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
                     ids = new HashSet<ID>();
                     targets.put(member, ids);
                 }
-                
+
                 ids.add(id);
             }
         }
-        
+
         return deliver(stanza, targets);
     }
-    
+
     private Map<ID, OXException> deliver(Stanza stanza, Map<Member, Set<ID>> targets) throws OXException {
         final HazelcastInstance hazelcastInstance = HazelcastAccess.getHazelcastInstance();
         Member localMember = hazelcastInstance.getCluster().getLocalMember();
@@ -148,7 +148,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
         for (Member receiver : targets.keySet()) {
             Set<ID> ids = targets.get(receiver);
             LOG.debug("Sending to '" + stanza.getTo() + "' @ " + receiver);
-            
+
             FutureTask<Map<ID, OXException>> task = new DistributedTask<Map<ID, OXException>>(new StanzaDispatcher(stanza, ids), receiver);
             executorService.execute(task);
             futures.add(task);
@@ -165,9 +165,8 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
                 throw ThreadPools.launderThrowable(e, OXException.class);
             }
         }
-        
+
         return exceptions;
     }
-
 
 }

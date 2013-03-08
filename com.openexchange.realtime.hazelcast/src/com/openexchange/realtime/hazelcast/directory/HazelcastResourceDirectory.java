@@ -75,7 +75,7 @@ import com.openexchange.realtime.util.IDMap;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class HazelcastResourceDirectory extends DefaultResourceDirectory {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HazelcastResourceDirectory.class);
 
     /** Mapping of general IDs to full IDs e.q marc.arens@premium <-> ox://marc.arens@premuim/random. */
@@ -114,7 +114,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
 
         return foundResources;
     }
-    
+
     @Override
     public IDMap<Resource> get(Collection<ID> ids) throws OXException {
         IDMap<Resource> foundResources = new IDMap<Resource>();
@@ -179,36 +179,8 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
 
         MultiMap<ID, ID> idMapping = getIDMapping();
         IMap<ID, Resource> allResources = getResourceMap();
-        // Transaction tx = newTransaction();
-        // tx.begin();
-        // try {
-        // if (!resourceIds.isEmpty()) {
-        // for (ID id : resourceIds) {
-        // idMapping.remove(id.toGeneralForm(), id);
-        // Resource resource = allResources.remove(id);
-        // if (resource != null) {
-        // removedResources.put(id, resource);
-        // }
-        // }
-        // }
-        //
-        // if (!generalIds.isEmpty()) {
-        // for (ID id : generalIds) {
-        // Collection<ID> toRemove = idMapping.remove(id);
-        // for (ID concreteId : toRemove) {
-        // Resource resource = allResources.remove(concreteId);
-        // if (resource != null) {
-        // removedResources.put(concreteId, resource);
-        // }
-        // }
-        // }
-        // }
-        //
-        // tx.commit();
-        // } catch (Exception e) {
-        // tx.rollback();
-        // throw new OXException(e);
-        // }
+        Transaction tx = newTransaction();
+        tx.begin();
         try {
             if (!resourceIds.isEmpty()) {
                 for (ID id : resourceIds) {
@@ -231,8 +203,11 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
                     }
                 }
             }
-        } catch (Exception e) {
-            throw new OXException(e);
+
+            tx.commit();
+        } catch (Throwable t) {
+            tx.rollback();
+            throw new OXException(t);
         }
 
         return removedResources;
@@ -243,43 +218,9 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
         IDMap<Resource> removedResources = new IDMap<Resource>();
         MultiMap<ID, ID> idMapping = getIDMapping();
         IMap<ID, Resource> allResources = getResourceMap();
-        // if (id.isGeneralForm()) {
-        // Transaction tx = newTransaction();
-        // tx.begin();
-        // try {
-        // Collection<ID> toRemove = idMapping.remove(id);
-        // if (toRemove != null) {
-        // for (ID concreteId : toRemove) {
-        // Resource resource = allResources.remove(concreteId);
-        // if (resource != null) {
-        // removedResources.put(concreteId, resource);
-        // }
-        // }
-        // }
-        //
-        // tx.commit();
-        // } catch (Exception e) {
-        // tx.rollback();
-        // throw new OXException(e);
-        // }
-        // } else {
-        // Transaction tx = newTransaction();
-        // tx.begin();
-        // try {
-        // idMapping.remove(id.toGeneralForm(), id);
-        // Resource resource = allResources.remove(id);
-        // if (resource != null) {
-        // removedResources.put(id, resource);
-        // }
-        //
-        // tx.commit();
-        // } catch (Exception e) {
-        // tx.rollback();
-        // throw new OXException(e);
-        // }
-        // }
-
         if (id.isGeneralForm()) {
+            Transaction tx = newTransaction();
+            tx.begin();
             try {
                 Collection<ID> toRemove = idMapping.remove(id);
                 if (toRemove != null) {
@@ -290,18 +231,26 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
                         }
                     }
                 }
-            } catch (Exception e) {
-                throw new OXException(e);
+
+                tx.commit();
+            } catch (Throwable t) {
+                tx.rollback();
+                throw new OXException(t);
             }
         } else {
+            Transaction tx = newTransaction();
+            tx.begin();
             try {
                 idMapping.remove(id.toGeneralForm(), id);
                 Resource resource = allResources.remove(id);
                 if (resource != null) {
                     removedResources.put(id, resource);
                 }
-            } catch (Exception e) {
-                throw new OXException(e);
+
+                tx.commit();
+            } catch (Throwable t) {
+                tx.rollback();
+                throw new OXException(t);
             }
         }
 
@@ -316,87 +265,76 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
         MultiMap<ID, ID> idMapping = getIDMapping();
         IMap<ID, Resource> allResources = getResourceMap();
         Resource previousResource = null;
-        // Transaction tx = newTransaction();
-        // if (LOG.isDebugEnabled()) {
-        // LOG.debug(String.format(
-        // "Starting transaction: %1$s for resource: %2$s, %3$tT",
-        // tx,
-        // data.getPresenceState(),
-        // data.getTimestamp()));
-        // }
-        // tx.begin();
-        // try {
-        // idMapping.put(id.toGeneralForm(), id);
-        // previous = allResources.put(id, data);
-        // if (LOG.isDebugEnabled()) {
-        // LOG.debug(String.format(
-        // "Committing transaction %1$s for resource %2$s, %3$tT",
-        // tx,
-        // data.getPresenceState(),
-        // data.getTimestamp()));
-        // }
-        // tx.commit();
-        // } catch (Exception e) {
-        // if (LOG.isDebugEnabled()) {
-        // LOG.debug(String.format(
-        // "Rolling back transaction: %1$s for resource: %2$s, %3$tT",
-        // tx,
-        // data.getPresenceState(),
-        // data.getTimestamp()));
-        // }
-        // tx.rollback();
-        // throw new OXException(e);
-        // }
-        idMapping.put(id.toGeneralForm(), id);
-        // previousResource = allResources.put(id, data);
+        Transaction tx = newTransaction();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(String.format(
+                "Starting transaction: %1$s for resource: %2$s",
+                tx, resource));
+        }
+        tx.begin();
+        try {
+            idMapping.put(id.toGeneralForm(), id);
 
-        // don't overwrite exisiting Presence Data
-        if (resource.getPresenceState() == null) {
-            previousResource = allResources.get(id);
-            if(previousResource != null) {
-                DefaultResource mergeResource = new DefaultResource();
-                mergeResource.setMessage(previousResource.getMessage());
-                mergeResource.setPresenceState(previousResource.getPresenceState());
-                mergeResource.setPriority(previousResource.getPriority());
-                mergeResource.setRoutingInfo(resource.getRoutingInfo());
-                mergeResource.setTimestamp(resource.getTimestamp());
-                allResources.put(id, mergeResource);
-            } else {
+            // don't overwrite exisiting Presence Data
+            if (resource.getPresence() == null) { // a DefaultResource / idle reconnect
+                previousResource = allResources.get(id);
+                if (previousResource != null && previousResource.getPresence() != null) {
+                    resource.setPresence(previousResource.getPresence());
+                    allResources.put(id, resource);
+                } else {
+                    previousResource = allResources.put(id, resource);
+                }
+            } else { // a Resource with Presence data
                 previousResource = allResources.put(id, resource);
             }
-        } else {
-            previousResource = allResources.put(id, resource);
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format(
+                    "Committing transaction %1$s for resource %2$s",
+                    tx, resource));
+            }
+            tx.commit();
+        } catch (Throwable t) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(String.format(
+                    "Rolling back transaction: %1$s for resource: %2$s",
+                    tx, resource));
+            }
+            tx.rollback();
+            throw new OXException(t);
         }
         return previousResource;
     }
 
     @Override
     public Presence getPresence(ID id) throws OXException {
-        IDMap<Resource> resources = get(id.toGeneralForm());
-
         Resource selectedResource = null;
-        for (Resource candidate : resources.values()) {
+        
+        IDMap<Resource> resources = get(id.toGeneralForm());
+        for (Resource candidateResource : resources.values()) {
+            Presence candidatePresence = candidateResource.getPresence();
+            if(candidatePresence == null || candidatePresence.getPriority() < 0) {
+                continue;
+            }
             if (selectedResource == null) {
-                selectedResource = candidate;
+                 selectedResource = candidateResource;
+                 continue;
             } else {
-                int comparisonResult = selectedResource.getTimestamp().compareTo(candidate.getTimestamp());
+                int comparisonResult = selectedResource.getTimestamp().compareTo(candidateResource.getTimestamp());
                 if (comparisonResult < 0) {
-                    // selectedResult is older than candidate
-                    selectedResource = candidate;
+                    selectedResource = candidateResource;
                 }
             }
         }
-        // @formatter:off
-        Presence presence = Presence.builder()
-            .from(id)
-            .message(selectedResource.getMessage())
-            .priority(selectedResource.getPriority())
-            .state(selectedResource.getPresenceState())
-            .build();
-        // @formatter:off
-        return presence;
+        
+        if(selectedResource == null) {
+            return null;
+        } else {
+            return selectedResource.getPresence();
+        }
+        
     }
-    
+        
     private Resource conjureResource(ID id) throws OXException {
         if (conjure(id)) {
             Resource res = new DefaultResource();

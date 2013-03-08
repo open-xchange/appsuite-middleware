@@ -65,6 +65,7 @@ import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.util.IDMap;
 
@@ -116,9 +117,9 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         
         set(concreteId, resource);
         Resource reloadedResource = get(generalId).entrySet().iterator().next().getValue();
-        Assert.assertEquals("Wrong presence state", resource.getPresenceState(), reloadedResource.getPresenceState());
+        Assert.assertEquals("Wrong presence state", resource.getPresence().getState(), reloadedResource.getPresence().getState());
         
-        DefaultResource changedResource = new DefaultResource(PresenceState.OFFLINE);
+        DefaultResource changedResource = new DefaultResource(Presence.builder().state(PresenceState.OFFLINE).build());
         Resource previous = set(concreteId, changedResource);
         Assert.assertEquals("Wrong resource", resource, previous);
         
@@ -227,7 +228,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
     }
     
     private Resource generateResource() {
-        return new DefaultResource();
+        return new DefaultResource(Presence.builder().state(PresenceState.ONLINE).build());
     }
 
 }

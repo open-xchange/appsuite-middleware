@@ -51,44 +51,30 @@ package com.openexchange.realtime.directory;
 
 import java.io.Serializable;
 import java.util.Date;
+import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.PresenceState;
 
 /**
  * {@link DefaultResource} Abstract {@link Resource} implementation.
  * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-// TODO: add Presence field instead of timestamp, state, message, priority as Stanzas aren't restricted to the base set of fields.
 public class DefaultResource implements Resource {
 
     private static final long serialVersionUID = -1140736920132224444L;
 
-    protected Date timestamp;
-
-    protected PresenceState state;
-
-    protected String message;
-
-    protected byte priority;
+    protected Presence presence;
 
     protected Serializable routingInfo;
 
-    /**
-     * Initializes a new {@link DefaultResource} with {@link PresenceState#ONLINE}.
-     */
-    public DefaultResource() {
-        // don't set a PresenceState for DefaultResources so we can distinguish DefaultResources from the ones with a Presence associated
-        // see TODO
-        this(null);
-    }
+    protected Date timestamp;
 
     /**
-     * Initializes a new {@link DefaultResource} with the supplied presence state, assuming the current time as timestamp.
-     * 
-     * @param state The presence state
+     * Initializes a new {@link DefaultResource} without associated {@link Presence}
      */
-    public DefaultResource(PresenceState state) {
-        this(state, new Date());
+    public DefaultResource() {
+        this(null);
     }
 
     /**
@@ -97,34 +83,30 @@ public class DefaultResource implements Resource {
      * @param state The presence state
      * @param timestamp The timestamp
      */
-    public DefaultResource(PresenceState state, Date timestamp) {
-        super();
-        this.timestamp = timestamp;
-        this.state = state;
-    }
+    public DefaultResource(Presence presence) {
+        this(presence, new Date());
 
-    @Override
-    public Date getTimestamp() {
-        return this.timestamp;
-    }
-
-    @Override
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    @Override
-    public byte getPriority() {
-        return this.priority;
     }
 
     /**
-     * Sets the priority
+     * Initializes a new {@link DefaultResource}.
      * 
-     * @param priority The priority to set
+     * @param presence The presence state
+     * @param timestamp The timestamp
      */
-    public void setPriority(byte priority) {
-        this.priority = priority;
+    public DefaultResource(Presence presence, Date timestamp) {
+        this.presence = presence;
+        this.timestamp = timestamp;
+    }
+
+    @Override
+    public Presence getPresence() {
+        return this.presence;
+    }
+
+    @Override
+    public void setPresence(Presence presence) {
+        this.presence = presence;
     }
 
     @Override
@@ -138,41 +120,21 @@ public class DefaultResource implements Resource {
     }
 
     @Override
-    public PresenceState getPresenceState() {
-        return this.state;
-    }
-
-    /**
-     * Sets the presence state
-     * 
-     * @param state the presence state to set
-     */
-    public void setPresenceState(PresenceState state) {
-        this.state = state;
-    }
-
-    /**
-     * Sets the message
-     * 
-     * @param message The message
-     */
-    public void setMessage(String message) {
-        this.message = message;
+    public Date getTimestamp() {
+        return this.timestamp;
     }
 
     @Override
-    public String getMessage() {
-        return this.message;
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((message == null) ? 0 : message.hashCode());
-        result = prime * result + priority;
+        result = prime * result + ((presence == null) ? 0 : presence.hashCode());
         result = prime * result + ((routingInfo == null) ? 0 : routingInfo.hashCode());
-        result = prime * result + ((state == null) ? 0 : state.hashCode());
         result = prime * result + ((timestamp == null) ? 0 : timestamp.hashCode());
         return result;
     }
@@ -183,22 +145,18 @@ public class DefaultResource implements Resource {
             return true;
         if (obj == null)
             return false;
-        if (getClass() != obj.getClass())
+        if (!(obj instanceof DefaultResource))
             return false;
         DefaultResource other = (DefaultResource) obj;
-        if (message == null) {
-            if (other.message != null)
+        if (presence == null) {
+            if (other.presence != null)
                 return false;
-        } else if (!message.equals(other.message))
-            return false;
-        if (priority != other.priority)
+        } else if (!presence.equals(other.presence))
             return false;
         if (routingInfo == null) {
             if (other.routingInfo != null)
                 return false;
         } else if (!routingInfo.equals(other.routingInfo))
-            return false;
-        if (state != other.state)
             return false;
         if (timestamp == null) {
             if (other.timestamp != null)

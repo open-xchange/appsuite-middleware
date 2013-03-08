@@ -141,7 +141,10 @@ public class MessageHandler extends AbstractStrategyHandler<Message> {
             for (Entry<ID, Resource> entry : resources.entrySet()) {
                 ID id = entry.getKey();
                 Resource resource = entry.getValue();
-                byte priority = resource.getPriority();
+                byte priority = 0;
+                if(resource.getPresence() != null) {
+                    priority = resource.getPresence().getPriority();
+                }
                 if (priority == highest) {
                     receivers.put(id, resource);
                 } else if (priority > highest) {

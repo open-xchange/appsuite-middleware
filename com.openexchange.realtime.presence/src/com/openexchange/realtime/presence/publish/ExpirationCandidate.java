@@ -47,61 +47,71 @@
  *
  */
 
-package com.openexchange.realtime.directory;
+package com.openexchange.realtime.presence.publish;
 
 import java.io.Serializable;
-import java.util.Date;
-import com.openexchange.realtime.packet.Presence;
-import com.openexchange.realtime.packet.PresenceState;
+import com.openexchange.realtime.directory.Resource;
 
 /**
- * {@link Resource} - Combines Presence and RoutingInfo.
+ * {@link ExpirationCandidate} - Combine Resource with birthTime to be used for expiration and sorting.
  * 
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface Resource extends Serializable {
+public class ExpirationCandidate implements Comparable<ExpirationCandidate>, Serializable {
+
+    private static final long serialVersionUID = -8665102416929430074L;
+
+    private Resource resource;
+
+    private final long birthTime;
 
     /**
-     * Gets the presence information.
+     * Initializes a new {@link ExpirationCandidate}.
      * 
-     * @return null or the associated Presence Stanza
+     * @param id
      */
-    Presence getPresence();
+    public ExpirationCandidate(Resource resource) {
+        super();
+        this.resource = resource;
+        this.birthTime = System.currentTimeMillis();
+    }
 
     /**
-     * Sets the presence information
+     * Gets the resource
      * 
-     * @param presence the Presence Stanza to set
+     * @return The resource
      */
-    void setPresence(Presence presence);
+    public Resource getResource() {
+        return resource;
+    }
 
     /**
-     * Gets internal routing information inside the server, e.g. to specify a node in a cluster member the resource is physically connected
-     * to.
+     * Sets the resource
      * 
-     * @return The routing information
+     * @param resource The resource to set
      */
-    Serializable getRoutingInfo();
+    public void setResource(Resource resource) {
+        this.resource = resource;
+    }
 
     /**
-     * Sets the routing information
+     * Gets the birthTime
      * 
-     * @param routingInfo The routing information to set
+     * @return The birthTime
      */
-    void setRoutingInfo(Serializable routingInfo);
+    public long getBirthTime() {
+        return birthTime;
+    }
 
-    /**
-     * Gets the time the resource was last updated or created
-     * 
-     * @return The timestamp
-     */
-    Date getTimestamp();
-
-    /**
-     * Sets the timestamp
-     * 
-     * @param timestamp The timestamp to set
-     */
-    void setTimestamp(Date timestamp);
+    @Override
+    public int compareTo(final ExpirationCandidate otherEntry) {
+        if (this.birthTime < otherEntry.birthTime) {// this one is older
+            return 1;
+        } else if (birthTime > otherEntry.birthTime) {// this one is younger
+            return -1;
+        } else {
+            return 0;
+        }
+    }
 
 }

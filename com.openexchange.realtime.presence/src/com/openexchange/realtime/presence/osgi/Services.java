@@ -47,61 +47,73 @@
  *
  */
 
-package com.openexchange.realtime.directory;
+package com.openexchange.realtime.presence.osgi;
 
-import java.io.Serializable;
-import java.util.Date;
-import com.openexchange.realtime.packet.Presence;
-import com.openexchange.realtime.packet.PresenceState;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link Resource} - Combines Presence and RoutingInfo.
- * 
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * {@link Services} - The static service lookup.
+ *
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface Resource extends Serializable {
+public final class Services {
 
     /**
-     * Gets the presence information.
-     * 
-     * @return null or the associated Presence Stanza
+     * Initializes a new {@link Services}.
      */
-    Presence getPresence();
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
 
     /**
-     * Sets the presence information
-     * 
-     * @param presence the Presence Stanza to set
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    void setPresence(Presence presence);
+    public static void setServiceLookup(ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
 
     /**
-     * Gets internal routing information inside the server, e.g. to specify a node in a cluster member the resource is physically connected
-     * to.
-     * 
-     * @return The routing information
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
      */
-    Serializable getRoutingInfo();
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
 
     /**
-     * Sets the routing information
-     * 
-     * @param routingInfo The routing information to set
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    void setRoutingInfo(Serializable routingInfo);
+    public static <S extends Object> S getService(Class<? extends S> clazz) {
+        com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException(
+                "Missing ServiceLookup instance. Bundle \"com.openexchange.realtime.presence\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
 
     /**
-     * Gets the time the resource was last updated or created
-     * 
-     * @return The timestamp
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
      */
-    Date getTimestamp();
-
-    /**
-     * Sets the timestamp
-     * 
-     * @param timestamp The timestamp to set
-     */
-    void setTimestamp(Date timestamp);
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
+    }
 
 }

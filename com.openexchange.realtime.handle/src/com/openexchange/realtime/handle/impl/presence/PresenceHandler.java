@@ -301,24 +301,29 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
     /**
      * Change the current Presence status of the client in the ResourceDirectory.
      * 
-     * @param stanza Stanza containing the new Presence Status
+     * @param presence Stanza containing the new Presence Status
      * @throws OXException If stanza conversion fails or the status can't be changed
      */
-    private void handlePresence(Presence stanza) throws OXException {
+    private void handlePresence(Presence presence) throws OXException {
         ResourceDirectory resourceDirectory = getResourceDirectory();
-        DefaultResource resource = new DefaultResource(stanza.getState());
-        resource.setMessage(stanza.getMessage());
-        resource.setPriority(stanza.getPriority());
-        Resource old = resourceDirectory.set(stanza.getFrom(), resource);
+        DefaultResource presenceResource = new DefaultResource(presence);
+        Resource old = resourceDirectory.set(presence.getFrom(), presenceResource);
         if (old != null) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug(String.format(
-                    "Update Presence: Old was: %1$s, %2$s, %3$d, %4$tT, %5$s",
-                    old.getPresenceState(),
-                    old.getMessage(),
-                    old.getPriority(),
-                    old.getTimestamp(),
-                    old.getRoutingInfo()));
+                if(old.getPresence() != null) {
+                    LOG.debug(String.format(
+                        "Update Presence: Old was: %1$s, %2$s, %3$d, %4$tT, %5$s",
+                        old.getPresence().getState(),
+                        old.getPresence().getMessage(),
+                        old.getPresence().getPriority(),
+                        old.getTimestamp(),
+                        old.getRoutingInfo()));
+                } else {
+                    LOG.debug(String.format(
+                        "Update Presence: Old was: %1$tT, %2$s",
+                        old.getTimestamp(),
+                        old.getRoutingInfo()));
+                }
             }
         }
     }
