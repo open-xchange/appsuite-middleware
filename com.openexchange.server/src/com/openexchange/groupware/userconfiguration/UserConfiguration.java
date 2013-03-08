@@ -590,7 +590,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>.
      */
     public boolean hasWebMail() {
-        return hasPermission(WEBMAIL);
+        return (this.permissionBits & WEBMAIL) > 0;
     }
 
     /**
@@ -608,7 +608,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasCalendar() {
-        return hasPermission(CALENDAR);
+        return (this.permissionBits & CALENDAR) > 0;
     }
 
     /**
@@ -626,7 +626,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasContact() {
-        return hasPermission(CONTACTS);
+        return (this.permissionBits & CONTACTS) > 0;
     }
 
     /**
@@ -644,7 +644,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasTask() {
-        return hasPermission(TASKS);
+        return (this.permissionBits & TASKS) > 0;
     }
 
     /**
@@ -662,7 +662,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasInfostore() {
-        return hasPermission(INFOSTORE);
+        return (this.permissionBits & INFOSTORE) > 0;
     }
 
     /**
@@ -680,7 +680,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasProject() {
-        return hasPermission(PROJECTS);
+        return (this.permissionBits & PROJECTS) > 0;
     }
 
     /**
@@ -698,7 +698,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasForum() {
-        return hasPermission(FORUM);
+        return (this.permissionBits & FORUM) > 0;
     }
 
     /**
@@ -716,7 +716,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasPinboardWriteAccess() {
-        return hasPermission(PINBOARD_WRITE_ACCESS);
+        return (this.permissionBits & PINBOARD_WRITE_ACCESS) > 0;
     }
 
     /**
@@ -734,7 +734,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasWebDAVXML() {
-        return hasPermission(WEBDAV_XML);
+        return (this.permissionBits & WEBDAV_XML) > 0;
     }
 
     /**
@@ -752,7 +752,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasWebDAV() {
-        return hasPermission(WEBDAV);
+        return (this.permissionBits & WEBDAV) > 0;
     }
 
     /**
@@ -770,7 +770,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasICal() {
-        return hasPermission(ICAL);
+        return (this.permissionBits & ICAL) > 0;
     }
 
     /**
@@ -788,7 +788,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasVCard() {
-        return hasPermission(VCARD);
+        return (this.permissionBits & VCARD) > 0;
     }
 
     /**
@@ -806,7 +806,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasRSSBookmarks() {
-        return hasPermission(RSS_BOOKMARKS);
+        return (this.permissionBits & RSS_BOOKMARKS) > 0;
     }
 
     /**
@@ -824,7 +824,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasRSSPortal() {
-        return hasPermission(RSS_PORTAL);
+        return (this.permissionBits & RSS_PORTAL) > 0;
     }
 
     /**
@@ -842,7 +842,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      */
     public boolean hasSyncML() {
-        return hasPermission(MOBILITY);
+        return (this.permissionBits & MOBILITY) > 0;
     }
 
     /**
@@ -905,7 +905,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if portal page is allowed; otherwise <code>false</code>
      */
     public boolean hasPortal() {
-        return !hasPermission(DENIED_PORTAL);
+        return (this.permissionBits & DENIED_PORTAL) <= 0;
     }
 
     /**
@@ -983,7 +983,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> full public folder access is granted; otherwise <code>false</code>
      */
     public boolean hasFullPublicFolderAccess() {
-        return hasPermission(EDIT_PUBLIC_FOLDERS);
+        return (this.permissionBits & EDIT_PUBLIC_FOLDERS) > 0;
     }
 
     /**
@@ -1002,7 +1002,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> full shared folder access is granted; otherwise <code>false</code>
      */
     public boolean hasFullSharedFolderAccess() {
-        return hasPermission(READ_CREATE_SHARED_FOLDERS);
+        return (this.permissionBits & READ_CREATE_SHARED_FOLDERS) > 0;
     }
 
     /**
@@ -1020,7 +1020,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if user can delegate tasks; otherwise <code>false</code>
      */
     public boolean canDelegateTasks() {
-        return hasPermission(DELEGATE_TASKS);
+        return (this.permissionBits & DELEGATE_TASKS) > 0;
     }
 
     /**
@@ -1038,7 +1038,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration indicates to collect email addresses; otherwise <code>false</code>
      */
     public boolean isCollectEmailAddresses() {
-        return hasPermission(COLLECT_EMAIL_ADDRESSES);
+        return (this.permissionBits & COLLECT_EMAIL_ADDRESSES) > 0;
     }
 
     /**
@@ -1057,7 +1057,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration indicates to enable multiple mail accounts; otherwise <code>false</code>
      */
     public boolean isMultipleMailAccounts() {
-        return hasPermission(MULTIPLE_MAIL_ACCOUNTS);
+        return (this.permissionBits & MULTIPLE_MAIL_ACCOUNTS) > 0;
     }
 
     /**
@@ -1076,7 +1076,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration indicates to enable subscription; otherwise <code>false</code>
      */
     public boolean isSubscription() {
-        return hasPermission(SUBSCRIPTION);
+        return (this.permissionBits & SUBSCRIPTION) > 0;
     }
 
     /**
@@ -1095,7 +1095,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration indicates to enable publication; otherwise <code>false</code>
      */
     public boolean isPublication() {
-        return hasPermission(PUBLICATION);
+        return (this.permissionBits & PUBLICATION) > 0;
     }
 
     /**
@@ -1111,7 +1111,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * Checks if this user configuration indicates that the user may use Exchange Active Sync
      */
     public boolean hasActiveSync() {
-        return hasPermission(ACTIVE_SYNC);
+        return (this.permissionBits & ACTIVE_SYNC) > 0;
     }
 
     /**
@@ -1125,7 +1125,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * Checks if this user configuration indicates that the user may use USM.
      */
     public boolean hasUSM() {
-        return hasPermission(USM);
+        return (this.permissionBits & USM) > 0;
     }
 
     /**
@@ -1139,7 +1139,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * Checks if this user configuration indicates that the user may use OLOX2.0.
      */
     public boolean hasOLOX20() {
-        return hasPermission(OLOX20);
+        return (this.permissionBits & OLOX20) > 0;
     }
 
     /**
@@ -1155,7 +1155,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration indicates that groups are allowed to be edited; otherwise <code>false</code>
      */
     public boolean isEditGroup() {
-        return hasPermission(EDIT_GROUP);
+        return (this.permissionBits & EDIT_GROUP) > 0;
     }
 
     /**
@@ -1174,7 +1174,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration indicates that resources are allowed to be edited; otherwise <code>false</code>
      */
     public boolean isEditResource() {
-        return hasPermission(EDIT_RESOURCE);
+        return (this.permissionBits & EDIT_RESOURCE) > 0;
     }
 
     /**
@@ -1194,7 +1194,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
      *         <code>false</code>
      */
     public boolean isEditPassword() {
-        return hasPermission(EDIT_PASSWORD);
+        return (this.permissionBits & EDIT_PASSWORD) > 0;
     }
 
     /**
@@ -1217,13 +1217,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     	if (permissionBit == 0) {
     		return true;
     	}
-        Set<String> extendedPermissions = getExtendedPermissions();
-        for (final Permission p : Permission.byBits(permissionBit)) {
-        	if (!extendedPermissions.contains(toLowerCase(p.name()))) {
-        		return false;
-        	}
-		}
-        return true;
+    	return (this.permissionBits & permissionBit) > 0;
     }
 
     /**
