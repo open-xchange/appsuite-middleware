@@ -1,3 +1,7 @@
+* 2013-03-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25131: Avoid impossible WHERE in folder query
+
 * 2013-03-07 - marcus.klein@open-xchange.com
 
  - Fix for bug 25238: Corrected order of returned UserConfiguration array and massively improved throughput of the UserConfiguration caching
