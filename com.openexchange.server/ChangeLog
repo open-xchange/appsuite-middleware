@@ -1,6 +1,7 @@
 * 2013-03-08 - marcus.klein@open-xchange.com
 
  - Fix for bug 25244: SOAP attributes are not lower case.
+ - Fix for bug 25253: Use cached entries as much as possible before converting data structures expensively.
 
 * 2013-03-08 - thorben.betten@open-xchange.com
 
