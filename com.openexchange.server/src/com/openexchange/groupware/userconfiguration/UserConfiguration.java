@@ -1214,16 +1214,8 @@ public final class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration enabled specified permission bit; otherwise <code>false</code>
      */
     public boolean hasPermission(final int permissionBit) {
-    	if (permissionBit == 0) {
-    		return true;
-    	}
-        Set<String> extendedPermissions = getExtendedPermissions();
-        for (final Permission p : Permission.byBits(permissionBit)) {
-        	if (!extendedPermissions.contains(toLowerCase(p.name()))) {
-        		return false;
-        	}
-		}
-        return true;
+        final Permission p = Permission.byBit(permissionBit);
+        return null == p ? false : getExtendedPermissions().contains(toLowerCase(p.name()));
     }
 
     /**
@@ -1254,7 +1246,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     }
 
     private boolean hasPermissionInternal(Permission permission) {
-    	return hasPermissionInternal(permission.bit);
+    	return permission.isAvailable() && hasPermissionInternal(permission.bit);
     }
 
     private void setPermission(final boolean enable, final int permission) {

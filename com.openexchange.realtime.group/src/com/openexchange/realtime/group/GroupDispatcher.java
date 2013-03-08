@@ -224,7 +224,9 @@ public class GroupDispatcher implements ComponentHandle {
         ids.add(id);
         stamps.put(id, stamp);
         id.on("dispose", LEAVE);
-        firstJoined(id);
+        if (first) {
+            firstJoined(id);
+        }
         onJoin(id);
     }
     

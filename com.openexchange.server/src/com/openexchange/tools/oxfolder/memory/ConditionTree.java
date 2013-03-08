@@ -53,8 +53,8 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
 
@@ -81,7 +81,7 @@ public final class ConditionTree {
         }
     };
 
-    private static final List<Condition> CONDITIONS = new CopyOnWriteArrayList<Condition>(Arrays.asList(CONDITION_ADMIN, CONDITION_READ_FOLDER));
+    private static final List<Condition> CONDITIONS = Collections.unmodifiableList(new ArrayList<Condition>(Arrays.asList(CONDITION_ADMIN, CONDITION_READ_FOLDER)));
 
     private static final int LENGTH = CONDITIONS.size();
 

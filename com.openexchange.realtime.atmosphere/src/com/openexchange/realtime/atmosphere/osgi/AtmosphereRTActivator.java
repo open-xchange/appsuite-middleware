@@ -79,7 +79,7 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SessiondService.class, AtmosphereService.class, MessageDispatcher.class, SimpleConverter.class, ResourceDirectory.class, StanzaQueueService.class, PayloadTreeConverter.class, CapabilityService.class };
+        return new Class<?>[] { SessiondService.class, AtmosphereService.class, MessageDispatcher.class, SimpleConverter.class, ResourceDirectory.class, StanzaQueueService.class,  PayloadTreeConverter.class, CapabilityService.class };
     }
 
     @Override

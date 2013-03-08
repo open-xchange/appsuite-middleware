@@ -118,8 +118,9 @@ public final class ConfigInetProxyActivator extends HousekeepingActivator {
                 for (int i = 1; i < size; i++) {
                     sb.append('|').append(nonProxyHosts.get(i));
                 }
-                System.setProperty("http.noProxyHosts", sb.toString());
-                System.setProperty("ftp.noProxyHosts", sb.toString());
+                final String sNoProxyHosts = sb.toString();
+                System.setProperty("http.noProxyHosts", sNoProxyHosts);
+                System.setProperty("ftp.noProxyHosts", sNoProxyHosts);
             }
             // Create service
             final ConfigInetProxyService inetProxyService = new ConfigInetProxyService(proxyEnabled, proxyInformation);
