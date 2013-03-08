@@ -60,13 +60,11 @@ import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
-import com.openexchange.realtime.presence.PresenceStatusService;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.realtime.presence.subscribe.database.CreatePresenceSubscriptionDB;
 import com.openexchange.realtime.presence.subscribe.database.PresenceSubscriptionsTable;
 import com.openexchange.realtime.presence.subscribe.database.SubscriptionsSQL;
 import com.openexchange.realtime.presence.subscribe.impl.SubscriptionServiceImpl;
-import com.openexchange.realtime.presence.subscribe.impl.UndeliveredSubscriptionRequestJanitor;
 import com.openexchange.user.UserService;
 
 /**
@@ -80,13 +78,11 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ContextService.class, UserService.class, MessageDispatcher.class, PresenceStatusService.class };
+        return new Class<?>[] { DatabaseService.class, ContextService.class, UserService.class, MessageDispatcher.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        PresenceStatusService presenceStatusService = getService(PresenceStatusService.class);
-        presenceStatusService.registerPresenceChangeListener(new UndeliveredSubscriptionRequestJanitor());
         final DatabaseService dbService = getService(DatabaseService.class);
         SubscriptionsSQL.db = dbService;
         registerService(PresenceSubscriptionService.class, new SubscriptionServiceImpl(this));

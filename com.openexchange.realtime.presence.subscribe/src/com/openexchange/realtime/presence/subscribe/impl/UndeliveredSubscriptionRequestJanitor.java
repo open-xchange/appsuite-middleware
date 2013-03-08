@@ -49,10 +49,6 @@
 
 package com.openexchange.realtime.presence.subscribe.impl;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.realtime.packet.Presence;
-import com.openexchange.realtime.presence.PresenceChangeListener;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -61,23 +57,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
-public class UndeliveredSubscriptionRequestJanitor implements PresenceChangeListener {
-
-    public static final Log LOG = com.openexchange.log.Log.loggerFor(UndeliveredSubscriptionRequestJanitor.class);
-
-    @Override
-    public void initialPresence(Presence presence) {
-        LOG.info("\nHÄLP I NEED IMPLEMENTATION\n");
-    }
-
-    @Override
-    public void normalPresence(Presence presence) {
-        LOG.info("\nHÄLP I NEED IMPLEMENTATION\n");
-    }
-
-    @Override
-    public void finalPresence(Presence presence) {
-        LOG.info("\nHÄLP I NEED IMPLEMENTATION\n");
-    }
+public class UndeliveredSubscriptionRequestJanitor {
 
 }

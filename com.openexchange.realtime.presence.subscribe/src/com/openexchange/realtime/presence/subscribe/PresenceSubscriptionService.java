@@ -56,7 +56,7 @@ import com.openexchange.realtime.packet.Presence;
 
 /**
  * {@link PresenceSubscriptionService}
- *
+ * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public interface PresenceSubscriptionService {
@@ -64,7 +64,7 @@ public interface PresenceSubscriptionService {
     /**
      * Sends a presence request to a specific user, defined in the Presence object. This request might be handled immediately if the
      * recipient is available or is stored for later handling.
-     *
+     * 
      * @param subscription
      * @param message optional message
      * @throws OXException
@@ -73,7 +73,7 @@ public interface PresenceSubscriptionService {
 
     /**
      * Allows a given user to see (or not to see) the current users presence status.
-     *
+     * 
      * @param id The user who is allowed to receive the presence status.
      * @param approval
      * @throws OXException
@@ -81,26 +81,28 @@ public interface PresenceSubscriptionService {
     public void approve(Presence approval) throws OXException;
 
     /**
-     * Returns all active subscribers for the current user.
-     *
-     * @param id
-     * @return
+     * Returns all active subscribers for the current user. In other words: Gets a list of IDs that sent subscription requests to the user
+     * with ID id and got approved by that user so they are allowed to see his Presence.
+     * 
+     * @param id The id of the user whose subscribers we want to see
+     * @return The subscribers of the user with id, or an empty list
      * @throws OXException
      */
     public List<ID> getSubscribers(ID id) throws OXException;
 
     /**
-     * Returns all active subscriptions for the user with given id.
-     *
-     * @param id
-     * @return
+     * Returns all active subscriptions for the user with given id.  In other words: Gets a list of IDs that approved subscription requests 
+     * sent to them by the user with ID id so that this user is allowed to see their Presence.
+     * 
+     * @param id The id of the user whose subscriptions we want to see
+     * @return The subscriptions of the user with id, or an empty list
      * @throws OXException
      */
     public List<ID> getSubscriptions(ID id) throws OXException;
 
     /**
      * Returns all pending requests for the user with the given id.
-     *
+     * 
      * @param id
      * @return
      * @throws OXException
@@ -109,7 +111,7 @@ public interface PresenceSubscriptionService {
 
     /**
      * Sends all pending reuqests for the user with the given id.
-     *
+     * 
      * @param id
      * @throws OXException
      */

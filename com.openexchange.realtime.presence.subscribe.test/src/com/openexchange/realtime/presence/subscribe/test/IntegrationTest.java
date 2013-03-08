@@ -87,9 +87,9 @@ public class IntegrationTest implements OSGiTest {
     public void testSubscribe() throws Exception {
         // marcus subscribes to martin
         Presence subscription = new Presence();
-        ID marcus = new ID(null, "marcus", "1337", null);
+        ID marcus = new ID(null, null, "marcus", "1337", null);
         subscription.setFrom(marcus);
-        ID martin = new ID(null, "martin.herfurth", "1337", null);
+        ID martin = new ID(null, null, "martin.herfurth", "1337", null);
         subscription.setTo(martin);
         subscription.setType(Presence.Type.UNSUBSCRIBED);
 
