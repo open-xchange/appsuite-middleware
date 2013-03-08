@@ -1246,7 +1246,7 @@ public final class UserConfiguration implements Serializable, Cloneable {
     }
 
     private boolean hasPermissionInternal(Permission permission) {
-    	return hasPermissionInternal(permission.bit);
+    	return permission.isAvailable() && hasPermissionInternal(permission.bit);
     }
 
     private void setPermission(final boolean enable, final int permission) {
