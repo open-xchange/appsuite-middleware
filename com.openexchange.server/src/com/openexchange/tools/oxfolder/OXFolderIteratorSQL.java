@@ -613,8 +613,8 @@ public final class OXFolderIteratorSQL {
             readCon = DBPool.pickup(ctx);
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -740,8 +740,8 @@ public final class OXFolderIteratorSQL {
             }
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -843,8 +843,8 @@ public final class OXFolderIteratorSQL {
             }
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -949,8 +949,8 @@ public final class OXFolderIteratorSQL {
             }
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // tmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -1043,8 +1043,8 @@ public final class OXFolderIteratorSQL {
             }
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -1134,8 +1134,8 @@ public final class OXFolderIteratorSQL {
             }
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -1264,8 +1264,8 @@ public final class OXFolderIteratorSQL {
             }
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -1371,8 +1371,8 @@ public final class OXFolderIteratorSQL {
                 condBuilder.toString(),
                 getSubfolderOrderBy(STR_OT)));
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -1442,8 +1442,8 @@ public final class OXFolderIteratorSQL {
                 condBuilder.toString(),
                 getSubfolderOrderBy(STR_OT)));
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -1524,8 +1524,8 @@ public final class OXFolderIteratorSQL {
             final String regex = "\\?";
             final String sContextId = String.valueOf(ctx.getContextId());
             final String sUserId = String.valueOf(userId);
-            sqlStr = sqlStr.replaceFirst(regex, sContextId);
-            sqlStr = sqlStr.replaceFirst(regex, sUserId);
+            // sqlStr = sqlStr.replaceFirst(regex, sContextId);
+            // sqlStr = sqlStr.replaceFirst(regex, sUserId);
             sqlStr = sqlStr.replaceFirst(regex, sContextId);
             sqlStr = sqlStr.replaceFirst(regex, sContextId);
             sqlStr = sqlStr.replaceFirst(regex, sUserId);
@@ -1582,8 +1582,8 @@ public final class OXFolderIteratorSQL {
                         getOrderBy(STR_OT, "module", "fname"));
                 stmt = rc.prepareStatement(sqlSelectStr);
             }
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -1955,8 +1955,8 @@ public final class OXFolderIteratorSQL {
                     condBuilder.toString(),
                     getSubfolderOrderBy(STR_OT)));
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -2048,8 +2048,8 @@ public final class OXFolderIteratorSQL {
         try {
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -2132,8 +2132,8 @@ public final class OXFolderIteratorSQL {
             }
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            //stmt.setInt(pos++, contextId);
+            //stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -2196,8 +2196,8 @@ public final class OXFolderIteratorSQL {
             readCon = DBPool.pickup(ctx);
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
