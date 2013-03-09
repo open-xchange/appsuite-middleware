@@ -79,14 +79,11 @@ import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
 import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.directory.DefaultResource;
-import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.ResourceDirectory;
-import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.dispatch.StanzaSender;
 import com.openexchange.realtime.handle.StanzaQueueService;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.util.IDMap;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -389,7 +386,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         if (session == null) {
             throw OXExceptionFactory.getInstance().create(SessionExceptionCodes.SESSION_EXPIRED, sessionInfo);
         }
-        serverSession = new ServerSessionAdapter(session);
+        serverSession = ServerSessionAdapter.valueOf(session);
         return serverSession;
     }
 
