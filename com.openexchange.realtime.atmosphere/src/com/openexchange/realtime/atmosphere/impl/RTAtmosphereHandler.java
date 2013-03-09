@@ -375,19 +375,15 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             throw new IllegalArgumentException("Invalid parameter: sessionInfo");
         }
 
-        Session session = null;
-        ServerSession serverSession = null;
-
         SessiondService sessiondService = services.getService(SessiondService.class);
         if (sessiondService == null) {
             throw OXExceptionFactory.getInstance().create(ServiceExceptionCode.SERVICE_UNAVAILABLE, SessiondService.class);
         }
-        session = sessiondService.getSession(sessionInfo);
+        Session session = sessiondService.getSession(sessionInfo);
         if (session == null) {
             throw OXExceptionFactory.getInstance().create(SessionExceptionCodes.SESSION_EXPIRED, sessionInfo);
         }
-        serverSession = ServerSessionAdapter.valueOf(session);
-        return serverSession;
+        return ServerSessionAdapter.valueOf(session);
     }
 
     /**
