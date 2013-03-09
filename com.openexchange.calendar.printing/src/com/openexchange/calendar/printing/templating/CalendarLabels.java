@@ -63,8 +63,8 @@ import com.openexchange.server.ServiceLookup;
  */
 public class CalendarLabels {
     
-    private ServiceLookup services;
-    private Locale locale;
+    private final ServiceLookup services;
+    private final Locale locale;
     private Map<String, Object> appointment = null;
     
     public CalendarLabels(Map<String, Object> appointment, Locale locale, ServiceLookup services) {

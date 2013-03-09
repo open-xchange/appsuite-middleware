@@ -174,10 +174,12 @@ public class AppsLoadServlet extends HttpServlet {
             FileCache cache = isTZ ? tzCache : appCache;
             byte[] data = cache.get(module, new FileCache.Filter() {
 
+                @Override
                 public String resolve(String path) {
                     return resolved;
                 }
 
+                @Override
                 @SuppressWarnings("deprecation")
                 public byte[] filter(ByteArrayOutputStream baos) {
                     if (format == null)

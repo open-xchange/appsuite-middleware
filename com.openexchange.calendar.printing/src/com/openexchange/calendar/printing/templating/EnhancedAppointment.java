@@ -70,16 +70,16 @@ import com.openexchange.user.UserService;
  */
 public class EnhancedAppointment {
 
-    private List<SimpleParticipant> accepted = new ArrayList<SimpleParticipant>();
-    private List<SimpleParticipant> declined = new ArrayList<SimpleParticipant>();
-    private List<SimpleParticipant> tentative = new ArrayList<SimpleParticipant>();
-    private List<SimpleParticipant> undecided = new ArrayList<SimpleParticipant>();
-    private List<SimpleParticipant> resources = new ArrayList<SimpleParticipant>();
+    private final List<SimpleParticipant> accepted = new ArrayList<SimpleParticipant>();
+    private final List<SimpleParticipant> declined = new ArrayList<SimpleParticipant>();
+    private final List<SimpleParticipant> tentative = new ArrayList<SimpleParticipant>();
+    private final List<SimpleParticipant> undecided = new ArrayList<SimpleParticipant>();
+    private final List<SimpleParticipant> resources = new ArrayList<SimpleParticipant>();
     
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
-    private Map<String, Object> appointment;
-    private Context ctx;
+    private final Map<String, Object> appointment;
+    private final Context ctx;
 
     public EnhancedAppointment(Map<String, Object> appointment, ServiceLookup services, Context ctx) throws OXException {
         super();

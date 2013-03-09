@@ -64,9 +64,9 @@ import com.openexchange.server.ServiceLookup;
  */
 public class CalendarHelper {
 
-    private CalendarFormatter formatters;
-    private EnhancedAppointment enhanced;
-    private CalendarLabels labels;
+    private final CalendarFormatter formatters;
+    private final EnhancedAppointment enhanced;
+    private final CalendarLabels labels;
 
     /**
      * Initializes a new {@link CalendarHelper}.

@@ -54,7 +54,6 @@ import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.CalendarObject;
 

@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class CalendarTemplateHelperFactory implements TemplateHelperFactory {
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
     
     public CalendarTemplateHelperFactory(ServiceLookup services) {
         this.services = services;
