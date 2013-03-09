@@ -55,7 +55,6 @@ import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link RTAtmosphereChannel}

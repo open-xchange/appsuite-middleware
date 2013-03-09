@@ -79,9 +79,9 @@ public class RemoteIPFinderTest {
         "2001:db8:0:8d3:0:8a2e:70:7342, 2001:db8:0:8d3:0:8a2e:70:7343, 2001:db8:0:8d3:0:8a2e:70:7344",
         COMMA_SEPARATOR);
 
-    private String emptyRemote = "";
+    private final String emptyRemote = "";
 
-    private List<String> emptyKnown = Collections.emptyList();
+    private final List<String> emptyKnown = Collections.emptyList();
 
     @Test
     public void testValidIPv4() {

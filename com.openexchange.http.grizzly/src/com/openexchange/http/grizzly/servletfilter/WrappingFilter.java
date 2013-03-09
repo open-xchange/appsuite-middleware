@@ -50,7 +50,6 @@
 package com.openexchange.http.grizzly.servletfilter;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.List;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -63,7 +62,6 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper;
 import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
-import com.openexchange.http.grizzly.osgi.GrizzlyActivator;
 import com.openexchange.http.grizzly.util.IPTools;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;

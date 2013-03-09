@@ -68,7 +68,7 @@ public class AssetHelper {
         this.prefix = prefix;
     }
 
-    private String prefix;
+    private final String prefix;
     
     public String getLinkTo(String asset) {
         try {

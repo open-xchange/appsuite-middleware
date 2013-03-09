@@ -62,7 +62,6 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import org.glassfish.grizzly.http.server.OXRequest;
 import org.glassfish.grizzly.http.server.Request;
 import org.glassfish.grizzly.servlet.ServletUtils;
 import com.openexchange.dispatcher.Parameterizable;

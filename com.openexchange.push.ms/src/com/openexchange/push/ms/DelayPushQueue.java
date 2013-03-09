@@ -49,7 +49,6 @@
 
 package com.openexchange.push.ms;
 
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.TimeUnit;
@@ -73,9 +72,9 @@ public class DelayPushQueue implements Runnable {
 
     private final int maxDelayDuration;
 
-    private ConcurrentHashMap<PushMsObject,DelayedPushMsObject> existingPushObjects = new ConcurrentHashMap<PushMsObject, DelayedPushMsObject>();
+    private final ConcurrentHashMap<PushMsObject,DelayedPushMsObject> existingPushObjects = new ConcurrentHashMap<PushMsObject, DelayedPushMsObject>();
 
-    private DelayQueue<DelayedPushMsObject> delayQueue;
+    private final DelayQueue<DelayedPushMsObject> delayQueue;
 
     private final Thread pollThread;
 

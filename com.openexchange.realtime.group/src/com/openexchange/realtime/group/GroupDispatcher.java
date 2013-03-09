@@ -51,7 +51,6 @@ package com.openexchange.realtime.group;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -84,10 +83,10 @@ public class GroupDispatcher implements ComponentHandle {
     
     public static ServiceLookup services = null;
     
-    private List<ID> ids = new CopyOnWriteArrayList<ID>();
-    private Map<ID, String> stamps = new ConcurrentHashMap<ID, String>();
+    private final List<ID> ids = new CopyOnWriteArrayList<ID>();
+    private final Map<ID, String> stamps = new ConcurrentHashMap<ID, String>();
     
-    private ID id;
+    private final ID id;
     
     private ActionHandler handler = null;
     
@@ -378,7 +377,7 @@ public class GroupDispatcher implements ComponentHandle {
     }
 
     
-    private IDEventHandler LEAVE = new IDEventHandler() {
+    private final IDEventHandler LEAVE = new IDEventHandler() {
         
         @Override
         public void handle(String event, ID id, Object source, Map<String, Object> properties) {

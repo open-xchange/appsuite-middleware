@@ -52,7 +52,6 @@ package com.openexchange.realtime.directory;
 import java.io.Serializable;
 import java.util.Date;
 import com.openexchange.realtime.packet.Presence;
-import com.openexchange.realtime.packet.PresenceState;
 
 /**
  * {@link Resource} - Combines Presence and RoutingInfo.

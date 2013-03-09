@@ -63,7 +63,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class ChineseRoomComponent implements Component{
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link ChineseRoomComponent}.

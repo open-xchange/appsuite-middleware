@@ -61,7 +61,7 @@ import java.util.Locale;
  */
 public class Dates {
     
-    private Locale locale;
+    private final Locale locale;
     
     public Dates(Locale locale) {
         this.locale = locale;

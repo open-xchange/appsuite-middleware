@@ -51,7 +51,6 @@ package com.openexchange.messaging.generic.internal;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.procedure.TIntProcedure;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

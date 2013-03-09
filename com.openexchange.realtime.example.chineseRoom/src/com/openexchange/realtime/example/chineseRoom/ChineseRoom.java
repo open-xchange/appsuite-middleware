@@ -61,7 +61,6 @@ import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ActionHandler;
 import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.server.ServiceLookup;
 
 
 /**
@@ -75,7 +74,7 @@ public class ChineseRoom extends GroupDispatcher implements ComponentHandle {
     private static final ActionHandler handler = new ActionHandler(ChineseRoom.class);
     
     // Our simple minded shared state
-    private CopyOnWriteArrayList<LoggedMessage> messages = new CopyOnWriteArrayList<LoggedMessage>();
+    private final CopyOnWriteArrayList<LoggedMessage> messages = new CopyOnWriteArrayList<LoggedMessage>();
     
     // Create a new chinese room instance
     public ChineseRoom(ID id) {

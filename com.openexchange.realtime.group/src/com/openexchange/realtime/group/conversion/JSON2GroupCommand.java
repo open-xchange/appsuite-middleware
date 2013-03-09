@@ -51,7 +51,6 @@ package com.openexchange.realtime.group.conversion;
 
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
-import com.openexchange.conversion.simple.SimplePayloadConverter.Quality;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.group.GroupCommand;
 import com.openexchange.realtime.group.commands.JoinCommand;

@@ -49,7 +49,6 @@
 
 package com.openexchange.push.ms;
 
-import java.util.concurrent.DelayQueue;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.ms.MessageListener;

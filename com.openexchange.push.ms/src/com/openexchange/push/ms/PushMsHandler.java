@@ -80,7 +80,7 @@ public class PushMsHandler implements EventHandler {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMsHandler.class));
     
-    private DelayPushQueue delayPushQueue;
+    private final DelayPushQueue delayPushQueue;
     
     private final Topic<PushMsObject> publisher;
     

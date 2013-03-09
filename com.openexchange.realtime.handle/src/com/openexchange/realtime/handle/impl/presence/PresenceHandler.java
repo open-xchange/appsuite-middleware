@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.handle.impl.presence;
 
-import java.text.DateFormat;
 import java.util.concurrent.BlockingQueue;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.RealtimeExceptionCodes;
@@ -63,8 +62,6 @@ import com.openexchange.realtime.handle.impl.Services;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.Presence.Type;
-import com.openexchange.realtime.packet.PresenceState;
-import com.openexchange.realtime.presence.PresenceStatusService;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.realtime.util.IDMap;
 

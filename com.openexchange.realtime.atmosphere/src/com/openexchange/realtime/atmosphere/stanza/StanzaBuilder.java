@@ -83,7 +83,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
 
     protected T stanza;
 
-    private ServerSession session;
+    private final ServerSession session;
 
     /**
      * Initializes a new {@link StanzaBuilder}.
