@@ -52,7 +52,6 @@ package com.openexchange.cache.impl;
 import static com.openexchange.java.Autoboxing.I;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -69,8 +68,6 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.ElementAttributes;
-import com.openexchange.caching.dynamic.OXObjectFactory;
-import com.openexchange.caching.dynamic.Refresher;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
@@ -222,36 +219,6 @@ public final class FolderCacheManager {
         return cacheLock.writeLock();
     }
 
-    private class FolderFactory implements OXObjectFactory<FolderObject> {
-
-        private static final long serialVersionUID = -4809018496183864081L;
-
-        private final Context ctx;
-
-        private final int folderId;
-
-        FolderFactory(final Context ctx, final int folderId) {
-            super();
-            this.ctx = ctx;
-            this.folderId = folderId;
-        }
-
-        @Override
-        public Lock getCacheLock() {
-            return FolderCacheManager.this.getCacheLock();
-        }
-
-        @Override
-        public Serializable getKey() {
-            return getCacheKey(ctx.getContextId(), folderId);
-        }
-
-        @Override
-        public FolderObject load() throws OXException {
-            return loadFolderObjectInternal(folderId, ctx, null);
-        }
-    }
-
     public void clearFor(final Context ctx, final boolean async) {
         final Runnable task = new Runnable() {
             
@@ -316,21 +283,23 @@ public final class FolderCacheManager {
         if (null == folderCache) {
             throw OXFolderExceptionCode.CACHE_NOT_ENABLED.create("foldercache.properties");
         }
-        try {
-            if (fromCache) {
-                // Conditional put into cache: Put only if absent.
-                if (null != readCon) {
-                    putIfAbsentInternal(new LoadingFolderProvider(objectId, ctx, readCon), ctx, null);
-                }
-            } else {
-                // Forced put into cache: Always put.
-                putFolderObject(loadFolderObjectInternal(objectId, ctx, readCon), ctx, true, null);
+        if (fromCache) {
+            // Conditional put into cache: Put only if absent.
+            if (null != readCon) {
+                putIfAbsentInternal(new LoadingFolderProvider(objectId, ctx, readCon), ctx, null);
             }
-            // Return refreshable object
-            return Refresher.refresh(REGION_NAME, folderCache, new FolderFactory(ctx, objectId), true).clone();
-        } catch (final OXException e) {
-            throw e;
+        } else {
+            // Forced put into cache: Always put.
+            putFolderObject(loadFolderObjectInternal(objectId, ctx, readCon), ctx, true, null);
         }
+        // Return object
+        final Object object = folderCache.get(getCacheKey(ctx.getContextId(), objectId));
+        if (object instanceof FolderObject) {
+            return ((FolderObject) object).clone();
+        }
+        final FolderObject fo = loadFolderObjectInternal(objectId, ctx, readCon);
+        putFolderObject(fo, ctx, true, null);
+        return fo.clone();
     }
 
     /**
@@ -438,7 +407,14 @@ public final class FolderCacheManager {
         if (null != readCon) {
             putIfAbsent(loadFolderObjectInternal(folderId, ctx, readCon), ctx, null);
         }
-        return Refresher.refresh(REGION_NAME, folderCache, new FolderFactory(ctx, folderId), true).clone();
+        // Return element
+        final Object object = folderCache.get(key);
+        if (object instanceof FolderObject) {
+            return ((FolderObject) object).clone();
+        }
+        final FolderObject fo = loadFolderObjectInternal(folderId, ctx, readCon);
+        putFolderObject(fo, ctx, true, null);
+        return fo.clone();
     }
 
     /**
@@ -808,4 +784,5 @@ public final class FolderCacheManager {
             return folderId;
         }
     }
+
 }

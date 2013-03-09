@@ -50,7 +50,6 @@
 package com.openexchange.mailaccount.internal;
 
 import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
-import java.io.Serializable;
 import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -64,7 +63,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -162,26 +160,14 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         if (cacheService == null) {
             return delegate.getDefaultMailAccount(user, cid);
         }
-        final RdbMailAccountStorage d = delegate;
-        final Lock l = cacheLock;
-        final OXObjectFactory<MailAccount> factory = new OXObjectFactory<MailAccount>() {
-
-            @Override
-            public Serializable getKey() {
-                return newCacheKey(cacheService, MailAccount.DEFAULT_ID, user, cid);
-            }
-
-            @Override
-            public MailAccount load() throws OXException, OXException {
-                return d.getDefaultMailAccount(user, cid);
-            }
-
-            @Override
-            public Lock getCacheLock() {
-                return l;
-            }
-        };
-        return new MailAccountReloader(factory, REGION_NAME);
+        final Cache cache = cacheService.getCache(REGION_NAME);
+        final Object object = cache.get(newCacheKey(cacheService, MailAccount.DEFAULT_ID, user, cid));
+        if (object instanceof MailAccount) {
+            return (MailAccount) object;
+        }
+        final MailAccount defaultMailAccount = delegate.getDefaultMailAccount(user, cid);
+        cache.put(newCacheKey(cacheService, MailAccount.DEFAULT_ID, user, cid), defaultMailAccount, false);
+        return defaultMailAccount;
     }
 
     @Override
@@ -190,38 +176,30 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         if (cacheService == null) {
             return delegate.getMailAccount(id, user, cid);
         }
+        final Cache cache = cacheService.getCache(REGION_NAME);
+        final CacheKey key = newCacheKey(cacheService, id, user, cid);
+        final Object object = cache.get(key);
+        if (object instanceof MailAccount) {
+            return (MailAccount) object;
+        }
         final RdbMailAccountStorage d = delegate;
-        final Lock l = cacheLock;
-        final OXObjectFactory<MailAccount> factory = new OXObjectFactory<MailAccount>() {
-
-            @Override
-            public Serializable getKey() {
-                return newCacheKey(cacheService, id, user, cid);
+        try {
+            final MailAccount mailAccount = d.getMailAccount(id, user, cid);
+            cache.put(key, mailAccount, false);
+            return mailAccount;
+        } catch (final OXException e) {
+            if (!MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
+                throw e;
             }
-
-            @Override
-            public MailAccount load() throws OXException, OXException {
-                try {
-                    return d.getMailAccount(id, user, cid);
-                } catch (final OXException e) {
-                    if (!MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
-                        throw e;
-                    }
-                    final Connection wcon = Database.get(cid, true);
-                    try {
-                        return d.getMailAccount(id, user, cid, wcon);
-                    } finally {
-                        Database.back(cid, true, wcon);
-                    }
-                }
+            final Connection wcon = Database.get(cid, true);
+            try {
+                final MailAccount mailAccount = d.getMailAccount(id, user, cid, wcon);
+                cache.put(key, mailAccount, false);
+                return mailAccount;
+            } finally {
+                Database.back(cid, true, wcon);
             }
-
-            @Override
-            public Lock getCacheLock() {
-                return l;
-            }
-        };
-        return new MailAccountReloader(factory, REGION_NAME);
+        }
     }
 
     @Override
@@ -266,28 +244,15 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
             }
         }
         /*
-         * Return reloading mail account
+         * Return mail account
          */
-        final RdbMailAccountStorage d = delegate;
-        final Lock l = cacheLock;
-        final OXObjectFactory<MailAccount> factory = new OXObjectFactory<MailAccount>() {
-
-            @Override
-            public Serializable getKey() {
-                return key;
-            }
-
-            @Override
-            public MailAccount load() throws OXException, OXException {
-                return d.getMailAccount(id, user, cid);
-            }
-
-            @Override
-            public Lock getCacheLock() {
-                return l;
-            }
-        };
-        return new MailAccountReloader(factory, REGION_NAME);
+        final Object object = cache.get(key);
+        if (object instanceof MailAccount) {
+            return (MailAccount) object;
+        }
+        final MailAccount mailAccount = delegate.getMailAccount(id, user, cid);
+        cache.put(key, mailAccount, false);
+        return mailAccount;
     }
 
     @Override

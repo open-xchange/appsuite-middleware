@@ -51,24 +51,14 @@ package com.openexchange.groupware.ldap;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
-import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -76,18 +66,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.log.LogFactory;
-import com.openexchange.server.osgi.ServerActivator;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.SessiondServiceExtended;
 
 /**
  * This class implements the user storage using a cache to store once read
  * objects.
  */
-public class CachingUserStorage extends UserStorage implements EventHandler {
+public class CachingUserStorage extends UserStorage {
 
     /**
      * Logger.
@@ -102,64 +87,11 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
     private final UserStorage delegate;
 
     /**
-     * Lock map for the cache.
-     */
-    private final ConcurrentTIntObjectHashMap<Lock> cacheLockMap;
-
-    private volatile ServiceRegistration<EventHandler> registration;
-
-    /**
      * Default constructor.
      */
     public CachingUserStorage(final UserStorage delegate) {
         super();
         this.delegate = delegate;
-        cacheLockMap = new ConcurrentTIntObjectHashMap<Lock>(1024);
-    }
-
-    @Override
-    public void handleEvent(final Event event) {
-        final String topic = event.getTopic();
-        if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
-            @SuppressWarnings("unchecked") final Map<String, Session> container = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-            for (final Session session : container.values()) {
-                handleRemovedSession(session);
-            }
-        } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
-            final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-            handleRemovedSession(session);
-        } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
-            @SuppressWarnings("unchecked") final Map<String, Session> container = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-            for (final Session session : container.values()) {
-                handleRemovedSession(session);
-            }
-        }
-    }
-
-    private void handleRemovedSession(final Session session) {
-        final SessiondService service = SessiondService.SERVICE_REFERENCE.get();
-        if (service instanceof SessiondServiceExtended) {
-            final int contextId = session.getContextId();
-            if (!((SessiondServiceExtended) service).hasForContext(contextId)) {
-                cacheLockMap.remove(contextId);
-            }
-        }
-    }
-
-    private Lock lockFor(final Context ctx) {
-        return lockFor(ctx.getContextId());
-    }
-
-    private Lock lockFor(final int contextId) {
-        Lock tmp = cacheLockMap.get(contextId);
-        if (null == tmp) {
-            final Lock newLock = new ReentrantLock(true);
-            tmp = cacheLockMap.putIfAbsent(contextId, newLock);
-            if (null == tmp) {
-                tmp = newLock;
-            }
-        }
-        return tmp;
     }
 
     @Override
@@ -168,12 +100,14 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
         if (cacheService == null) {
             return delegate.getUser(uid, context);
         }
-        return createProxy(context, uid, cacheService, null);
-    }
-
-    private User createProxy(final Context ctx, final int userId, final CacheService cacheService, final User user) throws OXException {
-        final UserFactory factory = new UserFactory(delegate, cacheService, lockFor(ctx), ctx, userId);
-        return null == user ? new UserReloader(factory, REGION_NAME) : new UserReloader(factory, user, REGION_NAME);
+        final Cache cache = cacheService.getCache(REGION_NAME);
+        final Object object = cache.get(cacheService.newCacheKey(context.getContextId(), uid));
+        if (object instanceof User) {
+            return (User) object;
+        }
+        final User user = delegate.getUser(uid, context);
+        cache.put(cacheService.newCacheKey(context.getContextId(), uid), user, false);
+        return user;
     }
 
     @Override
@@ -193,7 +127,8 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
             return delegate.getUser(ctx, userId, con);
         }
         final User user = delegate.getUser(ctx, userId, con);
-        return createProxy(ctx, userId, cacheService, user);
+        cacheService.getCache(REGION_NAME).put(cacheService.newCacheKey(ctx.getContextId(), user.getId()), user, false);
+        return user;
     }
 
     @Override
@@ -210,23 +145,19 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
         final Cache cache = cacheService.getCache(REGION_NAME);
         final Map<Integer, User> map = new HashMap<Integer, User>(userIds.length, 1);
         final List<Integer> toLoad = new ArrayList<Integer>(userIds.length);
-        final Lock lock = lockFor(ctx);
+        final int contextId = ctx.getContextId();
         for (final int userId : userIds) {
-            final UserFactory factory = new UserFactory(delegate, cacheService, lock, ctx, userId);
-            final Object object = cache.get(factory.getKey());
+            final Object object = cache.get(cacheService.newCacheKey(contextId, userId));
             if (object instanceof User) {
-                try {
-                    map.put(I(userId), new UserReloader(factory, (User) object, REGION_NAME));
-                } catch (final OXException e) {
-                    throw e;
-                }
+                map.put(I(userId), (User) object);
             } else {
                 toLoad.add(I(userId));
             }
         }
         final User[] loaded = delegate.getUser(ctx, I2i(toLoad));
         for (final User user : loaded) {
-            map.put(I(user.getId()), createProxy(ctx, user.getId(), cacheService, user));
+            cache.put(cacheService.newCacheKey(contextId, user.getId()), user, false);
+            map.put(I(user.getId()), user);
         }
         final List<User> retval = new ArrayList<User>(userIds.length);
         for (final int userId : userIds) {
@@ -393,21 +324,11 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
 
     @Override
     protected void startInternal() {
-        final BundleContext context = ServerActivator.getContext();
-        if (null != context) {
-            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registration = context.registerService(EventHandler.class, this, serviceProperties);
-        }
+        // Nothing to start
     }
 
     @Override
     protected void stopInternal() throws OXException {
-        final ServiceRegistration<EventHandler> registration = this.registration;
-        if (null != registration) {
-            registration.unregister();
-            this.registration = null;
-        }
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService != null) {
             cacheService.freeCache(REGION_NAME);

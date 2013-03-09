@@ -130,7 +130,7 @@ public class DefaultJSlob implements JSlob, Cloneable {
     }
 
     @Override
-    public Object clone() {
+    public JSlob clone() {
         try {
             final DefaultJSlob clone = (DefaultJSlob) super.clone();
             clone.setId(id == null ? null : new JSlobId(id.getServiceId(), id.getId(), id.getUser(), id.getContext()));

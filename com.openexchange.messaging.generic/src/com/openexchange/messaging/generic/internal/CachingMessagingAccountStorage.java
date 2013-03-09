@@ -60,7 +60,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingService;
@@ -167,32 +166,14 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
         if (cacheService == null) {
             return delegatee.getAccount(serviceId, id, session, modifier);
         }
-        final int user = session.getUserId();
-        final int cid = session.getContextId();
-        final MessagingAccountStorage d = delegatee;
-        final Lock l = cacheLock;
-        final OXObjectFactory<MessagingAccount> factory = new OXObjectFactory<MessagingAccount>() {
-
-            @Override
-            public Serializable getKey() {
-                return newCacheKey(cacheService, serviceId, id, user, cid);
-            }
-
-            @Override
-            public MessagingAccount load() throws OXException {
-                return d.getAccount(serviceId, id, session, modifier);
-            }
-
-            @Override
-            public Lock getCacheLock() {
-                return l;
-            }
-        };
-        try {
-            return new MessagingAccountReloader(factory, REGION_NAME);
-        } catch (final OXException e) {
-            throw e;
+        final Cache cache = cacheService.getCache(REGION_NAME);
+        final Object object = cache.get(newCacheKey(cacheService, serviceId, id, session.getUserId(), session.getContextId()));
+        if (object instanceof MessagingAccount) {
+            return (MessagingAccount) object;
         }
+        final MessagingAccount messagingAccount = delegatee.getAccount(serviceId, id, session, modifier);
+        cache.put(newCacheKey(cacheService, serviceId, id, session.getUserId(), session.getContextId()), messagingAccount, false);
+        return messagingAccount;
     }
 
     @Override

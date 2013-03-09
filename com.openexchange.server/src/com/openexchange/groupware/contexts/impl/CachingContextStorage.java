@@ -51,14 +51,13 @@ package com.openexchange.groupware.contexts.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
-import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.log.LogFactory;
+import com.openexchange.groupware.update.UpdateStatus;
+import com.openexchange.groupware.update.Updater;
+import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -69,16 +68,18 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class CachingContextStorage extends ContextStorage {
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CachingContextStorage.class));
+    static final Log LOG = com.openexchange.log.Log.loggerFor(CachingContextStorage.class);
+    
     private static final String REGION_NAME = "Context";
 
-    private final Lock cacheLock;
+    public static volatile CachingContextStorage parent;
+
     private final ContextStorage persistantImpl;
     private boolean started;
 
+
     public CachingContextStorage(final ContextStorage persistantImpl) {
         super();
-        cacheLock = new ReentrantLock();
         this.persistantImpl = persistantImpl;
     }
 
@@ -111,11 +112,19 @@ public class CachingContextStorage extends ContextStorage {
     @Override
     public ContextExtended loadContext(final int contextId) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        final OXObjectFactory<ContextExtended> factory = new ContextExtendedFactory(contextId);
         if (cacheService == null) {
-            return factory.load();
+            return load(contextId);
         }
-        return new ContextReloader(factory, REGION_NAME);
+        final Cache cache = cacheService.getCache(REGION_NAME);
+        final Integer key = I(contextId);
+        Object object = cache.get(key);
+        if (object instanceof ContextExtended) {
+            return (ContextExtended) object;
+        }
+        // Load it
+        final ContextExtended contextExtended = load(contextId);
+        cache.put(key, contextExtended, false);
+        return contextExtended;
     }
 
     @Override
@@ -159,12 +168,7 @@ public class CachingContextStorage extends ContextStorage {
             return;
         }
         final Cache cache = cacheService.getCache(REGION_NAME);
-        cacheLock.lock();
-        try {
-            cache.remove(I(contextId));
-        } finally {
-            cacheLock.unlock();
-        }
+        cache.remove(I(contextId));
     }
 
     @Override
@@ -175,20 +179,38 @@ public class CachingContextStorage extends ContextStorage {
             return;
         }
         final Cache cache = cacheService.getCache(REGION_NAME);
-        cacheLock.lock();
-        try {
-            cache.remove(loginContextInfo);
-        } finally {
-            cacheLock.unlock();
-        }
-    }
-
-    Lock getCacheLock() {
-        return cacheLock;
+        cache.remove(loginContextInfo);
     }
 
     ContextStorage getPersistantImpl() {
         return persistantImpl;
+    }
+
+    private ContextExtended load(final int contextId) throws OXException {
+        final ContextExtended retval = CachingContextStorage.parent.getPersistantImpl().loadContext(contextId);
+        // TODO We should introduce a logic layer above this context storage
+        // layer. That layer should then trigger the update tasks.
+        // Nearly all accesses to the ContextStorage need then to be replaced
+        // with an access to the ContextService.
+        final Updater updater = Updater.getInstance();
+        try {
+            final UpdateStatus status = updater.getStatus(retval);
+            retval.setUpdating(status.blockingUpdatesRunning()
+                    || status.needsBlockingUpdates());
+            if ((status.needsBlockingUpdates() || status
+                    .needsBackgroundUpdates())
+                    && !status.blockingUpdatesRunning()
+                    && !status.backgroundUpdatesRunning()) {
+                updater.startUpdate(retval);
+            }
+        } catch (final OXException e) {
+            if (SchemaExceptionCodes.DATABASE_DOWN.equals(e)) {
+                LOG.warn("Switching to read only mode for context " + contextId
+                        + " because master database is down.", e);
+                retval.setReadOnly(true);
+            }
+        }
+        return retval;
     }
 
 }

@@ -49,18 +49,13 @@
 
 package com.openexchange.jslob.storage.db.cache;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
-import com.openexchange.caching.dynamic.ModifyingOXObjectFactory;
-import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.jslob.JSlob;
@@ -131,17 +126,11 @@ public final class CachingJSlobStorage implements JSlobStorage {
     private final DBJSlobStorage delegate;
 
     /**
-     * Lock for the cache.
-     */
-    private final Lock cacheLock;
-
-    /**
      * Initializes a new {@link CachingJSlobStorage}.
      */
     private CachingJSlobStorage(final DBJSlobStorage delegate) {
         super();
         this.delegate = delegate;
-        cacheLock = new ReentrantLock();
     }
 
     /**
@@ -216,37 +205,13 @@ public final class CachingJSlobStorage implements JSlobStorage {
         if (null == cache) {
             return delegate.load(id);
         }
-        final DBJSlobStorage d = delegate;
-        final Lock l = cacheLock;
-        final OXObjectFactory<JSlob> factory = new ModifyingOXObjectFactory<JSlob>() {
-
-            @Override
-            public Serializable getKey() {
-                return id.getId();
-            }
-
-            @Override
-            public String getGroupName() {
-                return groupName(id);
-            }
-
-            @Override
-            public JSlob load() throws OXException, OXException {
-                return d.load(id);
-            }
-
-            @Override
-            public Lock getCacheLock() {
-                return l;
-            }
-
-            @Override
-            public JSlob modify(final JSlob element) throws OXException {
-                // Ensure we return a cloned version
-                return (JSlob) (null == element ? null : element.clone());
-            }
-        };
-        return new JSlobReloader(factory, REGION_NAME);
+        final Object object = cache.getFromGroup(id.getId(), groupName(id));
+        if (object instanceof JSlob) {
+            return (JSlob) object;
+        }
+        final JSlob loaded = delegate.load(id);
+        cache.putInGroup(id.getId(), groupName(id), loaded, false);
+        return loaded.clone();
     }
 
     @Override
@@ -259,75 +224,17 @@ public final class CachingJSlobStorage implements JSlobStorage {
         {
             final Object fromCache = cache.getFromGroup(id.getId(), groupName);
             if (null != fromCache) {
-                final DBJSlobStorage d = delegate;
-                final Lock l = cacheLock;
-                final OXObjectFactory<JSlob> factory = new ModifyingOXObjectFactory<JSlob>() {
-
-                    @Override
-                    public Serializable getKey() {
-                        return id.getId();
-                    }
-
-                    @Override
-                    public String getGroupName() {
-                        return groupName;
-                    }
-
-                    @Override
-                    public JSlob load() throws OXException, OXException {
-                        return d.load(id);
-                    }
-
-                    @Override
-                    public Lock getCacheLock() {
-                        return l;
-                    }
-
-                    @Override
-                    public JSlob modify(final JSlob element) throws OXException {
-                        // Ensure we return a cloned version
-                        return (JSlob) (null == element ? null : element.clone());
-                    }
-                };
-                return new JSlobReloader(factory, REGION_NAME);
+                return ((JSlob) fromCache).clone();
             }
         }
         // Optional retrieval from DB storage
         final JSlob opt = delegate.opt(id);
-        if (null != opt) {
-            final Lock l = cacheLock;
-            final OXObjectFactory<JSlob> factory = new ModifyingOXObjectFactory<JSlob>() {
-
-                @Override
-                public Serializable getKey() {
-                    return id.getId();
-                }
-
-                @Override
-                public String getGroupName() {
-                    return groupName;
-                }
-
-                @Override
-                public JSlob load() throws OXException, OXException {
-                    return opt;
-                }
-
-                @Override
-                public Lock getCacheLock() {
-                    return l;
-                }
-
-                @Override
-                public JSlob modify(final JSlob element) throws OXException {
-                    // Ensure we return a cloned version
-                    return (JSlob) (null == element ? null : element.clone());
-                }
-            };
-            return new JSlobReloader(factory, REGION_NAME);
+        if (null == opt) {
+            // Null
+            return null;
         }
-        // Null
-        return null;
+        cache.putInGroup(id.getId(), groupName, opt, false);
+        return opt.clone();
     }
 
     @Override

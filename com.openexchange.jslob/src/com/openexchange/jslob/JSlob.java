@@ -65,7 +65,7 @@ public interface JSlob extends Serializable {
      * @return A clone of this instance.
      * @see java.lang.Cloneable
      */
-    public Object clone();
+    public JSlob clone();
 
     /**
      * Gets the identifier

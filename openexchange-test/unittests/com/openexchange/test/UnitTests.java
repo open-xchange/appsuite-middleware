@@ -175,8 +175,6 @@ public class UnitTests {
         // Mail
         tests.addTest(com.openexchange.mail.MailAPITestSuite.suite());
 
-        // This test destroys the server service registry to prevent failing. So this must always be the last test.
-        tests.addTestSuite(com.openexchange.cache.impl.RefresherTest.class);
         return tests;
     }
 }

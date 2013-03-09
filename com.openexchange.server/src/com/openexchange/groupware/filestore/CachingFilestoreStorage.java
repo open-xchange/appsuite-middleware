@@ -50,14 +50,10 @@
 package com.openexchange.groupware.filestore;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.io.Serializable;
 import java.sql.Connection;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
-import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -66,7 +62,6 @@ public class CachingFilestoreStorage extends FilestoreStorage {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CachingFilestoreStorage.class));
     private static final String REGION_NAME = "Filestore";
-    static final Lock CACHE_LOCK = new ReentrantLock();
 
     private final FilestoreStorage delegate;
 
@@ -77,40 +72,17 @@ public class CachingFilestoreStorage extends FilestoreStorage {
     @Override
     public Filestore getFilestore(final int id) throws OXException {
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        final OXObjectFactory<Filestore> factory = new FilestoreFactory(id, delegate);
         if (cacheService == null) {
-            return factory.load();
+            return delegate.getFilestore(id);
         }
-        return new FilestoreReloader(factory, REGION_NAME);
-    }
-
-    private static final class FilestoreFactory implements OXObjectFactory<Filestore> {
-
-        private static final long serialVersionUID = -4542868153240572103L;
-
-        private final Integer id;
-        private final FilestoreStorage delegate;
-
-        protected FilestoreFactory(final int id, final FilestoreStorage delegate) {
-            super();
-            this.id = I(id);
-            this.delegate = delegate;
+        final Cache cache = cacheService.getCache(REGION_NAME);
+        final Object object = cache.get(I(id));
+        if (object instanceof Filestore) {
+            return (Filestore) object;
         }
-
-        @Override
-        public Serializable getKey() {
-            return id;
-        }
-
-        @Override
-        public Filestore load() throws OXException {
-            return delegate.getFilestore(id.intValue());
-        }
-
-        @Override
-        public Lock getCacheLock() {
-            return CACHE_LOCK;
-        }
+        final Filestore filestore = delegate.getFilestore(id);
+        cache.put(I(id), filestore, false);
+        return filestore;
     }
 
     @Override
@@ -131,13 +103,10 @@ public class CachingFilestoreStorage extends FilestoreStorage {
         if (null == retval) {
             retval = delegate.getFilestore(con, id);
             if (null != filestoreCache) {
-                CACHE_LOCK.lock();
                 try {
                     filestoreCache.put(I(id), retval, false);
                 } catch (final OXException e) {
                     LOG.error(e.getMessage(), e);
-                } finally {
-                    CACHE_LOCK.unlock();
                 }
             }
         }

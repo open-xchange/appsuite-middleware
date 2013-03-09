@@ -51,16 +51,12 @@ package com.openexchange.file.storage.rdb.internal;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.procedure.TIntProcedure;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.caching.dynamic.OXObjectFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
@@ -75,44 +71,6 @@ import com.openexchange.session.Session;
  * @since Open-Xchange v6.18.2
  */
 public final class CachingFileStorageAccountStorage implements FileStorageAccountStorage {
-
-    private static final class FileStorageAccountFactory implements OXObjectFactory<FileStorageAccount> {
-
-        private final FileStorageAccountStorage accountStorage;
-        private final String serviceId;
-        private final CacheService cacheService;
-        private final int accountId;
-        private final Session session;
-        private final Lock lock;
-
-        protected FileStorageAccountFactory(final String serviceId, final int accountId, final FileStorageAccountStorage accountStorage, final CacheService cacheService, final Session session, final Lock lock) {
-            this.accountStorage = accountStorage;
-            this.serviceId = serviceId;
-            this.cacheService = cacheService;
-            this.accountId = accountId;
-            this.session = session;
-            this.lock = lock;
-        }
-
-        @Override
-        public Serializable getKey() {
-            return newCacheKey(cacheService,
-                serviceId,
-                accountId,
-                session.getUserId(),
-                session.getContextId());
-        }
-
-        @Override
-        public FileStorageAccount load() throws OXException {
-            return accountStorage.getAccount(serviceId, accountId, session);
-        }
-
-        @Override
-        public Lock getCacheLock() {
-            return lock;
-        }
-    }
 
     private static final CachingFileStorageAccountStorage INSTANCE = new CachingFileStorageAccountStorage();
 
@@ -155,11 +113,6 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
     private final RdbFileStorageAccountStorage delegatee;
 
     /**
-     * Lock for the cache.
-     */
-    private final Lock cacheLock;
-
-    /**
      * The service registry.
      */
     private final ServiceLookup serviceRegistry;
@@ -170,7 +123,6 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
     private CachingFileStorageAccountStorage() {
         super();
         delegatee = RdbFileStorageAccountStorage.getInstance();
-        cacheLock = new ReentrantLock(true);
         serviceRegistry = Services.getServices();
     }
 
@@ -224,8 +176,14 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
         if (cacheService == null) {
             return delegatee.getAccount(serviceId, id, session);
         }
-        final OXObjectFactory<FileStorageAccount> factory = new FileStorageAccountFactory(serviceId, id, delegatee, cacheService, session, cacheLock);
-        return new FileStorageAccountReloader(factory, REGION_NAME);
+        final Cache cache = cacheService.getCache(REGION_NAME);
+        final Object object = cache.get(newCacheKey(cacheService, serviceId, id, session.getUserId(), session.getContextId()));
+        if (object instanceof FileStorageAccount) {
+            return (FileStorageAccount) object;
+        }
+        final FileStorageAccount account = delegatee.getAccount(serviceId, id, session);
+        cache.put(newCacheKey(cacheService, serviceId, id, session.getUserId(), session.getContextId()), account, false);
+        return account;
     }
 
     @Override
