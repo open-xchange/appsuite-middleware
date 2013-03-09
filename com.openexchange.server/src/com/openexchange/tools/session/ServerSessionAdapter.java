@@ -132,15 +132,10 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
     }
 
     private Session session;
-
     private Context ctx;
-
     private volatile User user;
-
     private volatile UserConfiguration userConfiguration;
-
     private volatile UserSettingMail userSettingMail;
-
     private ServerSession serverSession;
 
     /**
