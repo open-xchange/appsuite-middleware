@@ -54,7 +54,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.util.IDMap;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PresenceStatusService} - Service to store and query the PresenceStatus of currently connected clients.

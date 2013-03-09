@@ -52,7 +52,6 @@ package com.openexchange.templating.converter;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXState;
@@ -71,15 +70,15 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Request {
-    private Dispatcher dispatcher;
-    private ServerSession session;
+    private final Dispatcher dispatcher;
+    private final ServerSession session;
     
-    private boolean trusted;
+    private final boolean trusted;
     
     private String action;
     private String module;
     
-    private Map<String, String> parameters = new HashMap<String, String>();
+    private final Map<String, String> parameters = new HashMap<String, String>();
     
     private Object body;
     

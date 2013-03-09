@@ -71,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(allowPublicSession = true)
 public class AssetProvideAction implements AJAXActionService {
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     public AssetProvideAction(ServiceLookup services) {
         this.services = services;

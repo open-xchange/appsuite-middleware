@@ -1006,6 +1006,7 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
+    @Override
     public User searchUser(final String email, final Context context) throws OXException {
         return searchUser(email, context, true);
     }

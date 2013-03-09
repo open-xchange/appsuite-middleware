@@ -50,7 +50,6 @@
 package com.openexchange.realtime.presence;
 
 import com.openexchange.realtime.packet.Presence;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PresenceChangeListener} - Interface for PresenceChangeListeners. Classes interested in notifications of initial (coming online),

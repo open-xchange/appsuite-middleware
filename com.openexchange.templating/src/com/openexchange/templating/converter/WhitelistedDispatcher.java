@@ -59,8 +59,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WhitelistedDispatcher {
-    private Dispatcher dispatcher;
-    private ServerSession session;
+    private final Dispatcher dispatcher;
+    private final ServerSession session;
     
     private boolean trusted = false;
     

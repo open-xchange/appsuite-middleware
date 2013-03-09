@@ -54,7 +54,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.ElementPath;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PayloadTreeConverter} - Walks over a PayloadTree and converts PayloadElements contained in PayloadTreeNodes from the current

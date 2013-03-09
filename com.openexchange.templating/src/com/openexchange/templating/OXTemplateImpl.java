@@ -72,7 +72,7 @@ public class OXTemplateImpl implements OXTemplate{
     private Template template;
     private TemplateLevel level = TemplateLevel.USER;
     private boolean trusted;
-    private Map<String, String> properties = new HashMap<String, String>();
+    private final Map<String, String> properties = new HashMap<String, String>();
     
 
     public Template getTemplate() {

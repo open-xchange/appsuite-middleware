@@ -414,7 +414,7 @@ public final class EffectivePermission implements Permission {
     public Object clone() {
         try {
             final EffectivePermission clone = (EffectivePermission) super.clone();
-            clone.userConfig = (UserConfiguration) getUserConfig().clone();
+            clone.userConfig = getUserConfig().clone();
             clone.underlyingPerm = (Permission) underlyingPerm.clone();
             clone.allowedContentTypes =
                 (null == allowedContentTypes || allowedContentTypes.isEmpty()) ? new TIntHashSet(1) : new TIntHashSet(allowedContentTypes.toArray());

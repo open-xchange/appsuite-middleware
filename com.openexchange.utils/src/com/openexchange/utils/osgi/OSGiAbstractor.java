@@ -121,74 +121,92 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
             this.prefixString = "Logged for " + clazz.getCanonicalName() + ": ";
         }
 
+        @Override
         public void debug(Object message) {
             this.delegate.debug(prefixString + message);
         }
 
+        @Override
         public void debug(Object message, Throwable t) {
             this.delegate.debug(prefixString + message, t);
         }
 
+        @Override
         public void error(Object message) {
             this.delegate.error(prefixString + message);
         }
 
+        @Override
         public void error(Object message, Throwable t) {
             this.delegate.error(prefixString + message, t);
         }
 
+        @Override
         public void fatal(Object message) {
             this.delegate.fatal(prefixString + message);
         }
 
+        @Override
         public void fatal(Object message, Throwable t) {
             this.delegate.fatal(prefixString + message, t);
         }
 
+        @Override
         public void info(Object message) {
             this.delegate.info(prefixString + message);
         }
 
+        @Override
         public void info(Object message, Throwable t) {
             this.delegate.info(prefixString + message, t);
         }
 
+        @Override
         public boolean isDebugEnabled() {
             return this.delegate.isDebugEnabled();
         }
 
+        @Override
         public boolean isErrorEnabled() {
             return this.delegate.isErrorEnabled();
         }
 
+        @Override
         public boolean isFatalEnabled() {
             return this.delegate.isFatalEnabled();
         }
 
+        @Override
         public boolean isInfoEnabled() {
             return this.delegate.isInfoEnabled();
         }
 
+        @Override
         public boolean isTraceEnabled() {
             return this.delegate.isTraceEnabled();
         }
 
+        @Override
         public boolean isWarnEnabled() {
             return this.delegate.isWarnEnabled();
         }
 
+        @Override
         public void trace(Object message) {
             this.delegate.trace(prefixString + message);
         }
 
+        @Override
         public void trace(Object message, Throwable t) {
             this.delegate.trace(prefixString + message, t);
         }
 
+        @Override
         public void warn(Object message) {
             this.delegate.warn(prefixString + message);
         }
 
+        @Override
         public void warn(Object message, Throwable t) {
             this.delegate.warn(prefixString + message, t);
         }
@@ -289,6 +307,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
     /* (non-Javadoc)
      * @see com.openexchange.server.ServiceLookup#getOptionalService(java.lang.Class)
      */
+    @Override
     public final <S> S getOptionalService(Class<? extends S> clazz) {
         return getService(clazz);
     }
@@ -296,6 +315,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
     /* (non-Javadoc)
      * @see com.openexchange.server.ServiceLookup#getService(java.lang.Class)
      */
+    @Override
     public final <S> S getService(final Class<? extends S> clazz) {
         return getServiceStatic(clazz);
     }
@@ -428,6 +448,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
 
             private ServiceRegistration<?> registration;
 
+            @Override
             public Object addingService(final ServiceReference<Object> reference) {
                 final Object addedService = context.getService(reference);
                 final boolean needsRegistration;
@@ -475,10 +496,12 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
                 return addedService;
             }
 
+            @Override
             public void modifiedService(final ServiceReference<Object> arg0, final Object arg1) {
                 // Nothing to do here
             }
 
+            @Override
             public void removedService(final ServiceReference<Object> reference, final Object obj) {
                 ServiceRegistration<?> unregister = null;
                 lock.lock();
@@ -539,6 +562,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
                 final Filter filter = createFilter(bundleMap);
                 ServiceTracker<Object, Object> serviceTracker = new ServiceTracker<Object, Object>(context, filter, new ServiceTrackerCustomizer<Object, Object>() {
 
+                    @Override
                     @SuppressWarnings("unchecked")
                     public Object addingService(final ServiceReference<Object> reference) {
                         final Object addedService = context.getService(reference);
@@ -558,10 +582,12 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
                         return addedService;
                     }
 
+                    @Override
                     public void modifiedService(final ServiceReference<Object> arg0, final Object arg1) {
                         // Nothing to do here
                     }
 
+                    @Override
                     public void removedService(final ServiceReference<Object> arg0, final Object arg1) {
                         for (final Entry<?> entry : bundleMap) {
                             if (entry.getClazz().isInstance(arg1)) {

@@ -61,7 +61,6 @@ import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
-import com.openexchange.java.Streams;
 
 /**
  * CommandLineClient to run the consistency tool.

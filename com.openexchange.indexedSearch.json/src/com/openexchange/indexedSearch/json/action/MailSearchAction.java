@@ -66,7 +66,6 @@ import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
 import com.openexchange.index.SearchHandler;
-import com.openexchange.index.SearchHandlers;
 import com.openexchange.indexedSearch.json.IndexAJAXRequest;
 import com.openexchange.indexedSearch.json.ResultConverters;
 import com.openexchange.mail.MailJSONField;

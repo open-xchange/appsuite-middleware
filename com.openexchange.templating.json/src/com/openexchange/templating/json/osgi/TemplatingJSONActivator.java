@@ -50,7 +50,6 @@
 package com.openexchange.templating.json.osgi;
 
 import com.openexchange.ajax.requesthandler.Dispatcher;
-import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.templating.TemplateService;

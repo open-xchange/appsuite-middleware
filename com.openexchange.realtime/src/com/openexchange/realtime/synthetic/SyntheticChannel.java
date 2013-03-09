@@ -78,11 +78,11 @@ public class SyntheticChannel implements Channel, Runnable {
     
     private static final Log LOG = LogFactory.getLog(SyntheticChannel.class);
     
-    private ConcurrentHashMap<String, Component> components = new ConcurrentHashMap<String, Component>();
-    private ConcurrentHashMap<ID, ComponentHandle> handles = new ConcurrentHashMap<ID, ComponentHandle>();
+    private final ConcurrentHashMap<String, Component> components = new ConcurrentHashMap<String, Component>();
+    private final ConcurrentHashMap<ID, ComponentHandle> handles = new ConcurrentHashMap<ID, ComponentHandle>();
 
-    private ConcurrentHashMap<ID, Long> lastAccess = new ConcurrentHashMap<ID, Long>();
-    private CopyOnWriteArrayList<TimeoutEviction> timeouts = new CopyOnWriteArrayList<TimeoutEviction>();
+    private final ConcurrentHashMap<ID, Long> lastAccess = new ConcurrentHashMap<ID, Long>();
+    private final CopyOnWriteArrayList<TimeoutEviction> timeouts = new CopyOnWriteArrayList<TimeoutEviction>();
     
     @Override
     public String getProtocol() {
@@ -165,8 +165,8 @@ public class SyntheticChannel implements Channel, Runnable {
     }
     
     private class TimeoutEviction {
-        private long millis;
-        private ID id;
+        private final long millis;
+        private final ID id;
         
         public TimeoutEviction(long millis, ID id) {
             super();

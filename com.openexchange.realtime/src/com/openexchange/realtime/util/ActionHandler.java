@@ -90,8 +90,8 @@ import com.openexchange.realtime.payload.PayloadTree;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ActionHandler {
-    private Map<String, Method> methodsWithProperties = new HashMap<String, Method>();
-    private Map<String, Method> methods = new HashMap<String, Method>();
+    private final Map<String, Method> methodsWithProperties = new HashMap<String, Method>();
+    private final Map<String, Method> methods = new HashMap<String, Method>();
 
     public ActionHandler(Class klass) {
         for (Method method: klass.getMethods()) {

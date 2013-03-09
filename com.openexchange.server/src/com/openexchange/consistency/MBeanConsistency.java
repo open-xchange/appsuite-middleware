@@ -264,6 +264,7 @@ final class MBeanConsistency implements ConsistencyMBean {
         }
     }
 
+    @Override
     public List<String> checkOrRepairConfigDB(final boolean repair) throws MBeanException {
         try {
             return (List<String>) mbsc.invoke(name, "checkOrRepairConfigDB", new Object[]{repair}, new String[]{"boolean"});

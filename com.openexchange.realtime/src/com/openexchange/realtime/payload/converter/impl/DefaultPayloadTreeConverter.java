@@ -67,9 +67,9 @@ import com.openexchange.server.ServiceLookup;
  */
 public class DefaultPayloadTreeConverter implements PayloadTreeConverter {
 
-    private Map<ElementPath, String> preferredFormats = new ConcurrentHashMap<ElementPath, String>();
+    private final Map<ElementPath, String> preferredFormats = new ConcurrentHashMap<ElementPath, String>();
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     public DefaultPayloadTreeConverter(ServiceLookup services) {
         super();
@@ -83,6 +83,7 @@ public class DefaultPayloadTreeConverter implements PayloadTreeConverter {
 
     }
 
+    @Override
     public PayloadTreeNode incoming(PayloadTreeNode node) throws OXException {
         ElementPath elementPath = node.getElementPath();
         String format = preferredFormats.get(elementPath);
@@ -121,6 +122,7 @@ public class DefaultPayloadTreeConverter implements PayloadTreeConverter {
         return new PayloadTree(outgoing(payloadTree.getRoot(), format));
     }
 
+    @Override
     public PayloadTreeNode outgoing(PayloadTreeNode node, String format) throws OXException {
        
         PayloadElement payloadElement = node.getPayloadElement();

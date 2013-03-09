@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.util;
 
-import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;

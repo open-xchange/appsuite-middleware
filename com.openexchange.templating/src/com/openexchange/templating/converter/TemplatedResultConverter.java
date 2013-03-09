@@ -78,8 +78,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class TemplatedResultConverter implements ResultConverter, SimpleRegistryListener<TemplateHelperFactory> {
 
-    private ServiceLookup services;
-    private List<TemplateHelperFactory> helperFactories = new LinkedList<TemplateHelperFactory>();
+    private final ServiceLookup services;
+    private final List<TemplateHelperFactory> helperFactories = new LinkedList<TemplateHelperFactory>();
     private TemplateService templates = null;
     
     public TemplatedResultConverter(ServiceLookup services, TemplateService templates) {
