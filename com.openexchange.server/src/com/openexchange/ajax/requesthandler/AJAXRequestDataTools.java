@@ -54,7 +54,6 @@ import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -256,7 +255,7 @@ public class AJAXRequestDataTools {
      * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
      */
     public static boolean parseBoolParameter(final String parameter) {
-        return (null != parameter) && BOOL_VALS.contains(parameter.trim().toLowerCase(Locale.ENGLISH));
+        return (null != parameter) && BOOL_VALS.contains(toLowerCase(parameter.trim()));
     }
 
     /**
@@ -331,9 +330,36 @@ public class AJAXRequestDataTools {
     public String getAction(final HttpServletRequest req) {
         final String action = req.getParameter(PARAMETER_ACTION);
         if (null == action) {
-            return req.getMethod().toUpperCase(Locale.US);
+            return toUpperCase(req.getMethod());
         }
         return action;
 
+    }
+
+    /** ASCII-wise upper-case */
+    private static String toUpperCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+        }
+        return builder.toString();
+    }
+
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 }
