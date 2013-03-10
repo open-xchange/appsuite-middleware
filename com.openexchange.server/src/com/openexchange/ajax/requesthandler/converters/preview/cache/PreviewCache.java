@@ -373,15 +373,6 @@ public final class PreviewCache {
         }
     }
 
-    private boolean exists(final String id, final int userId, final int contextId, final DatabaseService dbService) throws OXException {
-        final Connection con = dbService.getReadOnly(contextId);
-        try {
-            return exists(id, userId, contextId, con);
-        } finally {
-            dbService.backReadOnly(contextId, con);
-        }
-    }
-
     private boolean exists(final String id, final int userId, final int contextId, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
