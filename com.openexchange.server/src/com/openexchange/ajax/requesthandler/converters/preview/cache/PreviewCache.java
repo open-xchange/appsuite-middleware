@@ -85,7 +85,7 @@ public final class PreviewCache {
      * @param in The binary stream
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @return <code>true</code> on insertion or <code>false</code> on update operation
+     * @return <code>true</code> on insertion or <code>false</code> if impossible to store
      * @throws OXException If operations fails
      */
     public boolean save(final String id, final InputStream in, final int userId, final int contextId) throws OXException, IOException {
@@ -99,22 +99,27 @@ public final class PreviewCache {
      * @param bytes The binary content
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @return <code>true</code> on insertion or <code>false</code> on update operation
+     * @return <code>true</code> on insertion or <code>false</code> if impossible to store
      * @throws OXException If operations fails
      */
     public boolean save(final String id, final byte[] bytes, final int userId, final int contextId) throws OXException {
-        final long total = getContextQuota(contextId);
+        // Check existence
         final boolean exists = exists(id, userId, contextId);
-        if (total > 0) {
+        // Get quota
+        final long[] qts = getContextQuota(contextId);
+        final long total = qts[0];
+        final long totalPerImage = qts[0];
+        if (total > 0 || totalPerImage > 0) {
             final String ignoree = exists ? id : null;
-            ensureUnexceededContextQuota(bytes.length, total, contextId, ignoree);
+            if (!ensureUnexceededContextQuota(bytes.length, total, totalPerImage, contextId, ignoree)) {
+                return false;
+            }
         }
         final DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         if (databaseService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
         final Connection con = databaseService.getWritable(contextId);
-        final boolean insert;
         boolean committed = true;
         PreparedStatement stmt = null;
         try {
@@ -136,7 +141,6 @@ public final class PreviewCache {
                 stmt.setLong(5, userId);
                 stmt.setString(6, id);
                 stmt.executeUpdate();
-                insert = true;
             } else {
                 /*
                  * Insert
@@ -149,11 +153,10 @@ public final class PreviewCache {
                 stmt.setLong(5, now);
                 stmt.setBinaryStream(6, Streams.newByteArrayInputStream(bytes));
                 stmt.executeUpdate();
-                insert = false;
             }
             con.commit();
             committed = true;
-            return insert;
+            return true;
         } catch (final DataTruncation e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (final SQLException e) {
@@ -174,9 +177,9 @@ public final class PreviewCache {
      * @param contextId The context identifier
      * @return The context quota or <code>-1</code> if unlimited
      */
-    public long getContextQuota(final int contextId) {
+    public long[] getContextQuota(final int contextId) {
         // TODO:
-        return -1L;
+        return new long[] { -1L, -1L };
     }
 
     /**
@@ -184,50 +187,85 @@ public final class PreviewCache {
      * 
      * @param desiredSize The desired size
      * @param total The context-sensitive caching quota
+     * @param totalPerImage The context-sensitive caching quota per image
      * @param contextId The context identifier
      * @param ignoree The optional identifier to ignore while checking
+     * @return <code>true</code> If enough space is available; otherwise <code>false</code>
      * @throws OXException If an error occurs
      */
-    public void ensureUnexceededContextQuota(final long desiredSize, final long total, final int contextId, final String ignoree) throws OXException {
-        if (total > 0L) {
-            final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-            if (dbService == null) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
+    public boolean ensureUnexceededContextQuota(final long desiredSize, final long total, final long totalPerImage, final int contextId, final String ignoree) throws OXException {
+        if (total <= 0L) {
+            // Unlimited quota
+            if (totalPerImage > 0 && desiredSize > totalPerImage) {
+                return false;
             }
-            Connection con = dbService.getReadOnly(contextId);
-            boolean readOlny = true;
-            try {
-                while (getUsedContextQuota(contextId, ignoree, con) + desiredSize > total) {
-                    // Upgrade to writable connection
-                    if (readOlny) {
-                        dbService.backReadOnly(contextId, con);
-                        con = dbService.getWritable(contextId);
-                        readOlny = false;
-                    }
-                    // Drop oldest entry
-                    dropOldestEntry(contextId, con);
-                }
-            } finally {
+            return true;
+        }
+        if (desiredSize > total || desiredSize > totalPerImage) {
+            return false;
+        }
+        // Create space
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        if (dbService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
+        }
+        Connection con = dbService.getReadOnly(contextId);
+        boolean readOlny = true;
+        try {
+            long usedContextQuota = getUsedContextQuota(contextId, ignoree, con);
+            if (usedContextQuota <= 0 && desiredSize > total) {
+                return false;
+            }
+            while (usedContextQuota + desiredSize > total) {
+                // Upgrade to writable connection
                 if (readOlny) {
                     dbService.backReadOnly(contextId, con);
-                } else {
-                    dbService.backWritable(contextId, con);
+                    con = dbService.getWritable(contextId);
+                    readOlny = false;
+                }
+                // Drop oldest entry
+                dropOldestEntry(contextId, con);
+                // Re-Calculate used quota
+                usedContextQuota = getUsedContextQuota(contextId, ignoree, con);
+                if (usedContextQuota <= 0 && desiredSize > total) {
+                    return false;
                 }
             }
-
+            return true;
+        } finally {
+            if (readOlny) {
+                dbService.backReadOnly(contextId, con);
+            } else {
+                dbService.backWritable(contextId, con);
+            }
         }
     }
 
     private void dropOldestEntry(final int contextId, final Connection con) throws OXException {
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND createdAt <= MIN(createdAt)");
+            stmt = con.prepareStatement("SELECT MIN(createdAt) FROM preview WHERE cid = ?");
             stmt.setLong(1, contextId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return;
+            }
+            final long oldestStamp = rs.getLong(1);
+            if (rs.wasNull()) {
+                return;
+            }
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            // Delete entry
+            stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND createdAt <= ?");
+            stmt.setLong(1, contextId);
+            stmt.setLong(2, oldestStamp);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            Databases.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
