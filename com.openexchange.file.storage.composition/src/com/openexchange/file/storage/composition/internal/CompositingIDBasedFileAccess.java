@@ -77,14 +77,16 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
-import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAccess;
 import com.openexchange.groupware.results.AbstractTimedResult;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.CallerRunsCompletionService;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -100,7 +102,7 @@ import com.openexchange.tx.TransactionException;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class CompositingIDBasedFileAccess extends AbstractService<Transaction> implements IDBasedFileAccess {
+public abstract class CompositingIDBasedFileAccess extends AbstractService<Transaction> implements IDBasedIgnorableVersionFileAccess {
 
     protected Session session;
 
@@ -483,6 +485,27 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     }
 
     @Override
+    public void saveDocument(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final boolean ignoreVersion) throws OXException {
+        save(document, data, sequenceNumber, modifiedColumns, new FileAccessDelegation() {
+
+            @Override
+            public void call(final FileStorageFileAccess access) throws OXException {
+                if (access instanceof FileStorageIgnorableVersionFileAccess) {
+                    ((FileStorageIgnorableVersionFileAccess) access).saveDocument(document, data, sequenceNumber, modifiedColumns, ignoreVersion);
+                } else {
+                    access.saveDocument(document, data, sequenceNumber, modifiedColumns);
+                }
+            }
+
+        });
+    }
+
+    @Override
+    public boolean supportsIgnorableVersion(final String serviceId, final String accountId) throws OXException {
+        return (getFileAccess(serviceId, accountId) instanceof FileStorageIgnorableVersionFileAccess);
+    }
+
+    @Override
     public void saveFileMetadata(final File document, final long sequenceNumber) throws OXException {
         save(document, null, sequenceNumber, null, new FileAccessDelegation() {
 
@@ -719,7 +742,7 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
      * @throws OXException If an error occurs
      */
     protected FileStorageFileAccess getFileAccess(final String serviceId, final String accountId) throws OXException {
-        final FileStorageAccountAccess cached = connectedAccounts.get().get(serviceId + "/" + accountId);
+        final FileStorageAccountAccess cached = connectedAccounts.get().get(new StringAllocator(serviceId).append('/').append(accountId).toString());
         if (cached != null) {
             return cached.getFileAccess();
         }

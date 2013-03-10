@@ -72,7 +72,7 @@ import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.cifs.cache.SmbFileMapManagement;
 import com.openexchange.groupware.results.Delta;
@@ -88,7 +88,7 @@ import com.openexchange.tx.TransactionException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStorageFileAccess {
+public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStorageIgnorableVersionFileAccess {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(CIFSFileAccess.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
@@ -356,6 +356,12 @@ public final class CIFSFileAccess extends AbstractCIFSAccess implements FileStor
 
     @Override
     public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+        saveDocument0(file, data, modifiedFields);
+    }
+
+    @Override
+    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields, final boolean ignoreVersion) throws OXException {
+        // CIFS/SMB does not support versioning
         saveDocument0(file, data, modifiedFields);
     }
 

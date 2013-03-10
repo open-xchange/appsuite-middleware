@@ -187,6 +187,11 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
+    public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final Metadata[] modifiedColumns, final boolean ignoreVersion, final ServerSession sessionObj) throws OXException {
+        virtualFolder();
+    }
+
+    @Override
     public void saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final ServerSession sessionObj) throws OXException {
         virtualFolder();
     }

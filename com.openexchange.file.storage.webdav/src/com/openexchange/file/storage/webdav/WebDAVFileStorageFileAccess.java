@@ -97,6 +97,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.webdav.workarounds.LiberalUnLockMethod;
 import com.openexchange.groupware.results.Delta;
@@ -112,7 +113,7 @@ import com.openexchange.tx.TransactionException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess implements FileStorageFileAccess {
+public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess implements FileStorageIgnorableVersionFileAccess {
 
     private static final class LockTokenKey {
 
@@ -677,6 +678,12 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
 
     @Override
     public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+        saveDocument0(file, data, modifiedFields);
+    }
+
+    @Override
+    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields, final boolean ignoreVersion) throws OXException {
+        // Versioning is not supported by WebDAV
         saveDocument0(file, data, modifiedFields);
     }
 

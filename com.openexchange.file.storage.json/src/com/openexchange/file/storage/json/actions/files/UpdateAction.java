@@ -56,7 +56,9 @@ import com.openexchange.documentation.annotations.Actions;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAccess;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -91,7 +93,22 @@ public class UpdateAction extends AbstractWriteAction {
 
         final IDBasedFileAccess fileAccess = request.getFileAccess();
         if (request.hasUploads()) {
-            fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
+            final boolean ignoreVersion = request.getBoolParameter("ignoreVersion");
+            if (ignoreVersion) {
+                if (fileAccess instanceof IDBasedIgnorableVersionFileAccess) {
+                    final IDBasedIgnorableVersionFileAccess ignorableVersionFileAccess = (IDBasedIgnorableVersionFileAccess) fileAccess;
+                    final FileID id = new FileID(file.getId());
+                    if (ignorableVersionFileAccess.supportsIgnorableVersion(id.getService(), id.getAccountId())) {
+                        ignorableVersionFileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns(), true);
+                    } else {
+                        ignorableVersionFileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
+                    }
+                } else {
+                    fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
+                }
+            } else {
+                fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
+            }
         } else {
             fileAccess.saveFileMetadata(file, request.getTimestamp(), request.getSentColumns());
         }

@@ -80,8 +80,9 @@ public interface InfostoreFacade extends TransactionAware{
 	public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, ServerSession sessionObj) throws OXException ;
 
 	public InputStream getDocument(int id, int version, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession sessionObj) throws OXException ;
-	public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession sessionObj) throws OXException ;
+	public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession sessionObj) throws OXException;
+	public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession sessionObj) throws OXException;
+	public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, ServerSession sessionObj) throws OXException;
 
 	public void removeDocument(long folderId, long date, ServerSession sessionObj) throws OXException;
 	public int[] removeDocument(int id[], long date, ServerSession sessionObj) throws OXException;

@@ -67,6 +67,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -123,6 +124,28 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     public AJAXInfostoreRequest(final AJAXRequestData requestData, final ServerSession session) {
         this.data = requestData;
         this.session = session;
+    }
+
+    /**
+     * Gets the value mapped to given parameter name.
+     * 
+     * @param name The parameter name
+     * @return The value mapped to given parameter name or <code>null</code> if not present
+     * @throws NullPointerException If name is <code>null</code>
+     */
+    public String getParameter(final String name) {
+        return data.getParameter(name);
+    }
+
+    /**
+     * Gets the boolean value mapped to given parameter name.
+     * 
+     * @param name The parameter name
+     * @return The boolean value mapped to given parameter name or <code>false</code> if not present
+     * @throws NullPointerException If name is <code>null</code>
+     */
+    public boolean getBoolParameter(final String name) {
+        return AJAXRequestDataTools.parseBoolParameter(name, data);
     }
 
     @Override

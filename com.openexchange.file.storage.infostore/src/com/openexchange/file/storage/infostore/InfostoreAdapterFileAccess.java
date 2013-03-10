@@ -61,7 +61,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.infostore.internal.VirtualFolderInfostoreFacade;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -80,7 +80,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
+public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFileAccess {
 
     private static final InfostoreFacade VIRTUAL_INFOSTORE = new VirtualFolderInfostoreFacade();
     private static final Set<Long> VIRTUAL_FOLDERS = new HashSet<Long>() {
@@ -224,9 +224,13 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
 
     @Override
     public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        getInfostore(file.getFolderId()).saveDocument(new FileMetadata(file), data, sequenceNumber, FieldMapping.getMatching(modifiedFields), sessionObj );
+        getInfostore(file.getFolderId()).saveDocument(new FileMetadata(file), data, sequenceNumber, FieldMapping.getMatching(modifiedFields), sessionObj);
     }
 
+    @Override
+    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields, final boolean ignoreVersion) throws OXException {
+        getInfostore(file.getFolderId()).saveDocument(new FileMetadata(file), data, sequenceNumber, FieldMapping.getMatching(modifiedFields), ignoreVersion, sessionObj);
+    }
 
     @Override
     public void saveFileMetadata(final File file, final long sequenceNumber) throws OXException {

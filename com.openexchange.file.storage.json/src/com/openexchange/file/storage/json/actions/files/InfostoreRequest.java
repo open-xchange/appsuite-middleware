@@ -69,6 +69,24 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface InfostoreRequest {
 
+    /**
+     * Gets the value mapped to given parameter name.
+     * 
+     * @param name The parameter name
+     * @return The value mapped to given parameter name or <code>null</code> if not present
+     * @throws NullPointerException If name is <code>null</code>
+     */
+    public String getParameter(final String name);
+
+    /**
+     * Gets the boolean value mapped to given parameter name.
+     * 
+     * @param name The parameter name
+     * @return The boolean value mapped to given parameter name or <code>false</code> if not present
+     * @throws NullPointerException If name is <code>null</code>
+     */
+    public boolean getBoolParameter(final String name);
+
     InfostoreRequest require(AbstractFileAction.Param...params) throws OXException ;
 
     InfostoreRequest requireBody() throws OXException;

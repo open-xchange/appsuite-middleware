@@ -194,193 +194,118 @@ public class SimInfostoreFacade implements InfostoreFacade {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#hasFolderForeignObjects(long, com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, com.openexchange.groupware.userconfiguration.UserConfiguration)
-     */
     @Override
     public boolean hasFolderForeignObjects(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException {
         // Nothing to do
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#isFolderEmpty(long, com.openexchange.groupware.contexts.Context)
-     */
     @Override
     public boolean isFolderEmpty(long folderId, Context ctx) throws OXException {
         // Nothing to do
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#lock(int, long, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public void lock(int id, long diff, ServerSession sessionObj) throws OXException {
         // Nothing to do
-
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#removeDocument(long, long, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public void removeDocument(long folderId, long date, ServerSession sessionObj) throws OXException {
         // Nothing to do
-
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#removeDocument(int[], long, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public int[] removeDocument(int[] id, long date, ServerSession sessionObj) throws OXException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#removeUser(int, com.openexchange.groupware.contexts.Context, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public void removeUser(int id, Context context, ServerSession session) throws OXException {
         // Nothing to do
-
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#removeVersion(int, int[], com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public int[] removeVersion(int id, int[] versionId, ServerSession sessionObj) throws OXException {
         // Nothing to do
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#saveDocument(com.openexchange.groupware.infostore.DocumentMetadata, java.io.InputStream, long, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession sessionObj) throws OXException {
         // Nothing to do
-
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#saveDocument(com.openexchange.groupware.infostore.DocumentMetadata, java.io.InputStream, long, com.openexchange.groupware.infostore.utils.Metadata[], com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession sessionObj) throws OXException {
         // Nothing to do
-
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#saveDocumentMetadata(com.openexchange.groupware.infostore.DocumentMetadata, long, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, ServerSession sessionObj) throws OXException {
         // Nothing to do
-
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#saveDocumentMetadata(com.openexchange.groupware.infostore.DocumentMetadata, long, com.openexchange.groupware.infostore.utils.Metadata[], com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, ServerSession sessionObj) throws OXException {
         // Nothing to do
-
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#setSessionHolder(com.openexchange.sessiond.impl.SessionHolder)
-     */
+    @Override
+    public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, ServerSession sessionObj) throws OXException {
+        // Nothing to do
+    }
+
     @Override
     public void setSessionHolder(SessionHolder sessionHolder) {
         // Nothing to do
-
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#touch(int, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public void touch(int id, ServerSession session) throws OXException {
         // Nothing to do
-
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.infostore.InfostoreFacade#unlock(int, com.openexchange.tools.session.ServerSession)
-     */
     @Override
     public void unlock(int id, ServerSession sessionObj) throws OXException {
         // Nothing to do
-
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.tx.Service#commit()
-     */
     @Override
     public void commit() throws TransactionException {
         // Nothing to do
-
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.tx.Service#finish()
-     */
     @Override
     public void finish() throws TransactionException {
         // Nothing to do
-
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.tx.Service#rollback()
-     */
     @Override
     public void rollback() throws TransactionException {
         // Nothing to do
-
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.tx.Service#setCommitsTransaction(boolean)
-     */
     @Override
     public void setCommitsTransaction(boolean commits) {
         // Nothing to do
-
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.tx.Service#setRequestTransactional(boolean)
-     */
     @Override
     public void setRequestTransactional(boolean transactional) {
         // Nothing to do
-
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.tx.Service#setTransactional(boolean)
-     */
     @Override
     public void setTransactional(boolean transactional) {
         // Nothing to do
-
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.groupware.tx.Service#startTransaction()
-     */
     @Override
     public void startTransaction() throws TransactionException {
         // Nothing to do
-
     }
 
     public void simulateDocument(int cid, int folder, int id, String string, byte[] bytes) {

@@ -144,6 +144,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.tx.UndoableAction;
 
 /**
  * DatabaseImpl
@@ -735,32 +736,40 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, Metadata[] modifiedColumns, final ServerSession sessionObj) throws OXException {
+        saveDocument(document, data, sequenceNumber, modifiedColumns, true, sessionObj);
+    }
+
+    @Override
+    public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, Metadata[] modifiedColumns, final boolean ignoreVersion, final ServerSession sessionObj) throws OXException {
         if (document.getId() == NEW) {
             saveDocument(document, data, sequenceNumber, sessionObj);
             indexDocument(sessionObj.getContext(), sessionObj.getUserId(), document.getId(), -1L, true);
             return;
         }
         try {
-            final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(
-                document.getId(),
-                sessionObj.getContext(),
-                getUser(sessionObj),
-                getUserConfiguration(sessionObj));
-            if (!infoPerm.canWriteObject()) {
-                throw InfostoreExceptionCodes.NO_WRITE_PERMISSION.create();
-            }
-            if ((Arrays.asList(modifiedColumns).contains(Metadata.FOLDER_ID_LITERAL)) && (document.getFolderId() != -1) && infoPerm.getObject().getFolderId() != document.getFolderId()) {
-                security.checkFolderId(document.getFolderId(), sessionObj.getContext());
-                final EffectivePermission isperm = security.getFolderPermission(
-                    document.getFolderId(),
+            // Check permission
+            {
+                final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(
+                    document.getId(),
                     sessionObj.getContext(),
                     getUser(sessionObj),
                     getUserConfiguration(sessionObj));
-                if (!(isperm.canCreateObjects())) {
-                    throw InfostoreExceptionCodes.NO_TARGET_CREATE_PERMISSION.create();
+                if (!infoPerm.canWriteObject()) {
+                    throw InfostoreExceptionCodes.NO_WRITE_PERMISSION.create();
                 }
-                if (!infoPerm.canDeleteObject()) {
-                    throw InfostoreExceptionCodes.NO_SOURCE_DELETE_PERMISSION.create();
+                if ((Arrays.asList(modifiedColumns).contains(Metadata.FOLDER_ID_LITERAL)) && (document.getFolderId() != -1) && infoPerm.getObject().getFolderId() != document.getFolderId()) {
+                    security.checkFolderId(document.getFolderId(), sessionObj.getContext());
+                    final EffectivePermission isperm = security.getFolderPermission(
+                        document.getFolderId(),
+                        sessionObj.getContext(),
+                        getUser(sessionObj),
+                        getUserConfiguration(sessionObj));
+                    if (!(isperm.canCreateObjects())) {
+                        throw InfostoreExceptionCodes.NO_TARGET_CREATE_PERMISSION.create();
+                    }
+                    if (!infoPerm.canDeleteObject()) {
+                        throw InfostoreExceptionCodes.NO_SOURCE_DELETE_PERMISSION.create();
+                    }
                 }
             }
 
@@ -768,8 +777,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
             final DocumentMetadata oldDocument = checkWriteLock(document.getId(), sessionObj);
 
-
-            final Set<Metadata> updatedCols = new HashSet<Metadata>(Arrays.asList(modifiedColumns));
+            Metadata[] modifiedCols = modifiedColumns;
+            final Set<Metadata> updatedCols = new HashSet<Metadata>(Arrays.asList(modifiedCols));
             if (!updatedCols.contains(Metadata.LAST_MODIFIED_LITERAL)) {
                 document.setLastModified(new Date());
             }
@@ -823,7 +832,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 	updatedCols.add(Metadata.TITLE_LITERAL);
                 }
 
-                modifiedColumns = updatedCols.toArray(new Metadata[updatedCols.size()]);
+                modifiedCols = updatedCols.toArray(new Metadata[updatedCols.size()]);
 
                 if (data != null) {
 
@@ -841,7 +850,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
                     final GetSwitch get = new GetSwitch(oldDocument);
                     final SetSwitch set = new SetSwitch(document);
-                    final Set<Metadata> alreadySet = new HashSet<Metadata>(Arrays.asList(modifiedColumns));
+                    final Set<Metadata> alreadySet = new HashSet<Metadata>(Arrays.asList(modifiedCols));
                     for (final Metadata m : Arrays.asList(Metadata.DESCRIPTION_LITERAL, Metadata.TITLE_LITERAL, Metadata.URL_LITERAL)) {
                         if (alreadySet.contains(m)) {
                             continue;
@@ -852,28 +861,48 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
                     document.setCreatedBy(sessionObj.getUserId());
                     document.setCreationDate(new Date());
-                    Connection con = null;
-                    try {
-                        con = getReadConnection(sessionObj.getContext());
-                        document.setVersion(getNextVersionNumberForInfostoreObject(
-                            sessionObj.getContext().getContextId(),
-                            document.getId(),
-                            con));
+                    // Set version
+                    final UndoableAction action;
+                    if (ignoreVersion) {
+                        document.setVersion(oldDocument.getVersion());
                         updatedCols.add(Metadata.VERSION_LITERAL);
-                    } catch (final SQLException e) {
-                        LOG.error("SQLException: ", e);
-                    } finally {
-                        releaseReadConnection(sessionObj.getContext(), con);
+
+                        final UpdateVersionAction updateVersionAction = new UpdateVersionAction();
+                        updateVersionAction.setContext(sessionObj.getContext());
+                        updateVersionAction.setDocuments(Arrays.asList(document));
+                        updateVersionAction.setOldDocuments(Arrays.asList(oldDocument));
+                        updateVersionAction.setProvider(this);
+                        updateVersionAction.setQueryCatalog(QUERIES);
+                        updateVersionAction.setModified(modifiedCols);
+                        updateVersionAction.setTimestamp(sequenceNumber);
+
+                        action = updateVersionAction;
+                    } else {
+                        Connection con = null;
+                        try {
+                            con = getReadConnection(sessionObj.getContext());
+                            document.setVersion(getNextVersionNumberForInfostoreObject(
+                                sessionObj.getContext().getContextId(),
+                                document.getId(),
+                                con));
+                            updatedCols.add(Metadata.VERSION_LITERAL);
+                        } catch (final SQLException e) {
+                            LOG.error("SQLException: ", e);
+                        } finally {
+                            releaseReadConnection(sessionObj.getContext(), con);
+                        }
+
+                        final CreateVersionAction createVersionAction = new CreateVersionAction();
+                        createVersionAction.setContext(sessionObj.getContext());
+                        createVersionAction.setDocuments(Arrays.asList(document));
+                        createVersionAction.setProvider(this);
+                        createVersionAction.setQueryCatalog(QUERIES);
+
+                        action = createVersionAction;
                     }
-
-                    final CreateVersionAction createVersionAction = new CreateVersionAction();
-                    createVersionAction.setContext(sessionObj.getContext());
-                    createVersionAction.setDocuments(Arrays.asList(document));
-                    createVersionAction.setProvider(this);
-                    createVersionAction.setQueryCatalog(QUERIES);
-
-                    perform(createVersionAction, true);
-                } else if (QUERIES.updateVersion(modifiedColumns)) {
+                    // Perform action
+                    perform(action, true);
+                } else if (QUERIES.updateVersion(modifiedCols)) {
                     if (!updatedCols.contains(Metadata.VERSION_LITERAL)) {
                         document.setVersion(oldDocument.getVersion());
                     }
@@ -883,25 +912,25 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     updateVersionAction.setOldDocuments(Arrays.asList(oldDocument));
                     updateVersionAction.setProvider(this);
                     updateVersionAction.setQueryCatalog(QUERIES);
-                    updateVersionAction.setModified(modifiedColumns);
+                    updateVersionAction.setModified(modifiedCols);
                     updateVersionAction.setTimestamp(sequenceNumber);
                     perform(updateVersionAction, true);
                 }
 
-                modifiedColumns = updatedCols.toArray(new Metadata[updatedCols.size()]);
-                if (QUERIES.updateDocument(modifiedColumns)) {
+                modifiedCols = updatedCols.toArray(new Metadata[updatedCols.size()]);
+                if (QUERIES.updateDocument(modifiedCols)) {
                     final UpdateDocumentAction updateAction = new UpdateDocumentAction();
                     updateAction.setContext(sessionObj.getContext());
                     updateAction.setDocuments(Arrays.asList(document));
                     updateAction.setOldDocuments(Arrays.asList(oldDocument));
                     updateAction.setProvider(this);
                     updateAction.setQueryCatalog(QUERIES);
-                    updateAction.setModified(modifiedColumns);
+                    updateAction.setModified(modifiedCols);
                     updateAction.setTimestamp(Long.MAX_VALUE);
                     perform(updateAction, true);
                 }
 
-                long indexFolderId = document.getFolderId() == oldDocument.getFolderId() ? -1L : oldDocument.getFolderId();
+                final long indexFolderId = document.getFolderId() == oldDocument.getFolderId() ? -1L : oldDocument.getFolderId();
                 indexDocument(sessionObj.getContext(), sessionObj.getUserId(), oldDocument.getId(), indexFolderId, false);
             } finally {
                 for (final InfostoreFilenameReservation infostoreFilenameReservation : reservations) {
