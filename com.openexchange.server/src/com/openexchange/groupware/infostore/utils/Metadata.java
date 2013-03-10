@@ -164,13 +164,18 @@ public class Metadata {
     public static final List<Metadata> VALUES = Collections.unmodifiableList(Arrays.asList(VALUES_ARRAY));
     public static final List<Metadata> HTTPAPI_VALUES = Collections.unmodifiableList(Arrays.asList(HTTPAPI_VALUES_ARRAY));
 
-
     private final String name;
     private final int id;
 
-    private Metadata(final int id,final String name){
+    private Metadata(final int id, final String name) {
+        super();
         this.name = name;
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return toUpperCase(name);
     }
 
     public String getName(){
@@ -259,6 +264,20 @@ public class Metadata {
         case DESCRIPTION : return AttachmentField.COMMENT_LITERAL;
         default : return null;
         }
+    }
+
+    /** ASCII-wise upper-case */
+    private static String toUpperCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+        }
+        return builder.toString();
     }
 
 }
