@@ -56,6 +56,7 @@ import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -82,14 +83,38 @@ public final class PreviewCache {
      * Stores given preview image's binary content.
      * 
      * @param id The identifier
-     * @param in The binary stream
+     * @param preview The cached preview
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return <code>true</code> on insertion or <code>false</code> if impossible to store
      * @throws OXException If operations fails
      */
-    public boolean save(final String id, final InputStream in, final int userId, final int contextId) throws OXException, IOException {
-        return save(id, Streams.stream2bytes(in), userId, contextId);
+    public boolean save(final String id, final CachedPreview preview, final int userId, final int contextId) throws OXException {
+        final InputStream in = preview.getInputStream();
+        if (null == in) {
+            return save(id, preview.getBytes(), preview.getFileName(), preview.getFileType(), userId, contextId);
+        }
+        return save(id, in, preview.getFileName(), preview.getFileType(), userId, contextId);
+    }
+
+    /**
+     * Stores given preview image's binary content.
+     * 
+     * @param id The identifier
+     * @param in The binary stream
+     * @param optName The optional file name
+     * @param optType The optional file MIME type; e.g. <code>"image/jpeg"</code>
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> on insertion or <code>false</code> if impossible to store
+     * @throws OXException If operations fails
+     */
+    public boolean save(final String id, final InputStream in, final String optName, final String optType, final int userId, final int contextId) throws OXException {
+        try {
+            return save(id, Streams.stream2bytes(in), optName, optType, userId, contextId);
+        } catch (final IOException e) {
+            throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
     }
 
     /**
@@ -97,12 +122,14 @@ public final class PreviewCache {
      * 
      * @param id The identifier
      * @param bytes The binary content
+     * @param optName The optional file name
+     * @param optType The optional file MIME type; e.g. <code>"image/jpeg"</code>
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return <code>true</code> on insertion or <code>false</code> if impossible to store
      * @throws OXException If operations fails
      */
-    public boolean save(final String id, final byte[] bytes, final int userId, final int contextId) throws OXException {
+    public boolean save(final String id, final byte[] bytes, final String optName, final String optType, final int userId, final int contextId) throws OXException {
         // Check existence
         final boolean exists = exists(id, userId, contextId);
         // Get quota
@@ -133,25 +160,47 @@ public final class PreviewCache {
                 /*
                  * Update
                  */
-                stmt = con.prepareStatement("UPDATE preview SET data = ?, size = ?, createdAt = ? WHERE cid = ? AND user = ? AND id = ?");
-                stmt.setBinaryStream(1, Streams.newByteArrayInputStream(bytes));
-                stmt.setLong(2, bytes.length);
-                stmt.setLong(3, now);
-                stmt.setLong(4, contextId);
-                stmt.setLong(5, userId);
-                stmt.setString(6, id);
+                stmt = con.prepareStatement("UPDATE preview SET data = ?, size = ?, createdAt = ?, fileName = ?, fileType = ? WHERE cid = ? AND user = ? AND id = ?");
+                int pos = 1;
+                stmt.setBinaryStream(pos++, Streams.newByteArrayInputStream(bytes));
+                stmt.setLong(pos++, bytes.length);
+                stmt.setLong(pos++, now);
+                if (null == optName) {
+                    stmt.setNull(pos++, Types.VARCHAR);
+                } else {
+                    stmt.setString(pos++, optName);
+                }
+                if (null == optType) {
+                    stmt.setNull(pos++, Types.VARCHAR);
+                } else {
+                    stmt.setString(pos++, optType);
+                }
+                stmt.setLong(pos++, contextId);
+                stmt.setLong(pos++, userId);
+                stmt.setString(pos++, id);
                 stmt.executeUpdate();
             } else {
                 /*
                  * Insert
                  */
-                stmt = con.prepareStatement("INSERT INTO preview (cid, user, id, size, createdAt, data) VALUES (?, ?, ?, ?, ?, ?)");
-                stmt.setLong(1, contextId);
-                stmt.setLong(2, userId);
-                stmt.setString(3, id);
-                stmt.setLong(4, bytes.length);
-                stmt.setLong(5, now);
-                stmt.setBinaryStream(6, Streams.newByteArrayInputStream(bytes));
+                stmt = con.prepareStatement("INSERT INTO preview (cid, user, id, size, createdAt, data, fileName, fileType) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                int pos = 1;
+                stmt.setLong(pos++, contextId);
+                stmt.setLong(pos++, userId);
+                stmt.setString(pos++, id);
+                stmt.setLong(pos++, bytes.length);
+                stmt.setLong(pos++, now);
+                stmt.setBinaryStream(pos++, Streams.newByteArrayInputStream(bytes));
+                if (null == optName) {
+                    stmt.setNull(pos++, Types.VARCHAR);
+                } else {
+                    stmt.setString(pos++, optName);
+                }
+                if (null == optType) {
+                    stmt.setNull(pos++, Types.VARCHAR);
+                } else {
+                    stmt.setString(pos++, optType);
+                }
                 stmt.executeUpdate();
             }
             con.commit();
@@ -305,7 +354,7 @@ public final class PreviewCache {
      * @return The binary content or <code>null</code>
      * @throws OXException If retrieving image data fails
      */
-    public byte[] get(final String id, final int userId, final int contextId) throws OXException {
+    public CachedPreview get(final String id, final int userId, final int contextId) throws OXException {
         if (null == id || contextId <= 0) {
             return null;
         }
@@ -321,19 +370,19 @@ public final class PreviewCache {
         }
     }
 
-    private byte[] load(final String id, final int userId, final int contextId, final Connection con) throws OXException {
+    private CachedPreview load(final String id, final int userId, final int contextId, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             if (userId > 0) {
                 // A user-sensitive image
-                stmt = con.prepareStatement("SELECT data FROM preview WHERE cid = ? AND user = ? AND id = ?");
+                stmt = con.prepareStatement("SELECT data, fileName, fileType, size FROM preview WHERE cid = ? AND user = ? AND id = ?");
                 stmt.setLong(1, contextId);
                 stmt.setLong(2, userId);
                 stmt.setString(3, id);
             } else {
                 // A context-global image
-                stmt = con.prepareStatement("SELECT data FROM preview WHERE cid = ? AND id = ?");
+                stmt = con.prepareStatement("SELECT data, fileName, fileType, size FROM preview WHERE cid = ? AND id = ?");
                 stmt.setLong(1, contextId);
                 stmt.setString(2, id);
             }
@@ -341,7 +390,7 @@ public final class PreviewCache {
             if (!rs.next()) {
                 return null;
             }
-            return Streams.stream2bytes(rs.getBinaryStream(1));
+            return new CachedPreview(Streams.stream2bytes(rs.getBinaryStream(1)), rs.getString(2), rs.getString(3), rs.getLong(4));
         } catch (final SQLException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (final IOException e) {

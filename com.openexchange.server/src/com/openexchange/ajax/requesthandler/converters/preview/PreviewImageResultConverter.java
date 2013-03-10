@@ -49,19 +49,24 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.CachedPreview;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.PreviewCache;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.preview.PreviewDocument;
@@ -69,6 +74,8 @@ import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -78,6 +85,16 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class PreviewImageResultConverter extends AbstractPreviewResultConverter {
+
+    private final PreviewCache previewCache;
+    
+    /**
+     * Initializes a new {@link PreviewImageResultConverter}.
+     */
+    public PreviewImageResultConverter() {
+        super();
+        previewCache = new PreviewCache();
+    }
 
     @Override
     public String getOutputFormat() {
@@ -97,6 +114,32 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
     @Override
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         try {
+            // Check cache first
+            final String eTag = requestData.getETag();
+            final boolean isValidEtag = !isEmpty(eTag);
+            if (isValidEtag) {
+                final CachedPreview cachedPreview = previewCache.get(eTag, session.getUserId(), session.getContextId());
+                if (null != cachedPreview) {
+                    requestData.setFormat("file");
+                    // Create appropriate IFileHolder
+                    String contentType = cachedPreview.getFileType();
+                    if (null == contentType) {
+                        contentType = "image/jpeg";
+                    }
+                    final InputStream inputStream = cachedPreview.getInputStream();
+                    if (null == inputStream) {
+                        final ByteArrayFileHolder responseFileHolder = new ByteArrayFileHolder(cachedPreview.getBytes());
+                        responseFileHolder.setContentType(contentType);
+                        responseFileHolder.setName(cachedPreview.getFileName());
+                        result.setResultObject(responseFileHolder, "file");
+                    } else {
+                        final FileHolder responseFileHolder = new FileHolder(inputStream, cachedPreview.getSize(), contentType, cachedPreview.getFileName());
+                        result.setResultObject(responseFileHolder, "file");                        
+                    }
+                    return;
+                }
+            }
+            // No cached preview available
             final Object resultObject = result.getResultObject();
             if (!(resultObject instanceof IFileHolder)) {
                 throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(
@@ -113,20 +156,61 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
             dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
 
-            final PreviewDocument previewDocument =
-                previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session, 1);
+            final PreviewDocument previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session, 1);
 
             requestData.setFormat("file");
 
-            final InputStream thumbnail = previewDocument.getThumbnail();
+            InputStream thumbnail = previewDocument.getThumbnail();
             if (null == thumbnail) {
                 // No thumbnail available
                 throw PreviewExceptionCodes.THUMBNAIL_NOT_AVAILABLE.create();
             }
-
+            // (Asynchronously) Put to cache if ETag is available
             final String fileName = previewDocument.getMetaData().get("resourcename");
-            final FileHolder responseFileHolder = new FileHolder(thumbnail, -1, "image/jpeg", fileName); // TODO: file length
+            int size = -1;
+            if (isValidEtag) {
+                final byte[] bytes = Streams.stream2bytes(thumbnail);
+                thumbnail = Streams.newByteArrayInputStream(bytes);
+                size = bytes.length;
+                // Specify task
+                final PreviewCache previewCache = this.previewCache;
+                final AbstractTask<Void> task = new AbstractTask<Void>() {
+
+                    @Override
+                    public Void call() throws OXException {
+                        final CachedPreview preview = new CachedPreview(bytes, fileName, "image/jpeg", bytes.length);
+                        previewCache.save(eTag, preview, session.getUserId(), session.getContextId());
+                        return null;
+                    }
+                };
+                // Acquire thread pool service
+                final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+                if (null == threadPool) {
+                    final Thread thread = Thread.currentThread();
+                    boolean ran = false;
+                    task.beforeExecute(thread);
+                    try {
+                        task.call();
+                        ran = true;
+                        task.afterExecute(null);
+                    } catch (final Exception ex) {
+                        if (!ran) {
+                            task.afterExecute(ex);
+                        }
+                        // Else the exception occurred within
+                        // afterExecute itself in which case we don't
+                        // want to call it again.
+                        throw (ex instanceof OXException ? (OXException) ex : AjaxExceptionCodes.UNEXPECTED_ERROR.create(ex, ex.getMessage()));
+                    }
+                } else {
+                    threadPool.submit(task);
+                }
+            }
+            // Set response object
+            final FileHolder responseFileHolder = new FileHolder(thumbnail, size, "image/jpeg", fileName);
             result.setResultObject(responseFileHolder, "file");
+        } catch (final IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
