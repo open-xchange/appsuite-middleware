@@ -78,10 +78,30 @@ public final class PreviewCache {
         super();
     }
 
+    /**
+     * Stores given preview image's binary content.
+     * 
+     * @param id The identifier
+     * @param in The binary stream
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> on insertion or <code>false</code> on update operation
+     * @throws OXException If operations fails
+     */
     public boolean save(final String id, final InputStream in, final int userId, final int contextId) throws OXException, IOException {
         return save(id, Streams.stream2bytes(in), userId, contextId);
     }
 
+    /**
+     * Stores given preview image's binary content.
+     * 
+     * @param id The identifier
+     * @param bytes The binary content
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> on insertion or <code>false</code> on update operation
+     * @throws OXException If operations fails
+     */
     public boolean save(final String id, final byte[] bytes, final int userId, final int contextId) throws OXException {
         final long total = getContextQuota(contextId);
         final boolean exists = exists(id, userId, contextId);
@@ -194,7 +214,7 @@ public final class PreviewCache {
                     dbService.backWritable(contextId, con);
                 }
             }
-            
+
         }
     }
 
@@ -234,7 +254,7 @@ public final class PreviewCache {
             Databases.closeSQLStuff(rs, stmt);
         }
     }
-    
+
     /**
      * Gets the preview image's binary content.
      * 
