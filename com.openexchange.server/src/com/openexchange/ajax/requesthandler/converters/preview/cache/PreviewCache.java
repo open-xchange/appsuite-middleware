@@ -103,6 +103,7 @@ public final class PreviewCache {
              */
             con.setAutoCommit(false);
             committed = false;
+            final long now = System.currentTimeMillis();
             if (exists) {
                 /*
                  * Update
@@ -110,7 +111,7 @@ public final class PreviewCache {
                 stmt = con.prepareStatement("UPDATE preview SET data = ?, size = ?, createdAt = ? WHERE cid = ? AND user = ? AND id = ?");
                 stmt.setBinaryStream(1, Streams.newByteArrayInputStream(bytes));
                 stmt.setLong(2, bytes.length);
-                stmt.setLong(3, System.currentTimeMillis());
+                stmt.setLong(3, now);
                 stmt.setLong(4, contextId);
                 stmt.setLong(5, userId);
                 stmt.setString(6, id);
@@ -125,7 +126,7 @@ public final class PreviewCache {
                 stmt.setLong(2, userId);
                 stmt.setString(3, id);
                 stmt.setLong(4, bytes.length);
-                stmt.setLong(5, System.currentTimeMillis());
+                stmt.setLong(5, now);
                 stmt.setBinaryStream(6, Streams.newByteArrayInputStream(bytes));
                 stmt.executeUpdate();
                 insert = false;
