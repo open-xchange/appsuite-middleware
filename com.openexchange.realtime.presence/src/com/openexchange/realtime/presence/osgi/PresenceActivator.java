@@ -62,6 +62,7 @@ import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 public class PresenceActivator extends HousekeepingActivator {
 
     private final static Log LOG = com.openexchange.log.Log.loggerFor(PresenceActivator.class);
+
     private PresencePublisher presencePublisher;
 
     @Override
@@ -74,11 +75,11 @@ public class PresenceActivator extends HousekeepingActivator {
         LOG.info("Starting bundle: " + getClass().getCanonicalName());
         Services.setServiceLookup(this);
         ResourceDirectory resourceDirectory = getService(ResourceDirectory.class);
-        if(resourceDirectory == null) {
+        if (resourceDirectory == null) {
             throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ResourceDirectory.class.getName());
         }
         presencePublisher = new PresencePublisher(resourceDirectory);
-        
+
         track(ResourceDirectory.class, new SimpleRegistryListener<ResourceDirectory>() {
 
             @Override
@@ -91,7 +92,14 @@ public class PresenceActivator extends HousekeepingActivator {
                 presencePublisher.setResourceDirectory(null);
             }
         });
-        
+        openTrackers();
+    }
+
+    @Override
+    public void stopBundle() throws Exception {
+        LOG.info("Stopping bundle: " + getClass().getCanonicalName());
+        super.stopBundle();
+        Services.setServiceLookup(null);
     }
 
 }
