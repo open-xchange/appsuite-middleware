@@ -285,6 +285,9 @@ public final class PreviewCache {
             if (!rs.next()) {
                 return 0L;
             }
+            if (rs.wasNull()) {
+                return 0L;
+            }
             return rs.getLong(1);
         } catch (final SQLException e) {
             throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
