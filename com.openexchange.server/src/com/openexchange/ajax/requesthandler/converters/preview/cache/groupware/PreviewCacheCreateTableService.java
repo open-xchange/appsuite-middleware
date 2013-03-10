@@ -61,17 +61,17 @@ public final class PreviewCacheCreateTableService extends AbstractCreateTableImp
 
     private static final String TABLE_PREVIEW = "preview";
 
-    private static final String CREATE_PREVIEW = "CREATE TABLE "+TABLE_PREVIEW+" (\n" +
-    		" cid INT4 unsigned NOT NULL,\n" +
-    		" user INT4 unsigned NOT NULL,\n" +
-    		" id VARCHAR(128) CHARACTER SET latin1 NOT NULL,\n" +
-    		" size BIGINT(64) NOT NULL,\n" +
-    		" createdAt BIGINT(64) NOT NULL,\n" +
-    		" data BLOB," +
-    		" PRIMARY KEY (cid, user, id),\n" +
-    		" INDEX `globalimage` (cid, id)\n" +
-    		" INDEX `user` (cid, user)\n" +
-    		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    private static final String CREATE_PREVIEW = "CREATE TABLE "+TABLE_PREVIEW+" (" +
+        " cid INT4 unsigned NOT NULL," +
+        " user INT4 unsigned NOT NULL," +
+        " id VARCHAR(128) CHARACTER SET latin1 NOT NULL," +
+        " size BIGINT(64) NOT NULL," +
+        " createdAt BIGINT(64) NOT NULL," +
+        " data BLOB," +
+        " PRIMARY KEY (cid, user, id)," +
+        " INDEX `globalimage` (cid, id)," +
+        " INDEX `user` (cid, user)" +
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     /**
      * Gets the table names.
