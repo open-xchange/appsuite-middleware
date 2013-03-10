@@ -50,6 +50,7 @@
 package com.openexchange.server.osgi;
 
 import org.osgi.framework.BundleActivator;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.osgi.PreviewCacheActivator;
 import com.openexchange.ajax.requesthandler.osgi.PrefixServiceActivator;
 import com.openexchange.image.osgi.ImageActivator;
 import com.openexchange.json.cache.impl.osgi.JsonCacheActivator;
@@ -101,7 +102,8 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.ajax.redirect.osgi.RedirectActivator(),
         new com.openexchange.groupware.tasks.osgi.TaskActivator(),
         new FolderUpdaterRegistryDependencyActivator(),
-        new ImageActivator()
+        new ImageActivator(), 
+        new PreviewCacheActivator(),
     };
 
     public ServerCompositeActivator() {
