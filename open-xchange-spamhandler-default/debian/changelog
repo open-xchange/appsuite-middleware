@@ -1,3 +1,9 @@
+open-xchange-spamhandler-default (7.0.1-5) unstable; urgency=low
+
+  * Build for patch 2013-03-07
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 04 Mar 2013 15:23:42 +0100
+
 open-xchange-spamhandler-default (7.0.1-4) unstable; urgency=low
 
   * Fourth release candidate for 7.0.1

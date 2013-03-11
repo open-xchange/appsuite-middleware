@@ -6,7 +6,7 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 5
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -153,3 +153,5 @@ Internal release build for EDP drop #2
 Internal release build for EDP drop #1
 * Wed Apr 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Internal release build for EDP drop #0
+* Wed Feb 01 2012 Marcus Klein <marcus.klein@open-xchange.com>
+Initial release
