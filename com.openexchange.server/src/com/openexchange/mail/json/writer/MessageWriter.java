@@ -730,7 +730,7 @@ public final class MessageWriter {
                     if (withKey) {
                         final JSONObject jsonObject = (JSONObject) jsonContainer;
                         jsonObject.put(MailJSONField.ACCOUNT_NAME.getKey(), mail.getAccountName());
-                        jsonObject.put(MailJSONField.ACCOUNT_ID.getKey(), mail.getAccountName());
+                        jsonObject.put(MailJSONField.ACCOUNT_ID.getKey(), mail.getAccountId());
                     } else {
                         ((JSONArray) jsonContainer).put(mail.getAccountName());
                     }
@@ -747,7 +747,7 @@ public final class MessageWriter {
                     if (withKey) {
                         final JSONObject jsonObject = (JSONObject) jsonContainer;
                         jsonObject.put(MailJSONField.ACCOUNT_NAME.getKey(), mail.getAccountName());
-                        jsonObject.put(MailJSONField.ACCOUNT_ID.getKey(), mail.getAccountName());
+                        jsonObject.put(MailJSONField.ACCOUNT_ID.getKey(), mail.getAccountId());
                     } else {
                         ((JSONArray) jsonContainer).put(mail.getAccountId());
                     }

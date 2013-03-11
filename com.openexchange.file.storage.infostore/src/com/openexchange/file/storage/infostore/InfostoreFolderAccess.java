@@ -103,7 +103,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
     @Override
     public String createFolder(final FileStorageFolder toCreate) throws OXException {
         final FolderService service = Services.getService(FolderService.class);
-        final FolderResponse<String> response = service.createFolder(FolderParser.parseFolder(toCreate), session);
+        final FolderResponse<String> response = service.createFolder(FolderParser.parseFolder(toCreate), session, null);
         return response.getResponse();
     }
 

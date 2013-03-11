@@ -52,10 +52,12 @@ package com.openexchange.folderstorage.internal.performers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
@@ -79,7 +81,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CreatePerformer extends AbstractPerformer {
+public final class CreatePerformer extends AbstractUserizedFolderPerformer {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(CreatePerformer.class));
 
@@ -94,8 +96,8 @@ public final class CreatePerformer extends AbstractPerformer {
      *
      * @param session The session
      */
-    public CreatePerformer(final ServerSession session) {
-        super(session);
+    public CreatePerformer(final ServerSession session, final FolderServiceDecorator decorator) {
+        super(session, decorator);
     }
 
     /**
@@ -104,8 +106,8 @@ public final class CreatePerformer extends AbstractPerformer {
      * @param user The user
      * @param context The context
      */
-    public CreatePerformer(final User user, final Context context) {
-        super(user, context);
+    public CreatePerformer(final User user, final Context context, final FolderServiceDecorator decorator) {
+        super(user, context, decorator);
     }
 
     /**
@@ -114,8 +116,8 @@ public final class CreatePerformer extends AbstractPerformer {
      * @param session The session
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public CreatePerformer(final ServerSession session, final FolderStorageDiscoverer folderStorageDiscoverer) {
-        super(session, folderStorageDiscoverer);
+    public CreatePerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(session, decorator, folderStorageDiscoverer);
     }
 
     /**
@@ -125,8 +127,8 @@ public final class CreatePerformer extends AbstractPerformer {
      * @param context The context
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public CreatePerformer(final User user, final Context context, final FolderStorageDiscoverer folderStorageDiscoverer) {
-        super(user, context, folderStorageDiscoverer);
+    public CreatePerformer(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+        super(user, context, decorator, folderStorageDiscoverer);
     }
 
     /**
@@ -177,11 +179,57 @@ public final class CreatePerformer extends AbstractPerformer {
             if (!CONTENT_TYPE_INFOSTORE.equals(cts)) {
                 final Session session = storageParameters.getSession();
                 if (null == session) {
-                    checkForDuplicate(toCreate.getName(), treeId, parentId, openedStorages);
+                    CheckForDuplicateResult result = getCheckForDuplicateResult(toCreate.getName(), treeId, parentId, openedStorages);
+                    if (null != result) {
+                        final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
+                        if (!autoRename) {
+                            throw result.error;
+                        }
+                        int count = 2;
+                        final StringBuilder nameBuilder = new StringBuilder(toCreate.getName());
+                        final int resetLen = nameBuilder.length();
+                        do {
+                            nameBuilder.setLength(resetLen);
+                            nameBuilder.append(" (").append(count++).append(')');
+                            result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, parentId, openedStorages);
+                        } while (null != result);
+                        toCreate.setName(nameBuilder.toString());
+                    }
                 } else {
-                    final CheckForDuplicateResult result = getCheckForDuplicateResult(toCreate.getName(), treeId, parentId, openedStorages);
-                    if (null != result && null != result.optFolderId && "USM-JSON".equals(session.getClient())) {
-                        return result.optFolderId;
+                    CheckForDuplicateResult result = getCheckForDuplicateResult(toCreate.getName(), treeId, parentId, openedStorages);
+                    if (null != result) {
+                        final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
+                        if (!autoRename) {
+                            if (null != result.optFolderId && "USM-JSON".equals(session.getClient())) {
+                                return result.optFolderId;
+                            }
+                            throw result.error;
+                        }
+                        int count = 2;
+                        final StringBuilder nameBuilder = new StringBuilder(toCreate.getName());
+                        final int resetLen = nameBuilder.length();
+                        do {
+                            nameBuilder.setLength(resetLen);
+                            nameBuilder.append(" (").append(count++).append(')');
+                            result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, parentId, openedStorages);
+                        } while (null != result);
+                        toCreate.setName(nameBuilder.toString());
+                    }
+                }
+            } else {
+                final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
+                if (autoRename) {
+                    CheckForDuplicateResult result = getCheckForDuplicateResult(toCreate.getName(), treeId, parentId, openedStorages);
+                    if (null != result) {
+                        int count = 2;
+                        final StringBuilder nameBuilder = new StringBuilder(toCreate.getName());
+                        final int resetLen = nameBuilder.length();
+                        do {
+                            nameBuilder.setLength(resetLen);
+                            nameBuilder.append(" (").append(count++).append(')');
+                            result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, parentId, openedStorages);
+                        } while (null != result);
+                        toCreate.setName(nameBuilder.toString());
                     }
                 }
             }

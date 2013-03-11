@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.TimeZone;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -150,7 +149,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      *
      * @return The folder service decorator or <code>null</code>
      */
-    protected FolderServiceDecorator getDecorator() {
+    protected final FolderServiceDecorator getDecorator() {
         return decorator;
     }
 
@@ -162,7 +161,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      *
      * @return The time zone
      */
-    protected TimeZone getTimeZone() {
+    protected final TimeZone getTimeZone() {
         TimeZone tmp = timeZone;
         if (null == tmp) {
             synchronized (this) {
@@ -184,7 +183,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      *
      * @return The locale
      */
-    protected Locale getLocale() {
+    protected final Locale getLocale() {
         Locale tmp = locale;
         if (null == tmp) {
             synchronized (this) {
@@ -203,7 +202,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      *
      * @return The allowed content types
      */
-    protected java.util.List<ContentType> getAllowedContentTypes() {
+    protected final java.util.List<ContentType> getAllowedContentTypes() {
         java.util.List<ContentType> tmp = allowedContentTypes;
         if (null == tmp) {
             synchronized (this) {
@@ -215,6 +214,35 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             }
         }
         return tmp;
+    }
+
+    /**
+     * Gets the named property from decorator (if not <code>null</code>).
+     *
+     * @param name The property name
+     * @return The property's value or <code>null</code>
+     */
+    @SuppressWarnings("unchecked")
+    protected final <V> V getDecoratorProperty(final String name) {
+        if (null == name || null == decorator) {
+            return null;
+        }
+        final Object val = decorator.getProperty(name);
+        return null == val ? null : (V) val;
+    }
+
+    /**
+     * Gets the named property's string value from decorator (if not <code>null</code>).
+     *
+     * @param name The property name
+     * @return The property's string value or <code>null</code>
+     */
+    protected final String getDecoratorStringProperty(final String name) {
+        if (null == name || null == decorator) {
+            return null;
+        }
+        final Object val = decorator.getProperty(name);
+        return null == val ? null : val.toString();
     }
 
     /**
