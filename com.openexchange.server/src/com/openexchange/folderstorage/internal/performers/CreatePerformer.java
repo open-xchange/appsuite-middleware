@@ -179,7 +179,22 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             if (!CONTENT_TYPE_INFOSTORE.equals(cts)) {
                 final Session session = storageParameters.getSession();
                 if (null == session) {
-                    checkForDuplicate(toCreate.getName(), treeId, parentId, openedStorages);
+                    CheckForDuplicateResult result = getCheckForDuplicateResult(toCreate.getName(), treeId, parentId, openedStorages);
+                    if (null != result) {
+                        final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
+                        if (!autoRename) {
+                            throw result.error;
+                        }
+                        int count = 2;
+                        final StringBuilder nameBuilder = new StringBuilder(toCreate.getName());
+                        final int resetLen = nameBuilder.length();
+                        do {
+                            nameBuilder.setLength(resetLen);
+                            nameBuilder.append(" (").append(count++).append(')');
+                            result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, parentId, openedStorages);
+                        } while (null != result);
+                        toCreate.setName(nameBuilder.toString());
+                    }
                 } else {
                     CheckForDuplicateResult result = getCheckForDuplicateResult(toCreate.getName(), treeId, parentId, openedStorages);
                     if (null != result) {
