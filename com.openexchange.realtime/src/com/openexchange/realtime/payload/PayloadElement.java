@@ -51,6 +51,7 @@ package com.openexchange.realtime.payload;
 
 import java.io.Serializable;
 import com.openexchange.realtime.util.ElementPath;
+import static com.openexchange.realtime.util.CopyObject.copyObject;
 
 /**
  * {@link PayloadElement} - Represents a stanza's payload element that is any (POJO) object linked with its format identifier. Namespace and
@@ -98,7 +99,8 @@ public class PayloadElement implements VisitablePayload, Serializable {
      * @throws IllegalArgumentException If the other PayloadElement is null
      */
     public PayloadElement(PayloadElement otherPayloadElement) {
-        this.data = otherPayloadElement.data;
+        //TODO: Change object to serializable in Stanza + PayloadTree
+        this.data = copyObject((Serializable)otherPayloadElement.data);
         this.elementName = otherPayloadElement.elementName;
         this.format = otherPayloadElement.format;
         this.namespace = otherPayloadElement.namespace;

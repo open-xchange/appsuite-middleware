@@ -49,35 +49,38 @@
 
 package com.openexchange.realtime.packet;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import org.junit.Test;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Presence;
+import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.Presence.Type;
-import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.payload.PayloadTree;
-
 
 /**
  * {@link PresenceTest}
- *
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class PresenceTest {
 
     private static ID fromID = new ID("ox", null, "marc.arens", "premium", null);
+
     private static PresenceState away = PresenceState.AWAY;
+
     private static String message = "I'll be back!";
+
     private static byte priority = 1;
 
     @Test
     public void testInitialPresenceBuilder() {
-        Presence initialPresence = Presence.builder()
-            .from(fromID)
-            .build();
+        Presence initialPresence = Presence.builder().from(fromID).build();
 
         assertEquals(fromID, initialPresence.getFrom());
         assertNull(initialPresence.getTo());
@@ -91,13 +94,15 @@ public class PresenceTest {
     }
 
     @Test
-    public void testUodatePresenceBuilder() {
+    public void testUpdatePresenceBuilder() {
+        // @formatter:off
         Presence updatePresence = Presence.builder()
             .from(fromID)
             .state(away)
             .message(message)
             .priority(priority)
             .build();
+        // @formatter:on
 
         assertEquals(fromID, updatePresence.getFrom());
         assertNull(updatePresence.getTo());
@@ -107,7 +112,7 @@ public class PresenceTest {
         assertEquals(Type.NONE, updatePresence.getType());
         assertNull(updatePresence.getError());
 
-        //Payload checks
+        // Payload checks
         assertEquals(updatePresence.getDefaultPayloads(), updatePresence.getPayloads());
         assertEquals(3, updatePresence.getPayloads().size());
         ArrayList<PayloadTree> statusTrees = new ArrayList<PayloadTree>(updatePresence.getPayloads(Presence.STATUS_PATH));
@@ -122,6 +127,43 @@ public class PresenceTest {
         assertEquals(message, messageTrees.get(0).getRoot().getData());
         assertEquals(priority, priorityTrees.get(0).getRoot().getData());
 
+    }
+
+    @Test
+    public void testCopyConstructor() throws OXException {
+        // @formatter:off
+        Presence awayPresence = Presence.builder()
+            .from(fromID)
+            .state(away)
+            .message(message)
+            .priority(priority)
+            .build();
+        // @formatter:on
+
+        Presence copiedAwayPresence = new Presence(awayPresence);
+
+        awayPresence.setFrom(new ID("ox", "francisco.laguna", "premium", "macbook air"));
+        awayPresence.setPriority((byte) -1);
+        awayPresence.setState(PresenceState.DO_NOT_DISTURB);
+        awayPresence.setMessage("Planning the future of the ox backend");
+        assertThat(awayPresence.getFrom(), is(not(copiedAwayPresence.getFrom())));
+        assertThat(awayPresence.getPriority(), is(not(copiedAwayPresence.getPriority())));
+        assertThat(awayPresence.getState(), is(not(copiedAwayPresence.getState())));
+        assertThat(awayPresence.getMessage(), is(not(copiedAwayPresence.getMessage())));
+
+        assertEquals(fromID, copiedAwayPresence.getFrom());
+        assertEquals(message, copiedAwayPresence.getMessage());
+        assertEquals(priority, copiedAwayPresence.getPriority());
+        assertEquals(away, copiedAwayPresence.getState());
+
+        assertEquals(message, getFirstTreeRootData(copiedAwayPresence.getPayloads(Presence.MESSAGE_PATH)));
+        assertEquals(priority, getFirstTreeRootData(copiedAwayPresence.getPayloads(Presence.PRIORITY_PATH)));
+        assertEquals(away, getFirstTreeRootData(copiedAwayPresence.getPayloads(Presence.STATUS_PATH)));
+    }
+
+    private Object getFirstTreeRootData(Collection<PayloadTree> trees) {
+        List<PayloadTree> payloads = new ArrayList<PayloadTree>(trees);
+        return payloads.get(0).getRoot().getData();
     }
 
 }
