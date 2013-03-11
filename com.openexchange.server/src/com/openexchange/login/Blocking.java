@@ -51,7 +51,7 @@ package com.openexchange.login;
 
 /**
  * {@link Blocking} - Marker interface for {@link LoginHandlerService} implementations to signal that the associated
- * {@code LoginHandlerService} shall be executed with blocking behavior; meaning calling thread does return when {@code LoginHandlerService}
+ * {@code LoginHandlerService} shall be executed with blocking behavior; meaning calling thread does return before {@code LoginHandlerService}
  * invocation terminates.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
