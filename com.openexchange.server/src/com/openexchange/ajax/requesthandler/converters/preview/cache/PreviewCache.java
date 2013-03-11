@@ -57,6 +57,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -227,8 +228,27 @@ public final class PreviewCache {
      * @return The context quota or <code>-1</code> if unlimited
      */
     public long[] getContextQuota(final int contextId) {
-        // TODO:
-        return new long[] { -1L, -1L };
+        long quota = -1L;
+        long quotaPerDocument = -1L;
+
+        // TODO: Check context-wise quota values
+
+        final ConfigurationService confService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (null != confService) {
+            String property = confService.getProperty("com.openexchange.preview.cache.quota", "-1").trim();
+            try {
+                quota = Long.parseLong(property);
+            } catch (NumberFormatException e) {
+                quota = -1L;
+            }
+            property = confService.getProperty("com.openexchange.preview.cache.quotaPerDocument", "-1").trim();
+            try {
+                quotaPerDocument = Long.parseLong(property);
+            } catch (NumberFormatException e) {
+                quotaPerDocument = -1L;
+            }
+        }
+        return new long[] { quota, quotaPerDocument };
     }
 
     /**
