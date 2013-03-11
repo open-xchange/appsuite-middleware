@@ -49,9 +49,16 @@
 
 package com.openexchange.realtime.hazelcast.directory;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -69,18 +76,21 @@ import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.util.IDMap;
 
-
 /**
  * {@link HazelcastResourceDirectoryTest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
+    private static ExecutorService executorService;
+    private static Random random;
     
     @BeforeClass
     public static void beforeClass() throws Exception {
         HazelcastInstance hazelcast = Hazelcast.getDefaultInstance();
         HazelcastAccess.setHazelcastInstance(hazelcast);
+        executorService = Executors.newFixedThreadPool(25);
+        random = new Random();
     }
     
     @AfterClass
@@ -100,7 +110,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
     public void testSetNewResource() throws Exception {
         ID concreteId = generateId();
         ID generalId = concreteId.toGeneralForm();
-        Resource resource = generateResource();
+        Resource resource = generateResource(concreteId);
         
         Assert.assertEquals("Wrong return value", null, set(concreteId, resource));
         IDMap<Resource> resources = get(generalId);
@@ -113,13 +123,13 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
     public void testUpdateResource() throws Exception {
         ID concreteId = generateId();
         ID generalId = concreteId.toGeneralForm();
-        Resource resource = generateResource();
+        Resource resource = generateResource(concreteId);
         
         set(concreteId, resource);
         Resource reloadedResource = get(generalId).entrySet().iterator().next().getValue();
         Assert.assertEquals("Wrong presence state", resource.getPresence().getState(), reloadedResource.getPresence().getState());
         
-        DefaultResource changedResource = new DefaultResource(Presence.builder().state(PresenceState.OFFLINE).build());
+        DefaultResource changedResource = new DefaultResource(Presence.builder().from(concreteId).state(PresenceState.OFFLINE).build());
         Resource previous = set(concreteId, changedResource);
         Assert.assertEquals("Wrong resource", resource, previous);
         
@@ -132,9 +142,9 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         ID id1 = generateId();
         ID id2 = generateId();
         ID id3 = generateId();
-        Resource r1 = generateResource();
-        Resource r2 = generateResource();
-        Resource r3 = generateResource();
+        Resource r1 = generateResource(id1);
+        Resource r2 = generateResource(id2);
+        Resource r3 = generateResource(id3);
         
         set(id1, r1);
         set(id2, r2);
@@ -182,11 +192,11 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         ID id3 = generateId();
         ID id4 = new ID("ox", null, "another.user", "context", UUID.randomUUID().toString());
         ID id5 = new ID("ox", null, "even.another", "context", UUID.randomUUID().toString());
-        Resource r1 = generateResource();
-        Resource r2 = generateResource();
-        Resource r3 = generateResource();
-        Resource r4 = generateResource();
-        Resource r5 = generateResource();
+        Resource r1 = generateResource(id1);
+        Resource r2 = generateResource(id2);
+        Resource r3 = generateResource(id3);
+        Resource r4 = generateResource(id4);
+        Resource r5 = generateResource(id5);
         
         set(id1, r1);
         set(id2, r2);
@@ -223,12 +233,38 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         Assert.assertEquals("Resources not empty", 0, resources.size());
     }
     
+    @Test
+    public void testTransactionsInSet() throws Exception {
+        final ID testID = generateId();
+        final Resource testResource = generateResource(testID);
+        
+        List<Callable<Integer>> callables = new ArrayList<Callable<Integer>>();
+        
+        for (int i = 0; i < 3; i++) {
+            final int j = i;
+            callables.add(new Callable<Integer>() {
+
+                public Integer call() throws Exception {
+                    Thread.sleep(random.nextInt(500));
+                    testResource.getPresence().setMessage(String.valueOf(j));
+                    set(testID, testResource);
+                    return j;
+                }
+            }
+            );
+        }
+        List<Future<Integer>> invokeAll = executorService.invokeAll(callables);
+        for (Future<Integer> future : invokeAll) {
+            System.out.println(future.get());
+        }
+    }
+    
     private ID generateId() {
         return new ID("ox", "some.component", "some.body", "context", UUID.randomUUID().toString());
     }
     
-    private Resource generateResource() {
-        return new DefaultResource(Presence.builder().state(PresenceState.ONLINE).build());
+    private Resource generateResource(ID id) {
+        return new DefaultResource(Presence.builder().from(id).state(PresenceState.ONLINE).build());
     }
 
 }
