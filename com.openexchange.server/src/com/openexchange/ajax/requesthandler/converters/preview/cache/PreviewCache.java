@@ -264,22 +264,21 @@ public final class PreviewCache {
      */
     public boolean ensureUnexceededContextQuota(final long desiredSize, final long total, final long totalPerDocument, final int contextId, final String ignoree) throws OXException {
         if (total <= 0L) {
-            // Unlimited quota
-            if (totalPerDocument > 0 && desiredSize > totalPerDocument) {
-                return false;
-            }
-            return true;
+            // Unlimited total quota
+            return (totalPerDocument <= 0 || desiredSize <= totalPerDocument);
         }
+        // Check if document's size fits into quota limits at all
         if (desiredSize > total || desiredSize > totalPerDocument) {
             return false;
         }
-        // Create space
+        // Try to create space through removing oldest entries
+        // until enough space is available
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         if (dbService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
         Connection con = dbService.getReadOnly(contextId);
-        boolean readOlny = true;
+        boolean readOnly = true;
         try {
             long usedContextQuota = getUsedContextQuota(contextId, ignoree, con);
             if (usedContextQuota <= 0 && desiredSize > total) {
@@ -287,10 +286,10 @@ public final class PreviewCache {
             }
             while (usedContextQuota + desiredSize > total) {
                 // Upgrade to writable connection
-                if (readOlny) {
+                if (readOnly) {
                     dbService.backReadOnly(contextId, con);
                     con = dbService.getWritable(contextId);
-                    readOlny = false;
+                    readOnly = false;
                 }
                 // Drop oldest entry
                 dropOldestEntry(contextId, con);
@@ -302,7 +301,7 @@ public final class PreviewCache {
             }
             return true;
         } finally {
-            if (readOlny) {
+            if (readOnly) {
                 dbService.backReadOnly(contextId, con);
             } else {
                 dbService.backWritable(contextId, con);
