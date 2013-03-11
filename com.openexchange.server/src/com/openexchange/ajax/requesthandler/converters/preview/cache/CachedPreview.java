@@ -52,7 +52,7 @@ package com.openexchange.ajax.requesthandler.converters.preview.cache;
 import java.io.InputStream;
 
 /**
- * {@link CachedPreview} - A cached preview image.
+ * {@link CachedPreview} - A cached preview document.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

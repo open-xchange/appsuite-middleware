@@ -66,7 +66,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * {@link PreviewCache} - The preview image cache.
+ * {@link PreviewCache} - The preview document cache.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -80,7 +80,7 @@ public final class PreviewCache {
     }
 
     /**
-     * Stores given preview image's binary content.
+     * Stores given preview document's binary content.
      * 
      * @param id The identifier
      * @param preview The cached preview
@@ -98,7 +98,7 @@ public final class PreviewCache {
     }
 
     /**
-     * Stores given preview image's binary content.
+     * Stores given preview document's binary content.
      * 
      * @param id The identifier
      * @param in The binary stream
@@ -118,7 +118,7 @@ public final class PreviewCache {
     }
 
     /**
-     * Stores given preview image's binary content.
+     * Stores given preview document's binary content.
      * 
      * @param id The identifier
      * @param bytes The binary content
@@ -135,10 +135,10 @@ public final class PreviewCache {
         // Get quota
         final long[] qts = getContextQuota(contextId);
         final long total = qts[0];
-        final long totalPerImage = qts[0];
-        if (total > 0 || totalPerImage > 0) {
+        final long totalPerDocument = qts[0];
+        if (total > 0 || totalPerDocument > 0) {
             final String ignoree = exists ? id : null;
-            if (!ensureUnexceededContextQuota(bytes.length, total, totalPerImage, contextId, ignoree)) {
+            if (!ensureUnexceededContextQuota(bytes.length, total, totalPerDocument, contextId, ignoree)) {
                 return false;
             }
         }
@@ -236,21 +236,21 @@ public final class PreviewCache {
      * 
      * @param desiredSize The desired size
      * @param total The context-sensitive caching quota
-     * @param totalPerImage The context-sensitive caching quota per image
+     * @param totalPerDocument The context-sensitive caching quota per document
      * @param contextId The context identifier
      * @param ignoree The optional identifier to ignore while checking
      * @return <code>true</code> If enough space is available; otherwise <code>false</code>
      * @throws OXException If an error occurs
      */
-    public boolean ensureUnexceededContextQuota(final long desiredSize, final long total, final long totalPerImage, final int contextId, final String ignoree) throws OXException {
+    public boolean ensureUnexceededContextQuota(final long desiredSize, final long total, final long totalPerDocument, final int contextId, final String ignoree) throws OXException {
         if (total <= 0L) {
             // Unlimited quota
-            if (totalPerImage > 0 && desiredSize > totalPerImage) {
+            if (totalPerDocument > 0 && desiredSize > totalPerDocument) {
                 return false;
             }
             return true;
         }
-        if (desiredSize > total || desiredSize > totalPerImage) {
+        if (desiredSize > total || desiredSize > totalPerDocument) {
             return false;
         }
         // Create space
@@ -346,13 +346,13 @@ public final class PreviewCache {
     }
 
     /**
-     * Gets the preview image's binary content.
+     * Gets the preview document's binary content.
      * 
-     * @param id The image identifier
-     * @param userId The user identifier or <code>-1</code> for context-global image
+     * @param id The document identifier
+     * @param userId The user identifier or <code>-1</code> for context-global document
      * @param contextId The context identifier
      * @return The binary content or <code>null</code>
-     * @throws OXException If retrieving image data fails
+     * @throws OXException If retrieving document data fails
      */
     public CachedPreview get(final String id, final int userId, final int contextId) throws OXException {
         if (null == id || contextId <= 0) {
@@ -375,13 +375,13 @@ public final class PreviewCache {
         ResultSet rs = null;
         try {
             if (userId > 0) {
-                // A user-sensitive image
+                // A user-sensitive document
                 stmt = con.prepareStatement("SELECT data, fileName, fileType, size FROM preview WHERE cid = ? AND user = ? AND id = ?");
                 stmt.setLong(1, contextId);
                 stmt.setLong(2, userId);
                 stmt.setString(3, id);
             } else {
-                // A context-global image
+                // A context-global document
                 stmt = con.prepareStatement("SELECT data, fileName, fileType, size FROM preview WHERE cid = ? AND id = ?");
                 stmt.setLong(1, contextId);
                 stmt.setString(2, id);
@@ -401,10 +401,10 @@ public final class PreviewCache {
     }
 
     /**
-     * Tests for existence of denoted preview image.
+     * Tests for existence of denoted preview document.
      * 
      * @param id The identifier
-     * @param userId The user identifier or <code>-1</code> for context-global image
+     * @param userId The user identifier or <code>-1</code> for context-global document
      * @param contextId The context identifier
      * @return <code>true</code> if exists; otherwise <code>false</code>
      * @throws OXException If an error occurs while checking existence
@@ -430,13 +430,13 @@ public final class PreviewCache {
         ResultSet rs = null;
         try {
             if (userId > 0) {
-                // A user-sensitive image
+                // A user-sensitive document
                 stmt = con.prepareStatement("SELECT 1 FROM preview WHERE cid = ? AND user = ? AND id = ?");
                 stmt.setLong(1, contextId);
                 stmt.setLong(2, userId);
                 stmt.setString(3, id);
             } else {
-                // A context-global image
+                // A context-global document
                 stmt = con.prepareStatement("SELECT 1 FROM preview WHERE cid = ? AND id = ?");
                 stmt.setLong(1, contextId);
                 stmt.setString(2, id);
