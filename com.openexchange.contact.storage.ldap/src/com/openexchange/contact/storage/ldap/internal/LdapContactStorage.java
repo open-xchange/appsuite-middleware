@@ -227,7 +227,7 @@ public class LdapContactStorage extends DefaultContactStorage {
     protected Contact doGet(Session session, String folderId, String id, ContactField[] fields) throws OXException {
         SearchIterator<Contact> searchIterator = null;
         try {
-            searchIterator = this.list(session, folderId, new String[] { id }, fields);
+            searchIterator = doList(session, folderId, new String[] { id }, fields, SortOptions.EMPTY);
             if (false == searchIterator.hasNext()) {
                 throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(parse(id), session.getContextId());
             } else {
@@ -250,7 +250,7 @@ public class LdapContactStorage extends DefaultContactStorage {
             term.addOperand(new ConstantOperand<String>(id));
             orTerm.addSearchTerm(term);
         }
-        return this.search(session, orTerm, fields, sortOptions);
+        return doSearch(session, orTerm, fields, sortOptions);
     }
 
     protected SearchIterator<Contact> doDeleted(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {

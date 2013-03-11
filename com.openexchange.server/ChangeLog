@@ -1,3 +1,7 @@
+* 2013-03-11 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25233: Made LDAP contact cache aware of possibly skipped empty distribution lists
+
 * 2013-03-11 - marcus.klein@open-xchange.com
 
  - Fix for bug 25256: Removed refreshing of context and user objects when reading some of their attributes.
