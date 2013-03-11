@@ -47,60 +47,61 @@
  *
  */
 
-package com.openexchange.indexedSearch.json.osgi;
+package com.openexchange.indexedSearch.json.converter;
 
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.capabilities.CapabilityChecker;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.index.IndexFacadeService;
-import com.openexchange.indexedSearch.json.IndexActionFactory;
-import com.openexchange.indexedSearch.json.ResultConverters;
-import com.openexchange.indexedSearch.json.capabilities.MailIndexChecker;
-import com.openexchange.indexedSearch.json.converter.SearchResult2JSONConverter;
-import com.openexchange.threadpool.ThreadPoolService;
+import java.util.List;
+import com.openexchange.index.IndexDocument;
+import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * {@link IndexJSONActivator}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link SearchResult}
+ * 
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class IndexJSONActivator extends AJAXModuleActivator {
+public class SearchResult {
 
-    private ResultConverters registry;
+    private long numFound;
 
-    /**
-     * Initializes a new {@link IndexJSONActivator}.
-     */
-    public IndexJSONActivator() {
+    private long duration;
+
+    private List<IndexDocument<MailMessage>> mailResults;
+
+    private int[] mailFields;
+
+    public SearchResult() {
         super();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CapabilityService.class, IndexFacadeService.class, DatabaseService.class, ThreadPoolService.class };
+    public List<IndexDocument<MailMessage>> getMailResults() {
+        return mailResults;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registry = new ResultConverters();
-        registry.start(context);
-
-        registerModule(new IndexActionFactory(this, registry), "indexedSearch");
-        
-        getService(CapabilityService.class).declareCapability(MailIndexChecker.CAPABILITY);
-        registerService(CapabilityChecker.class, new MailIndexChecker(this));
-        registerService(ResultConverter.class, new SearchResult2JSONConverter());
+    public void setMailResults(List<IndexDocument<MailMessage>> mailResults) {
+        this.mailResults = mailResults;
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        if (null != registry) {
-            registry.stop();
-            registry = null;
-        }
-        super.stopBundle();
+    public long getNumFound() {
+        return numFound;
+    }
+
+    public void setNumFound(long numFound) {
+        this.numFound = numFound;
+    }
+
+    public long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(long duration) {
+        this.duration = duration;
+    }
+
+    public int[] getMailFields() {
+        return mailFields;
+    }
+
+    public void setMailFields(int[] mailFields) {
+        this.mailFields = mailFields;
     }
 
 }
