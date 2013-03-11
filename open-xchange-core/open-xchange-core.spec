@@ -582,6 +582,7 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 %config(noreplace) /opt/open-xchange/etc/contextSets/index.yml
 %config(noreplace) /opt/open-xchange/etc/requestwatcher.properties
+%config(noreplace) /opt/open-xchange/etc/preview.properties
 
 %changelog
 * Fri Mar 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
