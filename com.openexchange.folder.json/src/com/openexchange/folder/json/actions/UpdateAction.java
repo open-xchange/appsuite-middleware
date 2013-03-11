@@ -148,7 +148,7 @@ public final class UpdateAction extends AbstractFolderAction {
          * Update
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        folderService.updateFolder(folder, timestamp, session, new FolderServiceDecorator().put("permissions", request.getParameter("permissions")).put("altNames", request.getParameter("altNames")).put("autoRename", request.getParameter("autoRename")));
+        folderService.updateFolder(folder, timestamp, session, new FolderServiceDecorator().put("permissions", request.getParameter("permissions")).put("altNames", request.getParameter("altNames")).put("autorename", request.getParameter("autorename")));
         /*
          * Invoke folder.getID() to obtain possibly new folder identifier
          */

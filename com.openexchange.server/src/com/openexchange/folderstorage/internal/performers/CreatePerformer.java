@@ -183,7 +183,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                 } else {
                     CheckForDuplicateResult result = getCheckForDuplicateResult(toCreate.getName(), treeId, parentId, openedStorages);
                     if (null != result) {
-                        final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autoRename"));
+                        final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
                         if (!autoRename) {
                             if (null != result.optFolderId && "USM-JSON".equals(session.getClient())) {
                                 return result.optFolderId;

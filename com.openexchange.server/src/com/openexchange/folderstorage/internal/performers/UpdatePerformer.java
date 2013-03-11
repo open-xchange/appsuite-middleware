@@ -161,7 +161,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                      */
                     CheckForDuplicateResult result = getCheckForDuplicateResult(folder.getName(), treeId, newParentId, openedStorages);
                     if (null != result) {
-                        final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autoRename"));
+                        final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
                         if (!autoRename) {
                             throw result.error;
                         }
@@ -187,7 +187,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                      */
                     CheckForDuplicateResult result = getCheckForDuplicateResult(newName, treeId, storageFolder.getParentID(), openedStorages);
                     if (null != result) {
-                        final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autoRename"));
+                        final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
                         if (!autoRename) {
                             throw result.error;
                         }
