@@ -49,6 +49,7 @@
 
 package com.openexchange.indexedSearch.json.converter;
 
+import java.util.Collection;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,6 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexDocument;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailListField;
@@ -68,29 +70,32 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link SearchResult2JSONConverter}
+ * {@link SearchResult2JSONConverter}. Converts a search result to JSON.
+ * 
+ *     "mail":{
+ *       "numFound":314,
+ *       "duration":15,
+ *       "documents":[
+ *         {
+ *           "documentId":"mail/1/2/default0/INBOX/1",
+ *           "data":{
+ *             "id":"1",
+ *             "folder_id":"default0/INBOX",
+ *             "subject":"Some mail subject",
+ *           }
+ *         },
+ *         ...
+ *       ]
+ *     }
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SearchResult2JSONConverter implements ResultConverter {
-    
-    private static MailListField[] DEFAULT_MAIL_FIELDS = new MailListField[] 
-        {
-        MailListField.ID,
-        MailListField.ACCOUNT_ID,
-        MailListField.FOLDER_ID,
-        MailListField.FROM,
-        MailListField.TO,
-        MailListField.CC,
-        MailListField.BCC,
-        MailListField.SUBJECT,
-        MailListField.SIZE,
-        MailListField.SENT_DATE,
-        MailListField.RECEIVED_DATE,
-        MailListField.ATTACHMENT,
-        MailListField.FLAGS,
-        MailListField.COLOR_LABEL
-    };
+
+    private static MailListField[] DEFAULT_MAIL_FIELDS = new MailListField[] {
+        MailListField.ID, MailListField.ACCOUNT_ID, MailListField.FOLDER_ID, MailListField.FROM, MailListField.TO, MailListField.CC,
+        MailListField.BCC, MailListField.SUBJECT, MailListField.SIZE, MailListField.SENT_DATE, MailListField.RECEIVED_DATE,
+        MailListField.ATTACHMENT, MailListField.FLAGS, MailListField.COLOR_LABEL };
 
     @Override
     public String getInputFormat() {
@@ -115,50 +120,66 @@ public class SearchResult2JSONConverter implements ResultConverter {
             return;
         }
         
-        SearchResult searchResult = (SearchResult) resultObject;
         OXJSONWriter resultWriter = new OXJSONWriter();
+        
         try {
-            resultWriter.object();
-            resultWriter.key("numFound");
-            resultWriter.value(searchResult.getNumFound());
-            resultWriter.key("duration");
-            resultWriter.value(searchResult.getDuration());
-            
-            JSONObject documentsJSON = new JSONObject();
-            List<IndexDocument<MailMessage>> mailDocuments = searchResult.getMailResults();
-            if (mailDocuments != null) {
-                MailListField[] fields;
-                int[] requestedFields = searchResult.getMailFields();
-                if (requestedFields == null) {
-                    fields = DEFAULT_MAIL_FIELDS;
-                } else {
-                    fields = MailListField.getFields(requestedFields);
-                }
-                
-                JSONArray mailJSON = convertMails(session, mailDocuments, fields);
-                documentsJSON.put("mail", mailJSON);
-            }
-            
-            resultWriter.key("documents");
-            resultWriter.value(documentsJSON);
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } finally {
-            try {
-                resultWriter.endObject();
-            } catch (JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        resultWriter.object();
+        if (resultObject instanceof SearchResult<?>) {
+            SearchResult<?> genericResult = (SearchResult<?>) resultObject;
+            writeResult(session, genericResult, resultWriter);
+        } else {
+            Collection<SearchResult<?>> results = (Collection<SearchResult<?>>) resultObject;
+            for (SearchResult<?> genericResult : results) {
+                writeResult(session, genericResult, resultWriter);
             }
         }
+    } catch (JSONException e) {
+        throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+    } finally {
+        try {
+            resultWriter.endObject();
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
         
         result.setResultObject(resultWriter.getObject(), "json");
+    }
+
+    private void writeResult(ServerSession session, SearchResult<?> genericResult, OXJSONWriter resultWriter) throws JSONException, OXException {
+        if (genericResult.getModule() == Types.EMAIL) {
+            writeMails(session, genericResult, resultWriter);
+        }
+    }
+    
+    private void writeMails(ServerSession session, SearchResult<?> genericResult, OXJSONWriter resultWriter) throws JSONException, OXException {
+        SearchResult<MailMessage> searchResult = (SearchResult<MailMessage>) genericResult;
+        List<IndexDocument<MailMessage>> mailDocuments = searchResult.getDocuments();
+        if (mailDocuments != null) {
+            MailListField[] fields;
+            int[] requestedFields = searchResult.getFields();
+            if (requestedFields == null) {
+                fields = DEFAULT_MAIL_FIELDS;
+            } else {
+                fields = MailListField.getFields(requestedFields);
+            }
+
+            JSONArray mails = convertMails(session, mailDocuments, fields);
+            JSONObject mailJSON = new JSONObject();
+            mailJSON.put("duration", searchResult.getDuration());
+            mailJSON.put("numFound", searchResult.getNumFound());
+            mailJSON.put("documents", mails);
+
+            resultWriter.key("mail");
+            resultWriter.value(mailJSON);
+        }
     }
 
     private JSONArray convertMails(ServerSession session, List<IndexDocument<MailMessage>> mails, MailListField[] fields) throws JSONException, OXException {
         if (mails.isEmpty()) {
             return new JSONArray();
         }
-        
+
         MailFieldWriter[] writers = MessageWriter.getMailFieldWriter(fields);
         OXJSONWriter jsonWriter = new OXJSONWriter();
         jsonWriter.array();
@@ -170,7 +191,7 @@ public class SearchResult2JSONConverter implements ResultConverter {
                 if (mail != null) {
                     JSONObject documentJSON = new JSONObject();
                     documentJSON.put("documentId", mailDocument.getDocumentId());
-                    
+
                     JSONObject mailJSON = new JSONObject();
                     int accountID = mail.getAccountId();
                     for (int j = 0; j < writers.length; j++) {
@@ -183,7 +204,7 @@ public class SearchResult2JSONConverter implements ResultConverter {
         } finally {
             jsonWriter.endArray();
         }
-        
+
         return (JSONArray) jsonWriter.getObject();
     }
 

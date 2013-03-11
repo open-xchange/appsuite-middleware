@@ -51,33 +51,39 @@ package com.openexchange.indexedSearch.json.converter;
 
 import java.util.List;
 import com.openexchange.index.IndexDocument;
-import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link SearchResult}
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class SearchResult {
+public class SearchResult<T> {
+
+    private final int module;
 
     private long numFound;
 
     private long duration;
 
-    private List<IndexDocument<MailMessage>> mailResults;
+    private List<IndexDocument<T>> documents;
 
-    private int[] mailFields;
+    private int[] fields;
 
-    public SearchResult() {
+    public SearchResult(int module) {
         super();
+        this.module = module;
     }
 
-    public List<IndexDocument<MailMessage>> getMailResults() {
-        return mailResults;
+    public int getModule() {
+        return module;
     }
 
-    public void setMailResults(List<IndexDocument<MailMessage>> mailResults) {
-        this.mailResults = mailResults;
+    public List<IndexDocument<T>> getDocuments() {
+        return documents;
+    }
+
+    public void setDocuments(List<IndexDocument<T>> documents) {
+        this.documents = documents;
     }
 
     public long getNumFound() {
@@ -96,12 +102,12 @@ public class SearchResult {
         this.duration = duration;
     }
 
-    public int[] getMailFields() {
-        return mailFields;
+    public int[] getFields() {
+        return fields;
     }
 
-    public void setMailFields(int[] mailFields) {
-        this.mailFields = mailFields;
+    public void setFields(int[] fields) {
+        this.fields = fields;
     }
 
 }

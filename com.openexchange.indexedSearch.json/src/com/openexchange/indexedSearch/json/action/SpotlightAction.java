@@ -102,6 +102,18 @@ import com.openexchange.tools.session.ServerSession;
                 "defined in http://oxpedia.org/wiki/index.php?title=HTTP_API#DetailedMailData.",
         optional = true,
         type = Type.ARRAY
+    ),
+    @Parameter(
+        name = "offset",
+        description = "The offset for documents to return within the list of all found documents. Use for pagination. Default: 0.",
+        optional = true,
+        type = Type.NUMBER
+    ),
+    @Parameter(
+        name = "length",
+        description = "The max. number of returned documents. Use for pagination. Default: 10.",
+        optional = true,
+        type = Type.NUMBER
     )
 })
 public class SpotlightAction extends AbstractIndexAction {
@@ -119,10 +131,12 @@ public class SpotlightAction extends AbstractIndexAction {
 
     @Override
     protected AJAXRequestResult perform(IndexAJAXRequest req) throws OXException {
-        long start = System.currentTimeMillis();
-        final ServerSession session = req.getSession();
-        final String term = req.checkParameter("term");
-        final String field = req.checkParameter("field");
+        long startTime = System.currentTimeMillis();
+        ServerSession session = req.getSession();
+        String term = req.checkParameter("term");
+        String field = req.checkParameter("field");
+        int offset = req.optInt("offset") == IndexAJAXRequest.NOT_FOUND ? 0 : req.optInt("offset");
+        int length = req.optInt("length") == IndexAJAXRequest.NOT_FOUND ? 10 : req.optInt("length");
         int[] columns = req.optIntArray(AJAXServlet.PARAMETER_COLUMNS);
         Set<MailIndexField> indexFields = null;
         if (columns == null) {
@@ -145,19 +159,21 @@ public class SpotlightAction extends AbstractIndexAction {
         QueryParameters params = new QueryParameters.Builder()
             .setHandler(searchHandler)
             .setSearchTerm(term)
+            .setOffset(offset)
+            .setLength(length)
             .build();
 
         IndexResult<MailMessage> result = indexAccess.query(params, null);
-        long diff = System.currentTimeMillis() - start;
+        long diff = System.currentTimeMillis() - startTime;
         if (LOG.isDebugEnabled()) {
             LOG.debug("Spotlight search duration for field '" + field + "': " + diff + "ms.");
         }
 
-        SearchResult searchResult = new SearchResult();
+        SearchResult<MailMessage> searchResult = new SearchResult<MailMessage>(Types.EMAIL);
         searchResult.setNumFound(result.getNumFound());
         searchResult.setDuration(diff);
-        searchResult.setMailResults(result.getResults());
-        searchResult.setMailFields(columns);
+        searchResult.setDocuments(result.getResults());
+        searchResult.setFields(columns);
         return new AJAXRequestResult(searchResult, "searchResult");
     }
 
