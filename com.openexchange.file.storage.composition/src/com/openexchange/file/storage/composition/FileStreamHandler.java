@@ -1,6 +1,6 @@
 /*
  *
-0 *    OPEN-XCHANGE legal information
+ *    OPEN-XCHANGE legal information
  *
  *    All intellectual property rights in the Software are protected by
  *    international copyright laws.
@@ -49,33 +49,35 @@
 
 package com.openexchange.file.storage.composition;
 
+import java.io.InputStream;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStoragePermission;
 
 /**
- * {@link FolderAware} - Extends {@link IDBasedFileAccess} by folder access..
- *
+ * {@link FileStreamHandler} - Handles a requested document's {@link InputStream} and returns a possibly modified one.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface FolderAware extends IDBasedFileAccess {
+public interface FileStreamHandler {
 
     /**
-     * Optionally gets the folder identified through given identifier
-     *
-     * @param id The file identifier
-     * @return The corresponding instance of {@link FileStorageFolder} or <code>null</code>
-     * @throws OXException If either folder does not exist or could not be fetched
+     * Handles specified document's {@link InputStream}.
+     * 
+     * @param documentStream The document's {@link InputStream}
+     * @param fileID The file identifier
+     * @param version The version
+     * @return The (possibly modified) stream
+     * @throws OXException If handling stream fails
      */
-    public FileStorageFolder optFolder(final String id) throws OXException;
+    InputStream handleDocumentStream(final InputStream documentStream, FileID fileID, String version) throws OXException;
 
     /**
-     * Optionally gets the permission for currently logged-in user accessing this folder
-     *
-     * @param id The file identifier
-     * @return The own permission or <code>null</code>
-     * @throws OXException If permission cannot be returned
+     * Gets this handler's ranking.
+     * <p>
+     * The default ranking is zero (<tt>0</tt>). A handler with a ranking of {@code Integer.MAX_VALUE} is very likely to be returned as the
+     * default handler, whereas a handler with a ranking of {@code Integer.MIN_VALUE} is very unlikely to be returned.
+     * 
+     * @return The ranking
      */
-    public FileStoragePermission optOwnPermission(String id) throws OXException;
+    int getRanking();
 
 }

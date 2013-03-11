@@ -1,6 +1,6 @@
 /*
  *
-0 *    OPEN-XCHANGE legal information
+ *    OPEN-XCHANGE legal information
  *
  *    All intellectual property rights in the Software are protected by
  *    international copyright laws.
@@ -49,33 +49,20 @@
 
 package com.openexchange.file.storage.composition;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStoragePermission;
+import java.util.Collection;
 
 /**
- * {@link FolderAware} - Extends {@link IDBasedFileAccess} by folder access..
+ * {@link FileStreamHandlerRegistry} - A registry for handlers.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface FolderAware extends IDBasedFileAccess {
+public interface FileStreamHandlerRegistry {
 
     /**
-     * Optionally gets the folder identified through given identifier
-     *
-     * @param id The file identifier
-     * @return The corresponding instance of {@link FileStorageFolder} or <code>null</code>
-     * @throws OXException If either folder does not exist or could not be fetched
+     * Gets available handlers sorted by their ranking (descendingly).
+     * 
+     * @return The available handlers
      */
-    public FileStorageFolder optFolder(final String id) throws OXException;
-
-    /**
-     * Optionally gets the permission for currently logged-in user accessing this folder
-     *
-     * @param id The file identifier
-     * @return The own permission or <code>null</code>
-     * @throws OXException If permission cannot be returned
-     */
-    public FileStoragePermission optOwnPermission(String id) throws OXException;
+    Collection<FileStreamHandler> getHandlers();
 
 }
