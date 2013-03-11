@@ -1100,6 +1100,7 @@ public class AJAXRequestData {
      * @param name The name
      * @return The value or <code>null</code> if absent
      */
+    @SuppressWarnings("unchecked")
     public <V> V getProperty(final String name) {
         if (null == name) {
             return null;
