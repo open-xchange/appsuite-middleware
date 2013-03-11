@@ -216,6 +216,22 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                         toCreate.setName(nameBuilder.toString());
                     }
                 }
+            } else {
+                final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
+                if (autoRename) {
+                    CheckForDuplicateResult result = getCheckForDuplicateResult(toCreate.getName(), treeId, parentId, openedStorages);
+                    if (null != result) {
+                        int count = 2;
+                        final StringBuilder nameBuilder = new StringBuilder(toCreate.getName());
+                        final int resetLen = nameBuilder.length();
+                        do {
+                            nameBuilder.setLength(resetLen);
+                            nameBuilder.append(" (").append(count++).append(')');
+                            result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, parentId, openedStorages);
+                        } while (null != result);
+                        toCreate.setName(nameBuilder.toString());
+                    }
+                }
             }
             /*
              * Create folder dependent on folder is virtual or not
