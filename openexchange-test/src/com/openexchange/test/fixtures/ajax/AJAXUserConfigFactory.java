@@ -66,8 +66,14 @@ public class AJAXUserConfigFactory implements TestUserConfigFactory {
     public TestUserConfig create(SimpleCredentials credentials) {
         AJAXSession session = new AJAXSession();
         try {
-            AJAXClient client = new AJAXClient(session);
-            session.setId(client.execute(new LoginRequest(credentials.getLogin(), credentials.getPassword(), LoginTools.generateAuthId(), AJAXUserConfigFactory.class.getName(), "6.15.0")).getSessionId());
+            AJAXClient client = new AJAXClient(session, true);
+            session.setId(client.execute(
+                new LoginRequest(
+                    credentials.getLogin(),
+                    credentials.getPassword(),
+                    LoginTools.generateAuthId(),
+                    AJAXUserConfigFactory.class.getName(),
+                    "6.15.0")).getSessionId());
             return new AJAXUserConfig(client);
         } catch (OXException e) {
             e.printStackTrace();

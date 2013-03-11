@@ -67,12 +67,13 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 
 /**
  * Tests the action tokenLogin of the login servlet.
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class TokenLoginTest extends AbstractAJAXSession {
 
     private String login;
+
     private String password;
 
     public TokenLoginTest(String name) {
@@ -95,7 +96,7 @@ public class TokenLoginTest extends AbstractAJAXSession {
 
     public void testTokenLogin() throws Exception {
         final AJAXSession session = new AJAXSession();
-        final AJAXClient myClient = new AJAXClient(session);
+        final AJAXClient myClient = new AJAXClient(session, false);
         try {
             TokenLoginResponse response = myClient.execute(new TokenLoginRequest(login, password));
             assertNotNull("Path of redirect response is not found.", response.getPath());
@@ -104,7 +105,10 @@ public class TokenLoginTest extends AbstractAJAXSession {
             assertNotSame("", I(-1), I(response.getUserId()));
             assertNotNull("Language string was not found as fragment.", response.getLanguage());
             // Activate session with tokens.
-            TokensResponse response2 = myClient.execute(new TokensRequest(response.getHttpSessionId(), response.getClientToken(), response.getServerToken()));
+            TokensResponse response2 = myClient.execute(new TokensRequest(
+                response.getHttpSessionId(),
+                response.getClientToken(),
+                response.getServerToken()));
             session.setId(response2.getSessionId());
             // Test if session really works
             int userId = myClient.execute(new GetRequest(Tree.Identifier)).getInteger();
@@ -116,7 +120,7 @@ public class TokenLoginTest extends AbstractAJAXSession {
 
     public void testSessionExpire() throws Exception {
         final AJAXSession session = new AJAXSession();
-        final AJAXClient myClient = new AJAXClient(session);
+        final AJAXClient myClient = new AJAXClient(session, false);
         try {
             TokenLoginResponse response = myClient.execute(new TokenLoginRequest(login, password));
             assertNotNull("Path of redirect response is not found.", response.getPath());
@@ -126,7 +130,11 @@ public class TokenLoginTest extends AbstractAJAXSession {
             assertNotNull("Language string was not found as fragment.", response.getLanguage());
             Thread.sleep(60000);
             // Tokened session should be timed out.
-            TokensResponse response2 = myClient.execute(new TokensRequest(response.getHttpSessionId(), response.getClientToken(), response.getServerToken(), false));
+            TokensResponse response2 = myClient.execute(new TokensRequest(
+                response.getHttpSessionId(),
+                response.getClientToken(),
+                response.getServerToken(),
+                false));
             assertTrue("Tokened session should be expired.", response2.hasError());
             // Check for correct exception
             OXException expected = OXExceptionFactory.getInstance().create(SessionExceptionCodes.NO_SESSION_FOR_SERVER_TOKEN);

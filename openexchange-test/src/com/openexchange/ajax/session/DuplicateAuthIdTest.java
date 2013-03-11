@@ -63,18 +63,25 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 
 /**
  * Checks if the server detects correctly a duplicate used authId.
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class DuplicateAuthIdTest extends TestCase {
 
     private String sameAuthId;
+
     private AJAXClient client1;
+
     private String login1;
+
     private String password1;
+
     private AJAXSession session2;
+
     private AJAXClient client2;
+
     private String login2;
+
     private String password2;
 
     public DuplicateAuthIdTest(String name) {
@@ -87,15 +94,17 @@ public class DuplicateAuthIdTest extends TestCase {
         AJAXConfig.init();
         sameAuthId = LoginTools.generateAuthId();
         final AJAXSession session1 = new AJAXSession();
-        client1 = new AJAXClient(session1);
+        client1 = new AJAXClient(session1, false); // explicit logout in tearDown
         login1 = AJAXConfig.getProperty(User1.getLogin()) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
         password1 = AJAXConfig.getProperty(User1.getPassword());
         LoginResponse response = client1.execute(new LoginRequest(login1, password1, sameAuthId, LoginTest.class.getName(), "6.15.0"));
+
         session1.setId(response.getSessionId());
         session2 = new AJAXSession();
         session2.getConversation().putCookie("JSESSIONID", session1.getConversation().getCookieValue("JSESSIONID"));
-        client2 = new AJAXClient(session2);
-        login2 = AJAXConfig.getProperty(User2.getLogin()) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);;
+        client2 = new AJAXClient(session2, false); // explicit logout in test method
+        login2 = AJAXConfig.getProperty(User2.getLogin()) + "@" + AJAXConfig.getProperty(Property.CONTEXTNAME);
+        ;
         password2 = AJAXConfig.getProperty(User2.getPassword());
     }
 

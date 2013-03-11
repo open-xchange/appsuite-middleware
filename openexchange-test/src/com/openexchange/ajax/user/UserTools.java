@@ -69,7 +69,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
 
 /**
- *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class UserTools extends Assert {
@@ -86,14 +85,14 @@ public final class UserTools extends Assert {
         search.setPattern(searchpattern);
         search.addFolder(FolderObject.SYSTEM_LDAP_FOLDER_ID);
         final SearchRequest request = new SearchRequest(search, UserTest.CONTACT_FIELDS);
-        final AJAXClient client = new AJAXClient(new AJAXSession(webCon, host, session));
+        final AJAXClient client = new AJAXClient(new AJAXSession(webCon, host, session), false);
         final SearchResponse response = Executor.execute(client, request);
-    	assertNotNull("timestamp", response.getTimestamp());
-    	return response.getUser();
+        assertNotNull("timestamp", response.getTimestamp());
+        return response.getUser();
     }
 
     public static Contact getUserContact(WebConversation webCon, String host, String session, int userId) throws OXException, IOException, SAXException, JSONException {
-        AJAXClient client = new AJAXClient(new AJAXSession(webCon, host, session));
+        AJAXClient client = new AJAXClient(new AJAXSession(webCon, host, session), false);
         client.setHostname(host);
         GetRequest request = new GetRequest(userId, client.getValues().getTimeZone());
         GetResponse response = client.execute(request);
@@ -101,7 +100,7 @@ public final class UserTools extends Assert {
     }
 
     public static User getUser(WebConversation webCon, String host, String session, int userId) throws OXException, IOException, SAXException, JSONException {
-        AJAXClient client = new AJAXClient(new AJAXSession(webCon, host, session));
+        AJAXClient client = new AJAXClient(new AJAXSession(webCon, host, session), false);
         client.setHostname(host);
         return new UserResolver(client).getUser(userId);
     }

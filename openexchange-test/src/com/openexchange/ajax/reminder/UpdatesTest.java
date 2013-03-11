@@ -93,8 +93,18 @@ public class UpdatesTest extends ReminderTest {
         appointmentObj.setParentFolderID(folderId);
         appointmentObj.setIgnoreConflicts(true);
 
-        final int targetId = AppointmentTest.insertAppointment(getWebConversation(), appointmentObj, timeZone, getHostName(), getSessionId());
-        final ReminderObject[] reminderObj = listUpdates(getWebConversation(), new Date(System.currentTimeMillis()-5000), getHostName(), getSessionId(), timeZone);
+        final int targetId = AppointmentTest.insertAppointment(
+            getWebConversation(),
+            appointmentObj,
+            timeZone,
+            getHostName(),
+            getSessionId());
+        final ReminderObject[] reminderObj = listUpdates(
+            getWebConversation(),
+            new Date(System.currentTimeMillis() - 5000),
+            getHostName(),
+            getSessionId(),
+            timeZone);
 
         int pos = -1;
         for (int a = 0; a < reminderObj.length; a++) {
@@ -111,10 +121,10 @@ public class UpdatesTest extends ReminderTest {
         assertEquals("folder id is not equals", folderId, reminderObj[pos].getFolder());
         assertEquals("user id is not equals", userId, reminderObj[pos].getUser());
 
-        final long expectedAlarm = startTime - (45*60*1000);
+        final long expectedAlarm = startTime - (45 * 60 * 1000);
         assertEquals("alarm is not equals", new Date(expectedAlarm), reminderObj[pos].getDate());
 
-        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
+        final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
         final GetResponse aGetR = client.execute(new GetRequest(folderId, targetId));
         client.execute(new DeleteRequest(targetId, folderId, aGetR.getTimestamp()));
     }

@@ -104,7 +104,7 @@ public class HttpAuthTest extends TestCase {
 
     public void testRedirect() throws Throwable {
         final AJAXSession session = new AJAXSession();
-        final AJAXClient myClient = new AJAXClient(session);
+        final AJAXClient myClient = new AJAXClient(session, false);
         try {
             session.getHttpClient().getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
             // Create session.

@@ -60,12 +60,13 @@ import com.openexchange.configuration.AJAXConfig.Property;
 
 /**
  * Tests the action formLogin of the login servlet.
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class FormLoginTest extends AbstractAJAXSession {
 
     private String login;
+
     private String password;
 
     public FormLoginTest(String name) {
@@ -88,7 +89,7 @@ public class FormLoginTest extends AbstractAJAXSession {
 
     public void testFormLogin() throws Exception {
         final AJAXSession session = new AJAXSession();
-        final AJAXClient myClient = new AJAXClient(session);
+        final AJAXClient myClient = new AJAXClient(session, false);
         try {
             FormLoginResponse response = myClient.execute(new FormLoginRequest(login, password));
             assertNotNull("Path of redirect response is not found.", response.getPath());
@@ -109,7 +110,7 @@ public class FormLoginTest extends AbstractAJAXSession {
      */
     public void dontTestFormLoginWithoutAuthId() throws Exception {
         final AJAXSession session = new AJAXSession();
-        final AJAXClient myClient = new AJAXClient(session);
+        final AJAXClient myClient = new AJAXClient(session, false);
         try {
             FormLoginResponse response = myClient.execute(new FormLoginRequest(login, password, null));
             assertNotNull("Path of redirect response is not found.", response.getPath());
