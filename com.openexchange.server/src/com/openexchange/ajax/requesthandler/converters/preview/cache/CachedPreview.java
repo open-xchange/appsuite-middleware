@@ -47,72 +47,94 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.converters.preview.cache.groupware;
+package com.openexchange.ajax.requesthandler.converters.preview.cache;
 
-import com.openexchange.database.AbstractCreateTableImpl;
-
+import java.io.InputStream;
 
 /**
- * {@link PreviewCacheCreateTableService}
- *
+ * {@link CachedPreview} - A cached preview image.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PreviewCacheCreateTableService extends AbstractCreateTableImpl {
+public final class CachedPreview {
 
-    private static final String TABLE_PREVIEW = "preview";
-
-    private static final String CREATE_PREVIEW = "CREATE TABLE "+TABLE_PREVIEW+" (" +
-        " cid INT4 unsigned NOT NULL," +
-        " user INT4 unsigned NOT NULL," +
-        " id VARCHAR(128) CHARACTER SET latin1 NOT NULL," +
-        " size BIGINT(64) NOT NULL," +
-        " createdAt BIGINT(64) NOT NULL," +
-        " fileName VARCHAR(128) COLLATE utf8_unicode_ci DEFAULT NULL," +
-        " fileType VARCHAR(32) CHARACTER SET latin1 DEFAULT NULL," +
-        " data BLOB," +
-        " PRIMARY KEY (cid, user, id)," +
-        " INDEX `globalimage` (cid, id)," +
-        " INDEX `user` (cid, user)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    private final byte[] bytes;
+    private final InputStream in;
+    private final String fileName;
+    private final String fileType;
+    private final long size;
 
     /**
-     * Gets the table names.
-     *
-     * @return The table names.
+     * Initializes a new {@link CachedPreview}.
      */
-    public static String[] getTablesToCreate() {
-        return new String[] { TABLE_PREVIEW };
-    }
-
-    /**
-     * Gets the CREATE-TABLE statements.
-     *
-     * @return The CREATE statements
-     */
-    public static String[] getCreateStmts() {
-        return new String[] { CREATE_PREVIEW };
-    }
-
-    /**
-     * Initializes a new {@link PreviewCacheCreateTableService}.
-     */
-    public PreviewCacheCreateTableService() {
+    public CachedPreview(final byte[] bytes, final String fileName, final String fileType, final long size) {
         super();
+        in = null;
+        this.bytes = bytes;
+        this.fileName = fileName;
+        this.fileType = fileType;
+        this.size = size;
     }
 
-    @Override
-    public String[] requiredTables() {
-        return NO_TABLES;
+    /**
+     * Initializes a new {@link CachedPreview}.
+     */
+    public CachedPreview(final InputStream in, final String fileName, final String fileType, final long size) {
+        super();
+        bytes = null;
+        this.in = in;
+        this.fileName = fileName;
+        this.fileType = fileType;
+        this.size = size;
     }
 
-    @Override
-    public String[] tablesToCreate() {
-        return getTablesToCreate();
+    /**
+     * Gets the size
+     * 
+     * @return The size or <code>-1</code> if unknown
+     */
+    public long getSize() {
+        return size;
     }
 
-    @Override
-    protected String[] getCreateStatements() {
-        return getCreateStmts();
+    /**
+     * Gets the bytes
+     * <p>
+     * If <code>null</code> check {@link #getInputStream()}.
+     * 
+     * @return The bytes or <code>null</code>
+     */
+    public byte[] getBytes() {
+        return bytes;
+    }
+
+    /**
+     * Gets the input stream
+     * <p>
+     * If <code>null</code> check {@link #getBytes()}.
+     * 
+     * @return The input stream or <code>null</code>
+     */
+    public InputStream getInputStream() {
+        return in;
+    }
+
+    /**
+     * Gets the file name
+     * 
+     * @return The file name
+     */
+    public String getFileName() {
+        return fileName;
+    }
+
+    /**
+     * Gets the file MIME type
+     * 
+     * @return The file MIME type
+     */
+    public String getFileType() {
+        return fileType;
     }
 
 }
