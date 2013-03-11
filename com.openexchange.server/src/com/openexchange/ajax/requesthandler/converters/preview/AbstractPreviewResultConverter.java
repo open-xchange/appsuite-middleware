@@ -49,10 +49,16 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
@@ -65,15 +71,22 @@ import com.openexchange.ajax.requesthandler.converters.preview.cache.PreviewCach
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
+import com.openexchange.preview.cache.CachedPreview;
+import com.openexchange.preview.cache.CachedPreviewDocument;
 import com.openexchange.preview.cache.PreviewCache;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -124,6 +137,58 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {        
         IFileHolder fileHolder = null;
         try {
+            // Check cache first
+            final PreviewCache previewCache = getPreviewCache();
+            final String eTag = requestData.getETag();
+            final boolean isValidEtag = !isEmpty(eTag);
+            if (isValidEtag) {
+                final CachedPreview cachedPreview = previewCache.get(eTag, session.getUserId(), session.getContextId());
+                if (null != cachedPreview) {
+                    /*
+                     * Get content according to output format
+                     */
+                    final ContentType contentType;
+                    {
+                        String fileType = cachedPreview.getFileType();
+                        if (null == fileType) {
+                            fileType = "application/octet-stream";
+                        }
+                        contentType = new ContentType(fileType);
+                    }
+                    final String content;
+                    {
+                        InputStreamReader reader = null;
+                        try {
+                            final InputStream in = cachedPreview.getInputStream();
+                            final String charset = contentType.getCharsetParameter();
+                            reader = new InputStreamReader(null == in ? Streams.newByteArrayInputStream(cachedPreview.getBytes()) : in, null == charset ? Charsets.ISO_8859_1 : Charsets.forName(charset));
+                            final StringAllocator sb = new StringAllocator(4096);
+                            final int cbuflen = 2048;
+                            final char[] cbuf = new char[cbuflen];
+                            for (int read; (read = reader.read(cbuf, 0, cbuflen)) > 0;) {
+                                sb.append(cbuf, 0, read);
+                            }
+                            content = sb.toString();
+                        } catch (final IOException e) {
+                            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                        } finally {
+                            Streams.close(reader);
+                        }
+                    }
+                    /*
+                     * Convert meta data to a map
+                     */
+                    final Map<String, String> map = new HashMap<String, String>(4);
+                    map.put("resourcename", cachedPreview.getFileName());
+                    map.put("content-type", contentType.toString());
+                    /*
+                     * Set preview document
+                     */
+                    result.setResultObject(new CachedPreviewDocument(Collections.singletonList(content), map), getOutputFormat());
+                    return;
+                }
+            }
+            // No cached preview available
             {
                 final Object resultObject = result.getResultObject();
                 if (!(resultObject instanceof IFileHolder)) {
@@ -149,7 +214,49 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
                     pages = requestData.getIntParameter("pages");
                 }
                 previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session, pages);
+                // Put to cache
+                if (isValidEtag) {
+                    final List<String> content = previewDocument.getContent();
+                    if (1 == content.size()) {
+                        final ContentType contentType = new ContentType(fileHolder.getContentType());
+                        final String charset = contentType.getCharsetParameter();
+                        final byte[] bytes = content.get(0).getBytes(null == charset ? Charsets.ISO_8859_1 : Charsets.forName(charset));
+                        final int size = bytes.length;
+                        final String fileName = fileHolder.getName();
+                        // Specify task
+                        final AbstractTask<Void> task = new AbstractTask<Void>() {
 
+                            @Override
+                            public Void call() throws OXException {
+                                final CachedPreview preview = new CachedPreview(bytes, fileName, contentType.toString(), size);
+                                previewCache.save(eTag, preview, session.getUserId(), session.getContextId());
+                                return null;
+                            }
+                        };
+                        // Acquire thread pool service
+                        final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+                        if (null == threadPool) {
+                            final Thread thread = Thread.currentThread();
+                            boolean ran = false;
+                            task.beforeExecute(thread);
+                            try {
+                                task.call();
+                                ran = true;
+                                task.afterExecute(null);
+                            } catch (final Exception ex) {
+                                if (!ran) {
+                                    task.afterExecute(ex);
+                                }
+                                // Else the exception occurred within
+                                // afterExecute itself in which case we don't
+                                // want to call it again.
+                                throw (ex instanceof OXException ? (OXException) ex : AjaxExceptionCodes.UNEXPECTED_ERROR.create(ex, ex.getMessage()));
+                            }
+                        } else {
+                            threadPool.submit(task);
+                        }
+                    }
+                }
             }
             if (requestData.getIntParameter("save") == 1) {
                 // TODO:
