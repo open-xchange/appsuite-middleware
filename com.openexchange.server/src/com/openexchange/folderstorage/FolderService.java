@@ -412,20 +412,22 @@ public interface FolderService {
      * @param folder The folder object containing tree identifier, parent identifier and data.
      * @param user The user
      * @param context The context
+     * @param decorator The folder service decorator or <code>null</code>
      * @return The identifier of the newly created folder
      * @throws OXException If creation fails
      */
-    FolderResponse<String> createFolder(Folder folder, User user, Context context) throws OXException;
+    FolderResponse<String> createFolder(Folder folder, User user, Context context, FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Creates a new folder described by given folder object.
      *
      * @param folder The folder object containing tree identifier, parent identifier and data.
      * @param session The session
+     * @param decorator The folder service decorator or <code>null</code>
      * @return The identifier of the newly created folder
      * @throws OXException If creation fails
      */
-    FolderResponse<String> createFolder(Folder folder, Session session) throws OXException;
+    FolderResponse<String> createFolder(Folder folder, Session session, FolderServiceDecorator decorator) throws OXException;
 
     // TODO: default folder? all visible folders
 

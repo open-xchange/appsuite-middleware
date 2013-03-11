@@ -122,14 +122,14 @@ public final class FolderServiceImpl implements FolderService {
     }
 
     @Override
-    public FolderResponse<String> createFolder(final Folder folder, final User user, final Context context) throws OXException {
-        final CreatePerformer createPerformer = new CreatePerformer(user, context);
+    public FolderResponse<String> createFolder(final Folder folder, final User user, final Context context, final FolderServiceDecorator decorator) throws OXException {
+        final CreatePerformer createPerformer = new CreatePerformer(user, context, decorator);
         return FolderResponseImpl.newFolderResponse(createPerformer.doCreate(folder), createPerformer.getStorageParameters().getWarnings());
     }
 
     @Override
-    public FolderResponse<String> createFolder(final Folder folder, final Session session) throws OXException {
-        final CreatePerformer createPerformer = new CreatePerformer(ServerSessionAdapter.valueOf(session));
+    public FolderResponse<String> createFolder(final Folder folder, final Session session, final FolderServiceDecorator decorator) throws OXException {
+        final CreatePerformer createPerformer = new CreatePerformer(ServerSessionAdapter.valueOf(session), decorator);
         return FolderResponseImpl.newFolderResponse(createPerformer.doCreate(folder), createPerformer.getStorageParameters().getWarnings());
     }
 

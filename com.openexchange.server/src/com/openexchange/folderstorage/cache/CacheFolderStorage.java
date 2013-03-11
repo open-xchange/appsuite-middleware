@@ -501,7 +501,12 @@ public final class CacheFolderStorage implements FolderStorage {
             /*
              * Perform create operation via non-cache storage
              */
-            final CreatePerformer createPerformer = null == session ? new CreatePerformer(storageParameters.getUser(), storageParameters.getContext(), registry) : new CreatePerformer(ServerSessionAdapter.valueOf(session), registry);
+            final CreatePerformer createPerformer;
+            if (null == session) {
+                createPerformer = new CreatePerformer(storageParameters.getUser(), storageParameters.getContext(), storageParameters.getDecorator(), registry);
+            } else {
+                createPerformer = new CreatePerformer(ServerSessionAdapter.valueOf(session), storageParameters.getDecorator(), registry);
+            }
             createPerformer.setCheck4Duplicates(false);
             final String folderId = createPerformer.doCreate(folder);
             /*
