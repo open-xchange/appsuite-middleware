@@ -51,6 +51,7 @@ package com.openexchange.realtime.atmosphere.impl.stanza.builder;
 
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IQ;
@@ -93,17 +94,15 @@ public class IQBuilder extends StanzaBuilder<IQ> {
      * @throws OXException if the type key is missing
      */
     private void type() throws OXException {
-        throw new UnsupportedOperationException("Not implemented yet!");
-//        String type = json.optString("type");
-//        if (type == null) {
-//            throw AtmosphereExceptionCode.MISSING_KEY.create("type", json);
-//        }
-//        for (IQ.Type t : IQ.Type.values()) {
-//            if (t.name().equalsIgnoreCase(type)) {
-//                stanza.setType(t);
-//                break;
-//            }
-//        }
+        String type = json.optString("type");
+        if (type == null || type.trim().equals("")) {
+            throw AtmosphereExceptionCode.MISSING_KEY.create("type", json);
+        }
+        try {
+            IQ.Type.valueOf(type.toUpperCase());
+        } catch (IllegalArgumentException iae) {
+            throw AtmosphereExceptionCode.ILLEGAL_VALUE.create(type, "type", json);
+        }
     }
 
 }
