@@ -98,7 +98,7 @@ public class LoginCounter implements LoginCounterMBean {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            con = service.getReadOnly(contextId);
+            con = service.getWritable(contextId);
             if ("*".equals(client.trim())) {
                 stmt = con.prepareStatement("SELECT value, name FROM user_attribute WHERE cid=? AND id=? AND name LIKE 'client:%'");
                 stmt.setInt(1, contextId);
@@ -129,7 +129,7 @@ public class LoginCounter implements LoginCounterMBean {
         } finally {
             closeSQLStuff(rs, stmt);
             if (null != con) {
-                service.backReadOnly(contextId, con);
+                service.backWritable(contextId, con);
             }
         }
     }
