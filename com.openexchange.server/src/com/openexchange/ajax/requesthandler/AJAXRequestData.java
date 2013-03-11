@@ -172,7 +172,7 @@ public class AJAXRequestData {
     /** The multipart flag. */
     private boolean multipart;
 
-    /** The path prefix; e.g. <code><i>/ajax/</i>servlet</code> */
+    /** The path prefix; &lt;prefix&gt; + <code>'/'</code> + &lt;module&gt; */
     private String prefix;
 
     /**
@@ -1163,10 +1163,24 @@ public class AJAXRequestData {
         return isWhitespace;
     }
 
+    /**
+     * Sets the path prefix.
+     * <p>
+     * &lt;prefix&gt; + <code>'/'</code> + &lt;module&gt;
+     *
+     * @param prefix The prefix
+     */
     public void setPrefix(String prefix) {
         this.prefix = prefix;
     }
     
+    /**
+     * Gets the path prefix.
+     * <p>
+     * &lt;prefix&gt; + <code>'/'</code> + &lt;module&gt;
+     * 
+     * @return The prefix
+     */
     public String getPrefix() {
         return prefix;
     }
