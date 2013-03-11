@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.converters.preview.cache.groupware;
+package com.openexchange.capabilities.groupware;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -59,11 +59,11 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link PreviewCacheDeleteListener}
+ * {@link CapabilityDeleteListener}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class PreviewCacheDeleteListener implements DeleteListener {
+public class CapabilityDeleteListener implements DeleteListener {
 
     @Override
     public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
@@ -81,7 +81,7 @@ public class PreviewCacheDeleteListener implements DeleteListener {
         PreparedStatement stmt = null;
         try {
             final int pos = 1;
-            stmt = writeCon.prepareStatement("DELETE FROM preview WHERE cid = ?");
+            stmt = writeCon.prepareStatement("DELETE FROM capability_context WHERE cid = ?");
             stmt.setInt(pos, contextId);
             stmt.executeUpdate();
         } catch (final SQLException e) {
@@ -98,7 +98,7 @@ public class PreviewCacheDeleteListener implements DeleteListener {
         PreparedStatement stmt = null;
         try {
             int pos = 1;
-            stmt = writeCon.prepareStatement("DELETE FROM preview WHERE cid = ? AND user = ?");
+            stmt = writeCon.prepareStatement("DELETE FROM capability_user WHERE cid = ? AND user = ?");
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos, event.getId());
             stmt.executeUpdate();

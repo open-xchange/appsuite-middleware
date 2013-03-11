@@ -52,25 +52,42 @@ package com.openexchange.capabilities.osgi;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.groupware.CapabilityCreateTableService;
+import com.openexchange.capabilities.groupware.CapabilityCreateTableTask;
+import com.openexchange.capabilities.groupware.CapabilityDeleteListener;
 import com.openexchange.capabilities.internal.CapabilityServiceImpl;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.CreateTableService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.timer.TimerService;
 
 public class CapabilitiesActivator extends HousekeepingActivator {
 
+    /** The service look-up */
+    public static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
+
+    private volatile CapabilityServiceImpl capService;
+
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, DatabaseService.class, TimerService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        SERVICES.set(this);
         final ServiceTracker<CapabilityChecker, CapabilityChecker> capCheckers = track(CapabilityChecker.class);
 
         final CapabilityServiceImpl capService = new CapabilityServiceImpl(this, context) {
@@ -90,6 +107,8 @@ public class CapabilitiesActivator extends HousekeepingActivator {
                 return checkers;
             }
         };
+        capService.startUp();
+        this.capService = capService;
 
         registerService(CapabilityService.class, capService);
 
@@ -107,7 +126,25 @@ public class CapabilitiesActivator extends HousekeepingActivator {
 
         });
 
+        /*
+         * Register update task, create table job and delete listener
+         */
+        registerService(CreateTableService.class, new CapabilityCreateTableService());
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CapabilityCreateTableTask()));
+        registerService(DeleteListener.class, new CapabilityDeleteListener());
+
         openTrackers();
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        SERVICES.set(null);
+        final CapabilityServiceImpl capService = this.capService;
+        if (null != capService) {
+            capService.shutDown();
+            this.capService = null;
+        }
+        super.stopBundle();
     }
 
 }

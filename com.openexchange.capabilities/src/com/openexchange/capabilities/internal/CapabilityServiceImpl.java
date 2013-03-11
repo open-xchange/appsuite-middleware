@@ -49,6 +49,10 @@
 
 package com.openexchange.capabilities.internal;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -58,10 +62,15 @@ import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityExceptionCodes;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -75,6 +84,8 @@ public class CapabilityServiceImpl implements CapabilityService {
 
     private final ConcurrentMap<String, Capability> capabilities;
     private final ConcurrentMap<String, Object> declaredCapabilities;
+
+    private volatile ScheduledTimerTask timerTask;
 
     private final ServiceLookup services;
     private volatile Boolean autologin;
@@ -90,6 +101,20 @@ public class CapabilityServiceImpl implements CapabilityService {
         this.services = services;
         capabilities = new ConcurrentHashMap<String, Capability>();
         declaredCapabilities = new ConcurrentHashMap<String, Object>();
+    }
+
+    /**
+     * Start-up.
+     */
+    public void startUp() {
+        // Nope
+    }
+
+    /**
+     * Shut-down.
+     */
+    public void shutDown() {
+        // Nope
     }
 
     private boolean autologin() {
@@ -116,27 +141,117 @@ public class CapabilityServiceImpl implements CapabilityService {
                 }
             }
         }
-
         // What about autologin?
-
         boolean autologin = autologin();
         if (autologin) {
             capabilities.add(new Capability("autologin", true));
         }
-
+        // Now the declared ones
         for (String cap : declaredCapabilities.keySet()) {
             if (check(cap, session)) {
                 capabilities.add(getCapability(cap));
             }
         }
-        
+        // Portal
         if (!session.isAnonymous()) {
             if (session.getUserConfiguration().hasPortal()) {
                 capabilities.add(getCapability("portal"));
             }
         }
+        // Now the ones from database
+        final DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
+        if (null != databaseService) {
+            final Set<String> set = new HashSet<String>();
+            final Set<String> removees = new HashSet<String>();
+            // Context-sensitive
+            for (final String sCap : getContextCaps(session.getContextId(), databaseService)) {
+                final char firstChar = sCap.charAt(0);
+                if ('-' == firstChar) {
+                    final String val = toLowerCase(sCap.substring(1));
+                    set.remove(val);
+                    removees.add(val);
+                } else {
+                    if ('+' == firstChar) {
+                        set.add(toLowerCase(sCap.substring(1)));
+                    } else {
+                        set.add(toLowerCase(sCap));
+                    }
+                }
+            }
+            // User-sensitive
+            for (final String sCap : getUserCaps(session.getUserId(), session.getContextId(), databaseService)) {
+                final char firstChar = sCap.charAt(0);
+                if ('-' == firstChar) {
+                    final String val = toLowerCase(sCap.substring(1));
+                    set.remove(val);
+                    removees.add(val);
+                } else {
+                    if ('+' == firstChar) {
+                        set.add(toLowerCase(sCap.substring(1)));
+                    } else {
+                        set.add(toLowerCase(sCap));
+                    }
+                }
+            }
+            // Merge them into result set
+            for (final String sCap : removees) {
+                capabilities.remove(getCapability(sCap));
+            }
+            for (final String sCap : set) {
+                capabilities.add(getCapability(sCap));
+            }
+        }
 
         return capabilities;
+    }
+
+    private Set<String> getContextCaps(final int contextId, final DatabaseService databaseService) throws OXException {
+        final Connection con = databaseService.getReadOnly(contextId);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT cap FROM capability_context WHERE cid=?");
+            stmt.setLong(1, contextId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return new HashSet<String>(0);
+            }
+            final Set<String> set = new HashSet<String>();
+            do {
+                set.add(rs.getString(1));
+            } while (rs.next());
+            return set;
+        } catch (final SQLException e) {
+            throw CapabilityExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(contextId, con);
+        }
+    }
+
+    private Set<String> getUserCaps(final int userId, final int contextId, final DatabaseService databaseService) throws OXException {
+        final Connection con = databaseService.getReadOnly(contextId);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT cap FROM capability_user WHERE cid=? AND user=?");
+            stmt.setLong(1, contextId);
+            stmt.setLong(2, userId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return Collections.emptySet();
+            }
+            final Set<String> set = new HashSet<String>();
+            do {
+                set.add(rs.getString(1));
+            } while (rs.next());
+            return set;
+        } catch (final SQLException e) {
+            throw CapabilityExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(contextId, con);
+        }
     }
 
     private boolean check(String cap, ServerSession session) throws OXException {
@@ -154,13 +269,11 @@ public class CapabilityServiceImpl implements CapabilityService {
 
     public Capability getCapability(String id) {
         Capability capability = capabilities.get(id);
-
-        if (capability == null) {
-            Capability existingCapability = capabilities.putIfAbsent(id, capability = new Capability(id, false));
-            return existingCapability != null ? existingCapability : capability;
+        if (capability != null) {
+            return capability;
         }
-
-        return capability;
+        Capability existingCapability = capabilities.putIfAbsent(id, capability = new Capability(id, false));
+        return existingCapability == null ? capability : existingCapability;
     }
 
     @Override
@@ -170,6 +283,20 @@ public class CapabilityServiceImpl implements CapabilityService {
 
     public List<CapabilityChecker> getCheckers() {
         return Collections.emptyList();
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }
