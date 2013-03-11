@@ -172,6 +172,7 @@ public class AJAXRequestData {
     /** The multipart flag. */
     private boolean multipart;
 
+    /** The path prefix; e.g. <code><i>/ajax/</i>servlet</code> */
     private String prefix;
 
     /**
