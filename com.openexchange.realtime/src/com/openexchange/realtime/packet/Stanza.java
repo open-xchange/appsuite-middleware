@@ -218,14 +218,19 @@ public abstract class Stanza implements Serializable {
         addPayloadToMap(tree, this.payloads);
     }
 
-    private void addPayloadToMap(PayloadTree tree, Map<ElementPath, List<PayloadTree>> map) {
+    /**
+     * Add a PayloadTree into a Map containing lists aof PayloadTrees mapped to their ElementPaths. 
+     * @param tree The tree to add
+     * @param payloadTreeMap The Map containing the trees
+     */
+    private void addPayloadToMap(PayloadTree tree, Map<ElementPath, List<PayloadTree>> payloadTreeMap) {
         ElementPath elementPath = tree.getElementPath();
-        List<PayloadTree> list = payloads.get(elementPath);
+        List<PayloadTree> list = payloadTreeMap.get(elementPath);
         if (list == null) {
             list = new ArrayList<PayloadTree>();
         }
         list.add(tree);
-        payloads.put(tree.getElementPath(), list);
+        payloadTreeMap.put(tree.getElementPath(), list);
     }
 
     /**
@@ -283,7 +288,7 @@ public abstract class Stanza implements Serializable {
         HashMap<ElementPath, List<PayloadTree>> copiedPayloads = new HashMap<ElementPath, List<PayloadTree>>();
         for (PayloadTree tree : getPayloads()) {
             PayloadTree copiedTree = new PayloadTree(tree);
-            addPayloadToMap(tree, copiedPayloads);
+            addPayloadToMap(copiedTree, copiedPayloads);
         }
         return copiedPayloads;
     }
