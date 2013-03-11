@@ -137,6 +137,19 @@ public class ID implements Serializable {
     }
 
     /**
+     * Initializes a new {@link ID} without a component.
+     * 
+     * @param protocol The protocol of the ID, ox, xmpp ...
+     * @param user The user represented by this ID
+     * @param context The context of the user represented by this ID
+     * @param resource The resource of the connected user eg. "desktop" or ontoher string identifying the connected client. Must be unique
+     *            to enable multiple logins.
+     */
+    public ID(final String protocol, final String user, final String context, final String resource) {
+        this(protocol, null, user, context, resource);
+    }
+
+    /**
      * Initializes a new {@link ID}.
      * 
      * @param protocol The protocol of the ID, ox, xmpp ...
