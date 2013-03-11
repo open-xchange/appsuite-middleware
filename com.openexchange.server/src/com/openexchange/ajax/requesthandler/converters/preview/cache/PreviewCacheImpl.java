@@ -63,33 +63,26 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewExceptionCodes;
+import com.openexchange.preview.cache.CachedPreview;
+import com.openexchange.preview.cache.PreviewCache;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * {@link PreviewCache} - The preview document cache.
+ * {@link PreviewCacheImpl} - The preview document cache.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PreviewCache {
+public final class PreviewCacheImpl implements PreviewCache {
 
     /**
-     * Initializes a new {@link PreviewCache}.
+     * Initializes a new {@link PreviewCacheImpl}.
      */
-    public PreviewCache() {
+    public PreviewCacheImpl() {
         super();
     }
 
-    /**
-     * Stores given preview document's binary content.
-     * 
-     * @param id The identifier
-     * @param preview The cached preview
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> on insertion or <code>false</code> if impossible to store
-     * @throws OXException If operations fails
-     */
+    @Override
     public boolean save(final String id, final CachedPreview preview, final int userId, final int contextId) throws OXException {
         final InputStream in = preview.getInputStream();
         if (null == in) {
@@ -98,18 +91,7 @@ public final class PreviewCache {
         return save(id, in, preview.getFileName(), preview.getFileType(), userId, contextId);
     }
 
-    /**
-     * Stores given preview document's binary content.
-     * 
-     * @param id The identifier
-     * @param in The binary stream
-     * @param optName The optional file name
-     * @param optType The optional file MIME type; e.g. <code>"image/jpeg"</code>
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> on insertion or <code>false</code> if impossible to store
-     * @throws OXException If operations fails
-     */
+    @Override
     public boolean save(final String id, final InputStream in, final String optName, final String optType, final int userId, final int contextId) throws OXException {
         try {
             return save(id, Streams.stream2bytes(in), optName, optType, userId, contextId);
@@ -118,18 +100,7 @@ public final class PreviewCache {
         }
     }
 
-    /**
-     * Stores given preview document's binary content.
-     * 
-     * @param id The identifier
-     * @param bytes The binary content
-     * @param optName The optional file name
-     * @param optType The optional file MIME type; e.g. <code>"image/jpeg"</code>
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> on insertion or <code>false</code> if impossible to store
-     * @throws OXException If operations fails
-     */
+    @Override
     public boolean save(final String id, final byte[] bytes, final String optName, final String optType, final int userId, final int contextId) throws OXException {
         // Check existence
         final boolean exists = exists(id, userId, contextId);
@@ -221,12 +192,7 @@ public final class PreviewCache {
         }
     }
 
-    /**
-     * Gets the caching quota for denoted context.
-     * 
-     * @param contextId The context identifier
-     * @return The context quota or <code>-1</code> if unlimited
-     */
+    @Override
     public long[] getContextQuota(final int contextId) {
         long quota = -1L;
         long quotaPerDocument = -1L;
@@ -251,17 +217,7 @@ public final class PreviewCache {
         return new long[] { quota, quotaPerDocument };
     }
 
-    /**
-     * Ensures enough space is available for desired size if context-sensitive caching quota is specified.
-     * 
-     * @param desiredSize The desired size
-     * @param total The context-sensitive caching quota
-     * @param totalPerDocument The context-sensitive caching quota per document
-     * @param contextId The context identifier
-     * @param ignoree The optional identifier to ignore while checking
-     * @return <code>true</code> If enough space is available; otherwise <code>false</code>
-     * @throws OXException If an error occurs
-     */
+    @Override
     public boolean ensureUnexceededContextQuota(final long desiredSize, final long total, final long totalPerDocument, final int contextId, final String ignoree) throws OXException {
         if (total <= 0L) {
             // Unlimited total quota
@@ -364,15 +320,7 @@ public final class PreviewCache {
         }
     }
 
-    /**
-     * Gets the preview document's binary content.
-     * 
-     * @param id The document identifier
-     * @param userId The user identifier or <code>-1</code> for context-global document
-     * @param contextId The context identifier
-     * @return The binary content or <code>null</code>
-     * @throws OXException If retrieving document data fails
-     */
+    @Override
     public CachedPreview get(final String id, final int userId, final int contextId) throws OXException {
         if (null == id || contextId <= 0) {
             return null;
@@ -419,15 +367,7 @@ public final class PreviewCache {
         }
     }
 
-    /**
-     * Tests for existence of denoted preview document.
-     * 
-     * @param id The identifier
-     * @param userId The user identifier or <code>-1</code> for context-global document
-     * @param contextId The context identifier
-     * @return <code>true</code> if exists; otherwise <code>false</code>
-     * @throws OXException If an error occurs while checking existence
-     */
+    @Override
     public boolean exists(final String id, final int userId, final int contextId) throws OXException {
         if (null == id || contextId <= 0) {
             return false;

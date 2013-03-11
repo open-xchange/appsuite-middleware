@@ -54,12 +54,14 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.PreviewCacheImpl;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
@@ -70,6 +72,7 @@ import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
+import com.openexchange.preview.cache.PreviewCache;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -83,6 +86,17 @@ import com.openexchange.tools.session.ServerSession;
 abstract class AbstractPreviewResultConverter implements ResultConverter {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractPreviewResultConverter.class));
+
+    private static final AtomicReference<PreviewCache> CACHE_REF = new AtomicReference<PreviewCache>(new PreviewCacheImpl());
+
+    /**
+     * Gets the preview cache reference.
+     *
+     * @return The preview cache or <code>null</code> if absent
+     */
+    protected static PreviewCache getPreviewCache() {
+        return CACHE_REF.get();
+    }
 
     /**
      * The <code>"view"</code> parameter.
@@ -107,16 +121,16 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
     }
 
     @Override
-    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
-        final IFileHolder fileHolder;
-        {
-            final Object resultObject = result.getResultObject();
-            if (!(resultObject instanceof IFileHolder)) {
-                throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
-            }
-            fileHolder = (IFileHolder) resultObject;
-        }
+    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {        
+        IFileHolder fileHolder = null;
         try {
+            {
+                final Object resultObject = result.getResultObject();
+                if (!(resultObject instanceof IFileHolder)) {
+                    throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
+                }
+                fileHolder = (IFileHolder) resultObject;
+            }
             /*
              * Obtain preview document
              */
@@ -229,5 +243,18 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
      * @return The output format
      */
     public abstract PreviewOutput getOutput();
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
 
 }

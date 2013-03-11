@@ -61,8 +61,6 @@ import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.ajax.requesthandler.converters.preview.cache.CachedPreview;
-import com.openexchange.ajax.requesthandler.converters.preview.cache.PreviewCache;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
@@ -73,6 +71,8 @@ import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
+import com.openexchange.preview.cache.CachedPreview;
+import com.openexchange.preview.cache.PreviewCache;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -93,7 +93,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
      */
     public PreviewImageResultConverter() {
         super();
-        previewCache = new PreviewCache();
+        previewCache = AbstractPreviewResultConverter.getPreviewCache();
     }
 
     @Override

@@ -83,7 +83,8 @@ Import-Package: com.openexchange.conversion,
  org.xml.sax,
  org.xml.sax.ext,
  org.xml.sax.helpers
-Export-Package: com.openexchange.preview
+Export-Package: com.openexchange.preview,
+ com.openexchange.preview.cache
 Bundle-ClassPath: .,
  lib/itextpdf-5.1.2.jar,
  lib/jOpenDocument-1.2.jar,

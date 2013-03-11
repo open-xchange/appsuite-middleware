@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.converters.preview.cache;
+package com.openexchange.preview.cache;
 
 import java.io.InputStream;
 
