@@ -63,7 +63,7 @@ public final class CapabilityCreateTableService extends AbstractCreateTableImpl 
 
     private static final String CREATE_CAP_CONTEXT = "CREATE TABLE "+TABLE_CAP_CONTEXT+" (" +
         " cid INT4 unsigned NOT NULL," +
-        " cap VARCHAR(32) CHARACTER SET latin1 DEFAULT NULL," +
+        " cap VARCHAR(64) CHARACTER SET latin1 DEFAULT NULL," +
         " PRIMARY KEY (cid, cap)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
@@ -72,7 +72,7 @@ public final class CapabilityCreateTableService extends AbstractCreateTableImpl 
     private static final String CREATE_CAP_USER = "CREATE TABLE "+TABLE_CAP_USER+" (" +
         " cid INT4 unsigned NOT NULL," +
         " user INT4 unsigned NOT NULL," +
-        " cap VARCHAR(32) CHARACTER SET latin1 DEFAULT NULL," +
+        " cap VARCHAR(64) CHARACTER SET latin1 DEFAULT NULL," +
         " PRIMARY KEY (cid, user, cap)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
