@@ -109,14 +109,9 @@ public class LoginCounter implements LoginCounterMBean {
                     final String name = rs.getString(2);
                     ret.add(new Object[] { new Date(Long.parseLong(rs.getString(1))), name.substring(7) });
                 }
-            } else {
-                stmt = con.prepareStatement("SELECT value FROM user_attribute WHERE cid=? AND id=? AND name=?");
-                stmt.setInt(1, contextId);
-                stmt.setInt(2, userId);
-                stmt.setString(3, "client:" + client);
-                rs = stmt.executeQuery();
+                return ret;
             }
-
+            // Query for single client identifier
             stmt = con.prepareStatement("SELECT value FROM user_attribute WHERE cid=? AND id=? AND name=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
@@ -289,17 +284,22 @@ public class LoginCounter implements LoginCounterMBean {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             UserContextId other = (UserContextId) obj;
-            if (contextId != other.contextId)
+            if (contextId != other.contextId) {
                 return false;
-            if (userId != other.userId)
+            }
+            if (userId != other.userId) {
                 return false;
+            }
             return true;
         }
     }
