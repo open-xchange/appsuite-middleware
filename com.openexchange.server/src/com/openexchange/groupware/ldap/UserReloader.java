@@ -93,13 +93,13 @@ final class UserReloader extends Refresher<User> implements User {
 
     @Override
     public boolean equals(final Object obj) {
-        updateDelegate();
+//        updateDelegate();
         return delegate.equals(obj);
     }
 
     @Override
     public int hashCode() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.hashCode();
     }
 
@@ -110,13 +110,13 @@ final class UserReloader extends Refresher<User> implements User {
 
     @Override
     public String[] getAliases() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getAliases();
     }
 
     @Override
     public Map<String, Set<String>> getAttributes() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getAttributes();
     }
 
@@ -127,19 +127,19 @@ final class UserReloader extends Refresher<User> implements User {
 
     @Override
     public String getDisplayName() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getDisplayName();
     }
 
     @Override
     public String getGivenName() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getGivenName();
     }
 
     @Override
     public int[] getGroups() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getGroups();
     }
 
@@ -150,85 +150,85 @@ final class UserReloader extends Refresher<User> implements User {
 
     @Override
     public String getImapLogin() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getImapLogin();
     }
 
     @Override
     public String getImapServer() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getImapServer();
     }
 
     @Override
     public Locale getLocale() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getLocale();
     }
 
     @Override
     public String getLoginInfo() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getLoginInfo();
     }
 
     @Override
     public String getMail() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getMail();
     }
 
     @Override
     public String getMailDomain() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getMailDomain();
     }
 
     @Override
     public String getPasswordMech() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getPasswordMech();
     }
 
     @Override
     public String getPreferredLanguage() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getPreferredLanguage();
     }
 
     @Override
     public int getShadowLastChange() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getShadowLastChange();
     }
 
     @Override
     public String getSmtpServer() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getSmtpServer();
     }
 
     @Override
     public String getSurname() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getSurname();
     }
 
     @Override
     public String getTimeZone() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getTimeZone();
     }
 
     @Override
     public String getUserPassword() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getUserPassword();
     }
 
     @Override
     public boolean isMailEnabled() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.isMailEnabled();
     }
 

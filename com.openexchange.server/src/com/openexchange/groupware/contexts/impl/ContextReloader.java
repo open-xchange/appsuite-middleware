@@ -84,13 +84,13 @@ final class ContextReloader extends Refresher<ContextExtended> implements Contex
 
     @Override
     public boolean equals(final Object obj) {
-        updateDelegate();
+//        updateDelegate();
         return delegate.equals(obj);
     }
 
     @Override
     public int hashCode() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.hashCode();
     }
 
@@ -101,13 +101,13 @@ final class ContextReloader extends Refresher<ContextExtended> implements Contex
 
     @Override
     public void setUpdating(final boolean updating) {
-        updateDelegate();
+//        updateDelegate();
         delegate.setUpdating(updating);
     }
 
     @Override
     public void setReadOnly(final boolean readOnly) {
-        updateDelegate();
+//        updateDelegate();
         delegate.setReadOnly(readOnly);
     }
 
@@ -118,61 +118,61 @@ final class ContextReloader extends Refresher<ContextExtended> implements Contex
 
     @Override
     public String getName() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getName();
     }
 
     @Override
     public String[] getFileStorageAuth() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getFileStorageAuth();
     }
 
     @Override
     public long getFileStorageQuota() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getFileStorageQuota();
     }
 
     @Override
     public int getFilestoreId() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getFilestoreId();
     }
 
     @Override
     public String getFilestoreName() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getFilestoreName();
     }
 
     @Override
     public String[] getLoginInfo() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getLoginInfo();
     }
 
     @Override
     public int getMailadmin() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getMailadmin();
     }
 
     @Override
     public boolean isEnabled() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.isEnabled();
     }
 
     @Override
     public boolean isUpdating() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.isUpdating();
     }
 
     @Override
     public boolean isReadOnly() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.isReadOnly();
     }
 
@@ -189,7 +189,7 @@ final class ContextReloader extends Refresher<ContextExtended> implements Contex
 
     @Override
     public Map<String, Set<String>> getAttributes() {
-        updateDelegate();
+//        updateDelegate();
         return delegate.getAttributes();
     }
 }
