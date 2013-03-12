@@ -214,7 +214,7 @@ public class CapabilityServiceImpl implements CapabilityService {
             stmt.setLong(1, contextId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
-                return new HashSet<String>(0);
+                return Collections.emptySet();
             }
             final Set<String> set = new HashSet<String>();
             do {
