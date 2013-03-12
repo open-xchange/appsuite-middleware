@@ -409,7 +409,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         }
         if (null == tmp) {
             idsAndUsers = delegate.getFromDelegate(pattern, cid);
-            cache.putInGroup(key, Integer.toString(cid), idsAndUsers);
+            cache.putInGroup(key, Integer.toString(cid), idsAndUsers, false);
         } else {
             idsAndUsers = tmp;
         }
