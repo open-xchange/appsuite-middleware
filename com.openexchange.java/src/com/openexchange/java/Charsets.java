@@ -109,7 +109,7 @@ public final class Charsets {
      * @return The ASCII string
      */
     public static String toAsciiString(final byte[] bytes) {
-        final StringBuilder sb = new StringBuilder(bytes.length);
+        final StringAllocator sb = new StringAllocator(bytes.length);
         for (int i = 0; i < bytes.length; i++) {
             sb.append((char) (bytes[i] & 0x00FF));
         }
@@ -131,7 +131,7 @@ public final class Charsets {
         if (len == 0) {
             return "";
         }
-        final StringBuilder sb = new StringBuilder(bytes.length);
+        final StringAllocator sb = new StringAllocator(bytes.length);
         for (int i = 0 ; i < len ; i++) {
             sb.append((char) (bytes[off + i] & 0x00FF));
         }
