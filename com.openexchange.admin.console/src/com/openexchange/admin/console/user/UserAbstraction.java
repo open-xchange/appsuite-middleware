@@ -1954,10 +1954,29 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     private Set<String> parseAndSetCapabilities(final CLIOption cliOption, final AdminParser parser) {
-        final String s = (String) parser.getOptionValue(cliOption);
+        String s = (String) parser.getOptionValue(cliOption);
         if (isEmpty(s)) {
             return Collections.emptySet();
         }
+        if ('"' == s.charAt(0)) {
+            if (s.length() <= 1) {
+                return Collections.emptySet();
+            }
+            s = s.substring(1);
+            if (isEmpty(s)) {
+                return Collections.emptySet();
+            }
+        }
+        if ('"' == s.charAt(s.length() - 1)) {
+            if (s.length() <= 1) {
+                return Collections.emptySet();
+            }
+            s = s.substring(0, s.length() - 1);
+            if (isEmpty(s)) {
+                return Collections.emptySet();
+            }
+        }
+        // Split
         final String[] arr = s.split(" *, *", 0);
         final Set<String> set = new HashSet<String>(arr.length);
         for (int i = 0; i < arr.length; i++) {
