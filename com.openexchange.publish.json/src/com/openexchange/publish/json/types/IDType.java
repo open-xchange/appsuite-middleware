@@ -49,10 +49,12 @@
 
 package com.openexchange.publish.json.types;
 
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.publish.json.EntityType;
+import com.openexchange.tools.id.IDMangler;
 
 /**
  * {@link IDType}
@@ -64,7 +66,12 @@ public class IDType implements EntityType {
     @Override
     public JSONObject toEntity(String entityId) throws JSONException {
         JSONObject object = new JSONObject();
-        object.put("id", entityId);
+        List<String> unmangle = IDMangler.unmangle(entityId);
+        
+        object.put("id", unmangle.get(0));
+        if (unmangle.size() > 1) {
+            object.put("folder", unmangle.get(1));
+        }
         return object;
     }
 
