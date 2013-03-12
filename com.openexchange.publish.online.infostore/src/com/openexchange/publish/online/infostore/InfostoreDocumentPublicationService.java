@@ -63,6 +63,7 @@ import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.helpers.AbstractPublicationService;
 import com.openexchange.publish.helpers.SecurityStrategy;
+import com.openexchange.tools.id.IDMangler;
 
 /**
  * {@link InfostoreDocumentPublicationService}
@@ -133,6 +134,8 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
         
         DocumentMetadata metadata = InfostorePublicationServlet.loadDocumentMetadata(publication);
         publication.setDisplayName((metadata.getTitle() != null) ? metadata.getTitle() : metadata.getFileName());
+        
+        publication.setEntityId(IDMangler.mangle(metadata.getId() + "", metadata.getFolderId() + ""));
         
         
     }

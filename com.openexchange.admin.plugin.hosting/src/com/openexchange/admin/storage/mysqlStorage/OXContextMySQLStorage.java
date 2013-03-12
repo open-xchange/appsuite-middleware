@@ -88,6 +88,7 @@ import com.openexchange.admin.exceptions.DatabaseContextMappingException;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
@@ -108,6 +109,7 @@ import com.openexchange.admin.tools.database.TableObject;
 import com.openexchange.admin.tools.database.TableRowObject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -2056,6 +2058,63 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } finally {
             closePreparedStatement(ps);
             closePreparedStatement(ppool);
+        }
+    }
+
+    @Override
+    public void changeCapabilities(final Context ctx, final Set<String> capsToAdd, final Set<String> capsToRemove, final Credentials auth) throws StorageException {
+        final int contextId = ctx.getId().intValue();
+        // SQL resources
+        Connection con = null;
+        PreparedStatement stmt = null;
+        boolean rollback = false;
+        boolean autocommit = false;
+        try {
+            con = cache.getConnectionForContext(contextId);
+            con.setAutoCommit(false); // BEGIN
+            autocommit = true;
+            rollback = true;
+            // Delete existing ones
+            if (null != capsToRemove) {
+                stmt = con.prepareStatement("DELETE FROM capability_context WHERE cid=? AND cap=?");
+                stmt.setInt(1, contextId);
+                for (final String cap : capsToRemove) {
+                    stmt.setString(2, cap);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+            // Insert new ones
+            if (null != capsToAdd) {
+                stmt = con.prepareStatement("INSERT INTO capability_context (cid, cap) VALUES (?, ?)");
+                stmt.setInt(1, contextId);
+                for (final String cap : capsToAdd) {
+                    stmt.setString(2, cap);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+            con.commit(); // COMMIT
+            rollback = false;
+        } catch (final SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } catch (final PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            Databases.closeSQLStuff(stmt);
+            if (autocommit) {
+                autocommit(con);
+            }
+            try {
+                cache.pushConnectionForContext(contextId, con);
+            } catch (PoolException e) {
+                LOG.error("Error pushing connection to pool for context " + contextId + "!", e);
+            }
         }
     }
 

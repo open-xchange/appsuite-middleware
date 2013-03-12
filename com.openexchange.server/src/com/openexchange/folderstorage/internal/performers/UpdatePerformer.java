@@ -165,12 +165,17 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         if (!autoRename) {
                             throw result.error;
                         }
+                        final boolean useParenthesis = PARENTHESIS_CAPABLE.contains(storageFolder.getContentType().toString());
                         int count = 2;
                         final StringBuilder nameBuilder = new StringBuilder(folder.getName());
                         final int resetLen = nameBuilder.length();
                         do {
                             nameBuilder.setLength(resetLen);
-                            nameBuilder.append(" (").append(count++).append(')');
+                            if (useParenthesis) {
+                                nameBuilder.append(" (").append(count++).append(')');
+                            } else {
+                                nameBuilder.append(" ").append(count++);
+                            }
                             result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, newParentId, openedStorages);
                         } while (null != result);
                         folder.setName(nameBuilder.toString());
@@ -191,12 +196,17 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         if (!autoRename) {
                             throw result.error;
                         }
+                        final boolean useParenthesis = PARENTHESIS_CAPABLE.contains(storageFolder.getContentType().toString());
                         int count = 2;
                         final StringBuilder nameBuilder = new StringBuilder(folder.getName());
                         final int resetLen = nameBuilder.length();
                         do {
                             nameBuilder.setLength(resetLen);
-                            nameBuilder.append(" (").append(count++).append(')');
+                            if (useParenthesis) {
+                                nameBuilder.append(" (").append(count++).append(')');
+                            } else {
+                                nameBuilder.append(" ").append(count++);
+                            }
                             result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, storageFolder.getParentID(), openedStorages);
                         } while (null != result);
                         folder.setName(nameBuilder.toString());
