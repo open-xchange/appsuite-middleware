@@ -174,7 +174,7 @@ public class XMPPChatDelivery extends SimpleChannelUpstreamHandler implements XM
         String resource = xml.child("bind").child("resource").content();
         ID prospect = new ID("xmpp", session.getLoginName(), session.getContext().getName(), resource);
         int suffix = 0;
-        while (channel.isConnected(prospect, session)) {
+        while (channel.isConnected(prospect)) {
             prospect.setResource(prospect.getResource() + "_" + ++suffix);
         }
 
@@ -211,7 +211,7 @@ public class XMPPChatDelivery extends SimpleChannelUpstreamHandler implements XM
     }
 
     @Override
-    public void deliver(XMPPStanza stanza, ServerSession session) throws OXException {
+    public void deliver(XMPPStanza stanza) throws OXException {
         write(stanza.toXML(session));
     }
 

@@ -55,12 +55,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.StateListener;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.ElementPath;
 import com.openexchange.realtime.util.IDMap;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link XMPPChannel}
@@ -127,7 +125,7 @@ public class XMPPChannel implements Channel {
     }
 
     @Override
-    public boolean conjure(ID id, StateListener listener) throws OXException {
+    public boolean conjure(ID id) throws OXException {
         return false;
     }
 
