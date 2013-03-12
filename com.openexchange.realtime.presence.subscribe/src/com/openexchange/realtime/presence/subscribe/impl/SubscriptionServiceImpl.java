@@ -86,40 +86,67 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
 
     @Override
     public void subscribe(Presence subscription, String message) throws OXException {
+        DatabaseService databaseService = services.getService(DatabaseService.class);
+        if (databaseService == null) {
+            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(DatabaseService.class.getName());
+        }
+        MessageDispatcher messageDispatcher = services.getService(MessageDispatcher.class);
+        if(messageDispatcher == null) {
+            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(MessageDispatcher.class.getName());
+        }
+        ResourceDirectory resourceDirectory = services.getService(ResourceDirectory.class);
+        if(resourceDirectory == null) {
+            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ResourceDirectory.class.getName());
+        }
+        
         SubscriptionParticipant from = createParticipant(subscription.getFrom());
         SubscriptionParticipant to = createParticipant(subscription.getTo());
 
         Subscription sub = new Subscription(from, to, Presence.Type.PENDING);
         sub.setRequest(message);
-        DatabaseService databaseService = services.getService(DatabaseService.class);
-        if (databaseService == null) {
-            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(DatabaseService.class.getName());
-        }
         SubscriptionsSQL storage = new SubscriptionsSQL(databaseService);
         storage.store(sub);
-        MessageDispatcher messageDispatcher = services.getService(MessageDispatcher.class);
-        ResourceDirectory resourceDirectory = services.getService(ResourceDirectory.class);
         IDMap<Resource> idMap = resourceDirectory.get(subscription.getTo());
         messageDispatcher.send(subscription, idMap);
     }
 
     @Override
     public void approve(Presence approval) throws OXException {
-        SubscriptionParticipant from = createParticipant(approval.getTo()); // The subscriber (from) is the TO in this approval presence
-        SubscriptionParticipant to = new SubscriptionParticipant(from.getUserId(), from.getCid());
+        DatabaseService databaseService = services.getService(DatabaseService.class);
+        if(databaseService == null) {
+            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(DatabaseService.class.getName());
+        }
+        MessageDispatcher messageDispatcher = services.getService(MessageDispatcher.class);
+        if(messageDispatcher == null) {
+            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(MessageDispatcher.class.getName());
+        }
+        ResourceDirectory resourceDirectory = services.getService(ResourceDirectory.class);
+        if(resourceDirectory == null) {
+            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ResourceDirectory.class.getName());
+        }
+        
+        /*
+         * The subscriber (from), is the one who ask for approval to subscribe to the Presence of becomes the recipient of this approval.
+         * The contact that approved the subscription Request is the to of this Subscription request.
+         */
+        SubscriptionParticipant from = createParticipant(approval.getTo());
+        UserAndContext approvingUser = IdLookup.getUserAndContextIDs(approval.getFrom());
+        SubscriptionParticipant to = new SubscriptionParticipant(approvingUser.getUserId(), approvingUser.getContextId());
         // TODO: Check for valid types
         Subscription sub = new Subscription(from, to, approval.getType());
-        SubscriptionsSQL storage = new SubscriptionsSQL(services.getService(DatabaseService.class));
+        SubscriptionsSQL storage = new SubscriptionsSQL(databaseService);
         storage.store(sub);
-        MessageDispatcher messageDispatcher = services.getService(MessageDispatcher.class);
-        ResourceDirectory resourceDirectory = services.getService(ResourceDirectory.class);
         IDMap<Resource> idMap = resourceDirectory.get(approval.getTo());
         messageDispatcher.send(approval, idMap);
     }
 
     @Override
     public List<ID> getSubscribers(ID id) throws OXException {
-        SubscriptionsSQL storage = new SubscriptionsSQL(services.getService(DatabaseService.class));
+        DatabaseService databaseService = services.getService(DatabaseService.class);
+        if(databaseService == null) {
+            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(DatabaseService.class.getName());
+        }
+        SubscriptionsSQL storage = new SubscriptionsSQL(databaseService);
         UserAndContext userAndContextIds = IdLookup.getUserAndContextIDs(id);
         SubscriptionParticipant to = new SubscriptionParticipant(userAndContextIds.getUserId(), userAndContextIds.getContextId());
         List<Subscription> subscriptions = storage.getFrom(to);
@@ -135,7 +162,12 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
 
     @Override
     public List<ID> getSubscriptions(ID id) throws OXException {
-        SubscriptionsSQL storage = new SubscriptionsSQL(services.getService(DatabaseService.class));
+        DatabaseService databaseService = services.getService(DatabaseService.class);
+        if(databaseService == null) {
+            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(DatabaseService.class.getName());
+        }
+        
+        SubscriptionsSQL storage = new SubscriptionsSQL(databaseService);
         UserAndContext userAndContextIds = IdLookup.getUserAndContextIDs(id);
         SubscriptionParticipant from = new SubscriptionParticipant(userAndContextIds.getUserId(), userAndContextIds.getContextId());
         List<Subscription> subscriptions = storage.getTo(from);
@@ -151,7 +183,12 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
 
     @Override
     public List<Presence> getPendingRequests(ID id) throws OXException {
-        SubscriptionsSQL storage = new SubscriptionsSQL(services.getService(DatabaseService.class));
+        DatabaseService databaseService = services.getService(DatabaseService.class);
+        if(databaseService == null) {
+            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(DatabaseService.class.getName());
+        }
+        
+        SubscriptionsSQL storage = new SubscriptionsSQL(databaseService);
         /*
          * Create Subscriptionparticipant by getting userid and contextID from realtimeID
          */
@@ -172,9 +209,16 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
 
     @Override
     public void pushPendingRequests(ID id) throws OXException {
-        List<Presence> pendingRequests = getPendingRequests(id);
         MessageDispatcher messageDispatcher = services.getService(MessageDispatcher.class);
+        if(messageDispatcher == null) {
+            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(MessageDispatcher.class.getName());
+        }
         ResourceDirectory resourceDirectory = services.getService(ResourceDirectory.class);
+        if(resourceDirectory == null) {
+            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ResourceDirectory.class.getName());
+        }
+        
+        List<Presence> pendingRequests = getPendingRequests(id);
         for (Presence presence : pendingRequests) {
             IDMap<Resource> idMap = resourceDirectory.get(presence.getTo());
             messageDispatcher.send(presence, idMap);
@@ -198,8 +242,14 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
         }
 
         ContextService contextService = services.getService(ContextService.class);
+        if(contextService == null) {
+            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ContextService.class.getName());
+        }
         UserService userService = services.getService(UserService.class);
-
+        if(userService == null) {
+            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(UserService.class.getName());
+        }
+        
         Context context = contextService.getContext(participant.getCid());
         User user = userService.getUser(participant.getUserId(), context);
 

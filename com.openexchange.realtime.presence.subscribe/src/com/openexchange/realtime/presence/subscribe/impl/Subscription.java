@@ -52,8 +52,10 @@ package com.openexchange.realtime.presence.subscribe.impl;
 import com.openexchange.realtime.packet.Presence;
 
 /**
- * {@link Subscription}
- *
+ * {@link Subscription} - Represents a Subscription from user1 to user2. User1 is the 'from' {@link SubscriptionParticipant} and user2 is
+ * the 'to' {@link SubscriptionParticipant}. This {@link Subscription} can have various states during it's liftime e.g. First it's 'pending'
+ * until user2 approves the request of user1 and turns the {@link Subscription} to SUBSCRIBED.
+ * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Subscription {
@@ -66,6 +68,13 @@ public class Subscription {
 
     private Presence.Type state;
 
+    /**
+     * Initializes a new {@link Subscription}.
+     * 
+     * @param from The user requesting the {@link Subscription}
+     * @param to The recipient of the {@link Subscription}
+     * @param state The current state of the {@link Subscription}
+     */
     public Subscription(SubscriptionParticipant from, SubscriptionParticipant to, Presence.Type state) {
         this.from = from;
         this.to = to;

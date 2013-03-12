@@ -59,6 +59,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.realtime.presence.subscribe.database.CreatePresenceSubscriptionDB;
@@ -68,17 +69,17 @@ import com.openexchange.realtime.presence.subscribe.impl.SubscriptionServiceImpl
 import com.openexchange.user.UserService;
 
 /**
- * {@link Activator}
+ * {@link PresenceSubscribeActivator}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class Activator extends HousekeepingActivator {
+public class PresenceSubscribeActivator extends HousekeepingActivator {
 
 //    private BundleActivator testFragment;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ContextService.class, UserService.class, MessageDispatcher.class };
+        return new Class<?>[] { ResourceDirectory.class, DatabaseService.class, ContextService.class, UserService.class, MessageDispatcher.class };
     }
 
     @Override
