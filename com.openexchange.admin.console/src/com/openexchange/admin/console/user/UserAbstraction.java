@@ -1958,6 +1958,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         if (isEmpty(s)) {
             return Collections.emptySet();
         }
+        s = s.trim();
         if ('"' == s.charAt(0)) {
             if (s.length() <= 1) {
                 return Collections.emptySet();
