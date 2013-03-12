@@ -49,18 +49,23 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
+import static com.openexchange.java.Charsets.toAsciiBytes;
+import static com.openexchange.java.Charsets.toAsciiString;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -75,7 +80,6 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
-import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.preview.PreviewDocument;
@@ -86,6 +90,7 @@ import com.openexchange.preview.cache.CachedPreviewDocument;
 import com.openexchange.preview.cache.PreviewCache;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -111,6 +116,9 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
         return CACHE_REF.get();
     }
 
+    private static final Charset UTF8 = Charsets.UTF_8;
+    private static final byte[] DELIM = new byte[] { '\r', '\n' };
+
     /**
      * The <code>"view"</code> parameter.
      */
@@ -133,6 +141,30 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
         return "file";
     }
 
+    /**
+     * Generates the key for preview cache.
+     *
+     * @param eTag The ETag identifier
+     * @param requestData The request data
+     * @param optParameters Optional parameters to consider
+     * @return The appropriate cache key
+     */
+    protected String generatePreviewCacheKey(final String eTag, final AJAXRequestData requestData, final String... optParameters) {
+        final StringAllocator sb = new StringAllocator(eTag);
+        sb.append('-').append(requestData.getModule());
+        sb.append('-').append(requestData.getAction());
+        sb.append('-').append(requestData.getSession().getContextId());
+        if (optParameters != null) {
+            for (String name : optParameters) {
+                String parameter = requestData.getParameter(name);
+                if (!isEmpty(parameter)) {
+                    sb.append('-').append(parameter);
+                }
+            }
+        }
+        return sb.toString();
+    }
+
     @Override
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {        
         IFileHolder fileHolder = null;
@@ -142,37 +174,19 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
             final String eTag = requestData.getETag();
             final boolean isValidEtag = !isEmpty(eTag);
             if (isValidEtag) {
-                final CachedPreview cachedPreview = previewCache.get(eTag, session.getUserId(), session.getContextId());
+                final String cacheKey = generatePreviewCacheKey(eTag, requestData, "pages");
+                final CachedPreview cachedPreview = previewCache.get(cacheKey, session.getUserId(), session.getContextId());
                 if (null != cachedPreview) {
                     /*
                      * Get content according to output format
                      */
-                    final ContentType contentType;
+                    final byte[] bytes;
                     {
-                        String fileType = cachedPreview.getFileType();
-                        if (null == fileType) {
-                            fileType = "application/octet-stream";
-                        }
-                        contentType = new ContentType(fileType);
-                    }
-                    final String content;
-                    {
-                        InputStreamReader reader = null;
-                        try {
-                            final InputStream in = cachedPreview.getInputStream();
-                            final String charset = contentType.getCharsetParameter();
-                            reader = new InputStreamReader(null == in ? Streams.newByteArrayInputStream(cachedPreview.getBytes()) : in, null == charset ? Charsets.ISO_8859_1 : Charsets.forName(charset));
-                            final StringAllocator sb = new StringAllocator(4096);
-                            final int cbuflen = 2048;
-                            final char[] cbuf = new char[cbuflen];
-                            for (int read; (read = reader.read(cbuf, 0, cbuflen)) > 0;) {
-                                sb.append(cbuf, 0, read);
-                            }
-                            content = sb.toString();
-                        } catch (final IOException e) {
-                            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-                        } finally {
-                            Streams.close(reader);
+                        final InputStream in = cachedPreview.getInputStream();
+                        if (null == in) {
+                            bytes = cachedPreview.getBytes();
+                        } else {
+                            bytes = Streams.stream2bytes(in);
                         }
                     }
                     /*
@@ -180,11 +194,35 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
                      */
                     final Map<String, String> map = new HashMap<String, String>(4);
                     map.put("resourcename", cachedPreview.getFileName());
-                    map.put("content-type", contentType.toString());
-                    /*
-                     * Set preview document
-                     */
-                    result.setResultObject(new CachedPreviewDocument(Collections.singletonList(content), map), getOutputFormat());
+                    map.put("content-type", cachedPreview.getFileType());
+                    // Decode contents
+                    final List<String> contents;
+                    {
+                        final int[] computedFailure = computeFailure(DELIM);
+                        int prev = 0;
+                        int pos;
+                        if ((pos = indexOf(bytes, DELIM, prev, computedFailure)) >= 0) {
+                            // Multiple contents
+                            contents = new LinkedList<String>();
+                            final ByteArrayOutputStream baos = new ByteArrayOutputStream(8192 << 1);
+                            do {
+                                baos.reset();
+                                prev = pos + DELIM.length;
+                                pos = indexOf(bytes, DELIM, prev, computedFailure);
+                                if (pos >= 0) {
+                                    baos.write(bytes, prev, pos);
+                                } else {
+                                    baos.write(bytes, prev, bytes.length);
+                                }
+                                contents.add(new String(Base64.decodeBase64(toAsciiBytes(toAsciiString(baos.toByteArray()))), UTF8));
+                            } while (pos >= 0);
+                        } else {
+                            // Single content
+                            contents = Collections.singletonList(new String(Base64.decodeBase64(toAsciiBytes(toAsciiString(bytes))), UTF8));
+                        }
+                    }
+                    // Set preview document
+                    result.setResultObject(new CachedPreviewDocument(contents, map), getOutputFormat());
                     return;
                 }
             }
@@ -217,19 +255,31 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
                 // Put to cache
                 if (isValidEtag) {
                     final List<String> content = previewDocument.getContent();
-                    if (1 == content.size()) {
-                        final ContentType contentType = new ContentType(fileHolder.getContentType());
-                        final String charset = contentType.getCharsetParameter();
-                        final byte[] bytes = content.get(0).getBytes(null == charset ? Charsets.ISO_8859_1 : Charsets.forName(charset));
-                        final int size = bytes.length;
+                    final int size = null == content ? 0 : content.size();
+                    if (size > 0) {
+                        final String cacheKey = generatePreviewCacheKey(eTag, requestData, "pages");
+                        final byte[] bytes;
+                        if (1 == content.size()) {
+                            bytes = toAsciiBytes(toAsciiString(Base64.encodeBase64(content.get(0).getBytes(UTF8))));
+                        } else {
+                            final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(8192 << 1);
+                            baos.write(toAsciiBytes(toAsciiString(Base64.encodeBase64(content.get(0).getBytes(UTF8)))));
+                            final byte[] delim = DELIM;
+                            for (int i = 1; i < size; i++) {
+                                baos.write(delim);
+                                baos.write(toAsciiBytes(toAsciiString(Base64.encodeBase64(content.get(i).getBytes(UTF8)))));
+                            }
+                            bytes = baos.toByteArray();
+                        }
                         final String fileName = fileHolder.getName();
+                        final String fileType = fileHolder.getContentType();
                         // Specify task
-                        final AbstractTask<Void> task = new AbstractTask<Void>() {
+                        final Task<Void> task = new AbstractTask<Void>() {
 
                             @Override
                             public Void call() throws OXException {
-                                final CachedPreview preview = new CachedPreview(bytes, fileName, contentType.toString(), size);
-                                previewCache.save(eTag, preview, session.getUserId(), session.getContextId());
+                                final CachedPreview preview = new CachedPreview(bytes, fileName, fileType, bytes.length);
+                                previewCache.save(cacheKey, preview, session.getUserId(), session.getContextId());
                                 return null;
                             }
                         };
@@ -250,7 +300,9 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
                                 // Else the exception occurred within
                                 // afterExecute itself in which case we don't
                                 // want to call it again.
-                                throw (ex instanceof OXException ? (OXException) ex : AjaxExceptionCodes.UNEXPECTED_ERROR.create(ex, ex.getMessage()));
+                                throw (ex instanceof OXException ? (OXException) ex : AjaxExceptionCodes.UNEXPECTED_ERROR.create(
+                                    ex,
+                                    ex.getMessage()));
                             }
                         } else {
                             threadPool.submit(task);
@@ -275,6 +327,8 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
             } else {
                 result.setResultObject(previewDocument, getOutputFormat());
             }
+        } catch (final IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(fileHolder);
         }
@@ -362,6 +416,58 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    /**
+     * Finds the first occurrence of the pattern in the text.
+     */
+    private int indexOf(final byte[] data, final byte[] pattern, final int[] computeFailure) {
+        return indexOf(data, pattern, 0, computeFailure);
+    }
+
+    /**
+     * Finds the first occurrence of the pattern in the text.
+     */
+    private int indexOf(final byte[] data, final byte[] pattern, final int fromIndex, final int[] computedFailure) {
+        final int[] failure = null == computedFailure ? computeFailure(pattern) : computedFailure;
+        int j = 0;
+        final int dLen = data.length;
+        if (dLen == 0) {
+            return -1;
+        }
+        final int pLen = pattern.length;
+        for (int i = fromIndex; i < dLen; i++) {
+            while (j > 0 && pattern[j] != data[i]) {
+                j = failure[j - 1];
+            }
+            if (pattern[j] == data[i]) {
+                j++;
+            }
+            if (j == pLen) {
+                return i - pLen + 1;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Computes the failure function using a boot-strapping process, where the pattern is matched against itself.
+     */
+    private int[] computeFailure(byte[] pattern) {
+        final int length = pattern.length;
+        int[] failure = new int[length];
+        int j = 0;
+        for (int i = 1; i < length; i++) {
+            while (j > 0 && pattern[j] != pattern[i]) {
+                j = failure[j - 1];
+            }
+            if (pattern[j] == pattern[i]) {
+                j++;
+            }
+            failure[i] = j;
+        }
+
+        return failure;
     }
 
 }
