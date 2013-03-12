@@ -28,6 +28,7 @@ Import-Package: com.openexchange.caching,
  gnu.trove.iterator,
  gnu.trove.list,
  gnu.trove.list.linked,
+ org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
 Export-Package: com.openexchange.capabilities
