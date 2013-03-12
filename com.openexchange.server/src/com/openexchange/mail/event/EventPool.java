@@ -49,9 +49,15 @@
 
 package com.openexchange.mail.event;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.DelayQueue;
@@ -266,6 +272,14 @@ public final class EventPool implements Runnable {
         }
     }
 
+    private static final Set<String> RESERVED_NAMES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+        PushEventConstants.PROPERTY_CONTEXT,
+        PushEventConstants.PROPERTY_CONTENT_RELATED,
+        PushEventConstants.PROPERTY_FOLDER,
+        PushEventConstants.PROPERTY_IMMEDIATELY,
+        PushEventConstants.PROPERTY_SESSION,
+        PushEventConstants.PROPERTY_USER)));
+
     private void broadcastEvent(final PooledEvent pooledEvent) {
         final Dictionary<String, Object> properties = new Hashtable<String, Object>(6);
         properties.put(PushEventConstants.PROPERTY_CONTEXT, Integer.valueOf(pooledEvent.getContextId()));
@@ -275,6 +289,19 @@ public final class EventPool implements Runnable {
             pooledEvent.getAccountId(),
             pooledEvent.getFullname()));
         properties.put(PushEventConstants.PROPERTY_CONTENT_RELATED, Boolean.valueOf(pooledEvent.isContentRelated()));
+        /*
+         * Check for additional properties
+         */
+        final Map<String, Object> moreProps = pooledEvent.getProperties();
+        if (null != moreProps && !moreProps.isEmpty()) {
+            final Set<String> reservedNames = RESERVED_NAMES;
+            for (final Entry<String, Object> entry : moreProps.entrySet()) {
+                final String name = entry.getKey();
+                if (!reservedNames.contains(name)) {
+                    properties.put(name, entry.getValue());
+                }
+            }
+        }
         /*
          * Create event with push topic
          */
