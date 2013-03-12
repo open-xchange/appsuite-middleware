@@ -50,7 +50,7 @@
 package com.openexchange.admin.console.user;
 
 import java.rmi.RemoteException;
-
+import java.util.Set;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -90,10 +90,18 @@ public class Change extends ChangeCore {
             // Change user with access rights combination name
             oxusr.changeModuleAccess(ctx, usr, accesscombinationname, auth);
         }
+
+        final Set<String> capabilitiesToAdd = parseAndSetCapabilitiesToAdd(parser);
+        final Set<String> capabilitiesToRemove = parseAndSetCapabilitiesToRemove(parser);
+        if ((null != capabilitiesToAdd && !capabilitiesToAdd.isEmpty()) || (null != capabilitiesToRemove && !capabilitiesToRemove.isEmpty())) {
+            oxusr.changeCapabilities(ctx, usr, capabilitiesToAdd, capabilitiesToRemove, auth);
+        }
     }
 
     @Override
     protected void setFurtherOptions(final AdminParser parser) {
         setAddAccessRightCombinationNameOption(parser);
+        setCapsToAdd(parser);
+        setCapsToRemove(parser);
     }
 }

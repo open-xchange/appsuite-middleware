@@ -59,10 +59,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import au.com.bytecode.opencsv.CSVReader;
 import com.openexchange.admin.console.AdminParser;
@@ -441,6 +443,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     protected static final String OPT_ACCESSRIGHTS_COMBINATION_NAME = "access-combination-name";
 
+    protected static final String OPT_CAPABILITIES_TO_ADD = "capabilities-to-add";
+    protected static final String OPT_CAPABILITIES_TO_REMOVE = "capabilities-to-remove";
+
     protected static final String OPT_ACCESS_CALENDAR = "access-calendar";
     protected static final String OPT_ACCESS_CONTACTS = "access-contacts";
     protected static final String OPT_ACCESS_DELEGATE_TASKS = "access-delegate-tasks";
@@ -622,6 +627,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption spamFilterOption = null;
 
     protected CLIOption accessRightsCombinationName = null;
+
+    protected CLIOption capsToAdd = null;
+    protected CLIOption capsToRemove = null;
 
     // access to modules
     protected CLIOption accessCalendarOption = null;
@@ -1835,6 +1843,14 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.accessRightsCombinationName = setLongOpt(parser,OPT_ACCESSRIGHTS_COMBINATION_NAME,"Access combination name", true, false,false);
     }
 
+    protected void setCapsToAdd(final AdminParser parser) {
+        this.capsToAdd = setLongOpt(parser,OPT_CAPABILITIES_TO_ADD,"The capabilities to add", true, false,false);
+    }
+
+    protected void setCapsToRemove(final AdminParser parser) {
+        this.capsToAdd = setLongOpt(parser,OPT_CAPABILITIES_TO_REMOVE,"The capabilities to remove", true, false,false);
+    }
+
     protected final void setAliasesOption(final AdminParser admp){
         this.aliasesOption = setShortLongOpt(admp,OPT_ALIASES_SHORT,OPT_ALIASES_LONG,"Email aliases of the user", true, NeededQuadState.notneeded);
     }
@@ -1921,6 +1937,36 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     public String parseAndSetAccessCombinationName(final AdminParser parser) {
         return (String) parser.getOptionValue(this.accessRightsCombinationName);
+    }
+
+    public Set<String> parseAndSetCapabilitiesToAdd(final AdminParser parser) {
+        if (null == capsToAdd) {
+            setCapsToAdd(parser);
+        }
+        return parseAndSetCapabilities(capsToAdd, parser);
+    }
+
+    public Set<String> parseAndSetCapabilitiesToRemove(final AdminParser parser) {
+        if (null == capsToRemove) {
+            setCapsToRemove(parser);
+        }
+        return parseAndSetCapabilities(capsToRemove, parser);
+    }
+
+    private Set<String> parseAndSetCapabilities(final CLIOption cliOption, final AdminParser parser) {
+        final String s = (String) parser.getOptionValue(cliOption);
+        if (isEmpty(s)) {
+            return Collections.emptySet();
+        }
+        final String[] arr = s.split(" *, *", 0);
+        final Set<String> set = new HashSet<String>(arr.length);
+        for (int i = 0; i < arr.length; i++) {
+            final String cap = arr[i];
+            if (!isEmpty(cap)) {
+                set.add(toLowerCase(cap));
+            }
+        }
+        return set;
     }
 
     /**
@@ -3472,5 +3518,32 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
         checkRequired(idarray);
         return idarray;
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 }

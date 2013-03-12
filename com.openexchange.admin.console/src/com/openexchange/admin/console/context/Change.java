@@ -52,6 +52,7 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.Set;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -107,6 +108,11 @@ public class Change extends ChangeCore {
             throw new InvalidDataException(ACCESS_COMBINATION_NAME_AND_ACCESS_RIGHTS_DETECTED_ERROR);
         }
 
+        final Set<String> capabilitiesToAdd = parseAndSetCapabilitiesToAdd(parser);
+        final Set<String> capabilitiesToRemove = parseAndSetCapabilitiesToRemove(parser);
+        if ((null != capabilitiesToAdd && !capabilitiesToAdd.isEmpty()) || (null != capabilitiesToRemove && !capabilitiesToRemove.isEmpty())) {
+            oxctx.changeCapabilities(ctx, capabilitiesToAdd, capabilitiesToRemove, auth);
+        }
     }
 
     @Override
@@ -116,5 +122,7 @@ public class Change extends ChangeCore {
         ctxabs.setRemoveMappingOption(parser, false);
         setAddAccessRightCombinationNameOption(parser);
         setModuleAccessOptions(parser);
+        setCapsToAdd(parser);
+        setCapsToRemove(parser);
     }
 }
