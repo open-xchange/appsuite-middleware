@@ -101,6 +101,7 @@ public class PayloadTreeNode implements VisitablePayload, Serializable {
      * @throws IllegalArgumentException if the other PayloadTreeNode is null
      */
     public PayloadTreeNode(PayloadTreeNode otherTreeNode) {
+        this();
         if (otherTreeNode == null) {
             throw new IllegalArgumentException("Other PayloadTreeNode must not be null.");
         }
