@@ -80,8 +80,6 @@ public class CapabilitiesActivator extends HousekeepingActivator {
     /** The service look-up */
     public static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
 
-    private volatile CapabilityServiceImpl capService;
-
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, DatabaseService.class, TimerService.class, CacheService.class };
@@ -92,7 +90,10 @@ public class CapabilitiesActivator extends HousekeepingActivator {
         SERVICES.set(this);
         final ServiceTracker<CapabilityChecker, CapabilityChecker> capCheckers = track(CapabilityChecker.class);
 
-        final CapabilityServiceImpl capService = new CapabilityServiceImpl(this, context) {
+        /*
+         * Create & register CapabilityService
+         */
+        final CapabilityServiceImpl capService = new CapabilityServiceImpl(this) {
 
             @Override
             public List<CapabilityChecker> getCheckers() {
@@ -109,9 +110,6 @@ public class CapabilitiesActivator extends HousekeepingActivator {
                 return checkers;
             }
         };
-        capService.startUp();
-        this.capService = capService;
-
         registerService(CapabilityService.class, capService);
 
         track(Capability.class, new SimpleRegistryListener<Capability>() {
@@ -185,11 +183,6 @@ public class CapabilitiesActivator extends HousekeepingActivator {
         if (null != cacheService) {
             cacheService.freeCache("CapabilitiesContext");
             cacheService.freeCache("CapabilitiesUser");
-        }
-        final CapabilityServiceImpl capService = this.capService;
-        if (null != capService) {
-            capService.shutDown();
-            this.capService = null;
         }
         super.stopBundle();
     }

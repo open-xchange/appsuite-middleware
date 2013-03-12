@@ -59,7 +59,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import org.osgi.framework.BundleContext;
+import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
@@ -72,7 +72,6 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -83,6 +82,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class CapabilityServiceImpl implements CapabilityService {
 
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(CapabilityServiceImpl.class);
+
     private static final Object PRESENT = new Object();
 
     private static final String REGION_NAME_CONTEXT = "CapabilitiesContext";
@@ -91,18 +92,13 @@ public class CapabilityServiceImpl implements CapabilityService {
     private final ConcurrentMap<String, Capability> capabilities;
     private final ConcurrentMap<String, Object> declaredCapabilities;
 
-    private volatile ScheduledTimerTask timerTask;
-
     private final ServiceLookup services;
     private volatile Boolean autologin;
 
     /**
      * Initializes a new {@link CapabilityServiceImpl}.
-     *
-     * @param capabilitiesActivator
-     * @param context
      */
-    public CapabilityServiceImpl(ServiceLookup services, BundleContext context) {
+    public CapabilityServiceImpl(final ServiceLookup services) {
         super();
         this.services = services;
         capabilities = new ConcurrentHashMap<String, Capability>();
@@ -117,6 +113,7 @@ public class CapabilityServiceImpl implements CapabilityService {
         try {
             return service.getCache(REGION_NAME_CONTEXT);
         } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
             return null;
         }
     }
@@ -129,22 +126,9 @@ public class CapabilityServiceImpl implements CapabilityService {
         try {
             return service.getCache(REGION_NAME_USER);
         } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
             return null;
         }
-    }
-
-    /**
-     * Start-up.
-     */
-    public void startUp() {
-        // Nope
-    }
-
-    /**
-     * Shut-down.
-     */
-    public void shutDown() {
-        // Nope
     }
 
     private boolean autologin() {
@@ -216,9 +200,13 @@ public class CapabilityServiceImpl implements CapabilityService {
                     removees.add(val);
                 } else {
                     if ('+' == firstChar) {
-                        set.add(toLowerCase(sCap.substring(1)));
+                        final String cap = toLowerCase(sCap.substring(1));
+                        set.add(cap);
+                        removees.remove(cap);
                     } else {
-                        set.add(toLowerCase(sCap));
+                        final String cap = toLowerCase(sCap);
+                        set.add(cap);
+                        removees.remove(cap);
                     }
                 }
             }
