@@ -185,12 +185,17 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                         if (!autoRename) {
                             throw result.error;
                         }
+                        final boolean useParenthesis = PARENTHESIS_CAPABLE.contains(cts);
                         int count = 2;
                         final StringBuilder nameBuilder = new StringBuilder(toCreate.getName());
                         final int resetLen = nameBuilder.length();
                         do {
                             nameBuilder.setLength(resetLen);
-                            nameBuilder.append(" ").append(count++);
+                            if (useParenthesis) {
+                                nameBuilder.append(" (").append(count++).append(')');
+                            } else {
+                                nameBuilder.append(" ").append(count++);
+                            }
                             result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, parentId, openedStorages);
                         } while (null != result);
                         toCreate.setName(nameBuilder.toString());
@@ -205,12 +210,17 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                             }
                             throw result.error;
                         }
+                        final boolean useParenthesis = PARENTHESIS_CAPABLE.contains(cts);
                         int count = 2;
                         final StringBuilder nameBuilder = new StringBuilder(toCreate.getName());
                         final int resetLen = nameBuilder.length();
                         do {
                             nameBuilder.setLength(resetLen);
-                            nameBuilder.append(" ").append(count++);
+                            if (useParenthesis) {
+                                nameBuilder.append(" (").append(count++).append(')');
+                            } else {
+                                nameBuilder.append(" ").append(count++);
+                            }
                             result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, parentId, openedStorages);
                         } while (null != result);
                         toCreate.setName(nameBuilder.toString());
@@ -221,12 +231,17 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                 if (autoRename) {
                     CheckForDuplicateResult result = getCheckForDuplicateResult(toCreate.getName(), treeId, parentId, openedStorages);
                     if (null != result) {
+                        final boolean useParenthesis = PARENTHESIS_CAPABLE.contains(cts);
                         int count = 2;
                         final StringBuilder nameBuilder = new StringBuilder(toCreate.getName());
                         final int resetLen = nameBuilder.length();
                         do {
                             nameBuilder.setLength(resetLen);
-                            nameBuilder.append(" ").append(count++);
+                            if (useParenthesis) {
+                                nameBuilder.append(" (").append(count++).append(')');
+                            } else {
+                                nameBuilder.append(" ").append(count++);
+                            }
                             result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, parentId, openedStorages);
                         } while (null != result);
                         toCreate.setName(nameBuilder.toString());

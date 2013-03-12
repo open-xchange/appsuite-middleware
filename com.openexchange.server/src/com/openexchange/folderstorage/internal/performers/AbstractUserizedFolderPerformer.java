@@ -49,9 +49,13 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
@@ -64,6 +68,11 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.CalendarContentType;
+import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
+import com.openexchange.folderstorage.database.contentType.TaskContentType;
+import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.UserizedFolderImpl;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -145,8 +154,18 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     }
 
     /**
+     * Those content type identifiers which are capable to accept folder names containing parenthesis characters.
+     */
+    protected static final Set<String> PARENTHESIS_CAPABLE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+        CalendarContentType.getInstance().toString(),
+        TaskContentType.getInstance().toString(),
+        ContactContentType.getInstance().toString(),
+        InfostoreContentType.getInstance().toString(),
+        FileStorageContentType.getInstance().toString())));
+
+    /**
      * Gets the optional folder service decorator.
-     *
+     * 
      * @return The folder service decorator or <code>null</code>
      */
     protected final FolderServiceDecorator getDecorator() {
