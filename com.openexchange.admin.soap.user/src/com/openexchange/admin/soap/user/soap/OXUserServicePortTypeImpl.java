@@ -12,8 +12,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -75,6 +77,77 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         } catch (final DatabaseUpdateException e) {
             throw new DatabaseUpdateException_Exception(e.getMessage(), e);
         }
+    }
+
+    @Override
+    public void changeCapabilities(final Context ctx, final User user,final String capsToAdd, final String capsToRemove, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception {
+        final OXUserInterface userInterface = getUserInterface();
+        try {
+            userInterface.changeCapabilities(soap2Context(ctx), soap2User(user), parseToSet(capsToAdd), parseToSet(capsToRemove), soap2Credentials(auth));
+        } catch (final RemoteException e) {
+            throw new RemoteException_Exception(e.getMessage(), e);
+        } catch (final InvalidCredentialsException e) {
+            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+        } catch (final NoSuchContextException e) {
+            throw new NoSuchContextException_Exception(e.getMessage(), e);
+        } catch (final StorageException e) {
+            throw new StorageException_Exception(e.getMessage(), e);
+        } catch (final InvalidDataException e) {
+            throw new InvalidDataException_Exception(e.getMessage(), e);
+        } catch (final DatabaseUpdateException e) {
+            throw new DatabaseUpdateException_Exception(e.getMessage(), e);
+        } catch (final NoSuchUserException e) {
+            throw new NoSuchUserException_Exception(e.getMessage(), e);
+        }
+    }
+
+    private Set<String> parseToSet(final String csv) {
+        String s = csv;
+        if (isEmpty(s)) {
+            return Collections.emptySet();
+        }
+        s = s.trim();
+        if ('"' == s.charAt(0)) {
+            if (s.length() <= 1) {
+                return Collections.emptySet();
+            }
+            s = s.substring(1);
+            if (isEmpty(s)) {
+                return Collections.emptySet();
+            }
+        }
+        if ('"' == s.charAt(s.length() - 1)) {
+            if (s.length() <= 1) {
+                return Collections.emptySet();
+            }
+            s = s.substring(0, s.length() - 1);
+            if (isEmpty(s)) {
+                return Collections.emptySet();
+            }
+        }
+        // Split
+        final String[] arr = s.split(" *, *", 0);
+        final Set<String> set = new HashSet<String>(arr.length);
+        for (int i = 0; i < arr.length; i++) {
+            final String cap = arr[i];
+            if (!isEmpty(cap)) {
+                set.add(toLowerCase(cap));
+            }
+        }
+        return set;
+    }
+
+    private String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
     @Override
@@ -520,7 +593,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         }
 
         if (null != soapUser.getAliases()) {
-            for (String alias : soapUser.getAliases()) {
+            for (final String alias : soapUser.getAliases()) {
                 if (null != alias) {
                     user.addAlias(alias);
                 }
@@ -682,7 +755,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             user.setImapServer(tmp);
         }
 
-        Integer i = soapUser.getImapPort();
+        final Integer i = soapUser.getImapPort();
         if (i != null) {
             final String s = user.getImapServerString();
             if (!isEmpty(s)) {
@@ -761,7 +834,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         if (tmp != null) {
             user.setMail_folder_trash_name(tmp);
         }
-        Boolean mailEnabled = soapUser.isMailenabled();
+        final Boolean mailEnabled = soapUser.isMailenabled();
         if (null != mailEnabled) {
             user.setMailenabled(mailEnabled);
         }
@@ -1341,7 +1414,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         ret.setId(itg);
 
         if (null != soapContext.getLoginMappings()) {
-            for (String loginMapping : soapContext.getLoginMappings()) {
+            for (final String loginMapping : soapContext.getLoginMappings()) {
                 if (null != loginMapping) {
                     ret.addLoginMapping(loginMapping);
                 }
@@ -1411,7 +1484,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             ret.setLogin(tmp);
         }
 
-        Boolean bool = soapDatabase.isMaster();
+        final Boolean bool = soapDatabase.isMaster();
         if (bool != null) {
             ret.setMaster(bool);
         }

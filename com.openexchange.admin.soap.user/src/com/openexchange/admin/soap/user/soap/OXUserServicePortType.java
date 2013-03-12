@@ -45,6 +45,23 @@ public interface OXUserServicePortType {
         Change parameters
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception;
 
+    @Action(input = "urn:changeCapabilities", output = "urn:changeCapabilitiesResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:changeCapabilitiesException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:changeCapabilitiesInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:changeCapabilitiesInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:changeCapabilitiesNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:changeCapabilitiesRemoteException"), @FaultAction(className = NoSuchUserException_Exception.class, value = "urn:changeCapabilitiesNoSuchUserException"), @FaultAction(className = DatabaseUpdateException_Exception.class, value = "urn:changeCapabilitiesDatabaseUpdateException")})
+    @RequestWrapper(localName = "changeCapabilities", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.user.soap.ChangeCapabilities")
+    @WebMethod(action = "urn:changeCapabilities")
+    public void changeCapabilities(
+        @WebParam(name = "ctx", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.Context ctx,
+        @WebParam(name = "user", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.User user,
+        @WebParam(name = "capsToAdd", targetNamespace = "http://soap.admin.openexchange.com")
+        java.lang.String capsToAdd,
+        @WebParam(name = "capsToRemove", targetNamespace = "http://soap.admin.openexchange.com")
+        java.lang.String capsToRemove,
+        @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
+        com.openexchange.admin.soap.user.dataobjects.Credentials auth
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception;
+
+    
     @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
     @Action(input = "urn:createByModuleAccessName", output = "urn:createByModuleAccessNameResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:createByModuleAccessNameStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:createByModuleAccessNameInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:createByModuleAccessNameInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:createByModuleAccessNameNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:createByModuleAccessNameRemoteException"), @FaultAction(className = DatabaseUpdateException_Exception.class, value = "urn:createByModuleAccessNameDatabaseUpdateException")})
     @RequestWrapper(localName = "createByModuleAccessName", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.user.soap.CreateByModuleAccessName")
