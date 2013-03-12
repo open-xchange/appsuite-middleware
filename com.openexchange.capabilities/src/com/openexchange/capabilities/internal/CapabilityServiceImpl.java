@@ -283,6 +283,9 @@ public class CapabilityServiceImpl implements CapabilityService {
     }
 
     private Set<String> getContextCaps(final int contextId) throws OXException {
+        if (contextId <= 0) {
+            return Collections.emptySet();
+        }
         final Cache cache = optContextCache();
         if (null == cache) {
             return loadContextCaps(contextId);
@@ -321,6 +324,8 @@ public class CapabilityServiceImpl implements CapabilityService {
             return set;
         } catch (final SQLException e) {
             throw CapabilityExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw CapabilityExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, con);
@@ -328,6 +333,9 @@ public class CapabilityServiceImpl implements CapabilityService {
     }
 
     private Set<String> getUserCaps(final int userId, final int contextId) throws OXException {
+        if (contextId <= 0 || userId <= 0) {
+            return Collections.emptySet();
+        }
         final Cache cache = optUserCache();
         if (null == cache) {
             return loadUserCaps(userId, contextId);
@@ -367,6 +375,8 @@ public class CapabilityServiceImpl implements CapabilityService {
             return set;
         } catch (final SQLException e) {
             throw CapabilityExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw CapabilityExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, con);
