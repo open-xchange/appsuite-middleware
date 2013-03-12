@@ -62,6 +62,7 @@ import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -118,7 +119,10 @@ public final class CreateAction extends AbstractFolderAction {
          * Create
          */
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        final FolderResponse<String> newIdResponse = folderService.createFolder(folder, session);
+        /*
+         * Parse parameters
+         */
+        final FolderResponse<String> newIdResponse = folderService.createFolder(folder, session, new FolderServiceDecorator().put("autorename", request.getParameter("autorename")));
         final String newId = newIdResponse.getResponse();
         return new AJAXRequestResult(newId, folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC()).addWarnings(newIdResponse.getWarnings());
     }

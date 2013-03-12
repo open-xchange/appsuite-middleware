@@ -224,6 +224,24 @@ public final class IndexAJAXRequest {
         }
         return ret;
     }
+    
+    public int[] optIntArray(final String name) throws OXException {
+        final String parameter = request.getParameter(name);
+        if (null == parameter) {
+            return null;
+        }
+        
+        final String[] sa = SPLIT.split(parameter, 0);
+        final int[] ret = new int[sa.length];
+        for (int i = 0; i < sa.length; i++) {
+            try {
+                ret[i] = Integer.parseInt(sa[i].trim());
+            } catch (final NumberFormatException e) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
+            }
+        }
+        return ret;
+    }
 
     /**
      * Checks for presence of comma-separated <code>String</code> list.

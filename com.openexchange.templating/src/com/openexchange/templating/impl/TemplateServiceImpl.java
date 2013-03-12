@@ -76,7 +76,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
@@ -89,6 +88,8 @@ import com.openexchange.templating.TemplateService;
 import com.openexchange.templating.TemplatingHelper;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import freemarker.cache.FileTemplateLoader;
+import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
@@ -151,7 +152,7 @@ public class TemplateServiceImpl implements TemplateService {
             }
             // A file is accessed in a foreign directory
             final OXException e = TemplateErrorMessage.AccessDenied.create();
-            LOG.error(new StringAllocator(64).append(e.getErrorCode()).append(": Acces to file denied: \"").append(templatePath).append("\" exceptionID=").append(e.getExceptionId()).toString());
+            LOG.error(new StringBuilder(64).append(e.getErrorCode()).append(": Acces to file denied: \"").append(templatePath).append("\" exceptionID=").append(e.getExceptionId()).toString());
             throw e;
         } catch (final IOException e) {
             throw TemplateErrorMessage.IOException.create(e, e.getMessage());
@@ -196,7 +197,7 @@ public class TemplateServiceImpl implements TemplateService {
         return retval;
 
     }
-    
+
     private void checkTrustLevel(OXTemplateImpl template) {
         String trustExpression = config.getProperty(TRUSTED_PROPERTY);
         if (trustExpression == null) {
@@ -207,20 +208,20 @@ public class TemplateServiceImpl implements TemplateService {
             template.setTrusted(true);
             return;
         }
-        
+
         if (trustExpression.indexOf("server") != -1 && template.getLevel() == TemplateLevel.SERVER) {
             template.setTrusted(true);
             return;
         }
-        
+
         if (trustExpression.indexOf("user") != -1 && template.getLevel() == TemplateLevel.USER) {
             template.setTrusted(true);
             return;
         }
-        
+
         template.setTrusted(false);
     }
-    
+
     private String extractProperties(String text, Properties properties) throws OXException {
         StringBuilder keep = new StringBuilder();
         StringBuilder props = new StringBuilder();
@@ -245,7 +246,7 @@ public class TemplateServiceImpl implements TemplateService {
                 keep.append(line).append('\n');
             }
         }
-        
+
         try {
             if (state > 0) {
                 properties.load(new StringReader(props.toString()));                
@@ -253,7 +254,7 @@ public class TemplateServiceImpl implements TemplateService {
         } catch (IOException e) {
             throw TemplateErrorMessage.IOException.create();
         }
-        
+
         return keep.toString();
     }
 
@@ -396,8 +397,8 @@ public class TemplateServiceImpl implements TemplateService {
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new FileReader(templateFile), 2048);
-            final StringAllocator builder = new StringAllocator(2048);
-            String line;
+            final StringBuilder builder = new StringBuilder(2048);
+            String line = null;
             while ((line = reader.readLine()) != null) {
                 builder.append(line).append('\n');
             }

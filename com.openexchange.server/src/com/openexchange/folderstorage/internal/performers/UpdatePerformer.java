@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -158,7 +159,22 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     /*
                      * Check for duplicate
                      */
-                    checkForDuplicate(folder.getName(), treeId, newParentId, openedStorages);
+                    CheckForDuplicateResult result = getCheckForDuplicateResult(folder.getName(), treeId, newParentId, openedStorages);
+                    if (null != result) {
+                        final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
+                        if (!autoRename) {
+                            throw result.error;
+                        }
+                        int count = 2;
+                        final StringBuilder nameBuilder = new StringBuilder(folder.getName());
+                        final int resetLen = nameBuilder.length();
+                        do {
+                            nameBuilder.setLength(resetLen);
+                            nameBuilder.append(" (").append(count++).append(')');
+                            result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, newParentId, openedStorages);
+                        } while (null != result);
+                        folder.setName(nameBuilder.toString());
+                    }
                 }
             }
             final boolean rename;
@@ -169,7 +185,22 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     /*
                      * Check for duplicate
                      */
-                    checkForDuplicate(newName, treeId, storageFolder.getParentID(), openedStorages);
+                    CheckForDuplicateResult result = getCheckForDuplicateResult(newName, treeId, storageFolder.getParentID(), openedStorages);
+                    if (null != result) {
+                        final boolean autoRename = AJAXRequestDataTools.parseBoolParameter(getDecoratorStringProperty("autorename"));
+                        if (!autoRename) {
+                            throw result.error;
+                        }
+                        int count = 2;
+                        final StringBuilder nameBuilder = new StringBuilder(folder.getName());
+                        final int resetLen = nameBuilder.length();
+                        do {
+                            nameBuilder.setLength(resetLen);
+                            nameBuilder.append(" (").append(count++).append(')');
+                            result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, storageFolder.getParentID(), openedStorages);
+                        } while (null != result);
+                        folder.setName(nameBuilder.toString());
+                    }
                 }
             }
             final boolean changePermissions;

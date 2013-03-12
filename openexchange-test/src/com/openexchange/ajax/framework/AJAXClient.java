@@ -62,7 +62,7 @@ import com.openexchange.exception.OXException;
 /**
  * This class implements the temporary memory of an AJAX client and provides some convenience methods to determine user specific values for
  * running some tests more easily.
- *
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AJAXClient {
@@ -79,9 +79,9 @@ public class AJAXClient {
 
     private String protocol = null;
 
-    public AJAXClient(final AJAXSession session) {
+    public AJAXClient(final AJAXSession session, final boolean logout) {
         this.session = session;
-        this.mustLogout = session.mustLogout();
+        this.mustLogout = logout;
     }
 
     public AJAXClient(final User user) throws OXException, OXException, IOException, JSONException {
@@ -90,12 +90,12 @@ public class AJAXClient {
         if (null == login) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(user.getLogin().getPropertyName());
         }
-        if(!login.contains("@")){
+        if (!login.contains("@")) {
             final String context = AJAXConfig.getProperty(Property.CONTEXTNAME);
             if (null == context) {
                 throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(Property.CONTEXTNAME.getPropertyName());
             }
-            login += "@"+context;
+            login += "@" + context;
         }
         final String password = AJAXConfig.getProperty(user.getPassword());
         if (null == password) {

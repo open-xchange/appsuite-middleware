@@ -56,6 +56,7 @@ import static com.openexchange.server.impl.OCLPermission.DELETE_ALL_OBJECTS;
 import static com.openexchange.server.impl.OCLPermission.READ_ALL_OBJECTS;
 import static com.openexchange.server.impl.OCLPermission.READ_FOLDER;
 import static com.openexchange.server.impl.OCLPermission.WRITE_ALL_OBJECTS;
+import gnu.trove.ConcurrentTIntObjectHashMap;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntIntMap;
@@ -236,22 +237,33 @@ public final class DatabaseFolderStorage implements FolderStorage {
          */
     }
 
+    private static final ConcurrentTIntObjectHashMap<Long> STAMPS = new ConcurrentTIntObjectHashMap<Long>(128);
+    private static final long DELAY = 60 * 60 * 1000;
     private static final int MAX = 3;
 
     @Override
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws OXException {
-        final DatabaseService databaseService = DatabaseServiceRegistry.getService(DatabaseService.class, true);
         final int contextId = storageParameters.getContextId();
+        final long now = System.currentTimeMillis();
+        final Long stamp = STAMPS.get(contextId);
+        if ((null != stamp) && ((stamp.longValue() + DELAY) > now)) {
+            return;
+        }
+        // Delay exceeded
+        STAMPS.remove(contextId);
+        final DatabaseService databaseService = DatabaseServiceRegistry.getService(DatabaseService.class, true);
         Connection con = null;
         boolean close = true;
+        boolean readOnly = true;
         try {
             {
                 final ConnectionMode conMode = optParameter(ConnectionMode.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
-                if (null != conMode && conMode.readWrite) {
+                if (null != conMode) {
                     con = conMode.connection;
+                    readOnly = !conMode.readWrite;
                     close = false;
                 } else {
-                    con = databaseService.getWritable(contextId);
+                    con = databaseService.getReadOnly(contextId);
                 }
             }
             final ServerSession session = ServerSessionAdapter.valueOf(storageParameters.getSession());
@@ -263,6 +275,24 @@ public final class DatabaseFolderStorage implements FolderStorage {
              */
             final Context context = session.getContext();
             int[] nonExistingParents = OXFolderSQL.getNonExistingParents(context, con);
+            if (null == nonExistingParents || 0 == nonExistingParents.length) {
+                return;
+            }
+            /*
+             * Upgrade to read-write connection & repeat if check was performed with read-only connection
+             */
+            if (readOnly) {
+                if (close) {
+                    databaseService.backReadOnly(contextId, con);
+                }
+                con = databaseService.getWritable(contextId);
+                readOnly = false;
+                // Query again...
+                nonExistingParents = OXFolderSQL.getNonExistingParents(context, con);
+                if (null == nonExistingParents || 0 == nonExistingParents.length) {
+                    return;
+                }
+            }
             /*
              * Some variables
              */
@@ -270,7 +300,6 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final OXFolderManager manager = OXFolderManager.getInstance(session, con, con);
             final OXFolderAccess folderAccess = getFolderAccess(context, con);
             final int userId = session.getUserId();
-            final long now = System.currentTimeMillis();
             /*
              * Iterate folders
              */
@@ -300,8 +329,13 @@ public final class DatabaseFolderStorage implements FolderStorage {
             } while (++runCount <= MAX && null != nonExistingParents && nonExistingParents.length > 0);
         } finally {
             if (null != con && close) {
-                databaseService.backWritable(contextId, con);
+                if (readOnly) {
+                    databaseService.backReadOnly(contextId, con);
+                } else {
+                    databaseService.backWritable(contextId, con);
+                }
             }
+            STAMPS.put(contextId, Long.valueOf(now));
         }
     }
 

@@ -82,7 +82,9 @@ public enum AtmosphereExceptionCode implements OXExceptionCode {
     /** Malformed Presence Data \"%1$s\" */
     PRESENCE_DATA_MALFORMED(AtmosphereExceptionMessage.PRESENCE_DATA_MALFORMED_MSG, CATEGORY_ERROR, 10),
     /** Malformed Presence Element: \"%1$s\" */
-    PRESENCE_DATA_ELEMENT_MALFORMED(AtmosphereExceptionMessage.PRESENCE_DATA_ELEMENT_MALFORMED_MSG, CATEGORY_ERROR, 11)
+    PRESENCE_DATA_ELEMENT_MALFORMED(AtmosphereExceptionMessage.PRESENCE_DATA_ELEMENT_MALFORMED_MSG, CATEGORY_ERROR, 11),
+    /** Illegal value \"%1$s\" for key \"%2$s\" in: \"%3$s\" */
+    ILLEGAL_VALUE(AtmosphereExceptionMessage.ILLEGAL_VALUE_MSG, CATEGORY_ERROR, 12)
     ;
 
     private final String message;

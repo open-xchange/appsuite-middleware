@@ -54,6 +54,7 @@ import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,6 +64,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
+import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
@@ -80,6 +82,8 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FileStreamHandler;
+import com.openexchange.file.storage.composition.FileStreamHandlerRegistry;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAccess;
 import com.openexchange.groupware.results.AbstractTimedResult;
@@ -98,11 +102,31 @@ import com.openexchange.tx.AbstractService;
 import com.openexchange.tx.TransactionException;
 
 /**
- * {@link CompositingIDBasedFileAccess}
+ * {@link AbstractCompositingIDBasedFileAccess}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public abstract class CompositingIDBasedFileAccess extends AbstractService<Transaction> implements IDBasedIgnorableVersionFileAccess {
+public abstract class AbstractCompositingIDBasedFileAccess extends AbstractService<Transaction> implements IDBasedIgnorableVersionFileAccess {
+
+    private static final AtomicReference<FileStreamHandlerRegistry> HANDLER_REGISTRY = new AtomicReference<FileStreamHandlerRegistry>();
+
+    /**
+     * Sets the registry reference.
+     * 
+     * @param streamHandlerRegistry The registry or <code>null</code>
+     */
+    public static void setHandlerRegistry(final FileStreamHandlerRegistry streamHandlerRegistry) {
+        HANDLER_REGISTRY.set(streamHandlerRegistry);
+    }
+
+    /**
+     * Gets the registry reference.
+     * 
+     * @return The registry or <code>null</code>
+     */
+    public static FileStreamHandlerRegistry getStreamHandlerRegistry() {
+        return HANDLER_REGISTRY.get();
+    }
 
     protected Session session;
 
@@ -110,11 +134,11 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     private final ThreadLocal<List<FileStorageAccountAccess>> accessesToClose = new ThreadLocal<List<FileStorageAccountAccess>>();
 
     /**
-     * Initializes a new {@link CompositingIDBasedFileAccess}.
+     * Initializes a new {@link AbstractCompositingIDBasedFileAccess}.
      *
      * @param session The associated session
      */
-    protected CompositingIDBasedFileAccess(final Session session) {
+    protected AbstractCompositingIDBasedFileAccess(final Session session) {
         super();
         this.session = session;
         connectedAccounts.set(new HashMap<String, FileStorageAccountAccess>());
@@ -161,8 +185,20 @@ public abstract class CompositingIDBasedFileAccess extends AbstractService<Trans
     @Override
     public InputStream getDocument(final String id, final String version) throws OXException {
         final FileID fileID = new FileID(id);
-
-        return getFileAccess(fileID.getService(), fileID.getAccountId()).getDocument(fileID.getFolderId(), fileID.getFileId(), version);
+        final FileStreamHandlerRegistry registry = getStreamHandlerRegistry();
+        if (null == registry) {
+            return getFileAccess(fileID.getService(), fileID.getAccountId()).getDocument(fileID.getFolderId(), fileID.getFileId(), version);
+        }
+        final Collection<FileStreamHandler> handlers = registry.getHandlers();
+        if (null == handlers || handlers.isEmpty()) {
+            return getFileAccess(fileID.getService(), fileID.getAccountId()).getDocument(fileID.getFolderId(), fileID.getFileId(), version);
+        }
+        // Handle stream
+        InputStream inputStream = getFileAccess(fileID.getService(), fileID.getAccountId()).getDocument(fileID.getFolderId(), fileID.getFileId(), version);
+        for (final FileStreamHandler streamHandler : handlers) {
+            inputStream = streamHandler.handleDocumentStream(inputStream, fileID, version);
+        }
+        return inputStream;
     }
 
     @Override

@@ -736,7 +736,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, Metadata[] modifiedColumns, final ServerSession sessionObj) throws OXException {
-        saveDocument(document, data, sequenceNumber, modifiedColumns, true, sessionObj);
+        saveDocument(document, data, sequenceNumber, modifiedColumns, false, sessionObj);
     }
 
     @Override

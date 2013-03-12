@@ -213,7 +213,7 @@ public class RoundtripTest extends AbstractRMITest {
 
         AJAXConfig.init();
         userSession = performLogin("user@" + srcCtx.getName() , "secret");
-        userClient = new AJAXClient(userSession);
+        userClient = new AJAXClient(userSession, false);
 
         Create.createPrivateFolder("Private folder test", Types.APPOINTMENT, userClient.getValues().getUserId());
 
@@ -423,8 +423,8 @@ public class RoundtripTest extends AbstractRMITest {
     private void compareUsers(final User orig, final User copied) throws Exception {
         final AJAXSession origSession = performLogin("user@" + srcCtx.getName(), "secret");
         final AJAXSession copiedSession = performLogin("user@" + dstCtx.getName(), "secret");
-        origClient = new AJAXClient(origSession);
-        copiedClient = new AJAXClient(copiedSession);
+        origClient = new AJAXClient(origSession, true);
+        copiedClient = new AJAXClient(copiedSession, true);
 
         final GetRequest origLocaleRequest = new GetRequest(Tree.Language);
         final GetRequest copiedLocaleRequest = new GetRequest(Tree.Language);

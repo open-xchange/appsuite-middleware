@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class MailIndexChecker implements CapabilityChecker {
     
-    public static final String CAPABILITY = "searchindex-mail";
+    public static final String CAPABILITY = "indexedSearch-mail";
     
     private final ServiceLookup serviceLookup;
     

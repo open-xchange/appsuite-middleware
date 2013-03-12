@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.event;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.push.PushEventConstants;
@@ -62,26 +64,17 @@ import com.openexchange.session.Session;
 public final class PooledEvent implements Delayed {
 
     private volatile long stamp;
-
     private final int contextId;
-
     private final int userId;
-
     private final int accountId;
-
     private final String topic;
-
     private final String fullname;
-
     private final Session session;
-
     private final boolean contentRelated;
-
     private final boolean immediateDelivery;
-
     private final int hash;
-
     private boolean async;
+    private final Map<String, Object> properties;
 
     /**
      * Initializes a new {@link PooledEvent} with {@link PushEventConstants#TOPIC default topic}.
@@ -111,6 +104,7 @@ public final class PooledEvent implements Delayed {
      */
     public PooledEvent(final String topic, final int contextId, final int userId, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final Session session) {
         super();
+        properties = new HashMap<String, Object>(4);
         async = true;
         this.topic = topic;
         stamp = System.currentTimeMillis();
@@ -132,6 +126,45 @@ public final class PooledEvent implements Delayed {
         result = prime * result + (contentRelated ? 1 : 0);
         result = prime * result + (immediateDelivery ? 1 : 0);
         hash = result;
+    }
+
+    /**
+     * Puts given property.
+     *
+     * @param name The property name
+     * @param value The property value
+     * @return This pooled event with property applied
+     */
+    public PooledEvent putProperty(final String name, final Object value) {
+        properties.put(name, value);
+        return this;
+    }
+
+    /**
+     * Gets given property.
+     *
+     * @param name The property name
+     */
+    public Object getProperty(final String name) {
+        return properties.get(name);
+    }
+
+    /**
+     * Removes given property.
+     *
+     * @param name The property name
+     */
+    public void removesProperty(final String name) {
+        properties.remove(name);
+    }
+
+    /**
+     * Gets the properties.
+     *
+     * @return The properties
+     */
+    public Map<String, Object> getProperties() {
+        return properties;
     }
 
     /**

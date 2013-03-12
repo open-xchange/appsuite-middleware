@@ -70,13 +70,14 @@ import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
- *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class RedirectTest extends AbstractAJAXSession {
 
     private String login;
+
     private String password;
+
     private boolean insecure;
 
     public RedirectTest(final String name) {
@@ -90,7 +91,9 @@ public class RedirectTest extends AbstractAJAXSession {
         password = AJAXConfig.getProperty(Property.PASSWORD);
         Init.injectProperty();
         ConfigurationService configService = new ConfigurationImpl();
-        final String value = configService.getProperty(ConfigurationProperty.INSECURE.getPropertyName(), ConfigurationProperty.INSECURE.getDefaultValue());
+        final String value = configService.getProperty(
+            ConfigurationProperty.INSECURE.getPropertyName(),
+            ConfigurationProperty.INSECURE.getDefaultValue());
         insecure = Boolean.parseBoolean(value);
     }
 
@@ -103,7 +106,7 @@ public class RedirectTest extends AbstractAJAXSession {
 
     public void testRedirect() throws Throwable {
         final AJAXSession session = new AJAXSession();
-        final AJAXClient myClient = new AJAXClient(session);
+        final AJAXClient myClient = new AJAXClient(session, false);
         try {
             // Create session.
             LoginResponse lResponse = myClient.execute(new LoginRequest(

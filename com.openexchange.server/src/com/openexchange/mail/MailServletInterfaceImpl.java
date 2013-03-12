@@ -3026,6 +3026,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private static final MailListField[] FIELDS_COLOR_LABEL = new MailListField[] { MailListField.COLOR_LABEL };
 
+    private static final Map<String, Object> MORE_PROPS_UPDATE_LABEL;
+    static {
+        final Map<String, Object> m = new HashMap<String, Object>(1, 1f);
+        m.put("operation", "updateMessageColorLabel");
+        MORE_PROPS_UPDATE_LABEL = Collections.unmodifiableMap(m);
+    }
+
     @Override
     public void updateMessageColorLabel(final String folder, final String[] mailIDs, final int newColorLabel) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
@@ -3047,7 +3054,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             ids = mailIDs;
             messageStorage.updateMessageColorLabel(fullname, ids, newColorLabel);
         }
-        postEvent(PushEventConstants.TOPIC_ATTR, accountId, fullname, true, true, false);
+        postEvent(PushEventConstants.TOPIC_ATTR, accountId, fullname, true, true, false, MORE_PROPS_UPDATE_LABEL);
         /*
          * Update caches
          */
@@ -3090,6 +3097,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return messages[0].getMailId();
     }
 
+    private static final Map<String, Object> MORE_PROPS_UPDATE_FLAGS;
+    static {
+        final Map<String, Object> m = new HashMap<String, Object>(1, 1f);
+        m.put("operation", "updateMessageFlags");
+        MORE_PROPS_UPDATE_FLAGS = Collections.unmodifiableMap(m);
+    }
+
     @Override
     public void updateMessageFlags(final String folder, final String[] mailIDs, final int flagBits, final boolean flagVal) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
@@ -3111,7 +3125,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             ids = mailIDs;
             messageStorage.updateMessageFlags(fullname, ids, flagBits, flagVal);
         }
-        postEvent(PushEventConstants.TOPIC_ATTR, accountId, fullname, true, true, false);
+        postEvent(PushEventConstants.TOPIC_ATTR, accountId, fullname, true, true, false, MORE_PROPS_UPDATE_FLAGS);
         final boolean spamAction = (usm.isSpamEnabled() && ((flagBits & MailMessage.FLAG_SPAM) > 0));
         if (spamAction) {
             final String spamFullname = mailAccess.getFolderStorage().getSpamFolder();
@@ -3288,7 +3302,24 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             return;
         }
-        EventPool.getInstance().put(new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, immediateDelivery, session).setAsync(async));
+        final PooledEvent pooledEvent = new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, immediateDelivery, session);
+        EventPool.getInstance().put(pooledEvent.setAsync(async));
+    }
+
+    private void postEvent(final String topic, final int accountId, final String fullname, final boolean contentRelated, final boolean immediateDelivery, final boolean async, final Map<String, Object> moreProperties) {
+        if (MailAccount.DEFAULT_ID != accountId) {
+            /*
+             * TODO: No event for non-primary account?
+             */
+            return;
+        }
+        final PooledEvent pooledEvent = new PooledEvent(topic, contextId, session.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, immediateDelivery, session);
+        if (null != moreProperties) {
+            for (final Entry<String, Object> entry : moreProperties.entrySet()) {
+                pooledEvent.putProperty(entry.getKey(), entry.getValue());
+            }
+        }
+        EventPool.getInstance().put(pooledEvent.setAsync(async));
     }
 
     @Override

@@ -78,7 +78,6 @@ import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
  * @author marcus
- *
  */
 public class AlwaysTest extends AbstractAJAXTest {
 
@@ -93,7 +92,8 @@ public class AlwaysTest extends AbstractAJAXTest {
     private static final Random rand = new Random(System.currentTimeMillis());
 
     /**
-     * Number of mails to read in each mail folder.<ul>
+     * Number of mails to read in each mail folder.
+     * <ul>
      * <li><code>-1</code> list all mails
      * <li><code>0</code> list no mails
      * </ul>
@@ -104,13 +104,10 @@ public class AlwaysTest extends AbstractAJAXTest {
      * This attributes of mails are requested when a mail folder is listed.
      */
     private static final int[] listAttributes = new int[] {
-        MailListField.ID.getField(), MailListField.FOLDER_ID.getField(),
-        MailListField.THREAD_LEVEL.getField(), MailListField.ATTACHMENT.getField(),
-        MailListField.FROM.getField(), MailListField.SUBJECT.getField(),
-        MailListField.RECEIVED_DATE.getField(), MailListField.SIZE.getField(),
-        MailListField.FLAGS.getField(), MailListField.PRIORITY.getField(),
-        CommonObject.COLOR_LABEL
-    };
+        MailListField.ID.getField(), MailListField.FOLDER_ID.getField(), MailListField.THREAD_LEVEL.getField(),
+        MailListField.ATTACHMENT.getField(), MailListField.FROM.getField(), MailListField.SUBJECT.getField(),
+        MailListField.RECEIVED_DATE.getField(), MailListField.SIZE.getField(), MailListField.FLAGS.getField(),
+        MailListField.PRIORITY.getField(), CommonObject.COLOR_LABEL };
 
     private AJAXClient client;
 
@@ -121,7 +118,7 @@ public class AlwaysTest extends AbstractAJAXTest {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
+        client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
     }
 
     public void testFolderListing() throws Throwable {
@@ -129,9 +126,7 @@ public class AlwaysTest extends AbstractAJAXTest {
         recListFolder(imapRoot.getFullName(), "");
     }
 
-    public void recListFolder(final String folderId, final String rights)
-        throws IOException, SAXException, JSONException, OXException,
-        OXException {
+    public void recListFolder(final String folderId, final String rights) throws IOException, SAXException, JSONException, OXException, OXException {
         LOG.trace("Listing " + folderId);
         if (rights.length() > 0) {
             listMails(folderId, MAX);
@@ -149,33 +144,25 @@ public class AlwaysTest extends AbstractAJAXTest {
      * @throws SAXException
      * @throws JSONException
      */
-    private void listMails(final String folderId, final int max)
-        throws IOException, SAXException, JSONException, OXException {
-        final JSONObject json = MailTest.getAllMails(getWebConversation(),
-            getHostName(), getSessionId(), folderId, listAttributes,
-            false);
+    private void listMails(final String folderId, final int max) throws IOException, SAXException, JSONException, OXException {
+        final JSONObject json = MailTest.getAllMails(getWebConversation(), getHostName(), getSessionId(), folderId, listAttributes, false);
         final Response response = ResponseParser.parse(json.toString());
         assertFalse(response.getErrorMessage(), response.hasError());
         final JSONArray array = (JSONArray) response.getData();
-        final int count = max == -1 ? array.length() : Math.min(max, array
-            .length());
+        final int count = max == -1 ? array.length() : Math.min(max, array.length());
         for (int i = 0; i < count; i++) {
             final int pos = max == -1 ? i : rand.nextInt(array.length());
             final JSONArray mailInfo = array.getJSONArray(pos);
             final String mailId = mailInfo.getString(0);
             LOG.info("Getting mail: " + mailId);
-            final Response mailResponse = MailTest.getMail(getWebConversation(),
-                getHostName(), getSessionId(), mailId);
+            final Response mailResponse = MailTest.getMail(getWebConversation(), getHostName(), getSessionId(), mailId);
             assertFalse(mailResponse.getErrorMessage(), mailResponse.hasError());
         }
     }
 
-    public static Map<String, String> getIMAPRights(final AJAXClient client,
-        final String parent) throws IOException,
-        SAXException, JSONException, OXException {
-        final ListResponse listR = client.execute(new ListRequest(EnumAPI.OX_OLD,
-            parent, new int[] { FolderObject.OBJECT_ID, FolderObject.OWN_RIGHTS
-            }, false));
+    public static Map<String, String> getIMAPRights(final AJAXClient client, final String parent) throws IOException, SAXException, JSONException, OXException {
+        final ListResponse listR = client.execute(new ListRequest(EnumAPI.OX_OLD, parent, new int[] {
+            FolderObject.OBJECT_ID, FolderObject.OWN_RIGHTS }, false));
         final Map<String, String> retval = new HashMap<String, String>();
         for (final Object[] row : listR) {
             retval.put(row[0].toString(), row[1].toString());
@@ -183,22 +170,18 @@ public class AlwaysTest extends AbstractAJAXTest {
         return retval;
     }
 
-    public FolderObject getIMAPRootFolder() throws OXException, IOException,
-        SAXException, JSONException, OXException {
-        final ListResponse listR = client.execute(new ListRequest(EnumAPI.OX_OLD,
-            String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID)));
+    public FolderObject getIMAPRootFolder() throws OXException, IOException, SAXException, JSONException, OXException {
+        final ListResponse listR = client.execute(new ListRequest(EnumAPI.OX_OLD, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID)));
         FolderObject defaultIMAPFolder = null;
         final Iterator<FolderObject> iter = listR.getFolder();
         while (iter.hasNext()) {
             final FolderObject fo = iter.next();
-            if (fo.containsFullName() && fo.getFullName().equals(
-                MailFolder.DEFAULT_FOLDER_ID)) {
+            if (fo.containsFullName() && fo.getFullName().equals(MailFolder.DEFAULT_FOLDER_ID)) {
                 defaultIMAPFolder = fo;
                 break;
             }
         }
-        assertTrue("Can't find IMAP root folder.", defaultIMAPFolder != null
-            && defaultIMAPFolder.hasSubfolders());
+        assertTrue("Can't find IMAP root folder.", defaultIMAPFolder != null && defaultIMAPFolder.hasSubfolders());
         return defaultIMAPFolder;
     }
 }

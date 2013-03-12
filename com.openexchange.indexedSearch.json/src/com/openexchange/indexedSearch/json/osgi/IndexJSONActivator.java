@@ -49,6 +49,7 @@
 
 package com.openexchange.indexedSearch.json.osgi;
 
+import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
@@ -57,6 +58,7 @@ import com.openexchange.index.IndexFacadeService;
 import com.openexchange.indexedSearch.json.IndexActionFactory;
 import com.openexchange.indexedSearch.json.ResultConverters;
 import com.openexchange.indexedSearch.json.capabilities.MailIndexChecker;
+import com.openexchange.indexedSearch.json.converter.SearchResult2JSONConverter;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -89,6 +91,7 @@ public class IndexJSONActivator extends AJAXModuleActivator {
         
         getService(CapabilityService.class).declareCapability(MailIndexChecker.CAPABILITY);
         registerService(CapabilityChecker.class, new MailIndexChecker(this));
+        registerService(ResultConverter.class, new SearchResult2JSONConverter());
     }
 
     @Override

@@ -106,11 +106,9 @@ import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.URLParameter;
 
 /**
- *
  * {@link AppointmentTest}
- *
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a> - added parseUserParticipants
- *
  */
 public class AppointmentTest extends AbstractAJAXTest {
 
@@ -118,19 +116,13 @@ public class AppointmentTest extends AbstractAJAXTest {
         super(name);
     }
 
-    public static final int[] APPOINTMENT_FIELDS = { DataObject.OBJECT_ID,
-    DataObject.CREATED_BY, DataObject.CREATION_DATE,
-    DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,
-    FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG,
-    CommonObject.CATEGORIES, CalendarObject.TITLE,
-    CalendarObject.START_DATE, CalendarObject.END_DATE,
-    Appointment.LOCATION, CalendarObject.NOTE,
-    CalendarObject.RECURRENCE_TYPE, CalendarObject.PARTICIPANTS,
-    CalendarObject.USERS, Appointment.SHOWN_AS,
-    Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION,
-    Appointment.FULL_TIME, Appointment.COLOR_LABEL, Appointment.DELETE_EXCEPTIONS,
-    Appointment.CHANGE_EXCEPTIONS, Appointment.RECURRENCE_START,
-    Appointment.ORGANIZER, Appointment.UID, Appointment.SEQUENCE };
+    public static final int[] APPOINTMENT_FIELDS = {
+        DataObject.OBJECT_ID, DataObject.CREATED_BY, DataObject.CREATION_DATE, DataObject.LAST_MODIFIED, DataObject.MODIFIED_BY,
+        FolderChildObject.FOLDER_ID, CommonObject.PRIVATE_FLAG, CommonObject.CATEGORIES, CalendarObject.TITLE, CalendarObject.START_DATE,
+        CalendarObject.END_DATE, Appointment.LOCATION, CalendarObject.NOTE, CalendarObject.RECURRENCE_TYPE, CalendarObject.PARTICIPANTS,
+        CalendarObject.USERS, Appointment.SHOWN_AS, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_POSITION, Appointment.FULL_TIME,
+        Appointment.COLOR_LABEL, Appointment.DELETE_EXCEPTIONS, Appointment.CHANGE_EXCEPTIONS, Appointment.RECURRENCE_START,
+        Appointment.ORGANIZER, Appointment.UID, Appointment.SEQUENCE };
 
     protected static final String APPOINTMENT_URL = "/ajax/calendar";
 
@@ -163,17 +155,13 @@ public class AppointmentTest extends AbstractAJAXTest {
         super.setUp();
 
         try {
-            final FolderObject folderObj = FolderTest
-                    .getStandardCalendarFolder(getWebConversation(),
-                    getHostName(), getSessionId());
+            final FolderObject folderObj = FolderTest.getStandardCalendarFolder(getWebConversation(), getHostName(), getSessionId());
             appointmentFolderId = folderObj.getObjectID();
             userId = folderObj.getCreatedBy();
 
-            timeZone = ConfigTools.getTimeZone(getWebConversation(),
-                    getHostName(), getSessionId());
+            timeZone = ConfigTools.getTimeZone(getWebConversation(), getHostName(), getSessionId());
 
-            LOG.debug(new StringBuilder().append("use timezone: ").append(
-                    timeZone).toString());
+            LOG.debug(new StringBuilder().append("use timezone: ").append(timeZone).toString());
 
             final Calendar c = Calendar.getInstance();
             c.setTimeZone(timeZone);
@@ -186,16 +174,12 @@ public class AppointmentTest extends AbstractAJAXTest {
             startTime += timeZone.getOffset(startTime);
             endTime = startTime + 3600000;
 
-            userParticipant2 = AbstractConfigWrapper.parseProperty(
-                    getAJAXProperties(), "user_participant2", "");
-            userParticipant3 = AbstractConfigWrapper.parseProperty(
-                    getAJAXProperties(), "user_participant3", "");
+            userParticipant2 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant2", "");
+            userParticipant3 = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "user_participant3", "");
 
-            groupParticipant = AbstractConfigWrapper.parseProperty(
-                    getAJAXProperties(), "group_participant", "");
+            groupParticipant = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "group_participant", "");
 
-            resourceParticipant = AbstractConfigWrapper.parseProperty(
-                    getAJAXProperties(), "resource_participant", "");
+            resourceParticipant = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "resource_participant", "");
         } catch (final Exception ex) {
             ex.printStackTrace();
 
@@ -203,62 +187,45 @@ public class AppointmentTest extends AbstractAJAXTest {
         }
     }
 
-    protected void compareObject(final Appointment appointmentObj1,
-            final Appointment appointmentObj2) throws Exception {
+    protected void compareObject(final Appointment appointmentObj1, final Appointment appointmentObj2) throws Exception {
         compareObject(appointmentObj1, appointmentObj2, appointmentObj1.getStartDate().getTime(), appointmentObj1.getEndDate().getTime());
     }
 
-    protected void compareObject(final Appointment appointmentObj1,
-            final Appointment appointmentObj2, final long newStartTime,
-            final long newEndTime) throws Exception {
-        assertEquals("id", appointmentObj1.getObjectID(), appointmentObj2
-                .getObjectID());
-        OXTestToolkit.assertEqualsAndNotNull("title", appointmentObj1.getTitle(),
-                appointmentObj2.getTitle());
-        assertEquals("start", newStartTime, appointmentObj2.getStartDate()
-        .getTime());
+    protected void compareObject(final Appointment appointmentObj1, final Appointment appointmentObj2, final long newStartTime, final long newEndTime) throws Exception {
+        assertEquals("id", appointmentObj1.getObjectID(), appointmentObj2.getObjectID());
+        OXTestToolkit.assertEqualsAndNotNull("title", appointmentObj1.getTitle(), appointmentObj2.getTitle());
+        assertEquals("start", newStartTime, appointmentObj2.getStartDate().getTime());
         assertEquals("end", newEndTime, appointmentObj2.getEndDate().getTime());
-        OXTestToolkit.assertEqualsAndNotNull("location", appointmentObj1.getLocation(),
-                appointmentObj2.getLocation());
-        assertEquals("shown_as", appointmentObj1.getShownAs(), appointmentObj2
-                .getShownAs());
-        assertEquals("folder id", appointmentObj1.getParentFolderID(),
-                appointmentObj2.getParentFolderID());
-        assertEquals("private flag", appointmentObj1.getPrivateFlag(),
-                appointmentObj2.getPrivateFlag());
-        assertEquals("full time", appointmentObj1.getFullTime(),
-                appointmentObj2.getFullTime());
-        assertEquals("label", appointmentObj1.getLabel(), appointmentObj2
-                .getLabel());
-        assertEquals("recurrence_type", appointmentObj1.getRecurrenceType(),
-                appointmentObj2.getRecurrenceType());
-        assertEquals("interval", appointmentObj1.getInterval(), appointmentObj2
-                .getInterval());
-        assertEquals("days", appointmentObj1.getDays(), appointmentObj2
-                .getDays());
-        assertEquals("month", appointmentObj1.getMonth(), appointmentObj2
-                .getMonth());
-        assertEquals("day_in_month", appointmentObj1.getDayInMonth(),
-                appointmentObj2.getDayInMonth());
-        assertEquals("until", appointmentObj1.getUntil(), appointmentObj2
-                .getUntil());
+        OXTestToolkit.assertEqualsAndNotNull("location", appointmentObj1.getLocation(), appointmentObj2.getLocation());
+        assertEquals("shown_as", appointmentObj1.getShownAs(), appointmentObj2.getShownAs());
+        assertEquals("folder id", appointmentObj1.getParentFolderID(), appointmentObj2.getParentFolderID());
+        assertEquals("private flag", appointmentObj1.getPrivateFlag(), appointmentObj2.getPrivateFlag());
+        assertEquals("full time", appointmentObj1.getFullTime(), appointmentObj2.getFullTime());
+        assertEquals("label", appointmentObj1.getLabel(), appointmentObj2.getLabel());
+        assertEquals("recurrence_type", appointmentObj1.getRecurrenceType(), appointmentObj2.getRecurrenceType());
+        assertEquals("interval", appointmentObj1.getInterval(), appointmentObj2.getInterval());
+        assertEquals("days", appointmentObj1.getDays(), appointmentObj2.getDays());
+        assertEquals("month", appointmentObj1.getMonth(), appointmentObj2.getMonth());
+        assertEquals("day_in_month", appointmentObj1.getDayInMonth(), appointmentObj2.getDayInMonth());
+        assertEquals("until", appointmentObj1.getUntil(), appointmentObj2.getUntil());
         if (appointmentObj1.getOrganizer() != null && appointmentObj2.getOrganizer() != null) {
             assertEquals("organizer", appointmentObj1.getOrganizer(), appointmentObj2.getOrganizer());
         }
         if (appointmentObj1.containsUid()) {
             assertEquals("uid", appointmentObj1.getUid(), appointmentObj2.getUid());
         }
-        //assertEquals("sequence", appointmentObj1.getSequence(), appointmentObj2.getSequence());
-        OXTestToolkit.assertEqualsAndNotNull("note", appointmentObj1.getNote(),
-                appointmentObj2.getNote());
-        OXTestToolkit.assertEqualsAndNotNull("categories", appointmentObj1.getCategories(),
-                appointmentObj2.getCategories());
-        OXTestToolkit.assertEqualsAndNotNull("delete_exceptions", appointmentObj1.getDeleteException(),
-                appointmentObj2.getDeleteException());
+        // assertEquals("sequence", appointmentObj1.getSequence(), appointmentObj2.getSequence());
+        OXTestToolkit.assertEqualsAndNotNull("note", appointmentObj1.getNote(), appointmentObj2.getNote());
+        OXTestToolkit.assertEqualsAndNotNull("categories", appointmentObj1.getCategories(), appointmentObj2.getCategories());
+        OXTestToolkit.assertEqualsAndNotNull(
+            "delete_exceptions",
+            appointmentObj1.getDeleteException(),
+            appointmentObj2.getDeleteException());
 
-        OXTestToolkit.assertEqualsAndNotNull("participants are not equals",
-                participants2String(appointmentObj1.getParticipants()),
-                participants2String(appointmentObj2.getParticipants()));
+        OXTestToolkit.assertEqualsAndNotNull(
+            "participants are not equals",
+            participants2String(appointmentObj1.getParticipants()),
+            participants2String(appointmentObj2.getParticipants()));
     }
 
     protected Appointment createAppointmentObject(final String title) {
@@ -273,9 +240,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         return appointmentobject;
     }
 
-    public static int insertAppointment(final WebConversation webCon,
-            final Appointment appointmentObj, final TimeZone userTimeZone,
-            String host, final String session) throws OXException, Exception {
+    public static int insertAppointment(final WebConversation webCon, final Appointment appointmentObj, final TimeZone userTimeZone, String host, final String session) throws OXException, Exception {
         host = appendPrefix(host);
 
         int objectId = 0;
@@ -291,12 +256,10 @@ public class AppointmentTest extends AbstractAJAXTest {
 
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
-                AJAXServlet.ACTION_NEW);
+        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
 
         final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes(com.openexchange.java.Charsets.UTF_8));
-        final WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL
-                + parameter.getURLParameters(), bais, "text/javascript");
+        final WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters(), bais, "text/javascript");
         final WebResponse resp = webCon.getResponse(req);
 
         assertEquals(200, resp.getResponseCode());
@@ -319,16 +282,19 @@ public class AppointmentTest extends AbstractAJAXTest {
         return objectId;
     }
 
-    public static int updateAppointment(final WebConversation webCon,
-            final Appointment appointmentObj, final int objectId, final int inFolder,
-            final TimeZone userTimeZone, final String host, final String session) throws Exception {
-        return updateAppointment(webCon, appointmentObj, objectId, inFolder, new Date(System.currentTimeMillis()+APPEND_MODIFIED), userTimeZone, host, session);
+    public static int updateAppointment(final WebConversation webCon, final Appointment appointmentObj, final int objectId, final int inFolder, final TimeZone userTimeZone, final String host, final String session) throws Exception {
+        return updateAppointment(
+            webCon,
+            appointmentObj,
+            objectId,
+            inFolder,
+            new Date(System.currentTimeMillis() + APPEND_MODIFIED),
+            userTimeZone,
+            host,
+            session);
     }
 
-    public static int updateAppointment(final WebConversation webCon,
-            final Appointment appointmentObj, int objectId, final int inFolder,
-            final Date modified, final TimeZone userTimeZone, String host, final String session)
-            throws Exception {
+    public static int updateAppointment(final WebConversation webCon, final Appointment appointmentObj, int objectId, final int inFolder, final Date modified, final TimeZone userTimeZone, String host, final String session) throws Exception {
         host = appendPrefix(host);
 
         final StringWriter stringWriter = new StringWriter();
@@ -341,15 +307,13 @@ public class AppointmentTest extends AbstractAJAXTest {
 
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
-                AJAXServlet.ACTION_UPDATE);
+        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE);
         parameter.setParameter(DataFields.ID, Integer.toString(objectId));
         parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, Integer.toString(inFolder));
         parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, modified);
 
         final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes(com.openexchange.java.Charsets.UTF_8));
-        final WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL
-                + parameter.getURLParameters(), bais, "text/javascript");
+        final WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters(), bais, "text/javascript");
         final WebResponse resp = webCon.getResponse(req);
 
         assertEquals(200, resp.getResponseCode());
@@ -381,7 +345,15 @@ public class AppointmentTest extends AbstractAJAXTest {
     }
 
     public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final int recurrencePosition, final String host, final String session, final boolean ignoreFailure) throws Exception {
-        deleteAppointment(webCon, id, inFolder, recurrencePosition, new Date(System.currentTimeMillis() + APPEND_MODIFIED), host, session, ignoreFailure);
+        deleteAppointment(
+            webCon,
+            id,
+            inFolder,
+            recurrencePosition,
+            new Date(System.currentTimeMillis() + APPEND_MODIFIED),
+            host,
+            session,
+            ignoreFailure);
     }
 
     public static void deleteAppointment(final WebConversation webCon, final int id, final int inFolder, final int recurrencePosition, final Date modified, final String host, final String session, final boolean ignoreFailure) throws OXException, IOException, JSONException {
@@ -406,15 +378,12 @@ public class AppointmentTest extends AbstractAJAXTest {
         }
     }
 
-    public static void confirmAppointment(final WebConversation webCon, final int objectId, final int folderId,
-            final int confirm, final String confirmMessage, String host, final String session)
-            throws Exception {
+    public static void confirmAppointment(final WebConversation webCon, final int objectId, final int folderId, final int confirm, final String confirmMessage, String host, final String session) throws Exception {
         host = appendPrefix(host);
 
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
-                AJAXServlet.ACTION_CONFIRM);
+        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CONFIRM);
         parameter.setParameter(DataFields.ID, objectId);
         parameter.setParameter(AJAXServlet.PARAMETER_FOLDERID, folderId);
 
@@ -422,10 +391,8 @@ public class AppointmentTest extends AbstractAJAXTest {
         jsonObj.put(ParticipantsFields.CONFIRMATION, confirm);
         jsonObj.put(ParticipantsFields.CONFIRM_MESSAGE, confirmMessage);
 
-        final ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString()
-        .getBytes());
-        final WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL
-                + parameter.getURLParameters(), bais, "text/javascript");
+        final ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes());
+        final WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters(), bais, "text/javascript");
         final WebResponse resp = webCon.getResponse(req);
 
         assertEquals(200, resp.getResponseCode());
@@ -437,18 +404,15 @@ public class AppointmentTest extends AbstractAJAXTest {
         }
     }
 
-    public static Appointment[] listAppointment(final WebConversation webCon, final int inFolder, final int[] cols, final Date start, final Date end, final TimeZone userTimeZone, final boolean showAll, final String host, final String session)
-    throws JSONException, OXException, IOException, SAXException {
+    public static Appointment[] listAppointment(final WebConversation webCon, final int inFolder, final int[] cols, final Date start, final Date end, final TimeZone userTimeZone, final boolean showAll, final String host, final String session) throws JSONException, OXException, IOException, SAXException {
         return listAppointment(webCon, inFolder, cols, start, end, userTimeZone, showAll, false, host, session);
     }
 
-    public static Appointment[] listAppointment(final WebConversation webCon, final int inFolder, final int[] cols, final Date start, final Date end, final TimeZone userTimeZone, final boolean showAll, final boolean recurrenceMaster, final String host, final String session)
-        throws JSONException, OXException, IOException, SAXException {
+    public static Appointment[] listAppointment(final WebConversation webCon, final int inFolder, final int[] cols, final Date start, final Date end, final TimeZone userTimeZone, final boolean showAll, final boolean recurrenceMaster, final String host, final String session) throws JSONException, OXException, IOException, SAXException {
         return listAppointment(webCon, inFolder, cols, start, end, userTimeZone, showAll, recurrenceMaster, -1, -1, host, session);
     }
 
-    public static Appointment[] listAppointment(final WebConversation webCon, final int inFolder, final int[] cols, final Date start, final Date end, final TimeZone userTimeZone, final boolean showAll, final boolean recurrenceMaster, final int leftHandLimit, final int rightHandLimit, String host, final String session)
-        throws JSONException, OXException, IOException, SAXException {
+    public static Appointment[] listAppointment(final WebConversation webCon, final int inFolder, final int[] cols, final Date start, final Date end, final TimeZone userTimeZone, final boolean showAll, final boolean recurrenceMaster, final int leftHandLimit, final int rightHandLimit, String host, final String session) throws JSONException, OXException, IOException, SAXException {
         host = appendPrefix(host);
 
         final URLParameter parameter = new URLParameter();
@@ -477,12 +441,10 @@ public class AppointmentTest extends AbstractAJAXTest {
         return listAppointment(webCon, cols, parameter, userTimeZone, host, session);
     }
 
-    public static Appointment[] listAppointment(final WebConversation webCon, final int[] cols, final URLParameter parameter, final TimeZone userTimeZone, String host, final String session)
-        throws JSONException, OXException, IOException, SAXException {
+    public static Appointment[] listAppointment(final WebConversation webCon, final int[] cols, final URLParameter parameter, final TimeZone userTimeZone, String host, final String session) throws JSONException, OXException, IOException, SAXException {
         host = appendPrefix(host);
 
-        final WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL
-                + parameter.getURLParameters());
+        final WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters());
         final WebResponse resp = webCon.getResponse(req);
 
         assertEquals(200, resp.getResponseCode());
@@ -497,8 +459,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 
         assertEquals(200, resp.getResponseCode());
 
-        return jsonArray2AppointmentArray((JSONArray) response.getData(), cols,
-                userTimeZone);
+        return jsonArray2AppointmentArray((JSONArray) response.getData(), cols, userTimeZone);
     }
 
     public static int resolveUid(final WebConversation webCon, final String host, final String session, final String uid) throws IOException, SAXException, JSONException {
@@ -524,9 +485,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         return jsonResponse.getInt("id");
     }
 
-    public static Appointment[] listAppointment(final WebConversation webCon,
-            final int[][] objectIdAndFolderId, final int[] cols, final TimeZone userTimeZone,
-            final String host, final String session) throws Exception {
+    public static Appointment[] listAppointment(final WebConversation webCon, final int[][] objectIdAndFolderId, final int[] cols, final TimeZone userTimeZone, final String host, final String session) throws Exception {
         final Appointment[] appointmentArray = new Appointment[objectIdAndFolderId.length];
         for (int a = 0; a < appointmentArray.length; a++) {
             appointmentArray[a] = new Appointment();
@@ -575,21 +534,16 @@ public class AppointmentTest extends AbstractAJAXTest {
         return jsonArray2AppointmentArray((JSONArray) response.getData(), cols, userTimeZone);
     }
 
-    public static Appointment loadAppointment(final WebConversation webCon,
-            final int objectId, final int inFolder, final TimeZone userTimeZone, final String host,
-            final String session) throws Exception {
+    public static Appointment loadAppointment(final WebConversation webCon, final int objectId, final int inFolder, final TimeZone userTimeZone, final String host, final String session) throws Exception {
         return loadAppointment(webCon, objectId, 0, inFolder, userTimeZone, host, session);
     }
 
-    public static Appointment loadAppointment(final WebConversation webCon,
-            final int objectId, final int recurrencePosition, final int inFolder, final TimeZone userTimeZone, String host,
-            final String session) throws Exception {
+    public static Appointment loadAppointment(final WebConversation webCon, final int objectId, final int recurrencePosition, final int inFolder, final TimeZone userTimeZone, String host, final String session) throws Exception {
         host = appendPrefix(host);
 
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
-                AJAXServlet.ACTION_GET);
+        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET);
         parameter.setParameter(DataFields.ID, objectId);
         parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
 
@@ -597,8 +551,7 @@ public class AppointmentTest extends AbstractAJAXTest {
             parameter.setParameter(CalendarFields.RECURRENCE_POSITION, recurrencePosition);
         }
 
-        final WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL
-                + parameter.getURLParameters());
+        final WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters());
         final WebResponse resp = webCon.getResponse(req);
 
         assertEquals(200, resp.getResponseCode());
@@ -614,39 +567,27 @@ public class AppointmentTest extends AbstractAJAXTest {
         final Appointment appointmentObj = new Appointment();
 
         final AppointmentParser appointmentParser = new AppointmentParser(true, userTimeZone);
-        appointmentParser
-                .parse(appointmentObj, (JSONObject) response.getData());
+        appointmentParser.parse(appointmentObj, (JSONObject) response.getData());
 
         return appointmentObj;
     }
 
-    public static Appointment loadAppointment(final WebConversation webCon,
-            final int objectId, final Date start, final Date end, final int[] cols, final TimeZone userTimeZone, final String host,
-            final String session) throws Exception {
-
+    public static Appointment loadAppointment(final WebConversation webCon, final int objectId, final Date start, final Date end, final int[] cols, final TimeZone userTimeZone, final String host, final String session) throws Exception {
 
         return loadAppointment(webCon, objectId, 0, start, end, cols, userTimeZone, host, session);
     }
 
-    public static Appointment loadAppointment(final WebConversation webCon,
-            final int objectId, final Date start, final Date end, final Date modified, final int[] cols, final TimeZone userTimeZone, final String host,
-            final String session) throws Exception {
-
+    public static Appointment loadAppointment(final WebConversation webCon, final int objectId, final Date start, final Date end, final Date modified, final int[] cols, final TimeZone userTimeZone, final String host, final String session) throws Exception {
 
         return loadAppointment(webCon, objectId, 0, start, end, modified, cols, userTimeZone, host, session);
     }
 
-    public static Appointment loadAppointment(final WebConversation webCon,
-            final int objectId, final Date start, final Date end, final Date modified, final int recurrencePosition, final int[] cols, final TimeZone userTimeZone, final String host,
-            final String session) throws Exception {
-
+    public static Appointment loadAppointment(final WebConversation webCon, final int objectId, final Date start, final Date end, final Date modified, final int recurrencePosition, final int[] cols, final TimeZone userTimeZone, final String host, final String session) throws Exception {
 
         return loadAppointment(webCon, objectId, 0, start, end, modified, recurrencePosition, cols, userTimeZone, host, session);
     }
 
-    public static Appointment loadAppointment(final WebConversation webCon,
-            final int objectId, final int inFolder, final Date start, final Date end, final int[] cols, final TimeZone userTimeZone, final String host,
-            final String session) throws JSONException, OXException, IOException, SAXException, OXException {
+    public static Appointment loadAppointment(final WebConversation webCon, final int objectId, final int inFolder, final Date start, final Date end, final int[] cols, final TimeZone userTimeZone, final String host, final String session) throws JSONException, OXException, IOException, SAXException, OXException {
 
         final boolean showAll = (inFolder == 0);
 
@@ -661,11 +602,18 @@ public class AppointmentTest extends AbstractAJAXTest {
         throw new TestException("object not found");
     }
 
-    public static Appointment loadAppointment(final WebConversation webCon,
-            final int objectId, final int inFolder, final Date start, final Date end, final Date modified, final int[] cols, final TimeZone userTimeZone, final String host,
-            final String session) throws Exception {
+    public static Appointment loadAppointment(final WebConversation webCon, final int objectId, final int inFolder, final Date start, final Date end, final Date modified, final int[] cols, final TimeZone userTimeZone, final String host, final String session) throws Exception {
 
-        final Appointment[] appointmentArray = listModifiedAppointment(webCon, inFolder, start, end, modified, cols, userTimeZone, host, session);
+        final Appointment[] appointmentArray = listModifiedAppointment(
+            webCon,
+            inFolder,
+            start,
+            end,
+            modified,
+            cols,
+            userTimeZone,
+            host,
+            session);
 
         for (int a = 0; a < appointmentArray.length; a++) {
             if (appointmentArray[a].getObjectID() == objectId) {
@@ -677,11 +625,18 @@ public class AppointmentTest extends AbstractAJAXTest {
         return null;
     }
 
-    public static Appointment loadAppointment(final WebConversation webCon,
-            final int objectId, final int inFolder, final Date start, final Date end, final Date modified, final int recurrencePosition, final int[] cols, final TimeZone userTimeZone, final String host,
-            final String session) throws Exception {
+    public static Appointment loadAppointment(final WebConversation webCon, final int objectId, final int inFolder, final Date start, final Date end, final Date modified, final int recurrencePosition, final int[] cols, final TimeZone userTimeZone, final String host, final String session) throws Exception {
 
-        final Appointment[] appointmentArray = listModifiedAppointment(webCon, inFolder, start, end, modified, cols, userTimeZone, host, session);
+        final Appointment[] appointmentArray = listModifiedAppointment(
+            webCon,
+            inFolder,
+            start,
+            end,
+            modified,
+            cols,
+            userTimeZone,
+            host,
+            session);
 
         for (int a = 0; a < appointmentArray.length; a++) {
             if (appointmentArray[a].getObjectID() == objectId && appointmentArray[a].getRecurrencePosition() == recurrencePosition) {
@@ -692,50 +647,36 @@ public class AppointmentTest extends AbstractAJAXTest {
         throw new TestException("object not found");
     }
 
-    public static Appointment[] listModifiedAppointment(
-            final WebConversation webCon, final Date start, final Date end,
-            final Date modified, final int[] cols, final TimeZone userTimeZone, final String host, final String session)
-            throws Exception {
+    public static Appointment[] listModifiedAppointment(final WebConversation webCon, final Date start, final Date end, final Date modified, final int[] cols, final TimeZone userTimeZone, final String host, final String session) throws Exception {
         return listModifiedAppointment(webCon, 0, start, end, modified, cols, userTimeZone, host, session);
     }
 
-    public static Appointment[] listModifiedAppointment(
-            final WebConversation webCon, final int inFolder, final Date start, final Date end,
-            final Date modified, final int[] cols, final TimeZone userTimeZone, final String host, final String session)
-            throws Exception {
-            return listModifiedAppointment(webCon, inFolder, start, end, modified, cols, userTimeZone, false, host, session);
+    public static Appointment[] listModifiedAppointment(final WebConversation webCon, final int inFolder, final Date start, final Date end, final Date modified, final int[] cols, final TimeZone userTimeZone, final String host, final String session) throws Exception {
+        return listModifiedAppointment(webCon, inFolder, start, end, modified, cols, userTimeZone, false, host, session);
     }
 
-
-    public static Appointment[] listModifiedAppointment(
-            final WebConversation webCon, final int inFolder, final Date start, final Date end,
-            final Date modified, final int[] cols, final TimeZone userTimeZone, final boolean bRecurrenceMaster, String host, final String session)
-            throws Exception {
+    public static Appointment[] listModifiedAppointment(final WebConversation webCon, final int inFolder, final Date start, final Date end, final Date modified, final int[] cols, final TimeZone userTimeZone, final boolean bRecurrenceMaster, String host, final String session) throws Exception {
         host = appendPrefix(host);
 
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
-                AJAXServlet.ACTION_UPDATES);
+        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES);
 
         if (inFolder != 0) {
             parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
         }
 
-
         parameter.setParameter(AJAXServlet.PARAMETER_IGNORE, "deleted");
         parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, modified);
         parameter.setParameter(AJAXServlet.PARAMETER_START, start);
         parameter.setParameter(AJAXServlet.PARAMETER_END, end);
-        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter
-                .colsArray2String(cols));
+        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
 
         if (bRecurrenceMaster) {
             parameter.setParameter(AppointmentRequest.RECURRENCE_MASTER, true);
         }
 
-        final WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL
-                + parameter.getURLParameters());
+        final WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters());
         final WebResponse resp = webCon.getResponse(req);
 
         assertEquals(200, resp.getResponseCode());
@@ -751,22 +692,17 @@ public class AppointmentTest extends AbstractAJAXTest {
 
         assertEquals(200, resp.getResponseCode());
 
-        return jsonArray2AppointmentArray((JSONArray) response.getData(), cols,
-                userTimeZone);
+        return jsonArray2AppointmentArray((JSONArray) response.getData(), cols, userTimeZone);
     }
 
-    public static Appointment[] listDeleteAppointment(
-            final WebConversation webCon, final int inFolder, final Date start, final Date end,
-            final Date modified, final TimeZone userTimeZone, String host, final String session)
-            throws OXException, Exception {
+    public static Appointment[] listDeleteAppointment(final WebConversation webCon, final int inFolder, final Date start, final Date end, final Date modified, final TimeZone userTimeZone, String host, final String session) throws OXException, Exception {
         host = appendPrefix(host);
 
         final int[] cols = new int[] { Appointment.OBJECT_ID };
 
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
-                AJAXServlet.ACTION_UPDATES);
+        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES);
 
         if (inFolder != 0) {
             parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, inFolder);
@@ -776,11 +712,9 @@ public class AppointmentTest extends AbstractAJAXTest {
         parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, modified);
         parameter.setParameter(AJAXServlet.PARAMETER_START, start);
         parameter.setParameter(AJAXServlet.PARAMETER_END, end);
-        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter
-                .colsArray2String(cols));
+        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
 
-        final WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL
-                + parameter.getURLParameters());
+        final WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters());
         final WebResponse resp = webCon.getResponse(req);
 
         assertEquals(200, resp.getResponseCode());
@@ -796,8 +730,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         assertEquals(200, resp.getResponseCode());
 
         final JSONArray jsonArray = (JSONArray) response.getData();
-        final Appointment[] appointmentArray = new Appointment[jsonArray
-                .length()];
+        final Appointment[] appointmentArray = new Appointment[jsonArray.length()];
         for (int a = 0; a < jsonArray.length(); a++) {
             appointmentArray[a] = new Appointment();
             appointmentArray[a].setObjectID(jsonArray.getInt(a));
@@ -806,25 +739,17 @@ public class AppointmentTest extends AbstractAJAXTest {
         return appointmentArray;
     }
 
-    public static Appointment[] searchAppointment(final WebConversation webCon,
-            final String searchpattern, final int inFolder, final int[] cols,
-            final TimeZone userTimeZone, final String host, final String session)
-            throws Exception {
+    public static Appointment[] searchAppointment(final WebConversation webCon, final String searchpattern, final int inFolder, final int[] cols, final TimeZone userTimeZone, final String host, final String session) throws Exception {
         return searchAppointment(webCon, searchpattern, inFolder, null, null, cols, userTimeZone, host, session);
     }
 
-    public static Appointment[] searchAppointment(final WebConversation webCon,
-            final String searchpattern, final int inFolder, final Date start, final Date end, final int[] cols,
-            final TimeZone userTimeZone, String host, final String session)
-            throws Exception {
+    public static Appointment[] searchAppointment(final WebConversation webCon, final String searchpattern, final int inFolder, final Date start, final Date end, final int[] cols, final TimeZone userTimeZone, String host, final String session) throws Exception {
         host = appendPrefix(host);
 
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
-                AJAXServlet.ACTION_SEARCH);
-        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter
-                .colsArray2String(cols));
+        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH);
+        parameter.setParameter(AJAXServlet.PARAMETER_COLUMNS, URLParameter.colsArray2String(cols));
 
         if (start != null) {
             parameter.setParameter(AJAXServlet.PARAMETER_START, start);
@@ -838,9 +763,8 @@ public class AppointmentTest extends AbstractAJAXTest {
         jsonObj.put("pattern", searchpattern);
         jsonObj.put(AJAXServlet.PARAMETER_INFOLDER, inFolder);
 
-        final WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL
-                + parameter.getURLParameters(), new ByteArrayInputStream(
-                jsonObj.toString().getBytes()), "text/javascript");
+        final WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters(), new ByteArrayInputStream(
+            jsonObj.toString().getBytes()), "text/javascript");
         final WebResponse resp = webCon.getResponse(req);
 
         assertEquals(200, resp.getResponseCode());
@@ -855,23 +779,19 @@ public class AppointmentTest extends AbstractAJAXTest {
 
         assertEquals(200, resp.getResponseCode());
 
-        return jsonArray2AppointmentArray((JSONArray) response.getData(), cols,
-                userTimeZone);
+        return jsonArray2AppointmentArray((JSONArray) response.getData(), cols, userTimeZone);
     }
 
-    public static boolean[] hasAppointments(final WebConversation webCon, final Date start,
-            final Date end, String host, final String session) throws Exception {
+    public static boolean[] hasAppointments(final WebConversation webCon, final Date start, final Date end, String host, final String session) throws Exception {
         host = appendPrefix(host);
 
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
-                AJAXServlet.ACTION_HAS);
+        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_HAS);
         parameter.setParameter(AJAXServlet.PARAMETER_START, start);
         parameter.setParameter(AJAXServlet.PARAMETER_END, end);
 
-        final WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL
-                + parameter.getURLParameters());
+        final WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters());
         final WebResponse resp = webCon.getResponse(req);
 
         assertEquals(200, resp.getResponseCode());
@@ -895,23 +815,18 @@ public class AppointmentTest extends AbstractAJAXTest {
         return hasAppointments;
     }
 
-    public static Appointment[] getFreeBusy(final WebConversation webCon,
-            final int particiantId, final int type, final Date start, final Date end,
-            final TimeZone userTimeZone, String host, final String session)
-            throws Exception {
+    public static Appointment[] getFreeBusy(final WebConversation webCon, final int particiantId, final int type, final Date start, final Date end, final TimeZone userTimeZone, String host, final String session) throws Exception {
         host = appendPrefix(host);
 
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
         parameter.setParameter(AJAXServlet.PARAMETER_ID, particiantId);
         parameter.setParameter("type", type);
-        parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
-                AJAXServlet.ACTION_FREEBUSY);
+        parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_FREEBUSY);
         parameter.setParameter(AJAXServlet.PARAMETER_START, start);
         parameter.setParameter(AJAXServlet.PARAMETER_END, end);
 
-        final WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL
-                + parameter.getURLParameters());
+        final WebRequest req = new GetMethodWebRequest(host + APPOINTMENT_URL + parameter.getURLParameters());
         final WebResponse resp = webCon.getResponse(req);
 
         assertEquals(200, resp.getResponseCode());
@@ -929,12 +844,9 @@ public class AppointmentTest extends AbstractAJAXTest {
         return jsonArray2AppointmentArray(jsonArray, userTimeZone);
     }
 
-    private static Appointment[] jsonArray2AppointmentArray(
-            final JSONArray jsonArray, final TimeZone userTimeZone) throws Exception {
-        final Appointment[] appointmentArray = new Appointment[jsonArray
-                .length()];
-        final AppointmentParser appointmentParser = new AppointmentParser(
-                userTimeZone);
+    private static Appointment[] jsonArray2AppointmentArray(final JSONArray jsonArray, final TimeZone userTimeZone) throws Exception {
+        final Appointment[] appointmentArray = new Appointment[jsonArray.length()];
+        final AppointmentParser appointmentParser = new AppointmentParser(userTimeZone);
 
         for (int a = 0; a < appointmentArray.length; a++) {
             appointmentArray[a] = new Appointment();
@@ -969,160 +881,149 @@ public class AppointmentTest extends AbstractAJAXTest {
         return appointmentArray;
     }
 
-    private static void parseCols(final int[] cols, final JSONArray jsonArray,
-            final Appointment appointmentObj, final TimeZone userTimeZone) throws JSONException, OXException {
+    private static void parseCols(final int[] cols, final JSONArray jsonArray, final Appointment appointmentObj, final TimeZone userTimeZone) throws JSONException, OXException {
         if (cols.length != jsonArray.length()) {
-            LOG.debug("expected cols: "
-                    + StringCollection.convertArray2String(cols)
-                    + " recieved cols: " + jsonArray.toString());
+            LOG.debug("expected cols: " + StringCollection.convertArray2String(cols) + " recieved cols: " + jsonArray.toString());
         }
 
-        assertEquals("compare array size with cols size", cols.length,
-                jsonArray.length());
+        assertEquals("compare array size with cols size", cols.length, jsonArray.length());
 
         for (int a = 0; a < cols.length; a++) {
             parse(a, cols[a], jsonArray, appointmentObj, userTimeZone);
         }
     }
 
-    private static void parse(final int pos, final int field, final JSONArray jsonArray,
-            final Appointment appointmentObj, final TimeZone userTimeZone) throws JSONException, OXException {
+    private static void parse(final int pos, final int field, final JSONArray jsonArray, final Appointment appointmentObj, final TimeZone userTimeZone) throws JSONException, OXException {
         switch (field) {
-            case Appointment.OBJECT_ID:
-                appointmentObj.setObjectID(jsonArray.getInt(pos));
-                break;
-            case Appointment.FOLDER_ID:
-                appointmentObj.setParentFolderID(jsonArray.getInt(pos));
-                break;
-            case Appointment.TITLE:
-                appointmentObj.setTitle(jsonArray.getString(pos));
-                break;
-            case Appointment.CREATION_DATE:
-                appointmentObj.setCreationDate(new Date(jsonArray.getLong(pos)));
-                break;
-            case Appointment.LAST_MODIFIED:
-                appointmentObj.setLastModified(new Date(jsonArray.getLong(pos)));
-                break;
-            case Appointment.START_DATE:
-                appointmentObj.setStartDate(new Date(jsonArray.getLong(pos)));
-                break;
-            case Appointment.END_DATE:
-                appointmentObj.setEndDate(new Date(jsonArray.getLong(pos)));
-                break;
-            case Appointment.SHOWN_AS:
-                appointmentObj.setShownAs(jsonArray.getInt(pos));
-                break;
-            case Appointment.LOCATION:
-                appointmentObj.setLocation(jsonArray.getString(pos));
-                break;
-            case Appointment.FULL_TIME:
-                appointmentObj.setFullTime(jsonArray.getBoolean(pos));
-                break;
-            case Appointment.PRIVATE_FLAG:
-                appointmentObj.setPrivateFlag(jsonArray.getBoolean(pos));
-                break;
-            case Appointment.CATEGORIES:
-                appointmentObj.setCategories(jsonArray.getString(pos));
-                break;
-            case Appointment.COLOR_LABEL:
-                appointmentObj.setLabel(jsonArray.getInt(pos));
-                break;
-            case Appointment.NOTE:
-                appointmentObj.setNote(jsonArray.getString(pos));
-                break;
-            case Appointment.RECURRENCE_POSITION:
-                if (!jsonArray.isNull(pos)) {
-                    appointmentObj.setRecurrencePosition(jsonArray.getInt(pos));
-                }
-                break;
-            case Appointment.RECURRENCE_TYPE:
-                if (!jsonArray.isNull(pos)) {
-                    appointmentObj.setRecurrenceType(jsonArray.getInt(pos));
-                }
-                break;
-            case Appointment.RECURRENCE_ID:
-                if (!jsonArray.isNull(pos)) {
-                    appointmentObj.setRecurrenceID(jsonArray.getInt(pos));
-                }
-                break;
-            case Appointment.INTERVAL:
-                if (!jsonArray.isNull(pos)) {
-                    appointmentObj.setInterval(jsonArray.getInt(pos));
-                }
-                break;
-            case Appointment.DAYS:
-                if (!jsonArray.isNull(pos)) {
-                    appointmentObj.setDays(jsonArray.getInt(pos));
-                }
-                break;
-            case Appointment.DAY_IN_MONTH:
-                if (!jsonArray.isNull(pos)) {
-                    appointmentObj.setDayInMonth(jsonArray.getInt(pos));
-                }
-                break;
-            case Appointment.MONTH:
-                if (!jsonArray.isNull(pos)) {
-                    appointmentObj.setMonth(jsonArray.getInt(pos));
-                }
-                break;
-            case Appointment.UNTIL:
-                if (!jsonArray.isNull(pos)) {
-                    appointmentObj.setUntil(new Date(jsonArray.getLong(pos)));
-                }
-                break;
-            case Appointment.RECURRENCE_COUNT:
-                if (!jsonArray.isNull(pos)) {
-                    appointmentObj.setOccurrence(jsonArray.getInt(pos));
-                }
-                break;
-            case Appointment.TIMEZONE:
-                if (!jsonArray.isNull(pos)) {
-                    appointmentObj.setTimezone(jsonArray.getString(pos));
-                }
-                break;
-            case Appointment.RECURRENCE_START:
-                if (!jsonArray.isNull(pos)) {
-                    appointmentObj.setRecurringStart(jsonArray.getLong(pos));
-                }
-                break;
-            case Appointment.PARTICIPANTS:
-                appointmentObj.setParticipants(parseParticipants(jsonArray
-                        .getJSONArray(pos)));
-                break;
-            case Appointment.USERS:
-                appointmentObj.setUsers(
-                    parseUserParticipants(jsonArray.getJSONArray(pos))
-                );
+        case Appointment.OBJECT_ID:
+            appointmentObj.setObjectID(jsonArray.getInt(pos));
+            break;
+        case Appointment.FOLDER_ID:
+            appointmentObj.setParentFolderID(jsonArray.getInt(pos));
+            break;
+        case Appointment.TITLE:
+            appointmentObj.setTitle(jsonArray.getString(pos));
+            break;
+        case Appointment.CREATION_DATE:
+            appointmentObj.setCreationDate(new Date(jsonArray.getLong(pos)));
+            break;
+        case Appointment.LAST_MODIFIED:
+            appointmentObj.setLastModified(new Date(jsonArray.getLong(pos)));
+            break;
+        case Appointment.START_DATE:
+            appointmentObj.setStartDate(new Date(jsonArray.getLong(pos)));
+            break;
+        case Appointment.END_DATE:
+            appointmentObj.setEndDate(new Date(jsonArray.getLong(pos)));
+            break;
+        case Appointment.SHOWN_AS:
+            appointmentObj.setShownAs(jsonArray.getInt(pos));
+            break;
+        case Appointment.LOCATION:
+            appointmentObj.setLocation(jsonArray.getString(pos));
+            break;
+        case Appointment.FULL_TIME:
+            appointmentObj.setFullTime(jsonArray.getBoolean(pos));
+            break;
+        case Appointment.PRIVATE_FLAG:
+            appointmentObj.setPrivateFlag(jsonArray.getBoolean(pos));
+            break;
+        case Appointment.CATEGORIES:
+            appointmentObj.setCategories(jsonArray.getString(pos));
+            break;
+        case Appointment.COLOR_LABEL:
+            appointmentObj.setLabel(jsonArray.getInt(pos));
+            break;
+        case Appointment.NOTE:
+            appointmentObj.setNote(jsonArray.getString(pos));
+            break;
+        case Appointment.RECURRENCE_POSITION:
+            if (!jsonArray.isNull(pos)) {
+                appointmentObj.setRecurrencePosition(jsonArray.getInt(pos));
+            }
+            break;
+        case Appointment.RECURRENCE_TYPE:
+            if (!jsonArray.isNull(pos)) {
+                appointmentObj.setRecurrenceType(jsonArray.getInt(pos));
+            }
+            break;
+        case Appointment.RECURRENCE_ID:
+            if (!jsonArray.isNull(pos)) {
+                appointmentObj.setRecurrenceID(jsonArray.getInt(pos));
+            }
+            break;
+        case Appointment.INTERVAL:
+            if (!jsonArray.isNull(pos)) {
+                appointmentObj.setInterval(jsonArray.getInt(pos));
+            }
+            break;
+        case Appointment.DAYS:
+            if (!jsonArray.isNull(pos)) {
+                appointmentObj.setDays(jsonArray.getInt(pos));
+            }
+            break;
+        case Appointment.DAY_IN_MONTH:
+            if (!jsonArray.isNull(pos)) {
+                appointmentObj.setDayInMonth(jsonArray.getInt(pos));
+            }
+            break;
+        case Appointment.MONTH:
+            if (!jsonArray.isNull(pos)) {
+                appointmentObj.setMonth(jsonArray.getInt(pos));
+            }
+            break;
+        case Appointment.UNTIL:
+            if (!jsonArray.isNull(pos)) {
+                appointmentObj.setUntil(new Date(jsonArray.getLong(pos)));
+            }
+            break;
+        case Appointment.RECURRENCE_COUNT:
+            if (!jsonArray.isNull(pos)) {
+                appointmentObj.setOccurrence(jsonArray.getInt(pos));
+            }
+            break;
+        case Appointment.TIMEZONE:
+            if (!jsonArray.isNull(pos)) {
+                appointmentObj.setTimezone(jsonArray.getString(pos));
+            }
+            break;
+        case Appointment.RECURRENCE_START:
+            if (!jsonArray.isNull(pos)) {
+                appointmentObj.setRecurringStart(jsonArray.getLong(pos));
+            }
+            break;
+        case Appointment.PARTICIPANTS:
+            appointmentObj.setParticipants(parseParticipants(jsonArray.getJSONArray(pos)));
+            break;
+        case Appointment.USERS:
+            appointmentObj.setUsers(parseUserParticipants(jsonArray.getJSONArray(pos)));
 
-                break;
-            case Appointment.CHANGE_EXCEPTIONS:
-                if (!jsonArray.isNull(pos)) {
-                    final JSONArray changeExceptions = jsonArray.getJSONArray(pos);
-                    appointmentObj.setChangeExceptions(parseExceptions(changeExceptions));
-                }
-                break;
-            case Appointment.DELETE_EXCEPTIONS:
-                if (!jsonArray.isNull(pos)) {
-                    final JSONArray deleteExceptions = jsonArray.getJSONArray(pos);
-                    appointmentObj.setDeleteExceptions(parseExceptions(deleteExceptions));
-                }
-                break;
-            case Appointment.ORGANIZER:
-                appointmentObj.setOrganizer(jsonArray.getString(pos));
-                break;
-            case Appointment.UID:
-                appointmentObj.setUid(jsonArray.getString(pos));
-                break;
-            case Appointment.SEQUENCE:
-                appointmentObj.setSequence(jsonArray.getInt(pos));
-                break;
+            break;
+        case Appointment.CHANGE_EXCEPTIONS:
+            if (!jsonArray.isNull(pos)) {
+                final JSONArray changeExceptions = jsonArray.getJSONArray(pos);
+                appointmentObj.setChangeExceptions(parseExceptions(changeExceptions));
+            }
+            break;
+        case Appointment.DELETE_EXCEPTIONS:
+            if (!jsonArray.isNull(pos)) {
+                final JSONArray deleteExceptions = jsonArray.getJSONArray(pos);
+                appointmentObj.setDeleteExceptions(parseExceptions(deleteExceptions));
+            }
+            break;
+        case Appointment.ORGANIZER:
+            appointmentObj.setOrganizer(jsonArray.getString(pos));
+            break;
+        case Appointment.UID:
+            appointmentObj.setUid(jsonArray.getString(pos));
+            break;
+        case Appointment.SEQUENCE:
+            appointmentObj.setSequence(jsonArray.getInt(pos));
+            break;
         }
     }
 
-
-
-    private static Date[] parseExceptions(final JSONArray jsonArray)
-    throws JSONException {
+    private static Date[] parseExceptions(final JSONArray jsonArray) throws JSONException {
         final Date[] exceptions = new Date[jsonArray.length()];
         for (int i = 0; i < jsonArray.length(); i++) {
             exceptions[i] = new Date(jsonArray.getLong(i));
@@ -1139,8 +1040,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         return userParticipants.toArray(new UserParticipant[userParticipants.size()]);
     }
 
-    private static Participant[] parseParticipants(final JSONArray jsonArray)
-    throws JSONException, OXException {
+    private static Participant[] parseParticipants(final JSONArray jsonArray) throws JSONException, OXException {
         final Participant[] participant = new Participant[jsonArray.length()];
         for (int i = 0; i < jsonArray.length(); i++) {
             final JSONObject jparticipant = jsonArray.getJSONObject(i);
@@ -1154,39 +1054,39 @@ public class AppointmentTest extends AbstractAJAXTest {
             final String mail = jparticipant.optString("mail");
             Participant p = null;
             switch (type) {
-                case Participant.USER:
-                    if (Participant.NO_ID == id) {
-                        throw new JSONException("JSONObject[id] not found.");
-                    }
-                    final UserParticipant user = new UserParticipant(id);
-                    p = user;
-                    break;
-                case Participant.GROUP:
-                    if (Participant.NO_ID == id) {
-                        throw new JSONException("JSONObject[id] not found.");
-                    }
-                    p = new GroupParticipant(id);
-                    break;
-                case Participant.RESOURCE:
-                    if (Participant.NO_ID == id) {
-                        throw new JSONException("JSONObject[id] not found.");
-                    }
-                    p = new ResourceParticipant(id);
-                    break;
-                case Participant.RESOURCEGROUP:
-                    if (Participant.NO_ID == id) {
-                        throw new JSONException("JSONObject[id] not found.");
-                    }
-                    p = new ResourceGroupParticipant(id);
-                    break;
-                case Participant.EXTERNAL_USER:
-                    if (null == mail) {
-                        throw new JSONException("JSONObject[mail] not found.");
-                    }
-                    p = new ExternalUserParticipant(mail);
-                    break;
-                default:
-                    throw new OXException().setLogMessage("invalidType");
+            case Participant.USER:
+                if (Participant.NO_ID == id) {
+                    throw new JSONException("JSONObject[id] not found.");
+                }
+                final UserParticipant user = new UserParticipant(id);
+                p = user;
+                break;
+            case Participant.GROUP:
+                if (Participant.NO_ID == id) {
+                    throw new JSONException("JSONObject[id] not found.");
+                }
+                p = new GroupParticipant(id);
+                break;
+            case Participant.RESOURCE:
+                if (Participant.NO_ID == id) {
+                    throw new JSONException("JSONObject[id] not found.");
+                }
+                p = new ResourceParticipant(id);
+                break;
+            case Participant.RESOURCEGROUP:
+                if (Participant.NO_ID == id) {
+                    throw new JSONException("JSONObject[id] not found.");
+                }
+                p = new ResourceGroupParticipant(id);
+                break;
+            case Participant.EXTERNAL_USER:
+                if (null == mail) {
+                    throw new JSONException("JSONObject[mail] not found.");
+                }
+                p = new ExternalUserParticipant(mail);
+                break;
+            default:
+                throw new OXException().setLogMessage("invalidType");
             }
             participant[i] = p;
         }
@@ -1194,8 +1094,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         return participant;
     }
 
-    private HashSet participants2String(final Participant[] participant)
-    throws Exception {
+    private HashSet participants2String(final Participant[] participant) throws Exception {
         if (participant == null) {
             return null;
         }
@@ -1219,25 +1118,25 @@ public class AppointmentTest extends AbstractAJAXTest {
         return sb.toString();
     }
 
-    protected void create( final Appointment appointment ) throws JSONException, IOException, SAXException, OXException {
+    protected void create(final Appointment appointment) throws JSONException, IOException, SAXException, OXException {
         final InsertRequest insert = new InsertRequest(appointment, TimeZones.UTC, true);
         getClient().execute(insert).fillAppointment(appointment);
-        clean.add( appointment );
+        clean.add(appointment);
     }
 
     protected void clean() throws JSONException, IOException, SAXException, OXException {
         final AJAXClient client = getClient();
-        for(final Appointment appointment : clean) {
+        for (final Appointment appointment : clean) {
             final DeleteRequest delete = new DeleteRequest(appointment);
             client.execute(delete);
         }
     }
 
     protected AJAXClient getClient() throws JSONException, IOException, OXException {
-        return new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
+        return new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
     }
 
-    protected Appointment link(final Appointment base, final Appointment update){
+    protected Appointment link(final Appointment base, final Appointment update) {
         update.setLastModified(base.getLastModified());
         update.setParentFolderID(base.getParentFolderID());
         update.setObjectID(base.getObjectID());

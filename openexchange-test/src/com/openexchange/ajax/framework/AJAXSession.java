@@ -60,7 +60,7 @@ import com.meterware.httpunit.WebConversation;
 /**
  * This class stores the HTTP client instance and the session identifier for an AJAX session. Additionally the fallback web conversation is
  * stored here.
- *
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AJAXSession {
@@ -71,10 +71,10 @@ public class AJAXSession {
     public static final String USER_AGENT = "OX6 HTTP API Testing Agent";
 
     private final WebConversation conversation;
+
     private final DefaultHttpClient httpClient;
 
     private String id;
-    private boolean mustLogout;
 
     public AJAXSession() {
         this(newWebConversation(), newHttpClient(), null);
@@ -89,7 +89,6 @@ public class AJAXSession {
         this.conversation = conversation;
         this.httpClient = httpClient;
         this.id = id;
-        this.mustLogout = id != null;
     }
 
     public WebConversation getConversation() {
@@ -106,16 +105,11 @@ public class AJAXSession {
 
     public void setId(final String id) {
         this.id = id;
-        this.mustLogout = id != null;
-    }
-
-    public boolean mustLogout() {
-        return mustLogout;
     }
 
     /**
-     * Setup the web conversation here so tests are able to create additional if
-     * several users are needed for tests.
+     * Setup the web conversation here so tests are able to create additional if several users are needed for tests.
+     * 
      * @return a new web conversation.
      */
     public static WebConversation newWebConversation() {
@@ -135,9 +129,12 @@ public class AJAXSession {
         HttpConnectionParams.setConnectionTimeout(params, minute);
         HttpConnectionParams.setSoTimeout(params, minute);
 
-        retval.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY); //OX cookies work with all browsers, meaning they are a mix of the Netscape draft and the RFC
-        retval.getParams().setParameter("User-Agent", USER_AGENT); //needs to be consistent
-        retval.getParams().setParameter("http.useragent", USER_AGENT); //needs to be consistent
+        retval.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY); // OX cookies work with all
+                                                                                                         // browsers, meaning they are a mix
+                                                                                                         // of the Netscape draft and the
+                                                                                                         // RFC
+        retval.getParams().setParameter("User-Agent", USER_AGENT); // needs to be consistent
+        retval.getParams().setParameter("http.useragent", USER_AGENT); // needs to be consistent
         return retval;
     }
 

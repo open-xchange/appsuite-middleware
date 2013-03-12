@@ -53,7 +53,7 @@ import java.io.InputStream;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link PreviewCache}
+ * {@link PreviewCache} - The preview document cache.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

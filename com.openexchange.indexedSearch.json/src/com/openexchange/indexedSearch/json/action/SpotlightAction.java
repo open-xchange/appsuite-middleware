@@ -49,17 +49,17 @@
 
 package com.openexchange.indexedSearch.json.action;
 
-import java.util.List;
-import javax.mail.internet.InternetAddress;
+import java.util.Set;
 import org.apache.commons.logging.Log;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.Type;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.IndexAccess;
-import com.openexchange.index.IndexDocument;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.IndexResult;
 import com.openexchange.index.QueryParameters;
@@ -68,7 +68,10 @@ import com.openexchange.index.SearchHandlers;
 import com.openexchange.indexedSearch.json.IndexAJAXRequest;
 import com.openexchange.indexedSearch.json.IndexedSearchExceptionCodes;
 import com.openexchange.indexedSearch.json.ResultConverters;
+import com.openexchange.indexedSearch.json.converter.SearchResult;
+import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -78,6 +81,41 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
+@Action(method = RequestMethod.GET, name = "spotlight", description = "Search for mails in a spotlight-like manner.", parameters = {
+    @Parameter(
+        name = "term",
+        description = "The term to search for. Use * for wildcard searches.",
+        optional = false,
+        type = Type.STRING
+    ),
+    @Parameter(
+        name = "field",
+        description = "The field to search in. Possible fields are 'from', 'to' and 'subject'.",
+        optional = false,
+        type =
+        Type.STRING
+    ),
+    @Parameter(
+        name = "columns",
+        description = "A comma-separated list of columns to return for found mails. " +
+                "If not specified, all columns are returned. Column identifiers for mails are " +
+                "defined in http://oxpedia.org/wiki/index.php?title=HTTP_API#DetailedMailData.",
+        optional = true,
+        type = Type.ARRAY
+    ),
+    @Parameter(
+        name = "offset",
+        description = "The offset for documents to return within the list of all found documents. Use for pagination. Default: 0.",
+        optional = true,
+        type = Type.NUMBER
+    ),
+    @Parameter(
+        name = "length",
+        description = "The max. number of returned documents. Use for pagination. Default: 10.",
+        optional = true,
+        type = Type.NUMBER
+    )
+})
 public class SpotlightAction extends AbstractIndexAction {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(SpotlightAction.class);
@@ -92,13 +130,19 @@ public class SpotlightAction extends AbstractIndexAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(IndexAJAXRequest req) throws OXException, JSONException {
-        long start = System.currentTimeMillis();
-        final ServerSession session = req.getSession();
-        final int maxPersons = req.optInt("maxPersons") == IndexAJAXRequest.NOT_FOUND ? 10 : req.optInt("maxPersons");
-        final int maxTopics = req.optInt("maxTopics") == IndexAJAXRequest.NOT_FOUND ? 10 : req.optInt("maxTopics");
-        final String q = req.checkParameter("q");
-        final String field = req.checkParameter("field");
+    protected AJAXRequestResult perform(IndexAJAXRequest req) throws OXException {
+        long startTime = System.currentTimeMillis();
+        ServerSession session = req.getSession();
+        String term = req.checkParameter("term");
+        String field = req.checkParameter("field");
+        int offset = req.optInt("offset") == IndexAJAXRequest.NOT_FOUND ? 0 : req.optInt("offset");
+        int length = req.optInt("length") == IndexAJAXRequest.NOT_FOUND ? 10 : req.optInt("length");
+        int[] columns = req.optIntArray(AJAXServlet.PARAMETER_COLUMNS);
+        Set<MailIndexField> indexFields = null;
+        if (columns == null) {
+            indexFields= MailIndexField.getFor(MailField.getFields(columns));
+        }
+
         final IndexFacadeService indexFacade = getService(IndexFacadeService.class);
         final SearchHandler searchHandler;
         if ("from".equals(field)) {
@@ -108,97 +152,29 @@ public class SpotlightAction extends AbstractIndexAction {
         } else if ("subject".equals(field)) {
             searchHandler = SearchHandlers.namedHandler("spotlight_subject");
         } else {
-            throw IndexedSearchExceptionCodes.UNKNOWN_HANDLER.create(field);
+            throw IndexedSearchExceptionCodes.UNKNOWN_HANDLER.create(indexFields);
         }
 
         IndexAccess<MailMessage> indexAccess = indexFacade.acquireIndexAccess(Types.EMAIL, session);
         QueryParameters params = new QueryParameters.Builder()
             .setHandler(searchHandler)
-            .setSearchTerm(q)
-            .setLength(maxPersons + maxTopics)
+            .setSearchTerm(term)
+            .setOffset(offset)
+            .setLength(length)
             .build();
 
         IndexResult<MailMessage> result = indexAccess.query(params, null);
-        JSONObject responseObject = new JSONObject();
-        responseObject.put("numFound", result.getNumFound());
-        
-        List<IndexDocument<MailMessage>> documents = result.getResults();
-        JSONArray docs = new JSONArray();
-        for (IndexDocument<MailMessage> document : documents) {
-            MailMessage mailMessage = document.getObject();
-            int accountId = mailMessage.getAccountId();
-            String folder = mailMessage.getFolder();
-            String mailId = mailMessage.getMailId();
-            InternetAddress[] from = mailMessage.getFrom();
-            InternetAddress[] to = mailMessage.getTo();
-            String subject = mailMessage.getSubject();
-            
-            JSONObject json = new JSONObject();
-            json.put("indexId", document.getDocumentId());
-            
-            if (accountId >= 0) {
-                json.put("account", accountId);
-            } else {
-                json.put("account", JSONObject.NULL);
-            }
-            
-            json.put("folder", folder);
-            json.put("mailId", mailId);
-            json.put("subject", subject);
-            
-            if (from == null) {
-                json.put("from", new JSONArray());
-            } else {
-                JSONArray addrs = new JSONArray();
-                for (InternetAddress addr : from) {
-                    String personal = addr.getPersonal();
-                    String address = addr.getAddress();
-                    String value;
-                    if (personal == null) {
-                        value = address;
-                    } else {
-                        value = personal + " <" + address + ">";
-                    }
-                    
-                    addrs.put(value);
-                }
-                
-                json.put("from", addrs);
-            }
-            
-            if (to == null) {
-                json.put("to", new JSONArray());
-            } else {
-                JSONArray addrs = new JSONArray();
-                for (InternetAddress addr : to) {
-                    String personal = addr.getPersonal();
-                    String address = addr.getAddress();
-                    String value;
-                    if (personal == null) {
-                        value = address;
-                    } else {
-                        value = personal + " <" + address + ">";
-                    }
-                    
-                    addrs.put(value);
-                }
-                
-                json.put("to", addrs);
-            }
-            
-            docs.put(json);
+        long diff = System.currentTimeMillis() - startTime;
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Spotlight search duration for field '" + field + "': " + diff + "ms.");
         }
-        responseObject.put("docs", docs);
 
-        long diff = System.currentTimeMillis() - start;
-        LOG.warn("Duration: " + diff + "ms.");
-        
-        JSONObject resultObject = new JSONObject();
-        JSONObject responseHeader = new JSONObject();
-        responseHeader.put("QTime", diff);
-        resultObject.put("responseHeader", responseHeader);
-        resultObject.put("response", responseObject);
-        return new AJAXRequestResult(resultObject, "apiResponse");
+        SearchResult<MailMessage> searchResult = new SearchResult<MailMessage>(Types.EMAIL);
+        searchResult.setNumFound(result.getNumFound());
+        searchResult.setDuration(diff);
+        searchResult.setDocuments(result.getResults());
+        searchResult.setFields(columns);
+        return new AJAXRequestResult(searchResult, "searchResult");
     }
 
     @Override

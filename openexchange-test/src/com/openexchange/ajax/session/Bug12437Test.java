@@ -59,7 +59,6 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 
 /**
- *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Bug12437Test extends TestCase {
@@ -79,7 +78,7 @@ public final class Bug12437Test extends TestCase {
         super.setUp();
         AJAXConfig.init();
         final AJAXSession session = new AJAXSession();
-        client = new AJAXClient(session);
+        client = new AJAXClient(session, true);
         login = "some invalid login";
         password = "some invalid password";
     }

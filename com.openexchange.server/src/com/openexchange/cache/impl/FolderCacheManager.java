@@ -471,20 +471,6 @@ public final class FolderCacheManager {
                 Condition cond = null;
                 if (tmp instanceof Condition) {
                     cond = (Condition) tmp;
-                } else {
-                    // Remove to distribute PUT as REMOVE
-                    folderCache.remove(key);
-                    // Dirty hack
-                    final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-                    if (null != cacheService) {
-                        try {
-                            final Cache globalCache = cacheService.getCache("GlobalFolderCache");
-                            final CacheKey cacheKey = cacheService.newCacheKey(1, FolderStorage.REAL_TREE_ID, String.valueOf(folderProvider.getObjectID()));
-                            globalCache.removeFromGroup(cacheKey, String.valueOf(ctx.getContextId()));
-                        } catch (final OXException e) {
-                            LOG.warn(e.getMessage(), e);
-                        }
-                    }
                 }
                 if (elemAttribs == null || folderCache.isDistributed()) {
                     // Put with default attributes

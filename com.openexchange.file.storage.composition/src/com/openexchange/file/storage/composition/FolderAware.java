@@ -1,6 +1,6 @@
 /*
  *
- *    OPEN-XCHANGE legal information
+0 *    OPEN-XCHANGE legal information
  *
  *    All intellectual property rights in the Software are protected by
  *    international copyright laws.

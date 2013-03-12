@@ -67,6 +67,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * This class contains the login test. It also contains static methods to made logins from other places.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class LoginTest extends AbstractAJAXTest {
@@ -83,6 +84,7 @@ public class LoginTest extends AbstractAJAXTest {
 
     /**
      * Default constructor.
+     * 
      * @param name Name of the test.
      */
     public LoginTest(final String name) {
@@ -91,6 +93,7 @@ public class LoginTest extends AbstractAJAXTest {
 
     /**
      * This method mades a logout.
+     * 
      * @param conversation WebConversation.
      * @param hostname hostname of the server running the server.
      * @param sessionId Session identifier of the user.
@@ -103,15 +106,15 @@ public class LoginTest extends AbstractAJAXTest {
 
         LOG.trace("Logging out.");
         LogoutRequest request = new LogoutRequest();
-        AJAXClient client = new AJAXClient(new AJAXSession(conversation, hostname, sessionId));
+        AJAXClient client = new AJAXClient(new AJAXSession(conversation, hostname, sessionId), false);
         client.setHostname(hostname);
         client.setProtocol(AJAXConfig.getProperty(Property.PROTOCOL));
         client.execute(request);
     }
 
     /**
-     * This method mades a login and returns the sessionId if the login is
-     * successful.
+     * This method mades a login and returns the sessionId if the login is successful.
+     * 
      * @param conversation WebConversation.
      * @param hostname hostname of the server running the server.
      * @param login Login of the user.
@@ -125,9 +128,14 @@ public class LoginTest extends AbstractAJAXTest {
      */
     @Deprecated
     public static String getSessionId(final WebConversation conversation, final String hostname, final String login, final String password) throws IOException, JSONException, OXException {
-        LoginRequest request = new LoginRequest(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), AJAXClient.VERSION);
+        LoginRequest request = new LoginRequest(
+            login,
+            password,
+            LoginTools.generateAuthId(),
+            AJAXClient.class.getName(),
+            AJAXClient.VERSION);
         // an empty string is passed to put temporary AJAXSession not in mustLogout mode. Logout is done with above logout() method.
-        AJAXClient client = new AJAXClient(new AJAXSession(conversation, hostname, "no logout"));
+        AJAXClient client = new AJAXClient(new AJAXSession(conversation, hostname, "no logout"), false);
         client.setHostname(hostname);
         client.setProtocol(AJAXConfig.getProperty(Property.PROTOCOL));
         LoginResponse response = client.execute(request);

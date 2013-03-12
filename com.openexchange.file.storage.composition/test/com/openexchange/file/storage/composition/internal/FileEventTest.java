@@ -252,7 +252,7 @@ public class FileEventTest {
         fileAccess = null;
     }
 
-    private static final class InMemoryAccess extends CompositingIDBasedFileAccess {
+    private static final class InMemoryAccess extends AbstractCompositingIDBasedFileAccess {
 
         private final FileStorageFileAccess access = new InMemoryFileStorageFileAccess(SERVICE, ACCOUNT);
 

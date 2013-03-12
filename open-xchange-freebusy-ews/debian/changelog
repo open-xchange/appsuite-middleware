@@ -10,13 +10,13 @@ open-xchange-freebusy-ews (7.0.0-0) unstable; urgency=low
 
  -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Tue, 04 Dec 2012 09:29:24 +0100
 
-open-xchange-freebusy-ews (6.23.0-2) unstable; urgency=low
+open-xchange-freebusy-ews (6.23.0-1) unstable; urgency=low
 
   * First release candidate for EDP drop #6
 
  -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Tue, 13 Nov 2012 11:22:46 +0100
 
-open-xchange-freebusy-ews (6.23.0-1) unstable; urgency=low
+open-xchange-freebusy-ews (6.23.0-0) unstable; urgency=low
 
   * prepare for 6.23.0
 

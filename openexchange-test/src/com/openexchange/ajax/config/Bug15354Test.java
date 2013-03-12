@@ -63,18 +63,25 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
  * {@link Bug15354Test}
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Bug15354Test extends AbstractAJAXSession {
 
     static final Log LOG = LogFactory.getLog(Bug15354Test.class);
+
     private static final int ITERATIONS = 10000;
+
     private static final int NEEDED_BROKEN = 10;
+
     private final BetaWriter[] writer = new BetaWriter[5];
+
     private final Thread[] thread = new Thread[writer.length];
+
     private AJAXClient client;
+
     private boolean origValue;
+
     private Object[] origAliases;
 
     public Bug15354Test(String name) {
@@ -150,17 +157,23 @@ public class Bug15354Test extends AbstractAJAXSession {
     }
 
     private static final class BetaWriter implements Runnable {
+
         private boolean run = true;
+
         private Throwable t;
+
         BetaWriter() {
             super();
         }
+
         void stop() {
             run = false;
         }
+
         Throwable getThrowable() {
             return t;
         }
+
         @Override
         public void run() {
             Random rand = new Random(System.currentTimeMillis());

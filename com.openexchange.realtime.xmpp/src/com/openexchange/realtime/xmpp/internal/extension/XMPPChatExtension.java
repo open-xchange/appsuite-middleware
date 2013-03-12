@@ -137,7 +137,7 @@ public class XMPPChatExtension implements XMPPExtension {
         xmpp.setPayloads(payloads);
     }
 
-    private void transform(XMPPMessage xmpp, Message message, ServerSession session) throws OXException {
+    private void transform(XMPPMessage xmpp, Message message) throws OXException {
         JID from = xmpp.getFrom();
         message.setFrom(new ID(null, null, from.getUser(), from.getDomain(), from.getResource()));
 
@@ -147,7 +147,7 @@ public class XMPPChatExtension implements XMPPExtension {
         XMPPPayloadTreeTransformer treeTransformer = new XMPPPayloadTreeTransformer();
         Collection<PayloadTree> payloads = new HashSet<PayloadTree>();
         for (PayloadTree payload : xmpp.getPayloads()) {
-            PayloadTree transformedTree = treeTransformer.outgoing(payload, session);
+            PayloadTree transformedTree = treeTransformer.outgoing(payload);
             payloads.add(transformedTree);
         }
 

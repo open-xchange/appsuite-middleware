@@ -56,10 +56,12 @@ import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FileStreamHandlerRegistry;
 import com.openexchange.file.storage.composition.FolderAware;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.file.storage.composition.internal.CompositingIDBasedFileAccess;
+import com.openexchange.file.storage.composition.internal.AbstractCompositingIDBasedFileAccess;
+import com.openexchange.file.storage.composition.internal.FileStreamHandlerRegistryImpl;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
@@ -73,11 +75,10 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class FileStorageCompositionActivator extends HousekeepingActivator {
 
-    private final class CompositingIDBasedFileAccessImpl extends CompositingIDBasedFileAccess implements FolderAware {
+    private final class CompositingIDBasedFileAccessImpl extends AbstractCompositingIDBasedFileAccess implements FolderAware {
 
         /**
          * Initializes a new {@link CompositingIDBasedFileAccessImpl}.
-         * @param session
          */
         CompositingIDBasedFileAccessImpl(Session session) {
             super(session);
@@ -125,16 +126,6 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        // Nothing to do
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        // Nothing to do
-    }
-
-    @Override
     protected void startBundle() throws Exception {
         registerService(IDBasedFileAccessFactory.class, new IDBasedFileAccessFactory() {
 
@@ -144,11 +135,18 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
             }
 
         });
+        // Start-up & register FileStreamHandlerRegistry
+        final FileStreamHandlerRegistryImpl registry = new FileStreamHandlerRegistryImpl(context);
+        AbstractCompositingIDBasedFileAccess.setHandlerRegistry(registry);
+        rememberTracker(registry);
+        openTrackers();
+        registerService(FileStreamHandlerRegistry.class, registry);
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        cleanUp();
+        super.stopBundle();
+        AbstractCompositingIDBasedFileAccess.setHandlerRegistry(null);
     }
 
 }
