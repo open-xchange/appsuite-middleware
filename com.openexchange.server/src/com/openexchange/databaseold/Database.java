@@ -269,4 +269,8 @@ public final class Database {
     public static int getServerId() throws OXException {
         return getDatabaseService().getServerId();
     }
+
+    public static String getServerName() throws OXException {
+        return getDatabaseService().getServerName();
+    }
 }

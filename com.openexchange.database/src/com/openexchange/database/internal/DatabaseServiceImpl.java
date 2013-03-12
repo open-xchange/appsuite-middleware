@@ -144,6 +144,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
         return configDatabaseService.getServerId();
     }
 
+    @Override
+    public String getServerName() throws OXException {
+        return configDatabaseService.getServerName();
+    }
+
     // Implemented database service methods.
 
     @Override

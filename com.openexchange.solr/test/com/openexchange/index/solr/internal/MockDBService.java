@@ -104,6 +104,12 @@ public class MockDBService implements DatabaseService {
     }
 
     @Override
+    public String getServerName() throws OXException {
+        // Nothing to do
+        return null;
+    }
+
+    @Override
     public Connection getReadOnly(final Context ctx) throws OXException {
         return dbProvider.getReadConnection(null);
     }

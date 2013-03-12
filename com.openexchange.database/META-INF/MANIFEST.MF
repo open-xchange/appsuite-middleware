@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Database Connection Pooling
+Bundle-SymbolicName: com.openexchange.database
+Bundle-Version: 7.0.1
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.mysql.jdbc,
+ com.openexchange.caching,
+ com.openexchange.config,
+ com.openexchange.database,
+ com.openexchange.exception,
+ com.openexchange.groupware.contexts,
+ com.openexchange.java,
+ com.openexchange.log,
+ com.openexchange.management,
+ com.openexchange.monitoring,
+ com.openexchange.threadpool,
+ com.openexchange.timer,
+ gnu.trove.list,
+ gnu.trove.list.linked,
+ javax.management,
+ javax.management.openmbean,
+ javax.management.remote,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Bundle-Activator: com.openexchange.database.osgi.Activator

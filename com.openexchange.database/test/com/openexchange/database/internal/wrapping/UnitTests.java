@@ -47,48 +47,26 @@
  *
  */
 
-package com.openexchange.database;
+package com.openexchange.database.internal.wrapping;
 
-import java.sql.Connection;
-import com.openexchange.exception.OXException;
+import junit.framework.JUnit4TestAdapter;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
- * {@link ConfigDatabaseService}
+ * {@link UnitTests}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface ConfigDatabaseService {
+public class UnitTests {
 
-    /**
-     * Returns a connection for reading from the config database.
-     * @return a connection for reading from the config database.
-     * @throws OXException if no connection can be obtained.
-     */
-    Connection getReadOnly() throws OXException;
+    private UnitTests() {
+        super();
+    }
 
-    /**
-     * Returns a connection to the config database.
-     * @return a connection to the config database.
-     * @throws OXException if no connection can be obtained.
-     */
-    Connection getWritable() throws OXException;
-
-    /**
-     * Returns a read only connection to the config database to the pool.
-     * @param con Connection to return.
-     */
-    void backReadOnly(Connection con);
-
-    /**
-     * Returns a writable connection to the config database to the pool.
-     * @param con Connection to return.
-     */
-    void backWritable(Connection con);
-
-    int[] listContexts(int poolId) throws OXException;
-
-    int getServerId() throws OXException;
-
-    String getServerName() throws OXException;
-
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.database.internal.wrapping.JDBC4ConnectionReturnerTest.class));
+        return tests;
+    }
 }

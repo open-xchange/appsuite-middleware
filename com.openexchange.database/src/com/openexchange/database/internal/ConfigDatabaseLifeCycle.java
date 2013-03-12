@@ -49,7 +49,6 @@
 
 package com.openexchange.database.internal;
 
-import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 
 /**
@@ -65,10 +64,10 @@ public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
 
     ConfigDatabaseLifeCycle(final Configuration configuration, final Management management, final Timer timer) {
         super();
-        configDBWrite = new ConnectionPool(IDNA.toASCII(configuration.getWriteUrl()), configuration.getWriteProps(), configuration.getPoolConfig());
+        configDBWrite = new ConnectionPool(configuration.getWriteUrl(), configuration.getWriteProps(), configuration.getPoolConfig());
         timer.addTask(configDBWrite.getCleanerTask());
         management.addPool(Constants.CONFIGDB_WRITE_ID, configDBWrite);
-        configDBRead = new ConnectionPool(IDNA.toASCII(configuration.getReadUrl()), configuration.getReadProps(), configuration.getPoolConfig());
+        configDBRead = new ConnectionPool(configuration.getReadUrl(), configuration.getReadProps(), configuration.getPoolConfig());
         timer.addTask(configDBRead.getCleanerTask());
         management.addPool(Constants.CONFIGDB_READ_ID, configDBRead);
     }

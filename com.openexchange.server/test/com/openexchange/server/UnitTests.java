@@ -70,7 +70,6 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.ajax.parser.TaskLastModifiedTest.class);
         tests.addTestSuite(com.openexchange.ajax.LoginAddFragmentTest.class);
         tests.addTest(new JUnit4TestAdapter(com.openexchange.groupware.ldap.UserAttributeDiffTest.class));
-        tests.addTest(new JUnit4TestAdapter(com.openexchange.database.internal.wrapping.JDBC4ConnectionReturnerTest.class));
         tests.addTest(new JUnit4TestAdapter(com.openexchange.i18n.tools.replacement.TaskEndDateReplacementTest.class));
         tests.addTestSuite(com.openexchange.tools.collections.OXCollectionsTest.class);
         tests.addTestSuite(com.openexchange.tools.iterator.SearchIteratorDelegatorTest.class);

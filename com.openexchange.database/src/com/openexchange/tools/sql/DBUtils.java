@@ -47,48 +47,76 @@
  *
  */
 
-package com.openexchange.database;
+package com.openexchange.tools.sql;
 
 import java.sql.Connection;
-import com.openexchange.exception.OXException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import org.apache.commons.logging.Log;
+import com.openexchange.log.LogFactory;
 
 /**
- * {@link ConfigDatabaseService}
+ * Utilities for database resource handling.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public interface ConfigDatabaseService {
+public final class DBUtils {
 
-    /**
-     * Returns a connection for reading from the config database.
-     * @return a connection for reading from the config database.
-     * @throws OXException if no connection can be obtained.
-     */
-    Connection getReadOnly() throws OXException;
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DBUtils.class));
 
-    /**
-     * Returns a connection to the config database.
-     * @return a connection to the config database.
-     * @throws OXException if no connection can be obtained.
-     */
-    Connection getWritable() throws OXException;
+    private DBUtils() {
+        super();
+    }
 
-    /**
-     * Returns a read only connection to the config database to the pool.
-     * @param con Connection to return.
-     */
-    void backReadOnly(Connection con);
+    public static void closeSQLStuff(ResultSet result) {
+        if (result != null) {
+            try {
+                result.close();
+            } catch (SQLException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
 
-    /**
-     * Returns a writable connection to the config database to the pool.
-     * @param con Connection to return.
-     */
-    void backWritable(Connection con);
+    public static void closeSQLStuff(Statement stmt) {
+        if (null != stmt) {
+            try {
+                stmt.close();
+            } catch (SQLException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+    }
 
-    int[] listContexts(int poolId) throws OXException;
+    public static void closeSQLStuff(ResultSet result, Statement stmt) {
+        closeSQLStuff(result);
+        closeSQLStuff(stmt);
+    }
 
-    int getServerId() throws OXException;
+    public static void rollback(Connection con) {
+        if (null == con) {
+            return;
+        }
+        try {
+            if (!con.isClosed()) {
+                con.rollback();
+            }
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
 
-    String getServerName() throws OXException;
-
+    public static void autocommit(Connection con) {
+        if (null == con) {
+            return;
+        }
+        try {
+            if (!con.isClosed()) {
+                con.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
 }

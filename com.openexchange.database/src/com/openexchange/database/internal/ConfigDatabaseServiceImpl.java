@@ -161,4 +161,9 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     public int getServerId() throws OXException {
         return Server.getServerId();
     }
+
+    @Override
+    public String getServerName() throws OXException {
+        return Server.getServerName();
+    }
 }
