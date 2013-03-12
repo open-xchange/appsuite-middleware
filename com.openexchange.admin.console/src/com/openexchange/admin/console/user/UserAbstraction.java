@@ -1940,6 +1940,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     public Set<String> parseAndSetCapabilitiesToAdd(final AdminParser parser) {
+        final CLIOption capsToAdd = this.capsToAdd;
         if (null == capsToAdd) {
             setCapsToAdd(parser);
         }
@@ -1947,6 +1948,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     public Set<String> parseAndSetCapabilitiesToRemove(final AdminParser parser) {
+        final CLIOption capsToRemove = this.capsToRemove;
         if (null == capsToRemove) {
             setCapsToRemove(parser);
         }
