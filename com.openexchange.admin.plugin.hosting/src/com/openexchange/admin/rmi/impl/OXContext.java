@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i2I;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
@@ -61,8 +62,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -104,6 +105,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.pipesnfilters.Filter;
 
 public class OXContext extends OXContextCommonImpl implements OXContextInterface {
@@ -122,6 +124,54 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         this.pool = new OXAdminPoolDBPoolExtension();
         if (log.isDebugEnabled()) {
             log.debug("Class loaded: " + this.getClass().getName());
+        }
+    }
+
+    @Override
+    public void changeCapabilities(Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        if ((null == capsToAdd || capsToAdd.isEmpty()) && (null == capsToRemove || capsToRemove.isEmpty())) {
+            return;
+        }
+
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+
+        new BasicAuthenticator(context).doAuthentication(auth);
+
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, ctx);
+        } catch (NoSuchObjectException e) {
+            throw new NoSuchContextException(e);
+        }
+
+        log.debug(ctx+" - "+(null == capsToAdd ? "" : capsToAdd.toString())+" | "+(null == capsToRemove ? "" : capsToRemove.toString()));
+
+        try {
+            if (!tool.existsContext(ctx)) {
+                throw new NoSuchContextException();
+            }
+
+            callPluginMethod("changeCapabilities", ctx, capsToAdd, capsToRemove, auth);
+
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            oxcox.changeCapabilities(ctx, capsToAdd, capsToRemove, auth);
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context, CacheService.class);
+        if (null != cacheService) {
+            try {
+                final Serializable key = Integer.valueOf(ctx.getId().intValue());
+                Cache jcs = cacheService.getCache("CapabilitiesContext");
+                jcs.remove(key);
+            } catch (final OXException e) {
+                log.error(e.getMessage(), e);
+            } finally {
+                AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+            }
         }
     }
 

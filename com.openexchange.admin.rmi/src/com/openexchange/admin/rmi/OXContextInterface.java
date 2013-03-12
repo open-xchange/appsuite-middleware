@@ -51,6 +51,7 @@ package com.openexchange.admin.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.Set;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -383,6 +384,20 @@ public interface OXContextInterface extends Remote {
      */
     public void change(final Context ctx, final Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
 
+    /**
+     * Changes specified context's capabilities.
+     *
+     * @param ctx The context
+     * @param capsToAdd The capabilities to add
+     * @param capsToRemove The capabilities to remove
+     * @param auth The credentials
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     */
+    public void changeCapabilities(Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
 
     /**
      * Change module access rights for ALL users in the specified context.<br>

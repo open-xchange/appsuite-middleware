@@ -50,6 +50,7 @@ package com.openexchange.admin.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.Set;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -225,6 +226,24 @@ public interface OXUserInterface extends Remote {
      * @throws InvalidDataException
      */
     public User getContextAdmin(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException;
+
+    /**
+     * Changes specified context's capabilities.
+     * 
+     * @param ctx The context
+     * @param user The user
+     * @param capsToAdd The capabilities to add
+     * @param capsToRemove The capabilities to remove
+     * @param auth The credentials
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException
+     * @throws NoSuchUserException
+     */
+    public void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Manipulate user data within the given context.

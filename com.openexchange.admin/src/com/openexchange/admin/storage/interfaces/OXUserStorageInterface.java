@@ -52,15 +52,17 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
 import java.sql.Connection;
+import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.log.LogFactory;
 
 /**
  * This interface provides an abstraction to the storage of the user information
@@ -188,6 +190,19 @@ public abstract class OXUserStorageInterface {
      *
      */
     public abstract User[] getData(final Context ctx, User[] users) throws StorageException;
+
+    /**
+     * Changes specified context's capabilities.
+     * 
+     * @param ctx The context
+     * @param user The user
+     * @param capsToAdd The capabilities to add
+     * @param capsToRemove The capabilities to remove
+     * @param auth The credentials
+     * @throws StorageException When an error in the subsystems occurred.
+     */
+    public abstract void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Credentials auth) throws StorageException;
+
 
     /**
      * Manipulate user data within the given context.

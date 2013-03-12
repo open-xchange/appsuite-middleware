@@ -140,6 +140,62 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
+    public void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        if ((null == capsToAdd || capsToAdd.isEmpty()) && (null == capsToRemove || capsToRemove.isEmpty())) {
+            return;
+        }
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        
+        if (log.isDebugEnabled()) {
+            log.debug(ctx + " - " + user + " - "+ (null == capsToAdd ? "" : capsToAdd.toString())+" | "+(null == capsToRemove ? "" : capsToRemove.toString()) + " - " + auth);
+        }
+
+        try {
+            basicauth.doAuthentication(auth, ctx);
+            checkContextAndSchema(ctx);
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, user);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
+            final int user_id = user.getId().intValue();
+            if (!tool.existsUser(ctx, user_id)) {
+                throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
+            }
+            oxu.changeCapabilities(ctx, user, capsToAdd, capsToRemove, auth);
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final InvalidCredentialsException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final DatabaseUpdateException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final NoSuchUserException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+        final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context, CacheService.class);
+        if (null != cacheService) {
+            try {
+                Cache jcs = cacheService.getCache("CapabilitiesUser");
+                jcs.removeFromGroup(user.getId(), ctx.getId().toString());
+            } catch (final OXException e) {
+                log.error(e.getMessage(), e);
+            } finally {
+                AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+            }
+        }
+    }
+
+    @Override
     public void change(final Context ctx, final User usrdata, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         auth = auth == null ? new Credentials("","") : auth;
         try {

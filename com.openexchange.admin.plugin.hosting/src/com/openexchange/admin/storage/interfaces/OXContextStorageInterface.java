@@ -52,10 +52,11 @@ package com.openexchange.admin.storage.interfaces;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Set;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
@@ -65,6 +66,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
+import com.openexchange.log.LogFactory;
 import com.openexchange.tools.pipesnfilters.Filter;
 
 /**
@@ -179,6 +181,17 @@ public abstract class OXContextStorageInterface {
      * @throws StorageException
      */
     public abstract void change(final Context ctx) throws StorageException;
+
+    /**
+     * Changes specified context's capabilities.
+     *
+     * @param ctx The context
+     * @param capsToAdd The capabilities to add
+     * @param capsToRemove The capabilities to remove
+     * @param auth The credentials
+     * @throws StorageException
+     */
+    public abstract void changeCapabilities(Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Credentials auth) throws StorageException;
 
     /**
      * @param ctx
