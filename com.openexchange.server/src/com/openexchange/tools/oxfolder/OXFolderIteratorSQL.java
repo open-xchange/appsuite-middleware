@@ -1926,7 +1926,7 @@ public final class OXFolderIteratorSQL {
         final StringBuilder condBuilder = new StringBuilder(32);
         if (null != modules && modules.length > 0) {
             if (1 == modules.length) {
-                condBuilder.append("AND (ot.module IN = ").append(modules[0]).append(')');
+                condBuilder.append("AND (ot.module = ").append(modules[0]).append(')');
             } else {
                 condBuilder.append("AND (ot.module IN (");
                 condBuilder.append(modules[0]);
