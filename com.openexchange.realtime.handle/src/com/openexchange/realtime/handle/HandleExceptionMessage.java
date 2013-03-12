@@ -49,21 +49,16 @@
 
 package com.openexchange.realtime.handle;
 
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link StanzaQueueService}
+ * {@link HandleExceptionMessage}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public interface StanzaQueueService {
-    
-    /**
-     * Enqueue a Stanza in the StanzaQueueService
-     * @param stanza The Stanza to enqueue, must not be null and one of Presence, IQ or Message
-     * @return false if the element couldn't be added to this StanzaQueueService, else true
-     */
-    boolean enqueueStanza(Stanza stanza);
+public class HandleExceptionMessage implements LocalizableStrings {
 
+    /** Could not send directed Presence to resource: %1$s */
+    public static final String DIRECT_PRESENCE_FAILED_MSG = "Could not send directed Presence to resource: %1$s";
 }

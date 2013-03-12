@@ -52,6 +52,7 @@ package com.openexchange.realtime.handle.impl.message;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.ResourceDirectory;
@@ -64,125 +65,149 @@ import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.util.IDMap;
 
 /**
- * {@link MessageHandler}
+ * {@link MessageHandler} - Handles Message Stanzas.
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class MessageHandler extends AbstractStrategyHandler<Message> {
+
+    private final static Log LOG = com.openexchange.log.Log.loggerFor(MessageHandler.class);
 
     public MessageHandler(BlockingQueue<Message> queue) {
         super(queue, new HandlerStrategy<Message>());
     }
 
     @Override
-    public void handleToIsNull(Message stanza) throws OXException {
-        // TODO Broadcast to all subscribed entities
-    }
-
-    @Override
-    public void handleAccountNotExists(Message stanza) throws OXException {
-        // TODO service-unavailable error
-    }
-
-    @Override
-    public void handleInboundStanzaWithConcreteRecipient(Message stanza) throws OXException {
-        ResourceDirectory resourceDirectory = getResourceDirectory();
-        ID to = stanza.getTo();
-        IDMap<Resource> resources = resourceDirectory.get(to);
-        if (resources.isEmpty()) {
-            /*
-             * Else if the JID is of the form <user@domain/resource> and no available resource 
-             * matches the full JID, the recipient's server SHOULD treat the stanza as if it were 
-             * addressed to <user@domain> if it is a message stanza.
-             */
-            handleInboundStanzaWithGeneralRecipient0(stanza, to.toGeneralForm());
-        } else {
-            MessageDispatcher messageDispatcher = getMessageDispatcher();
-            Map<ID, OXException> failed = messageDispatcher.send(stanza, resources);
-            if (!failed.isEmpty()) {
-                OXException exception = failed.values().iterator().next();
-                if (DispatchExceptionCode.RESOURCE_OFFLINE.equals(exception) || DispatchExceptionCode.UNKNOWN_CHANNEL.equals(exception)) {
-                    sendServiceUnavailable(stanza);
-                }
-            }
+    public void handleToIsNull(Message stanza) {
+        try {
+            throw new UnsupportedOperationException("Not implemented yet.");
+        } catch (Exception e) {
+            // TODO: send error stanza to stanza.from or other proper error handling for messages depending on this case.
+            LOG.error("Unable to handle broadcast stanza.", e);            
         }
     }
 
     @Override
-    public void handleInboundStanzaWithGeneralRecipient(Message stanza) throws OXException {
+    public void handleAccountNotExists(Message stanza) {
+        try {
+            throw new UnsupportedOperationException("Not implemented yet.");
+        } catch (Exception e) {
+            // TODO: send error stanza to stanza.from or other proper error handling for messages depending on this case.
+            LOG.error("Unable to handle stanza for non existant account ", e);            
+        }
+    }
+
+    @Override
+    public void handleInboundStanzaWithConcreteRecipient(Message stanza) {
+        try {
+            ResourceDirectory resourceDirectory = getResourceDirectory();
+            ID to = stanza.getTo();
+            IDMap<Resource> resources = resourceDirectory.get(to);
+            if (resources.isEmpty()) {
+                /*
+                 * Else if the JID is of the form <user@domain/resource> and no available resource matches the full JID, the recipient's
+                 * server SHOULD treat the stanza as if it were addressed to <user@domain> if it is a message stanza.
+                 */
+                handleInboundStanzaWithGeneralRecipient0(stanza, to.toGeneralForm());
+            } else {
+                MessageDispatcher messageDispatcher = getMessageDispatcher();
+                Map<ID, OXException> failed = messageDispatcher.send(stanza, resources);
+                if (!failed.isEmpty()) {
+                    OXException exception = failed.values().iterator().next();
+                    if (DispatchExceptionCode.RESOURCE_OFFLINE.equals(exception) || DispatchExceptionCode.UNKNOWN_CHANNEL.equals(exception)) {
+                        sendServiceUnavailable(stanza);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // TODO: send error stanza to stanza.from  or other proper error handling for messages depending on this case.
+            LOG.error("Unable to handle inbound stanza.", e);
+        }
+    }
+
+    @Override
+    public void handleInboundStanzaWithGeneralRecipient(Message stanza) {
         handleInboundStanzaWithGeneralRecipient0(stanza, stanza.getTo());
     }
 
-    private void handleInboundStanzaWithGeneralRecipient0(Message stanza, ID recipient) throws OXException {
-        ResourceDirectory resourceDirectory = getResourceDirectory();
-        IDMap<Resource> resources = resourceDirectory.get(recipient);
-        if (resources.isEmpty()) {
-            /*
-             * For message stanzas, the server MAY choose to store the stanza on behalf of the user and deliver it when the user next
-             * becomes available, or forward the message to the user via some other means (e.g., to the user's email account). However, if
-             * offline message storage or message forwarding is not enabled, the server MUST return to the sender a <service-unavailable/>
-             * stanza error. (Note: Offline message storage and message forwarding are not defined in XMPP, since they are strictly a matter
-             * of implementation and service provisioning.)
-             */
-            sendServiceUnavailable(stanza);
-        } else {
-            /*
-             * For message stanzas, the server SHOULD deliver the stanza to the highest-priority available resource (if the resource did not
-             * provide a value for the <priority/> element, the server SHOULD consider it to have provided a value of zero). If two or more
-             * available resources have the same priority, the server MAY use some other rule (e.g., most recent connect time, most recent
-             * activity time, or highest availability as determined by some hierarchy of <show/> values) to choose between them or MAY
-             * deliver the message to all such resources. However, the server MUST NOT deliver the stanza to an available resource with a
-             * negative priority; if the only available resource has a negative priority, the server SHOULD handle the message as if there
-             * were no available resources (defined below). In addition, the server MUST NOT rewrite the 'to' attribute (i.e., it MUST leave
-             * it as <user@domain> rather than change it to <user@domain/resource>).
-             */
-            IDMap<Resource> receivers = new IDMap<Resource>();
-            byte highest = 0;
-            for (Entry<ID, Resource> entry : resources.entrySet()) {
-                ID id = entry.getKey();
-                Resource resource = entry.getValue();
-                byte priority = 0;
-                if(resource.getPresence() != null) {
-                    priority = resource.getPresence().getPriority();
-                }
-                if (priority == highest) {
-                    receivers.put(id, resource);
-                } else if (priority > highest) {
-                    receivers.clear();
-                    receivers.put(id, resource);
-                }
-            }
-
-            if (receivers.isEmpty()) {
+    private void handleInboundStanzaWithGeneralRecipient0(Message stanza, ID recipient) {
+        try {
+            ResourceDirectory resourceDirectory = getResourceDirectory();
+            IDMap<Resource> resources = resourceDirectory.get(recipient);
+            if (resources.isEmpty()) {
                 /*
-                 * Handle the same as if resources.isEmpty()
+                 * For message stanzas, the server MAY choose to store the stanza on behalf of the user and deliver it when the user next
+                 * becomes available, or forward the message to the user via some other means (e.g., to the user's email account). However,
+                 * if offline message storage or message forwarding is not enabled, the server MUST return to the sender a
+                 * <service-unavailable/> stanza error. (Note: Offline message storage and message forwarding are not defined in XMPP, since
+                 * they are strictly a matter of implementation and service provisioning.)
                  */
                 sendServiceUnavailable(stanza);
             } else {
-                MessageDispatcher messageDispatcher = getMessageDispatcher();
-                Map<ID, OXException> failed = messageDispatcher.send(stanza, receivers);
-                if (failed.size() == receivers.size()) {
+                /*
+                 * For message stanzas, the server SHOULD deliver the stanza to the highest-priority available resource (if the resource did
+                 * not provide a value for the <priority/> element, the server SHOULD consider it to have provided a value of zero). If two
+                 * or more available resources have the same priority, the server MAY use some other rule (e.g., most recent connect time,
+                 * most recent activity time, or highest availability as determined by some hierarchy of <show/> values) to choose between
+                 * them or MAY deliver the message to all such resources. However, the server MUST NOT deliver the stanza to an available
+                 * resource with a negative priority; if the only available resource has a negative priority, the server SHOULD handle the
+                 * message as if there were no available resources (defined below). In addition, the server MUST NOT rewrite the 'to'
+                 * attribute (i.e., it MUST leave it as <user@domain> rather than change it to <user@domain/resource>).
+                 */
+                IDMap<Resource> receivers = new IDMap<Resource>();
+                byte highest = 0;
+                for (Entry<ID, Resource> entry : resources.entrySet()) {
+                    ID id = entry.getKey();
+                    Resource resource = entry.getValue();
+                    byte priority = 0;
+                    if (resource.getPresence() != null) {
+                        priority = resource.getPresence().getPriority();
+                    }
+                    if (priority == highest) {
+                        receivers.put(id, resource);
+                    } else if (priority > highest) {
+                        receivers.clear();
+                        receivers.put(id, resource);
+                    }
+                }
+
+                if (receivers.isEmpty()) {
+                    /*
+                     * Handle the same as if resources.isEmpty()
+                     */
                     sendServiceUnavailable(stanza);
+                } else {
+                    MessageDispatcher messageDispatcher = getMessageDispatcher();
+                    Map<ID, OXException> failed = messageDispatcher.send(stanza, receivers);
+                    if (failed.size() == receivers.size()) {
+                        sendServiceUnavailable(stanza);
+                    }
                 }
             }
+        } catch (Exception e) {
+            // TODO: send error stanza to stanza.from  or other proper error handling for messages depending on this case.
+            LOG.error("Unable to handle inbound stanza.", e);
         }
     }
 
     @Override
-    public void handleOutboundStanza(Message stanza) throws OXException {
-        // TODO Auto-generated method stub
-
+    public void handleOutboundStanza(Message stanza) {
+        try {
+            throw new UnsupportedOperationException("Not implemented yet.");
+        } catch (Exception e) {
+            // TODO: send error stanza to stanza.from or other proper error handling for messages depending on this case.
+            LOG.error("Unable to handle inbound stanza.", e);            
+        }
     }
 
     @Override
-    public boolean applyPrivacyLists(Message stanza) throws OXException {
-        // TODO Auto-generated method stub
+    public boolean applyPrivacyLists(Message stanza) {
         return true;
     }
-    
+
     private void sendServiceUnavailable(Message stanza) {
-        // TODO Auto-generated method stub
-        
+        throw new UnsupportedOperationException("Not implemented yet.");
     }
 
 }

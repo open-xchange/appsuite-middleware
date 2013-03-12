@@ -74,7 +74,7 @@ public class StanzaQueueServiceImpl implements StanzaQueueService {
     private final BlockingQueue<IQ> iqQueue = new ArrayBlockingQueue<IQ>(2048);
 
     @Override
-    public boolean enqueueStanza(Stanza stanza) throws OXException {
+    public boolean enqueueStanza(Stanza stanza) {
         if (stanza == null) {
             throw new IllegalArgumentException("Parameter 'stanza' must not be null!");
         }

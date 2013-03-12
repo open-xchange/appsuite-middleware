@@ -47,88 +47,86 @@
  *
  */
 
-package com.openexchange.realtime.handle.impl.iq;
+package com.openexchange.realtime.handle;
 
-import java.util.concurrent.BlockingQueue;
-import org.apache.commons.logging.Log;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.handle.impl.AbstractStrategyHandler;
-import com.openexchange.realtime.handle.impl.HandlerStrategy;
-import com.openexchange.realtime.handle.impl.HandlerUtils;
-import com.openexchange.realtime.handle.impl.message.MessageHandler;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.IQ;
-import com.openexchange.realtime.packet.IQ.Type;
-
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link IQHandler}
+ * {@link HandleExceptionCode}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class IQHandler extends AbstractStrategyHandler<IQ> {
+public enum HandleExceptionCode implements OXExceptionCode {
 
-    private final static Log LOG = com.openexchange.log.Log.loggerFor(IQHandler.class);
-    
-    public IQHandler(BlockingQueue<IQ> queue) {
-        super(queue, new HandlerStrategy<IQ>());
-    }
-    
-    private void handleInbound(IQ iq) throws OXException {
-        if (HandlerUtils.applyPrivacyLists(iq)) {
-            ID to = iq.getTo();
-            if (to.isGeneralForm()) {
-                
-            } else {
-                
-            }
-        }
+    /** Could not send directed Presence to resource: %1$s */
+    DIRECT_PRESENCE_FAILED(HandleExceptionMessage.DIRECT_PRESENCE_FAILED_MSG, CATEGORY_ERROR, 1)
+    ;
+
+    private final String message;
+    private final int number;
+    private final Category category;
+
+    private HandleExceptionCode(final String message, final Category category, final int detailNumber) {
+        this.message = message;
+        number = detailNumber;
+        this.category = category;
     }
 
     @Override
-    public void handleToIsNull(IQ stanza) {
-        Type type = stanza.getType();
-        if (type == null) {
-            // TODO: throw Exception
-        }
-        
-        if (type == Type.GET || type == Type.SET) {
-            /*
-             * If the server receives an IQ stanza of type "get" or "set" with no 'to' attribute and
-             * it understands the namespace that qualifies the content of the stanza, it MUST either process the stanza on behalf of the
-             * sending entity (where the meaning of "process" is determined by the semantics of the qualifying namespace) or return an error
-             * to the sending entity.
-             */
-        }
+    public boolean equals(OXException e) {
+        return OXExceptionFactory.getInstance().equals(this, e);
     }
 
     @Override
-    public void handleAccountNotExists(IQ stanza) {
-        // TODO Auto-generated method stub
-        
+    public int getNumber() {
+        return number;
     }
 
     @Override
-    public void handleInboundStanzaWithGeneralRecipient(IQ stanza) {
-        // TODO Auto-generated method stub
-        
-    }
-    
-    @Override
-    public void handleInboundStanzaWithConcreteRecipient(IQ stanza) {
-        // TODO Auto-generated method stub
-        
+    public Category getCategory() {
+        return category;
     }
 
     @Override
-    public void handleOutboundStanza(IQ stanza) {
-        // TODO Auto-generated method stub
-        
+    public String getPrefix() {
+        return "ATMOSPHERE";
     }
 
     @Override
-    public boolean applyPrivacyLists(IQ stanza) {
-        // TODO Auto-generated method stub
-        return false;
+    public String getMessage() {
+        return message;
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @param cause The optional initial cause
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Throwable cause, final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 }

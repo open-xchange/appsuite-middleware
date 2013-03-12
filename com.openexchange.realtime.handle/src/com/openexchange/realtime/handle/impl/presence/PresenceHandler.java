@@ -49,13 +49,17 @@
 
 package com.openexchange.realtime.handle.impl.presence;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.RealtimeExceptionCodes;
 import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.handle.HandleExceptionCode;
 import com.openexchange.realtime.handle.impl.AbstractStrategyHandler;
 import com.openexchange.realtime.handle.impl.HandlerStrategy;
 import com.openexchange.realtime.handle.impl.Services;
@@ -74,41 +78,40 @@ import com.openexchange.realtime.util.IDMap;
  * <li>Get a list of IDs you are subscribed to and their status</li>
  * <li>Change my status</li>
  * </ul>
+ * See http://xmpp.org/rfcs/rfc3921.html#presence
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class PresenceHandler extends AbstractStrategyHandler<Presence> {
 
+    private final static Log LOG = com.openexchange.log.Log.loggerFor(PresenceHandler.class);
+
     public PresenceHandler(BlockingQueue<Presence> queue) {
         super(queue, new HandlerStrategy<Presence>());
     }
 
     @Override
-    public void handleToIsNull(Presence stanza) throws OXException {
-        /*
-         * If the server receives a presence stanza with no 'to' attribute, the server SHOULD broadcast it to the entities that are
-         * subscribed to the sending entity's presence, if applicable (the semantics of presence broadcast for instant messaging and
-         * presence applications are defined in [XMPP-IM]).
-         */
-        Type type = stanza.getType();
-        if (Type.SUBSCRIBE == type) {
-            handleSubscribe(stanza);
-        } else if (Type.SUBSCRIBED == type) {
-            handleSubscribed(stanza);
-        } else if (Type.UNSUBSCRIBE == type) {
-            handleUnSubscribe(stanza);
-        } else if (Type.UNSUBSCRIBED == type) {
-            handleUnSubscribed(stanza);
-        } else if (Type.NONE == type || Type.UNAVAILABLE == type) {
-            handlePresence(stanza);
-        } else {
-            throw new UnsupportedOperationException("Not implemented yet!");
+    public void handleToIsNull(Presence stanza) {
+        try {
+            /*
+             * If the server receives a presence stanza with no 'to' attribute, the server SHOULD broadcast it to the entities that are
+             * subscribed to the sending entity's presence, if applicable (the semantics of presence broadcast for instant messaging and
+             * presence applications are defined in [XMPP-IM]).
+             */
+            Type type = stanza.getType();
+            if (Type.NONE == type || Type.UNAVAILABLE == type) {
+                handleBroadcastPresence(stanza);
+            } else {
+                throw new IllegalArgumentException("Only Stanzas of type NONE or UNAVAILABLE are suported for broadcasting.");
+            }
+        } catch (Exception e) {
+
         }
     }
 
     @Override
-    public void handleAccountNotExists(Presence stanza) throws OXException {
+    public void handleAccountNotExists(Presence stanza) {
         /*
          * Else if the JID is of the form <user@domain> or <user@domain/resource> and the associated user account does not exist, the
          * recipient's server (a) SHOULD silently ignore the stanza (i.e., neither deliver it nor return an error) if it is a presence
@@ -118,74 +121,68 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
     }
 
     @Override
-    public void handleInboundStanzaWithConcreteRecipient(Presence stanza) throws OXException {
-        ResourceDirectory resourceDirectory = getResourceDirectory();
-        ID to = stanza.getTo();
-        IDMap<Resource> idMap = resourceDirectory.get(to);
-        if (idMap.isEmpty()) {
-            /*
-             * Else if the JID is of the form <user@domain/resource> and no available resource matches the full JID, the recipient's server
-             * (a) SHOULD silently ignore the stanza (i.e., neither deliver it nor return an error) if it is a presence stanza [...]
-             */
-            return;
-        }
-
-        MessageDispatcher messageDispatcher = getMessageDispatcher();
-        messageDispatcher.send(stanza, idMap);
-    }
-
-    @Override
-    public void handleInboundStanzaWithGeneralRecipient(Presence stanza) throws OXException {
-        ResourceDirectory resourceDirectory = getResourceDirectory();
-        ID to = stanza.getTo();
-        IDMap<Resource> idMap = resourceDirectory.get(to);
-        if (idMap.isEmpty()) {
-            /*
-             * Else if the JID is of the form <user@domain> and there are no available resources associated with the user, how the stanza is
-             * handled depends on the stanza type:
-             */
-            Type type = stanza.getType();
-            if (type == Type.SUBSCRIBE || type == Type.SUBSCRIBED || type == Type.UNSUBSCRIBE || type == Type.UNSUBSCRIBED) {
-                /*
-                 * 1. For presence stanzas of type "subscribe", "subscribed", "unsubscribe", and "unsubscribed", the server MUST maintain a
-                 * record of the stanza and deliver the stanza at least once (i.e., when the user next creates an available resource); in
-                 * addition, the server MUST continue to deliver presence stanzas of type "subscribe" until the user either approves or
-                 * denies the subscription request (see also Presence Subscriptions).
-                 */
-                storeStanzaForDelayedDelivery(stanza);
-            } else {
-                /*
-                 * 2. For all other presence stanzas, the server SHOULD silently ignore the stanza by not storing it for later delivery or
-                 * replying to it on behalf of the user.
-                 */
-                return;
-            }
+    public void handleInboundStanzaWithConcreteRecipient(Presence presence) {
+        Type type = presence.getType();
+        if (Type.SUBSCRIBE == type) {
+            handleSubscribe(presence);
+        } else if (Type.SUBSCRIBED == type) {
+            handleSubscribed(presence);
+        } else if (Type.UNSUBSCRIBE == type) {
+            handleUnSubscribe(presence);
+        } else if (Type.UNSUBSCRIBED == type) {
+            handleUnSubscribed(presence);
+        } else if (Type.NONE == type || Type.UNAVAILABLE == type) {
+            handleDirectedPresence(presence);
         } else {
-            /*
-             * Else if the JID is of the form <user@domain> and there is at least one available resource available for the user, the
-             * recipient's server MUST follow these rules: For presence stanzas other than those of type "probe", the server MUST deliver
-             * the stanza to all available resources; for presence probes, the server SHOULD reply based on the rules defined in Presence
-             * Probes. In addition, the server MUST NOT rewrite the 'to' attribute (i.e., it MUST leave it as <user@domain> rather than
-             * change it to <user@domain/resource>). TODO: implement probe
-             */
-            MessageDispatcher messageDispatcher = getMessageDispatcher();
-            messageDispatcher.send(stanza, idMap);
+            throw new UnsupportedOperationException("Handling of Type " + type + " isn't implemented yet!");
         }
     }
 
     @Override
-    public void handleOutboundStanza(Presence stanza) throws OXException {
-        // TODO Implement me
+    public void handleInboundStanzaWithGeneralRecipient(Presence presence) {
+        /*
+         * If the JID is of the form <user@domain> and there are no available resources associated with the user, how the stanza is handled
+         * depends on the stanza type: 1. For presence stanzas of type "subscribe", "subscribed", "unsubscribe", and "unsubscribed", the
+         * server MUST maintain a record of the stanza and deliver the stanza at least once (i.e., when the user next creates an available
+         * resource); in addition, the server MUST continue to deliver presence stanzas of type "subscribe" until the user either approves
+         * or denies the subscription request (see also Presence Subscriptions). 2. For all other presence stanzas, the server SHOULD
+         * silently ignore the stanza by not storing it for later delivery or replying to it on behalf of the user. Else if the JID is ofthe
+         * form <user@domain> and there is at least one available resource available for the user, the recipient's server MUST follow these
+         * rules: For presence stanzas other than those of type "probe", the server MUST deliver the stanza to all available resources; for
+         * presence probes, the server SHOULD reply based on the rules defined in Presence Probes. In addition, the server MUST NOT rewrite
+         * the 'to' attribute (i.e., it MUST leave it as <user@domain> rather than change it to <user@domain/resource>).
+         */
+        // TODO: implement probe
+        Type type = presence.getType();
+        if (Type.SUBSCRIBE == type) {
+            handleSubscribe(presence);
+        } else if (Type.SUBSCRIBED == type) {
+            handleSubscribed(presence);
+        } else if (Type.UNSUBSCRIBE == type) {
+            handleUnSubscribe(presence);
+        } else if (Type.UNSUBSCRIBED == type) {
+            handleUnSubscribed(presence);
+        } else if (Type.NONE == type || Type.UNAVAILABLE == type) {
+            handleDirectedPresence(presence);
+        } else {
+            throw new UnsupportedOperationException("Handling of Type " + type + " isn't implemented yet!");
+        }
     }
 
     @Override
-    public boolean applyPrivacyLists(Presence stanza) throws OXException {
-        // TODO Implement me
-        return true;
+    public void handleOutboundStanza(Presence stanza) {
+        try {
+            throw new UnsupportedOperationException("Not implemented yet.");
+        } catch (Exception e) {
+            // TODO: send error stanza to stanza.from or other proper error handling for messages depending on this case.
+            LOG.error("Unable to handle broadcast stanza.", e);
+        }
     }
 
-    private void storeStanzaForDelayedDelivery(Presence stanza) {
-        // TODO: Implement me
+    @Override
+    public boolean applyPrivacyLists(Presence stanza) {
+        LOG.error("Not implemented yet");
+        return true;
     }
 
     /**
@@ -208,12 +205,16 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
      * @param stanza the incoming Stanza representing the subscribe request
      * @throws OXException if the subscription fails, e.g. Stanza can't be read
      */
-    private void handleSubscribe(Presence stanza) throws OXException {
-        PresenceSubscriptionService subscriptionService = Services.getService(PresenceSubscriptionService.class);
-        if (subscriptionService == null) {
-            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(PresenceSubscriptionService.class.getName());
+    private void handleSubscribe(Presence stanza) {
+        try {
+            PresenceSubscriptionService subscriptionService = Services.getService(PresenceSubscriptionService.class);
+            if (subscriptionService == null) {
+                throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(PresenceSubscriptionService.class.getName());
+            }
+            subscriptionService.subscribe(stanza, stanza.getMessage());
+        } catch (OXException oxe) {
+            handleError(stanza, oxe);
         }
-        subscriptionService.subscribe(stanza, stanza.getMessage());
     }
 
     /**
@@ -234,12 +235,16 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
      * @param stanza the incoming Stanza representing the approval
      * @throws OXException If stanza conversion fails or the subscription can't be approved
      */
-    private void handleSubscribed(Presence stanza) throws OXException {
-        PresenceSubscriptionService subscriptionService = Services.getService(PresenceSubscriptionService.class);
-        if (subscriptionService == null) {
-            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(PresenceSubscriptionService.class.getName());
+    private void handleSubscribed(Presence stanza) {
+        try {
+            PresenceSubscriptionService subscriptionService = Services.getService(PresenceSubscriptionService.class);
+            if (subscriptionService == null) {
+                throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(PresenceSubscriptionService.class.getName());
+            }
+            subscriptionService.approve(stanza);
+        } catch (OXException oxe) {
+            handleError(stanza, oxe);
         }
-        subscriptionService.approve(stanza);
     }
 
     /**
@@ -257,12 +262,16 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
      * @param stanza
      * @throws OXException
      */
-    private void handleUnSubscribe(Presence stanza) throws OXException {
-        PresenceSubscriptionService subscriptionService = Services.getService(PresenceSubscriptionService.class);
-        if (subscriptionService == null) {
-            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(PresenceSubscriptionService.class.getName());
+    private void handleUnSubscribe(Presence stanza) {
+        try {
+            PresenceSubscriptionService subscriptionService = Services.getService(PresenceSubscriptionService.class);
+            if (subscriptionService == null) {
+                throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(PresenceSubscriptionService.class.getName());
+            }
+            subscriptionService.approve(stanza);
+        } catch (OXException oxe) {
+            handleError(stanza, oxe);
         }
-        subscriptionService.approve(stanza);
     }
 
     /**
@@ -287,12 +296,83 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
      * @param stanza the Stanza representing the unsubscribed request.
      * @throws OXException If stanza conversion fails or the subscription can't be denied/canceled
      */
-    private void handleUnSubscribed(Presence stanza) throws OXException {
-        PresenceSubscriptionService subscriptionService = Services.getService(PresenceSubscriptionService.class);
-        if (subscriptionService == null) {
-            throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(PresenceSubscriptionService.class.getName());
+    private void handleUnSubscribed(Presence stanza) {
+        try {
+            PresenceSubscriptionService subscriptionService = Services.getService(PresenceSubscriptionService.class);
+            if (subscriptionService == null) {
+                throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(PresenceSubscriptionService.class.getName());
+            }
+            subscriptionService.approve(stanza);
+        } catch (OXException oxe) {
+            handleError(stanza, oxe);
         }
-        subscriptionService.approve(stanza);
+    }
+
+    /**
+     * Handle directed Presence Stanzas by delivering them to all connected Resources of the general ID or simply discarding them if no
+     * connected Resource can be found.
+     * 
+     * @param presence The directed Presence Stanza
+     * @throws OXException If the lookup of the recipient fails due to errors
+     */
+    private void handleDirectedPresence(Presence presence) {
+        try {
+            PresenceSubscriptionService presenceSubscriptionService = Services.getService(PresenceSubscriptionService.class);
+            ResourceDirectory resourceDirectory = getResourceDirectory();
+            Map<ID, OXException> failedDeliveries = Collections.emptyMap();
+            ID from = presence.getFrom().toGeneralForm();
+            ID to = presence.getTo().toGeneralForm();
+            IDMap<Resource> idMap = resourceDirectory.get(to);
+
+            if (idMap.isEmpty()) {
+                /*
+                 * From http://xmpp.org/rfcs/rfc3921.html#rules 11.1.2 If the JID is of the form <user@domain/resource> and no available
+                 * resource matches the full JID, the recipient's server (a) SHOULD silently ignore the stanza (i.e., neither deliver it nor
+                 * return an error) if it is a presence stanza [...]
+                 */
+                return;
+            }
+
+            /*
+             * Case 1: If the user sends directed presence to a contact that is in the user's roster with a subscription type of "from" or
+             * "both" after having sent initial presence and before sending unavailable presence broadcast, the user's server MUST route or
+             * deliver the full XML of that presence stanza (subject to privacy lists) but SHOULD NOT otherwise modify the contact's status
+             * regarding presence broadcast (i.e., it SHOULD include the contact's JID in any subsequent presence broadcasts initiated by
+             * the user).
+             */
+            if (presenceSubscriptionService.getSubscribers(from).contains(to)) {
+                MessageDispatcher messageDispatcher = getMessageDispatcher();
+                failedDeliveries = messageDispatcher.send(presence, idMap);
+            }
+            /*
+             * Case 2: If the user sends directed presence to an entity that is not in the user's roster with a subscription type of "from"
+             * or "both" after having sent initial presence and before sending unavailable presence broadcast, the user's server MUST route
+             * or deliver the full XML of that presence stanza to the entity but MUST NOT modify the contact's status regarding available
+             * presence broadcast (i.e., it MUST NOT include the entity's JID in any subsequent broadcasts of available presence initiated
+             * by the user); however, if the available resource from which the user sent the directed presence become unavailable, the
+             * user's server MUST broadcast that unavailable presence to the entity (if the user has not yet sent directed unavailable
+             * presence to that entity). Case 3: If the user sends directed presence without first sending initial presence or after having
+             * sent unavailable presence broadcast (i.e., the resource is active but not available), the user's server MUST treat the
+             * entities to which the user sends directed presence in the same way that it treats the entities listed in case #2 above.
+             * TL/DR: Add unsubscribed entity to temporary Map<ID,List<ID>> {Sender -> Recipients} and inform recipient when sender sends
+             * final unavailable Presence
+             */
+            else {
+                throw new UnsupportedOperationException("Not implemented yet.");
+            }
+            /*
+             * The user has no interest in being informed about ever single failed delivery but wants to be informed if the Presence
+             * couldn't be delivered to any resource of the desired recipient.
+             */
+            if (failedDeliveries.entrySet().size() == idMap.size()) {
+                throw HandleExceptionCode.DIRECT_PRESENCE_FAILED.create(presence.getTo().toGeneralForm());
+            }
+        } catch (OXException oxe) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(oxe);
+            }
+            handleError(presence, oxe);
+        }
     }
 
     /**
@@ -301,13 +381,13 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
      * @param presence Stanza containing the new Presence Status
      * @throws OXException If stanza conversion fails or the status can't be changed
      */
-    private void handlePresence(Presence presence) throws OXException {
+    private void handleBroadcastPresence(Presence presence) throws OXException {
         ResourceDirectory resourceDirectory = getResourceDirectory();
         DefaultResource presenceResource = new DefaultResource(presence);
         Resource old = resourceDirectory.set(presence.getFrom(), presenceResource);
         if (old != null) {
             if (LOG.isDebugEnabled()) {
-                if(old.getPresence() != null) {
+                if (old.getPresence() != null) {
                     LOG.debug(String.format(
                         "Update Presence: Old was: %1$s, %2$s, %3$d, %4$tT, %5$s",
                         old.getPresence().getState(),
@@ -316,12 +396,28 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
                         old.getTimestamp(),
                         old.getRoutingInfo()));
                 } else {
-                    LOG.debug(String.format(
-                        "Update Presence: Old was: %1$tT, %2$s",
-                        old.getTimestamp(),
-                        old.getRoutingInfo()));
+                    LOG.debug(String.format("Update Presence: Old was: %1$tT, %2$s", old.getTimestamp(), old.getRoutingInfo()));
                 }
             }
         }
     }
+
+    /**
+     * Inform the Sender about an error while handling his Presence Stanza.
+     * 
+     * @param presence The presence that couldn't be handled
+     * @param oxException The OXException that cuased the handling to fail
+     */
+    private void handleError(Presence presence, OXException oxException) {
+        try {
+            MessageDispatcher messageDispatcher = getMessageDispatcher();
+            Presence errorPresence = new Presence(presence);
+            errorPresence.setTo(presence.getFrom());
+            errorPresence.setError(oxException);
+            messageDispatcher.send(errorPresence);
+        } catch (Exception e) {
+            LOG.error(e);
+        }
+    }
+
 }

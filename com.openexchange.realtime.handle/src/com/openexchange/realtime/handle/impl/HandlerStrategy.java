@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.handle.impl;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 
@@ -61,7 +60,7 @@ import com.openexchange.realtime.packet.Stanza;
  */
 public class HandlerStrategy<T extends Stanza> {
     
-    public void handleStanza(T stanza, StrategyHandler<T> handler) throws OXException {
+    public void handleStanza(T stanza, StrategyHandler<T> handler) {
         ID to = stanza.getTo();
         if (to == null) {
             handler.handleToIsNull(stanza);

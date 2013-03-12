@@ -49,27 +49,25 @@
 
 package com.openexchange.realtime.handle.impl;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.Stanza;
 
-
 /**
- * {@link StrategyHandler}
- *
+ * {@link StrategyHandler} - Strategy for handling different kind of Stanzas.
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public interface StrategyHandler<T extends Stanza> {
-    
-    void handleToIsNull(T stanza) throws OXException;
-    
-    void handleAccountNotExists(T stanza) throws OXException;
-    
-    void handleInboundStanzaWithGeneralRecipient(T stanza) throws OXException;
-    
-    void handleInboundStanzaWithConcreteRecipient(T stanza) throws OXException;
-    
-    void handleOutboundStanza(T stanza) throws OXException;
-    
-    boolean applyPrivacyLists(T stanza) throws OXException;
+
+    void handleToIsNull(T stanza);
+
+    void handleAccountNotExists(T stanza);
+
+    void handleInboundStanzaWithGeneralRecipient(T stanza);
+
+    void handleInboundStanzaWithConcreteRecipient(T stanza);
+
+    void handleOutboundStanza(T stanza);
+
+    boolean applyPrivacyLists(T stanza);
 
 }

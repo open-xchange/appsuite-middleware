@@ -59,6 +59,7 @@ import com.openexchange.realtime.handle.impl.StanzaQueueServiceImpl;
 import com.openexchange.realtime.handle.impl.iq.IQHandler;
 import com.openexchange.realtime.handle.impl.message.MessageHandler;
 import com.openexchange.realtime.handle.impl.presence.PresenceHandler;
+import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 
@@ -72,7 +73,7 @@ public class StanzaHandlerActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ResourceDirectory.class, MessageDispatcher.class, ThreadPoolService.class };
+        return new Class<?>[] { ResourceDirectory.class, PresenceSubscriptionService.class, MessageDispatcher.class, ThreadPoolService.class };
     }
 
     @Override

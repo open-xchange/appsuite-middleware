@@ -7,6 +7,7 @@ Bundle-Activator: com.openexchange.realtime.handle.osgi.StanzaHandlerActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
+ com.openexchange.i18n,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.realtime,
