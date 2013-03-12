@@ -68,7 +68,7 @@ import com.openexchange.realtime.util.ElementPath;
 
 /**
  * {@link Stanza} - Abstract information unit that can be send from one entity to another.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -83,12 +83,10 @@ public abstract class Stanza implements Serializable {
     private String id = "";
 
     private String selector = "default";
-    
+
     // Payloads carried by this Stanza as n-ary trees
     Map<ElementPath, List<PayloadTree>> payloads;
-    
-    
-    
+
     /**
      * Initializes a new {@link Stanza}.
      */
@@ -98,7 +96,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Gets the id
-     *
+     * 
      * @return The id
      */
     public String getId() {
@@ -107,7 +105,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Sets the id
-     *
+     * 
      * @param id The id to set
      */
     public void setId(final String id) {
@@ -116,7 +114,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Get the {@link ID} describing the stanza's recipient.
-     *
+     * 
      * @return null or the ID of the stanza's recipient
      */
     public ID getTo() {
@@ -125,7 +123,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Set the {@link ID} describing the Stanza's recipient.
-     *
+     * 
      * @param to the ID of the stanza's recipient
      */
     public void setTo(final ID to) {
@@ -134,7 +132,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Get the {@link ID} describing the Stanza's sender.
-     *
+     * 
      * @return the {@link ID} describing the Stanza's sender.
      */
     public ID getFrom() {
@@ -143,7 +141,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Set the {@link ID} describing the Stanza's sender.
-     *
+     * 
      * @param from the {@link ID} describing the Stanza's sender.
      */
     public void setFrom(final ID from) {
@@ -152,7 +150,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Get a List of namespaces of the payloads of this Stanza.
-     *
+     * 
      * @return Empty Set or the namespaces of the payloads of this Stanza.
      */
     public Collection<ElementPath> getElementPaths() {
@@ -165,7 +163,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Get all Payloads of this Stanza.
-     *
+     * 
      * @return A List of PayloadTrees.
      */
     public Collection<PayloadTree> getPayloads() {
@@ -176,22 +174,24 @@ public abstract class Stanza implements Serializable {
         }
         return resultList;
     }
-    
+
     /**
-     * A very common case: Get the single payload
-     * @return
+     * A very common case: Get the single payload contained in this Stanza.
+     * 
+     * @return null if the Stanza doesn't contain a Payload, otherwise the Payload 
      */
     public PayloadElement getPayload() {
         Iterator<List<PayloadTree>> iterator = payloads.values().iterator();
         if (iterator.hasNext()) {
             return iterator.next().get(0).getRoot().getPayloadElement();
         }
-        
+
         return null;
     }
+
     /**
      * Set all Payloads of this Stanza.
-     *
+     * 
      * @param payloadTrees The PayloadTrees forming the Payloads.
      */
     public void setPayloads(Collection<PayloadTree> payloadTrees) {
@@ -210,7 +210,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Add a payload to this Stanza.
-     *
+     * 
      * @param tree The PayloadTreeNoode to add to this Stanza
      * @return true if the PayloadTreeNode could be added to this Stanza
      */
@@ -219,7 +219,8 @@ public abstract class Stanza implements Serializable {
     }
 
     /**
-     * Add a PayloadTree into a Map containing lists aof PayloadTrees mapped to their ElementPaths. 
+     * Add a PayloadTree into a Map containing lists of PayloadTrees mapped to their ElementPaths.
+     * 
      * @param tree The tree to add
      * @param payloadTreeMap The Map containing the trees
      */
@@ -235,7 +236,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Remove a PayloadTree from this Stanza.
-     *
+     * 
      * @param tree The PayloadTree to remove from this Stanza
      */
     public void removePayload(final PayloadTree tree) {
@@ -249,7 +250,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Get a Collection of Payloads that match an ElementPath
-     *
+     * 
      * @param elementPath The Elementpath identifying the Payload
      * @return A Collection of PayloadTrees
      */
@@ -265,7 +266,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Filter the payloads based on a Predicate.
-     *
+     * 
      * @param predicate
      * @return Payloads matching the Predicate or an empty Collection
      */
@@ -281,7 +282,7 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Return a Map<ElementPath, List<PayloadTree>> containing deep copies of this stanza's payloads.
-     *
+     * 
      * @return a Map<ElementPath, List<PayloadTree>> containing deep copies of this stanza's payloads.
      */
     protected Map<ElementPath, List<PayloadTree>> deepCopyPayloads() {
@@ -292,28 +293,27 @@ public abstract class Stanza implements Serializable {
         }
         return copiedPayloads;
     }
-    
+
     public String getSelector() {
         return selector;
     }
 
-    
     public void setSelector(String selector) {
         this.selector = selector;
     }
-    
+
     public void transformPayloads(String format) throws OXException {
         List<PayloadTree> copy = new ArrayList<PayloadTree>(getPayloads().size());
-        for(PayloadTree tree: getPayloads()) {
+        for (PayloadTree tree : getPayloads()) {
             tree = tree.toExternal(format);
             copy.add(tree);
         }
         setPayloads(copy);
     }
-    
+
     public void transformPayloadsToInternal() throws OXException {
         List<PayloadTree> copy = new ArrayList<PayloadTree>(getPayloads().size());
-        for(PayloadTree tree: getPayloads()) {
+        for (PayloadTree tree : getPayloads()) {
             tree = tree.toInternal();
             copy.add(tree);
         }
@@ -322,15 +322,13 @@ public abstract class Stanza implements Serializable {
 
     /**
      * Init default fields from values found in the PayloadTrees of the Stanza.
+     * 
      * @throws OXException when the Stanza couldn't be initialized
      */
     public abstract void initializeDefaults() throws OXException;
-    
+
     public abstract Stanza newInstance();
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -343,9 +341,6 @@ public abstract class Stanza implements Serializable {
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -382,7 +377,5 @@ public abstract class Stanza implements Serializable {
             return false;
         return true;
     }
-    
-    
 
 }
