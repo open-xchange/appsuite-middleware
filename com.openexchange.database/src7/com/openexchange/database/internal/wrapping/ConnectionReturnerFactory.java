@@ -52,6 +52,7 @@ package com.openexchange.database.internal.wrapping;
 import java.sql.Connection;
 import com.openexchange.database.internal.AssignmentImpl;
 import com.openexchange.database.internal.Pools;
+import com.openexchange.database.internal.ReplicationMonitor;
 
 /**
  * {@link ConnectionReturnerFactory}
@@ -64,7 +65,7 @@ public class ConnectionReturnerFactory {
         super();
     }
 
-    public static Connection createConnection(Pools pools, AssignmentImpl assign, Connection con, boolean noTimeout, boolean write, boolean usedAsRead) {
-        return new JDBC41ConnectionReturner(pools, assign, con, noTimeout, write, usedAsRead);
+    public static Connection createConnection(Pools pools, ReplicationMonitor monitor, AssignmentImpl assign, Connection con, boolean noTimeout, boolean write, boolean usedAsRead) {
+        return new JDBC41ConnectionReturner(pools, monitor, assign, con, noTimeout, write, usedAsRead);
     }
 }

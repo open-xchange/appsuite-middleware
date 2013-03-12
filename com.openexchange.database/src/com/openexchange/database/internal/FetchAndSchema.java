@@ -47,25 +47,19 @@
  *
  */
 
-package com.openexchange.database.internal.wrapping;
+package com.openexchange.database.internal;
 
 import java.sql.Connection;
-import com.openexchange.database.internal.AssignmentImpl;
-import com.openexchange.database.internal.Pools;
-import com.openexchange.database.internal.ReplicationMonitor;
+import com.openexchange.exception.OXException;
+import com.openexchange.pooling.PoolingException;
 
 /**
- * {@link ConnectionReturnerFactory}
+ * Interface for implementations fetching a connections from a pool and selecting a specific database schema.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ConnectionReturnerFactory {
+interface FetchAndSchema {
 
-    private ConnectionReturnerFactory() {
-        super();
-    }
+    Connection get(Pools pools, AssignmentImpl assign, boolean write, boolean usedAsRead) throws PoolingException, OXException;
 
-    public static Connection createConnection(Pools pools, ReplicationMonitor monitor, AssignmentImpl assign, Connection con, boolean noTimeout, boolean write, boolean usedAsRead) {
-        return new JDBC4ConnectionReturner(pools, monitor, assign, con, noTimeout, write, usedAsRead);
-    }
 }

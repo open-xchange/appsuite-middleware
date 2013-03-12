@@ -75,19 +75,20 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigDatabaseServiceImpl.class));
 
     private final Pools pools;
-
     private final ConfigDatabaseAssignmentService assignmentService;
+    private final ReplicationMonitor monitor;
 
-    ConfigDatabaseServiceImpl(ConfigDatabaseAssignmentService assignmentService, Pools pools) {
+    ConfigDatabaseServiceImpl(ConfigDatabaseAssignmentService assignmentService, Pools pools, ReplicationMonitor monitor) {
         super();
         this.assignmentService = assignmentService;
         this.pools = pools;
+        this.monitor = monitor;
     }
 
     private Connection get(final boolean write) throws OXException {
         final AssignmentImpl assign = assignmentService.getConfigDBAssignment();
         LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, ForceLog.valueOf("configdb"));
-        return ReplicationMonitor.checkFallback(pools, assign, false, write);
+        return monitor.checkFallback(pools, assign, false, write);
         // TODO Enable the following if the configuration database gets a table replicationMonitor.
         // return ReplicationMonitor.checkActualAndFallback(pools, assign, false, write);
     }

@@ -76,18 +76,20 @@ public final class DatabaseServiceImpl implements DatabaseService {
     private final Pools pools;
     private final ConfigDatabaseService configDatabaseService;
     private final ContextDatabaseAssignmentService assignmentService;
+    private final ReplicationMonitor monitor;
 
-    public DatabaseServiceImpl(Pools pools, ConfigDatabaseService configDatabaseService, ContextDatabaseAssignmentService assignmentService) {
+    public DatabaseServiceImpl(Pools pools, ConfigDatabaseService configDatabaseService, ContextDatabaseAssignmentService assignmentService, ReplicationMonitor monitor) {
         super();
         this.pools = pools;
         this.configDatabaseService = configDatabaseService;
         this.assignmentService = assignmentService;
+        this.monitor = monitor;
     }
 
     private Connection get(final int contextId, final boolean write, final boolean noTimeout) throws OXException {
         final AssignmentImpl assign = assignmentService.getAssignment(contextId);
         LogProperties.putLogProperty(LogProperties.Name.DATABASE_SCHEMA, ForceLog.valueOf(assign.getSchema()));
-        return ReplicationMonitor.checkActualAndFallback(pools, assign, noTimeout, write);
+        return monitor.checkActualAndFallback(pools, assign, noTimeout, write);
     }
 
     private static void back(final Connection con) {

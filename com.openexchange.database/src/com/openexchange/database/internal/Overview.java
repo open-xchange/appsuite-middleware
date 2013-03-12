@@ -57,10 +57,12 @@ package com.openexchange.database.internal;
 public class Overview implements OverviewMBean {
 
     private final Pools pools;
+    private final ReplicationMonitor monitor;
 
-    public Overview(Pools pools) {
+    public Overview(Pools pools, ReplicationMonitor monitor) {
         super();
         this.pools = pools;
+        this.monitor = monitor;
     }
 
     @Override
@@ -74,16 +76,16 @@ public class Overview implements OverviewMBean {
 
     @Override
     public long getMasterConnectionsFetched() {
-        return ReplicationMonitor.getMasterConnectionsFetched();
+        return monitor.getMasterConnectionsFetched();
     }
 
     @Override
     public long getSlaveConnectionsFetched() {
-        return ReplicationMonitor.getSlaveConnectionsFetched();
+        return monitor.getSlaveConnectionsFetched();
     }
 
     @Override
     public long getMasterInsteadOfSlave() {
-        return ReplicationMonitor.getMasterInsteadOfSlave();
+        return monitor.getMasterInsteadOfSlave();
     }
 }

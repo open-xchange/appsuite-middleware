@@ -47,25 +47,54 @@
  *
  */
 
-package com.openexchange.database.internal.wrapping;
+package com.openexchange.database.internal;
 
 import java.sql.Connection;
-import com.openexchange.database.internal.AssignmentImpl;
-import com.openexchange.database.internal.Pools;
-import com.openexchange.database.internal.ReplicationMonitor;
+import java.sql.SQLException;
+import org.apache.commons.logging.Log;
+import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.internal.wrapping.ConnectionReturnerFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.pooling.PoolingException;
 
 /**
- * {@link ConnectionReturnerFactory}
+ * Fetches a connection with timeouts and selects the wanted schema.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class ConnectionReturnerFactory {
+final class TimeoutFetchAndSchema implements FetchAndSchema {
 
-    private ConnectionReturnerFactory() {
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(TimeoutFetchAndSchema.class);
+    private final ReplicationMonitor monitor;
+
+    TimeoutFetchAndSchema(ReplicationMonitor monitor) {
         super();
+        this.monitor = monitor;
     }
 
-    public static Connection createConnection(Pools pools, ReplicationMonitor monitor, AssignmentImpl assign, Connection con, boolean noTimeout, boolean write, boolean usedAsRead) {
-        return new JDBC4ConnectionReturner(pools, monitor, assign, con, noTimeout, write, usedAsRead);
+    @Override
+    public Connection get(Pools pools, AssignmentImpl assign, boolean write, boolean usedAsRead) throws PoolingException, OXException {
+        final int poolId;
+        if (write) {
+            poolId = assign.getWritePoolId();
+        } else {
+            poolId = assign.getReadPoolId();
+        }
+        final ConnectionPool pool = pools.getPool(poolId);
+        final Connection retval = pool.get();
+        try {
+            final String schema = assign.getSchema();
+            if (null != schema && !retval.getCatalog().equals(schema)) {
+                retval.setCatalog(schema);
+            }
+        } catch (SQLException e) {
+            try {
+                pool.back(retval);
+            } catch (PoolingException e1) {
+                LOG.error(e1.getMessage(), e1);
+            }
+            throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
+        }
+        return ConnectionReturnerFactory.createConnection(pools, monitor, assign, retval, false, write, usedAsRead);
     }
 }

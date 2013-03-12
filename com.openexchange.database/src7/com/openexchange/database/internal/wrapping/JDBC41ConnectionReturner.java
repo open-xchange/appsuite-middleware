@@ -54,6 +54,7 @@ import java.sql.SQLException;
 import java.util.concurrent.Executor;
 import com.openexchange.database.internal.AssignmentImpl;
 import com.openexchange.database.internal.Pools;
+import com.openexchange.database.internal.ReplicationMonitor;
 
 /**
  * {@link JDBC41ConnectionReturner}
@@ -62,8 +63,8 @@ import com.openexchange.database.internal.Pools;
  */
 public class JDBC41ConnectionReturner extends JDBC4ConnectionReturner {
 
-    public JDBC41ConnectionReturner(Pools pools, AssignmentImpl assign, Connection delegate, boolean noTimeout, boolean write, boolean usedAsRead) {
-        super(pools, assign, delegate, noTimeout, write, usedAsRead);
+    public JDBC41ConnectionReturner(Pools pools, ReplicationMonitor monitor, AssignmentImpl assign, Connection delegate, boolean noTimeout, boolean write, boolean usedAsRead) {
+        super(pools, monitor, assign, delegate, noTimeout, write, usedAsRead);
     }
 
     @Override

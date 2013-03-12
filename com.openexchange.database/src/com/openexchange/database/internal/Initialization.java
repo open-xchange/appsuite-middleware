@@ -54,39 +54,31 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.internal.Configuration.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 
 /**
  * {@link Initialization}
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class Initialization {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Initialization.class));
-
     private static final Initialization SINGLETON = new Initialization();
 
-    private CacheService cacheService;
-
     private final Management management = new Management();
-
     private final Timer timer = new Timer();
-
     private final Configuration configuration = new Configuration();
 
+    private CacheService cacheService;
+    private ReplicationMonitor monitor;
     private Pools pools;
-
     private ContextDatabaseAssignmentImpl contextAssignment;
-
     private ConfigDatabaseServiceImpl configDatabaseService;
+    private DatabaseServiceImpl databaseService;
 
-    private volatile DatabaseServiceImpl databaseService;
-
-    /**
-     * Prevent instantiation.
-     */
     private Initialization() {
         super();
     }
@@ -96,65 +88,48 @@ public final class Initialization {
     }
 
     public boolean isStarted() {
-        return null != pools;
-    }
-
-    /**
-     * Gets the database service
-     *
-     * @return The database service or <code>null</code> if not initialized, yet
-     */
-    public DatabaseService getDatabaseService() {
-        return databaseService;
+        return null != databaseService;
     }
 
     public DatabaseService start(final ConfigurationService configurationService) throws OXException {
-        return start0(configurationService, false);
-    }
-
-    public DatabaseService startIfAbsent(final ConfigurationService configurationService) throws OXException {
-        return start0(configurationService, true);
-    }
-
-    private DatabaseService start0(final ConfigurationService configurationService, final boolean returnIfPresent) throws OXException {
-        synchronized (management) {
-            if (null != pools) {
-                if (returnIfPresent) {
-                    return databaseService;
-                }
-                throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(Initialization.class.getName());
-            }
-            // Parse configuration
-            configuration.readConfiguration(configurationService);
-            // Set timer interval
-            timer.configure(configuration);
-            // Setting up database connection pools.
-            pools = new Pools(timer);
-            management.addOverview(new Overview(pools));
-            // Add life cycle for configuration database
-            final ConfigDatabaseLifeCycle configDBLifeCycle = new ConfigDatabaseLifeCycle(configuration, management, timer);
-            pools.addLifeCycle(configDBLifeCycle);
-            // Configuration database connection pool service.
-            configDatabaseService = new ConfigDatabaseServiceImpl(new ConfigDatabaseAssignmentImpl(), pools);
-            // Context database assignments.
-            contextAssignment = new ContextDatabaseAssignmentImpl(configDatabaseService);
-            if (null != cacheService) {
-                contextAssignment.setCacheService(cacheService);
-            }
-            // Context pool life cycle.
-            final ContextDatabaseLifeCycle contextDBLifeCycle =
-                new ContextDatabaseLifeCycle(configuration, management, timer, configDatabaseService);
-            pools.addLifeCycle(contextDBLifeCycle);
-            Server.setConfigDatabaseService(configDatabaseService);
-            Server.start(configurationService);
-            try {
-                LOG.info("Resolved server name \"" + Server.getServerName() + "\" to identifier " + Server.getServerId());
-            } catch (final OXException e) {
-                LOG.warn("Resolving server name to an identifier failed. This is normal until a server has been registered.", e);
-            }
-            databaseService = new DatabaseServiceImpl(pools, configDatabaseService, contextAssignment);
-            return databaseService;
+        if (null != databaseService) {
+            throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(Initialization.class.getName());
         }
+        // Parse configuration
+        configuration.readConfiguration(configurationService);
+        // Set timer interval
+        timer.configure(configuration);
+        // Setting up database connection pools.
+        pools = new Pools(timer);
+        // Setting up the replication monitor
+        monitor = new ReplicationMonitor(configuration.getBoolean(Property.REPLICATION_MONITOR, true));
+        management.addOverview(new Overview(pools, monitor));
+        // Add life cycle for configuration database
+        final ConfigDatabaseLifeCycle configDBLifeCycle = new ConfigDatabaseLifeCycle(configuration, management, timer);
+        pools.addLifeCycle(configDBLifeCycle);
+        // Configuration database connection pool service.
+        configDatabaseService = new ConfigDatabaseServiceImpl(new ConfigDatabaseAssignmentImpl(), pools, monitor);
+        // Context database assignments.
+        contextAssignment = new ContextDatabaseAssignmentImpl(configDatabaseService);
+        if (null != cacheService) {
+            contextAssignment.setCacheService(cacheService);
+        }
+        // Context pool life cycle.
+        final ContextDatabaseLifeCycle contextDBLifeCycle = new ContextDatabaseLifeCycle(
+            configuration,
+            management,
+            timer,
+            configDatabaseService);
+        pools.addLifeCycle(contextDBLifeCycle);
+        Server.setConfigDatabaseService(configDatabaseService);
+        Server.start(configurationService);
+        try {
+            LOG.info("Resolved server name \"" + Server.getServerName() + "\" to identifier " + Server.getServerId());
+        } catch (OXException e) {
+            LOG.warn("Resolving server name to an identifier failed. This is normal until a server has been registered.", e);
+        }
+        databaseService = new DatabaseServiceImpl(pools, configDatabaseService, contextAssignment, monitor);
+        return databaseService;
     }
 
     public void stop() {

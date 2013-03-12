@@ -78,20 +78,18 @@ import com.openexchange.database.internal.ReplicationMonitor;
 public class JDBC4ConnectionReturner implements Connection {
 
     private final Pools pools;
-
+    private final ReplicationMonitor monitor;
     private final AssignmentImpl assign;
+    private final boolean noTimeout;
+    private final boolean write;
+    private final boolean usedAsRead;
 
     protected Connection delegate;
 
-    private final boolean noTimeout;
-
-    private final boolean write;
-
-    private final boolean usedAsRead;
-
-    public JDBC4ConnectionReturner(final Pools pools, final AssignmentImpl assign, final Connection delegate, final boolean noTimeout, final boolean write, final boolean usedAsRead) {
+    public JDBC4ConnectionReturner(Pools pools, ReplicationMonitor monitor, AssignmentImpl assign, Connection delegate, boolean noTimeout, boolean write, boolean usedAsRead) {
         super();
         this.pools = pools;
+        this.monitor = monitor;
         this.assign = assign;
         this.delegate = delegate;
         this.noTimeout = noTimeout;
@@ -117,7 +115,7 @@ public class JDBC4ConnectionReturner implements Connection {
         }
         final Connection toReturn = delegate;
         delegate = null;
-        ReplicationMonitor.backAndIncrementTransaction(pools, assign, toReturn, noTimeout, write, usedAsRead);
+        monitor.backAndIncrementTransaction(pools, assign, toReturn, noTimeout, write, usedAsRead);
     }
 
     @Override

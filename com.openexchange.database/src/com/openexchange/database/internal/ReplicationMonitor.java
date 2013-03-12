@@ -62,7 +62,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DBPoolingExceptionCodes;
-import com.openexchange.database.internal.wrapping.ConnectionReturnerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.pooling.PoolingException;
 
@@ -73,79 +72,25 @@ import com.openexchange.pooling.PoolingException;
  */
 public final class ReplicationMonitor {
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReplicationMonitor.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ReplicationMonitor.class));
 
-    private static final AtomicLong masterConnectionsFetched = new AtomicLong();
+    private final FetchAndSchema TIMEOUT = new TimeoutFetchAndSchema(this);
+    private final FetchAndSchema NOTIMEOUT = new NotimeoutFetchAndSchema(this);
+    private final AtomicLong masterConnectionsFetched = new AtomicLong();
+    private final AtomicLong slaveConnectionsFetched = new AtomicLong();
+    private final AtomicLong masterInsteadOfSlaveFetched = new AtomicLong();
+    private final boolean active;
 
-    private static final AtomicLong slaveConnectionsFetched = new AtomicLong();
-
-    private static final AtomicLong masterInsteadOfSlaveFetched = new AtomicLong();
-
-    private ReplicationMonitor() {
+    ReplicationMonitor(boolean active) {
         super();
+        this.active = active;
     }
 
-    interface FetchAndSchema {
-        Connection get(Pools pools, AssignmentImpl assign, boolean write, boolean usedAsRead) throws PoolingException, OXException;
-    }
-
-    static final FetchAndSchema TIMEOUT = new FetchAndSchema() {
-        @Override
-        public Connection get(final Pools pools, final AssignmentImpl assign, final boolean write, final boolean usedAsRead) throws PoolingException, OXException {
-            final int poolId;
-            if (write) {
-                poolId = assign.getWritePoolId();
-            } else {
-                poolId = assign.getReadPoolId();
-            }
-            final ConnectionPool pool = pools.getPool(poolId);
-            final Connection retval = pool.get();
-            try {
-                final String schema = assign.getSchema();
-                if (null != schema && !retval.getCatalog().equals(schema)) {
-                    retval.setCatalog(schema);
-                }
-            } catch (final SQLException e) {
-                try {
-                    pool.back(retval);
-                } catch (final PoolingException e1) {
-                    LOG.error(e1.getMessage(), e1);
-                }
-                throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
-            }
-            return ConnectionReturnerFactory.createConnection(pools, assign, retval, false, write, usedAsRead);
-        }
-    };
-
-    static final FetchAndSchema NOTIMEOUT = new FetchAndSchema() {
-        @Override
-        public Connection get(final Pools pools, final AssignmentImpl assign, final boolean write, final boolean usedAsRead) throws OXException, PoolingException {
-            final int poolId;
-            if (write) {
-                poolId = assign.getWritePoolId();
-            } else {
-                poolId = assign.getReadPoolId();
-            }
-            final ConnectionPool pool = pools.getPool(poolId);
-            final Connection retval = pool.getWithoutTimeout();
-            try {
-                final String schema = assign.getSchema();
-                if (null != schema && !retval.getCatalog().equals(schema)) {
-                    retval.setCatalog(schema);
-                }
-            } catch (final SQLException e) {
-                pool.backWithoutTimeout(retval);
-                throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
-            }
-            return ConnectionReturnerFactory.createConnection(pools, assign, retval, true, write, usedAsRead);
-        }
-    };
-
-    static Connection checkFallback(Pools pools, AssignmentImpl assign, boolean noTimeout, boolean write) throws OXException {
+    Connection checkFallback(Pools pools, AssignmentImpl assign, boolean noTimeout, boolean write) throws OXException {
         return checkFallback(pools, assign, noTimeout ? NOTIMEOUT : TIMEOUT, write);
     }
 
-    static Connection checkFallback(Pools pools, AssignmentImpl assign, FetchAndSchema fetch, boolean write) throws OXException {
+    private Connection checkFallback(Pools pools, AssignmentImpl assign, FetchAndSchema fetch, boolean write) throws OXException {
         Connection retval;
         int tries = 0;
         do {
@@ -175,11 +120,11 @@ public final class ReplicationMonitor {
         return retval;
     }
 
-    static Connection checkActualAndFallback(final Pools pools, final AssignmentImpl assign, final boolean noTimeout, final boolean write) throws OXException {
+    Connection checkActualAndFallback(final Pools pools, final AssignmentImpl assign, final boolean noTimeout, final boolean write) throws OXException {
         return checkActualAndFallback(pools, assign, noTimeout ? NOTIMEOUT : TIMEOUT, write);
     }
 
-    static Connection checkActualAndFallback(final Pools pools, final AssignmentImpl assign, final FetchAndSchema fetch, final boolean write) throws OXException {
+    private Connection checkActualAndFallback(final Pools pools, final AssignmentImpl assign, final FetchAndSchema fetch, final boolean write) throws OXException {
         Connection retval;
         long clientTransaction = 0;
         int tries = 0;
@@ -252,11 +197,11 @@ public final class ReplicationMonitor {
         return slaveTransaction >= masterTransaction;
     }
 
-    public static void backAndIncrementTransaction(final Pools pools, final AssignmentImpl assign, final Connection con, final boolean noTimeout, final boolean write, final boolean usedAsRead) {
+    public void backAndIncrementTransaction(Pools pools, AssignmentImpl assign, Connection con, boolean noTimeout, boolean write, boolean usedAsRead) {
         final int poolId;
         if (write) {
             poolId = assign.getWritePoolId();
-            if (poolId != assign.getReadPoolId() && !usedAsRead && Constants.CONFIGDB_WRITE_ID != poolId) {
+            if (active && poolId != assign.getReadPoolId() && !usedAsRead && Constants.CONFIGDB_WRITE_ID != poolId) {
                 increaseTransactionCounter(assign, con);
             }
         } else {
@@ -304,7 +249,7 @@ public final class ReplicationMonitor {
 
     private static long lastLogged = 0;
 
-    static void increaseTransactionCounter(final AssignmentImpl assign, final Connection con) {
+    private static void increaseTransactionCounter(AssignmentImpl assign, Connection con) {
         try {
             if (con.isClosed()) {
                 return;
@@ -349,7 +294,7 @@ public final class ReplicationMonitor {
         }
     }
 
-    public static void incrementFetched(final Assignment assign, final boolean write) {
+    private void incrementFetched(final Assignment assign, final boolean write) {
         if (assign.getWritePoolId() == assign.getReadPoolId() || write) {
             masterConnectionsFetched.incrementAndGet();
         } else {
@@ -357,19 +302,19 @@ public final class ReplicationMonitor {
         }
     }
 
-    private static void incrementInstead() {
+    private void incrementInstead() {
         masterInsteadOfSlaveFetched.incrementAndGet();
     }
 
-    public static long getMasterConnectionsFetched() {
+    long getMasterConnectionsFetched() {
         return masterConnectionsFetched.get();
     }
 
-    public static long getSlaveConnectionsFetched() {
+    long getSlaveConnectionsFetched() {
         return slaveConnectionsFetched.get();
     }
 
-    public static long getMasterInsteadOfSlave() {
+    long getMasterInsteadOfSlave() {
         return masterInsteadOfSlaveFetched.get();
     }
 }

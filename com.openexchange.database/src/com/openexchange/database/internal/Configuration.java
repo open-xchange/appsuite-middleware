@@ -149,9 +149,6 @@ public final class Configuration {
         }).booleanValue();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public void readConfiguration(final ConfigurationService service) throws OXException {
         if (null != props) {
             throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(this.getClass().getName());
@@ -272,11 +269,13 @@ public final class Configuration {
         /** Validate connections on a pool clean run. */
         TEST_ON_IDLE("testOnIdle"),
         /** Test threads if they use connections correctly. */
-        TEST_THREADS("testThreads");
+        TEST_THREADS("testThreads"),
+        /** Allows to disable the replication monitor. */
+        REPLICATION_MONITOR("com.openexchange.database.replicationMonitor");
 
         private String propertyName;
 
-        private Property(final String propertyName) {
+        private Property(String propertyName) {
             this.propertyName = propertyName;
         }
 
