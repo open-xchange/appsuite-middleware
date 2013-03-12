@@ -1848,7 +1848,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected void setCapsToRemove(final AdminParser parser) {
-        this.capsToAdd = setLongOpt(parser,OPT_CAPABILITIES_TO_REMOVE,"The capabilities to remove", true, false,false);
+        this.capsToRemove = setLongOpt(parser,OPT_CAPABILITIES_TO_REMOVE,"The capabilities to remove", true, false,false);
     }
 
     protected final void setAliasesOption(final AdminParser admp){
