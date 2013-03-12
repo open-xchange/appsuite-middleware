@@ -234,97 +234,6 @@ public class CapabilityServiceImpl implements CapabilityService {
         return capabilities;
     }
 
-    private Set<String> getContextCaps(final int contextId) throws OXException {
-        final Cache cache = optContextCache();
-        if (null == cache) {
-            return loadContextCaps(contextId);
-        }
-        final Object object = cache.get(Integer.valueOf(contextId));
-        if (object instanceof Set) {
-            @SuppressWarnings("unchecked")
-            final Set<String> caps = (Set<String>) object;
-            return caps;
-        }
-        // Load from database
-        final Set<String> caps = loadContextCaps(contextId);
-        cache.put(Integer.valueOf(contextId), new HashSet<String>(caps), false);
-        return caps;
-    }
-
-    private Set<String> loadContextCaps(final int contextId) throws OXException {
-        final DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
-        if (null == databaseService) {
-            return Collections.emptySet();
-        }
-        final Connection con = databaseService.getReadOnly(contextId);
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT cap FROM capability_context WHERE cid=?");
-            stmt.setLong(1, contextId);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return Collections.emptySet();
-            }
-            final Set<String> set = new HashSet<String>();
-            do {
-                set.add(rs.getString(1));
-            } while (rs.next());
-            return set;
-        } catch (final SQLException e) {
-            throw CapabilityExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-            databaseService.backReadOnly(contextId, con);
-        }
-    }
-
-    private Set<String> getUserCaps(final int userId, final int contextId) throws OXException {
-        final Cache cache = optContextCache();
-        if (null == cache) {
-            return loadUserCaps(userId, contextId);
-        }
-        final Object object = cache.getFromGroup(Integer.valueOf(userId), Integer.toString(contextId));
-        if (object instanceof Set) {
-            @SuppressWarnings("unchecked")
-            final Set<String> caps = (Set<String>) object;
-            return caps;
-        }
-        // Load from database
-        final Set<String> caps = loadUserCaps(userId, contextId);
-        cache.putInGroup(Integer.valueOf(userId), Integer.toString(contextId), new HashSet<String>(caps), false);
-        return caps;
-    }
-
-    private Set<String> loadUserCaps(final int userId, final int contextId) throws OXException {
-        final DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
-        if (null == databaseService) {
-            return Collections.emptySet();
-        }
-        final Connection con = databaseService.getReadOnly(contextId);
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT cap FROM capability_user WHERE cid=? AND user=?");
-            stmt.setLong(1, contextId);
-            stmt.setLong(2, userId);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return Collections.emptySet();
-            }
-            final Set<String> set = new HashSet<String>();
-            do {
-                set.add(rs.getString(1));
-            } while (rs.next());
-            return set;
-        } catch (final SQLException e) {
-            throw CapabilityExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-            databaseService.backReadOnly(contextId, con);
-        }
-    }
-
     private boolean check(String cap, ServerSession session) throws OXException {
         for (CapabilityChecker checker : getCheckers()) {
             if (!checker.isEnabled(cap, session)) {
@@ -371,6 +280,97 @@ public class CapabilityServiceImpl implements CapabilityService {
      */
     public List<CapabilityChecker> getCheckers() {
         return Collections.emptyList();
+    }
+
+    private Set<String> getContextCaps(final int contextId) throws OXException {
+        final Cache cache = optContextCache();
+        if (null == cache) {
+            return loadContextCaps(contextId);
+        }
+        final Object object = cache.get(Integer.valueOf(contextId));
+        if (object instanceof Set) {
+            @SuppressWarnings("unchecked")
+            final Set<String> caps = (Set<String>) object;
+            return caps;
+        }
+        // Load from database
+        final Set<String> caps = loadContextCaps(contextId);
+        cache.put(Integer.valueOf(contextId), new HashSet<String>(caps), false);
+        return caps;
+    }
+
+    private Set<String> loadContextCaps(final int contextId) throws OXException {
+        final DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
+        if (null == databaseService) {
+            return Collections.emptySet();
+        }
+        final Connection con = databaseService.getReadOnly(contextId);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT cap FROM capability_context WHERE cid=?");
+            stmt.setLong(1, contextId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return Collections.emptySet();
+            }
+            final Set<String> set = new HashSet<String>();
+            do {
+                set.add(rs.getString(1));
+            } while (rs.next());
+            return set;
+        } catch (final SQLException e) {
+            throw CapabilityExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(contextId, con);
+        }
+    }
+
+    private Set<String> getUserCaps(final int userId, final int contextId) throws OXException {
+        final Cache cache = optUserCache();
+        if (null == cache) {
+            return loadUserCaps(userId, contextId);
+        }
+        final Object object = cache.getFromGroup(Integer.valueOf(userId), Integer.toString(contextId));
+        if (object instanceof Set) {
+            @SuppressWarnings("unchecked")
+            final Set<String> caps = (Set<String>) object;
+            return caps;
+        }
+        // Load from database
+        final Set<String> caps = loadUserCaps(userId, contextId);
+        cache.putInGroup(Integer.valueOf(userId), Integer.toString(contextId), new HashSet<String>(caps), false);
+        return caps;
+    }
+
+    private Set<String> loadUserCaps(final int userId, final int contextId) throws OXException {
+        final DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
+        if (null == databaseService) {
+            return Collections.emptySet();
+        }
+        final Connection con = databaseService.getReadOnly(contextId);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT cap FROM capability_user WHERE cid=? AND user=?");
+            stmt.setLong(1, contextId);
+            stmt.setLong(2, userId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return Collections.emptySet();
+            }
+            final Set<String> set = new HashSet<String>();
+            do {
+                set.add(rs.getString(1));
+            } while (rs.next());
+            return set;
+        } catch (final SQLException e) {
+            throw CapabilityExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(contextId, con);
+        }
     }
 
     /** ASCII-wise to lower-case */
