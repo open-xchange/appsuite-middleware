@@ -190,7 +190,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                         final int resetLen = nameBuilder.length();
                         do {
                             nameBuilder.setLength(resetLen);
-                            nameBuilder.append(" (").append(count++).append(')');
+                            nameBuilder.append(" ").append(count++);
                             result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, parentId, openedStorages);
                         } while (null != result);
                         toCreate.setName(nameBuilder.toString());
@@ -210,7 +210,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                         final int resetLen = nameBuilder.length();
                         do {
                             nameBuilder.setLength(resetLen);
-                            nameBuilder.append(" (").append(count++).append(')');
+                            nameBuilder.append(" ").append(count++);
                             result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, parentId, openedStorages);
                         } while (null != result);
                         toCreate.setName(nameBuilder.toString());
@@ -226,7 +226,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                         final int resetLen = nameBuilder.length();
                         do {
                             nameBuilder.setLength(resetLen);
-                            nameBuilder.append(" (").append(count++).append(')');
+                            nameBuilder.append(" ").append(count++);
                             result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, parentId, openedStorages);
                         } while (null != result);
                         toCreate.setName(nameBuilder.toString());

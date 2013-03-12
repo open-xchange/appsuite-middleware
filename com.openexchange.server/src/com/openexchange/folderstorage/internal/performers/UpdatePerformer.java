@@ -170,7 +170,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         final int resetLen = nameBuilder.length();
                         do {
                             nameBuilder.setLength(resetLen);
-                            nameBuilder.append(" (").append(count++).append(')');
+                            nameBuilder.append(" ").append(count++);
                             result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, newParentId, openedStorages);
                         } while (null != result);
                         folder.setName(nameBuilder.toString());
@@ -196,7 +196,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         final int resetLen = nameBuilder.length();
                         do {
                             nameBuilder.setLength(resetLen);
-                            nameBuilder.append(" (").append(count++).append(')');
+                            nameBuilder.append(" ").append(count++);
                             result = getCheckForDuplicateResult(nameBuilder.toString(), treeId, storageFolder.getParentID(), openedStorages);
                         } while (null != result);
                         folder.setName(nameBuilder.toString());
