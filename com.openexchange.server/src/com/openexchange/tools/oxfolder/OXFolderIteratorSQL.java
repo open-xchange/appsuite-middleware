@@ -1922,18 +1922,25 @@ public final class OXFolderIteratorSQL {
         /*
          * Query database
          */
-        final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.module IN (");
-        condBuilder.append(modules[0]);
-        for (int i = 1; i < modules.length; i++) {
-            condBuilder.append(", ").append(modules[i]);
+        final StringBuilder condBuilder = new StringBuilder(32);
+        if (null != modules && modules.length > 0) {
+            if (1 == modules.length) {
+                condBuilder.append("AND (ot.module = ").append(modules[0]).append(')');
+            } else {
+                condBuilder.append("AND (ot.module IN (");
+                condBuilder.append(modules[0]);
+                for (int i = 1; i < modules.length; i++) {
+                    condBuilder.append(", ").append(modules[i]);
+                }
+                condBuilder.append("))");
+            }
         }
         if (type == SHARED) {
-            condBuilder.append(")) AND (ot.type = ").append(PRIVATE);
-            condBuilder.append(" AND ot.created_from != ").append(userId);
+            condBuilder.append(" AND (ot.type = ").append(PRIVATE);
+            condBuilder.append(" AND ot.created_from != ").append(userId).append(')');
         } else {
-            condBuilder.append(")) AND (ot.type = ").append(type);
+            condBuilder.append(" AND (ot.type = ").append(type).append(')');
         }
-        condBuilder.append(')');
         if (parent != null) {
             condBuilder.append(" AND (ot.parent = ").append(parent.intValue()).append(')');
         }
