@@ -233,6 +233,9 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         Assert.assertEquals("Resources not empty", 0, resources.size());
     }
     
+    /*
+     * https://github.com/hazelcast/hazelcast/issues/441
+     */
     @Test
     public void testTransactionsInSet() throws Exception {
         final ID testID = generateId();
