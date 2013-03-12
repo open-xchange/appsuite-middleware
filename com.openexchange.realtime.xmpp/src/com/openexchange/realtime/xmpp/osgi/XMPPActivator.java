@@ -61,7 +61,7 @@ import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.MessageDispatcher;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.xmpp.XMPPChannel;
 import com.openexchange.realtime.xmpp.XMPPExtension;
 import com.openexchange.realtime.xmpp.converter.MessageBodyToXMPP;
