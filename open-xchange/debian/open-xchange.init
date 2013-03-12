@@ -61,7 +61,9 @@ fi
 
 case "$1" in
   start)
-	echo -n "Starting $DESC: "
+    echo "Cleaning up $DESC environment: killing readerengine processes."
+    ox_kill_readerengine_instances
+    echo -n "Starting $DESC: "
 	ox_start_daemon $STARTSCRIPT $NAME open-xchange open-xchange
 	echo "$NAME."
 	;;
@@ -70,6 +72,8 @@ case "$1" in
 	echo -n "Stopping $DESC: "
 	ox_stop_daemon $NAME
 	echo "$NAME."
+    echo "Cleaning up $DESC environment: killing readerengine processes."
+    ox_kill_readerengine_instances
 	;;
 
   restart|force-reload)
@@ -81,6 +85,11 @@ case "$1" in
         $0 start
 	echo "$NAME."
 	;;
+
+  clean)
+    echo "Cleaning up $DESC environment: killing readerengine processes."
+    ox_kill_readerengine_instances
+    ;;
 
   status)
 	echo -n "Checking for $DESC: "

@@ -303,13 +303,14 @@ public class QuotaFileStorageTest extends TestCase {
             return 0;
         }
 
-        /* (non-Javadoc)
-         * @see com.openexchange.database.DatabaseService#writeAssignment(java.sql.Connection, com.openexchange.database.Assignment)
-         */
+        @Override
+        public String getServerName() {
+            return null;
+        }
+
         @Override
         public void writeAssignment(final Connection con, final Assignment assignment) throws OXException {
             // Nothing to do
-            
         }
     }
 

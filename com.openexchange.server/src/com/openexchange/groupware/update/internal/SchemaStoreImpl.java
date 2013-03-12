@@ -68,7 +68,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.database.internal.Server;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.ExecutedTask;
@@ -441,7 +440,7 @@ public class SchemaStoreImpl extends SchemaStore {
             retval.setBackgroundUpdatesRunning(false);
             retval.setGroupwareCompatible(true);
             retval.setAdminCompatible(true);
-            retval.setServer(Server.getServerName());
+            retval.setServer(Database.getServerName());
             retval.setSchema(con.getCatalog());
         }
         return retval;
