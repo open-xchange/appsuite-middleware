@@ -5114,6 +5114,11 @@ msgstr ""
 msgid "Unexpected error: %1$s"
 msgstr ""
 
+#. * Could not send directed Presence to resource: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.handle/src/com/openexchange/realtime/handle/HandleExceptionMessage.java:63
+msgid "Could not send directed Presence to resource: %1$s"
+msgstr ""
+
 #. * Invalid context ID. Couldn't find context for: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.presence.subscribe/src/com/openexchange/realtime/presence/subscribe/PresenceSubscribeExceptionMessages.java:63
 msgid "Invalid context ID. Couldn't find context for: %1$s"
