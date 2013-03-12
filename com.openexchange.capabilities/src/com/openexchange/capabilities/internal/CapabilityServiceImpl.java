@@ -60,6 +60,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityExceptionCodes;
@@ -77,10 +79,14 @@ import com.openexchange.tools.session.ServerSession;
  * {@link CapabilityServiceImpl}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CapabilityServiceImpl implements CapabilityService {
 
     private static final Object PRESENT = new Object();
+
+    private static final String REGION_NAME_CONTEXT = "CapabilitiesContext";
+    private static final String REGION_NAME_USER = "CapabilitiesUser";
 
     private final ConcurrentMap<String, Capability> capabilities;
     private final ConcurrentMap<String, Object> declaredCapabilities;
@@ -101,6 +107,30 @@ public class CapabilityServiceImpl implements CapabilityService {
         this.services = services;
         capabilities = new ConcurrentHashMap<String, Capability>();
         declaredCapabilities = new ConcurrentHashMap<String, Object>();
+    }
+
+    private Cache optContextCache() {
+        final CacheService service = services.getOptionalService(CacheService.class);
+        if (null == service) {
+            return null;
+        }
+        try {
+            return service.getCache(REGION_NAME_CONTEXT);
+        } catch (final OXException e) {
+            return null;
+        }
+    }
+
+    private Cache optUserCache() {
+        final CacheService service = services.getOptionalService(CacheService.class);
+        if (null == service) {
+            return null;
+        }
+        try {
+            return service.getCache(REGION_NAME_USER);
+        } catch (final OXException e) {
+            return null;
+        }
     }
 
     /**
@@ -159,12 +189,11 @@ public class CapabilityServiceImpl implements CapabilityService {
             }
         }
         // Now the ones from database
-        final DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
-        if (null != databaseService) {
+        {
             final Set<String> set = new HashSet<String>();
             final Set<String> removees = new HashSet<String>();
             // Context-sensitive
-            for (final String sCap : getContextCaps(session.getContextId(), databaseService)) {
+            for (final String sCap : getContextCaps(session.getContextId())) {
                 final char firstChar = sCap.charAt(0);
                 if ('-' == firstChar) {
                     final String val = toLowerCase(sCap.substring(1));
@@ -179,7 +208,7 @@ public class CapabilityServiceImpl implements CapabilityService {
                 }
             }
             // User-sensitive
-            for (final String sCap : getUserCaps(session.getUserId(), session.getContextId(), databaseService)) {
+            for (final String sCap : getUserCaps(session.getUserId(), session.getContextId())) {
                 final char firstChar = sCap.charAt(0);
                 if ('-' == firstChar) {
                     final String val = toLowerCase(sCap.substring(1));
@@ -205,7 +234,28 @@ public class CapabilityServiceImpl implements CapabilityService {
         return capabilities;
     }
 
-    private Set<String> getContextCaps(final int contextId, final DatabaseService databaseService) throws OXException {
+    private Set<String> getContextCaps(final int contextId) throws OXException {
+        final Cache cache = optContextCache();
+        if (null == cache) {
+            return loadContextCaps(contextId);
+        }
+        final Object object = cache.get(Integer.valueOf(contextId));
+        if (object instanceof Set) {
+            @SuppressWarnings("unchecked")
+            final Set<String> caps = (Set<String>) object;
+            return caps;
+        }
+        // Load from database
+        final Set<String> caps = loadContextCaps(contextId);
+        cache.put(Integer.valueOf(contextId), new HashSet<String>(caps), false);
+        return caps;
+    }
+
+    private Set<String> loadContextCaps(final int contextId) throws OXException {
+        final DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
+        if (null == databaseService) {
+            return Collections.emptySet();
+        }
         final Connection con = databaseService.getReadOnly(contextId);
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -229,7 +279,28 @@ public class CapabilityServiceImpl implements CapabilityService {
         }
     }
 
-    private Set<String> getUserCaps(final int userId, final int contextId, final DatabaseService databaseService) throws OXException {
+    private Set<String> getUserCaps(final int userId, final int contextId) throws OXException {
+        final Cache cache = optContextCache();
+        if (null == cache) {
+            return loadUserCaps(userId, contextId);
+        }
+        final Object object = cache.getFromGroup(Integer.valueOf(userId), Integer.toString(contextId));
+        if (object instanceof Set) {
+            @SuppressWarnings("unchecked")
+            final Set<String> caps = (Set<String>) object;
+            return caps;
+        }
+        // Load from database
+        final Set<String> caps = loadUserCaps(userId, contextId);
+        cache.putInGroup(Integer.valueOf(userId), Integer.toString(contextId), new HashSet<String>(caps), false);
+        return caps;
+    }
+
+    private Set<String> loadUserCaps(final int userId, final int contextId) throws OXException {
+        final DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
+        if (null == databaseService) {
+            return Collections.emptySet();
+        }
         final Connection con = databaseService.getReadOnly(contextId);
         PreparedStatement stmt = null;
         ResultSet rs = null;

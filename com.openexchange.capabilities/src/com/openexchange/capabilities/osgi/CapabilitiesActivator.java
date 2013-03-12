@@ -49,12 +49,14 @@
 
 package com.openexchange.capabilities.osgi;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
@@ -82,7 +84,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DatabaseService.class, TimerService.class };
+        return new Class<?>[] { ConfigurationService.class, DatabaseService.class, TimerService.class, CacheService.class };
     }
 
     @Override
@@ -133,12 +135,57 @@ public class CapabilitiesActivator extends HousekeepingActivator {
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CapabilityCreateTableTask()));
         registerService(DeleteListener.class, new CapabilityDeleteListener());
 
+        /*
+         * Define cache regions
+         */
+        {
+            final String regionName = "CapabilitiesContext";
+            final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
+                    "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                    "jcs.region."+regionName+".cacheattributes.MaxObjects=10000\n" +
+                    "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                    "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                    "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=300\n" +
+                    "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" +
+                    "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                    "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                    "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
+                    "jcs.region."+regionName+".elementattributes.IdleTime=300\n" +
+                    "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                    "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                    "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+            getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
+        }
+        {
+            final String regionName = "CapabilitiesUser";
+            final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
+                    "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                    "jcs.region."+regionName+".cacheattributes.MaxObjects=1000000\n" +
+                    "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                    "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                    "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds=300\n" +
+                    "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds=60\n" +
+                    "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                    "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                    "jcs.region."+regionName+".elementattributes.MaxLifeSeconds=-1\n" +
+                    "jcs.region."+regionName+".elementattributes.IdleTime=300\n" +
+                    "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                    "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                    "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+            getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
+        }
+
         openTrackers();
     }
 
     @Override
     protected void stopBundle() throws Exception {
         SERVICES.set(null);
+        final CacheService cacheService = getService(CacheService.class);
+        if (null != cacheService) {
+            cacheService.freeCache("CapabilitiesContext");
+            cacheService.freeCache("CapabilitiesUser");
+        }
         final CapabilityServiceImpl capService = this.capService;
         if (null != capService) {
             capService.shutDown();
