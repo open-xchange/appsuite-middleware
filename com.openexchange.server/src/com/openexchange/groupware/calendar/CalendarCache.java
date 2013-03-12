@@ -51,10 +51,10 @@ package com.openexchange.groupware.calendar;
 
 import java.io.Serializable;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 
@@ -98,7 +98,7 @@ public final class CalendarCache {
     }
 
     public void add(final Object key, final String groupKey, final Object o) throws OXException {
-        jcs.putInGroup((Serializable) key, groupKey, (Serializable) o);
+        jcs.putInGroup((Serializable) key, groupKey, (Serializable) o, false);
     }
 
     public Object get(final Object key, final String groupKey) {
