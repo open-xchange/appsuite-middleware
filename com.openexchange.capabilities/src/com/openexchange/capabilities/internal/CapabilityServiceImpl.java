@@ -263,16 +263,28 @@ public class CapabilityServiceImpl implements CapabilityService {
         return true;
     }
 
+    /**
+     * Gets all currently known capabilities.
+     *
+     * @return All capabilities
+     * @throws OXException If operation fails
+     */
     public Set<Capability> getAllKnownCapabilities() throws OXException {
         return new HashSet<Capability>(capabilities.values());
     }
 
+    /**
+     * Gets the singleton capability for given identifier
+     *
+     * @param id The identifier
+     * @return The singleton capability
+     */
     public Capability getCapability(String id) {
         Capability capability = capabilities.get(id);
         if (capability != null) {
             return capability;
         }
-        Capability existingCapability = capabilities.putIfAbsent(id, capability = new Capability(id, false));
+        final Capability existingCapability = capabilities.putIfAbsent(id, capability = new Capability(id, false));
         return existingCapability == null ? capability : existingCapability;
     }
 
@@ -281,6 +293,11 @@ public class CapabilityServiceImpl implements CapabilityService {
         declaredCapabilities.put(capability, PRESENT);
     }
 
+    /**
+     * Gets the available capability checkers.
+     *
+     * @return The checkers
+     */
     public List<CapabilityChecker> getCheckers() {
         return Collections.emptyList();
     }
