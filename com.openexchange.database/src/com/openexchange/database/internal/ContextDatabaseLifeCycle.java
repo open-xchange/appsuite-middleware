@@ -49,8 +49,8 @@
 
 package com.openexchange.database.internal;
 
+import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.sql.Connection;

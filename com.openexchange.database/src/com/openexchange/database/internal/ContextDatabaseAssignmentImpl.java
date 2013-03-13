@@ -49,8 +49,8 @@
 
 package com.openexchange.database.internal;
 
+import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -151,7 +151,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         return retval;
     }
 
-    private void writeAssignmentDB(Connection con, Assignment assign) throws OXException {
+    private static void writeAssignmentDB(Connection con, Assignment assign) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(INSERT);

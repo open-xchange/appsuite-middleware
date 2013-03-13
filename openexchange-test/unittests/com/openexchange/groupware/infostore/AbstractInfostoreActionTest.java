@@ -19,8 +19,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tx.AbstractActionTest;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.setuptools.TestConfig;
+import com.openexchange.setuptools.TestContextToolkit;
 import com.openexchange.tools.sql.DBUtils;
 
 public abstract class AbstractInfostoreActionTest extends AbstractActionTest {

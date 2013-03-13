@@ -49,10 +49,10 @@
 
 package com.openexchange.database.internal;
 
+import static com.openexchange.database.internal.DBUtils.autocommit;
+import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
+import static com.openexchange.database.internal.DBUtils.rollback;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

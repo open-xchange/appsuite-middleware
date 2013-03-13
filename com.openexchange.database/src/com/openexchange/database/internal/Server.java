@@ -49,7 +49,7 @@
 
 package com.openexchange.database.internal;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -104,19 +104,19 @@ public final class Server {
     }
 
     public static final void start(final ConfigurationService service) throws OXException {
-        final String serverName = service.getProperty(PROPERTY_NAME);
-        if (null == serverName || serverName.length() == 0) {
+        final String tmp = service.getProperty(PROPERTY_NAME);
+        if (null == tmp || tmp.length() == 0) {
             throw DBPoolingExceptionCodes.NO_SERVER_NAME.create();
         }
-        Server.serverName = serverName;
+        serverName = tmp;
     }
 
     public static String getServerName() throws OXException {
-        final String serverName = Server.serverName;
-        if (null == serverName) {
+        final String tmp = Server.serverName;
+        if (null == tmp) {
             throw DBPoolingExceptionCodes.NOT_INITIALIZED.create(Server.class.getName());
         }
-        return serverName;
+        return tmp;
     }
 
     private static int loadServerId(final String name) throws OXException {
@@ -124,9 +124,9 @@ public final class Server {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
-        final ConfigDatabaseService configDatabaseService = Server.configDatabaseService;
+        final ConfigDatabaseService myService = Server.configDatabaseService;
         try {
-            con = configDatabaseService.getReadOnly();
+            con = myService.getReadOnly();
             stmt = con.prepareStatement(SELECT);
             stmt.setString(1, name);
             result = stmt.executeQuery();
@@ -138,7 +138,7 @@ public final class Server {
         } finally {
             closeSQLStuff(result, stmt);
             if (null != con) {
-                configDatabaseService.backReadOnly(con);
+                myService.backReadOnly(con);
             }
         }
         return retval;
