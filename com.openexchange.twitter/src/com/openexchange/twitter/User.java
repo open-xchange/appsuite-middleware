@@ -49,7 +49,6 @@
 
 package com.openexchange.twitter;
 
-import java.net.URL;
 import java.util.Date;
 
 /**
@@ -99,14 +98,14 @@ public interface User {
      *
      * @return The profile image URL of the user
      */
-    URL getProfileImageURL();
+    String getProfileImageURL();
 
     /**
      * Returns the URL of the user
      *
      * @return The URL of the user
      */
-    URL getURL();
+    String getURL();
 
     /**
      * Test if the user status is protected

@@ -80,11 +80,11 @@ public final class RetweetDetailsImpl implements RetweetDetails {
     }
 
     public int getRateLimitLimit() {
-        return retweetStatus.getRateLimitStatus().getHourlyLimit();
+        return retweetStatus.getRateLimitStatus().getLimit();
     }
 
     public int getRateLimitRemaining() {
-        return retweetStatus.getRateLimitStatus().getRemainingHits();
+        return retweetStatus.getRateLimitStatus().getRemaining();
     }
 
     public long getRateLimitReset() {

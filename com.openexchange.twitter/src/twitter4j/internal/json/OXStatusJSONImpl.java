@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,59 @@
  *
  */
 
-package twitter4j;
+package twitter4j.internal.json;
 
-import twitter4j.auth.Authorization;
+import twitter4j.TwitterException;
 import twitter4j.conf.Configuration;
 import twitter4j.internal.http.HttpResponse;
-import twitter4j.internal.json.OXStatusJSONImpl;
+import twitter4j.internal.org.json.JSONObject;
 
 /**
- * {@link OXTwitterImpl}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link OXStatusJSONImpl} - A data class representing one single status of a user.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OXTwitterImpl extends twitter4j.TwitterImpl implements OXTwitter {
+public class OXStatusJSONImpl extends StatusJSONImpl {
 
-    private static final long serialVersionUID = -5828299325374714007L;
+    private static final long serialVersionUID = 7548618898682727456L;
 
     /**
-     * Initializes a new {@link OXTwitterImpl}.
-     *
-     * @param conf
-     * @param auth
+     * Initializes a new {@link OXStatusJSONImpl}.
      */
-    public OXTwitterImpl(final Configuration conf, final Authorization auth) {
-        super(conf, auth);
+    public OXStatusJSONImpl() {
+        super();
     }
 
-    @Override
-    public Status showStatusAuthenticated(final long id) throws TwitterException {
-        return new OXStatusJSONImpl(get(conf.getRestBaseURL() + "statuses/show/" + id + ".json?include_entities=" + conf.isIncludeEntitiesEnabled()), conf);
-        //return new Status(get(conf.getRestBaseURL() + "statuses/show/" + id + ".xml", null, true), this);
+    /**
+     * Initializes a new {@link OXStatusJSONImpl}.
+     * 
+     * @param json The JSON object
+     * @throws TwitterException If an error occurs
+     */
+    public OXStatusJSONImpl(JSONObject json) throws TwitterException {
+        super(json);
     }
 
-    private HttpResponse get(final String url) throws TwitterException {
-        if (!conf.isMBeanEnabled()) {
-            return http.get(url, auth);
-        }
-        // intercept HTTP call for monitoring purposes
-        HttpResponse response = null;
-        final long start = System.currentTimeMillis();
-        try {
-            response = http.get(url, auth);
-        } finally {
-            final long elapsedTime = System.currentTimeMillis() - start;
-            TwitterAPIMonitor.getInstance().methodCalled(url, elapsedTime, isOk(response));
-        }
-        return response;
+    /**
+     * Initializes a new {@link OXStatusJSONImpl}.
+     * 
+     * @param res The HTTP response
+     * @param conf The configuration
+     * @throws TwitterException If an error occurs
+     */
+    public OXStatusJSONImpl(HttpResponse res, Configuration conf) throws TwitterException {
+        super(res, conf);
     }
 
-    private boolean isOk(final HttpResponse response) {
-        return response != null && response.getStatusCode() < 300;
+    /**
+     * Initializes a new {@link OXStatusJSONImpl}.
+     * 
+     * @param json The JSON object
+     * @param conf The configuration
+     * @throws TwitterException If an error occurs
+     */
+    public OXStatusJSONImpl(JSONObject json, Configuration conf) throws TwitterException {
+        super(json, conf);
     }
 
 }

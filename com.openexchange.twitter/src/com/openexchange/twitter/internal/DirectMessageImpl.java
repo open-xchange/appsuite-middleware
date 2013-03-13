@@ -87,11 +87,11 @@ public final class DirectMessageImpl implements DirectMessage {
     }
 
     public int getRateLimitLimit() {
-        return twitter4jDirectMessage.getRateLimitStatus().getHourlyLimit();
+        return twitter4jDirectMessage.getRateLimitStatus().getLimit();
     }
 
     public int getRateLimitRemaining() {
-        return twitter4jDirectMessage.getRateLimitStatus().getRemainingHits();
+        return twitter4jDirectMessage.getRateLimitStatus().getRemaining();
     }
 
     public long getRateLimitReset() {

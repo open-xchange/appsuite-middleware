@@ -120,7 +120,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
     @Override
     public List<Status> getFriendsTimeline() throws OXException {
         try {
-            final List<twitter4j.Status> l = twitter4jTwitter.getFriendsTimeline();
+            final List<twitter4j.Status> l = twitter4jTwitter.getFavorites();
 
             final List<Status> ret = new ArrayList<Status>(l.size());
             for (final twitter4j.Status status : l) {
@@ -135,7 +135,7 @@ public final class TwitterAccessImpl implements TwitterAccess {
     @Override
     public List<Status> getFriendsTimeline(final Paging paging) throws OXException {
         try {
-            final List<twitter4j.Status> l = twitter4jTwitter.getFriendsTimeline(pagingFrom(paging));
+            final List<twitter4j.Status> l = twitter4jTwitter.getFavorites(pagingFrom(paging));
 
             final List<Status> ret = new ArrayList<Status>(l.size());
             for (final twitter4j.Status status : l) {

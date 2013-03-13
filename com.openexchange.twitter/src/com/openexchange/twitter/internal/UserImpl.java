@@ -49,7 +49,6 @@
 
 package com.openexchange.twitter.internal;
 
-import java.net.URL;
 import java.util.Date;
 import twitter4j.User;
 
@@ -123,7 +122,7 @@ public final class UserImpl implements com.openexchange.twitter.User {
     }
 
     @Override
-    public URL getProfileImageURL() {
+    public String getProfileImageURL() {
         return twitter4jUser.getProfileImageURL();
     }
 
@@ -148,11 +147,11 @@ public final class UserImpl implements com.openexchange.twitter.User {
     }
 
     public int getRateLimitLimit() {
-        return twitter4jUser.getRateLimitStatus().getHourlyLimit();
+        return twitter4jUser.getRateLimitStatus().getLimit();
     }
 
     public int getRateLimitRemaining() {
-        return twitter4jUser.getRateLimitStatus().getRemainingHits();
+        return twitter4jUser.getRateLimitStatus().getRemaining();
     }
 
     public long getRateLimitReset() {
@@ -203,7 +202,7 @@ public final class UserImpl implements com.openexchange.twitter.User {
     }
 
     @Override
-    public URL getURL() {
+    public String getURL() {
         return twitter4jUser.getURL();
     }
 
