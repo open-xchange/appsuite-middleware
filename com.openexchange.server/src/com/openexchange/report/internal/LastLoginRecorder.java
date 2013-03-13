@@ -100,21 +100,30 @@ public class LastLoginRecorder implements LoginHandlerService {
     public void handleLogin(final LoginResult login) throws OXException {
         final LoginRequest request = login.getRequest();
         // Determine key
-        String key;
+        final String client;
         if (null != request.getClient()) {
-            key = request.getClient();
+            client = request.getClient();
         } else if (null != request.getInterface()) {
-            key = request.getInterface().toString();
+            client = request.getInterface().toString();
         } else {
             return;
         }
+        // Update
+        updateLastLogin(client, login.getUser(), login.getContext());
+    }
+
+    /**
+     * Updates the last login.
+     *
+     * @param client The client identifier
+     * @param user The user
+     * @param ctx The context
+     * @throws OXException If operation fails
+     */
+    public static void updateLastLogin(final String client, final User user, final Context ctx) throws OXException {
         // Set attribute
-        key = "client:" + key;
-        final Context ctx = login.getContext();
-        if (ctx.isReadOnly()) {
-            return;
-        }
-        final User origUser = login.getUser();
+        String key = "client:" + client;
+        final User origUser = user;
         // Retrieve existing ones
         final Map<String, Set<String>> attributes;
         {
@@ -137,13 +146,8 @@ public class LastLoginRecorder implements LoginHandlerService {
         final UserImpl newUser = new UserImpl();
         newUser.setId(origUser.getId());
         newUser.setAttributes(attributes);
-        UserService service;
-        try {
-            service = ServerServiceRegistry.getInstance().getService(UserService.class, true);
-            service.updateUser(newUser, ctx);
-        } catch (final OXException e) {
-            throw e;
-        }
+        UserService service = ServerServiceRegistry.getInstance().getService(UserService.class, true);
+        service.updateUser(newUser, ctx);
     }
 
     @Override

@@ -103,6 +103,11 @@ public final class SessiondEventConstants {
     public static final String TOPIC_STORED_SESSION = "com/openexchange/sessiond/stored/session";
 
     /**
+     * The topic on single session has been restored from session storage.
+     */
+    public static final String TOPIC_RESTORED_SESSION = "com/openexchange/sessiond/restored/session";
+
+    /**
      * The topic on a session being 'touched', i.e. being put into the first session container.
      */
     public static final String TOPIC_TOUCH_SESSION = "com/openexchange/sessiond/touch/session";
@@ -113,7 +118,7 @@ public final class SessiondEventConstants {
      * Needed on event handler registration to a bundle context.
      */
     private static final String[] TOPICS = { TOPIC_LAST_SESSION, TOPIC_REMOVE_SESSION, TOPIC_REMOVE_CONTAINER, TOPIC_REMOVE_DATA, 
-        TOPIC_ADD_SESSION, TOPIC_REACTIVATE_SESSION, TOPIC_STORED_SESSION, TOPIC_TOUCH_SESSION };
+        TOPIC_ADD_SESSION, TOPIC_REACTIVATE_SESSION, TOPIC_STORED_SESSION, TOPIC_RESTORED_SESSION, TOPIC_TOUCH_SESSION };
 
     /**
      * Gets an array of {@link String string} including all known topics.

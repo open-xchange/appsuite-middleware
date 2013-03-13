@@ -74,7 +74,7 @@ import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.imapidle.services.ImapIdleServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessionMatcher;
+import com.openexchange.sessiond.AbstractSessionMatcher;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -294,7 +294,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         if (null == session) {
             final SessiondService service = ImapIdleServiceRegistry.getServiceRegistry().getService(SessiondService.class);
             if (invalidSessionIds.isEmpty()) {
-                session = service.findFirstMatchingSessionForUser(userId, contextId, new SessionMatcher() {
+                session = service.findFirstMatchingSessionForUser(userId, contextId, new AbstractSessionMatcher() {
 
                     @Override
                     public boolean accepts(final Session tmp) {
@@ -422,7 +422,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                      * Bind ImapIdlePushListener to another session
                      */
                     final SessiondService sessiondService = ImapIdleServiceRegistry.getServiceRegistry().getService(SessiondService.class);
-                    final Session session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new SessionMatcher() {
+                    final Session session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new AbstractSessionMatcher() {
 
                         @Override
                         public boolean accepts(final Session tmp) {

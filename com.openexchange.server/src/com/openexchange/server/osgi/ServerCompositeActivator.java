@@ -55,6 +55,7 @@ import com.openexchange.ajax.requesthandler.osgi.PrefixServiceActivator;
 import com.openexchange.image.osgi.ImageActivator;
 import com.openexchange.json.cache.impl.osgi.JsonCacheActivator;
 import com.openexchange.osgi.CompositeBundleActivator;
+import com.openexchange.report.osgi.ReportActivator;
 
 /**
  * {@link ServerCompositeActivator} combines several activators in the server bundle that have been prepared to split up the server bundle into several
@@ -103,6 +104,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new FolderUpdaterRegistryDependencyActivator(),
         new ImageActivator(), 
         new PreviewCacheActivator(),
+        new ReportActivator(),
     };
 
     public ServerCompositeActivator() {

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,51 +49,26 @@
 
 package com.openexchange.sessiond;
 
-import java.util.Collections;
-import java.util.EnumSet;
 import java.util.Set;
-import com.openexchange.session.Session;
 
 
 /**
- * {@link SessionMatcher} - Checks a certain session.
+ * {@link AbstractSessionMatcher} - The abstract session matcher.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SessionMatcher {
+public abstract class AbstractSessionMatcher implements SessionMatcher {
 
     /**
-     * The constant set indicating no flags.
+     * Initializes a new {@link AbstractSessionMatcher}.
      */
-    public static final Set<Flag> NO_FLAGS = Collections.unmodifiableSet(EnumSet.noneOf(Flag.class));
-
-    /**
-     * Flag enumeration for session matcher.
-     */
-    public static enum Flag {
-        /**
-         * Whether to ignore sessions kept in long-term container.
-         */
-        IGNORE_LONG_TERM,
-        /**
-         * Whether to ignore sessions kept in distributed session storage.
-         */
-        IGNORE_SESSION_STORAGE,
+    protected AbstractSessionMatcher() {
+        super();
     }
 
-    /**
-     * Gets the matcher's behavioral flags.
-     *
-     * @return The flags or <code>null</code> for no flags at all
-     * @see #NO_FLAGS
-     */
-    Set<Flag> flags();
+    @Override
+    public Set<Flag> flags() {
+        return NO_FLAGS;
+    }
 
-    /**
-     * Checks whether passed session is accepted; meaning it fulfills matcher's condition.
-     *
-     * @param session The session to check
-     * @return <code>true</code> if accepted; otherwise <code>false</code> if not
-     */
-    boolean accepts(Session session);
 }

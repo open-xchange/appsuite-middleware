@@ -369,14 +369,14 @@ public final class SessionHandler {
         return retval;
     }
 
-    public static Session findFirstSessionForUser(final int userId, final int contextId, final SessionMatcher matcher) {
+    public static Session findFirstSessionForUser(final int userId, final int contextId, final SessionMatcher matcher, final boolean ignoreLongTerm, final boolean ignoreStorage) {
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return null;
         }
-        Session retval = sessionData.findFirstSessionForUser(userId, contextId, matcher);
-        if (null == retval) {
+        Session retval = sessionData.findFirstSessionForUser(userId, contextId, matcher, ignoreLongTerm);
+        if (null == retval && !ignoreStorage) {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (null != storageService) {
                 try {
@@ -452,7 +452,6 @@ public final class SessionHandler {
      * @param session The session to store
      * @param sessionStorageService The storage service
      * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly replacing put
-     * @param async Whether to perform task asynchronously or not
      */
     public static void storeSessionSync(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
         storeSession(session, sessionStorageService, addIfAbsent, false, null);
@@ -805,7 +804,6 @@ public final class SessionHandler {
         }
         // Post event for created session
         postSessionCreation(addedSession);
-
         return activatedSession;
     }
 
@@ -832,7 +830,14 @@ public final class SessionHandler {
                     final Session storedSession = getSessionFrom(sessionId, storageService);
                     if (null != storedSession) {
                         final SessionControl sc = sessionData.addSession(new SessionImpl(storedSession), noLimit, true);
-                        return null == sc ? sessionToSessionControl(storedSession) : sc;
+                        if (null != sc) {
+                            // Another thread already put in the meantime
+                            return sc;
+                        }
+                        // Put successfully without conflicts
+                        final SessionControl control = sessionToSessionControl(storedSession);
+                        postSessionRestored(control.getSession());
+                        return control;
                     }
                 } catch (final OXException e) {
                     if (!SessionStorageExceptionCodes.NO_SESSION_FOUND.equals(e)) {
@@ -1048,7 +1053,36 @@ public final class SessionHandler {
             final Event event = new Event(SessiondEventConstants.TOPIC_STORED_SESSION, dic);
             eventAdmin.postEvent(event);
             if (DEBUG) {
-                LOG.debug("Posted event for added session");
+                LOG.debug("Posted event for stored session into session storage");
+            }
+        }
+    }
+
+    /**
+     * Post event that a single session has been restored from {@link SessionStorageService session storage}.
+     *
+     * @param session The stored session
+     */
+    protected static void postSessionRestored(final Session session) {
+        postSessionRestored(session, null);
+    }
+
+    /**
+     * Post event that a single session has been restored from {@link SessionStorageService session storage}.
+     *
+     * @param session The stored session
+     */
+    protected static void postSessionRestored(final Session session, final EventAdmin optEventAdmin) {
+        final EventAdmin eventAdmin = optEventAdmin == null ? getServiceRegistry().getService(EventAdmin.class) : optEventAdmin;
+        if (eventAdmin != null) {
+            // Post appropriate event
+            final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
+            dic.put(SessiondEventConstants.PROP_SESSION, session);
+            dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
+            final Event event = new Event(SessiondEventConstants.TOPIC_RESTORED_SESSION, dic);
+            eventAdmin.postEvent(event);
+            if (DEBUG) {
+                LOG.debug("Posted event for restored session from session storage");
             }
         }
     }
@@ -1056,6 +1090,7 @@ public final class SessionHandler {
     private static void postSessionCreation(final Session session) {
         final EventAdmin eventAdmin = getServiceRegistry().getService(EventAdmin.class);
         if (eventAdmin != null) {
+            // Post appropriate event            
             final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             dic.put(SessiondEventConstants.PROP_SESSION, session);
             dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
