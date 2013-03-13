@@ -49,51 +49,14 @@
 
 package com.openexchange.sessiond;
 
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Set;
 import com.openexchange.session.Session;
 
 
 /**
- * {@link SessionMatcher} - Checks a certain session.
+ * {@link SessionMatcher}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface SessionMatcher {
-
-    /**
-     * The constant set indicating no flags.
-     */
-    public static final Set<Flag> NO_FLAGS = Collections.unmodifiableSet(EnumSet.noneOf(Flag.class));
-
-    /**
-     * Flag enumeration for session matcher.
-     */
-    public static enum Flag {
-        /**
-         * Whether to ignore sessions kept in long-term container.
-         */
-        IGNORE_LONG_TERM,
-        /**
-         * Whether to ignore sessions kept in distributed session storage.
-         */
-        IGNORE_SESSION_STORAGE,
-    }
-
-    /**
-     * Gets the matcher's behavioral flags.
-     *
-     * @return The flags or <code>null</code> for no flags at all
-     * @see #NO_FLAGS
-     */
-    Set<Flag> flags();
-
-    /**
-     * Checks whether passed session is accepted; meaning it fulfills matcher's condition.
-     *
-     * @param session The session to check
-     * @return <code>true</code> if accepted; otherwise <code>false</code> if not
-     */
-    boolean accepts(Session session);
+    public boolean accepts(Session session);
 }

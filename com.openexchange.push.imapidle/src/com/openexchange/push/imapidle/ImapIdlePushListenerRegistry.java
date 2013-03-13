@@ -57,13 +57,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
-import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.imapidle.services.ImapIdleServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.AbstractSessionMatcher;
+import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.Collections;
 
@@ -225,7 +225,7 @@ public final class ImapIdlePushListenerRegistry {
     public boolean removePushListener(final int contextId, final int userId) throws OXException {
         final SessiondService sessiondService = ImapIdleServiceRegistry.getServiceRegistry().getService(SessiondService.class);
         // Bind ImapIdlePushListener to another session because of password change issues.
-        final Session session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new AbstractSessionMatcher() {
+        final Session session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new SessionMatcher() {
 
             @Override
             public boolean accepts(final Session tmp) {

@@ -100,30 +100,21 @@ public class LastLoginRecorder implements LoginHandlerService {
     public void handleLogin(final LoginResult login) throws OXException {
         final LoginRequest request = login.getRequest();
         // Determine key
-        final String client;
+        String key;
         if (null != request.getClient()) {
-            client = request.getClient();
+            key = request.getClient();
         } else if (null != request.getInterface()) {
-            client = request.getInterface().toString();
+            key = request.getInterface().toString();
         } else {
             return;
         }
-        // Update
-        updateLastLogin(client, login.getUser(), login.getContext());
-    }
-
-    /**
-     * Updates the last login.
-     *
-     * @param client The client identifier
-     * @param user The user
-     * @param ctx The context
-     * @throws OXException If operation fails
-     */
-    public static void updateLastLogin(final String client, final User user, final Context ctx) throws OXException {
         // Set attribute
-        String key = "client:" + client;
-        final User origUser = user;
+        key = "client:" + key;
+        final Context ctx = login.getContext();
+        if (ctx.isReadOnly()) {
+            return;
+        }
+        final User origUser = login.getUser();
         // Retrieve existing ones
         final Map<String, Set<String>> attributes;
         {
@@ -146,8 +137,13 @@ public class LastLoginRecorder implements LoginHandlerService {
         final UserImpl newUser = new UserImpl();
         newUser.setId(origUser.getId());
         newUser.setAttributes(attributes);
-        UserService service = ServerServiceRegistry.getInstance().getService(UserService.class, true);
-        service.updateUser(newUser, ctx);
+        UserService service;
+        try {
+            service = ServerServiceRegistry.getInstance().getService(UserService.class, true);
+            service.updateUser(newUser, ctx);
+        } catch (final OXException e) {
+            throw e;
+        }
     }
 
     @Override
