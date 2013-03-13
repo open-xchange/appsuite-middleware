@@ -49,7 +49,7 @@
 
 package com.openexchange.database.internal;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
 import java.sql.Connection;
@@ -64,7 +64,6 @@ import com.openexchange.exception.OXException;
  * ConfigDBStorage
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
 public class ConfigDBStorage {
 

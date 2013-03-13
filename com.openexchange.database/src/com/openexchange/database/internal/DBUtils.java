@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.sql;
+package com.openexchange.database.internal;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -58,10 +58,10 @@ import com.openexchange.log.LogFactory;
 
 /**
  * Utilities for database resource handling.
- *
+ * TODO Use com.openexchange.tools.sql.DBUtils again, if it becomes available in a prominent place.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class DBUtils {
+final class DBUtils {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DBUtils.class));
 
@@ -69,7 +69,7 @@ public final class DBUtils {
         super();
     }
 
-    public static void closeSQLStuff(ResultSet result) {
+    static void closeSQLStuff(ResultSet result) {
         if (result != null) {
             try {
                 result.close();
@@ -79,7 +79,7 @@ public final class DBUtils {
         }
     }
 
-    public static void closeSQLStuff(Statement stmt) {
+    static void closeSQLStuff(Statement stmt) {
         if (null != stmt) {
             try {
                 stmt.close();
@@ -89,12 +89,12 @@ public final class DBUtils {
         }
     }
 
-    public static void closeSQLStuff(ResultSet result, Statement stmt) {
+    static void closeSQLStuff(ResultSet result, Statement stmt) {
         closeSQLStuff(result);
         closeSQLStuff(stmt);
     }
 
-    public static void rollback(Connection con) {
+    static void rollback(Connection con) {
         if (null == con) {
             return;
         }
@@ -107,7 +107,7 @@ public final class DBUtils {
         }
     }
 
-    public static void autocommit(Connection con) {
+    static void autocommit(Connection con) {
         if (null == con) {
             return;
         }
