@@ -328,4 +328,7 @@ public class POP3ExceptionMessage implements LocalizableStrings {
      */
     public final static String VALIDATE_DENIED_MSG = "Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work.";
 
+    // POP3 messages cannot be imported because of existing quota constraints on primary mail account. Please free some space.
+    public static final String QUOTA_CONSTRAINT_MSG = "POP3 messages cannot be imported because of existing quota constraints on primary mail account. Please free some space.";
+
 }

@@ -16,14 +16,15 @@ public class XMPPLoginRequest implements LoginRequest {
 
     private final String password;
 
-    public XMPPLoginRequest(String user, String password) {
+    private String host;
+
+    private int port;
+
+    public XMPPLoginRequest(String user, String password, String host, int port) {
         this.user = user;
         this.password = password;
-    }
-
-    @Override
-    public boolean isVolatile() {
-        return false;
+        this.host = host;
+        this.port = port;
     }
 
     @Override
@@ -79,6 +80,36 @@ public class XMPPLoginRequest implements LoginRequest {
     @Override
     public String getAuthId() {
         return UUIDs.getUnformattedString(UUID.randomUUID());
+    }
+
+    @Override
+    public String getClientToken() {
+        return null;
+    }
+
+    @Override
+    public boolean isSecure() {
+        return false;
+    }
+
+    @Override
+    public String getServerName() {
+        return host;
+    }
+
+    @Override
+    public int getServerPort() {
+        return port;
+    }
+
+    @Override
+    public String getHttpSessionID() {
+        return null;
+    }
+
+    @Override
+    public boolean isTransient() {
+        return false;
     }
 
 }

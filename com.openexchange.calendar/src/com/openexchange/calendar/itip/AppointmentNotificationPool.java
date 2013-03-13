@@ -433,7 +433,7 @@ public class AppointmentNotificationPool implements
             }
             List<NotificationParticipant> recipients = generator.getRecipients();
             for (NotificationParticipant participant : recipients) {
-                if (!(participant.isExternal() || participant.isResource())) {
+                if (!participant.isExternal()) {
                     if (isAlreadyInformed(participant, mostRecent, session.getContextId())) {
                         continue; // Skip this participant. He was already informed about the exact same Appointment.
                     }

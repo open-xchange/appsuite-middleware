@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Common
 Bundle-SymbolicName: com.openexchange.common
-Bundle-Version: 7.0.1
+Bundle-Version: 7.0.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: javax.activation
@@ -89,8 +89,8 @@ Bundle-ClassPath: .,
  lib/kxml2-2.3.0.jar,
  lib/libidn-1.9.jar,
  lib/mail-1.4.5.jar,
- lib/mysql-connector-java-5.1.22-bin.jar,
- lib/nekohtml-1.9.16.jar,
+ lib/mysql-connector-java-5.1.23-bin.jar,
+ lib/nekohtml-1.9.17.jar,
  lib/owasp-esapi-2.0.1.jar,
  lib/rabin-hash-function-2.0.jar,
  lib/tnef-1.8.0.jar,
@@ -100,7 +100,7 @@ Bundle-ClassPath: .,
  lib/scribe-java-1.3.3.jar,
  lib/concurrentlinkedhashmap-lru-1.3.2.jar
 Export-Package: com.googlecode.concurrentlinkedhashmap,
- com.mysql.jdbc;version="5.1.18",
+ com.mysql.jdbc;version="5.1.23",
  com.openexchange.httpclient.ssl,
  com.openexchange.l10n,
  com.openexchange.tools.ssl,

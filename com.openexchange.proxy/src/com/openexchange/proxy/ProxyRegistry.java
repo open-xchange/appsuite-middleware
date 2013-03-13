@@ -54,6 +54,8 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link ProxyRegistry} - The registry for proxy registrations.
+ * <p>
+ * Basically a mapping <i>session &lt;-&gt; registration*</i>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

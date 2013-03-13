@@ -100,7 +100,8 @@ public class FormLogin implements LoginRequestHandler {
             true,
             conf.getDefaultClient(),
             conf.isCookieForceHTTPS(),
-            conf.isDisableTrimLogin());
+            conf.isDisableTrimLogin(),
+            !conf.isFormLoginWithoutAuthId());
         Map<String, Object> properties = new HashMap<String, Object>(1);
         {
             String capabilities = req.getParameter("capabilities");

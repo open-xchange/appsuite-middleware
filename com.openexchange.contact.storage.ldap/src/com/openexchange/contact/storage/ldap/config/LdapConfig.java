@@ -285,6 +285,7 @@ public class LdapConfig {
             .append('\t').append("Page results size: ").append(pagesize).append('\n')
             .append('\t').append("Result sorting: ").append(sorting).append('\n')
             .append('\t').append("ADS deletion support: ").append(adsDeletionSupport).append('\n')
+            .append('\t').append("Exclude empty distribution lists: ").append(excludeEmptyLists).append('\n')
         ;
         return stringBuilder.toString();
     }

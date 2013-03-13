@@ -119,8 +119,12 @@ TOKEN : /* LITERALS */
 // note that newlines and other characters are all allowed strings
   < QUOTED_STRING:
       "\""
-      (~["\""]|"\\\"")*
+      (~["\"","\\"]|<ESCAPED_CHAR>)*
       "\""
+  >
+|
+  <#ESCAPED_CHAR:
+      ("\\" ("\\"|"\""))
   >
 |
 // multi-line = "text:" *(SP / HTAB) (hash-comment / CRLF)

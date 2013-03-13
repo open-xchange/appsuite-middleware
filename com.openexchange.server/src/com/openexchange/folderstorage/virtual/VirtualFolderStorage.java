@@ -197,7 +197,7 @@ public final class VirtualFolderStorage implements FolderStorage {
                  * Default calendar folder
                  */
                 FolderStorage realStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(realTreeId, CalendarContentType.getInstance());
-                checkOpenedStorage(realStorage, params, true, openedStorages);
+                checkOpenedStorage(realStorage, params, false, openedStorages);
                 String folderID = realStorage.getDefaultFolderID(params.getUser(), realTreeId, CalendarContentType.getInstance(), PrivateType.getInstance(), params);
                 final MemoryTree tree = MemoryTable.getMemoryTableFor(params.getSession()).getTree(unsignedInt(treeId), params.getSession());
                 if (!tree.containsFolder(folderID)) {
@@ -211,7 +211,7 @@ public final class VirtualFolderStorage implements FolderStorage {
                  * Default contact folder
                  */
                 realStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(realTreeId, ContactContentType.getInstance());
-                checkOpenedStorage(realStorage, params, true, openedStorages);
+                checkOpenedStorage(realStorage, params, false, openedStorages);
                 folderID = realStorage.getDefaultFolderID(params.getUser(), realTreeId, ContactContentType.getInstance(), PrivateType.getInstance(), params);
                 if (!tree.containsFolder(folderID)) {
                     final Folder folder = realStorage.getFolder(realTreeId, folderID, params);
@@ -224,7 +224,7 @@ public final class VirtualFolderStorage implements FolderStorage {
                  * Default task folder
                  */
                 realStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(realTreeId, TaskContentType.getInstance());
-                checkOpenedStorage(realStorage, params, true, openedStorages);
+                checkOpenedStorage(realStorage, params, false, openedStorages);
                 folderID = realStorage.getDefaultFolderID(params.getUser(), realTreeId, TaskContentType.getInstance(), PrivateType.getInstance(), params);
                 if (!tree.containsFolder(folderID)) {
                     final Folder folder = realStorage.getFolder(realTreeId, folderID, params);
@@ -237,7 +237,7 @@ public final class VirtualFolderStorage implements FolderStorage {
                  * Default mail folder(s)
                  */
                 realStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(realTreeId, MailContentType.getInstance());
-                checkOpenedStorage(realStorage, params, true, openedStorages);
+                checkOpenedStorage(realStorage, params, false, openedStorages);
                 folderID = realStorage.getDefaultFolderID(params.getUser(), realTreeId, MailContentType.getInstance(), PrivateType.getInstance(), params);
                 // INBOX
                 if (!tree.containsFolder(folderID)) {

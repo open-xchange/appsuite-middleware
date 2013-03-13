@@ -3,7 +3,7 @@ Name:           open-xchange-meta
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
 Version:	@OXVERSION@
-%define		ox_release 5
+%define		ox_release 6
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -144,7 +144,7 @@ Summary:	The Open-Xchange Meta package for OX into Parallels integration
 Requires:	open-xchange-meta-backend
 Requires:	open-xchange-meta-gui
 Requires:	%{all_lang_backend}
-Requires:	open-xchange-parallels, open-xchange-custom-parallels-gui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging
+Requires:	open-xchange-parallels, open-xchange-custom-parallels-gui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-manage-group-resource
 Conflicts:	open-xchange-admin-plugin-autocontextid, open-xchange-admin-plugin-reseller
 
 
@@ -333,12 +333,30 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Tue Mar 12 2013 Carsten Hoeger <choeger@open-xchange.com>
+Sixth release candidate for 6.22.2/7.0.2
+* Mon Mar 11 2013 Carsten Hoeger <choeger@open-xchange.com>
+Fifth release candidate for 6.22.2/7.0.2
+* Fri Mar 08 2013 Carsten Hoeger <choeger@open-xchange.com>
+Fourth release candidate for 6.22.2/7.0.2
+* Fri Mar 08 2013 Carsten Hoeger <choeger@open-xchange.com>
+Third release candidate for 6.22.2/7.0.2
+* Thu Mar 07 2013 Carsten Hoeger <choeger@open-xchange.com>
+Second release candidate for 6.22.2/7.0.2
 * Mon Mar 04 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-03-07
+* Fri Mar 01 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-03-07
+* Wed Feb 27 2013 Carsten Hoeger <choeger@open-xchange.com>
+First release candidate for 6.22.2/7.0.2
+* Mon Feb 25 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-02-22
 * Tue Feb 19 2013 Carsten Hoeger <choeger@open-xchange.com>
 Fourth release candidate for 7.0.1
 * Tue Feb 19 2013 Carsten Hoeger <choeger@open-xchange.com>
 Third release candidate for 7.0.1
+* Tue Feb 19 2013 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 7.0.2 release
 * Fri Feb 15 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-02-13
 * Thu Feb 14 2013 Carsten Hoeger <choeger@open-xchange.com>

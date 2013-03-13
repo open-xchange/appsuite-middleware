@@ -65,7 +65,7 @@ ox_set_JAVA_BIN
 test -z "$LIBPATH" && LIBPATH=${PREFIX}/lib
 
 BNAME=$(basename $0)
-CMDARR=( $(echo $BNAME | sed -e 's/\(create\|delete\|changeaccessglobal\|getaccesscombinationnameforuser\|list\|change\)\(.*\)/\1 \2/') )
+CMDARR=( $(echo $BNAME | sed -e 's/\(create\|delete\|exists\|changeaccessglobal\|getaccesscombinationnameforuser\|list\|change\)\(.*\)/\1 \2/') )
 MODULE=${CMDARR[1]}
 
 case "${CMDARR[0]}" in

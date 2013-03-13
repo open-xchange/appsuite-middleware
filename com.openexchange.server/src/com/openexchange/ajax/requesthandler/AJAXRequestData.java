@@ -538,7 +538,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the value mapped to given parameter name.
-     * 
+     *
      * @param name The parameter name
      * @return The value mapped to given parameter name
      * @throws NullPointerException If name is <code>null</code>
@@ -550,7 +550,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the value mapped to given parameter name.
-     * 
+     *
      * @param name The parameter name
      * @return The value mapped to given parameter name
      * @throws NullPointerException If name is <code>null</code>

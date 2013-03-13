@@ -219,6 +219,17 @@ public abstract class UserConfigurationStorage {
     public abstract UserConfiguration[] getUserConfiguration(Context ctx, User[] users) throws OXException;
 
     /**
+     * Loads the {@link UserConfiguration} for a lot of users. The extended permissions will not be initialized. This is a special method
+     * to improve performance of the caching layer. Therefore package private.
+     * @param ctx the context
+     * @param userIds an array of user identifier for that the configuration should be loaded.
+     * @param groups the corresponding array of groups for the given user identifier.
+     * @return the corresponding array of {@link UserConfiguration}s.
+     * @throws OXException if loading the data from the database fails somehow.
+     */
+    abstract UserConfiguration[] getUserConfigurationWithoutExtended(Context ctx, int[] userIds, int[][] groups) throws OXException;
+
+    /**
      * <p>
      * Clears the whole storage. All kept instances of
      * <code>UserConfiguration</code> are going to be removed from storage.

@@ -55,6 +55,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentMap;
@@ -203,8 +204,13 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
     public MDNSServiceInfo registerService(final String serviceId, final int port, final String info) throws OXException {
         try {
             final UUID id = getIdentifierFor(/* serviceId */);
-            final String name = new StringBuilder().append(getUnformattedString(id)).append('/').append(serviceId).toString();
-            final ServiceInfo sinfo = ServiceInfo.create(Constants.SERVICE_TYPE, name, port, null == info ? "" : info);
+            final String name = new StringBuilder().append(getUnformattedString(id)).append('/').append(serviceId).toString().trim();
+            /*
+             * supply service info description in properties map to work-around http://sourceforge.net/p/jmdns/bugs/109/
+             */
+            HashMap<String, byte[]> props = new HashMap<String, byte[]>(1);
+            props.put("description", (null == info ? "" : info).getBytes());
+            final ServiceInfo sinfo = ServiceInfo.create(Constants.SERVICE_TYPE, name, port, 0, 0, props);
             jmdns.registerService(sinfo);
             if (LOG.isInfoEnabled()) {
                 LOG.info(new StringBuilder(64).append("Registered new service: ").append(sinfo).toString());

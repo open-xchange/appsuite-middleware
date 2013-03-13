@@ -74,8 +74,9 @@ case "$1" in
 
   restart|force-reload)
 	echo -n "Restarting $DESC: "
+        read pid < /var/run/open-xchange.pid
         $0 stop
-        while ox_is_running open-xchange "/opt/open-xchange/sbin/open-xchange"; do
+        while ox_is_running open-xchange "/opt/open-xchange/etc" $pid; do
              sleep 1
         done
         $0 start

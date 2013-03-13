@@ -12,9 +12,6 @@ default:
     contact: 'Open-Xchange AG, Rollnerstr. 14, D-90408 Nürnberg, E-Mail: info@open-xchange.com'
 
     forgotPassword: false
-    
-    
-    copyright: '(c) 2013 Open-Xchange.'
-    version: '7.0.0 Drop #6'
 
-    
+
+    copyright: '(c) 2013 Open-Xchange.'

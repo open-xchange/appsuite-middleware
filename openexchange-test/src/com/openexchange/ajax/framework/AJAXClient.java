@@ -80,11 +80,13 @@ public class AJAXClient {
     private String protocol = null;
 
     public AJAXClient(final AJAXSession session) {
+        super();
         this.session = session;
         this.mustLogout = session.mustLogout();
     }
 
     public AJAXClient(final User user) throws OXException, OXException, IOException, JSONException {
+        super();
         AJAXConfig.init();
         String login = AJAXConfig.getProperty(user.getLogin());
         if (null == login) {
@@ -103,6 +105,12 @@ public class AJAXClient {
         }
         session = new AJAXSession();
         session.setId(execute(new LoginRequest(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), VERSION)).getSessionId());
+    }
+
+    public AJAXClient() throws OXException {
+        super();
+        AJAXConfig.init();
+        session = new AJAXSession();
     }
 
     public enum User {

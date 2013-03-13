@@ -112,7 +112,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     private final Appointment appointment;
 
-    private final Appointment original;
+    private Appointment original;
 
     private final ITipIntegrationUtility util;
 
@@ -128,7 +128,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     private final ServiceLookup services;
 
-    private final List<NotificationParticipant> participants;
+    private List<NotificationParticipant> participants;
 
     private final User user;
 
@@ -344,6 +344,8 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             }
         }
         mail.setMessage(message);
+        mail.setOriginal(original);
+        mail.setAppointment(appointmentToReport);
 
         return mail;
     }
@@ -1023,10 +1025,20 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
         @Override
         public NotificationMail generateDeleteMailFor(final NotificationParticipant participant) throws OXException {
-            if (participant.hasRole(ITipRole.ATTENDEE)) {
-                final Appointment appointmentToReport = appointment.clone();
+            if (actor.hasRole(ITipRole.ATTENDEE)) {
+                Appointment appointmentToReport = appointment.clone();
                 removeParticipant(appointmentToReport, session.getUserId());
-                return update(request(participant, appointmentToReport, State.Type.DELETED));
+                NotificationMail request = request(participant, appointmentToReport, State.Type.MODIFIED);
+                request.setOriginal(appointment);
+                
+                List<NotificationParticipant> newParticipants = new ArrayList<NotificationParticipant>();
+                for (NotificationParticipant np : participants) {
+                    if (np.getIdentifier() != session.getUserId()) {
+                        newParticipants.add(np);
+                    }
+                }
+                request.setParticipants(newParticipants);
+                return update(request);
             }
             return ATTENDEE.generateDeleteMailFor(participant);
         }

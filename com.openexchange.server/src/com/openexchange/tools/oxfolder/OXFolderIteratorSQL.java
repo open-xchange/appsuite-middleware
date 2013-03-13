@@ -294,7 +294,8 @@ public final class OXFolderIteratorSQL {
             permissionIds,
             accessibleModules,
             additionalCondition,
-            orderBy);
+            orderBy,
+            false);
     }
 
     /**
@@ -319,9 +320,49 @@ public final class OXFolderIteratorSQL {
      * @param accessibleModules The user's accessible modules
      * @param additionalCondition The optional additional condition; pass <code>null</code> to ignore
      * @param orderBy The optional <code>ORDER BY</code> clause; pass <code>null</code> to ignore
+     * @param queryOptUserPrivate <code>true</code> to also query user private folders (optional); otherwise <code>false</code> for pure permission-wise query
      * @return The core SQL statement to query user-visible folders
      */
-    private static String getSQLUserVisibleFolders(final String folderTable, final String permissionTable, final String fields, final String permissionIds, final String accessibleModules, final String additionalCondition, final String orderBy, final String... indexNames) {
+    private static String getSQLUserVisibleFolders(final String folderTable, final String permissionTable, final String fields, final String permissionIds, final String accessibleModules, final String additionalCondition, final String orderBy, final boolean queryOptUserPrivate) {
+        return getSQLUserVisibleFolders(
+            folderTable,
+            permissionTable,
+            fields,
+            permissionIds,
+            accessibleModules,
+            additionalCondition,
+            orderBy,
+            queryOptUserPrivate,
+            new String[0]);
+    }
+
+    /**
+     * Generates the core SQL statement to query user-visible folders.
+     * <p>
+     * Returned {@link String} is supposed to be used within a {@link PreparedStatement}.<br>
+     * The following fields have to be set via {@link PreparedStatement#setInt(int, int)} method:
+     * <ol>
+     * <li>Context ID</li>
+     * <li>User ID</li>
+     * <li>Context ID</li>
+     * <li>Context ID</li>
+     * <li>User ID</li>
+     * <li>Context ID</li>
+     * <li>Context ID</li>
+     * <ol>
+     *
+     * @param folderTable The folder table name
+     * @param permissionTable The permission table name
+     * @param fields The fields to select
+     * @param permissionIds The user's permission identifiers
+     * @param accessibleModules The user's accessible modules
+     * @param additionalCondition The optional additional condition; pass <code>null</code> to ignore
+     * @param orderBy The optional <code>ORDER BY</code> clause; pass <code>null</code> to ignore
+     * @param queryOptUserPrivate <code>true</code> to also query user private folders (optional); otherwise <code>false</code> for pure permission-wise query
+     * @param indexNames The optional indexes to use (<code>"...FORCE INDEX..."</code>)
+     * @return The core SQL statement to query user-visible folders
+     */
+    private static String getSQLUserVisibleFolders(final String folderTable, final String permissionTable, final String fields, final String permissionIds, final String accessibleModules, final String additionalCondition, final String orderBy, final boolean queryOptUserPrivate, final String... indexNames) {
         final StringBuilder sb = new StringBuilder(256);
         /*
          * Compose SELECT string prepended to each UNION statement
@@ -365,17 +406,21 @@ public final class OXFolderIteratorSQL {
         /*
          * Compose WHERE clauses
          */
-        final String[] whereClauses = new String[3];
+        final List<String> whereClauses = new ArrayList<String>(3);
         /*-
+         * Optional:
+         * 
          * WHERE ot.cid = ? AND (ot.permission_flag = 1 AND ot.created_from = ?)
          *
          * 1. cid
          * 2. user
          */
-        sb.append(" WHERE ot.cid = ? AND (ot.permission_flag = ").append(PRIVATE_PERMISSION).append(" AND ot.created_from = ?)");
-        appendix(sb, accessibleModules, additionalCondition);
-        whereClauses[0] = sb.toString();
-        sb.setLength(0);
+        if (queryOptUserPrivate) {
+            sb.append(" WHERE ot.cid = ? AND (ot.permission_flag = ").append(PRIVATE_PERMISSION).append(" AND ot.created_from = ?)");
+            appendix(sb, accessibleModules, additionalCondition);
+            whereClauses.add(sb.toString());
+            sb.setLength(0);
+        }
         /*-
          * JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ?
          * WHERE (op.admin_flag = 1 AND op.permission_id = ?)
@@ -387,7 +432,7 @@ public final class OXFolderIteratorSQL {
         sb.append(" JOIN ").append(permissionTable).append(
             " AS op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ? WHERE (op.admin_flag = 1 AND op.permission_id = ?)");
         appendix(sb, accessibleModules, additionalCondition);
-        whereClauses[1] = sb.toString();
+        whereClauses.add(sb.toString());
         sb.setLength(0);
         /*-
          * JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ?
@@ -399,19 +444,19 @@ public final class OXFolderIteratorSQL {
         sb.append(" JOIN ").append(permissionTable).append(" AS op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ? WHERE (op.fp > ").append(
             OCLPermission.NO_PERMISSIONS).append(" AND op.permission_id IN ").append(permissionIds).append(')');
         appendix(sb, accessibleModules, additionalCondition);
-        whereClauses[2] = sb.toString();
+        whereClauses.add(sb.toString());
         sb.setLength(0);
         /*
          * Finally, compose UNION statement
          */
         {
             sb.append(select);
-            sb.append(whereClauses[0]);
+            sb.append(whereClauses.get(0));
         }
-        for (int i = 1; i < whereClauses.length; i++) {
+        for (int i = 1; i < whereClauses.size(); i++) {
             sb.append(" UNION ");
             sb.append(select);
-            sb.append(whereClauses[i]);
+            sb.append(whereClauses.get(i));
         }
         if (null != preparedOrderBy) {
             sb.append(' ').append(preparedOrderBy);
@@ -568,8 +613,8 @@ public final class OXFolderIteratorSQL {
             readCon = DBPool.pickup(ctx);
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -695,8 +740,8 @@ public final class OXFolderIteratorSQL {
             }
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -798,8 +843,8 @@ public final class OXFolderIteratorSQL {
             }
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -904,8 +949,8 @@ public final class OXFolderIteratorSQL {
             }
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // tmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -998,8 +1043,8 @@ public final class OXFolderIteratorSQL {
             }
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -1089,8 +1134,8 @@ public final class OXFolderIteratorSQL {
             }
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -1219,8 +1264,8 @@ public final class OXFolderIteratorSQL {
             }
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -1326,8 +1371,8 @@ public final class OXFolderIteratorSQL {
                 condBuilder.toString(),
                 getSubfolderOrderBy(STR_OT)));
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -1397,8 +1442,8 @@ public final class OXFolderIteratorSQL {
                 condBuilder.toString(),
                 getSubfolderOrderBy(STR_OT)));
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -1479,8 +1524,8 @@ public final class OXFolderIteratorSQL {
             final String regex = "\\?";
             final String sContextId = String.valueOf(ctx.getContextId());
             final String sUserId = String.valueOf(userId);
-            sqlStr = sqlStr.replaceFirst(regex, sContextId);
-            sqlStr = sqlStr.replaceFirst(regex, sUserId);
+            // sqlStr = sqlStr.replaceFirst(regex, sContextId);
+            // sqlStr = sqlStr.replaceFirst(regex, sUserId);
             sqlStr = sqlStr.replaceFirst(regex, sContextId);
             sqlStr = sqlStr.replaceFirst(regex, sContextId);
             sqlStr = sqlStr.replaceFirst(regex, sUserId);
@@ -1537,8 +1582,8 @@ public final class OXFolderIteratorSQL {
                         getOrderBy(STR_OT, "module", "fname"));
                 stmt = rc.prepareStatement(sqlSelectStr);
             }
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -1877,18 +1922,25 @@ public final class OXFolderIteratorSQL {
         /*
          * Query database
          */
-        final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.module IN (");
-        condBuilder.append(modules[0]);
-        for (int i = 1; i < modules.length; i++) {
-            condBuilder.append(", ").append(modules[i]);
+        final StringBuilder condBuilder = new StringBuilder(32);
+        if (null != modules && modules.length > 0) {
+            if (1 == modules.length) {
+                condBuilder.append("AND (ot.module = ").append(modules[0]).append(')');
+            } else {
+                condBuilder.append("AND (ot.module IN (");
+                condBuilder.append(modules[0]);
+                for (int i = 1; i < modules.length; i++) {
+                    condBuilder.append(", ").append(modules[i]);
+                }
+                condBuilder.append("))");
+            }
         }
         if (type == SHARED) {
-            condBuilder.append(")) AND (ot.type = ").append(PRIVATE);
-            condBuilder.append(" AND ot.created_from != ").append(userId);
+            condBuilder.append(" AND (ot.type = ").append(PRIVATE);
+            condBuilder.append(" AND ot.created_from != ").append(userId).append(')');
         } else {
-            condBuilder.append(")) AND (ot.type = ").append(type);
+            condBuilder.append(" AND (ot.type = ").append(type).append(')');
         }
-        condBuilder.append(')');
         if (parent != null) {
             condBuilder.append(" AND (ot.parent = ").append(parent.intValue()).append(')');
         }
@@ -1910,8 +1962,8 @@ public final class OXFolderIteratorSQL {
                     condBuilder.toString(),
                     getSubfolderOrderBy(STR_OT)));
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -2003,8 +2055,8 @@ public final class OXFolderIteratorSQL {
         try {
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -2073,7 +2125,8 @@ public final class OXFolderIteratorSQL {
                 permissionIds(userId, memberInGroups, ctx),
                 StringCollection.getSqlInString(accessibleModules),
                 condition,
-                "ORDER by ot.fuid");
+                "ORDER by ot.fuid",
+                false);
         Connection readCon = con;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -2086,8 +2139,8 @@ public final class OXFolderIteratorSQL {
             }
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            //stmt.setInt(pos++, contextId);
+            //stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -2150,8 +2203,8 @@ public final class OXFolderIteratorSQL {
             readCon = DBPool.pickup(ctx);
             stmt = readCon.prepareStatement(sqlSelectStr);
             int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            // stmt.setInt(pos++, contextId);
+            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);

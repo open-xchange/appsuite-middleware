@@ -74,8 +74,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
@@ -755,7 +757,7 @@ public class RdbUserStorage extends UserStorage {
         final Map<String, Set<String>> attributes = user.getAttributes();
         final Map<String, Set<String>> added = new HashMap<String, Set<String>>();
         final Map<String, Set<String>> removed = new HashMap<String, Set<String>>();
-        final Map<String, Set<String[]>> changed = new HashMap<String, Set<String[]>>();
+        final Map<String, Set<String[]>> changed = new LinkedHashMap<String, Set<String[]>>();
         calculateDifferences(oldAttributes, attributes, added, removed, changed);
         PreparedStatement stmt = null;
         // Add new attributes
@@ -839,14 +841,16 @@ public class RdbUserStorage extends UserStorage {
                 }
                 if (size != lines) {
                     // Ignoring the failed update of a clients login timestamp. This only happens if a parallel login with the same client took place.
-                    boolean onlyLogins = true;
-                    for (final String name : changed.keySet()) {
-                        if (!name.startsWith("client:")) {
-                            onlyLogins = false;
+                    boolean onlyLoginsFailed = true;
+                    int j = 0;
+                    for (Entry<String, Set<String[]>> entry : changed.entrySet()) {
+                        if (!entry.getKey().startsWith("client:") && mLines[j] != 1) {
+                            onlyLoginsFailed = false;
                             break;
                         }
+                        j++;
                     }
-                    if (!onlyLogins) {
+                    if (!onlyLoginsFailed) {
                         final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
                         LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
                         LOG.error("Expected lines: " + size + " Updated lines: " + lines);
@@ -1002,8 +1006,12 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    @Override
     public User searchUser(final String email, final Context context) throws OXException {
+        return searchUser(email, context, true);
+    }
+    
+    @Override
+    public User searchUser(final String email, final Context context, boolean considerAliases) throws OXException {
         String sql = "SELECT id FROM user WHERE cid=? AND mail LIKE ?";
         final Connection con = DBPool.pickup(context);
         try {
@@ -1025,7 +1033,7 @@ public class RdbUserStorage extends UserStorage {
                 closeSQLStuff(result, stmt);
             }
             try {
-                if (userId == -1) {
+                if (userId == -1 && considerAliases) {
                     sql = "SELECT id FROM user_attribute WHERE cid=? AND name=? AND value LIKE ?";
                     stmt = con.prepareStatement(sql);
                     int pos = 1;

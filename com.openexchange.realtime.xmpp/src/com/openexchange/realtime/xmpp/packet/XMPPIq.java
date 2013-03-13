@@ -53,6 +53,10 @@ import org.joox.JOOX;
 import org.joox.Match;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.payload.PayloadElement;
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
+import com.openexchange.realtime.payload.transformer.PayloadTreeTransformer;
+import com.openexchange.realtime.xmpp.transformer.XMPPPayloadTreeTransformer;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -71,9 +75,9 @@ public class XMPPIq extends XMPPStanza {
         super(session);
     }
 
-    public XMPPIq(Match xml, ServerSession session) {
+    public XMPPIq(Match xml, ServerSession session) throws OXException {
         super(session);
-        parseXml(xml);
+        parseXml(xml, session);
     }
 
     public static enum Type {
@@ -83,16 +87,6 @@ public class XMPPIq extends XMPPStanza {
     private Type type;
 
     private JID from;
-
-    private PayloadElement payload;
-
-    public PayloadElement getPayload() {
-        return payload;
-    }
-
-    public void setPayload(PayloadElement payload) {
-        this.payload = payload;
-    }
 
     public Type getType() {
         return type;
@@ -119,15 +113,20 @@ public class XMPPIq extends XMPPStanza {
         if (from != null) {
             document.attr("from", from.toString());
         }
-        if (payload != null) {
-            document.append(JOOX.$(payload.to("xmpp", session)));
-            // PayloadTreeTransformer.outgoing
+
+        if (payloads != null) {
+            PayloadTreeTransformer transformer = new XMPPPayloadTreeTransformer();
+            for (PayloadTree payload : payloads) {
+                PayloadTree transformedTree = transformer.incoming(payload, session);
+                PayloadTreeNode root = transformedTree.getRoot();
+                document.append((String) root.getData());
+            }
         }
 
         return document.toString();
     }
 
-    private void parseXml(Match xml) {
+    private void parseXml(Match xml, ServerSession session) throws OXException {
         String f = xml.attr("from");
         if (f != null) {
             from = new JID(f);
@@ -141,10 +140,11 @@ public class XMPPIq extends XMPPStanza {
         type = Type.valueOf(xml.attr("type"));
         setId(xml.attr("id"));
 
-        Match body = xml.child();
+        Match body = xml.child(); //Should only be one payload element.
         if (body != null) {
-            setPayload(new Payload(body.toString(), "xmpp"));
-            // replace with StanzaInitializer + PayloadTreeTransformer.incoming ?
+            PayloadTreeTransformer treeTransformer = new XMPPPayloadTreeTransformer();
+            PayloadTree outgoing = treeTransformer.outgoing(new PayloadTree(new PayloadTreeNode(new PayloadElement(body.content(), "xml", "", body.id()))), session);
+            payloads.add(outgoing);
         }
     }
 

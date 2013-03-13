@@ -51,6 +51,12 @@ package com.openexchange.admin.console;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Set;
 import javax.management.AttributeNotFoundException;
@@ -70,6 +76,65 @@ import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 public class StatisticTools extends AbstractJMXTools {
+
+    
+    public class ThreadOutputElem {
+
+        private final long threadId;
+        private final String threadName;
+        private final long allocatedBytes;
+        private final long cpuTime;
+        private final long userTime;
+        private StackTraceElement[] stackTrace;
+
+        public ThreadOutputElem(long threadId, String threadName, long allocatedBytes, long cpuTime, long userTime) {
+            this.threadId = threadId;
+            this.threadName = threadName;
+            this.allocatedBytes = allocatedBytes;
+            this.cpuTime = cpuTime;
+            this.userTime = userTime;
+        }
+
+        public ThreadOutputElem(long threadId, String threadName, long allocatedBytes, long cpuTime, long userTime, StackTraceElement[] stackTrace) {
+            this.threadId = threadId;
+            this.threadName = threadName;
+            this.allocatedBytes = allocatedBytes;
+            this.cpuTime = cpuTime;
+            this.userTime = userTime;
+            this.stackTrace = stackTrace;
+        }
+
+        public long getThreadId() {
+            return threadId;
+        }
+
+        
+        public String getThreadName() {
+            return threadName;
+        }
+
+        public long getAllocatedBytes() {
+            return allocatedBytes;
+        }
+
+        public long getCpuTime() {
+            return cpuTime;
+        }
+
+        public long getUserTime() {
+            return userTime;
+        }
+
+        
+        public StackTraceElement[] getStackTrace() {
+            return stackTrace;
+        }
+
+        public void setStackTrace(StackTraceElement[] stackTrace) {
+            this.stackTrace = stackTrace;
+        }
+
+    }
 
     private static final char OPT_STATS_SHORT = 'x';
 
@@ -106,7 +171,15 @@ public class StatisticTools extends AbstractJMXTools {
     private static final char OPT_DOOPERATIONS_STATS_SHORT = 'd';
 
     private static final String OPT_DOOPERATIONS_STATS_LONG = "dooperation";
-
+    
+    private static final char OPT_MEMORY_THREADS_STATS_SHORT = 'm';
+    
+    private static final String OPT_MEMORY_THREADS_STATS_LONG = "memory";
+    
+    private static final char OPT_MEMORY_THREADS_FULL_STATS_SHORT = 'M';
+    
+    private static final String OPT_MEMORY_THREADS_FULL_STATS_LONG = "Memory";
+    
     private CLIOption xchangestats = null;
 
     private CLIOption threadpoolstats = null;
@@ -124,7 +197,11 @@ public class StatisticTools extends AbstractJMXTools {
     private CLIOption showoperation = null;
 
     private CLIOption dooperation = null;
-
+    
+    private CLIOption memorythreadstats = null;
+    
+    private CLIOption memorythreadstatsfull = null;
+    
     private CLIOption sessionStats = null;
 
     private CLIOption usmSessionStats = null;
@@ -260,6 +337,16 @@ public class StatisticTools extends AbstractJMXTools {
             count++;
             System.out.println("Done");
         }
+        if (null != parser.getOptionValue(this.memorythreadstats)) {
+            showThreadMemory(env, admin, false);
+            count++;
+        }
+
+        if (null != parser.getOptionValue(this.memorythreadstatsfull)) {
+            showThreadMemory(env, admin, true);
+            count++;
+        }
+        
         if (0 == count) {
             System.err.println(new StringBuilder("No option selected (").append(OPT_STATS_LONG).append(", ").append(OPT_RUNTIME_STATS_LONG).append(
                 ", ").append(OPT_OS_STATS_LONG).append(", ").append(OPT_THREADING_STATS_LONG).append(", ").append(OPT_ALL_STATS_LONG).append(
@@ -267,6 +354,86 @@ public class StatisticTools extends AbstractJMXTools {
             parser.printUsage();
         } else if (count > 1) {
             System.err.println("More than one of the stat options given. Using the first one only");
+        }
+    }
+
+    private void showThreadMemory(final HashMap<String, String[]> env, boolean admin, boolean stacktrace) throws InterruptedException, IOException, MalformedObjectNameException, InstanceNotFoundException, MBeanException, ReflectionException {
+        final MBeanServerConnection initConnection = initConnection(admin, env);
+        ThreadMXBean threadBean = ManagementFactory.newPlatformMXBeanProxy(initConnection, ManagementFactory.THREAD_MXBEAN_NAME, ThreadMXBean.class);
+        final long[] allThreadIds = threadBean.getAllThreadIds();
+        ObjectName srvThrdName = new ObjectName(ManagementFactory.THREAD_MXBEAN_NAME);
+        long[] allocatedBytes = null;
+        long[] cpuTime = null;
+        long[] userTime = null; 
+        final ThreadInfo[] threadInfo;
+        if (stacktrace) {
+            threadInfo = threadBean.getThreadInfo(allThreadIds, Integer.MAX_VALUE);
+        } else {
+            threadInfo = threadBean.getThreadInfo(allThreadIds);
+        }
+        try {
+            allocatedBytes = (long[]) initConnection.invoke(srvThrdName, "getThreadAllocatedBytes", new Object[]{allThreadIds}, new String[] {"[J"});
+        } catch (javax.management.ReflectionException e) {
+            System.err.println("AllocatedBytes is not supported on this JVM");
+            // Simple set to an array of 0
+            allocatedBytes = new long[threadInfo.length]; 
+            Arrays.fill(allocatedBytes, 0);
+        }
+        // First try the new method everytime, if not available use the old iteration approach
+        try {
+            cpuTime = (long[]) initConnection.invoke(srvThrdName, "getThreadCpuTime", new Object[]{allThreadIds}, new String[] {"[J"});
+        } catch (javax.management.ReflectionException e) {
+            cpuTime = new long[threadInfo.length]; 
+            for (int i = 0; i < allThreadIds.length; i++) {
+                cpuTime[i] = threadBean.getThreadCpuTime(allThreadIds[i]);
+            }
+        }
+        try {
+            userTime = (long[]) initConnection.invoke(srvThrdName, "getThreadUserTime", new Object[]{allThreadIds}, new String[] {"[J"});
+        } catch (javax.management.ReflectionException e) {
+            userTime = new long[threadInfo.length]; 
+            for (int i = 0; i < allThreadIds.length; i++) {
+                userTime[i] = threadBean.getThreadUserTime(allThreadIds[i]);
+            }
+        }
+        if (allocatedBytes.length != cpuTime.length || cpuTime.length != userTime.length || userTime.length != threadInfo.length) {
+            System.err.println("Different results returned");
+            return;
+        }
+        final ArrayList<ThreadOutputElem> arrayList = new ArrayList<ThreadOutputElem>();
+        if (stacktrace) {
+            System.out.println("ThreadID, Name, AllocatedBytes, CpuTime, UserTime, StackTrace");
+            for (int i = 0; i < allThreadIds.length; i++) {
+                arrayList.add(new ThreadOutputElem(allThreadIds[i], threadInfo[i].getThreadName(), allocatedBytes[i], cpuTime[i], userTime[i], threadInfo[i].getStackTrace()));
+            }
+        } else {
+            System.out.println("ThreadID, Name, AllocatedBytes, CpuTime, UserTime");
+            for (int i = 0; i < allThreadIds.length; i++) {
+                arrayList.add(new ThreadOutputElem(allThreadIds[i], threadInfo[i].getThreadName(), allocatedBytes[i], cpuTime[i], userTime[i]));
+            }
+        }
+        
+        Collections.sort(arrayList, new Comparator<ThreadOutputElem>() {
+
+            @Override
+            public int compare(ThreadOutputElem o1, ThreadOutputElem o2) {
+                if (o1.getAllocatedBytes() > o2.getAllocatedBytes()) {
+                    return -1;
+                } else if (o1.getAllocatedBytes() == o2.getAllocatedBytes()) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            }
+        });
+        if (stacktrace) {
+            for (final ThreadOutputElem elem : arrayList) {
+                System.out.println(elem.getThreadId() + ", " + elem.getThreadName() + ", " + elem.getAllocatedBytes() + ", " + elem.getCpuTime() + ", " + elem.getUserTime() + ", " + Arrays.toString(elem.getStackTrace()));
+            }
+        } else {
+            for (final ThreadOutputElem elem : arrayList) {
+                System.out.println(elem.getThreadId() + ", " + elem.getThreadName() + ", " + elem.getAllocatedBytes() + ", " + elem.getCpuTime() + ", " + elem.getUserTime());
+            }
         }
     }
 
@@ -352,6 +519,8 @@ public class StatisticTools extends AbstractJMXTools {
         this.jsonStats = setShortLongOpt(parser, 'j', "jsonstats", "shows the JSON statistics", false, NeededQuadState.notneeded);
         this.clusterStats = setShortLongOpt(parser, 'c', "clusterstats", "shows the cluster statistics", false, NeededQuadState.notneeded);
         this.grizzlyStats = setShortLongOpt(parser, 'g', "grizzlystats", "shows the grizzly statistics", false, NeededQuadState.notneeded);
+        this.memorythreadstats = setShortLongOpt(parser, OPT_MEMORY_THREADS_STATS_SHORT, OPT_MEMORY_THREADS_STATS_LONG, "shows memory usage of threads", false, NeededQuadState.notneeded);
+        this.memorythreadstatsfull = setShortLongOpt(parser, OPT_MEMORY_THREADS_FULL_STATS_SHORT, OPT_MEMORY_THREADS_FULL_STATS_LONG, "shows memory usage of threads including stack traces", false, NeededQuadState.notneeded);
     }
 
     private void showMemoryPoolData(final MBeanServerConnection mbc) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException {

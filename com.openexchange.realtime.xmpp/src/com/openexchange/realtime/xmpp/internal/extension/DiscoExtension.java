@@ -57,6 +57,7 @@ import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.xmpp.XMPPDelivery;
 import com.openexchange.realtime.xmpp.XMPPExtension;
 import com.openexchange.realtime.xmpp.packet.XMPPStanza;
+import com.openexchange.realtime.xmpp.transformer.XMPPPayloadElementTransformer;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -65,6 +66,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class DiscoExtension implements XMPPExtension {
+
+    private Set<XMPPPayloadElementTransformer> payloadElementTransformers = new HashSet<XMPPPayloadElementTransformer>();
 
     @Override
     public String getServiceName() {
@@ -87,6 +90,11 @@ public class DiscoExtension implements XMPPExtension {
     @Override
     public Set<String> getComponents() {
         return new HashSet<String>(Arrays.asList("", "test."));
+    }
+
+    @Override
+    public Set<XMPPPayloadElementTransformer> getElementTransformers() {
+        return payloadElementTransformers;
     }
 
 }

@@ -390,10 +390,14 @@ public final class MailMessageCache {
      * @throws OXException
      */
     public void removeUserMessages(final int userId, final int cid) throws OXException {
+        final Cache cache = this.cache;
         if (null == cache) {
             return;
         }
         final CacheKey mapKey = getMapKey(userId, cid);
+        if (cache.get(mapKey) == null) {
+            return;
+        }
         final Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {

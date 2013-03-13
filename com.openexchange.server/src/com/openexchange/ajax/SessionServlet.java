@@ -139,7 +139,7 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private static volatile ClientWhitelist clientWhitelist;
 
-    private static volatile CookieHashSource hashSource;
+    protected static volatile CookieHashSource hashSource;
 
     private static volatile boolean rangesLoaded;
 
@@ -260,6 +260,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
             }
         	if (simpleSession != null) {
+        	    checkSecret(hashSource, req, simpleSession);
         		verifySession(req, sessiondService, simpleSession.getSessionID(), simpleSession);
         		rememberPublicSession(req, simpleSession);
         	}
@@ -591,13 +592,7 @@ public abstract class SessionServlet extends AJAXServlet {
         /*
          * Get session secret
          */
-        final String secret = extractSecret(source, req, session.getHash(), session.getClient());
-        if (secret == null || !session.getSecret().equals(secret)) {
-            if (INFO && null != secret) {
-                LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");
-            }
-            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
-        }
+        checkSecret(source, req, session);
         try {
             final Context context = ContextStorage.getInstance().getContext(session.getContextId());
             final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
@@ -631,6 +626,16 @@ public abstract class SessionServlet extends AJAXServlet {
             throw e;
         } catch (final UndeclaredThrowableException e) {
             throw UserExceptionCode.USER_NOT_FOUND.create(e, I(session.getUserId()), I(session.getContextId()));
+        }
+    }
+
+    public static void checkSecret(final CookieHashSource source, final HttpServletRequest req, final Session session) throws OXException {
+        final String secret = extractSecret(source, req, session.getHash(), session.getClient());
+        if (secret == null || !session.getSecret().equals(secret)) {
+            if (INFO && null != secret) {
+                LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");
+            }
+            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
         }
     }
 

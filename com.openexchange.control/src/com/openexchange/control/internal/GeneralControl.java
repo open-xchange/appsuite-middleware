@@ -53,13 +53,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.management.MBeanException;
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.BundleListener;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.packageadmin.PackageAdmin;
@@ -206,15 +212,33 @@ public class GeneralControl implements GeneralControlMBean, MBeanRegistration {
                 // Note that stopping process is done in a separate thread
                 systemBundle.stop();
                 if (waitForExit) {
-                    /*
-                     * TODO: This a bad solution for waiting for thread termination.
-                     */
+                    final Lock SHUTDOWN_LOCK = new ReentrantLock();
+                    final Condition SHUTDOWN_COMPLETED = SHUTDOWN_LOCK.newCondition();
+                    
+                    systemBundle.getBundleContext().addBundleListener(new BundleListener() {
+                        
+                        @Override
+                        public void bundleChanged(BundleEvent event) {
+                            if (systemBundle.getState() == Bundle.RESOLVED) {
+                                try {
+                                    SHUTDOWN_LOCK.lock();
+                                    SHUTDOWN_COMPLETED.signalAll();
+
+                                } finally {
+                                    SHUTDOWN_LOCK.unlock();
+                                }
+                            }
+                        }
+                    });
+                    SHUTDOWN_LOCK.lock();
                     try {
-                        Thread.sleep(2000);
-                    } catch (final InterruptedException e) {
+                        SHUTDOWN_COMPLETED.await(10, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                         LOG.error(e.getMessage(), e);
-                    }
+                    } finally {
+                        SHUTDOWN_LOCK.unlock();
+                    } 
                 }
             }
         } catch (final BundleException e) {

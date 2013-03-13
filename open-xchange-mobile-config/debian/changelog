@@ -1,3 +1,45 @@
+open-xchange-mobile-config (7.0.2-6) unstable; urgency=low
+
+  * Sixth release candidate for 6.22.2/7.0.2
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Tue, 12 Mar 2013 11:26:29 +0100
+
+open-xchange-mobile-config (7.0.2-5) unstable; urgency=low
+
+  * Fifth release candidate for 6.22.2/7.0.2
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Mon, 11 Mar 2013 14:20:45 +0100
+
+open-xchange-mobile-config (7.0.2-4) unstable; urgency=low
+
+  * Fourth release candidate for 6.22.2/7.0.2
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Fri, 08 Mar 2013 14:36:00 +0100
+
+open-xchange-mobile-config (7.0.2-3) unstable; urgency=low
+
+  * Third release candidate for 6.22.2/7.0.2
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Fri, 08 Mar 2013 08:51:30 +0100
+
+open-xchange-mobile-config (7.0.2-2) unstable; urgency=low
+
+  * Second release candidate for 6.22.2/7.0.2
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Thu, 07 Mar 2013 14:24:48 +0100
+
+open-xchange-mobile-config (7.0.2-1) unstable; urgency=low
+
+  * First release candidate for 6.22.2/7.0.2
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Wed, 27 Feb 2013 16:06:56 +0100
+
+open-xchange-mobile-config (7.0.2-0) unstable; urgency=low
+
+  * prepare for 7.0.2 release
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Tue, 19 Feb 2013 08:54:56 +0100
+
 open-xchange-mobile-config (7.0.1-5) unstable; urgency=low
 
   * Build for patch 2013-03-07
@@ -105,6 +147,18 @@ open-xchange-mobile-config (6.23.0-0) unstable; urgency=low
   * prepare for next EDP drop
 
  -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Mon, 03 Sep 2012 13:46:40 +0200
+
+open-xchange-mobile-config (6.22.1-13) unstable; urgency=low
+
+  * Build for patch 2013-03-07
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Fri, 01 Mar 2013 15:23:38 +0100
+
+open-xchange-mobile-config (6.22.1-12) unstable; urgency=low
+
+  * Build for patch 2013-02-22
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Mon, 25 Feb 2013 16:55:10 +0100
 
 open-xchange-mobile-config (6.22.1-11) unstable; urgency=low
 

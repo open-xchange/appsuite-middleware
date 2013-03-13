@@ -161,6 +161,11 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User searchUser(final String email, final Context context, boolean considerAliases) throws OXException {
+        return UserStorage.getInstance().searchUser(email, context, considerAliases);
+    }
+
+    @Override
     public User[] searchUserByName(final String name, final Context context, final int searchType) throws OXException {
         return UserStorage.getInstance().searchUserByName(name, context, searchType);
     }

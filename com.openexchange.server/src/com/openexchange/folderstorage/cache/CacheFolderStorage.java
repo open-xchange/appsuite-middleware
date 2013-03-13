@@ -266,7 +266,7 @@ public final class CacheFolderStorage implements FolderStorage {
         acquire(rlock);
         try {
             for (final FolderStorage folderStorage : registry.getFolderStoragesForTreeID(treeId)) {
-                final boolean started = folderStorage.startTransaction(storageParameters, true);
+                final boolean started = folderStorage.startTransaction(storageParameters, false);
                 try {
                     folderStorage.checkConsistency(treeId, storageParameters);
                     if (started) {

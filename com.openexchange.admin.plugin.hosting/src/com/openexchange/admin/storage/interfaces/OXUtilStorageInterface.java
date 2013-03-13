@@ -159,15 +159,12 @@ public abstract class OXUtilStorageInterface {
     public abstract void changeFilestore(final Filestore fstore) throws StorageException;
 
     /**
-     * List all registered filestores
-     *
-     * @param search_pattern
-     *            a pattern to search for
-     * @return an array of filestore objects
+     * List all registered file stores.
+     * @param pattern a pattern to search for
+     * @return an array of file store objects
      * @throws StorageException
      */
-    public abstract Filestore[] listFilestores(final String search_pattern) throws StorageException;
-
+    public abstract Filestore[] listFilestores(String pattern, boolean omitUsage) throws StorageException;
 
     /**
      * get filestore by ID

@@ -812,6 +812,13 @@ public class MailAccountPOP3Storage implements POP3Storage {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Batch append operation to POP3 storage failed: " + e.getMessage(), e);
             }
+            final Throwable cause = e.getCause();
+            if ((cause instanceof MessagingException) && toLowerCase(cause.getMessage()).indexOf("quota") >= 0) {
+                /*
+                 * Apparently cause by exceeded quota constraint; abort immediately
+                 */
+                throw POP3ExceptionCode.QUOTA_CONSTRAINT.create(cause, new Object[0]);
+            }
             /*
              * Retry one-by-one. Handling each mail message.
              */
@@ -910,6 +917,20 @@ public class MailAccountPOP3Storage implements POP3Storage {
         } catch (final IllegalAccessException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

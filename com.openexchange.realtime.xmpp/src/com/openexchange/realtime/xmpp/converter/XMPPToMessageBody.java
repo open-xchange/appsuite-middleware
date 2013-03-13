@@ -49,9 +49,8 @@
 
 package com.openexchange.realtime.xmpp.converter;
 
-import org.joox.JOOX;
+import static org.joox.JOOX.$;
 import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.chat.ChatMessage;
 import com.openexchange.tools.session.ServerSession;
@@ -61,12 +60,7 @@ import com.openexchange.tools.session.ServerSession;
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class XMPPToMessageBody implements SimplePayloadConverter {
-
-    @Override
-    public String getInputFormat() {
-        return "xmpp";
-    }
+public class XMPPToMessageBody extends AbstractXMLConverter {
 
     @Override
     public String getOutputFormat() {
@@ -74,15 +68,10 @@ public class XMPPToMessageBody implements SimplePayloadConverter {
     }
 
     @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
-    }
-
-    @Override
     public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
         String message = (String) data;
 
-        return new ChatMessage(JOOX.$(message).content());
+        return new ChatMessage($(message).content());
     }
 
 }

@@ -168,12 +168,17 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
         if (cacheService == null) {
             return delegate.getUser(uid, context);
         }
-        return createProxy(context, uid, cacheService, null);
+        return createProxy(context, uid, cacheService);
     }
 
-    private User createProxy(final Context ctx, final int userId, final CacheService cacheService, final User user) throws OXException {
+    private User createProxy(Context ctx, int userId, CacheService cacheService) throws OXException {
         final UserFactory factory = new UserFactory(delegate, cacheService, lockFor(ctx), ctx, userId);
-        return null == user ? new UserReloader(factory, REGION_NAME) : new UserReloader(factory, user, REGION_NAME);
+        return new UserReloader(factory, REGION_NAME);
+    }
+
+    private User createProxy(Context ctx, int userId, CacheService cacheService, User user, boolean doCache) throws OXException {
+        final UserFactory factory = new UserFactory(delegate, cacheService, lockFor(ctx), ctx, userId);
+        return new UserReloader(factory, user, REGION_NAME, doCache);
     }
 
     @Override
@@ -193,7 +198,7 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
             return delegate.getUser(ctx, userId, con);
         }
         final User user = delegate.getUser(ctx, userId, con);
-        return createProxy(ctx, userId, cacheService, user);
+        return createProxy(ctx, userId, cacheService, user, true);
     }
 
     @Override
@@ -216,7 +221,7 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
             final Object object = cache.get(factory.getKey());
             if (object instanceof User) {
                 try {
-                    map.put(I(userId), new UserReloader(factory, (User) object, REGION_NAME));
+                    map.put(I(userId), new UserReloader(factory, (User) object, REGION_NAME, false));
                 } catch (final OXException e) {
                     throw e;
                 }
@@ -226,7 +231,7 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
         }
         final User[] loaded = delegate.getUser(ctx, I2i(toLoad));
         for (final User user : loaded) {
-            map.put(I(user.getId()), createProxy(ctx, user.getId(), cacheService, user));
+            map.put(I(user.getId()), createProxy(ctx, user.getId(), cacheService, user, true));
         }
         final List<User> retval = new ArrayList<User>(userIds.length);
         for (final int userId : userIds) {
@@ -312,6 +317,12 @@ public class CachingUserStorage extends UserStorage implements EventHandler {
     public User searchUser(final String email, final Context context) throws OXException {
         // Caching doesn't make any sense here.
         return delegate.searchUser(email, context);
+    }
+
+    @Override
+    public User searchUser(final String email, final Context context, boolean considerAliases) throws OXException {
+        // Caching doesn't make any sense here.
+        return delegate.searchUser(email, context, considerAliases);
     }
 
     @Override

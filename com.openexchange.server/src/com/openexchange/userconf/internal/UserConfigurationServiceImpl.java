@@ -104,20 +104,4 @@ public final class UserConfigurationServiceImpl implements UserConfigurationServ
     public void saveUserConfiguration(final UserConfiguration userConfiguration) throws OXException {
         UserConfigurationStorage.getInstance().saveUserConfiguration(userConfiguration);
     }
-
-    @Override
-    public void saveUserConfiguration(final int permissionBits, final int userId, final Context ctx) throws OXException {
-        UserConfigurationStorage.getInstance().saveUserConfiguration(permissionBits, userId, ctx);
-    }
-
-    @Override
-    public UserConfiguration getUserConfigurationSafe(final int userId, final Context ctx) {
-        return UserConfigurationStorage.getInstance().getUserConfigurationSafe(userId, ctx);
-    }
-
-    @Override
-    public UserConfiguration getUserConfigurationSafe(final int userId, final int[] groups, final Context ctx) {
-        return UserConfigurationStorage.getInstance().getUserConfigurationSafe(userId, groups, ctx);
-    }
-
 }

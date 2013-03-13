@@ -135,7 +135,7 @@ public class AJAXSession {
 
     public static DefaultHttpClient newHttpClient() {
         DefaultHttpClient retval = new DefaultHttpClient();
-        
+
         HttpParams params = retval.getParams();
         int minute = 1 * 60 * 1000;
         HttpConnectionParams.setConnectionTimeout(params, minute);

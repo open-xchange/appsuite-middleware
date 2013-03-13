@@ -1,3 +1,45 @@
+open-xchange-publish (7.0.2-6) unstable; urgency=low
+
+  * Sixth release candidate for 6.22.2/7.0.2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 12 Mar 2013 11:26:35 +0100
+
+open-xchange-publish (7.0.2-5) unstable; urgency=low
+
+  * Fifth release candidate for 6.22.2/7.0.2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 11 Mar 2013 14:20:50 +0100
+
+open-xchange-publish (7.0.2-4) unstable; urgency=low
+
+  * Fourth release candidate for 6.22.2/7.0.2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 08 Mar 2013 14:36:06 +0100
+
+open-xchange-publish (7.0.2-3) unstable; urgency=low
+
+  * Third release candidate for 6.22.2/7.0.2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 08 Mar 2013 08:51:36 +0100
+
+open-xchange-publish (7.0.2-2) unstable; urgency=low
+
+  * Second release candidate for 6.22.2/7.0.2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 07 Mar 2013 14:24:54 +0100
+
+open-xchange-publish (7.0.2-1) unstable; urgency=low
+
+  * First release candidate for 6.22.2/7.0.2
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 27 Feb 2013 16:07:01 +0100
+
+open-xchange-publish (7.0.2-0) unstable; urgency=low
+
+  * prepare for 7.0.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 19 Feb 2013 08:55:03 +0100
+
 open-xchange-publish (7.0.1-5) unstable; urgency=low
 
   * Build for patch 2013-03-07
@@ -105,6 +147,18 @@ open-xchange-publish (6.23.0-0) unstable; urgency=low
   * prepare for next EDP drop
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 03 Sep 2012 13:46:16 +0200
+
+open-xchange-publish (6.22.1-13) unstable; urgency=low
+
+  * Build for patch 2013-03-07
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 01 Mar 2013 15:23:19 +0100
+
+open-xchange-publish (6.22.1-12) unstable; urgency=low
+
+  * Build for patch 2013-02-22
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 25 Feb 2013 16:54:52 +0100
 
 open-xchange-publish (6.22.1-11) unstable; urgency=low
 

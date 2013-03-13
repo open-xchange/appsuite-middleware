@@ -51,44 +51,43 @@ package com.openexchange.admin.console;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import junit.framework.TestCase;
-
 import org.junit.After;
 import org.junit.Before;
 
-public abstract class AbstractTest extends TestCase {
+public abstract class AbstractTest {
 
     protected  static String TEST_DOMAIN = "example.org";
     protected  static String CHANGE_SUFFIX = "_changed";
-    
+
     protected static String OPTION_CONTEXT_ADMIN_USER = "--adminuser=oxadmin";
     protected static String OPTION_CONTEXT_ADMIN_PWD = "--adminpass=secret";
     protected static String OPTION_SUPER_ADMIN_USER = "--adminuser=oxadminmaster";
     protected static String OPTION_SUPER_ADMIN_PWD = "--adminpass=secret";
     protected static String OPTION_USER_PASSWORD = "--password=foo-user-pass";
-    
+
     protected static String VALID_CHAR_TESTUSER = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     protected static String VALID_CHAR_TESTRESOURCE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-+.%$@";
     protected static String VALID_CHAR_TESTGROUP = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-+.%$@";
-    
-    
+
+
     protected int returnCode;
     protected ByteArrayOutputStream errBytes;
     protected ByteArrayOutputStream outBytes;
     protected PrintStream errConsole;
     protected PrintStream outConsole;
-    
+
+    @Before
     public void grabStreams() {
         errBytes = new ByteArrayOutputStream();
         outBytes = new ByteArrayOutputStream();
-        
+
         errConsole = System.err;
         outConsole = System.out;
 
         System.setErr(new PrintStream(errBytes));
         System.setOut(new PrintStream(outBytes));
     }
-    
+
     /**
      * Reset the buffers, so that the next test doesn't use the output of this one!
      * Should be called after checking result of test via an assert method!
@@ -97,10 +96,7 @@ public abstract class AbstractTest extends TestCase {
         errBytes.reset();
         outBytes.reset();
     }
-    
-    
-    
-    @Override
+
     @After
     public void tearDown() {
         if(errConsole == null) {
@@ -108,78 +104,84 @@ public abstract class AbstractTest extends TestCase {
         }
         System.setErr(errConsole);
         System.setOut(outConsole);
-        
+
         System.out.println("OUT-->" + outBytes.toString());
         System.out.println("ERR-->" + errBytes.toString());
         System.out.println("Returncode-->" + this.returnCode);
 
     }
+
     /**
-     * 
+     *
      * @return String[] with only oxadmin and password option set and a "--foouknownoption=bar" option
      */
     public static String[] getUnknownOptionData(){
         final String[] tmp = {OPTION_CONTEXT_ADMIN_USER, OPTION_CONTEXT_ADMIN_PWD,"--foouknownoption=bar"};
 
         return  tmp;
-    } 
+    }
+
     /**
-     * 
+     *
      * @return String[] with only oxadmin and password option and NO other option set.
      */
     public static String[] getMissingOptionData(){
         final String[] tmp = {OPTION_CONTEXT_ADMIN_USER, OPTION_CONTEXT_ADMIN_PWD};
 
         return  tmp;
-    } 
-    
+    }
+
     /**
-     * 
-     * @return String[] with only wrong oxadmin and wrong password option 
+     *
+     * @return String[] with only wrong oxadmin and wrong password option
      */
     public static String[] getWrongCredentialsOptionData(){
         final String[] tmp = {OPTION_CONTEXT_ADMIN_USER+"_xyzf00bar", OPTION_CONTEXT_ADMIN_PWD+"_xyzfoobar"};
 
         return  tmp;
-    } 
-    
+    }
+
     /**
-     * 
-     * @return String[] with only wrong oxadminmaster and wrong password option 
+     *
+     * @return String[] with only wrong oxadminmaster and wrong password option
      */
     public static String[] getWrongMasterCredentialsOptionData(){
         final String[] tmp = {OPTION_SUPER_ADMIN_USER+"_xyzf00bar", OPTION_SUPER_ADMIN_PWD+"_xyzfoobar"};
 
         return  tmp;
     }
-    
+
     /**
-     * 
+     *
      * @return String[] with only  oxadminmaster and  password option ,usefull for list tools!
      */
     public static String[] getMasterCredentialsOptionData(){
         final String[] tmp = {OPTION_SUPER_ADMIN_USER, OPTION_SUPER_ADMIN_PWD};
 
         return  tmp;
-    } 
+    }
+
     /**
-     * 
+     *
      * @return String[] with only oxadmin and password option and "--csv" option set.
      */
     public static String[] getCSVOptionData(){
         final String[] tmp = {OPTION_CONTEXT_ADMIN_USER, OPTION_CONTEXT_ADMIN_PWD,"--csv"};
 
         return  tmp;
-    } 
-    
+    }
+
     /**
-     * 
+     *
      * @return String[] with only oxadmin and password option and "--csv" option set.
      */
     public static String[] getCSVMasterOptionData(){
         final String[] tmp = {OPTION_SUPER_ADMIN_USER, OPTION_SUPER_ADMIN_PWD,"--csv"};
 
         return  tmp;
-    } 
-    
+    }
+
+    public void setReturnCode(int returnCode) {
+        this.returnCode = returnCode;
+    }
 }

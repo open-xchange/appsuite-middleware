@@ -753,22 +753,23 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return the trace of the thread that lastly obtained this access
      */
     public final String getTrace() {
-        final com.openexchange.java.StringAllocator sBuilder = new com.openexchange.java.StringAllocator(2048);
+        final StringBuilder sBuilder = new StringBuilder(2048);
         {
             final Props taskProps = LogProperties.optLogProperties(usingThread);
-            final Map<String, String> sorted = new TreeMap<String, String>();
-            for (final Entry<String, Object> entry : taskProps.asMap().entrySet()) {
-                final String propertyName = entry.getKey();
-                final Object value = entry.getValue();
-                if (null != value) {
-                    sorted.put(propertyName, value.toString());
+            if (null != taskProps) {
+                final Map<String, String> sorted = new TreeMap<String, String>();
+                for (final Entry<String, Object> entry : taskProps.asMap().entrySet()) {
+                    final String propertyName = entry.getKey();
+                    final Object value = entry.getValue();
+                    if (null != value) {
+                        sorted.put(propertyName, value.toString());
+                    }
                 }
+                for (final Map.Entry<String, String> entry : sorted.entrySet()) {
+                    sBuilder.append(entry.getKey()).append('=').append(entry.getValue()).append(lineSeparator);
+                }
+                sBuilder.append(lineSeparator);
             }
-            for (final Map.Entry<String, String> entry : sorted.entrySet()) {
-                sBuilder.append(entry.getKey()).append('=').append(entry.getValue()).append(lineSeparator);
-            }
-            sBuilder.append(lineSeparator);
-            
         }
         sBuilder.append(toString());
         sBuilder.append(lineSeparator).append("Mail connection established (or fetched from cache) at: ").append(lineSeparator);

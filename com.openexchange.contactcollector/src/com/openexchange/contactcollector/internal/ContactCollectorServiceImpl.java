@@ -119,7 +119,6 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
 
     @Override
     public void createCollectFolder(final Session session, final Context ctx, final String folderName, final Connection con) throws OXException, SQLException {
-        new ContactCollectorFolderCreator().create(session, ctx, folderName, con);
+        ContactCollectorFolderCreator.create(session, ctx, folderName, con);
     }
-
 }

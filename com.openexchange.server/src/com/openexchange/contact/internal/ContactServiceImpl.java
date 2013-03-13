@@ -722,7 +722,7 @@ public class ContactServiceImpl extends DefaultContactService {
 		 * determine queried storages according to searched folders
 		 */
 		Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session,
-				termAnanlyzer.hasFolderIDs() ? termAnanlyzer.getFolderIDs() : Tools.getSearchFolders(contextID, userID));
+				termAnanlyzer.hasFolderIDs() ? termAnanlyzer.getFolderIDs() : Tools.getSearchFolders(contextID, userID, false));
         Check.hasStorages(queriedStorages);
         /*
          * prepare fields and sort options
@@ -775,7 +775,8 @@ public class ContactServiceImpl extends DefaultContactService {
 		 * determine queried storages according to searched folders
 		 */
 		Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session,
-				contactSearch.hasFolders() ? Tools.toStringList(contactSearch.getFolders()) : Tools.getSearchFolders(contextID, userID));
+				contactSearch.hasFolders() ? Tools.toStringList(contactSearch.getFolders()) :
+				    Tools.getSearchFolders(contextID, userID, contactSearch.isEmailAutoComplete()));
 		Check.hasStorages(queriedStorages);
         /*
          * prepare fields and sort options

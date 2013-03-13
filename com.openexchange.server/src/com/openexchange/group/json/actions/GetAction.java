@@ -88,11 +88,12 @@ public final class GetAction extends AbstractGroupAction {
     protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
         final int groupId = req.checkInt(PARAMETER_ID);
         Date timestamp = new Date(0);
-        final GroupStorage groupStorage = GroupStorage.getInstance();
-        final Group group = groupStorage.getGroup(groupId, req.getSession().getContext());
+        final Group group = GroupStorage.getInstance().getGroup(groupId, req.getSession().getContext());
+        // Write it as JSON
         final GroupWriter groupWriter = new GroupWriter();
-        final JSONObject retval = new JSONObject();
+        final JSONObject retval = new JSONObject(8);
         groupWriter.writeGroup(group, retval);
+        // Output
         timestamp = group.getLastModified();
         return new AJAXRequestResult(retval, timestamp, "json");
     }

@@ -224,6 +224,10 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
 
                 @Override
                 public void handleEvent(final Event event) {
+                    final Object operation = event.getProperty("operation");
+                    if (null != operation && operation.toString().startsWith("update")) {
+                        return;
+                    }
                     final Session session = ((Session) event.getProperty(PushEventConstants.PROPERTY_SESSION));
                     final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
                     final Boolean contentRelated = (Boolean) event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED);

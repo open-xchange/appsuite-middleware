@@ -49,6 +49,8 @@
 
 package com.openexchange.realtime.packet;
 
+import com.openexchange.realtime.util.ElementPath;
+
 
 /**
  * {@link Message} - A regular message associated with a certain {@link Type type}.
@@ -74,6 +76,8 @@ public class Message extends Stanza {
     }
 
     private Type type;
+    
+    public static final ElementPath BODY_PATH = new ElementPath("body");
 
     /**
      * Initializes a new {@link Message}.

@@ -58,7 +58,7 @@ import com.openexchange.groupware.ldap.User;
 /**
  * {@link OverridingUserConfigurationStorage}
  */
-public class OverridingUserConfigurationStorage extends UserConfigurationStorage{
+public class OverridingUserConfigurationStorage extends UserConfigurationStorage {
 
     /** The delegate */
     protected final UserConfigurationStorage delegate;
@@ -95,6 +95,20 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
         final List<UserConfiguration> retval = new ArrayList<UserConfiguration>();
         for (final User user : users) {
             retval.add(getUserConfiguration(user.getId(), user.getGroups(), ctx));
+        }
+        return retval.toArray(new UserConfiguration[retval.size()]);
+    }
+
+    @Override
+    UserConfiguration[] getUserConfigurationWithoutExtended(Context ctx, int[] userIds, int[][] groups) throws OXException {
+        List<UserConfiguration> retval = new ArrayList<UserConfiguration>();
+        for (int i = 0; i < userIds.length ; i++) {
+            UserConfiguration config = getOverride(userIds[i], groups[i], ctx, false);
+            if (null == config) {
+                retval.add(delegate.getUserConfiguration(userIds[i], groups[i], ctx, false));
+            } else {
+                retval.add(config);
+            }
         }
         return retval.toArray(new UserConfiguration[retval.size()]);
     }

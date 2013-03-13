@@ -60,4 +60,25 @@ public interface Header {
 
     String getValue();
 
+    public static final class SimpleHeader implements Header {
+
+        private final String name;
+        private final String value;
+
+        public SimpleHeader(String name, String value) {
+            super();
+            this.name = name;
+            this.value = value;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String getValue() {
+            return value;
+        }
+    }
 }

@@ -14,8 +14,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashSet;
-import java.util.Set;
 import org.apache.commons.logging.Log;
 import com.openexchange.admin.contextrestore.dataobjects.UpdateTaskEntry;
 import com.openexchange.admin.contextrestore.dataobjects.UpdateTaskInformation;
@@ -108,7 +106,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
             }
             if (null != connection2) {
                 autocommit(connection2);
-                Database.back(poolId, connection2);
+                Database.back(true, connection2);
             }
         }
     }
@@ -150,7 +148,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
                 }
 
             } catch (final OXException e) {
-                throw new StorageException(new PoolException(e.getMessage()));
+                throw new StorageException(new PoolException(e.getMessage(), e));
             } finally {
                 closeSQLStuff(result, prepareStatement);
                 if (null != connection) {
@@ -164,7 +162,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
             PreparedStatement prepareStatement = null;
             ResultSet result = null;
             final int poolId = infoObject.getPoolId();
-            final Set<UpdateTaskEntry> current;
+            final UpdateTaskInformation current = new UpdateTaskInformation();
             try {
                 connection = Database.get(poolId, infoObject.getSchema());
                 prepareStatement = connection.prepareStatement("SELECT cid, taskName, successful, lastModified FROM `updateTask`");
@@ -173,7 +171,6 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
                 if (!result.next()) {
                     throw new OXContextRestoreException(Code.NO_ENTRIES_IN_UPDATE_TASK_TABLE);
                 }
-                current = new HashSet<UpdateTaskEntry>(128);
                 do {
                     final int contextId = result.getInt(1);
                     if (contextId <= 0 || contextId == infoObject.getContextId()) {
@@ -181,7 +178,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
                     }
                 } while (result.next());
             } catch (final OXException e) {
-                throw new StorageException(new PoolException(e.getMessage()));
+                throw new StorageException(new PoolException(e.getMessage(), e));
             } finally {
                 closeSQLStuff(result, prepareStatement);
                 if (null != connection) {
@@ -189,12 +186,7 @@ public final class OXContextRestoreMySQLStorage extends OXContextRestoreSQLStora
                 }
             }
 
-            Set<UpdateTaskEntry> set = updateTaskInfo.asSet();
-            if (!set.removeAll(current) || !set.isEmpty()) {
-                throw new OXContextRestoreException(Code.UPDATE_TASK_TABLES_INCOMPATIBLE);
-            }
-            set = updateTaskInfo.asSet();
-            if (!current.removeAll(set) || !current.isEmpty()) {
+            if (!updateTaskInfo.equalTo(current)) {
                 throw new OXContextRestoreException(Code.UPDATE_TASK_TABLES_INCOMPATIBLE);
             }
         }

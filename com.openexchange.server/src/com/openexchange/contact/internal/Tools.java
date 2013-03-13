@@ -348,22 +348,23 @@ public final class Tools {
 	 * set of default folders for the user, or all contact folders visible to
 	 * the user.
 	 *
-	 * @param contextID the context ID
-	 * @param userID the user ID.
-	 * @return
+	 * @param contextID The context ID
+	 * @param userID The user ID
+	 * @param emailAutoComplete <code>true</code> if the search is an e-mail auto-complete-search, <code>false</code>, otherwise.
+	 * @return The search folders
 	 * @throws OXException
 	 */
-	public static List<String> getSearchFolders(final int contextID, final int userID) throws OXException {
-		if (ContactConfig.getInstance().getBoolean(Property.ALL_FOLDERS_FOR_AUTOCOMPLETE).booleanValue()) {
-			/*
-			 * use all visible folders for search
-			 */
-			return getVisibleFolders(contextID, userID);
+	public static List<String> getSearchFolders(int contextID, int userID, boolean emailAutoComplete) throws OXException {
+		if (emailAutoComplete && false == ContactConfig.getInstance().getBoolean(Property.ALL_FOLDERS_FOR_AUTOCOMPLETE).booleanValue()) {
+            /*
+             * use default set of folders for search
+             */
+            return getBasicFolders(contextID, userID);
 		} else {
-			/*
-			 * use default set of folders for search
-			 */
-			return getBasicFolders(contextID, userID);
+            /*
+             * use all visible folders for search
+             */
+            return getVisibleFolders(contextID, userID);
 		}
 	}
 
@@ -517,17 +518,17 @@ public final class Tools {
 		}
 	}
 
-	/**
-	 * Sets the 'file as' attribute to the contact's display name if needed, i.e. the 'display name'-property is set, while the
-	 * 'file as'-property isn't.
-	 *
-	 * @param contact The contact to set the 'file as' for
-	 */
-	public static void setFileAsIfNeeded(final Contact contact) {
-	    if (contact.containsDisplayName() && (false == contact.containsFileAs() || Tools.isEmpty(contact.getFileAs()))) {
+    /**
+     * Sets the 'file as' attribute to the contact's display name if needed, i.e. the 'display name'-property is set, while the
+     * 'file as'-property isn't.
+     *
+     * @param contact The contact to set the 'file as' for
+     */
+    public static void setFileAsIfNeeded(final Contact contact) {
+        if (contact.containsDisplayName() && (false == contact.containsFileAs() || Tools.isEmpty(contact.getFileAs()))) {
             contact.setFileAs(contact.getDisplayName());
-	    }
-	}
+        }
+    }
 
 	/**
      * Creates a new {@link ContactSearchObject} based on the supplied one, but using a specific set of folder IDs.

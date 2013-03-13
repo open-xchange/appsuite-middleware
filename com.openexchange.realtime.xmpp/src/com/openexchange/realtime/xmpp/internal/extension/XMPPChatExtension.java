@@ -50,6 +50,7 @@
 package com.openexchange.realtime.xmpp.internal.extension;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -58,11 +59,14 @@ import com.openexchange.realtime.MessageDispatcher;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.xmpp.XMPPDelivery;
 import com.openexchange.realtime.xmpp.XMPPExtension;
 import com.openexchange.realtime.xmpp.packet.JID;
 import com.openexchange.realtime.xmpp.packet.XMPPMessage;
 import com.openexchange.realtime.xmpp.packet.XMPPStanza;
+import com.openexchange.realtime.xmpp.transformer.XMPPPayloadElementTransformer;
+import com.openexchange.realtime.xmpp.transformer.XMPPPayloadTreeTransformer;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -76,7 +80,13 @@ public class XMPPChatExtension implements XMPPExtension {
     /**
      * The {@code ServiceLookup} reference.
      */
-    public static final AtomicReference<ServiceLookup> SERVICES_REFERENCE = new AtomicReference<ServiceLookup>();
+    public static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
+
+    private Set<XMPPPayloadElementTransformer> payloadElementTransformers = new HashSet<XMPPPayloadElementTransformer>();
+
+    public XMPPChatExtension() {
+        payloadElementTransformers.add(new XMPPPayloadElementTransformer("chatMessage", Message.BODY_PATH));
+    }
 
     @Override
     public String getServiceName() {
@@ -102,7 +112,7 @@ public class XMPPChatExtension implements XMPPExtension {
         Message message = new Message();
         message.setType(Message.Type.chat);
         transform((XMPPMessage) xmpp, message, session);
-        SERVICES_REFERENCE.get().getService(MessageDispatcher.class).send(message, xmpp.getSession());
+        SERVICES.get().getService(MessageDispatcher.class).send(message, xmpp.getSession());
     }
 
     @Override
@@ -117,12 +127,14 @@ public class XMPPChatExtension implements XMPPExtension {
         ID to = message.getTo();
         xmpp.setTo(new JID(to.getUser(), to.getContext(), to.getResource()));
 
-        xmpp.setPayload(message.getPayload().to("xmpp", session));
-        /*
-         * PayloadTree transformedTree = PayloadTreeTransformer.outgoing(message.getPayload(), session);
-         * xmpp.setPayload(transformedPayloadTree)
-         */
-        
+        XMPPPayloadTreeTransformer treeTransformer = new XMPPPayloadTreeTransformer();
+        Collection<PayloadTree> payloads = new HashSet<PayloadTree>();
+        for (PayloadTree payload : message.getPayloads()) {
+            PayloadTree transformedTree = treeTransformer.outgoing(payload, session);
+            payloads.add(transformedTree);
+        }
+
+        xmpp.setPayloads(payloads);
     }
 
     private void transform(XMPPMessage xmpp, Message message, ServerSession session) throws OXException {
@@ -132,11 +144,19 @@ public class XMPPChatExtension implements XMPPExtension {
         JID to = xmpp.getTo();
         message.setTo(new ID(null, to.getUser(), to.getDomain(), to.getResource()));
 
-        message.setPayload(xmpp.getPayload().to("chatMessage", session));
-        /*
-         * PayloadTree transformedTree = PayloadTreeTransformer.incoming(xmpp.getPayload(), session);
-         * message.setPayload(transformedPayloadTree)
-         */
+        XMPPPayloadTreeTransformer treeTransformer = new XMPPPayloadTreeTransformer();
+        Collection<PayloadTree> payloads = new HashSet<PayloadTree>();
+        for (PayloadTree payload : xmpp.getPayloads()) {
+            PayloadTree transformedTree = treeTransformer.outgoing(payload, session);
+            payloads.add(transformedTree);
+        }
+
+        message.setPayloads(payloads);
+    }
+
+    @Override
+    public Set<XMPPPayloadElementTransformer> getElementTransformers() {
+        return payloadElementTransformers;
     }
 
 }

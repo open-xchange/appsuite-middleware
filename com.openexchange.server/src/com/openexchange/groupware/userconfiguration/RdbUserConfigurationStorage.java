@@ -50,6 +50,8 @@
 package com.openexchange.groupware.userconfiguration;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.getIN;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import java.sql.Connection;
@@ -58,6 +60,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -463,6 +466,63 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
             }
         } finally {
             closeResources(result, stmt, closeCon ? con : null, true, ctx);
+        }
+        return retval;
+    }
+
+    @Override
+    UserConfiguration[] getUserConfigurationWithoutExtended(Context ctx, int[] userIds, int[][] groups) throws OXException {
+        if (0 == userIds.length) {
+            return new UserConfiguration[0];
+        }
+        Connection con = Database.get(ctx, false);
+        try {
+            return loadUserConfigurationWithoutExtended(ctx, con, userIds, groups);
+        } catch (SQLException e) {
+            throw UserConfigurationCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Database.back(ctx, false, con);
+        }
+    }
+
+    private static UserConfiguration[] loadUserConfigurationWithoutExtended(Context ctx, Connection con, int[] userIds, int[][] groupsArg) throws OXException, SQLException {
+        int length = userIds.length;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        final UserConfiguration[] retval = new UserConfiguration[length];
+        try {
+            final TIntIntMap userMap;
+            if (length <= LIMIT) {
+                String sql = "SELECT user,permissions FROM user_configuration WHERE cid=? AND user IN (";
+                sql = getIN(sql, length);
+                stmt = con.prepareStatement(sql);
+                int pos = 1;
+                stmt.setInt(pos++, ctx.getContextId());
+                userMap = new TIntIntHashMap(length, 1);
+                for (int i = 0; i < length; i++) {
+                    stmt.setInt(pos++, userIds[i]);
+                    userMap.put(userIds[i], i);
+                }
+            } else {
+                stmt = con.prepareStatement("SELECT user,permissions FROM user_configuration WHERE cid=?");
+                stmt.setInt(1, ctx.getContextId());
+                userMap = new TIntIntHashMap(length, 1);
+                for (int i = 0; i < length; i++) {
+                    userMap.put(userIds[i], i);
+                }
+            }
+            result = stmt.executeQuery();
+            while (result.next()) {
+                final int userId = result.getInt(1);
+                if (userMap.containsKey(userId)) {
+                    final int pos = userMap.get(userId);
+                    final int[] groups = groupsArg[pos] == null ? UserStorage.getInstance().getUser(userId, ctx).getGroups() : groupsArg[pos];
+                    final UserConfiguration userConfiguration = new UserConfiguration(result.getInt(2), userId, groups, ctx);
+                    retval[pos] = userConfiguration;
+                }
+            }
+        } finally {
+            closeSQLStuff(result, stmt);
         }
         return retval;
     }

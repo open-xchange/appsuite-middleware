@@ -9,6 +9,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.MessageDispatcher;
+import com.openexchange.realtime.ResourceRegistry;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
 import com.openexchange.realtime.atmosphere.payload.transformer.AtmospherePayloadElementTransformer;
@@ -21,7 +22,7 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SessiondService.class, AtmosphereService.class, MessageDispatcher.class, SimpleConverter.class };
+        return new Class<?>[] { SessiondService.class, AtmosphereService.class, MessageDispatcher.class, SimpleConverter.class, ResourceRegistry.class };
     }
 
     @Override
