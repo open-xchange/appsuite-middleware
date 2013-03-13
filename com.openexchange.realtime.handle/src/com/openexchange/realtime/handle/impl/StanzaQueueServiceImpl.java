@@ -51,7 +51,6 @@ package com.openexchange.realtime.handle.impl;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import com.openexchange.exception.OXException;
 import com.openexchange.realtime.handle.StanzaQueueService;
 import com.openexchange.realtime.packet.IQ;
 import com.openexchange.realtime.packet.Message;
