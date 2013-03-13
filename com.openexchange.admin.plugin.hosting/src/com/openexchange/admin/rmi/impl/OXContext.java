@@ -130,7 +130,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     @Override
     public void changeCapabilities(Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         if ((null == capsToAdd || capsToAdd.isEmpty()) && (null == capsToRemove || capsToRemove.isEmpty())) {
-            return;
+            throw new InvalidDataException("No capabilities specified.");
         }
 
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;

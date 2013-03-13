@@ -142,7 +142,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     @Override
     public void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         if ((null == capsToAdd || capsToAdd.isEmpty()) && (null == capsToRemove || capsToRemove.isEmpty())) {
-            return;
+            throw new InvalidDataException("No capabilities specified.");
         }
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         

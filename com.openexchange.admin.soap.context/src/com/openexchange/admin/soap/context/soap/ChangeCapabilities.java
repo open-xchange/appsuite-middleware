@@ -56,7 +56,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import com.openexchange.admin.soap.context.dataobjects.Context;
 import com.openexchange.admin.soap.context.dataobjects.Credentials;
-import com.openexchange.admin.soap.context.dataobjects.User;
 
 /**
  * {@link ChangeCapabilities}
@@ -66,7 +65,6 @@ import com.openexchange.admin.soap.context.dataobjects.User;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
     "ctx",
-    "user",
     "capsToAdd",
     "capsToRemove",
     "auth"
@@ -83,8 +81,6 @@ public final class ChangeCapabilities {
 
     @XmlElement(nillable = true)
     protected Context ctx;
-    @XmlElement(nillable = true)
-    protected User user;
     @XmlElement(nillable = true)
     protected String capsToAdd;
     @XmlElement(nillable = true)
@@ -114,30 +110,6 @@ public final class ChangeCapabilities {
      */
     public void setCtx(Context value) {
         this.ctx = value;
-    }
-
-    /**
-     * Ruft den Wert der user-Eigenschaft ab.
-     *
-     * @return
-     *     possible object is
-     *     {@link User }
-     *
-     */
-    public User getUser() {
-        return user;
-    }
-
-    /**
-     * Legt den Wert der user-Eigenschaft fest.
-     *
-     * @param value
-     *     allowed object is
-     *     {@link User }
-     *
-     */
-    public void setUser(User value) {
-        this.user = value;
     }
 
     public String getCapsToAdd() {
