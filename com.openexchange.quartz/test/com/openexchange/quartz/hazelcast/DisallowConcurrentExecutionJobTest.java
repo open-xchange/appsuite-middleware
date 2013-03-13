@@ -145,10 +145,13 @@ public class DisallowConcurrentExecutionJobTest {
         JobStore jobStore = new TestableHazelcastJobStore();
         DirectSchedulerFactory.getInstance().createScheduler("sched1", "1", new SimpleThreadPool(4, 1), jobStore, null, 0, 10, -1);
         Scheduler scheduler = DirectSchedulerFactory.getInstance().getScheduler("sched1");
-        scheduler.start();
-        scheduler.standby();
-        scheduler.start();
-        scheduler.shutdown();
+        try {
+            scheduler.start();
+            scheduler.standby();
+            scheduler.start();
+        } finally {
+            scheduler.shutdown(true);
+        }
     }
 
     @Test
@@ -158,28 +161,30 @@ public class DisallowConcurrentExecutionJobTest {
 //        RAMJobStore jobStore = new RAMJobStore();
         DirectSchedulerFactory.getInstance().createScheduler("sched1", "1", new SimpleThreadPool(4, 1), jobStore, null, 0, 10, -1);
         Scheduler scheduler = DirectSchedulerFactory.getInstance().getScheduler("sched1");
-        scheduler.start();
+        try {
+            scheduler.start();
 
 
-        CountDownLatch latch = new CountDownLatch(2);
-        scheduler.getContext().put(BARRIER, latch);
-        JobDetail job = JobBuilder.newJob(ChangingDetailJob.class)
-                .withIdentity("TestJob/1/2/3/ABC", "testJobs/1/2")
-                .build();
+            CountDownLatch latch = new CountDownLatch(2);
+            scheduler.getContext().put(BARRIER, latch);
+            JobDetail job = JobBuilder.newJob(ChangingDetailJob.class)
+                    .withIdentity("TestJob/1/2/3/ABC", "testJobs/1/2")
+                    .build();
 
-        Trigger trigger = TriggerBuilder.newTrigger()
-                .forJob(job)
-                .withIdentity("testTrigger")
-                .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInMilliseconds(1000L).withRepeatCount(2))
-                .startNow()
-                .build();
+            Trigger trigger = TriggerBuilder.newTrigger()
+                    .forJob(job)
+                    .withIdentity("testTrigger")
+                    .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInMilliseconds(1000L).withRepeatCount(2))
+                    .startNow()
+                    .build();
 
-        scheduler.scheduleJob(job, trigger);
+            scheduler.scheduleJob(job, trigger);
 
-        latch.await(10, TimeUnit.SECONDS);
-        Assert.assertEquals("Latch was not 0", 0, latch.getCount());
-
-        scheduler.shutdown();
+            latch.await(10, TimeUnit.SECONDS);
+            Assert.assertEquals("Latch was not 0", 0, latch.getCount());
+        } finally {
+            scheduler.shutdown(true);
+        }
     }
 
     @Test
@@ -187,34 +192,36 @@ public class DisallowConcurrentExecutionJobTest {
         TestableHazelcastJobStore jobStore = new TestableHazelcastJobStore();
         DirectSchedulerFactory.getInstance().createScheduler("sched1", "1", new SimpleThreadPool(4, 1), jobStore, null, 0, 10, -1);
         Scheduler scheduler1 = DirectSchedulerFactory.getInstance().getScheduler("sched1");
-        scheduler1.start();
+        try {
+            scheduler1.start();
+            CyclicBarrier barrier = new CyclicBarrier(2);
+            scheduler1.getContext().put(BARRIER, barrier);
 
-        CyclicBarrier barrier = new CyclicBarrier(2);
-        scheduler1.getContext().put(BARRIER, barrier);
+            JobDetail job = JobBuilder.newJob(LongRunningJob.class)
+                .withIdentity("TestJob/1/2/3/ABC", "testJobs/1/2")
+                .build();
 
-        JobDetail job = JobBuilder.newJob(LongRunningJob.class)
-            .withIdentity("TestJob/1/2/3/ABC", "testJobs/1/2")
-            .build();
+            Trigger trigger = TriggerBuilder.newTrigger()
+                .forJob(job)
+                .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/withInterval/5000")
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule()
+                .withIntervalInMilliseconds(5000)
+                .repeatForever()
+                .withMisfireHandlingInstructionFireNow())
+                .startNow()
+                .build();
+            scheduler1.scheduleJob(job, trigger);
 
-        Trigger trigger = TriggerBuilder.newTrigger()
-            .forJob(job)
-            .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/withInterval/5000")
-            .withSchedule(SimpleScheduleBuilder.simpleSchedule()
-            .withIntervalInMilliseconds(5000)
-            .repeatForever()
-            .withMisfireHandlingInstructionFireNow())
-            .startNow()
-            .build();
-        scheduler1.scheduleJob(job, trigger);
-
-        barrier.await();
-        barrier.reset();
-        ConsistencyTask consistencyTask = new ConsistencyTask(jobStore, jobStore.getLocallyAcquiredTriggers(), jobStore.getLocallyExecutingTriggers());
-        consistencyTask.run();
-        barrier.await();
-        List<JobExecutionContext> currentlyExecutingJobs = scheduler1.getCurrentlyExecutingJobs();
-        Assert.assertFalse("Jobs were running concurrently!", currentlyExecutingJobs.size() > 1);
-        scheduler1.shutdown(true);
+            barrier.await();
+            barrier.reset();
+            ConsistencyTask consistencyTask = new ConsistencyTask(jobStore, jobStore.getLocallyAcquiredTriggers(), jobStore.getLocallyExecutingTriggers());
+            consistencyTask.run();
+            barrier.await();
+            List<JobExecutionContext> currentlyExecutingJobs = scheduler1.getCurrentlyExecutingJobs();
+            Assert.assertFalse("Jobs were running concurrently!", currentlyExecutingJobs.size() > 1);
+        } finally {
+            scheduler1.shutdown(true);
+        }
     }
 
     @Test
@@ -222,61 +229,65 @@ public class DisallowConcurrentExecutionJobTest {
         JobStore jobStore = new TestableHazelcastJobStore();
         DirectSchedulerFactory.getInstance().createScheduler("sched1", "1", new SimpleThreadPool(4, 1), jobStore, null, 0, 10, -1);
         Scheduler scheduler1 = DirectSchedulerFactory.getInstance().getScheduler("sched1");
-        scheduler1.start();
+        
+        try {
+            scheduler1.start();
 
-        CyclicBarrier barrier = new CyclicBarrier(2);
-        scheduler1.getContext().put(BARRIER, barrier);
+            CyclicBarrier barrier = new CyclicBarrier(2);
+            scheduler1.getContext().put(BARRIER, barrier);
 
-        JobDetail job = JobBuilder.newJob(LongRunningJob.class)
-            .withIdentity("TestJob/1/2/3/ABC", "testJobs/1/2")
-            .build();
+            JobDetail job = JobBuilder.newJob(LongRunningJob.class)
+                .withIdentity("TestJob/1/2/3/ABC", "testJobs/1/2")
+                .build();
 
-        Trigger trigger = TriggerBuilder.newTrigger()
-            .forJob(job)
-            .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/withInterval/5000")
-            .withSchedule(SimpleScheduleBuilder.simpleSchedule()
-            .withIntervalInMilliseconds(5000)
-            .repeatForever()
-            .withMisfireHandlingInstructionFireNow())
-            .startNow()
-            .build();
-        scheduler1.scheduleJob(job, trigger);
+            Trigger trigger = TriggerBuilder.newTrigger()
+                .forJob(job)
+                .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/withInterval/5000")
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule()
+                .withIntervalInMilliseconds(5000)
+                .repeatForever()
+                .withMisfireHandlingInstructionFireNow())
+                .startNow()
+                .build();
+            scheduler1.scheduleJob(job, trigger);
 
-        barrier.await();
-        System.out.println("Job started. We have 30 seconds from now.");
-        Set<JobKey> jobKeys = scheduler1.getJobKeys(GroupMatcher.jobGroupEquals("testJobs/1/2"));
-        List<JobExecutionContext> currentlyExecutingJobs = scheduler1.getCurrentlyExecutingJobs();
-        Assert.assertTrue("Wrong number of jobs in store", jobKeys.size() == 1);
-        Assert.assertTrue("Wrong number of executing jobs", currentlyExecutingJobs.size() == 1);
+            barrier.await();
+            System.out.println("Job started. We have 30 seconds from now.");
+            Set<JobKey> jobKeys = scheduler1.getJobKeys(GroupMatcher.jobGroupEquals("testJobs/1/2"));
+            List<JobExecutionContext> currentlyExecutingJobs = scheduler1.getCurrentlyExecutingJobs();
+            Assert.assertTrue("Wrong number of jobs in store", jobKeys.size() == 1);
+            Assert.assertTrue("Wrong number of executing jobs", currentlyExecutingJobs.size() == 1);
 
-        scheduler1.deleteJob(job.getKey());
-        jobKeys = scheduler1.getJobKeys(GroupMatcher.jobGroupEquals("testJobs/1/2"));
-        currentlyExecutingJobs = scheduler1.getCurrentlyExecutingJobs();
-        Assert.assertTrue("Wrong number of jobs in store", jobKeys.size() == 0);
-        Assert.assertTrue("Wrong number of executing jobs", currentlyExecutingJobs.size() == 1);
+            scheduler1.deleteJob(job.getKey());
+            jobKeys = scheduler1.getJobKeys(GroupMatcher.jobGroupEquals("testJobs/1/2"));
+            currentlyExecutingJobs = scheduler1.getCurrentlyExecutingJobs();
+            Assert.assertTrue("Wrong number of jobs in store", jobKeys.size() == 0);
+            Assert.assertTrue("Wrong number of executing jobs", currentlyExecutingJobs.size() == 1);
 
-        Thread.sleep(5000L);
+            Thread.sleep(5000L);
 
-        barrier.reset();
-        job = JobBuilder.newJob(LongRunningJob.class)
-            .withIdentity("TestJob/1/2/3/ABC", "testJobs/1/2")
-            .build();
-        trigger = TriggerBuilder.newTrigger()
-            .forJob(job)
-            .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/withInterval/5000")
-            .withSchedule(SimpleScheduleBuilder.simpleSchedule()
-            .withIntervalInMilliseconds(5000)
-            .repeatForever()
-            .withMisfireHandlingInstructionFireNow())
-            .startNow()
-            .build();
-        scheduler1.scheduleJob(job, trigger);
-        barrier.await();
+            barrier.reset();
+            job = JobBuilder.newJob(LongRunningJob.class)
+                .withIdentity("TestJob/1/2/3/ABC", "testJobs/1/2")
+                .build();
+            trigger = TriggerBuilder.newTrigger()
+                .forJob(job)
+                .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/withInterval/5000")
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule()
+                .withIntervalInMilliseconds(5000)
+                .repeatForever()
+                .withMisfireHandlingInstructionFireNow())
+                .startNow()
+                .build();
+            scheduler1.scheduleJob(job, trigger);
+            barrier.await();
 
-        // Now look if both threads are running
-        currentlyExecutingJobs = scheduler1.getCurrentlyExecutingJobs();
-        Assert.assertFalse("Jobs were running concurrently!", currentlyExecutingJobs.size() > 1);
-        scheduler1.shutdown(true);
+            // Now look if both threads are running
+            currentlyExecutingJobs = scheduler1.getCurrentlyExecutingJobs();
+            Assert.assertFalse("Jobs were running concurrently!", currentlyExecutingJobs.size() > 1);
+        } finally {
+            scheduler1.shutdown(true);
+        }
     }
 
     @Test
@@ -293,57 +304,59 @@ public class DisallowConcurrentExecutionJobTest {
         scheduler1.getListenerManager().addJobListener(listener);
         scheduler2.getContext().put(BARRIER, latch);
         scheduler2.getListenerManager().addJobListener(listener);
-        scheduler1.start();
-        scheduler2.start();
+        try {
+            scheduler1.start();
+            scheduler2.start();
 
-        JobDetail job1 = JobBuilder.newJob(ReschedulingTestJob.class)
-            .withIdentity("TestJob/1/2/3/ABC", "testJobs/1/2")
-            .build();
+            JobDetail job1 = JobBuilder.newJob(ReschedulingTestJob.class)
+                .withIdentity("TestJob/1/2/3/ABC", "testJobs/1/2")
+                .build();
 
-        SimpleTrigger trigger1 = TriggerBuilder.newTrigger()
-            .forJob(job1)
-            .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/withInterval/5000")
-            .startAt(new Date(System.currentTimeMillis()))
-            .withPriority(5)
-            .withSchedule(SimpleScheduleBuilder.simpleSchedule()
-            .withIntervalInMilliseconds(5000)
-            .repeatForever()
-            .withMisfireHandlingInstructionFireNow())
-            .build();
+            SimpleTrigger trigger1 = TriggerBuilder.newTrigger()
+                .forJob(job1)
+                .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/withInterval/5000")
+                .startAt(new Date(System.currentTimeMillis()))
+                .withPriority(5)
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule()
+                .withIntervalInMilliseconds(5000)
+                .repeatForever()
+                .withMisfireHandlingInstructionFireNow())
+                .build();
 
-        scheduler1.scheduleJob(job1, trigger1);
+            scheduler1.scheduleJob(job1, trigger1);
 
-        Thread.sleep(10);
-        scheduler2.scheduleJob(TriggerBuilder.newTrigger()
-            .forJob(job1)
-            .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/oneShot/" + System.currentTimeMillis())
-            .startAt(new Date(System.currentTimeMillis()))
-            .withPriority(5)
-            .build());
+            Thread.sleep(10);
+            scheduler2.scheduleJob(TriggerBuilder.newTrigger()
+                .forJob(job1)
+                .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/oneShot/" + System.currentTimeMillis())
+                .startAt(new Date(System.currentTimeMillis()))
+                .withPriority(5)
+                .build());
 
-        Thread.sleep(10);
-        scheduler1.scheduleJob(TriggerBuilder.newTrigger()
-            .forJob(job1)
-            .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/oneShot/" + System.currentTimeMillis())
-            .startAt(new Date(System.currentTimeMillis()))
-            .withPriority(5)
-            .build());
+            Thread.sleep(10);
+            scheduler1.scheduleJob(TriggerBuilder.newTrigger()
+                .forJob(job1)
+                .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/oneShot/" + System.currentTimeMillis())
+                .startAt(new Date(System.currentTimeMillis()))
+                .withPriority(5)
+                .build());
 
-        Thread.sleep(10);
-        scheduler2.scheduleJob(TriggerBuilder.newTrigger()
-            .forJob(job1)
-            .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/oneShot/" + System.currentTimeMillis())
-            .startAt(new Date(System.currentTimeMillis()))
-            .withPriority(5)
-            .build());
+            Thread.sleep(10);
+            scheduler2.scheduleJob(TriggerBuilder.newTrigger()
+                .forJob(job1)
+                .withIdentity("someTrigger/1/2/3/ABC", "testTriggers/1/2/oneShot/" + System.currentTimeMillis())
+                .startAt(new Date(System.currentTimeMillis()))
+                .withPriority(5)
+                .build());
 
-        latch.await(30, TimeUnit.SECONDS);
-        if (latch.getCount() > 0L) {
-            Assert.fail("Count was " + latch.getCount());
+            latch.await(30, TimeUnit.SECONDS);
+            if (latch.getCount() > 0L) {
+                Assert.fail("Count was " + latch.getCount());
+            }
+        } finally {
+            scheduler1.shutdown(true);
+            scheduler2.shutdown(true);
         }
-
-        scheduler1.shutdown(true);
-        scheduler2.shutdown(true);
     }
 
     @Test
@@ -354,28 +367,30 @@ public class DisallowConcurrentExecutionJobTest {
         props.setProperty("org.quartz.threadPool.threadCount", "3");
         props.setProperty("org.quartz.jobStore.class", JOB_STORE);
         Scheduler scheduler = new StdSchedulerFactory(props).getScheduler();
-        scheduler.getContext().put(BARRIER, latch);
-        scheduler.getListenerManager().addJobListener(new SleepingJobListener());
+        try {
+            scheduler.getContext().put(BARRIER, latch);
+            scheduler.getListenerManager().addJobListener(new SleepingJobListener());
 
-        Date startTime = new Date(System.currentTimeMillis() + 100);
-        JobDetail job1 = JobBuilder.newJob(SleepingTestJob.class).withIdentity("job1").build();
-        Trigger trigger1 = TriggerBuilder.newTrigger()
-            .withSchedule(SimpleScheduleBuilder.simpleSchedule())
-            .startAt(startTime)
-            .build();
+            Date startTime = new Date(System.currentTimeMillis() + 100);
+            JobDetail job1 = JobBuilder.newJob(SleepingTestJob.class).withIdentity("job1").build();
+            Trigger trigger1 = TriggerBuilder.newTrigger()
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule())
+                .startAt(startTime)
+                .build();
 
-        Trigger trigger2 = TriggerBuilder.newTrigger()
-            .withSchedule(SimpleScheduleBuilder.simpleSchedule())
-            .startAt(new Date(startTime.getTime() + 100))
-            .forJob(job1.getKey())
-            .build();
+            Trigger trigger2 = TriggerBuilder.newTrigger()
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule())
+                .startAt(new Date(startTime.getTime() + 100))
+                .forJob(job1.getKey())
+                .build();
 
-        scheduler.scheduleJob(job1, trigger1);
-        scheduler.scheduleJob(trigger2);
-        scheduler.start();
-
-        latch.await(125, TimeUnit.SECONDS);
-        scheduler.shutdown(true);
+            scheduler.scheduleJob(job1, trigger1);
+            scheduler.scheduleJob(trigger2);
+            scheduler.start();
+        } finally {
+            latch.await(125, TimeUnit.SECONDS);
+            scheduler.shutdown(true);
+        }
     }
 
     @Test
@@ -388,24 +403,26 @@ public class DisallowConcurrentExecutionJobTest {
         props.setProperty("org.quartz.threadPool.threadCount", "2");
         props.setProperty("org.quartz.jobStore.class", JOB_STORE);
         Scheduler scheduler = new StdSchedulerFactory(props).getScheduler();
-        scheduler.getContext().put(BARRIER, barrier);
-        scheduler.getContext().put(DATE_STAMPS, jobExecDates);
-        scheduler.getListenerManager().addJobListener(new TestJobListener(2));
+        try {
+            scheduler.getContext().put(BARRIER, barrier);
+            scheduler.getContext().put(DATE_STAMPS, jobExecDates);
+            scheduler.getListenerManager().addJobListener(new TestJobListener(2));
 
-        Date startTime = new Date(System.currentTimeMillis() + 100); // make the triggers fire at the same time.
+            Date startTime = new Date(System.currentTimeMillis() + 100); // make the triggers fire at the same time.
 
-        JobDetail job1 = JobBuilder.newJob(TestJob.class).withIdentity("job1").build();
-        Trigger trigger1 = TriggerBuilder.newTrigger().withSchedule(SimpleScheduleBuilder.simpleSchedule()).startAt(startTime).build();
+            JobDetail job1 = JobBuilder.newJob(TestJob.class).withIdentity("job1").build();
+            Trigger trigger1 = TriggerBuilder.newTrigger().withSchedule(SimpleScheduleBuilder.simpleSchedule()).startAt(startTime).build();
 
-        Trigger trigger2 = TriggerBuilder.newTrigger().withSchedule(SimpleScheduleBuilder.simpleSchedule()).startAt(startTime).forJob(
-            job1.getKey()).build();
-        scheduler.scheduleJob(job1, trigger1);
-        scheduler.scheduleJob(trigger2);
-        scheduler.start();
+            Trigger trigger2 = TriggerBuilder.newTrigger().withSchedule(SimpleScheduleBuilder.simpleSchedule()).startAt(startTime).forJob(
+                job1.getKey()).build();
+            scheduler.scheduleJob(job1, trigger1);
+            scheduler.scheduleJob(trigger2);
+            scheduler.start();
 
-        barrier.await(125, TimeUnit.SECONDS);
-
-        scheduler.shutdown(true);
+            barrier.await(125, TimeUnit.SECONDS);
+        } finally {
+            scheduler.shutdown(true);
+        }
 
         Assert.assertTrue(jobExecDates.size() == 2);
         long fireTimeTrigger1 = jobExecDates.get(0).getTime();
@@ -433,16 +450,18 @@ public class DisallowConcurrentExecutionJobTest {
         props.setProperty("org.quartz.threadPool.threadCount", "2");
         props.setProperty("org.quartz.jobStore.class", JOB_STORE);
         Scheduler scheduler = new StdSchedulerFactory(props).getScheduler();
-        scheduler.getContext().put(BARRIER, barrier);
-        scheduler.getContext().put(DATE_STAMPS, jobExecDates);
-        scheduler.getListenerManager().addJobListener(new TestJobListener(2));
-        scheduler.scheduleJob(job1, trigger1);
-        scheduler.scheduleJob(trigger2);
-        scheduler.start();
+        try {
+            scheduler.getContext().put(BARRIER, barrier);
+            scheduler.getContext().put(DATE_STAMPS, jobExecDates);
+            scheduler.getListenerManager().addJobListener(new TestJobListener(2));
+            scheduler.scheduleJob(job1, trigger1);
+            scheduler.scheduleJob(trigger2);
+            scheduler.start();
 
-        barrier.await(125, TimeUnit.SECONDS);
-
-        scheduler.shutdown(true);
+            barrier.await(125, TimeUnit.SECONDS);
+        } finally {
+            scheduler.shutdown(true);
+        }
 
         Assert.assertTrue(jobExecDates.size() == 2);
         long fireTimeTrigger1 = jobExecDates.get(0).getTime();
