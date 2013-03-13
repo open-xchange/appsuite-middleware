@@ -72,7 +72,7 @@ import com.openexchange.admin.soap.user.dataobjects.User;
     "capsToRemove",
     "auth"
 })
-@XmlRootElement(name = "getModuleAccess")
+@XmlRootElement(name = "changeCapabilities")
 public final class ChangeCapabilities {
 
     /**

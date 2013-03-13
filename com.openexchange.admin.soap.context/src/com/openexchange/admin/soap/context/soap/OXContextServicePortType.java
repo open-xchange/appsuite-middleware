@@ -29,18 +29,12 @@ public interface OXContextServicePortType {
         Change parameters
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception;
 
+    @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
     @Action(input = "urn:changeCapabilities", output = "urn:changeCapabilitiesResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:changeCapabilitiesStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:changeCapabilitiesInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:changeCapabilitiesInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:changeCapabilitiesNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:changeCapabilitiesRemoteException")})
-    @RequestWrapper(localName = "changeCapabilities", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.context.soap.ChangeCapabilities")
     @WebMethod(action = "urn:changeCapabilities")
     public void changeCapabilities(
-        @WebParam(name = "ctx", targetNamespace = "http://soap.admin.openexchange.com")
-        com.openexchange.admin.soap.context.dataobjects.Context ctx,
-        @WebParam(name = "capsToAdd", targetNamespace = "http://soap.admin.openexchange.com")
-        java.lang.String capsToAdd,
-        @WebParam(name = "capsToRemove", targetNamespace = "http://soap.admin.openexchange.com")
-        java.lang.String capsToRemove,
-        @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
-        com.openexchange.admin.soap.context.dataobjects.Credentials auth
+        @WebParam(partName = "parameters", name = "changeCapabilities", targetNamespace = "http://soap.admin.openexchange.com")
+        ChangeCapabilities parameters
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
