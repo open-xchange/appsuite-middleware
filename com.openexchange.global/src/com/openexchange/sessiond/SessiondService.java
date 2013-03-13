@@ -138,6 +138,7 @@ public interface SessiondService {
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param matcher The session matcher
+     * @return The first matching session or <code>null</code> if none matches
      */
     public Session findFirstMatchingSessionForUser(int userId, int contextId, SessionMatcher matcher);
 
