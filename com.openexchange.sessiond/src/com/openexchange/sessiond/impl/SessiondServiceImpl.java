@@ -94,7 +94,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public Session addSession(final AddSessionParameter param) throws OXException {
-        final SessionImpl session = SessionHandler.addSession(
+        return SessionHandler.addSession(
             param.getUserId(),
             param.getUserLoginInfo(),
             param.getPassword(),
@@ -106,10 +106,6 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
             param.getClient(),
             param.getClientToken(),
             param.isTransient());
-        if (null == session) {
-            return null;
-        }
-        return session;
     }
 
     @Override
