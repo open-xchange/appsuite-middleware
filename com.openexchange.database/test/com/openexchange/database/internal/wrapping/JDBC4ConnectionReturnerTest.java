@@ -57,6 +57,7 @@ import java.sql.SQLException;
 import org.junit.Test;
 import com.openexchange.database.internal.AssignmentImpl;
 import com.openexchange.database.internal.Pools;
+import com.openexchange.database.internal.ReplicationMonitor;
 
 /**
  * Tests methods in class {@link JDBC4ConnectionReturner}
@@ -92,7 +93,7 @@ public class JDBC4ConnectionReturnerTest {
         } else {
             clazz = Class.forName("com.openexchange.database.internal.wrapping.JDBC4ConnectionReturner");
         }
-        Constructor<?> constructor = clazz.getConstructor(Pools.class, AssignmentImpl.class, Connection.class, boolean.class, boolean.class, boolean.class);
+        Constructor<?> constructor = clazz.getConstructor(Pools.class, ReplicationMonitor.class, AssignmentImpl.class, Connection.class, boolean.class, boolean.class, boolean.class);
         return constructor;
     }
 
