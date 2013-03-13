@@ -146,7 +146,10 @@ public final class LastLoginUpdater implements EventHandler {
                         task = newTask;
                         // Schedule timer task for every 24h
                         final TimerService service = ServerServiceRegistry.getInstance().getService(TimerService.class);
-                        task.set(service.scheduleAtFixedRate(new PeriodicTask(client, session.getUserId(), session.getContextId(), LOG), MILLIS_DAY, MILLIS_DAY));
+                        final PeriodicTask periodicTask = new PeriodicTask(client, session.getUserId(), session.getContextId(), LOG);
+                        final ScheduledTimerTask associatedTask = service.scheduleAtFixedRate(periodicTask, MILLIS_DAY, MILLIS_DAY);
+                        periodicTask.setAssociatedTask(associatedTask);
+                        task.set(associatedTask);
                     }
                 } finally {
                     lock.unlock();
@@ -216,6 +219,7 @@ public final class LastLoginUpdater implements EventHandler {
         private final String client;
         private final int userId;
         private final Log logger;
+        private volatile ScheduledTimerTask associatedTask;
 
         PeriodicTask(String client, int userId, int contextId, Log logger) {
             super();
@@ -225,15 +229,32 @@ public final class LastLoginUpdater implements EventHandler {
             this.logger = logger;
         }
 
+        void setAssociatedTask(ScheduledTimerTask associatedTask) {
+            this.associatedTask = associatedTask;
+        }
+
         @Override
         public void run() {
+            ScheduledTimerTask associatedTask = this.associatedTask;
+            if (null == associatedTask) {
+                // Already canceled
+                return;
+            }
             final ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
             final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
             if (null != contextService && null != userService) {
                 try {
-                    final Context context = contextService.getContext(contextId);
-                    final User user = userService.getUser(userId, context);
-                    LastLoginRecorder.updateLastLogin(client, user, context);
+                    final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                    final Session found = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new ByClientSessionMatcher(client));
+                    if (null != found) {
+                        // Still valid session
+                        final Context context = contextService.getContext(contextId);
+                        final User user = userService.getUser(userId, context);
+                        LastLoginRecorder.updateLastLogin(client, user, context);
+                    } else {
+                        associatedTask.cancel(false);
+                        this.associatedTask = null;
+                    }
                 } catch (final Exception e) {
                     logger.warn("Failed updating last login timestamp for client \"" + client + "\" (user=" + userId + ", context=" + contextId + ").", e);
                 }
