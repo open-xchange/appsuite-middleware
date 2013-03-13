@@ -738,15 +738,32 @@ public class ImprovedHazelcastJobStore implements JobStore {
 
     @Override
     public List<OperableTrigger> acquireNextTriggers(long noLaterThan, int maxCount, long timeWindow) throws JobPersistenceException {
+        long startTime = System.currentTimeMillis();
+        StringBuilder logBuilder = null;
+        if (LOG.isTraceEnabled()) {
+            logBuilder = new StringBuilder();
+            logBuilder.append("Acquiring triggers at ");
+            logBuilder.append(startTime);
+            logBuilder.append("\n");
+        }
+        
         List<OperableTrigger> returnList = new ArrayList<OperableTrigger>();
         lock.lock();
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Got lock. " + System.nanoTime());
+        if (logBuilder != null) {
+            logBuilder.append("    Got lock at ");
+            logBuilder.append(System.currentTimeMillis());
+            logBuilder.append("\n");
         }
 
         long firstAcquiredTriggerFireTime = 0L;
         try {
             Collection<TriggerStateWrapper> filteredTriggers = triggersByKey.values(new SelectTriggersPredicate(noLaterThan, timeWindow));
+            if (logBuilder != null) {
+                logBuilder.append("    Filtered triggers at ");
+                logBuilder.append(System.currentTimeMillis());
+                logBuilder.append("\n");
+            }
+
             if (filteredTriggers == null || filteredTriggers.isEmpty()) {
                 return returnList;
             }
@@ -802,13 +819,17 @@ public class ImprovedHazelcastJobStore implements JobStore {
             return returnList;
         } finally {
             lock.unlock();
-            if (LOG.isTraceEnabled()) {
-                StringBuilder sb = new StringBuilder("Releasing lock. ");
-                sb.append(System.nanoTime()).append(". ");
+            if (logBuilder != null) {
+                logBuilder.append("    Released lock at ");
+                logBuilder.append(System.currentTimeMillis());
+                logBuilder.append("\n    Duration: ");
+                logBuilder.append(System.currentTimeMillis() - startTime);
+                logBuilder.append("ms.");
                 for (OperableTrigger trigger : returnList) {
-                    sb.append("\n    Trigger: ").append(trigger.getKey().getName());
+                    logBuilder.append("\n        Trigger: ").append(trigger.getKey().getName());
                 }
-                LOG.trace(sb.toString());
+                
+                LOG.trace(logBuilder.toString());
             }
         }
     }
