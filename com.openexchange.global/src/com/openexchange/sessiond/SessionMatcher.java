@@ -59,6 +59,7 @@ import com.openexchange.session.Session;
  * {@link SessionMatcher} - Checks a certain session.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SessionMatcher {
 
