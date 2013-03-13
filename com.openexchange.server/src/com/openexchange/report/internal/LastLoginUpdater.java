@@ -221,7 +221,7 @@ public final class LastLoginUpdater implements EventHandler {
         private final Log logger;
         private volatile ScheduledTimerTask associatedTask;
 
-        PeriodicTask(final String client, final int userId, final int contextId, final Log logger) {
+        PeriodicTask(String client, int userId, int contextId, Log logger) {
             super();
             this.contextId = contextId;
             this.client = client;
@@ -229,13 +229,13 @@ public final class LastLoginUpdater implements EventHandler {
             this.logger = logger;
         }
 
-        void setAssociatedTask(final ScheduledTimerTask associatedTask) {
+        void setAssociatedTask(ScheduledTimerTask associatedTask) {
             this.associatedTask = associatedTask;
         }
 
         @Override
         public void run() {
-            final ScheduledTimerTask associatedTask = this.associatedTask;
+            ScheduledTimerTask associatedTask = this.associatedTask;
             if (null == associatedTask) {
                 // Already canceled
                 return;
