@@ -2074,8 +2074,26 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             con.setAutoCommit(false); // BEGIN
             autocommit = true;
             rollback = true;
+            // Determine what is already present
+            final Set<String> existing;
+            {
+                stmt = con.prepareStatement("SELECT cap FROM capability_context WHERE cid=?");
+                stmt.setInt(1, contextId);
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    existing = new HashSet<String>(16);
+                    do {
+                        existing.add(rs.getString(1));
+                    } while (rs.next());
+                } else {
+                    existing = Collections.<String> emptySet();
+                }
+                Databases.closeSQLStuff(rs, stmt);
+                stmt = null;
+                rs = null;
+            }
             // Delete existing ones
-            if (null != capsToRemove) {
+            if (null != capsToRemove && !capsToRemove.isEmpty()) {
                 stmt = con.prepareStatement("DELETE FROM capability_context WHERE cid=? AND cap=?");
                 stmt.setInt(1, contextId);
                 for (final String cap : capsToRemove) {
@@ -2083,16 +2101,23 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     stmt.addBatch();
                 }
                 stmt.executeBatch();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
             }
             // Insert new ones
             if (null != capsToAdd) {
-                stmt = con.prepareStatement("INSERT INTO capability_context (cid, cap) VALUES (?, ?)");
-                stmt.setInt(1, contextId);
-                for (final String cap : capsToAdd) {
-                    stmt.setString(2, cap);
-                    stmt.addBatch();
+                capsToAdd.removeAll(existing);
+                if (!capsToAdd.isEmpty()) {
+                    stmt = con.prepareStatement("INSERT INTO capability_context (cid, cap) VALUES (?, ?)");
+                    stmt.setInt(1, contextId);
+                    for (final String cap : capsToAdd) {
+                        stmt.setString(2, cap);
+                        stmt.addBatch();
+                    }
+                    stmt.executeBatch();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
                 }
-                stmt.executeBatch();
             }
             con.commit(); // COMMIT
             rollback = false;
@@ -2103,10 +2128,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
         } finally {
+            Databases.closeSQLStuff(stmt);
             if (rollback) {
                 rollback(con);
             }
-            Databases.closeSQLStuff(stmt);
             if (autocommit) {
                 autocommit(con);
             }

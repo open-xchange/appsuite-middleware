@@ -66,6 +66,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -236,8 +237,27 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             con.setAutoCommit(false); // BEGIN
             autocommit = true;
             rollback = true;
+            // Determine what is already present
+            final Set<String> existing;
+            {
+                stmt = con.prepareStatement("SELECT cap FROM capability_user WHERE cid=? AND user=?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, user.getId().intValue());
+                ResultSet rs = stmt.executeQuery();
+                if (rs.next()) {
+                    existing = new HashSet<String>(16);
+                    do {
+                        existing.add(rs.getString(1));
+                    } while (rs.next());
+                } else {
+                    existing = Collections.<String> emptySet();
+                }
+                Databases.closeSQLStuff(rs, stmt);
+                stmt = null;
+                rs = null;
+            }
             // Delete existing ones
-            if (null != capsToRemove) {
+            if (null != capsToRemove && !capsToRemove.isEmpty()) {
                 stmt = con.prepareStatement("DELETE FROM capability_user WHERE cid=? AND user=? AND cap=?");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, user.getId().intValue());
@@ -246,17 +266,24 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     stmt.addBatch();
                 }
                 stmt.executeBatch();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
             }
             // Insert new ones
             if (null != capsToAdd) {
-                stmt = con.prepareStatement("INSERT INTO capability_user (cid, user, cap) VALUES (?, ?, ?)");
-                stmt.setInt(1, contextId);
-                stmt.setInt(2, user.getId().intValue());
-                for (final String cap : capsToAdd) {
-                    stmt.setString(3, cap);
-                    stmt.addBatch();
+                capsToAdd.removeAll(existing);
+                if (!capsToAdd.isEmpty()) {
+                    stmt = con.prepareStatement("INSERT INTO capability_user (cid, user, cap) VALUES (?, ?, ?)");
+                    stmt.setInt(1, contextId);
+                    stmt.setInt(2, user.getId().intValue());
+                    for (final String cap : capsToAdd) {
+                        stmt.setString(3, cap);
+                        stmt.addBatch();
+                    }
+                    stmt.executeBatch();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
                 }
-                stmt.executeBatch();
             }
             con.commit(); // COMMIT
             rollback = false;
@@ -267,10 +294,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             log.error("Pool Error", e);
             throw new StorageException(e);
         } finally {
+            Databases.closeSQLStuff(stmt);
             if (rollback) {
                 rollback(con);
             }
-            Databases.closeSQLStuff(stmt);
             if (autocommit) {
                 autocommit(con);
             }
