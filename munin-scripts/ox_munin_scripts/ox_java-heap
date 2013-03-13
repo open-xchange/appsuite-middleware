@@ -45,14 +45,14 @@ while (<SHOWRUNTIME>)
 		print "a.value $val\n";
 		next;
 	}
-	if ( $_ =~ /Survivor Space,type=MemoryPool,Usage /) {
+	if ( $_ =~ /Survivor( Space)?,type=MemoryPool,Usage /) {
 		s/.*\=//; 
 		s/].*//;
 		$val=$_+0;
 		print "b.value $val\n";
 		next;
 	}
-	if ( $_ =~ /Eden Space,type=MemoryPool,Usage /) {
+	if ( $_ =~ /Eden( Space)?,type=MemoryPool,Usage /) {
 		s/.*\=//; 
 		s/].*//;
 		$val=$_+0;

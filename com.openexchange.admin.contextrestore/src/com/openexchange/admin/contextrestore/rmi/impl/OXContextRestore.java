@@ -248,25 +248,25 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                             if (dbmatcher.matches()) {
                                 // Database found
                                 final String databasename = dbmatcher.group(1);
-                                if ("mysql".equals(databasename) || "information_schema".equals(databasename)) {
-                                    furthersearch = false;
-                                } else {
+                                if ("configdb".equals(databasename) || (null != schema && schema.equals(databasename))) {
                                     furthersearch = true;
+                                    LOG.info("Database: " + databasename);
+                                    if (null != bufferedWriter) {
+                                        bufferedWriter.append("/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;\n");
+                                        bufferedWriter.flush();
+                                        bufferedWriter.close();
+                                    }
+                                    
+                                    final String file = "/tmp/" + databasename + ".txt";
+                                    bufferedWriter = new BufferedWriter(new FileWriter(file));
+                                    bufferedWriter.append("/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;\n");
+                                    // Reset values
+                                    cidpos = -1;
+                                    state = 0;
+                                    oldstate = 0;
+                                } else {
+                                    furthersearch = false;
                                 }
-                                LOG.info("Database: " + databasename);
-                                if (null != bufferedWriter) {
-                                    bufferedWriter.append("/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;\n");
-                                    bufferedWriter.flush();
-                                    bufferedWriter.close();
-                                }
-
-                                final String file = "/tmp/" + databasename + ".txt";
-                                bufferedWriter = new BufferedWriter(new FileWriter(file));
-                                bufferedWriter.append("/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;\n");
-                                // Reset values
-                                cidpos = -1;
-                                state = 0;
-                                oldstate = 0;
                             } else if (furthersearch && tablematcher.matches()) {
                                 // Table found
                                 tableName = tablematcher.group(1);
@@ -279,10 +279,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                                 LOG.info("Dump found");
                                 if ("updateTask".equals(tableName)) {
                                     // One or more entries for 'updateTask' table
-                                    if (null == updateTaskInformation) {
-                                        updateTaskInformation = new UpdateTaskInformation();
-                                    }
-                                    searchAndCheckUpdateTask(in, cid, updateTaskInformation);
+                                    updateTaskInformation = searchAndCheckUpdateTask(in, cid);
                                 }
                                 if ("version".equals(tableName)) {
                                     // The version table is quite small so it is safe to read the whole line here:
@@ -402,42 +399,26 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
         private final static Pattern insertIntoUpdateTaskValues =
             Pattern.compile("\\((?:" + REGEX_VALUE + ",)(?:" + REGEX_VALUE + ",)(?:" + REGEX_VALUE + ",)" + REGEX_VALUE + "\\)");
 
-        private UpdateTaskInformation searchAndCheckUpdateTask(final BufferedReader in, final int contextId, final UpdateTaskInformation updateTaskInformation) throws IOException {
-            StringBuilder insert = null;
-            String line;
-            {
-                boolean eoi = false;
-                while (!eoi && (line = in.readLine()) != null && !line.startsWith("--")) {
-                    if (null == insert) {
-                        if (line.startsWith("INSERT INTO `updateTask` VALUES ")) {
-                            // Start collecting lines
-                            insert = new StringBuilder(2048);
-                            insert.append(line);
-                        }
-                    } else {
-                        insert.append(line);
-                        if (line.endsWith(");")) {
-                            eoi = true;
+        private UpdateTaskInformation searchAndCheckUpdateTask(final BufferedReader in, final int contextId) throws IOException {
+            final UpdateTaskInformation retval = new UpdateTaskInformation();
+            String line = in.readLine();
+            while ((line = in.readLine()) != null && !line.startsWith("--")) {
+                if (line.startsWith("INSERT INTO `updateTask` VALUES ")) {
+                    final Matcher matcher = insertIntoUpdateTaskValues.matcher(line.substring(32));
+                    while (matcher.find()) {
+                        final UpdateTaskEntry updateTaskEntry = new UpdateTaskEntry();
+                        final int contextId2 = Integer.parseInt(matcher.group(1));
+                        if (contextId2 <= 0 || contextId2 == contextId) {
+                            updateTaskEntry.setContextId(contextId2);
+                            updateTaskEntry.setTaskName(matcher.group(2).replaceAll("'", ""));
+                            updateTaskEntry.setSuccessful((Integer.parseInt(matcher.group(3)) > 0));
+                            updateTaskEntry.setLastModified(Long.parseLong(matcher.group(4)));
+                            retval.add(updateTaskEntry);
                         }
                     }
                 }
             }
-            if (null != insert) {
-                final Matcher matcher = insertIntoUpdateTaskValues.matcher(insert.substring(32));
-                insert = null;
-                while (matcher.find()) {
-                    final UpdateTaskEntry updateTaskEntry = new UpdateTaskEntry();
-                    final int contextId2 = Integer.parseInt(matcher.group(1));
-                    if (contextId2 <= 0 || contextId2 == contextId) {
-                        updateTaskEntry.setContextId(contextId2);
-                        updateTaskEntry.setTaskName(matcher.group(2));
-                        updateTaskEntry.setSuccessful((Integer.parseInt(matcher.group(3)) > 0));
-                        updateTaskEntry.setLastModified(Long.parseLong(matcher.group(4)));
-                        updateTaskInformation.add(updateTaskEntry);
-                    }
-                }
-            }
-            return updateTaskInformation;
+            return retval;
         }
 
         /**

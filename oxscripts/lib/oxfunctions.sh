@@ -123,20 +123,25 @@ ox_start_daemon() {
 ox_is_running() {
     local name="$1"
     local pattern="$2"
+    local pid="$3"
     test -z "$name" && die "ox_is_running: missing name argument (arg 1)"
     test -z "$pattern" && die "ox_is_running: missing pattern argument (arg 2)"
 
-    if [ -e /var/run/${name}.pid ]; then
-	read PID < /var/run/${name}.pid
-	# take care nothing influences line length if ps output
-	COLUMNS=1000
-	if ps $PID | grep "$pattern" > /dev/null; then
-	   return 0
-	else
-	   return 1
-	fi
+    if [ -z "$pid" ]; then
+       if [ -e /var/run/${name}.pid ]; then
+          read pid < /var/run/${name}.pid
+       fi
+    fi
+    if [ -n "$pid" ]; then
+        # take care nothing influences line length if ps output
+        COLUMNS=1000
+        if ps $pid | grep "$pattern" > /dev/null; then
+           return 0
+        else
+           return 1
+        fi
     else
-	   return 1
+        return 1
     fi
 }
 

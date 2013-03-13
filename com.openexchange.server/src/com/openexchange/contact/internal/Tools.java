@@ -348,22 +348,23 @@ public final class Tools {
 	 * set of default folders for the user, or all contact folders visible to
 	 * the user.
 	 *
-	 * @param contextID the context ID
-	 * @param userID the user ID.
-	 * @return
+	 * @param contextID The context ID
+	 * @param userID The user ID
+	 * @param emailAutoComplete <code>true</code> if the search is an e-mail auto-complete-search, <code>false</code>, otherwise.
+	 * @return The search folders
 	 * @throws OXException
 	 */
-	public static List<String> getSearchFolders(final int contextID, final int userID) throws OXException {
-		if (ContactConfig.getInstance().getBoolean(Property.ALL_FOLDERS_FOR_AUTOCOMPLETE).booleanValue()) {
-			/*
-			 * use all visible folders for search
-			 */
-			return getVisibleFolders(contextID, userID);
+	public static List<String> getSearchFolders(int contextID, int userID, boolean emailAutoComplete) throws OXException {
+		if (emailAutoComplete && false == ContactConfig.getInstance().getBoolean(Property.ALL_FOLDERS_FOR_AUTOCOMPLETE).booleanValue()) {
+            /*
+             * use default set of folders for search
+             */
+            return getBasicFolders(contextID, userID);
 		} else {
-			/*
-			 * use default set of folders for search
-			 */
-			return getBasicFolders(contextID, userID);
+            /*
+             * use all visible folders for search
+             */
+            return getVisibleFolders(contextID, userID);
 		}
 	}
 

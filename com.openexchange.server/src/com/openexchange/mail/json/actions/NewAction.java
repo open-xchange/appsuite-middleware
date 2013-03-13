@@ -162,7 +162,7 @@ public final class NewAction extends AbstractMailAction {
             try {
                 String value = jsonMailObj.getString(MailJSONField.FROM.getKey());
                 final int endPos;
-                if ('[' == value.charAt(0) && (endPos = value.indexOf(']', 1)) < value.length()) {
+                if (value.length() > 0 && '[' == value.charAt(0) && (endPos = value.indexOf(']', 1)) < value.length()) {
                     value = new com.openexchange.java.StringAllocator(32).append("\"[").append(value.substring(1, endPos)).append("]\"").append(value.substring(endPos+1)).toString();
                 }
                 from = parseAddressList(value, true, true)[0];

@@ -58,7 +58,7 @@ import com.openexchange.groupware.ldap.User;
 /**
  * {@link OverridingUserConfigurationStorage}
  */
-public class OverridingUserConfigurationStorage extends UserConfigurationStorage{
+public class OverridingUserConfigurationStorage extends UserConfigurationStorage {
 
     /** The delegate */
     protected final UserConfigurationStorage delegate;
@@ -100,6 +100,20 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
     }
 
     @Override
+    UserConfiguration[] getUserConfigurationWithoutExtended(Context ctx, int[] userIds, int[][] groups) throws OXException {
+        List<UserConfiguration> retval = new ArrayList<UserConfiguration>();
+        for (int i = 0; i < userIds.length ; i++) {
+            UserConfiguration config = getOverride(userIds[i], groups[i], ctx, false);
+            if (null == config) {
+                retval.add(delegate.getUserConfiguration(userIds[i], groups[i], ctx, false));
+            } else {
+                retval.add(config);
+            }
+        }
+        return retval.toArray(new UserConfiguration[retval.size()]);
+    }
+
+    @Override
     public void clearStorage() throws OXException {
         delegate.clearStorage();
     }
@@ -128,10 +142,5 @@ public class OverridingUserConfigurationStorage extends UserConfigurationStorage
     @Override
     public void saveUserConfiguration(final int permissionBits, final int userId, final Context ctx) throws OXException {
         delegate.saveUserConfiguration(permissionBits, userId, ctx);
-    }
-
-    @Override
-    UserConfiguration[] getUserConfigurationWithoutExtended(Context ctx, int[] userId, int[][] groups) throws OXException {
-        return delegate.getUserConfigurationWithoutExtended(ctx, userId, groups);
     }
 }

@@ -119,30 +119,29 @@ public class SearchResult2JSONConverter implements ResultConverter {
             result.setResultObject(JSONObject.NULL, "json");
             return;
         }
-        
+
         OXJSONWriter resultWriter = new OXJSONWriter();
-        
         try {
-        resultWriter.object();
-        if (resultObject instanceof SearchResult<?>) {
-            SearchResult<?> genericResult = (SearchResult<?>) resultObject;
-            writeResult(session, genericResult, resultWriter);
-        } else {
-            Collection<SearchResult<?>> results = (Collection<SearchResult<?>>) resultObject;
-            for (SearchResult<?> genericResult : results) {
+            resultWriter.object();
+            if (resultObject instanceof SearchResult<?>) {
+                SearchResult<?> genericResult = (SearchResult<?>) resultObject;
                 writeResult(session, genericResult, resultWriter);
+            } else {
+                Collection<SearchResult<?>> results = (Collection<SearchResult<?>>) resultObject;
+                for (SearchResult<?> genericResult : results) {
+                    writeResult(session, genericResult, resultWriter);
+                }
             }
-        }
-    } catch (JSONException e) {
-        throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-    } finally {
-        try {
-            resultWriter.endObject();
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } finally {
+            try {
+                resultWriter.endObject();
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            }
         }
-    }
-        
+
         result.setResultObject(resultWriter.getObject(), "json");
     }
 

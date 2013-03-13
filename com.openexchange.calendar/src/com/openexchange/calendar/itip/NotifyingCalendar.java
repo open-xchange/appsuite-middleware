@@ -484,6 +484,7 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
 
     private void calculateExceptionPosition(final CalendarDataObject source, final CalendarDataObject target, final boolean isDelete) throws OXException {
         try {
+            boolean isException = target.isException();
             if (source.containsRecurrenceDatePosition()) {
                 target.setRecurrenceDatePosition(source.getRecurrenceDatePosition());
             }
@@ -496,7 +497,7 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
             if (target.containsRecurrenceDatePosition() && target.getRecurrenceDatePosition() != null || target.containsRecurrencePosition() && target.getRecurrencePosition() != 0) {
                 calendarCollection.setRecurrencePositionOrDateInDAO(target, true);
                 RecurringResultsInterface recResults;
-                if (!target.isException()) {
+                if (!isException) {
                     recResults = calendarCollection.calculateRecurring(target, 0, 0, target.getRecurrencePosition());
                     if (recResults == null) {
                     	return;

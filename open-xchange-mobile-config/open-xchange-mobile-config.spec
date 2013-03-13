@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  java-devel >= 1.6.0
 # TODO: version not hardcoded in spec file
 Version:	@OXVERSION@
-%define		ox_release 5
+%define		ox_release 6
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -43,6 +43,12 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
+    # SoftwareChange_Request-1339
+    pfile=/opt/open-xchange/etc/settings/oxmobile.properties
+    if ! ox_exists_property mox/config/defaultContactFolder $pfile; then
+        ox_set_property mox/config/defaultContactFolder "private" $pfile
+    fi
+
     # SoftwareChange_Request-1294
     pfile=/opt/open-xchange/etc/settings/oxmobile.properties
     if ! ox_exists_property mox/defaultContactStoreFolder $pfile; then
@@ -61,10 +67,24 @@ fi
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
+* Tue Mar 12 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Sixth release candidate for 6.22.2/7.0.2
+* Mon Mar 11 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Fifth release candidate for 6.22.2/7.0.2
+* Fri Mar 08 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Fourth release candidate for 6.22.2/7.0.2
+* Fri Mar 08 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Third release candidate for 6.22.2/7.0.2
+* Thu Mar 07 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Second release candidate for 6.22.2/7.0.2
 * Mon Mar 04 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2013-03-08
 * Fri Mar 01 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2013-03-07
+* Fri Mar 01 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2013-03-07
+* Wed Feb 27 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+First release candidate for 6.22.2/7.0.2
 * Tue Feb 26 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2013-02-22
 * Mon Feb 25 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
@@ -73,6 +93,8 @@ Build for patch 2013-02-22
 Fourth release candidate for 7.0.1
 * Tue Feb 19 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Third release candidate for 7.0.1
+* Tue Feb 19 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+prepare for 7.0.2 release
 * Fri Feb 15 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2013-02-13
 * Thu Feb 14 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>

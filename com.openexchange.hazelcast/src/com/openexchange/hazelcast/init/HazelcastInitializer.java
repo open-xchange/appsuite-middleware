@@ -52,6 +52,7 @@ package com.openexchange.hazelcast.init;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -73,6 +74,7 @@ import com.hazelcast.core.LifecycleListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.Hazelcasts;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.hazelcast.init.HazelcastInitializer.InitMode;
 import com.openexchange.hazelcast.mbean.HazelcastMBean;
 import com.openexchange.hazelcast.osgi.HazelcastActivator;
 
@@ -132,7 +134,7 @@ public final class HazelcastInitializer {
             /*
              * Remove from existing network configuration
              */
-            final Set<String> members = resolve2Members(nodes);
+            final Set<String> members = resolve2Members(nodes, config.getNetworkConfig().getInterfaces().getInterfaces());
             if (members.isEmpty()) {
                 return InitMode.NONE;
             }
@@ -262,7 +264,7 @@ public final class HazelcastInitializer {
             /*
              * Append to existing network configuration
              */
-            final Set<String> members = resolve2Members(nodes);
+            final Set<String> members = resolve2Members(nodes, config.getNetworkConfig().getInterfaces().getInterfaces());
             if (members.isEmpty()) {
                 if (logger.isInfoEnabled()) {
                     logger.info("\nHazelcast:\n\tAbort re-configuration of Hazelcast instance:\n\tNo additional members\n");
@@ -292,7 +294,7 @@ public final class HazelcastInitializer {
             tcpIpConfig.setMembers(new ArrayList<String>(cur));
             return InitMode.RE_INITIALIZED;
         } else {
-            final Set<String> members = resolve2Members(nodes);
+            final Set<String> members = resolve2Members(nodes, config.getNetworkConfig().getInterfaces().getInterfaces());
             if (!members.isEmpty()) {
                 if (logger.isInfoEnabled()) {
                     logger.info("\nHazelcast:\n\tConfiguring Hazelcast instance:\n\tInitial members: " + members + "\n");
@@ -311,13 +313,14 @@ public final class HazelcastInitializer {
 
     private static final Pattern SPLIT = Pattern.compile("\\%");
 
-    private static Set<String> resolve2Members(final List<InetAddress> nodes) {
-        Set<String> localHost = getLocalHost();
+    private static Set<String> resolve2Members(final List<InetAddress> nodes, Collection<String> excludedHosts) {
+        Set<String> excluded = new HashSet<String>(excludedHosts);
+        excluded.addAll(getLocalHost());
         final Set<String> members = new LinkedHashSet<String>(nodes.size());
         for (final InetAddress inetAddress : nodes) {
             final String[] addressArgs = SPLIT.split(inetAddress.getHostAddress(), 0);
             for (final String address : addressArgs) {
-                if (false == localHost.contains(address)) {
+                if (false == excluded.contains(address)) {
                     members.add(address);
                 }
             }

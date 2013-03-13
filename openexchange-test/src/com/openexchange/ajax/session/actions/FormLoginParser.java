@@ -55,6 +55,7 @@ import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER_ID;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
+import com.openexchange.ajax.framework.AbstractRedirectParser;
 
 /**
  * Parses the redirect response of the formLogin action of the login servlet.

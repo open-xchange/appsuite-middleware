@@ -442,7 +442,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 int position = newrule.getPosition();
                 final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
                 if (position >= clientrules.size()) {
-                    throw OXMailfilterExceptionCode.POSITION_TOO_BIG.create();
+                    throw OXMailfilterExceptionCode.BAD_POSITION.create(Integer.valueOf(position));
                 }
                 final int nextuid = rules.getNextuid();
                 setUidInRule(newrule, nextuid);
