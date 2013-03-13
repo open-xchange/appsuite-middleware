@@ -894,7 +894,14 @@ public final class ConfigJSlobService implements JSlobService {
             return null;
         }
         try {
-            return new JSONTokener(propertyValue).nextValue();
+            Object value = new JSONTokener(propertyValue).nextValue();
+            if (value instanceof String) {
+                if (propertyValue.startsWith("\"")){
+                    return value;
+                }
+                return propertyValue;
+            }
+            return value;
         } catch (final Exception e) {
             return propertyValue;
         }

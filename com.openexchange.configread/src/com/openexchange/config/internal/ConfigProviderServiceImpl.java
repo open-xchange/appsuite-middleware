@@ -127,6 +127,7 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
     public void setConfigService(final ConfigurationService configService) throws OXException {
         this.configService = configService;
         initSettings(configService);
+        initStructuredObjects(configService);
         initMetadata(configService);
     }
 
@@ -141,6 +142,38 @@ public class ConfigProviderServiceImpl implements ConfigProviderService {
 
         }
 
+    }
+    
+    private void initStructuredObjects(final ConfigurationService config) throws OXException {
+        Map<String, Object> yamlInFolder = config.getYamlInFolder(SETTINGS);
+        for(Object yamlContent: yamlInFolder.values()) {
+            if (yamlContent instanceof Map) {
+                Map<String, Object> entries = (Map<String, Object>) yamlContent;
+                for(Map.Entry<String, Object> entry: entries.entrySet()) {
+                    String namespace = entry.getKey();
+                    Object subkeys = entry.getValue();
+                    recursivelyInitStructuredObjects(namespace, subkeys);
+                }
+            }
+        }
+    }
+
+    private void recursivelyInitStructuredObjects(String namespace, Object subkeys) throws OXException {
+        if (subkeys instanceof Map) {
+            Map<String, Object> entries = (Map<String, Object>) subkeys;
+            for(Map.Entry<String, Object> entry: entries.entrySet()) {
+                recursivelyInitStructuredObjects(namespace + "/" + entry.getKey(), entry.getValue());
+            }
+        } else {
+            // We found a leaf
+            final ServerProperty serverProperty = get(namespace, -1, -1);
+            serverProperty.set(PREFRENCE_PATH, (String) namespace);
+            serverProperty.set(subkeys.toString());
+            serverProperty.setDefined(true);
+            if(serverProperty.get(PROTECTED) == null) {
+                serverProperty.set(PROTECTED, TRUE);
+            }
+        }
     }
 
     private void initMetadata(final ConfigurationService config) throws OXException {
