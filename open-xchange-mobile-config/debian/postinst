@@ -26,6 +26,12 @@ postFix() {
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
+    # SoftwareChange_Request-1339
+    pfile=/opt/open-xchange/etc/settings/oxmobile.properties
+    if ! ox_exists_property mox/config/defaultContactFolder $pfile; then
+        ox_set_property mox/config/defaultContactFolder "private" $pfile
+    fi
+
     # SoftwareChange_Request-1294
     pfile=/opt/open-xchange/etc/settings/oxmobile.properties
     if ! ox_exists_property mox/defaultContactStoreFolder $pfile; then

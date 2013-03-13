@@ -1006,70 +1006,60 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         // Find filestore for context.
         ctx.setFilestore_name(ctx.getIdAsString() + "_ctx_store");
-        final Integer storeId = ctx.getFilestoreId();
-        if( null == storeId ) {
-            ctx.setFilestoreId(OXUtilStorageInterface.getInstance().findFilestoreForContext().getId());
+        Integer storeId = ctx.getFilestoreId();
+        if (null == storeId) {
+            storeId = OXUtilStorageInterface.getInstance().findFilestoreForContext().getId();
+            ctx.setFilestoreId(storeId);
         } else {
-            if( ! OXToolStorageInterface.getInstance().existsStore(storeId) ) {
-                StorageException e = new StorageException("Filestore with id " + storeId + " does not exist");
-                LOG.error(e);
-                throw e;
+            if (!OXToolStorageInterface.getInstance().existsStore(i(storeId))) {
+                throw new StorageException("Filestore with identifier " + storeId + " does not exist.");
             }
         }
 
         final Connection configCon;
         try {
             configCon = cache.getConnectionForConfigDB();
-        } catch (final PoolException e) {
-            LOG.error("Pool Error", e);
+        } catch (PoolException e) {
             throw new StorageException(e.getMessage(), e);
         }
         try {
             Integer dbId = null;
-            if( null != ctx.getWriteDatabase() ) {
+            if (null != ctx.getWriteDatabase()) {
                 dbId = ctx.getWriteDatabase().getId();
             }
             final Database db;
-            if( (null == dbId) || (dbId.intValue() <= 0) ) {
-                db = getNextDBHandleByWeight(configCon);
-            } else {
-                db = OXToolStorageInterface.getInstance().loadDatabaseById(dbId);
-                if( null == db ) {
-                    StorageException e = new StorageException("Database with id " + dbId + " does not exist");
-                    LOG.error(e);
-                    throw e;
+            try {
+                if (null == dbId || i(dbId) <= 0) {
+                    db = getNextDBHandleByWeight(configCon);
+                } else {
+                    db = OXToolStorageInterface.getInstance().loadDatabaseById(i(dbId));
                 }
+            } catch (SQLException e) {
+                throw new StorageException(e.getMessage(), e);
+            } catch (OXContextException e) {
+                LOG.error(e.getMessage(), e);
+                throw new StorageException(e.getMessage());
             }
-            // Check Database instance
-            if (isEmpty(db.getUrl())) {
-                StorageException e = new StorageException("Database with id " + db.getId() + " has no URL specified");
-                LOG.error(e);
+            // Two separate try-catch blocks are necessary because rollback only works after starting a transaction.
+            try {
+                startTransaction(configCon);
+                findOrCreateSchema(configCon, db);
+                contextCommon.fillContextAndServer2DBPool(ctx, configCon, db);
+                contextCommon.fillLogin2ContextTable(ctx, configCon);
+                configCon.commit();
+                final Context retval = writeContext(configCon, ctx, adminUser, access);
+                LOG.info("Context " + retval.getId() + " created!");
+                return retval;
+            } catch (SQLException e) {
+                rollback(configCon);
+                throw new StorageException(e.getMessage(), e);
+            } catch (StorageException e) {
+                rollback(configCon);
                 throw e;
+            } finally {
+                autocommit(configCon);
             }
-            if (isEmpty(db.getDriver())) {
-                StorageException e = new StorageException("Database with id " + db.getId() + " has no Driver specified");
-                LOG.error(e);
-                throw e;
-            }
-            startTransaction(configCon);
-            findOrCreateSchema(configCon, db);
-            contextCommon.fillContextAndServer2DBPool(ctx, configCon, db);
-            contextCommon.fillLogin2ContextTable(ctx, configCon);
-            configCon.commit();
-            final Context retval = writeContext(configCon, ctx, adminUser, access);
-            LOG.info("Context " + retval.getId() + " created!");
-            return retval;
-        } catch (final SQLException e) {
-            LOG.error("SQL Error", e);
-            throw new StorageException(e.getMessage(), e);
-        } catch (final OXContextException e) {
-            LOG.error("Context Error", e);
-            throw new StorageException(e);
-        } catch (final StorageException e) {
-            rollback(configCon);
-            throw e;
         } finally {
-            autocommit(configCon);
             pushConnectionToPoolConfigDB(configCon);
         }
     }
@@ -1333,22 +1323,17 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      * @param configCon a write connection to the configuration database that is already in a transaction.
      */
     private void findOrCreateSchema(final Connection configCon, final Database db) throws StorageException {
-        final OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
-        String schemaName;
-        if (this.CONTEXTS_PER_SCHEMA == 1 || (schemaName = getNextUnfilledSchemaFromDB(db.getId(), configCon)) == null) {
+        String schemaName = getNextUnfilledSchemaFromDB(db.getId(), configCon);
+        if (CONTEXTS_PER_SCHEMA == 1 || schemaName == null) {
             int schemaUnique;
             try {
                 schemaUnique = IDGenerator.getId(configCon);
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw new StorageException(e.getMessage(), e);
             }
             schemaName = db.getName() + '_' + schemaUnique;
             db.setScheme(schemaName);
-            if (null == db.getDriver()) {
-                // Use default driver if missing
-                db.setDriver("com.mysql.jdbc.Driver");
-            }
-            oxu.createDatabase(db);
+            OXUtilStorageInterface.getInstance().createDatabase(db);
         } else {
             db.setScheme(schemaName);
         }

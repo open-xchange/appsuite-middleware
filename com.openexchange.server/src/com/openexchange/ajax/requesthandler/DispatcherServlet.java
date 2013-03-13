@@ -245,6 +245,7 @@ public class DispatcherServlet extends SessionServlet {
                 }
                 // Check if a simple (aka public) session has been found
                 if (simpleSession != null) {
+                    checkSecret(hashSource, req, simpleSession);
                     verifySession(req, sessiondService, simpleSession.getSessionID(), simpleSession);
                     rememberPublicSession(req, simpleSession);
                 }

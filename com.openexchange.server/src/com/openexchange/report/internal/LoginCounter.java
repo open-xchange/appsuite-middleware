@@ -259,8 +259,8 @@ public class LoginCounter implements LoginCounterMBean {
     private static final class UserContextId {
         
         private final int contextId;
-        
         private final int userId;
+        private final int hash;
 
         /**
          * Initializes a new {@link UserContextId}.
@@ -271,15 +271,16 @@ public class LoginCounter implements LoginCounterMBean {
             super();
             this.contextId = contextId;
             this.userId = userId;
-        }
-
-        @Override
-        public int hashCode() {
             final int prime = 31;
             int result = 1;
             result = prime * result + contextId;
             result = prime * result + userId;
-            return result;
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
         }
 
         @Override

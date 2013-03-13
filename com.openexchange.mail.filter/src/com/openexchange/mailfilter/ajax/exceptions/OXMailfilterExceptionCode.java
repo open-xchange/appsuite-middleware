@@ -93,9 +93,9 @@ public enum OXMailfilterExceptionCode implements OXExceptionCode {
      */
     SERVLET_REGISTRATION_FAILED("mail filter servlet cannot be registered: %s", CATEGORY_ERROR, 6),
     /**
-     * The position where the rule should be added is too big
+     * Bad rule position: %d
      */
-    POSITION_TOO_BIG("The position where the rule should be added is too big", CATEGORY_ERROR, 7),
+    BAD_POSITION("Bad rule position: %d", CATEGORY_ERROR, 7),
     /**
      * A rule with the id %1$s does not exist for user %2$s in context %3$s
      */
@@ -156,7 +156,6 @@ public enum OXMailfilterExceptionCode implements OXExceptionCode {
      * No active sieve script found
      */
     NO_ACTIVE_SCRIPT("No active sieve script found.", CATEGORY_ERROR, 22),
-
     ;
 
 	public static final String ERR_PREFIX_INVALID_ADDRESS = "The parameter for redirect must be a valid Internet email address";

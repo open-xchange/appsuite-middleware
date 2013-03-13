@@ -2346,43 +2346,48 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public Database loadDatabaseById(Integer id) throws StorageException {
-        Connection con = null;
-        PreparedStatement prep_check = null;
-        ResultSet rs = null;
-        final Database ret;
-
+    public Database loadDatabaseById(int id) throws StorageException {
+        final Connection con;
         try {
             con = ClientAdminThread.cache.getConnectionForConfigDB();
-
-            prep_check = con.prepareStatement("SELECT read_db_pool_id FROM db_pool JOIN db_cluster ON write_db_pool_id=db_pool_id WHERE db_pool_id=?");
-            prep_check.setInt(1, id);
-
-            rs = prep_check.executeQuery();
-            if( rs.next() ) {
-                ret = new Database();
-                ret.setRead_id(rs.getInt(1));
-                ret.setId(id);
+        } catch (PoolException e) {
+            throw new StorageException(e.getMessage(), e);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        final Database retval;
+        try {
+            stmt = con.prepareStatement("SELECT url,driver,login,password,name,read_db_pool_id,weight,max_units FROM db_pool JOIN db_cluster ON write_db_pool_id=db_pool_id WHERE db_pool_id=?");
+            stmt.setInt(1, id);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                retval = new Database();
+                int pos = 1;
+                retval.setId(I(id));
+                retval.setUrl(rs.getString(pos++));
+                retval.setDriver(rs.getString(pos++));
+                retval.setLogin(rs.getString(pos++));
+                retval.setPassword(rs.getString(pos++));
+                retval.setName(rs.getString(pos++));
+                final int slaveId = rs.getInt(pos++);
+                if (slaveId > 0) {
+                    retval.setRead_id(I(slaveId));
+                }
+                retval.setClusterWeight(I(rs.getInt(pos++)));
+                retval.setMaxUnits(I(rs.getInt(pos++)));
             } else {
-                ret = null;
+                throw new StorageException("Database with identifer " + id + " does not exist.");
             }
-
-            return ret;
-        } catch (final PoolException e) {
-            log.error("Pool Error",e);
-            throw new StorageException(e);
-        } catch (final SQLException e) {
-            log.error("SQL Error",e);
-            throw new StorageException(e.toString());
+        } catch (SQLException e) {
+            throw new StorageException(e.getMessage(), e);
         } finally {
-            closeRecordSet(rs);
-            closePreparedStatement(prep_check);
-
+            closeSQLStuff(rs, stmt);
             try {
                cache.pushConnectionForConfigDB(con);
-            } catch (final PoolException e) {
+            } catch (PoolException e) {
                 log.error("Error pushing connection to pool!", e);
             }
         }
+        return retval;
     }
 }

@@ -313,8 +313,7 @@ public class TemplateServiceImpl implements TemplateService {
                     global = true;
                 }
                 String templateText = (folder == null) ? null : infostore.findTemplateInFolder(session, folder, templateName);
-                
-                
+
                 final String userDir = System.getProperty("user.dir");
                 final String templatePath = config.getProperty(PATH_PROPERTY);
                 System.setProperty("user.dir", templatePath);
@@ -398,7 +397,7 @@ public class TemplateServiceImpl implements TemplateService {
         try {
             reader = new BufferedReader(new FileReader(templateFile), 2048);
             final StringBuilder builder = new StringBuilder(2048);
-            String line = null;
+            String line;
             while ((line = reader.readLine()) != null) {
                 builder.append(line).append('\n');
             }

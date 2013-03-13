@@ -2,6 +2,14 @@
 
  - Story 30395131: Added configuration option to disable the MySQL master/slave replication monitor.
 
+* 2013-03-11 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25233: Made LDAP contact cache aware of possibly skipped empty distribution lists
+
+* 2013-03-11 - marcus.klein@open-xchange.com
+
+ - Fix for bug 25256: Removed refreshing of context and user objects when reading some of their attributes.
+
 * 2013-03-08 - marcus.klein@open-xchange.com
 
  - Fix for bug 25244: SOAP attributes are not lower case.
@@ -15,11 +23,43 @@
 
  - Fix for bug 25238: Corrected order of returned UserConfiguration array and massively improved throughput of the UserConfiguration caching
    layer.
+ - Fix for bug 25219: User caching layer will not put objects again into cache if they are retrieved from cache.
+
+* 2013-03-07 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 25228: Support backslashes in Folder Names.
+
+* 2013-03-07 - marc.arens@open-xchange.com
+
+ - Fix for bug 23703: ManuallyCountedIMAPConnections and OpenFileDescriptorCount stats are broken
+ - Fix for bug 23702: Java Heap stats broken
+
+* 2013-03-06 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 22903: [L3] restorecontext fails
+
+* 2013-03-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25213: Exclude configured local bind network interface from list of potential cluster members    
+
+* 2013-03-06 - choeger@open-xchange.com
+
+ - Fix for bug 25205: Added missing PID to the method stopping the groupware process.
+
+* 2013-03-06 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 25023: Confusing mail regarding particpant removal.
 
 * 2013-03-06 - marcus.klein@open-xchange.com
 
+ - Fix for bug 24576: Added links to the scripts to start the CLTs existscontext and existsuser.
  - Fix for bug 25162: Loading user configuration without acquired lock for the cache. Introduced cache for user configuration without
    extended permissions.
+ - Fix for bug 24990: Packaged backend extension for data retention into CSV files.
+
+* 2013-03-05 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25206: Corrected check for empty distribution list   
 
 * 2013-03-04 - thorben.betten@open-xchange.com
 
@@ -30,9 +70,25 @@
 
  - Fix for bug 25168: Fix for bug 25168: Do not encode uiWebPath parameter provided in request. This breaks absolute Location headers
 
+* 2013-03-04 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 24586: Enhanced error message for bad sieve filter position.
+
+* 2013-03-04 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25180: Use 'allFoldersForAutoComplete' setting only for e-mail auto-complete   
+
+* 2013-02-27 - marcus.klein@open-xchange.com
+
+ - Partly fix for bug 25100: First check on the slave if the contact collect folder needs to be created.
+
 * 2013-02-27 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 25142: Supply service info description in properties map
+
+* 2013-02-25 - marcus.klein@open-xchange.com
+
+ - Fix for bug 23666: Nearly all information of a database is necessary if a new schema needs to be created for the new context.
 
 * 2013-02-23 - thorben.betten@open-xchange.com
 
@@ -102,6 +158,10 @@
  - Fix for bug 24933: Orderly clean user-sensitive caches
  - Fix for bug 24958: Fixed .yml file for XING crawler
  - Fix for bug 24916: Added needed field to accepted modifyable user contact fields
+ 
+ * 2013-02-12 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 23962: Adjusted server response handling
 
 * 2013-02-12 - dennis.sieben@open-xchange.com
 

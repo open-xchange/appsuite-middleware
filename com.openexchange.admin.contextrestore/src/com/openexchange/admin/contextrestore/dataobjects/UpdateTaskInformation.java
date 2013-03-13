@@ -52,12 +52,11 @@ package com.openexchange.admin.contextrestore.dataobjects;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -116,14 +115,14 @@ public final class UpdateTaskInformation {
 
     }
 
-    private final List<UpdateTaskEntry> entries;
+    private final Map<String, List<UpdateTaskEntry>> entries;
 
     /**
      * Initializes a new {@link UpdateTaskInformation}.
      */
     public UpdateTaskInformation() {
         super();
-        entries = new LinkedList<UpdateTaskEntry>();
+        entries = new HashMap<String, List<UpdateTaskEntry>>();
     }
 
     /**
@@ -131,7 +130,7 @@ public final class UpdateTaskInformation {
      */
     public UpdateTaskInformation(final int capacity) {
         super();
-        entries = new ArrayList<UpdateTaskEntry>(capacity);
+        entries = new HashMap<String, List<UpdateTaskEntry>>(capacity);
     }
 
     /**
@@ -159,16 +158,7 @@ public final class UpdateTaskInformation {
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
     public boolean contains(final UpdateTaskEntry e) {
-        return entries.contains(e);
-    }
-
-    /**
-     * Gets an unmodifiable {@link Iterator} for the update task collection.
-     *
-     * @return The iterator
-     */
-    public Iterator<UpdateTaskEntry> iterator() {
-        return new UnmodifiableIterator<UpdateTaskEntry>(entries.iterator());
+        return entries.containsKey(e.getTaskName());
     }
 
     /**
@@ -177,7 +167,16 @@ public final class UpdateTaskInformation {
      * @param e The element to add
      */
     public void add(final UpdateTaskEntry e) {
-        entries.add(e);
+        if (null == e) {
+            return;
+        }
+        final String taskName = e.getTaskName();
+        List<UpdateTaskEntry> list = entries.get(taskName);
+        if (null == list) {
+            list = new LinkedList<UpdateTaskEntry>();
+            entries.put(taskName, list);
+        }
+        list.add(e);
     }
 
     /**
@@ -186,7 +185,14 @@ public final class UpdateTaskInformation {
      * @param e The element to remove
      */
     public void remove(final UpdateTaskEntry e) {
-        entries.remove(e);
+        if (null == e) {
+            return;
+        }
+        final String taskName = e.getTaskName();
+        List<UpdateTaskEntry> list = entries.get(taskName);
+        if (null != list && list.remove(e) && list.isEmpty()) {
+            entries.remove(taskName);
+        }
     }
 
     /**
@@ -197,78 +203,58 @@ public final class UpdateTaskInformation {
     }
 
     /**
-     * Gets the element at specified index.
-     *
-     * @param index The index
-     * @return The element.
+     * Checks equality to given update task collection.
+     * 
+     * @param other The other update task collection.
+     * @return <code>true</code> if equal; otherwise <code>false</code>
      */
-    public UpdateTaskEntry get(final int index) {
-        return entries.get(index);
+    public boolean equalTo(final UpdateTaskInformation other) {
+        if (null == other) {
+            return false;
+        }
+        final Map<String, List<UpdateTaskEntry>> m1 = this.entries;
+        final Map<String, List<UpdateTaskEntry>> m2 = other.entries;
+        // Check by size
+        {
+            final int size1 = m1.size();
+            final int size2 = m2.size();
+            if (size1 != size2) {
+                return false;
+            }
+        }
+        for (final Entry<String, List<UpdateTaskEntry>> entry : m1.entrySet()) {
+            final String taskName = entry.getKey();
+            final List<UpdateTaskEntry> list2 = m2.get(taskName);
+            if (null == list2) {
+                return false;
+            }
+            final List<UpdateTaskEntry> list1 = entry.getValue();
+            if (list1.size() != list2.size()) {
+                return false;
+            }
+            for (final UpdateTaskEntry updateTaskEntry : list1) {
+                if (!contained(updateTaskEntry, list1)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
-    /**
-     * Adds element at given index position.
-     *
-     * @param index The index
-     * @param element The element
-     */
-    public void add(final int index, final UpdateTaskEntry element) {
-        entries.add(index, element);
-    }
-
-    /**
-     * Removes element from given index position.
-     *
-     * @param index The index
-     * @return The removed element
-     */
-    public UpdateTaskEntry remove(final int index) {
-        return entries.remove(index);
-    }
-
-    /**
-     * Gets the {@link Set} view for this collection.
-     *
-     * @return The set
-     */
-    public Set<UpdateTaskEntry> asSet() {
-        return new HashSet<UpdateTaskEntry>(entries);
+    private static boolean contained(final UpdateTaskEntry e, final List<UpdateTaskEntry> list) {
+        final String taskName = e.getTaskName();
+        final boolean successful = e.isSuccessful();
+        for (final UpdateTaskEntry cur : list) {
+            if (taskName.equals(cur.getTaskName()) && successful == cur.isSuccessful()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public String toString() {
         return entries.toString();
-    }
-
-    private static final class UnmodifiableIterator<E> implements Iterator<E> {
-
-        private final Iterator<E> it;
-
-        /** Constructor. */
-        protected UnmodifiableIterator(final Iterator<E> it) {
-            super();
-            this.it = it;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return it.hasNext();
-        }
-
-        @Override
-        public E next() {
-            return it.next();
-        }
-
-        /**
-         * Guaranteed to throw an exception and leave the underlying data unmodified.
-         *
-         * @throws UnsupportedOperationException always
-         */
-        @Override
-        public final void remove() {
-            throw new UnsupportedOperationException();
-        }
     }
 
 }

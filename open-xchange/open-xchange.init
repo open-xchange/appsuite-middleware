@@ -254,8 +254,9 @@ case "$1" in
     restart)
 	## Stop the service and regardless of whether it was
 	## running or not, start it again.
+        read pid < /var/run/open-xchange.pid
 	$0 stop
-	while ox_is_running open-xchange "/opt/open-xchange/sbin/open-xchange"; do
+	while ox_is_running open-xchange "/opt/open-xchange/sbin/open-xchange" $pid; do
 	     sleep 1
 	done
 	$0 start

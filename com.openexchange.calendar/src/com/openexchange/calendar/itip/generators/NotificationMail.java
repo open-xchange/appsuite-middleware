@@ -322,6 +322,9 @@ public class NotificationMail {
 
     private boolean onlyPseudoChangesOnParticipants() {
         AppointmentDiff appDiff = getDiff();
+        if (appDiff == null) {
+            return false;
+        }
         boolean onlyParticipantsChanged = appDiff.exactlyTheseChanged(CalendarField.getByColumn(CalendarObject.PARTICIPANTS).getJsonName());
         if (onlyParticipantsChanged) {
             FieldUpdate participantUpdate = appDiff.getUpdateFor(CalendarField.getByColumn(CalendarObject.PARTICIPANTS).getJsonName());

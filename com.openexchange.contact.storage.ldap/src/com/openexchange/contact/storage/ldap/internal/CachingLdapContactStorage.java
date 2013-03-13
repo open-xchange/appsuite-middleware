@@ -78,6 +78,13 @@ public class CachingLdapContactStorage extends LdapContactStorage {
     private final LdapContactCache cache;
 
     /**
+     * Fields needed from both the cache and the storage to perform merge operations afterwards
+     */
+    private static final ContactField[] FIELDS_FOR_MERGE = {
+        ContactField.OBJECT_ID, ContactField.MARK_AS_DISTRIBUTIONLIST, ContactField.DISTRIBUTIONLIST
+    };
+
+    /**
      * Initializes a new {@link CachingLdapContactStorage}.
      *
      * @param delegate
@@ -99,7 +106,7 @@ public class CachingLdapContactStorage extends LdapContactStorage {
         if (null == contact) {
             return doGet(session, folderId, id, fields);
         } else {
-            Contact fullContact = doGet(session, folderId, id, LdapContactCache.getUnknownFields(fields));
+            Contact fullContact = doGet(session, folderId, id, LdapContactCache.getUnknownFields(fields, FIELDS_FOR_MERGE));
             super.mapper.mergeDifferences(fullContact, contact);
             return fullContact;
         }
@@ -112,7 +119,7 @@ public class CachingLdapContactStorage extends LdapContactStorage {
             Collection<Contact> contacts = cache.values();
             return sort(contacts, sortOptions);
         } else {
-            ContactField[] unknownFields = LdapContactCache.getUnknownFields(fields, ContactField.OBJECT_ID);
+            ContactField[] unknownFields = LdapContactCache.getUnknownFields(fields, FIELDS_FOR_MERGE);
             SearchIterator<Contact> searchIterator = doAll(session, folderId, unknownFields, sortOptions);
             return mergeCacheData(session, searchIterator, fields);
         }
@@ -124,7 +131,7 @@ public class CachingLdapContactStorage extends LdapContactStorage {
         if (LdapContactCache.isCached(fields)) {
             return sort(cache.list(parse(ids)), sortOptions);
         } else {
-            ContactField[] unknownFields = LdapContactCache.getUnknownFields(fields, ContactField.OBJECT_ID);
+            ContactField[] unknownFields = LdapContactCache.getUnknownFields(fields, FIELDS_FOR_MERGE);
             SearchIterator<Contact> searchIterator = doList(session, folderId, ids, unknownFields, sortOptions);
             return mergeCacheData(session, searchIterator, fields);
         }
@@ -142,7 +149,7 @@ public class CachingLdapContactStorage extends LdapContactStorage {
             }
             return sort(contacts, sortOptions);
         } else {
-            ContactField[] unknownFields = LdapContactCache.getUnknownFields(fields, ContactField.OBJECT_ID);
+            ContactField[] unknownFields = LdapContactCache.getUnknownFields(fields, FIELDS_FOR_MERGE);
             SearchIterator<Contact> searchIterator = doModified(session, folderID, since, unknownFields, sortOptions);
             return mergeCacheData(session, searchIterator, fields);
         }
@@ -154,7 +161,7 @@ public class CachingLdapContactStorage extends LdapContactStorage {
         if (LdapContactCache.isCached(fields) && LdapContactCache.isCached(term)) {
             return sort(filter(cache.values(), term, Tools.getLocale(sortOptions)), sortOptions);
         } else {
-            ContactField[] unknownFields = LdapContactCache.getUnknownFields(fields, ContactField.OBJECT_ID);
+            ContactField[] unknownFields = LdapContactCache.getUnknownFields(fields, FIELDS_FOR_MERGE);
             SearchIterator<Contact> searchIterator = doSearch(session, term, unknownFields, sortOptions);
             return mergeCacheData(session, searchIterator, fields);
         }
@@ -167,9 +174,19 @@ public class CachingLdapContactStorage extends LdapContactStorage {
                 Contact loadedContact = searchIterator.next();
                 Contact cachedContact = cache.get(loadedContact.getObjectID());
                 if (null == cachedContact) {
-                    // not cached, load completely
-                    contacts.add(super.get(session, Integer.toString(getFolderID()),
-                        Integer.toString(loadedContact.getObjectID()), originalRequestedFields));
+                    // not cached, try to load completely as fallback
+                    Contact fallbackContact = null;
+                    try {
+                        fallbackContact = super.get(session, Integer.toString(getFolderID()),
+                            Integer.toString(loadedContact.getObjectID()), originalRequestedFields);
+                    } catch (OXException e) {
+                        if (false == e.isNotFound()) {
+                            throw e;
+                        }
+                    }
+                    if (null != fallbackContact) {
+                        contacts.add(fallbackContact);
+                    }
                 } else {
                     // merge information from cache
                     mapper.mergeDifferences(loadedContact, cachedContact);
