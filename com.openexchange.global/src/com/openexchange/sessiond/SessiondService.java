@@ -134,6 +134,10 @@ public interface SessiondService {
 
     /**
      * Finds the first session of the specified user that matches the give criterion.
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param matcher The session matcher
      */
     public Session findFirstMatchingSessionForUser(int userId, int contextId, SessionMatcher matcher);
 
