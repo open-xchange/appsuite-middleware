@@ -151,7 +151,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         return retval;
     }
 
-    private void writeAssignmentDB(Connection con, Assignment assign) throws OXException {
+    private static void writeAssignmentDB(Connection con, Assignment assign) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(INSERT);

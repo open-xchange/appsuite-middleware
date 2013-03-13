@@ -192,8 +192,8 @@ public final class Management {
         }
     }
 
-    public void addOverview(final Overview overview) {
-        this.overview = overview;
+    public void addOverview(final Overview newOverview) {
+        this.overview = newOverview;
         if (null != managementService) {
             registerOverview();
         }

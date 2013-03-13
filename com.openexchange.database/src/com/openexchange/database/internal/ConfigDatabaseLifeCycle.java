@@ -49,7 +49,6 @@
 
 package com.openexchange.database.internal;
 
-import com.openexchange.exception.OXException;
 
 /**
  * Creates the pools for the configuration database connections.
@@ -73,7 +72,7 @@ public final class ConfigDatabaseLifeCycle implements PoolLifeCycle {
     }
 
     @Override
-    public ConnectionPool create(final int poolId) throws OXException {
+    public ConnectionPool create(final int poolId) {
         switch (poolId) {
         case Constants.CONFIGDB_WRITE_ID:
             return configDBWrite;
