@@ -102,7 +102,7 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
             }
         }
         
-//        handler.onDisconnect(atmosphereState);
+        handler.onDisconnect(atmosphereState);
     }
 
     @Override
