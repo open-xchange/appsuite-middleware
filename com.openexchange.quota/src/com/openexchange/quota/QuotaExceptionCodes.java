@@ -72,7 +72,7 @@ public enum QuotaExceptionCodes implements OXExceptionCode {
     /**
      * Quota exceeded.
      */
-    QUOTA_EXCEEDED(QuotaExceptionMessages.QUOTA_EXCEEDED_MSG, CATEGORY_ERROR, 3),
+    QUOTA_EXCEEDED(QuotaExceptionMessages.QUOTA_EXCEEDED_MSG, CATEGORY_USER_INPUT, 3),
 
     ;
 
