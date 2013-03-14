@@ -54,6 +54,8 @@ import com.openexchange.session.Session;
 
 /**
  * {@link QuotaRestriction} - A quota restriction determines the quota for passed arguments.
+ * <p>
+ * Implementations of this interface are tracked and added by {@link QuotaService quota service}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
