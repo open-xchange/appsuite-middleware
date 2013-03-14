@@ -54,6 +54,8 @@ import java.util.Map;
 
 /**
  * {@link ResourceDescription} - A resource description.
+ * <p>
+ * A simple property container capable to carry POJOs.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
