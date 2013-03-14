@@ -75,6 +75,8 @@ public final class SQL {
      */
     private static final String ALL_FIELDS;
 
+    static final String COUNT_TASKS_IN_CONTEXT = "SELECT count(id) FROM task WHERE cid=?";
+
     /**
      * Tables for tasks.
      */

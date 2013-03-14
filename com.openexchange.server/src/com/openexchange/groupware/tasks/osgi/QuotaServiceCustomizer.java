@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,36 +49,41 @@
 
 package com.openexchange.groupware.tasks.osgi;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.reminder.TargetService;
-import com.openexchange.groupware.tasks.ModifyThroughDependant;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.groupware.tasks.InsertData;
 import com.openexchange.quota.QuotaService;
 
 /**
- * {@link TaskActivator}
+ * {@link QuotaServiceCustomizer}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class TaskActivator extends AJAXModuleActivator {
+public final class QuotaServiceCustomizer implements ServiceTrackerCustomizer<QuotaService, QuotaService> {
 
-    public TaskActivator() {
+    private BundleContext context;
+
+    public QuotaServiceCustomizer(BundleContext context) {
         super();
+        this.context = context;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
+    public QuotaService addingService(ServiceReference<QuotaService> reference) {
+        QuotaService quotaService = context.getService(reference);
+        InsertData.setQuotaService(quotaService);
+        return quotaService;
     }
 
     @Override
-    protected void startBundle() {
-        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
-        props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
-        registerService(TargetService.class, new ModifyThroughDependant(), props);
-        track(QuotaService.class, new QuotaServiceCustomizer(context));
+    public void modifiedService(ServiceReference<QuotaService> reference, QuotaService quotaService) {
+        // Nothing to do.
+    }
+
+    @Override
+    public void removedService(ServiceReference<QuotaService> reference, QuotaService quotaService) {
+        InsertData.setQuotaService(null);
+        context.ungetService(reference);
     }
 }

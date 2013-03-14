@@ -64,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.contexts.Context;
@@ -600,5 +601,29 @@ public class RdbTaskStorage extends TaskStorage {
                 }
             }
         }, folderId, columns, ACTIVE, con);
+    }
+
+    @Override
+    int countTasks(Context ctx) throws OXException {
+        final Connection con = Database.get(ctx, false);
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        final int retval;
+        try {
+            stmt = con.prepareStatement(SQL.COUNT_TASKS_IN_CONTEXT);
+            stmt.setInt(1, ctx.getContextId());
+            result = stmt.executeQuery();
+            if (result.next()) {
+                retval = result.getInt(1);
+            } else {
+                throw TaskExceptionCode.NO_COUNT_RESULT.create();
+            }
+        } catch (SQLException e) {
+            throw TaskExceptionCode.SQL_ERROR.create(e);
+        } finally {
+            closeSQLStuff(result, stmt);
+            Database.back(ctx, false, con);
+        }
+        return retval;
     }
 }
