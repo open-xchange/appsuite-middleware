@@ -4,6 +4,7 @@
    counter.
  - Story 38666533: Reading now parallel from all database servers and serial through schemas of a database server to have the fastest
    possible listing of file store usage.
+ - Story 28219067: The tasks component respects the globally defined object count quota when new tasks are created.
 
 * 2013-03-12 - marcus.klein@open-xchange.com
 

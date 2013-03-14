@@ -498,7 +498,7 @@ class UpdateData {
         for (final TaskParticipant changedParticipant : getChangedParticipants()) {
             if (changedParticipant.getType() == TaskParticipant.Type.INTERNAL) {
                 final InternalParticipant cip = (InternalParticipant) changedParticipant;
-                changedInternals.put(cip.getIdentifier(), cip);
+                changedInternals.put(I(cip.getIdentifier()), cip);
             }
         }
 
@@ -509,7 +509,7 @@ class UpdateData {
         for (final TaskParticipant tp : toCheck) {
             if (tp.getType() == TaskParticipant.Type.INTERNAL) {
                 final InternalParticipant ip = (InternalParticipant) tp;
-                final InternalParticipant cp = changedInternals.get(ip.getIdentifier());
+                final InternalParticipant cp = changedInternals.get(I(ip.getIdentifier()));
                 if (cp != null) {
                     changedGroup.add(cp);
                 }
@@ -782,7 +782,7 @@ class UpdateData {
             final boolean own = Permission.canReadInFolder(ctx, user, userConfig, destFolder);
             final List<Integer> emptyList = new ArrayList<Integer>();
             final List<Integer> listWithFolder = new ArrayList<Integer>();
-            listWithFolder.add(destFolder.getObjectID());
+            listWithFolder.add(I(destFolder.getObjectID()));
 
             TaskIterator ti;
             if (own) {
@@ -805,8 +805,8 @@ class UpdateData {
                     boolean startDate;
 
                     if (actual.getStartDate() != null) {
-                        final Long aStartDateLong = actual.getStartDate().getTime();
-                        final Long uStartDateLong = updated.getStartDate().getTime();
+                        final long aStartDateLong = actual.getStartDate().getTime();
+                        final long uStartDateLong = updated.getStartDate().getTime();
                         startDate = aStartDateLong / 1000 == uStartDateLong / 1000;
                     } else {
                         if (updated.getStartDate() == null) {
@@ -843,7 +843,7 @@ class UpdateData {
     private static void insertNextRecurrence(final Session session, final Context ctx, final int userId, final UserConfiguration userConfig, final FolderObject folder, final Task task, final Set<TaskParticipant> parts, final Set<Folder> folders) throws OXException, OXException {
         // TODO create insert class
         TaskLogic.checkNewTask(task, userId, userConfig, parts);
-        TaskLogic.insertTask(ctx, task, parts, folders);
+        InsertData.insertTask(ctx, task, parts, folders);
         try {
             new EventClient(session).create(task, folder);
         } catch (final OXException e) {
