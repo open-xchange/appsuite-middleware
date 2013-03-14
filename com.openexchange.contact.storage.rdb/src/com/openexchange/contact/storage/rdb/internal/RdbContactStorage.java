@@ -74,6 +74,12 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.log.LogFactory;
+import com.openexchange.quota.Quota;
+import com.openexchange.quota.QuotaExceptionCodes;
+import com.openexchange.quota.QuotaService;
+import com.openexchange.quota.QuotaType;
+import com.openexchange.quota.Resource;
+import com.openexchange.quota.ResourceDescription;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
@@ -184,6 +190,17 @@ public class RdbContactStorage extends DefaultContactStorage {
                 serverSession.getUserId(), serverSession.getUserConfiguration(), connection);
             if (false == permission.canCreateObjects()) {
                 throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(parse(folderId), contextID, serverSession.getUserId());
+            }
+            /*
+             * check quota restrictions
+             */
+            QuotaService quotaService = RdbServiceLookup.getService(QuotaService.class, true);
+            Quota quota = quotaService.getQuotaFor(Resource.CONTACT, ResourceDescription.getEmptyResourceDescription(), session);
+            if (null != quota) {
+                long quotaValue = quota.getQuota(QuotaType.AMOUNT);
+                if (0 < quotaValue && quotaValue <= executor.count(connection, Table.CONTACTS, contextID)) {
+                    throw QuotaExceptionCodes.QUOTA_EXCEEDED.create();
+                }
             }
             /*
              * prepare insert
