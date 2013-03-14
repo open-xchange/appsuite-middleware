@@ -62,6 +62,15 @@ public class ResourceDescription {
     /** The empty resource description */
     public static final ResourceDescription EMPTY_RESOURCE_DESCRIPTION = new EmptyResourceDescription();
 
+    /**
+     * Gets the empty resource description.
+     *
+     * @return The empty resource description
+     */
+    public static ResourceDescription getEmptyResourceDescription() {
+        return EMPTY_RESOURCE_DESCRIPTION;
+    }
+
     /** The properties map */
     protected final Map<String, Object> properties;
 
