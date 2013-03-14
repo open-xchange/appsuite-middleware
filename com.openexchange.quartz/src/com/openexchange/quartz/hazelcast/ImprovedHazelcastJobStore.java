@@ -759,7 +759,9 @@ public class ImprovedHazelcastJobStore implements JobStore {
         try {
             Collection<TriggerStateWrapper> filteredTriggers = triggersByKey.values(new SelectTriggersPredicate(noLaterThan, timeWindow));
             if (logBuilder != null) {
-                logBuilder.append("    Filtered triggers at ");
+                logBuilder.append("    Filtered ");
+                logBuilder.append(filteredTriggers.size());
+                logBuilder.append(" triggers at ");
                 logBuilder.append(System.currentTimeMillis());
                 logBuilder.append("\n");
             }
