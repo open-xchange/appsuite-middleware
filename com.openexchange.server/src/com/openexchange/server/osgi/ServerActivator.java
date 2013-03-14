@@ -174,6 +174,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
+import com.openexchange.quota.QuotaService;
 import com.openexchange.report.internal.LastLoginRecorder;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.search.SearchService;
@@ -251,7 +252,7 @@ public final class ServerActivator extends HousekeepingActivator {
         CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class, IDBasedFileAccessFactory.class,
         FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class, CryptoService.class, HttpService.class,
         SystemNameService.class, ImageTransformationService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
-        TextXtractService.class, SecretEncryptionFactoryService.class };
+        TextXtractService.class, SecretEncryptionFactoryService.class, QuotaService.class };
 
     private static volatile BundleContext CONTEXT;
 
