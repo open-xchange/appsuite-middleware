@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 import java.util.Set;
 import org.apache.commons.logging.Log;
 import com.hazelcast.core.HazelcastInstance;
@@ -280,7 +281,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
                 previousResource = allResources.get(id);
                 if (previousResource != null && previousResource.getPresence() != null) {
                     resource.setPresence(previousResource.getPresence());
-                    allResources.put(id, resource);
+                    allResources.set(id, resource, 0, TimeUnit.SECONDS);
                 } else {
                     previousResource = allResources.put(id, resource);
                 }
