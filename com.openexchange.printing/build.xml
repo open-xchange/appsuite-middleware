@@ -12,6 +12,7 @@
     <import file="build-project.xml"/>
 
     <target name="postInstall">
+    	<mkdir dir="${destDir}/${prefix}/${templatesDir}" />
         <copy todir="${destDir}/${prefix}/${templatesDir}">
             <fileset dir="${templatesDir}"/>
         </copy>

@@ -49,19 +49,11 @@
 
 package com.openexchange.printing.email;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.resource.Resource;
-import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.user.UserService;
 
 public class EnhancedEmail {
 
