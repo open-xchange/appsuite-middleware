@@ -52,7 +52,6 @@ package com.openexchange.quota.internal;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Set;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exception.OXException;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaRestriction;
@@ -66,7 +65,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link QuotaServiceImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class QuotaServiceImpl implements QuotaService {
@@ -88,7 +87,7 @@ public final class QuotaServiceImpl implements QuotaService {
     }
 
     @Override
-    public Quota getQuotaFor(Resource resource, ResourceDescription desc, Session session) throws OXException {
+    public Quota getQuotaFor(final Resource resource, final ResourceDescription desc, final Session session) throws OXException {
         final QuotaRestriction quotaRestriction;
         synchronized (restrictions) {
             quotaRestriction = restrictions.get(resource);
@@ -98,7 +97,7 @@ public final class QuotaServiceImpl implements QuotaService {
 
     /**
      * Adds given quota restriction.
-     * 
+     *
      * @param restriction The quota restriction.
      * @return <code>true</code> if added; otherwise <code>false</code>
      */
@@ -124,7 +123,7 @@ public final class QuotaServiceImpl implements QuotaService {
 
     /**
      * Removes quota restriction.
-     * 
+     *
      * @param restriction The quota restriction.
      */
     public void removeQuotaRestriction(final QuotaRestriction restriction) {

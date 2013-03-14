@@ -73,7 +73,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link QuotaActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class QuotaActivator extends HousekeepingActivator {
@@ -100,7 +100,7 @@ public final class QuotaActivator extends HousekeepingActivator {
         track(QuotaRestriction.class, new ServiceTrackerCustomizer<QuotaRestriction, QuotaRestriction>() {
 
             @Override
-            public QuotaRestriction addingService(ServiceReference<QuotaRestriction> reference) {
+            public QuotaRestriction addingService(final ServiceReference<QuotaRestriction> reference) {
                 final QuotaRestriction restriction = context.getService(reference);
                 if (impl.addQuotaRestriction(restriction)) {
                     return restriction;
@@ -110,12 +110,12 @@ public final class QuotaActivator extends HousekeepingActivator {
             }
 
             @Override
-            public void modifiedService(ServiceReference<QuotaRestriction> reference, QuotaRestriction service) {
+            public void modifiedService(final ServiceReference<QuotaRestriction> reference, final QuotaRestriction service) {
                 // Ignore
             }
 
             @Override
-            public void removedService(ServiceReference<QuotaRestriction> reference, QuotaRestriction service) {
+            public void removedService(final ServiceReference<QuotaRestriction> reference, final QuotaRestriction service) {
                 context.ungetService(reference);
             }
         });
@@ -130,7 +130,7 @@ public final class QuotaActivator extends HousekeepingActivator {
             }
 
             @Override
-            public Quota getQuota(Resource resource, ResourceDescription desc, Session session, ServiceProvider serviceProvider) throws OXException {
+            public Quota getQuota(final Resource resource, final ResourceDescription desc, final Session session, final ServiceProvider serviceProvider) throws OXException {
                 final ConfigView configView =
                     serviceProvider.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
                 // Get property; first with "context" scope...
@@ -139,7 +139,7 @@ public final class QuotaActivator extends HousekeepingActivator {
                     // ... then with "server" scope if not defined
                     property = configView.property("server", "com.openexchange.quota.calendar", String.class);
                     if (!property.isDefined()) {
-                        return UnlimitedQuota.getInstance();                        
+                        return UnlimitedQuota.getInstance();
                     }
                 }
                 try {
@@ -165,7 +165,7 @@ public final class QuotaActivator extends HousekeepingActivator {
             }
 
             @Override
-            public Quota getQuota(Resource resource, ResourceDescription desc, Session session, ServiceProvider serviceProvider) throws OXException {
+            public Quota getQuota(final Resource resource, final ResourceDescription desc, final Session session, final ServiceProvider serviceProvider) throws OXException {
                 final ConfigView configView =
                     serviceProvider.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
                 // Get property; first with "context" scope...
@@ -174,7 +174,7 @@ public final class QuotaActivator extends HousekeepingActivator {
                     // ... then with "server" scope if not defined
                     property = configView.property("server", "com.openexchange.quota.task", String.class);
                     if (!property.isDefined()) {
-                        return UnlimitedQuota.getInstance();                        
+                        return UnlimitedQuota.getInstance();
                     }
                 }
                 try {
@@ -200,7 +200,7 @@ public final class QuotaActivator extends HousekeepingActivator {
             }
 
             @Override
-            public Quota getQuota(Resource resource, ResourceDescription desc, Session session, ServiceProvider serviceProvider) throws OXException {
+            public Quota getQuota(final Resource resource, final ResourceDescription desc, final Session session, final ServiceProvider serviceProvider) throws OXException {
                 final ConfigView configView =
                     serviceProvider.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
                 // Get property; first with "context" scope...
@@ -209,7 +209,7 @@ public final class QuotaActivator extends HousekeepingActivator {
                     // ... then with "server" scope if not defined
                     property = configView.property("server", "com.openexchange.quota.contact", String.class);
                     if (!property.isDefined()) {
-                        return UnlimitedQuota.getInstance();                        
+                        return UnlimitedQuota.getInstance();
                     }
                 }
                 try {
@@ -230,7 +230,7 @@ public final class QuotaActivator extends HousekeepingActivator {
     }
 
     @Override
-    public <S> ServiceTracker<S, S> trackService(Class<S> clazz) {
+    public <S> ServiceTracker<S, S> trackService(final Class<S> clazz) {
         return super.trackService(clazz);
     }
 

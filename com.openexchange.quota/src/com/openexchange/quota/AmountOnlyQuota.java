@@ -51,7 +51,7 @@ package com.openexchange.quota;
 
 /**
  * {@link AmountOnlyQuota} - The amount-only quota implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AmountOnlyQuota implements Quota {
@@ -60,7 +60,7 @@ public final class AmountOnlyQuota implements Quota {
 
     /**
      * Initializes a new {@link AmountOnlyQuota}.
-     * 
+     *
      * @param quota The amount quota
      */
     public AmountOnlyQuota(final long quota) {
@@ -69,7 +69,7 @@ public final class AmountOnlyQuota implements Quota {
     }
 
     @Override
-    public long getQuota(QuotaType type) {
+    public long getQuota(final QuotaType type) {
         return QuotaType.AMOUNT.equals(type) ? quota : Quota.UNLIMITED;
     }
 

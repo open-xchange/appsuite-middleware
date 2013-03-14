@@ -54,7 +54,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link QuotaService} - The quota service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface QuotaService {
@@ -72,7 +72,7 @@ public interface QuotaService {
      * <li>{@link Resource#TASK}</li>
      * <ul>
      * <p>
-     * 
+     *
      * @param resource The resource
      * @param desc The resource description (if needed to determine resource's quota); or
      *            {@link ResourceDescription#getEmptyResourceDescription()} if none needed

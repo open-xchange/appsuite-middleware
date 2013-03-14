@@ -51,7 +51,7 @@ package com.openexchange.quota;
 
 /**
  * {@link UnlimitedQuota} - The unlimited quota.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UnlimitedQuota implements Quota {
@@ -60,7 +60,7 @@ public class UnlimitedQuota implements Quota {
 
     /**
      * Gets the instance
-     * 
+     *
      * @return The instance
      */
     public static UnlimitedQuota getInstance() {
@@ -75,7 +75,7 @@ public class UnlimitedQuota implements Quota {
     }
 
     @Override
-    public long getQuota(QuotaType type) {
+    public long getQuota(final QuotaType type) {
         return UNLIMITED;
     }
 

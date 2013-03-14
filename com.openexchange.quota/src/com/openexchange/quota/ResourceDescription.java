@@ -59,7 +59,7 @@ import java.util.Set;
  * {@link ResourceDescription} - A resource description.
  * <p>
  * A simple property container capable to carry POJOs.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ResourceDescription {
@@ -121,7 +121,7 @@ public class ResourceDescription {
 
     /**
      * Initializes a new {@link ResourceDescription}.
-     * 
+     *
      * @param properties The properties
      */
     protected ResourceDescription(final Map<String, Object> properties) {
@@ -140,7 +140,7 @@ public class ResourceDescription {
 
     /**
      * Checks for existence of specified property.
-     * 
+     *
      * @param propertyName The property name
      * @return <code>true</code> if such a property exists; otherwise <code>false</code>
      */
@@ -150,7 +150,7 @@ public class ResourceDescription {
 
     /**
      * Puts specified property.
-     * 
+     *
      * @param propertyName The property name
      * @param propertyValue The property value
      * @return This description with property put
@@ -165,7 +165,7 @@ public class ResourceDescription {
 
     /**
      * Removes specified property.
-     * 
+     *
      * @param propertyName The property name
      * @return This description with property removed
      */
@@ -176,7 +176,7 @@ public class ResourceDescription {
 
     /**
      * Puts specified properties.
-     * 
+     *
      * @param properties The properties to put
      * @return This description with properties put
      */
@@ -189,7 +189,7 @@ public class ResourceDescription {
 
     /**
      * Gets the named property.
-     * 
+     *
      * @param propertyName The property name
      * @return The property value or <code>null</code>
      */
