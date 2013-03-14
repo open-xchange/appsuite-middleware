@@ -215,6 +215,13 @@ public class InfostorePublicationServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Loads the meta-data of the document associated with specified publication.
+     *
+     * @param publication The publication
+     * @return The associated document's meta-data or <b><code>null</code></b>
+     * @throws OXException If loading meta-data fails
+     */
     public static DocumentMetadata loadDocumentMetadata(final Publication publication) throws OXException {
         final String entityId = publication.getEntityId();
         if (null == entityId) {
