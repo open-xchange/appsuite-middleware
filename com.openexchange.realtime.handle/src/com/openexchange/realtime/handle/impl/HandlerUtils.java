@@ -83,7 +83,7 @@ public class HandlerUtils {
         if (to == null) {
             return false;
         }
-        if (to.getProtocol().equals("synthetic")) {
+        if ("synthetic".equals(to.getProtocol())) {
             return true;
         }
         try {
