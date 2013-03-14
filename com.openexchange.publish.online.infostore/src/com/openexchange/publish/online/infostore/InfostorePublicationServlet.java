@@ -63,7 +63,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -71,6 +70,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.tools.PublicationSession;
@@ -216,15 +216,19 @@ public class InfostorePublicationServlet extends HttpServlet {
     }
 
     public static DocumentMetadata loadDocumentMetadata(final Publication publication) throws OXException {
+        final String entityId = publication.getEntityId();
+        if (null == entityId) {
+            // Impossible to load without identifier
+            return null;
+        }
 
-        final int id = Integer.parseInt(publication.getEntityId());
+        final int id = Integer.parseInt(entityId);
         final int version = InfostoreFacade.CURRENT_VERSION;
         final Context ctx = publication.getContext();
         final User user = loadUser(publication);
         final UserConfiguration userConfig = loadUserConfig(publication);
 
-        final DocumentMetadata document = infostore.getDocumentMetadata(id, version, ctx, user, userConfig);
-        return document;
+        return infostore.getDocumentMetadata(id, version, ctx, user, userConfig);
     }
 
     private static UserConfiguration loadUserConfig(final Publication publication) throws OXException {
