@@ -58,11 +58,11 @@ package com.openexchange.quota;
 public enum QuotaType {
 
     /**
-     * The quota for number of entities.
+     * The quota for number of items.
      */
     AMOUNT,
     /**
-     * The quota for size of entities.
+     * The quota for size of items.
      */
     SIZE,
 }
