@@ -67,6 +67,11 @@ public interface SessionMatcher {
     public static final Set<Flag> NO_FLAGS = Collections.unmodifiableSet(EnumSet.noneOf(Flag.class));
 
     /**
+     * The constant set indicating all flags.
+     */
+    public static final Set<Flag> ALL_FLAGS = Collections.unmodifiableSet(EnumSet.allOf(Flag.class));
+
+    /**
      * Flag enumeration for session matcher.
      */
     public static enum Flag {
