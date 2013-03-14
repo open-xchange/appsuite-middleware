@@ -64,6 +64,8 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
 %config(noreplace) /opt/open-xchange/etc/*
+%dir /opt/open-xchange/templates/
+%config(noreplace) /opt/open-xchange/templates/*
 
 %changelog
 * Tue Mar 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
