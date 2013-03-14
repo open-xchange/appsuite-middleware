@@ -53,6 +53,12 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Combines the context file store information for a specific database server and a certain file store. Collects across all schemas of that
+ * database server the file store usage for the given file store.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
 class FilestoreContextBlock {
 
     public final int representativeContextID, writeDBPoolID, filestoreID;
@@ -76,9 +82,10 @@ class FilestoreContextBlock {
 
     public void update(final int contextID, final long usage) {
         final FilestoreInfo info = filestores.get(I(contextID));
-        if(info != null) {
+        if (info != null) {
             info.usage = usage;
         }
+        // The schema may contain contexts having the files stored in another file store.
     }
 
     @Override

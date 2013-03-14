@@ -66,18 +66,24 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
 import org.apache.commons.collections.keyvalue.MultiKey;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXUtilSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.log.LogFactory;
+import com.openexchange.threadpool.ThreadPoolCompletionService;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.arrays.Collections;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -88,6 +94,19 @@ import com.openexchange.tools.sql.DBUtils;
 public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     private final static Log LOG = LogFactory.getLog(OXUtilMySQLStorage.class);
+
+    private static final ThreadPools.ExpectedExceptionFactory<StorageException> EXCEPTION_FACTORY = new ThreadPools.ExpectedExceptionFactory<StorageException>() {
+
+        @Override
+        public StorageException newUnexpectedError(final Throwable t) {
+            return new StorageException(t);
+        }
+
+        @Override
+        public Class<StorageException> getType() {
+            return StorageException.class;
+        }
+    };
 
     public OXUtilMySQLStorage() {
         super();
@@ -1326,10 +1345,34 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     private void updateFilestoresWithRealUsage(final List<Filestore> stores) throws StorageException {
         final Collection<FilestoreContextBlock> blocks = makeBlocksFromFilestoreContexts();
-        for (final FilestoreContextBlock block : blocks) {
-            updateBlockWithFilestoreUsage(block);
+        // Sort by database.
+        Map<Integer, Collection<FilestoreContextBlock>> dbMap = new HashMap<Integer, Collection<FilestoreContextBlock>>();
+        for (FilestoreContextBlock block : blocks) {
+            Collection<FilestoreContextBlock> dbBlock = dbMap.get(I(block.writeDBPoolID));
+            if (null == dbBlock) {
+                dbBlock = new ArrayList<FilestoreContextBlock>();
+                dbMap.put(I(block.writeDBPoolID), dbBlock);
+            }
+            dbBlock.add(block);
         }
+        // Create callables for every database server and submit them to the completion service.
+        final CompletionService<Void> completionService = new ThreadPoolCompletionService<Void>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
+        int taskCount = 0;
+        for (final Collection<FilestoreContextBlock> dbBlock : dbMap.values()) {
+            completionService.submit(new Callable<Void>() {
+                @Override
+                public Void call() throws Exception {
+                    updateBlocksInSameDBWithFilestoreUsage(dbBlock);
+                    return null;
+                }
+            });
+            taskCount++;
+        }
+        // Await completion
+        ThreadPools.<Void, StorageException> takeCompletionService(completionService, taskCount, EXCEPTION_FACTORY);
+        // Combine the information from the blocks into the stores collection.
         updateFilestoresWithUsageFromBlocks(stores, blocks);
+        // We read bytes from the database but the RMI client wants to see mega bytes.
         for (final Filestore store: stores){
             store.setSize(L(toMB(l(store.getSize()))));
             store.setUsed(L(toMB(l(store.getUsed()))));
@@ -1372,6 +1415,12 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             } catch (final PoolException e) {
                 throw new StorageException(e);
             }
+        }
+    }
+
+    protected static void updateBlocksInSameDBWithFilestoreUsage(Collection<FilestoreContextBlock> blocks) throws StorageException {
+        for (FilestoreContextBlock block : blocks) {
+            updateBlockWithFilestoreUsage(block);
         }
     }
 

@@ -1,7 +1,9 @@
-* 2013-03-12 - marcus.klein@open-xchange.com
+* 2013-03-14 - marcus.klein@open-xchange.com
 
  - Story 30395131: Added methods to database service for returning writable connections without incrementing the replication monitor
    counter.
+ - Story 38666533: Reading now parallel from all database servers and serial through schemas of a database server to have the fastest
+   possible listing of file store usage.
 
 * 2013-03-12 - marcus.klein@open-xchange.com
 
