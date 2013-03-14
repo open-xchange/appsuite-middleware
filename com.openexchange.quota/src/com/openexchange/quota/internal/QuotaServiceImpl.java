@@ -92,12 +92,22 @@ public final class QuotaServiceImpl implements QuotaService {
     }
 
     @Override
-    public Quota getQuotaFor(final Resource resource, final ResourceDescription desc, final Session session) throws OXException {
+    public Quota getQuotaFor(final Resource resource, final ResourceDescription resourceDescription, final Session session) throws OXException {
+        if (null == resource || null == session) {
+            return UnlimitedQuota.getInstance();
+        }
         final QuotaRestriction quotaRestriction;
         synchronized (restrictions) {
             quotaRestriction = restrictions.get(resource);
         }
-        return null == quotaRestriction ? UnlimitedQuota.getInstance() : quotaRestriction.getQuota(resource, desc, session, serviceProvider);
+        if (null == quotaRestriction) {
+            return UnlimitedQuota.getInstance();
+        }
+        return quotaRestriction.getQuota(
+            resource,
+            null == resourceDescription ? ResourceDescription.getEmptyResourceDescription() : resourceDescription,
+            session,
+            serviceProvider);
     }
 
     /**
