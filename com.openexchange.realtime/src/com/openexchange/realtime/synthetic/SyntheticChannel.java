@@ -147,8 +147,8 @@ public class SyntheticChannel implements Channel, Runnable {
     }
 
     @Override
-    public void send(Stanza stanza) throws OXException {
-        ComponentHandle handle = handles.get(stanza.getTo());
+    public void send(Stanza stanza, ID recipient) throws OXException {
+        ComponentHandle handle = handles.get(recipient);
         if (handle == null) {
             throw RealtimeExceptionCodes.INVALID_ID.create(stanza.getTo());
         }

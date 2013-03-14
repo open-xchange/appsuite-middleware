@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.RealtimeExceptionCodes;
 import com.openexchange.realtime.dispatch.DispatchExceptionCode;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
@@ -87,9 +88,13 @@ public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
             } else {
                 if (channel.isConnected(recipient)) {
                     try {
-                        channel.send(stanza);
+                        channel.send(stanza, recipient);
                     } catch (OXException e) {
-                        exceptions.put(recipient, e);
+                        if (RealtimeExceptionCodes.RESOURCE_NOT_AVAILABLE.equals(e)) {
+                            exceptions.put(recipient, DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString()));
+                        } else {
+                            exceptions.put(recipient, e);
+                        }
                     } catch (RuntimeException e) {
                         exceptions.put(recipient, DispatchExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage()));
                     }
