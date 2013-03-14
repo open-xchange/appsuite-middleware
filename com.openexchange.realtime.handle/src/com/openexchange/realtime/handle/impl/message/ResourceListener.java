@@ -121,7 +121,10 @@ public class ResourceListener implements ChangeListener {
 
     @Override
     public void updated(ID id, Resource value, Resource previousValue) {
-
+       if(LOG.isDebugEnabled()) {
+            LOG.debug("Updated called for ResourceListener.");
+        }
+        added(id, previousValue);
     }
 
     @Override
