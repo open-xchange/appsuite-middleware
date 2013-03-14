@@ -49,8 +49,11 @@
 
 package com.openexchange.quota;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * {@link ResourceDescription} - A resource description.
@@ -89,6 +92,11 @@ public class ResourceDescription {
             return null;
         }
 
+        @Override
+        public java.util.Set<String> getPropertyNames() {
+            return Collections.emptySet();
+        }
+
     };
 
     /**
@@ -119,6 +127,15 @@ public class ResourceDescription {
     protected ResourceDescription(final Map<String, Object> properties) {
         super();
         this.properties = properties;
+    }
+
+    /**
+     * Gets the available property names.
+     *
+     * @return The names
+     */
+    public Set<String> getPropertyNames() {
+        return new LinkedHashSet<String>(properties.keySet());
     }
 
     /**
