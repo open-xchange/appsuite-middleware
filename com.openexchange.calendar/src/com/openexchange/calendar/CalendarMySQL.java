@@ -49,6 +49,7 @@
 
 package com.openexchange.calendar;
 
+import static com.openexchange.sql.grammar.Constant.ASTERISK;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
@@ -125,11 +126,19 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.log.LogFactory;
+import com.openexchange.quota.Quota;
+import com.openexchange.quota.QuotaExceptionCodes;
+import com.openexchange.quota.QuotaService;
+import com.openexchange.quota.QuotaType;
+import com.openexchange.quota.Resource;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
 import com.openexchange.sql.builder.StatementBuilder;
+import com.openexchange.sql.grammar.COUNT;
 import com.openexchange.sql.grammar.Column;
+import com.openexchange.sql.grammar.Constant;
 import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.ISNULL;
 import com.openexchange.sql.grammar.OR;
@@ -209,6 +218,8 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     private static volatile AppointmentSqlFactoryService factory;
+
+    private static ServiceLookup services;
 
     public static void setApppointmentSqlFactory(final AppointmentSqlFactoryService factory) {
         CalendarMySQL.factory = factory;
@@ -1637,7 +1648,23 @@ public class CalendarMySQL implements CalendarSqlImp {
         return b ? 1 : 0;
     }
 
+    private void checkQuota(Session session) throws OXException {
+        QuotaService quotaService = services.getService(QuotaService.class);
+        if (null != quotaService) {
+            Quota quota = quotaService.getQuotaFor(Resource.CALENDAR, session);
+            long quotaValue = quota.getQuota(QuotaType.AMOUNT);
+            if (quotaValue > 0) {
+                long used = countAppointments(session);
+                if (used > 0 && used >= quotaValue) {
+                    throw QuotaExceptionCodes.QUOTA_EXCEEDED.create();
+                }
+            }
+        }
+    }
+
     private final CalendarDataObject[] insertAppointment0(final CalendarDataObject cdao, final Connection writecon, final Session so, final boolean notify) throws DataTruncation, SQLException, OXException, OXException {
+        checkQuota(so);
+        
         int i = 1;
         CalendarVolatileCache.getInstance().invalidateGroup(String.valueOf(cdao.getContextID()));
         PreparedStatement pst = null;
@@ -5405,5 +5432,37 @@ public class CalendarMySQL implements CalendarSqlImp {
             DBPool.push(ctx, connection);
         }
         return 0;
+    }
+
+    @Override
+    public int countAppointments(Session session) throws OXException {
+        SELECT select = new SELECT(new COUNT(ASTERISK)).FROM("prg_dates").WHERE(new EQUALS("cid", PLACEHOLDER));
+        List<Object> params = new ArrayList<Object>();
+        Context ctx = Tools.getContext(session);
+        params.add(ctx.getContextId());
+
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            connection = DBPool.pickup(ctx);
+            stmt = new StatementBuilder().prepareStatement(connection, select, params);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (final SQLException e) {
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
+        } finally {
+            DBUtils.closeResources(rs, stmt, null, true, ctx);
+            DBPool.push(ctx, connection);
+        }
+        
+        return 0;
+    }
+
+    public static void setServiceLookup(ServiceLookup serviceLookup) {
+        CalendarMySQL.services = serviceLookup;
     }
 }

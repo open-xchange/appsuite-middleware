@@ -89,6 +89,12 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Charsets;
 import com.openexchange.log.LogFactory;
+import com.openexchange.quota.Quota;
+import com.openexchange.quota.QuotaExceptionCodes;
+import com.openexchange.quota.QuotaService;
+import com.openexchange.quota.QuotaType;
+import com.openexchange.quota.Resource;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
@@ -121,6 +127,8 @@ public class CalendarSql implements AppointmentSQLInterface {
     public static final String PARTICIPANT_TABLE_NAME = "prg_dates_members";
 
     private static volatile CalendarSqlImp cimp;
+
+    private static ServiceLookup services;
 
     private final Session session;
 
