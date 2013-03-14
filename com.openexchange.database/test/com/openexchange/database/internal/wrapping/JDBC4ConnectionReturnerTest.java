@@ -81,7 +81,7 @@ public class JDBC4ConnectionReturnerTest {
     @Test(expected = SQLException.class)
     public final void testForBug22113() throws SQLException, IllegalArgumentException, SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException, ClassNotFoundException, NoSuchMethodException {
         Connection delegate = null;
-        Object object = getConstructor().newInstance(null, null, delegate, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
+        Object object = getConstructor().newInstance(null, null, null, delegate, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
         Connection con = (Connection) object;
         con.close();
     }
