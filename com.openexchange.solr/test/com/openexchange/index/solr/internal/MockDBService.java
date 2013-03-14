@@ -176,6 +176,16 @@ public class MockDBService implements DatabaseService {
     }
 
     @Override
+    public void backWritableAfterReading(Context ctx, Connection con) {
+        dbProvider.releaseWriteConnection(null, con);
+    }
+
+    @Override
+    public void backWritableAfterReading(int contextId, Connection con) {
+        dbProvider.releaseWriteConnection(null, con);
+    }
+
+    @Override
     public void backForUpdateTask(final int contextId, final Connection con) {
         // Nothing to do
 

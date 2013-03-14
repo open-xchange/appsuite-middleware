@@ -51,17 +51,14 @@ package com.openexchange.tools.file;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.InputStream;
 import java.net.URI;
 import java.sql.Connection;
-import java.util.Random;
 import junit.framework.TestCase;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.test.DelayedInputStream;
 import com.openexchange.tools.RandomString;
 import com.openexchange.tools.file.external.FileStorage;
 import com.openexchange.tools.file.internal.DBQuotaFileStorage;
@@ -210,6 +207,16 @@ public class QuotaFileStorageTest extends TestCase {
 
         @Override
         public void backWritable(final int contextId, final Connection con) {
+            // Nothing to do.
+        }
+
+        @Override
+        public void backWritableAfterReading(Context ctx, Connection con) {
+            // Nothing to do.
+        }
+
+        @Override
+        public void backWritableAfterReading(int contextId, Connection con) {
             // Nothing to do.
         }
 

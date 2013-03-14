@@ -1,5 +1,10 @@
 * 2013-03-12 - marcus.klein@open-xchange.com
 
+ - Story 30395131: Added methods to database service for returning writable connections without incrementing the replication monitor
+   counter.
+
+* 2013-03-12 - marcus.klein@open-xchange.com
+
  - Story 30395131: Added configuration option to disable the MySQL master/slave replication monitor.
 
 * 2013-03-11 - tobias.friedrich@open-xchange.com

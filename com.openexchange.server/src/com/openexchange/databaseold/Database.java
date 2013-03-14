@@ -183,6 +183,14 @@ public final class Database {
         }
     }
 
+    public static void backAfterReading(Context ctx, Connection con) {
+        try {
+            getDatabaseService().backWritableAfterReading(ctx, con);
+        } catch (OXException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
     /**
      * Returns a connection to the database of the context with the specified identifier to the pool.
      * @param contextId identifier of the context.
@@ -197,6 +205,14 @@ public final class Database {
                 getDatabaseService().backReadOnly(contextId, con);
             }
         } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+        }
+    }
+
+    public static void backAfterReading(int contextId, Connection con) {
+        try {
+            getDatabaseService().backWritableAfterReading(contextId, con);
+        } catch (OXException e) {
             LOG.error(e.getMessage(), e);
         }
     }

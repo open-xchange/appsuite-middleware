@@ -154,6 +154,28 @@ public interface DatabaseService extends ConfigDatabaseService {
     void backWritable(int contextId, Connection con);
 
     /**
+     * Returns a writable connection to the database of the specified context to the pool. It should be used to return a writable connection
+     * if it was only used for reading information from the master database server.
+     * When this connection is returned the replication monitor will not increase the replication counter. Therefore the database pooling
+     * component can not determine when written information will be available on the slave.
+     * This allows to reduce the write IO load on the database servers but keep in mind that reading from the master does not scale out.
+     * @param ctx Context.
+     * @param con Writable connection to return.
+     */
+    void backWritableAfterReading(Context ctx, Connection con);
+
+    /**
+     * Returns a writable connection to the database of the specified context to the pool. It should be used to return a writable connection
+     * if it was only used for reading information from the master database server.
+     * When this connection is returned the replication monitor will not increase the replication counter. Therefore the database pooling
+     * component can not determine when written information will be available on the slave.
+     * This allows to reduce the write IO load on the database servers but keep in mind that reading from the master does not scale out.
+     * @param contextId identifier of the context.
+     * @param con Writable connection to return.
+     */
+    void backWritableAfterReading(int contextId, Connection con);
+
+    /**
      * Returns a writable connection to the database of the context with the specified identifier to the pool. This method must be used if
      * the connection is obtained with {@link #getForUpdateTask(int)}.
      * @param contextId identifier of the context.

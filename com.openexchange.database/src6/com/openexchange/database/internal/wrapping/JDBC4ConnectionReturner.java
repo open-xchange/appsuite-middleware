@@ -82,7 +82,7 @@ public class JDBC4ConnectionReturner implements Connection {
     private final AssignmentImpl assign;
     private final boolean noTimeout;
     private final boolean write;
-    private final boolean usedAsRead;
+    private boolean usedAsRead;
 
     protected Connection delegate;
 
@@ -94,6 +94,10 @@ public class JDBC4ConnectionReturner implements Connection {
         this.delegate = delegate;
         this.noTimeout = noTimeout;
         this.write = write;
+        this.usedAsRead = usedAsRead;
+    }
+
+    public void setUsedAsRead(boolean usedAsRead) {
         this.usedAsRead = usedAsRead;
     }
 
