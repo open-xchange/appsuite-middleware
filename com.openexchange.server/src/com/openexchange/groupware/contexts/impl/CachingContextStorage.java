@@ -61,22 +61,22 @@ import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * This class implements a caching for the context storage. It provides a proxy
- * implementation for the Context interface to the outside world to be able to
- * keep the referenced context data up-to-date.
+ * This class implements a caching for the context storage. It provides a proxy implementation for the Context interface to the outside
+ * world to be able to keep the referenced context data up-to-date.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class CachingContextStorage extends ContextStorage {
 
     static final Log LOG = com.openexchange.log.Log.loggerFor(CachingContextStorage.class);
-    
+
     private static final String REGION_NAME = "Context";
 
     public static volatile CachingContextStorage parent;
 
     private final ContextStorage persistantImpl;
-    private boolean started;
 
+    private boolean started;
 
     public CachingContextStorage(final ContextStorage persistantImpl) {
         super();
@@ -195,18 +195,13 @@ public class CachingContextStorage extends ContextStorage {
         final Updater updater = Updater.getInstance();
         try {
             final UpdateStatus status = updater.getStatus(retval);
-            retval.setUpdating(status.blockingUpdatesRunning()
-                    || status.needsBlockingUpdates());
-            if ((status.needsBlockingUpdates() || status
-                    .needsBackgroundUpdates())
-                    && !status.blockingUpdatesRunning()
-                    && !status.backgroundUpdatesRunning()) {
+            retval.setUpdating(status.blockingUpdatesRunning() || status.needsBlockingUpdates());
+            if ((status.needsBlockingUpdates() || status.needsBackgroundUpdates()) && !status.blockingUpdatesRunning() && !status.backgroundUpdatesRunning()) {
                 updater.startUpdate(retval);
             }
         } catch (final OXException e) {
             if (SchemaExceptionCodes.DATABASE_DOWN.equals(e)) {
-                LOG.warn("Switching to read only mode for context " + contextId
-                        + " because master database is down.", e);
+                LOG.warn("Switching to read only mode for context " + contextId + " because master database is down.", e);
                 retval.setReadOnly(true);
             }
         }
