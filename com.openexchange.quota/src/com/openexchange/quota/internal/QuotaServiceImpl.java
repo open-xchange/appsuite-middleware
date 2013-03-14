@@ -87,7 +87,7 @@ public final class QuotaServiceImpl implements QuotaService {
     }
 
     @Override
-    public Quota getQuotaFor(Resource resource, Session session) throws OXException {
+    public Quota getQuotaFor(final Resource resource, final Session session) throws OXException {
         return getQuotaFor(resource, ResourceDescription.getEmptyResourceDescription(), session);
     }
 
