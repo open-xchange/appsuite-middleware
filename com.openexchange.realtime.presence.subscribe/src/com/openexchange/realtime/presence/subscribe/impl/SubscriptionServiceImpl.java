@@ -99,14 +99,15 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
             throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ResourceDirectory.class.getName());
         }
         
-        SubscriptionParticipant from = createParticipant(subscription.getFrom());
-        SubscriptionParticipant to = createParticipant(subscription.getTo());
+        SubscriptionParticipant from = createParticipant(subscription.getFrom().toGeneralForm());
+        SubscriptionParticipant to = createParticipant(subscription.getTo().toGeneralForm());
 
         Subscription sub = new Subscription(from, to, Presence.Type.PENDING);
         sub.setRequest(message);
         SubscriptionsSQL storage = new SubscriptionsSQL(databaseService);
         storage.store(sub);
-        IDMap<Resource> idMap = resourceDirectory.get(subscription.getTo());
+        // Lookup should be done with the general id, as protocol and resource don't matter 
+        IDMap<Resource> idMap = resourceDirectory.get(subscription.getTo().toGeneralForm());
         messageDispatcher.send(subscription, idMap);
     }
 
@@ -136,7 +137,8 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
         Subscription sub = new Subscription(from, to, approval.getType());
         SubscriptionsSQL storage = new SubscriptionsSQL(databaseService);
         storage.store(sub);
-        IDMap<Resource> idMap = resourceDirectory.get(approval.getTo());
+        // Lookup should be done with the general id, as protocol and resource don't matter 
+        IDMap<Resource> idMap = resourceDirectory.get(approval.getTo().toGeneralForm());
         messageDispatcher.send(approval, idMap);
     }
 
@@ -220,7 +222,8 @@ public class SubscriptionServiceImpl implements PresenceSubscriptionService {
         
         List<Presence> pendingRequests = getPendingRequests(id);
         for (Presence presence : pendingRequests) {
-            IDMap<Resource> idMap = resourceDirectory.get(presence.getTo());
+            // Lookup should be done with the general id, as protocol and resource don't matter
+            IDMap<Resource> idMap = resourceDirectory.get(presence.getTo().toGeneralForm());
             messageDispatcher.send(presence, idMap);
         }
     }
