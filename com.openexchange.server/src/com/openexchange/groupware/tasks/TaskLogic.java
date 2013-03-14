@@ -72,7 +72,6 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
@@ -84,7 +83,6 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
-import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -704,44 +702,6 @@ public final class TaskLogic {
      * Participant storage.
      */
     private static final ParticipantStorage partStor = ParticipantStorage.getInstance();
-
-    /**
-     * Stores a task with its participants and folders.
-     *
-     * @param ctx Context.
-     * @param task Task to store.
-     * @param participants Participants of the task.
-     * @param folders Folders the task should appear in.
-     * @throws OXException if an error occurs while storing the task.
-     */
-    static void insertTask(final Context ctx, final Task task, final Set<TaskParticipant> participants, final Set<Folder> folders) throws OXException {
-        final Connection con = DBPool.pickupWriteable(ctx);
-        try {
-            con.setAutoCommit(false);
-            final int taskId = IDGenerator.getId(ctx, Types.TASK, con);
-            task.setObjectID(taskId);
-            storage.insertTask(ctx, con, task, ACTIVE);
-            if (participants.size() != 0) {
-                partStor.insertParticipants(ctx, con, taskId, participants, ACTIVE);
-            }
-            foldStor.insertFolder(ctx, con, taskId, folders, ACTIVE);
-            con.commit();
-        } catch (final SQLException e) {
-            rollback(con);
-            throw TaskExceptionCode.INSERT_FAILED.create(e, e.getMessage());
-        } catch (final OXException e) {
-            rollback(con);
-            throw e;
-        } finally {
-            try {
-                con.setAutoCommit(true);
-            } catch (final SQLException e) {
-                final OXException tske = TaskExceptionCode.AUTO_COMMIT.create(e);
-                LOG.error(tske.getMessage(), tske);
-            }
-            DBPool.closeWriterSilent(ctx, con);
-        }
-    }
 
     /**
      * Deletes an ACTIVE task object. This stores the task as a DELETED task object, deletes all reminders and sends the task delete event.

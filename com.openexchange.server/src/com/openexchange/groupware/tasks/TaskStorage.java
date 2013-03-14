@@ -283,4 +283,11 @@ public abstract class TaskStorage {
 
     public abstract boolean containsNotSelfCreatedTasks(Context ctx, Connection con, int userId, int folderId) throws OXException;
 
+    /**
+     * Counts the number of tasks existing for the given contexts.
+     * @param ctx Context.
+     * @return the number of tasks stored for the given context.
+     * @throws OXException if reading from the persistent storage fails.
+     */
+    abstract int countTasks(Context ctx) throws OXException;
 }

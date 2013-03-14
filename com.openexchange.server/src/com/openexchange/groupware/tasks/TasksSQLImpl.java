@@ -49,14 +49,11 @@
 
 package com.openexchange.groupware.tasks;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import org.apache.commons.logging.Log;
 import com.openexchange.api2.TasksSQLInterface;
-import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -179,52 +176,18 @@ public class TasksSQLImpl implements TasksSQLInterface {
     }
 
     @Override
-    public void insertTaskObject(final Task task) throws OXException {
-        final Context ctx;
-        final Set<TaskParticipant> parts;
-        final FolderObject folder;
-        try {
-            ctx = Tools.getContext(session.getContextId());
-            final int userId = session.getUserId();
-            final User user = Tools.getUser(ctx, userId);
-            final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, userId);
-            parts = TaskLogic.createParticipants(ctx, task.getParticipants());
-            TaskLogic.checkNewTask(task, userId, userConfig, parts);
-            // Check access rights
-            final int folderId = task.getParentFolderID();
-            folder = Tools.getFolder(ctx, folderId);
-            Permission.checkCreate(ctx, user, userConfig, folder);
-            if (task.getPrivateFlag() && (Tools.isFolderPublic(folder) || Tools.isFolderShared(folder, user))) {
-                throw TaskExceptionCode.PRIVATE_FLAG.create(I(folderId));
-            }
-            // TODO create insert class
-            // Create folder mappings
-            Set<Folder> folders;
-            if (Tools.isFolderPublic(folder)) {
-                folders = TaskLogic.createFolderMapping(folderId, task.getCreatedBy(), InternalParticipant.EMPTY_INTERNAL);
-            } else {
-                Tools.fillStandardFolders(ctx, ParticipantStorage.extractInternal(parts));
-                int creator = userId;
-                if (Tools.isFolderShared(folder, user)) {
-                    creator = folder.getCreator();
-                }
-                folders = TaskLogic.createFolderMapping(folderId, creator,ParticipantStorage.extractInternal(parts));
-            }
-            // Insert task
-            TaskLogic.insertTask(ctx, task, parts, folders);
-        } catch (final OXException e) {
-            throw e;
-        }
-        if (task.containsAlarm()) {
-            Reminder.createReminder(ctx, task);
-        }
-        // Prepare for event
-        task.setUsers(TaskLogic.createUserParticipants(parts));
-        try {
-            new EventClient(session).create(task, folder);
-        } catch (final OXException e) {
-            throw e;
-        }
+    public void insertTaskObject(Task task) throws OXException {
+        final Context ctx = Tools.getContext(session.getContextId());
+        final int userId = session.getUserId();
+        final User user = Tools.getUser(ctx, userId);
+        final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, userId);
+        final int folderId = task.getParentFolderID();
+        final FolderObject folder = Tools.getFolder(ctx, folderId);
+        InsertData insert = new InsertData(ctx, user, userConfig, folder, task);
+        insert.prepare(session);
+        insert.doInsert();
+        insert.createReminder();
+        insert.sentEvent(session);
     }
 
     @Override
