@@ -149,8 +149,10 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 		final List<ContactField> fields = new ArrayList<ContactField>();
 		for (int columnID : columnIDs) {
 			final ContactField field = this.getMappedField(columnID);
-			if (null != field && (null == illegalFields || false == illegalFields.contains(field))) {
-                fields.add(field);
+			if (null != field) {
+			    if (null == illegalFields || false == illegalFields.contains(field)) {
+	                fields.add(field);
+			    }
             } else if (Contact.IMAGE1_URL == columnID) {
             	fields.add(ContactField.NUMBER_OF_IMAGES); // query NUMBER_OF_IMAGES to set image URL afterwards
                 fields.add(ContactField.LAST_MODIFIED); // query LAST_MODIFIED to set image URL afterwards
@@ -174,10 +176,20 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 	}
 
     public ContactField[] getAllFields() {
-    	if (null == allFields) {
-    		this.allFields = this.mappings.keySet().toArray(newArray(this.mappings.keySet().size()));
-    	}
-    	return this.allFields;
+        if (null == allFields) {
+            this.allFields = this.mappings.keySet().toArray(newArray(this.mappings.keySet().size()));
+        }
+        return this.allFields;
+    }
+
+    public ContactField[] getAllFields(EnumSet<ContactField> illegalFields) {
+        List<ContactField> fields = new ArrayList<ContactField>();
+        for (ContactField field : getAllFields()) {
+            if (false == illegalFields.contains(field)) {
+                fields.add(field);
+            }
+        }
+        return fields.toArray(new ContactField[fields.size()]);
     }
 
 	@Override
@@ -3257,6 +3269,29 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             @Override
             public void remove(Contact contact) {
                 contact.removeUid();
+            }
+        });
+
+        mappings.put(ContactField.SORT_NAME, new StringMapping<Contact>(ContactFields.SORT_NAME, Contact.SPECIAL_SORTING) {
+
+            @Override
+            public void set(Contact contact, String value) {
+                // no
+            }
+
+            @Override
+            public boolean isSet(Contact contact) {
+                return true;
+            }
+
+            @Override
+            public String get(Contact contact) {
+                return contact.getSortName();
+            }
+
+            @Override
+            public void remove(Contact contact) {
+                // no
             }
         });
 

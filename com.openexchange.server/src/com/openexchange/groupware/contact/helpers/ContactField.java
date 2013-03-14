@@ -204,7 +204,8 @@ public enum ContactField{
     BUSINESS_ADDRESS(Contact.ADDRESS_BUSINESS, "businessAddress", "BUSINESS_ADDRESS", "businessAddress", ContactFields.ADDRESS_BUSINESS, Types.VARCHAR),
     OTHER_ADDRESS(Contact.ADDRESS_OTHER, "otherAddress", "OTHER_ADDRESS", "otherAddress", ContactFields.ADDRESS_OTHER, Types.VARCHAR),
     UID(Contact.UID, "uid", "UID", "uid", ContactFields.UID, Types.VARCHAR),
-    FILENAME(Contact.FILENAME, "filename", "FILENAME", "filename", "", Types.VARCHAR)
+    FILENAME(Contact.FILENAME, "filename", "FILENAME", "filename", "", Types.VARCHAR),
+    SORT_NAME(Contact.SPECIAL_SORTING, "", "SORT_NAME", "sort_name", ContactFields.SORT_NAME, 0)
     ;
 
     private int columnNumber, sqlType;
@@ -480,13 +481,13 @@ public enum ContactField{
         }
     }
 
-    private static final EnumSet<ContactField> VIRTUAL_FIELDS = EnumSet.of(IMAGE1_URL);
+    private static final EnumSet<ContactField> VIRTUAL_FIELDS = EnumSet.of(IMAGE1_URL, SORT_NAME);
     @Deprecated
     public boolean isVirtual() {
         return VIRTUAL_FIELDS.contains(this);
     }
 
-    private static final EnumSet<ContactField> NON_DB_FIELDS = EnumSet.of(IMAGE1_URL, IMAGE1_CONTENT_TYPE, IMAGE_LAST_MODIFIED, IMAGE1, DISTRIBUTIONLIST, LINKS);
+    private static final EnumSet<ContactField> NON_DB_FIELDS = EnumSet.of(IMAGE1_URL, IMAGE1_CONTENT_TYPE, IMAGE_LAST_MODIFIED, IMAGE1, DISTRIBUTIONLIST, LINKS, SORT_NAME);
     @Deprecated
     public boolean isDBField() {
         return !NON_DB_FIELDS.contains(this);

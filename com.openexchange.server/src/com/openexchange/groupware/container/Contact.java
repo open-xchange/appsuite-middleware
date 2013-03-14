@@ -59,6 +59,7 @@ import java.util.LinkedList;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.java.Strings;
 
 /**
  * {@link Contact} - Represents a contact.
@@ -4700,4 +4701,63 @@ public class Contact extends CommonObject {
         }
         return true;
     }
+
+    public String getSortName() {
+        /*
+         * prefer lastname if set
+         */
+        String sortName = getYomiLastName();
+        if (Strings.isEmpty(sortName)) {
+            sortName = getSurName();
+        }
+        if (false == Strings.isEmpty(sortName)) {
+            /*
+             * append firstname if possible
+             */
+            String firstName = getYomiFirstName();
+            if (Strings.isEmpty(firstName)) {
+                firstName = getGivenName();
+            }
+            if (false == Strings.isEmpty(firstName)) {
+                sortName += firstName;
+            }
+        } else {
+            /*
+             * display name?
+             */
+            if (Strings.isEmpty(sortName)) {
+                /*
+                 * display name?
+                 */
+                sortName = getDisplayName();
+                if (Strings.isEmpty(sortName)) {
+                    /*
+                     * company?
+                     */
+                    sortName = getYomiCompany();
+                    if (Strings.isEmpty(sortName)) {
+                        sortName = getCompany();
+                        if (Strings.isEmpty(sortName)) {
+                            /*
+                             * email1
+                             */
+                            sortName = getEmail1();
+                            if (Strings.isEmpty(sortName)) {
+                                /*
+                                 * email2
+                                 */
+                                sortName = getEmail2();
+                                if (Strings.isEmpty(sortName)) {
+                                    sortName = ""; // empty
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return sortName;
+    }
+
 }

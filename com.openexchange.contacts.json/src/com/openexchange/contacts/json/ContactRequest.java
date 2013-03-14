@@ -52,7 +52,6 @@ package com.openexchange.contacts.json;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +66,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.SortOrder;
+import com.openexchange.contacts.json.actions.ContactAction;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -91,11 +91,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ContactRequest {
-
-    /**
-     * Contact fields that are not persistent.
-     */
-    private static final EnumSet<ContactField> VIRTUAL_FIELDS = EnumSet.of(ContactField.IMAGE1_URL, ContactField.LAST_MODIFIED_UTC);
 
     private final AJAXRequestData request;
     private final ServerSession session;
@@ -207,9 +202,19 @@ public class ContactRequest {
     	return getFields((ContactField[])null);
     }
 
-    public ContactField[] getFields(final ContactField...mandatoryFields) throws OXException {
-    	ContactField[] fields = null;
-    	if (this.isInternalSort()) {
+    public ContactField[] getFields(ContactField...mandatoryFields) throws OXException {
+        /*
+         * get requested column IDs
+         */
+        int[] columnIDs = RequestTools.getColumnsAsIntArray(request);
+        if (null == columnIDs) {
+            throw OXJSONExceptionCodes.MISSING_FIELD.create("columns");
+        }
+        /*
+         * determine mandatory fields
+         */
+    	ContactField[] fields;
+    	if (this.isInternalSort() || Arrays.contains(columnIDs, ContactMapper.getInstance().get(ContactField.SORT_NAME).getColumnID())) {
     		fields = new ContactField[] {
     			ContactField.LAST_MODIFIED, ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME,
 				ContactField.YOMI_FIRST_NAME, ContactField.GIVEN_NAME, ContactField.DISPLAY_NAME, ContactField.YOMI_COMPANY,
@@ -220,11 +225,10 @@ public class ContactRequest {
     	if (null != mandatoryFields) {
     		fields = Arrays.add(fields, mandatoryFields);
     	}
-    	final int[] columnIDs = RequestTools.getColumnsAsIntArray(request);
-    	if (null == columnIDs) {
-    	    throw OXJSONExceptionCodes.MISSING_FIELD.create("columns");
-    	}
-    	return ContactMapper.getInstance().getFields(columnIDs, VIRTUAL_FIELDS, fields);
+    	/*
+    	 * get mapped fields
+    	 */
+    	return ContactMapper.getInstance().getFields(columnIDs, ContactAction.VIRTUAL_FIELDS, fields);
     }
 
     /**
