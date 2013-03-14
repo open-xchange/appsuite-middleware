@@ -583,6 +583,7 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/contextSets/index.yml
 %config(noreplace) /opt/open-xchange/etc/requestwatcher.properties
 %config(noreplace) /opt/open-xchange/etc/preview.properties
+%config(noreplace) /opt/open-xchange/etc/quota.properties
 
 %changelog
 * Tue Mar 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
