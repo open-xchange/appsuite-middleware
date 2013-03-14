@@ -227,6 +227,41 @@ public final class QuotaActivator extends HousekeepingActivator {
                 return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class };
             }
         });
+        registerService(QuotaRestriction.class, new QuotaRestriction() {
+
+            @Override
+            public Resource getResource() {
+                return Resource.INFOSTORE_FILES;
+            }
+
+            @Override
+            public Quota getQuota(final Resource resource, final ResourceDescription desc, final Session session, final ServiceProvider serviceProvider) throws OXException {
+                final ConfigView configView =
+                    serviceProvider.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
+                // Get property; first with "context" scope...
+                ConfigProperty<String> property = configView.property("context", "com.openexchange.quota.infostore", String.class);
+                if (!property.isDefined()) {
+                    // ... then with "server" scope if not defined
+                    property = configView.property("server", "com.openexchange.quota.infostore", String.class);
+                    if (!property.isDefined()) {
+                        return UnlimitedQuota.getInstance();
+                    }
+                }
+                try {
+                    return new AmountOnlyQuota(Long.parseLong(property.get().trim()));
+                } catch (final RuntimeException e) {
+                    log.warn(
+                        "Couldn't detect quota for " + resource.toString() + " (user=" + session.getUserId() + ", context=" + session.getContextId() + ")",
+                        e);
+                    return UnlimitedQuota.getInstance();
+                }
+            }
+
+            @Override
+            public Class<?>[] getNeededServices() {
+                return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class };
+            }
+        });
     }
 
     @Override

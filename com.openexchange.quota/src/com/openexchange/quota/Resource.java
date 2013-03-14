@@ -70,8 +70,8 @@ public enum Resource {
      */
     CONTACT,
     /**
-     * The quota resource for files.
+     * The quota resource for infostore files.
      */
-    FILES,
+    INFOSTORE_FILES,
 
 }
