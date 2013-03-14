@@ -58,8 +58,11 @@ import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.DispatchExceptionCode;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.handle.StanzaStorage;
+import com.openexchange.realtime.handle.TimedStanza;
 import com.openexchange.realtime.handle.impl.AbstractStrategyHandler;
 import com.openexchange.realtime.handle.impl.HandlerStrategy;
+import com.openexchange.realtime.handle.impl.Services;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.util.IDMap;
@@ -133,9 +136,8 @@ public class MessageHandler extends AbstractStrategyHandler<Message> {
 
     private void handleInboundStanzaWithGeneralRecipient0(Message stanza, ID recipient) {
         try {
-            ResourceDirectory resourceDirectory = getResourceDirectory();
-            IDMap<Resource> resources = resourceDirectory.get(recipient);
-            if (resources.isEmpty()) {
+            IDMap<Resource> receivers = DestinationSelector.select(recipient);
+            if (receivers.isEmpty()) {
                 /*
                  * For message stanzas, the server MAY choose to store the stanza on behalf of the user and deliver it when the user next
                  * becomes available, or forward the message to the user via some other means (e.g., to the user's email account). However,
@@ -143,7 +145,7 @@ public class MessageHandler extends AbstractStrategyHandler<Message> {
                  * <service-unavailable/> stanza error. (Note: Offline message storage and message forwarding are not defined in XMPP, since
                  * they are strictly a matter of implementation and service provisioning.)
                  */
-                sendServiceUnavailable(stanza);
+                storeMessage(recipient, stanza);
             } else {
                 /*
                  * For message stanzas, the server SHOULD deliver the stanza to the highest-priority available resource (if the resource did
@@ -155,34 +157,10 @@ public class MessageHandler extends AbstractStrategyHandler<Message> {
                  * message as if there were no available resources (defined below). In addition, the server MUST NOT rewrite the 'to'
                  * attribute (i.e., it MUST leave it as <user@domain> rather than change it to <user@domain/resource>).
                  */
-                IDMap<Resource> receivers = new IDMap<Resource>();
-                byte highest = 0;
-                for (Entry<ID, Resource> entry : resources.entrySet()) {
-                    ID id = entry.getKey();
-                    Resource resource = entry.getValue();
-                    byte priority = 0;
-                    if (resource.getPresence() != null) {
-                        priority = resource.getPresence().getPriority();
-                    }
-                    if (priority == highest) {
-                        receivers.put(id, resource);
-                    } else if (priority > highest) {
-                        receivers.clear();
-                        receivers.put(id, resource);
-                    }
-                }
-
-                if (receivers.isEmpty()) {
-                    /*
-                     * Handle the same as if resources.isEmpty()
-                     */
+                MessageDispatcher messageDispatcher = getMessageDispatcher();
+                Map<ID, OXException> failed = messageDispatcher.send(stanza, receivers);
+                if (failed.size() == receivers.size()) {
                     sendServiceUnavailable(stanza);
-                } else {
-                    MessageDispatcher messageDispatcher = getMessageDispatcher();
-                    Map<ID, OXException> failed = messageDispatcher.send(stanza, receivers);
-                    if (failed.size() == receivers.size()) {
-                        sendServiceUnavailable(stanza);
-                    }
                 }
             }
         } catch (Exception e) {
@@ -204,6 +182,11 @@ public class MessageHandler extends AbstractStrategyHandler<Message> {
     @Override
     public boolean applyPrivacyLists(Message stanza) {
         return true;
+    }
+    
+    private void storeMessage(ID recipient, Message stanza) throws OXException {
+        StanzaStorage stanzaStorage = Services.getService(StanzaStorage.class);
+        stanzaStorage.pushStanza(recipient, new TimedStanza(System.currentTimeMillis(), stanza));
     }
 
     private void sendServiceUnavailable(Message stanza) {

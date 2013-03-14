@@ -52,12 +52,15 @@ package com.openexchange.realtime.handle.osgi;
 import java.util.concurrent.Future;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.directory.ResourceDirectory;
+import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.handle.StanzaQueueService;
+import com.openexchange.realtime.handle.StanzaStorage;
 import com.openexchange.realtime.handle.impl.Services;
 import com.openexchange.realtime.handle.impl.StanzaQueueServiceImpl;
 import com.openexchange.realtime.handle.impl.iq.IQHandler;
 import com.openexchange.realtime.handle.impl.message.MessageHandler;
+import com.openexchange.realtime.handle.impl.message.ResourceListener;
 import com.openexchange.realtime.handle.impl.presence.PresenceHandler;
 import com.openexchange.realtime.presence.subscribe.PresenceSubscriptionService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -73,7 +76,8 @@ public class StanzaHandlerActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ResourceDirectory.class, PresenceSubscriptionService.class, MessageDispatcher.class, ThreadPoolService.class };
+        return new Class<?>[] { ResourceDirectory.class, PresenceSubscriptionService.class,
+            MessageDispatcher.class, LocalMessageDispatcher.class, ThreadPoolService.class, StanzaStorage.class };
     }
 
     @Override
@@ -85,6 +89,7 @@ public class StanzaHandlerActivator extends HousekeepingActivator {
         messageFuture = threadPoolService.submit(ThreadPools.task(new MessageHandler(queueService.getMessageQueue())));
         iqFuture = threadPoolService.submit(ThreadPools.task(new IQHandler(queueService.getIqQueue())));
         registerService(StanzaQueueService.class, queueService);
+        getService(ResourceDirectory.class).addListener(new ResourceListener());
     }
     
     @Override

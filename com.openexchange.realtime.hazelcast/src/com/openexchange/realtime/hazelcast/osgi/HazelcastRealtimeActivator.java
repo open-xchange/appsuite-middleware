@@ -63,10 +63,12 @@ import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.handle.StanzaStorage;
 import com.openexchange.realtime.hazelcast.Services;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.directory.HazelcastResourceDirectory;
 import com.openexchange.realtime.hazelcast.impl.GlobalMessageDispatcherImpl;
+import com.openexchange.realtime.hazelcast.impl.HazelcastStanzaStorage;
 
 /**
  * {@link HazelcastRealtimeActivator}
@@ -123,6 +125,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         openTrackers();
         registerService(ResourceDirectory.class, directory, null);
         registerService(MessageDispatcher.class, globalDispatcher);
+        registerService(StanzaStorage.class, new HazelcastStanzaStorage());
     }
 
     @Override
