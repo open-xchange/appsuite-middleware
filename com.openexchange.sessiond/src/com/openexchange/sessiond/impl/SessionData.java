@@ -739,21 +739,22 @@ final class SessionData {
         SessionControl control = null;
         wlock.lock();
         try {
-            boolean movedSession = false;
-            for (int i = 1; i < sessionList.size() && !movedSession; i++) {
+            for (int i = 1; i < sessionList.size() && null == control; i++) {
                 final SessionContainer container = sessionList.get(i);
                 if (container.containsSessionId(sessionId)) {
+                    // Remove from current container & put into first one
                     control = container.removeSessionById(sessionId);
-                    sessionList.getFirst().putSessionControl(control);
-                    LOG.trace("Moved from container " + i + " to first one.");
-                    movedSession = true;
+                    if (null != control) {
+                        sessionList.getFirst().putSessionControl(control);
+                        LOG.trace("Moved from container " + i + " to first one.");
+                    }
                 }
             }
-            if (!movedSession) {
+            if (null == control) {
                 if (sessionList.getFirst().containsSessionId(sessionId)) {
-                    LOG.warn("Somebody else moved session to most actual container.");
+                    LOG.warn("Somebody else moved session to most up-to-date container.");
                 } else {
-                    LOG.warn("Was not able to move the session " + sessionId + " into the most actual container.");
+                    LOG.warn("Was not able to move the session " + sessionId + " into the most up-to-date container.");
                 }
             }
         } catch (final OXException e) {

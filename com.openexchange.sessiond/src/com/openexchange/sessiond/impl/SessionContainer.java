@@ -266,9 +266,12 @@ final class SessionContainer {
      * Puts specified {@link SessionControl} object into this container
      *
      * @param sessionControl The session control to put
-     * @throws OXException
+     * @throws OXException If put operation fails because of conflict with an existing session
      */
     protected void putSessionControl(final SessionControl sessionControl) throws OXException {
+        if (null == sessionControl) {
+            return;
+        }
         final Session session = sessionControl.getSession();
         final String sessionId = session.getSessionID();
         final SessionControl oldSessionControl = sessionMap.putIfAbsentBySessionId(sessionId, sessionControl);
@@ -303,9 +306,12 @@ final class SessionContainer {
      * Removes the session bound to specified session ID.
      *
      * @param sessionId The session Id
-     * @return The {@link SessionControl session control} previously associated with specified session ID, or <code>null</code>.
+     * @return The {@link SessionControl session control} previously associated with specified session identifier, or <code>null</code>.
      */
     protected SessionControl removeSessionById(final String sessionId) {
+        if (null == sessionId) {
+            return null;
+        }
         final SessionControl sessionControl = sessionMap.removeBySessionId(sessionId);
         if (sessionControl != null) {
             final Session session = sessionControl.getSession();

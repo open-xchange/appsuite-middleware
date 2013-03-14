@@ -99,22 +99,32 @@ public class LastLoginRecorder implements LoginHandlerService {
     @Override
     public void handleLogin(final LoginResult login) throws OXException {
         final LoginRequest request = login.getRequest();
-        // Determine key
-        String key;
+        // Determine client
+        String client;
         if (null != request.getClient()) {
-            key = request.getClient();
+            client = request.getClient();
         } else if (null != request.getInterface()) {
-            key = request.getInterface().toString();
+            client = request.getInterface().toString();
         } else {
             return;
         }
+        updateLastLogin(client, login.getUser(), login.getContext());
+    }
+
+    /**
+     * Updates the last-accessed time stamp for given user's client.
+     *
+     * @param client The client identifier
+     * @param origUser The associated user
+     * @param context The context
+     * @throws OXException If update fails for any reason
+     */
+    static void updateLastLogin(final String client, final User origUser, final Context context) throws OXException {
         // Set attribute
-        key = "client:" + key;
-        final Context ctx = login.getContext();
-        if (ctx.isReadOnly()) {
+        final String key = "client:" + client;
+        if (context.isReadOnly()) {
             return;
         }
-        final User origUser = login.getUser();
         // Retrieve existing ones
         final Map<String, Set<String>> attributes;
         {
@@ -124,7 +134,7 @@ public class LastLoginRecorder implements LoginHandlerService {
                 int count = 0;
                 for (final String origKey : origAttributes.keySet()) {
                     if (origKey.startsWith("client:") && ++count > maxClientCount) {
-                        throw UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(Integer.valueOf(ctx.getContextId()), Integer.valueOf(origUser.getId()));
+                        throw UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(Integer.valueOf(context.getContextId()), Integer.valueOf(origUser.getId()));
                     }
                 }
                 attributes = new HashMap<String, Set<String>>(origAttributes);
@@ -140,7 +150,7 @@ public class LastLoginRecorder implements LoginHandlerService {
         UserService service;
         try {
             service = ServerServiceRegistry.getInstance().getService(UserService.class, true);
-            service.updateUser(newUser, ctx);
+            service.updateUser(newUser, context);
         } catch (final OXException e) {
             throw e;
         }
