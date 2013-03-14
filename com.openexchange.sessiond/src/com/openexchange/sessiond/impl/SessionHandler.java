@@ -369,14 +369,14 @@ public final class SessionHandler {
         return retval;
     }
 
-    public static Session findFirstSessionForUser(final int userId, final int contextId, final SessionMatcher matcher) {
+    public static Session findFirstSessionForUser(final int userId, final int contextId, final SessionMatcher matcher, final boolean ignoreLongTerm, final boolean ignoreStorage) {
         final SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return null;
         }
-        Session retval = sessionData.findFirstSessionForUser(userId, contextId, matcher);
-        if (null == retval) {
+        Session retval = sessionData.findFirstSessionForUser(userId, contextId, matcher, ignoreLongTerm);
+        if (null == retval && !ignoreStorage) {
             final SessionStorageService storageService = getServiceRegistry().getService(SessionStorageService.class);
             if (null != storageService) {
                 try {

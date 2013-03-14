@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
@@ -233,7 +234,11 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
 
     @Override
     public Session findFirstMatchingSessionForUser(final int userId, final int contextId, final SessionMatcher matcher) {
-        return SessionHandler.findFirstSessionForUser(userId, contextId, matcher);
+        if (null == matcher) {
+            return null;
+        }
+        final Set<SessionMatcher.Flag> flags = matcher.flags();
+        return SessionHandler.findFirstSessionForUser(userId, contextId, matcher, flags.contains(SessionMatcher.Flag.IGNORE_LONG_TERM), flags.contains(SessionMatcher.Flag.IGNORE_SESSION_STORAGE));
     }
 
 }

@@ -367,7 +367,7 @@ final class SessionData {
         return null;
     }
 
-    public Session findFirstSessionForUser(final int userId, final int contextId, final SessionMatcher matcher) {
+    public Session findFirstSessionForUser(final int userId, final int contextId, final SessionMatcher matcher, final boolean ignoreLongTerm) {
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -379,21 +379,23 @@ final class SessionData {
         } finally {
             rlock.unlock();
         }
-        rlongTermLock.lock();
-        try {
-            if (!hasLongTermSession(userId, contextId)) {
-                return null;
-            }
-            for (final SessionMap longTermMap : longTermList) {
-                for (final SessionControl control : longTermMap.values()) {
-                    final Session session = control.getSession();
-                    if (session.getContextId() == contextId && session.getUserId() == userId && matcher.accepts(control.getSession())) {
-                        return control.getSession();
+        if (!ignoreLongTerm) {
+            rlongTermLock.lock();
+            try {
+                if (!hasLongTermSession(userId, contextId)) {
+                    return null;
+                }
+                for (final SessionMap longTermMap : longTermList) {
+                    for (final SessionControl control : longTermMap.values()) {
+                        final Session session = control.getSession();
+                        if (session.getContextId() == contextId && session.getUserId() == userId && matcher.accepts(control.getSession())) {
+                            return control.getSession();
+                        }
                     }
                 }
+            } finally {
+                rlongTermLock.unlock();
             }
-        } finally {
-            rlongTermLock.unlock();
         }
         return null;
     }
