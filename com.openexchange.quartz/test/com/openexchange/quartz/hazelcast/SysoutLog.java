@@ -49,50 +49,110 @@
 
 package com.openexchange.quartz.hazelcast;
 
-import java.util.Collection;
-import java.util.concurrent.ConcurrentMap;
+import org.apache.commons.logging.Log;
 
-import org.quartz.JobPersistenceException;
-import org.quartz.TriggerKey;
-
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Instance;
-import com.openexchange.quartz.hazelcast.ImprovedHazelcastJobStore;
 
 /**
+ * {@link SysoutLog}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class TestableHazelcastJobStore extends ImprovedHazelcastJobStore {
+public class SysoutLog implements Log {
 
-    private HazelcastInstance hazelcast = null;
-    
-    static {
-        LOG = new SysoutLog();
+    @Override
+    public void debug(Object arg0) {
+        System.out.println(arg0.toString());
     }
 
     @Override
-    public void shutdown() {
-        Collection<Instance> instances = hazelcast.getInstances();
-        for (Instance instance : instances) {
-            instance.destroy();
-        }
+    public void debug(Object arg0, Throwable arg1) {
+        System.out.println(arg0.toString());
+        arg1.printStackTrace();
     }
 
     @Override
-    protected HazelcastInstance getHazelcast() throws JobPersistenceException {
-        if (hazelcast == null) {
-            hazelcast = Hazelcast.getDefaultInstance();
-        }
-
-        return hazelcast;
+    public void error(Object arg0) {
+        System.out.println(arg0.toString());
     }
 
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyAcquiredTriggers() {
-        return locallyAcquiredTriggers;
+    @Override
+    public void error(Object arg0, Throwable arg1) {
+        System.out.println(arg0.toString());
+        arg1.printStackTrace();
     }
 
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyExecutingTriggers() {
-        return locallyExecutingTriggers;
+    @Override
+    public void fatal(Object arg0) {
+        System.out.println(arg0.toString());
     }
+
+    @Override
+    public void fatal(Object arg0, Throwable arg1) {
+        System.out.println(arg0.toString());
+        arg1.printStackTrace();
+    }
+
+    @Override
+    public void info(Object arg0) {
+        System.out.println(arg0.toString());
+    }
+
+    @Override
+    public void info(Object arg0, Throwable arg1) {
+        System.out.println(arg0.toString());
+        arg1.printStackTrace();
+    }
+
+    @Override
+    public boolean isDebugEnabled() {
+        return true;
+    }
+
+    @Override
+    public boolean isErrorEnabled() {
+        return true;
+    }
+
+    @Override
+    public boolean isFatalEnabled() {
+        return true;
+    }
+
+    @Override
+    public boolean isInfoEnabled() {
+        return true;
+    }
+
+    @Override
+    public boolean isTraceEnabled() {
+        return true;
+    }
+
+    @Override
+    public boolean isWarnEnabled() {
+        return true;
+    }
+
+    @Override
+    public void trace(Object arg0) {
+        System.out.println(arg0.toString());
+    }
+
+    @Override
+    public void trace(Object arg0, Throwable arg1) {
+        System.out.println(arg0.toString());
+        arg1.printStackTrace();
+    }
+
+    @Override
+    public void warn(Object arg0) {
+        System.out.println(arg0.toString());
+    }
+
+    @Override
+    public void warn(Object arg0, Throwable arg1) {
+        System.out.println(arg0.toString());
+        arg1.printStackTrace();
+    }
+
 }
