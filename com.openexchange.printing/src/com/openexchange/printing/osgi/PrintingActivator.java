@@ -47,52 +47,33 @@
  *
  */
 
-package com.openexchange.quartz.hazelcast;
+package com.openexchange.printing.osgi;
 
-import java.util.Collection;
-import java.util.concurrent.ConcurrentMap;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.i18n.I18nService;
+import com.openexchange.printing.contacts.ContactTemplateHelperFactory;
+import com.openexchange.printing.email.EmailTemplateHelperFactory;
+import com.openexchange.printing.tasks.TaskTemplateHelperFactory;
+import com.openexchange.templating.TemplateHelperFactory;
 
-import org.quartz.JobPersistenceException;
-import org.quartz.TriggerKey;
+public class PrintingActivator extends AJAXModuleActivator {
 
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Instance;
-import com.openexchange.quartz.hazelcast.ImprovedHazelcastJobStore;
+	@Override
+	protected Class<?>[] getNeededServices() {
+		return new Class[]{ I18nService.class};
+	}
 
-/**
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- */
-public class TestableHazelcastJobStore extends ImprovedHazelcastJobStore {
+	@Override
+	protected void startBundle() throws Exception {
+		PrintingServices.LOOKUP.set(this);
 
-    private HazelcastInstance hazelcast = null;
-    
-    static {
-        LOG = new SysoutLog();
-    }
-
-    @Override
-    public void shutdown() {
-        Collection<Instance> instances = hazelcast.getInstances();
-        for (Instance instance : instances) {
-            instance.destroy();
-        }
-    }
-
-    @Override
-    protected HazelcastInstance getHazelcast() throws JobPersistenceException {
-        if (hazelcast == null) {
-            hazelcast = Hazelcast.getDefaultInstance();
-        }
-
-        return hazelcast;
-    }
-
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyAcquiredTriggers() {
-        return locallyAcquiredTriggers;
-    }
-
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyExecutingTriggers() {
-        return locallyExecutingTriggers;
-    }
+        registerService(TemplateHelperFactory.class, new ContactTemplateHelperFactory(this));
+        registerService(TemplateHelperFactory.class, new TaskTemplateHelperFactory(this));
+        registerService(TemplateHelperFactory.class, new EmailTemplateHelperFactory(this));
+	}
+	
+	protected void stopBundle() throws Exception {
+		PrintingServices.LOOKUP.set(null);
+		super.stopBundle();
+	}
 }

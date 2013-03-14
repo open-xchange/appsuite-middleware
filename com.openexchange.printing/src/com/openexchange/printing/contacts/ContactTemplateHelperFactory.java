@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,37 @@
  *
  */
 
-package com.openexchange.quartz.hazelcast;
+package com.openexchange.printing.contacts;
 
-import java.util.Collection;
-import java.util.concurrent.ConcurrentMap;
 
-import org.quartz.JobPersistenceException;
-import org.quartz.TriggerKey;
+import java.util.Map;
+import java.util.TimeZone;
 
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Instance;
-import com.openexchange.quartz.hazelcast.ImprovedHazelcastJobStore;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.templating.TemplateHelperFactory;
+import com.openexchange.tools.session.ServerSession;
 
-/**
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- */
-public class TestableHazelcastJobStore extends ImprovedHazelcastJobStore {
+public class ContactTemplateHelperFactory implements TemplateHelperFactory {
 
-    private HazelcastInstance hazelcast = null;
+	private ServiceLookup services;
+	
+    public ContactTemplateHelperFactory(ServiceLookup services) {
+        this.services = services;
+    }
     
-    static {
-        LOG = new SysoutLog();
-    }
+	@Override
+	public String getName() {
+		return "contacts";
+	}
 
-    @Override
-    public void shutdown() {
-        Collection<Instance> instances = hazelcast.getInstances();
-        for (Instance instance : instances) {
-            instance.destroy();
-        }
-    }
+	@Override
+	public Object create(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter, Map<String, Object> rootObject) throws OXException {			
 
-    @Override
-    protected HazelcastInstance getHazelcast() throws JobPersistenceException {
-        if (hazelcast == null) {
-            hazelcast = Hazelcast.getDefaultInstance();
-        }
-
-        return hazelcast;
-    }
-
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyAcquiredTriggers() {
-        return locallyAcquiredTriggers;
-    }
-
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyExecutingTriggers() {
-        return locallyExecutingTriggers;
-    }
+		TimeZone tz = TimeZone.getTimeZone( requestData.isSet("timezone") ? requestData.getParameter("timezone") : session.getUser().getTimeZone() );			    
+		return new ContactHelper((Map<String, Object>) result.getResultObject(), session.getUser().getLocale(), tz, session.getContext(), services);
+	}
 }

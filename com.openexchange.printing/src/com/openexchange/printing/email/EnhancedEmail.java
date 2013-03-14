@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,35 @@
  *
  */
 
-package com.openexchange.quartz.hazelcast;
+package com.openexchange.printing.email;
 
-import java.util.Collection;
-import java.util.concurrent.ConcurrentMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-import org.quartz.JobPersistenceException;
-import org.quartz.TriggerKey;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.resource.Resource;
+import com.openexchange.resource.ResourceService;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.user.UserService;
 
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Instance;
-import com.openexchange.quartz.hazelcast.ImprovedHazelcastJobStore;
+public class EnhancedEmail {
 
-/**
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- */
-public class TestableHazelcastJobStore extends ImprovedHazelcastJobStore {
+	private final ServiceLookup services;
 
-    private HazelcastInstance hazelcast = null;
-    
-    static {
-        LOG = new SysoutLog();
-    }
+	private final Map<String, Object> email;
+	private final Context ctx;
 
-    @Override
-    public void shutdown() {
-        Collection<Instance> instances = hazelcast.getInstances();
-        for (Instance instance : instances) {
-            instance.destroy();
-        }
-    }
+	public EnhancedEmail(Map<String, Object> email, ServiceLookup services, Context ctx) throws OXException {
+		super();
+		this.services = services;
+		this.email = email;
+		this.ctx = ctx;
+	}
 
-    @Override
-    protected HazelcastInstance getHazelcast() throws JobPersistenceException {
-        if (hazelcast == null) {
-            hazelcast = Hazelcast.getDefaultInstance();
-        }
-
-        return hazelcast;
-    }
-
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyAcquiredTriggers() {
-        return locallyAcquiredTriggers;
-    }
-
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyExecutingTriggers() {
-        return locallyExecutingTriggers;
-    }
+	
 }

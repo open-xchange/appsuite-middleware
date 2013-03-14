@@ -47,52 +47,36 @@
  *
  */
 
-package com.openexchange.quartz.hazelcast;
+package com.openexchange.printing;
 
-import java.util.Collection;
-import java.util.concurrent.ConcurrentMap;
-
-import org.quartz.JobPersistenceException;
-import org.quartz.TriggerKey;
-
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Instance;
-import com.openexchange.quartz.hazelcast.ImprovedHazelcastJobStore;
 
 /**
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * {@link SimpleParticipant}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class TestableHazelcastJobStore extends ImprovedHazelcastJobStore {
+public class SimpleParticipant {
 
-    private HazelcastInstance hazelcast = null;
+    private String displayName;
+    private String message;
+
+    public SimpleParticipant setDisplayName(String string) {
+        this.displayName = string;
+        return this;
+    }
     
-    static {
-        LOG = new SysoutLog();
+    public String getDisplayName() {
+        return displayName;
     }
-
-    @Override
-    public void shutdown() {
-        Collection<Instance> instances = hazelcast.getInstances();
-        for (Instance instance : instances) {
-            instance.destroy();
-        }
+    
+    public SimpleParticipant setMessage(String string) {
+        this.message = string;
+        return this;
     }
-
-    @Override
-    protected HazelcastInstance getHazelcast() throws JobPersistenceException {
-        if (hazelcast == null) {
-            hazelcast = Hazelcast.getDefaultInstance();
-        }
-
-        return hazelcast;
+    
+    public String getMessage() {
+        return message;
     }
+    
 
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyAcquiredTriggers() {
-        return locallyAcquiredTriggers;
-    }
-
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyExecutingTriggers() {
-        return locallyExecutingTriggers;
-    }
 }

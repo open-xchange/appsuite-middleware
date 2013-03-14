@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,42 @@
  *
  */
 
-package com.openexchange.quartz.hazelcast;
+package com.openexchange.printing.email;
 
-import java.util.Collection;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
 
-import org.quartz.JobPersistenceException;
-import org.quartz.TriggerKey;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.printing.DateFormatter;
+import com.openexchange.printing.EnhancedTaskOrAppointment;
+import com.openexchange.printing.TemplateLabels;
+import com.openexchange.server.ServiceLookup;
 
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Instance;
-import com.openexchange.quartz.hazelcast.ImprovedHazelcastJobStore;
+public class EmailHelper {
+	private final DateFormatter formatters;
+	private final EnhancedTaskOrAppointment enhanced;
+	private final TemplateLabels labels;
 
-/**
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- */
-public class TestableHazelcastJobStore extends ImprovedHazelcastJobStore {
+	public EmailHelper(Map<String, Object> contact, Locale locale,
+			TimeZone timezone, Context ctx, ServiceLookup services)
+			throws OXException {
+		super();
+		this.formatters = new DateFormatter(locale, timezone);
+		this.enhanced   = new EnhancedTaskOrAppointment(contact, services, ctx);
+		this.labels     = new TemplateLabels(locale, services);
+	}
 
-    private HazelcastInstance hazelcast = null;
-    
-    static {
-        LOG = new SysoutLog();
-    }
+	public DateFormatter getFormatters() {
+		return formatters;
+	}
 
-    @Override
-    public void shutdown() {
-        Collection<Instance> instances = hazelcast.getInstances();
-        for (Instance instance : instances) {
-            instance.destroy();
-        }
-    }
+	public EnhancedTaskOrAppointment getEnhanced() {
+		return enhanced;
+	}
 
-    @Override
-    protected HazelcastInstance getHazelcast() throws JobPersistenceException {
-        if (hazelcast == null) {
-            hazelcast = Hazelcast.getDefaultInstance();
-        }
-
-        return hazelcast;
-    }
-
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyAcquiredTriggers() {
-        return locallyAcquiredTriggers;
-    }
-
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyExecutingTriggers() {
-        return locallyExecutingTriggers;
-    }
+	public TemplateLabels getLabels() {
+		return labels;
+	}
 }

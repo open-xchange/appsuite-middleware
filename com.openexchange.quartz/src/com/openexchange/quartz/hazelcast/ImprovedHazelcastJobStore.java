@@ -101,7 +101,7 @@ import com.openexchange.quartz.hazelcast.predicates.TriggersForCalendarPredicate
  */
 public class ImprovedHazelcastJobStore implements JobStore {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(ImprovedHazelcastJobStore.class);
+    protected static Log LOG = com.openexchange.log.Log.loggerFor(ImprovedHazelcastJobStore.class);
 
     private SchedulerSignaler signaler;
 
@@ -739,6 +739,7 @@ public class ImprovedHazelcastJobStore implements JobStore {
     @Override
     public List<OperableTrigger> acquireNextTriggers(long noLaterThan, int maxCount, long timeWindow) throws JobPersistenceException {
         long startTime = System.currentTimeMillis();
+        long lastTime = startTime;
         StringBuilder logBuilder = null;
         if (LOG.isTraceEnabled()) {
             logBuilder = new StringBuilder();
@@ -750,20 +751,24 @@ public class ImprovedHazelcastJobStore implements JobStore {
         List<OperableTrigger> returnList = new ArrayList<OperableTrigger>();
         lock.lock();
         if (logBuilder != null) {
-            logBuilder.append("    Got lock at ");
-            logBuilder.append(System.currentTimeMillis());
-            logBuilder.append("\n");
+            logBuilder.append("    Getting lock took ");
+            long now = System.currentTimeMillis();
+            logBuilder.append(now - lastTime);
+            lastTime = now;
+            logBuilder.append("ms.\n");
         }
 
         long firstAcquiredTriggerFireTime = 0L;
         try {
             Collection<TriggerStateWrapper> filteredTriggers = triggersByKey.values(new SelectTriggersPredicate(noLaterThan, timeWindow));
             if (logBuilder != null) {
-                logBuilder.append("    Filtered ");
+                logBuilder.append("    Filtering ");
                 logBuilder.append(filteredTriggers.size());
-                logBuilder.append(" triggers at ");
-                logBuilder.append(System.currentTimeMillis());
-                logBuilder.append("\n");
+                logBuilder.append(" triggers took ");
+                long now = System.currentTimeMillis();
+                logBuilder.append(now - lastTime);
+                lastTime = now;
+                logBuilder.append("ms.\n");
             }
 
             if (filteredTriggers == null || filteredTriggers.isEmpty()) {
@@ -772,6 +777,13 @@ public class ImprovedHazelcastJobStore implements JobStore {
 
             ArrayList<TriggerStateWrapper> triggers = new ArrayList<TriggerStateWrapper>(filteredTriggers);
             Collections.sort(triggers, new TriggerWrapperTimeComparator());
+            if (logBuilder != null) {
+                logBuilder.append("    Sorting triggers took ");
+                long now = System.currentTimeMillis();
+                logBuilder.append(now - lastTime);
+                lastTime = now;
+                logBuilder.append("ms.\n");
+            }
             Set<JobKey> excluded = new HashSet<JobKey>();
             for (TriggerStateWrapper stateWrapper : triggers) {
                 if (stateWrapper.getTrigger().getNextFireTime() == null || stateWrapper.getState() == TriggerStateWrapper.STATE_COMPLETE) {
@@ -817,16 +829,29 @@ public class ImprovedHazelcastJobStore implements JobStore {
                     break;
                 }
             }
-
+            
+            if (logBuilder != null) {
+                logBuilder.append("    Processing triggers took ");
+                long now = System.currentTimeMillis();
+                logBuilder.append(now - lastTime);
+                lastTime = now;
+                logBuilder.append("ms.\n");
+            }
             return returnList;
         } finally {
-            lock.unlock();
-            if (logBuilder != null) {
-                logBuilder.append("    Released lock at ");
-                logBuilder.append(System.currentTimeMillis());
-                logBuilder.append("\n    Duration: ");
-                logBuilder.append(System.currentTimeMillis() - startTime);
-                logBuilder.append("ms.");
+            if (logBuilder == null) {
+                lock.unlock();
+            } else {
+                lastTime = System.currentTimeMillis();
+                lock.unlock();
+                long now = System.currentTimeMillis();
+                logBuilder.append("    Releasing lock took ");
+                logBuilder.append(now - lastTime);
+                logBuilder.append("ms.\n    Overall duration: ");
+                logBuilder.append(now - startTime);
+                logBuilder.append("ms (");
+                logBuilder.append(now);
+                logBuilder.append(").");
                 for (OperableTrigger trigger : returnList) {
                     logBuilder.append("\n        Trigger: ").append(trigger.getKey().getName());
                 }

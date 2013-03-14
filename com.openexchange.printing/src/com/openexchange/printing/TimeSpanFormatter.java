@@ -47,52 +47,59 @@
  *
  */
 
-package com.openexchange.quartz.hazelcast;
+package com.openexchange.printing;
 
-import java.util.Collection;
-import java.util.concurrent.ConcurrentMap;
-
-import org.quartz.JobPersistenceException;
-import org.quartz.TriggerKey;
-
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Instance;
-import com.openexchange.quartz.hazelcast.ImprovedHazelcastJobStore;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
+import com.openexchange.calendar.itip.Messages;
+import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.StringAllocator;
 
 /**
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * {@link CalendarFormatter}
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
+ *         Laguna</a>
  */
-public class TestableHazelcastJobStore extends ImprovedHazelcastJobStore {
+public class TimeSpanFormatter extends DateFormatter {
+	
+	private Map<String, Object> timespanThingy;
 
-    private HazelcastInstance hazelcast = null;
-    
-    static {
-        LOG = new SysoutLog();
-    }
+	public TimeSpanFormatter(Map<String, Object> timeSpanThingy, Locale locale, TimeZone tz) {
+		super(locale, tz);
+		this.timespanThingy = timeSpanThingy;
+	}
 
-    @Override
-    public void shutdown() {
-        Collection<Instance> instances = hazelcast.getInstances();
-        for (Instance instance : instances) {
-            instance.destroy();
-        }
-    }
+	public String getInterval() {
+		return formatInterval(timespanThingy);
+	}
 
-    @Override
-    protected HazelcastInstance getHazelcast() throws JobPersistenceException {
-        if (hazelcast == null) {
-            hazelcast = Hazelcast.getDefaultInstance();
-        }
+	public String formatDate(Map<String, Object> appointment) {
+		Date startDate = new Date((Long) appointment.get("start_date"));
+		Date endDate = new Date((Long) appointment.get("end_date"));
+		return formatDate(startDate, endDate, isFullTime());
+	}
 
-        return hazelcast;
-    }
+	public String formatInterval(Map<String, Object> appointment) {
+		if (isFullTime()) {
+			return StringHelper.valueOf(locale).getString(Messages.FULL_TIME);
+		}
+		Date startDate = new Date((Long) appointment.get("start_date"));
+		Date endDate = new Date((Long) appointment.get("end_date"));
+		return formatInterval(startDate, endDate, isFullTime());
+	}
 
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyAcquiredTriggers() {
-        return locallyAcquiredTriggers;
-    }
+	public String getDateSpec() {
+		StringAllocator b = new StringAllocator();
+		b.append(formatDate(timespanThingy));
+		return b.toString();
+	}
 
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyExecutingTriggers() {
-        return locallyExecutingTriggers;
-    }
+	private boolean isFullTime() {
+		Boolean fullTime = (Boolean) timespanThingy.get("full_time");
+		return fullTime == null || fullTime;
+	}
+
 }

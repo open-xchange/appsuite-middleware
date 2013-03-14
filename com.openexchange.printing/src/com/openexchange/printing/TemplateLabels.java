@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,25 @@
  *
  */
 
-package com.openexchange.quartz.hazelcast;
+package com.openexchange.printing;
 
-import java.util.Collection;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Locale;
+import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.server.ServiceLookup;
 
-import org.quartz.JobPersistenceException;
-import org.quartz.TriggerKey;
+public class TemplateLabels {
 
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.Instance;
-import com.openexchange.quartz.hazelcast.ImprovedHazelcastJobStore;
-
-/**
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- */
-public class TestableHazelcastJobStore extends ImprovedHazelcastJobStore {
-
-    private HazelcastInstance hazelcast = null;
+    private final ServiceLookup services;
+    private final Locale locale;
     
-    static {
-        LOG = new SysoutLog();
+    public TemplateLabels(Locale locale, ServiceLookup services) {
+        this.services = services;
+        this.locale = locale;        
     }
 
-    @Override
-    public void shutdown() {
-        Collection<Instance> instances = hazelcast.getInstances();
-        for (Instance instance : instances) {
-            instance.destroy();
-        }
+    
+    private String getString(String s) {
+        return StringHelper.valueOf(locale).getString(s);
     }
 
-    @Override
-    protected HazelcastInstance getHazelcast() throws JobPersistenceException {
-        if (hazelcast == null) {
-            hazelcast = Hazelcast.getDefaultInstance();
-        }
-
-        return hazelcast;
-    }
-
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyAcquiredTriggers() {
-        return locallyAcquiredTriggers;
-    }
-
-    public ConcurrentMap<TriggerKey, Boolean> getLocallyExecutingTriggers() {
-        return locallyExecutingTriggers;
-    }
 }
