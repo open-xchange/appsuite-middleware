@@ -137,7 +137,6 @@ import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaService;
 import com.openexchange.quota.QuotaType;
 import com.openexchange.quota.Resource;
-import com.openexchange.quota.ResourceDescription;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -512,7 +511,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             {
                 final QuotaService quotaService = ServerServiceRegistry.getInstance().getService(QuotaService.class);
                 if (null != quotaService) {
-                    final Quota quota = quotaService.getQuotaFor(Resource.INFOSTORE_FILES, ResourceDescription.getEmptyResourceDescription(), sessionObj);
+                    final Quota quota = quotaService.getQuotaFor(Resource.INFOSTORE_FILES, sessionObj);
                     final long quotaValue = quota.getQuota(QuotaType.AMOUNT);
                     if (quotaValue > 0) {
                         final long used = getUsedQuota(context);
