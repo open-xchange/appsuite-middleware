@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Quota Bundle
+Bundle-SymbolicName: com.openexchange.quota
+Bundle-Version: 7.0.2
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.config,
+ com.openexchange.config.cascade,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Export-Package: com.openexchange.quota
