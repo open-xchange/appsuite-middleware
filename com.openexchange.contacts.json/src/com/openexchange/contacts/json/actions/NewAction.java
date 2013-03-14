@@ -94,7 +94,7 @@ public class NewAction extends ContactAction {
         }
         Contact contact = null;
 		try {
-			contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields());
+			contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields(ContactAction.VIRTUAL_FIELDS));
 		} catch (JSONException e) {
 			throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
 		}

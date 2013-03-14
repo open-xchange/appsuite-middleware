@@ -51,6 +51,7 @@ package com.openexchange.contacts.json.actions;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.EnumSet;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -58,6 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -82,6 +84,12 @@ public abstract class ContactAction implements AJAXActionService {
 
     public static final int[] COLUMNS_ALIAS_LIST = new int[] {
         20, 1, 5, 2, 500, 501, 502, 505, 523, 525, 526, 527, 542, 555, 102, 602, 592, 101, 551, 552, 543, 547, 548, 549, 556, 569 };
+
+    /**
+     * Contact fields that are not persistent.
+     */
+    public static final EnumSet<ContactField> VIRTUAL_FIELDS =
+        EnumSet.of(ContactField.IMAGE1_URL, ContactField.LAST_MODIFIED_UTC, ContactField.SORT_NAME);
 
     /**
      * Initializes a new {@link ContactAction}.

@@ -61,6 +61,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -103,11 +104,12 @@ public class ListAction extends ContactAction {
          */
         List<Contact> contacts = new ArrayList<Contact>();
         Date lastModified = new Date(0);
+        ContactField[] fields = request.getFields();
         for (final Entry<String, List<String>> entry : ids.entrySet()) {
             SearchIterator<Contact> searchIterator = null;
             try {
                 searchIterator = getContactService().getContacts(request.getSession(), entry.getKey(),
-                		entry.getValue().toArray(new String[entry.getValue().size()]), request.getFields());
+                		entry.getValue().toArray(new String[entry.getValue().size()]), fields);
                 int parentFolderID = Integer.parseInt(entry.getKey());
                 while (searchIterator.hasNext()) {
                     Contact contact = searchIterator.next();

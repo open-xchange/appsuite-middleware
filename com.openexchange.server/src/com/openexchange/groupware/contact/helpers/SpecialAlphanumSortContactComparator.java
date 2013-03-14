@@ -137,18 +137,19 @@ public class SpecialAlphanumSortContactComparator implements Comparator<Contact>
 
     @Override
     public int compare(final Contact contact1, final Contact contact2) {
-        final int nonNullField1 = detectFirstNonEmptyField(contact1);
-        final int nonNullField2 = detectFirstNonEmptyField(contact2);
-        final int compared =
-            stringComparator.compare(
-                0 == nonNullField1 ? "" : contact1.get(nonNullField1).toString(),
-                0 == nonNullField2 ? "" : contact2.get(nonNullField2).toString());
-        if (0 == compared && isLastName(nonNullField1) && isLastName(nonNullField2)) {
-            /*
-             * Both last names are equal. Consider first name, too (if non-null)
-             */
-            return inverse * compareGivenName(contact1, contact2);
-        }
+//        final int nonNullField1 = detectFirstNonEmptyField(contact1);
+//        final int nonNullField2 = detectFirstNonEmptyField(contact2);
+//        final int compared =
+//            stringComparator.compare(
+//                0 == nonNullField1 ? "" : contact1.get(nonNullField1).toString(),
+//                0 == nonNullField2 ? "" : contact2.get(nonNullField2).toString());
+//        if (0 == compared && isLastName(nonNullField1) && isLastName(nonNullField2)) {
+//            /*
+//             * Both last names are equal. Consider first name, too (if non-null)
+//             */
+//            return inverse * compareGivenName(contact1, contact2);
+//        }
+        int compared = stringComparator.compare(contact1.getSortName(), contact2.getSortName());
         return inverse * compared;
     }
 
