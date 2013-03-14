@@ -231,9 +231,13 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
             this.clazz = clazz;
             this.service = service;
             this.dictionary = dictionary;
-            this.dependingServices = new SimpleEntry<?>[dependingServices.length];
-            for (int i = 0; i < dependingServices.length; i++) {
-                this.dependingServices[i] = new SimpleEntry(dependingServices[i]);
+            if (null != dependingServices) {
+                this.dependingServices = new SimpleEntry<?>[dependingServices.length];
+                for (int i = 0; i < dependingServices.length; i++) {
+                    this.dependingServices[i] = new SimpleEntry(dependingServices[i]);
+                }
+            } else {
+                this.dependingServices = null;
             }
             this.properties = properties;
         }
