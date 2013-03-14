@@ -123,9 +123,9 @@ public class IndexingServiceImpl implements IndexingService {
                             SimpleScheduleBuilder.simpleSchedule()
                             .withIntervalInMilliseconds(repeatInterval)
                             .repeatForever()
-                            .withMisfireHandlingInstructionFireNow());
+                            .withMisfireHandlingInstructionIgnoreMisfires());
                     } else {
-                        triggerBuilder.withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow());
+                        triggerBuilder.withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionIgnoreMisfires());
                     }
                     Trigger trigger = triggerBuilder.build();
                     Scheduler scheduler = getScheduler();
