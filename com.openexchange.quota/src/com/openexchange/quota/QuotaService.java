@@ -70,6 +70,7 @@ public interface QuotaService {
      * <li>{@link Resource#CALENDAR}</li>
      * <li>{@link Resource#CONTACT}</li>
      * <li>{@link Resource#TASK}</li>
+     * <li>{@link Resource#INFOSTORE_FILES}</li>
      * <ul>
      * <p>
      *
@@ -92,6 +93,7 @@ public interface QuotaService {
      * <li>{@link Resource#CALENDAR}</li>
      * <li>{@link Resource#CONTACT}</li>
      * <li>{@link Resource#TASK}</li>
+     * <li>{@link Resource#INFOSTORE_FILES}</li>
      * <ul>
      * <p>
      *
