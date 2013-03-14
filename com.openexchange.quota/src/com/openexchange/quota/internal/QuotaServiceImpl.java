@@ -132,4 +132,9 @@ public final class QuotaServiceImpl implements QuotaService {
         }
     }
 
+    @Override
+    public String toString() {
+        return "QuotaServiceImpl";
+    }
+
 }
