@@ -69,7 +69,6 @@ import com.openexchange.quota.ResourceDescription;
 import com.openexchange.quota.ServiceProvider;
 import com.openexchange.quota.UnlimitedQuota;
 import com.openexchange.quota.internal.QuotaServiceImpl;
-import com.openexchange.quota.internal.Services;
 import com.openexchange.session.Session;
 
 /**
@@ -95,7 +94,6 @@ public final class QuotaActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
         final QuotaServiceImpl impl = new QuotaServiceImpl(this);
         registerService(QuotaService.class, impl);
         final BundleContext context = this.context;
@@ -234,12 +232,6 @@ public final class QuotaActivator extends HousekeepingActivator {
     @Override
     public <S> ServiceTracker<S, S> trackService(Class<S> clazz) {
         return super.trackService(clazz);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
     }
 
 }
