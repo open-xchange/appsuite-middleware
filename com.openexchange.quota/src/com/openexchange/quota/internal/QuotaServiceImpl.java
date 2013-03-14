@@ -52,6 +52,7 @@ package com.openexchange.quota.internal;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Set;
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exception.OXException;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaRestriction;
@@ -112,7 +113,7 @@ public final class QuotaServiceImpl implements QuotaService {
                 for (final Class<?> clazz : clazzes) {
                     if (null == services.getService(clazz) && !trackedServices.contains(clazz)) {
                         // Schedule tracker for that service
-                        services.trackService(clazz);
+                        services.trackService(clazz).open();
                     }
                 }
             }
