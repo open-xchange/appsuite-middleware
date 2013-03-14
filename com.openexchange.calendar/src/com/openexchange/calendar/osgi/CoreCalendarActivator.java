@@ -56,6 +56,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.calendar.CalendarAdministration;
 import com.openexchange.calendar.CalendarMySQL;
 import com.openexchange.calendar.CalendarReminderDelete;
+import com.openexchange.calendar.CalendarSql;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.cache.CalendarVolatileCache;
@@ -67,6 +68,7 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.java.Streams;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.quota.QuotaService;
 
 /**
  * {@link CoreCalendarActivator}
@@ -84,7 +86,7 @@ public class CoreCalendarActivator extends HousekeepingActivator {
 
     @Override
     protected java.lang.Class<?>[] getNeededServices() {
-        return new Class<?>[] { CacheService.class };
+        return new Class<?>[] { CacheService.class, QuotaService.class };
     }
 
 
@@ -93,6 +95,8 @@ public class CoreCalendarActivator extends HousekeepingActivator {
         final AppointmentSqlFactory factory = new AppointmentSqlFactory();
         ITipActivator.initFeatures(factory);
         CalendarMySQL.setApppointmentSqlFactory(factory);
+        
+        CalendarMySQL.setServiceLookup(this);
 
         registerService(AppointmentSqlFactoryService.class, factory, null);
         registerService(CalendarCollectionService.class, new CalendarCollection(), null);

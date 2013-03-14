@@ -60,7 +60,7 @@ public interface ServiceLookup {
      * Gets the service of specified type
      *
      * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
+     * @return The service or <code>null</code> if absent
      * @throws IllegalStateException If an error occurs while returning the demanded service
      */
     public <S extends Object> S getService(final Class<? extends S> clazz);
@@ -69,7 +69,7 @@ public interface ServiceLookup {
      * Gets the optional service  of specified type
      *
      * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
+     * @return The service or <code>null</code> if absent
      */
     public <S extends Object> S getOptionalService(final Class<? extends S> clazz);
 

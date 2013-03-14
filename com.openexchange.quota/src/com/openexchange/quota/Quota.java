@@ -51,7 +51,7 @@ package com.openexchange.quota;
 
 /**
  * {@link Quota} - Represents a quota restriction.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Quota {
@@ -63,7 +63,7 @@ public interface Quota {
 
     /**
      * Gets the quota for specified type.
-     * 
+     *
      * @param type The quota type
      * @return The quota restriction or {@link #UNLIMITED}
      */

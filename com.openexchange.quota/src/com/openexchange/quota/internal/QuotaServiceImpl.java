@@ -65,7 +65,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link QuotaServiceImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class QuotaServiceImpl implements QuotaService {
@@ -87,17 +87,32 @@ public final class QuotaServiceImpl implements QuotaService {
     }
 
     @Override
-    public Quota getQuotaFor(Resource resource, ResourceDescription desc, Session session) throws OXException {
+    public Quota getQuotaFor(final Resource resource, final Session session) throws OXException {
+        return getQuotaFor(resource, ResourceDescription.getEmptyResourceDescription(), session);
+    }
+
+    @Override
+    public Quota getQuotaFor(final Resource resource, final ResourceDescription resourceDescription, final Session session) throws OXException {
+        if (null == resource || null == session) {
+            return UnlimitedQuota.getInstance();
+        }
         final QuotaRestriction quotaRestriction;
         synchronized (restrictions) {
             quotaRestriction = restrictions.get(resource);
         }
-        return null == quotaRestriction ? UnlimitedQuota.getInstance() : quotaRestriction.getQuota(resource, desc, session, serviceProvider);
+        if (null == quotaRestriction) {
+            return UnlimitedQuota.getInstance();
+        }
+        return quotaRestriction.getQuota(
+            resource,
+            null == resourceDescription ? ResourceDescription.getEmptyResourceDescription() : resourceDescription,
+            session,
+            serviceProvider);
     }
 
     /**
      * Adds given quota restriction.
-     * 
+     *
      * @param restriction The quota restriction.
      * @return <code>true</code> if added; otherwise <code>false</code>
      */
@@ -112,7 +127,7 @@ public final class QuotaServiceImpl implements QuotaService {
                 for (final Class<?> clazz : clazzes) {
                     if (null == services.getService(clazz) && !trackedServices.contains(clazz)) {
                         // Schedule tracker for that service
-                        services.trackService(clazz);
+                        services.trackService(clazz).open();
                     }
                 }
             }
@@ -123,13 +138,18 @@ public final class QuotaServiceImpl implements QuotaService {
 
     /**
      * Removes quota restriction.
-     * 
+     *
      * @param restriction The quota restriction.
      */
     public void removeQuotaRestriction(final QuotaRestriction restriction) {
         synchronized (restrictions) {
             restrictions.remove(restriction.getResource());
         }
+    }
+
+    @Override
+    public String toString() {
+        return "QuotaServiceImpl";
     }
 
 }

@@ -69,8 +69,15 @@ public final class AmountOnlyQuota implements Quota {
     }
 
     @Override
-    public long getQuota(QuotaType type) {
+    public long getQuota(final QuotaType type) {
         return QuotaType.AMOUNT.equals(type) ? quota : Quota.UNLIMITED;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("AmountOnlyQuota [quota=").append(quota).append("]");
+        return builder.toString();
     }
 
 }

@@ -102,6 +102,32 @@ public class Executor {
     }
 
     /**
+     * Gets the number of records in a context.
+     *
+     * @param connection The db connection to use
+     * @param table The database table to query
+     * @param contextID The context ID
+     * @return The number of records
+     * @throws SQLException
+     * @throws OXException
+     */
+    public long count(Connection connection, Table table, int contextID) throws SQLException, OXException {
+        StringAllocator allocator = new StringAllocator(128);
+        allocator.append("SELECT COUNT(*) FROM ").append(table).append(" WHERE ")
+            .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?;");
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
+        try {
+            stmt = connection.prepareStatement(allocator.toString());
+            stmt.setInt(1, contextID);
+            resultSet = logExecuteQuery(stmt);
+            return resultSet.next() ? resultSet.getLong(1) : 0;
+        } finally {
+            closeSQLStuff(resultSet, stmt);
+        }
+    }
+
+    /**
      * Selects a single contact from the database.
      *
      * @param connection

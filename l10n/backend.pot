@@ -5022,9 +5022,9 @@ msgstr ""
 msgid "No UDP channel is configured."
 msgstr ""
 
-#. Quota exceeded.
+#. Quota exceeded. Please delete some items in order to create new ones.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:69
-msgid "Quota exceeded."
+msgid "Quota exceeded. Please delete some items in order to create new ones."
 msgstr ""
 
 #. * The mandatory session information is missing.

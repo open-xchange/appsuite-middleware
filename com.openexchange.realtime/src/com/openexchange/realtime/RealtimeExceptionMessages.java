@@ -71,4 +71,7 @@ public class RealtimeExceptionMessages implements LocalizableStrings {
     /** Invalid ID. Resource identifier is missing. */
     public static final String INVALID_ID = "Invalid ID. Resource identifier is missing.";
 
+    /** Resource not available. */
+    public static final String RESOURCE_NOT_AVAILABLE_MSG = "Resource not available.";
+
 }

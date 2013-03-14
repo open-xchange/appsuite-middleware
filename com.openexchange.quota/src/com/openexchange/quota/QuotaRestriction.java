@@ -56,28 +56,28 @@ import com.openexchange.session.Session;
  * {@link QuotaRestriction} - A quota restriction determines the quota for passed arguments.
  * <p>
  * Implementations of this interface are tracked and added by {@link QuotaService quota service}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface QuotaRestriction {
 
     /**
      * Gets the needed services in order to determine quotas.
-     * 
+     *
      * @return The needed services.
      */
     Class<?>[] getNeededServices();
 
     /**
      * Gets the associated resource.
-     * 
+     *
      * @return The resource; never <code>null</code>
      */
     Resource getResource();
 
     /**
      * Gets the associated quota
-     * 
+     *
      * @param resource The resource
      * @param desc The resource description
      * @param session The session

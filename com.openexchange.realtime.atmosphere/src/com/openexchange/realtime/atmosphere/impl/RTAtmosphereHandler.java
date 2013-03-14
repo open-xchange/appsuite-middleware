@@ -50,6 +50,7 @@
 package com.openexchange.realtime.atmosphere.impl;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -66,7 +67,6 @@ import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereResponse;
 import org.atmosphere.cpr.Broadcaster;
 import org.atmosphere.cpr.BroadcasterFactory;
-import org.atmosphere.cpr.MetaBroadcaster;
 import org.atmosphere.websocket.WebSocketEventListenerAdapter;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,6 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
+import com.openexchange.realtime.RealtimeExceptionCodes;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
 import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
 import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
@@ -456,17 +457,44 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     }
 
     @Override
-    public void send(Stanza stanza) throws OXException {
+    public void send(Stanza stanza, ID recipient) throws OXException {
         StanzaWriter stanzaWriter = new StanzaWriter();
         String stanzaAsJSON = stanzaWriter.write(stanza).toString();
-        ID generalForm = stanza.getTo().toGeneralForm();
-        String contextAndUser = generateBroadcasterId(generalForm);
+        String broadcasterId = generateBroadcasterId(recipient);
+        
         /*
          * Broadcast stanza to all entities matching the user@context by using a wildcard for the resource: /user@context/*
          */
-        MetaBroadcaster.getDefault().broadcastTo(contextAndUser + "/*", stanzaAsJSON);
-        // chat: talk to everybody aka "/"
-        // MetaBroadcaster.getDefault().broadcastTo("/", stanzaAsJSON);
+        Broadcaster broadcaster = BroadcasterFactory.getDefault().lookup(broadcasterId);
+        if (broadcaster == null) {
+            handleResourceNotAvailable();
+        }
+        
+        Collection<AtmosphereResource> resources = broadcaster.getAtmosphereResources();
+        if (resources == null || resources.isEmpty()) {
+            handleResourceNotAvailable();
+        }
+        
+        for (AtmosphereResource resource : resources) {
+            if (resource.isCancelled() || resource.getResponse().isCommitted()) {
+                handleResourceNotAvailable();
+            }
+
+            PrintWriter writer;
+            try {
+                writer = resource.getResponse().getWriter();
+                writer.print(stanzaAsJSON);
+                if (writer.checkError()) {
+                    handleResourceNotAvailable();
+                }
+            } catch (IOException e) {
+                handleResourceNotAvailable();
+            }
+        }
+    }
+    
+    private void handleResourceNotAvailable() throws OXException {
+        throw RealtimeExceptionCodes.RESOURCE_NOT_AVAILABLE.create();
     }
 
     /**
@@ -564,17 +592,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             sb.append("/").append(id.getResource());
         }
         return sb.toString();
-    }
-
-    /**
-     * Handle outgoing Stanzas by transforming it into the proper representation and sending it to the addressed entity.
-     * 
-     * @param stanza the Stanza to send
-     * @throws OXException if no transformer for the given Stanza can be found
-     */
-    public void handleOutgoing(Stanza stanza) throws OXException {
-        stanza.transformPayloads("json");
-        send(stanza);
     }
 
 }

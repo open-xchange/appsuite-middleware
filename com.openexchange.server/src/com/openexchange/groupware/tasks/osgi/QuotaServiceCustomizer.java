@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,43 @@
  *
  */
 
-package com.openexchange.quota.internal;
+package com.openexchange.groupware.tasks.osgi;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.groupware.tasks.InsertData;
+import com.openexchange.quota.QuotaService;
 
 /**
- * {@link Services} - The static service lookup.
+ * {@link QuotaServiceCustomizer}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Services {
+public final class QuotaServiceCustomizer implements ServiceTrackerCustomizer<QuotaService, QuotaService> {
 
-    /**
-     * Initializes a new {@link Services}.
-     */
-    private Services() {
+    private BundleContext context;
+
+    public QuotaServiceCustomizer(BundleContext context) {
         super();
+        this.context = context;
     }
 
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Sets the service lookup.
-     *
-     * @param serviceLookup The service lookup or <code>null</code>
-     */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
+    @Override
+    public QuotaService addingService(ServiceReference<QuotaService> reference) {
+        QuotaService quotaService = context.getService(reference);
+        InsertData.setQuotaService(quotaService);
+        return quotaService;
     }
 
-    /**
-     * Gets the service lookup.
-     *
-     * @return The service lookup or <code>null</code>
-     */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
+    @Override
+    public void modifiedService(ServiceReference<QuotaService> reference, QuotaService quotaService) {
+        // Nothing to do.
     }
 
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.caching.hazelcast\" not started?");
-        }
-        return serviceLookup.getService(clazz);
+    @Override
+    public void removedService(ServiceReference<QuotaService> reference, QuotaService quotaService) {
+        InsertData.setQuotaService(null);
+        context.ungetService(reference);
     }
-
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
-        }
-    }
-
 }

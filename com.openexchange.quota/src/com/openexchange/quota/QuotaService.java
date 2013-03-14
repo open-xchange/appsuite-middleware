@@ -54,16 +54,50 @@ import com.openexchange.session.Session;
 
 /**
  * {@link QuotaService} - The quota service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface QuotaService {
 
     /**
-     * Gets the quota for denoted resource.
-     * 
+     * Gets the quota for denoted resource that needs no {@link ResourceDescription resource description}.
+     * <p>
+     * <b>Note</b>: In order to query possible quota restriction, an appropriate {@link QuotaRestriction} needs to be registered for desired
+     * {@link Resource resource}.
+     * <p>
+     * Pre-Defined resources are:
+     * <ul>
+     * <li>{@link Resource#CALENDAR}</li>
+     * <li>{@link Resource#CONTACT}</li>
+     * <li>{@link Resource#TASK}</li>
+     * <ul>
+     * <p>
+     *
      * @param resource The resource
-     * @param desc The resource description (if needed to determine resource's quota)
+     * @param session The user session
+     * @return The quota
+     * @throws OXException If querying quota fails
+     * @see ResourceDescription#EMPTY_RESOURCE_DESCRIPTION
+     */
+    Quota getQuotaFor(Resource resource, Session session) throws OXException;
+
+    /**
+     * Gets the quota for denoted resource.
+     * <p>
+     * <b>Note</b>: In order to query possible quota restriction, an appropriate {@link QuotaRestriction} needs to be registered for desired
+     * {@link Resource resource}.
+     * <p>
+     * Pre-Defined resources are:
+     * <ul>
+     * <li>{@link Resource#CALENDAR}</li>
+     * <li>{@link Resource#CONTACT}</li>
+     * <li>{@link Resource#TASK}</li>
+     * <ul>
+     * <p>
+     *
+     * @param resource The resource
+     * @param desc The resource description (if needed to determine resource's quota); or
+     *            {@link ResourceDescription#getEmptyResourceDescription()} if none needed
      * @param session The user session
      * @return The quota
      * @throws OXException If querying quota fails

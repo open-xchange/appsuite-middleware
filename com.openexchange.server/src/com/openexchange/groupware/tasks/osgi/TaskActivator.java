@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.groupware.tasks.ModifyThroughDependant;
+import com.openexchange.quota.QuotaService;
 
 /**
  * {@link TaskActivator}
@@ -69,15 +70,15 @@ public class TaskActivator extends AJAXModuleActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
-        props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
-        registerService(TargetService.class, new ModifyThroughDependant(), props);
-    }
-
-    @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[0];
     }
 
+    @Override
+    protected void startBundle() {
+        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
+        props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
+        registerService(TargetService.class, new ModifyThroughDependant(), props);
+        track(QuotaService.class, new QuotaServiceCustomizer(context));
+    }
 }

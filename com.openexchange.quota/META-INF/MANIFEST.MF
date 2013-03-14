@@ -17,3 +17,4 @@ Import-Package: com.openexchange.config,
  org.osgi.framework,
  org.osgi.util.tracker
 Export-Package: com.openexchange.quota
+Bundle-Activator: com.openexchange.quota.osgi.QuotaActivator

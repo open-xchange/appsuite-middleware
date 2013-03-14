@@ -69,6 +69,8 @@ public enum RealtimeExceptionCodes implements OXExceptionCode {
     UNEXPECTED_ERROR(RealtimeExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 4),
     /** Invalid ID. Resource identifier is missing. */
     INVALID_ID(RealtimeExceptionMessages.INVALID_ID, CATEGORY_ERROR, 5),
+    /** Resource not available. */
+    RESOURCE_NOT_AVAILABLE(RealtimeExceptionMessages.RESOURCE_NOT_AVAILABLE_MSG, CATEGORY_ERROR, 6)
     ;
 
     private int number;

@@ -112,9 +112,10 @@ public interface Channel {
 	 * Sends specified stanza.
 	 *
 	 * @param stanza The stanza to send
+	 * @param recipient The recipient that shall receive the stanza
 	 * @throws OXException If send operation fails for any reason
 	 */
-	public void send(Stanza stanza) throws OXException;
+	public void send(Stanza stanza, ID recipient) throws OXException;
 	
 	
 }

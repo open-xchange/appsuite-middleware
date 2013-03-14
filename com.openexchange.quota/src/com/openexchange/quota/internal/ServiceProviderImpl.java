@@ -71,12 +71,12 @@ public final class ServiceProviderImpl implements ServiceProvider {
     }
 
     @Override
-    public <S> S getService(Class<? extends S> clazz) {
+    public <S> S getService(final Class<? extends S> clazz) {
         return services.getService(clazz);
     }
 
     @Override
-    public <S> S getOptionalService(Class<? extends S> clazz) {
+    public <S> S getOptionalService(final Class<? extends S> clazz) {
         return services.getOptionalService(clazz);
     }
 

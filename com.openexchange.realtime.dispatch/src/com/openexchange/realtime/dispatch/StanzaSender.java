@@ -50,6 +50,7 @@
 package com.openexchange.realtime.dispatch;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 
 /**
@@ -62,7 +63,8 @@ public interface StanzaSender {
     /**
      * Send Stanzas to the ID specified in the Stanza.
      * @param stanza the Stanza to send
+     * @param recipient The recipient that shall receive the stanza
      * @throws OXException when sending of the Stanza fails
      */
-	public void send(Stanza stanza) throws OXException;
+	public void send(Stanza stanza, ID recipient) throws OXException;
 }
