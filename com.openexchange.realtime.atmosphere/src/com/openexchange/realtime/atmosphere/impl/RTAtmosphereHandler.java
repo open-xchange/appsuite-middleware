@@ -103,9 +103,6 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
-    // TODO: Figure Out JSONP and Long-Polling State management. Hot-Swap the
-    // AtmosphereResource.
-
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(RTAtmosphereHandler.class));
 
     private final ServiceLookup services;
@@ -316,34 +313,34 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         if (broadcasterIds != null) {
             broadcasterIds.remove(broadcasterId);
         }
-
+        LOG.debug("\nRemoving sessionId: "+atmosphereState.session.getSessionID()+"\n");
         sessionIdToState.remove(atmosphereState.session.getSessionID());
     }
 
     @Override
     public void onStateChange(AtmosphereResourceEvent event) throws IOException {
-        AtmosphereResource resource = event.getResource();
-        AtmosphereResponse response = resource.getResponse();
-        if (event.isSuspended()) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("\n\nonStateChange: Writing message: " + event.getMessage().toString() + " to resource: " + resource.uuid() + "\n\n");
-            }
-            response.getWriter().write(event.getMessage().toString());
-            switch (resource.transport()) {
-            case JSONP:
-            case AJAX:
-            case LONG_POLLING:
-                event.getResource().resume();
-                break;
-            default:
-                response.getWriter().flush();
-                break;
-            }
-        } else if (!event.isResuming()) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Event wasn't resuming remote connection got closed by proxy or browser: \n" + "BroadcasterId: " + event.broadcaster().getID() + "\n" + "Resource: " + event.getResource().uuid() + "\n");
-            }
-        }
+//        AtmosphereResource resource = event.getResource();
+//        AtmosphereResponse response = resource.getResponse();
+//        if (event.isSuspended()) {
+//            if (LOG.isDebugEnabled()) {
+//                LOG.debug("\n\nonStateChange: Writing message: " + event.getMessage().toString() + " to resource: " + resource.uuid() + "\n\n");
+//            }
+//            response.getWriter().write(event.getMessage().toString());
+//            switch (resource.transport()) {
+//            case JSONP:
+//            case AJAX:
+//            case LONG_POLLING:
+//                event.getResource().resume();
+//                break;
+//            default:
+//                response.getWriter().flush();
+//                break;
+//            }
+//        } else if (!event.isResuming()) {
+//            if (LOG.isDebugEnabled()) {
+//                LOG.debug("Event wasn't resuming remote connection got closed by proxy or browser: \n" + "BroadcasterId: " + event.broadcaster().getID() + "\n" + "Resource: " + event.getResource().uuid() + "\n");
+//            }
+//        }
     }
 
     /**
@@ -487,6 +484,15 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 if (writer.checkError()) {
                     handleResourceNotAvailable();
                 }
+                switch (resource.transport()) {
+                case JSONP:
+                case AJAX:
+                case LONG_POLLING:
+                    resource.resume();
+                    break;
+                default:
+                    break;
+                }
             } catch (IOException e) {
                 handleResourceNotAvailable();
             }
@@ -510,6 +516,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         state.session = serverSession;
         state.atmosphereResource = atmosphereResource;
         state.id = constructId(atmosphereResource, serverSession);
+        LOG.debug("\nTracking sessionId: "+serverSession.getSessionID()+"\n");
         sessionIdToState.put(serverSession.getSessionID(), state);
         return state;
     }
