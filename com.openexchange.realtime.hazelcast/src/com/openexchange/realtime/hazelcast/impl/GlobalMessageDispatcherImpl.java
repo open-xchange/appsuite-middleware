@@ -138,9 +138,11 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
         final HazelcastInstance hazelcastInstance = HazelcastAccess.getHazelcastInstance();
         Member localMember = hazelcastInstance.getCluster().getLocalMember();
         Set<ID> localIds = targets.remove(localMember);
+        Map<ID, OXException> exceptions = new HashMap<ID, OXException>();
         if (localIds != null) {
             // Send via local message dispatcher to locally reachable receivers
-            Services.getService(LocalMessageDispatcher.class).send(stanza, localIds);
+            Map<ID, OXException> sent = Services.getService(LocalMessageDispatcher.class).send(stanza, localIds);
+            exceptions.putAll(sent);
         }
         // Sent to remote receivers
         ExecutorService executorService = hazelcastInstance.getExecutorService();
@@ -154,7 +156,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
             futures.add(task);
         }
         // Await completion of send requests and extract their exceptions (if any)
-        Map<ID, OXException> exceptions = new HashMap<ID, OXException>();
+       
         for (FutureTask<Map<ID, OXException>> future : futures) {
             try {
                 exceptions.putAll(future.get());
