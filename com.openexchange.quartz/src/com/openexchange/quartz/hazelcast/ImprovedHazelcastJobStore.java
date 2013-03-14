@@ -787,6 +787,10 @@ public class ImprovedHazelcastJobStore implements JobStore {
             Set<JobKey> excluded = new HashSet<JobKey>();
             for (TriggerStateWrapper stateWrapper : triggers) {
                 if (stateWrapper.getTrigger().getNextFireTime() == null || stateWrapper.getState() == TriggerStateWrapper.STATE_COMPLETE) {
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Removing trigger " + stateWrapper.getTrigger().getKey().getName());
+                    }
+                    
                     removeTrigger(stateWrapper.getTrigger().getKey());
                     continue;
                 }
@@ -851,7 +855,9 @@ public class ImprovedHazelcastJobStore implements JobStore {
                 logBuilder.append(now - startTime);
                 logBuilder.append("ms (");
                 logBuilder.append(now);
-                logBuilder.append(").");
+                logBuilder.append(").\n    Returning ");
+                logBuilder.append(returnList.size());
+                logBuilder.append(" triggers.");
                 for (OperableTrigger trigger : returnList) {
                     logBuilder.append("\n        Trigger: ").append(trigger.getKey().getName());
                 }
@@ -1164,6 +1170,9 @@ public class ImprovedHazelcastJobStore implements JobStore {
             triggersByKey.set(stateWrapper.getTrigger().getKey(), stateWrapper, 0, TimeUnit.SECONDS);
         }
 
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Applied misfire on trigger: " + stateWrapper.getTrigger().getKey().getName());
+        }
         return true;
     }
 
