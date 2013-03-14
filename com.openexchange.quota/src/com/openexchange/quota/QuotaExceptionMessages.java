@@ -53,7 +53,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link QuotaExceptionMessages} - Exception messages for capability module that needs to be translated.
+ * {@link QuotaExceptionMessages} - Exception messages for quota module that needs to be translated.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

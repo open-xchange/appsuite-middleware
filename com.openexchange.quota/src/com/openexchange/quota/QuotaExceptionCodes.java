@@ -55,7 +55,7 @@ import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link QuotaExceptionCodes} - Enumeration of all {@link OXException}s known in capability module.
+ * {@link QuotaExceptionCodes} - Enumeration of all {@link OXException}s known in quota module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -79,7 +79,7 @@ public enum QuotaExceptionCodes implements OXExceptionCode {
     /**
      * The error code prefix for capability module.
      */
-    public static final String PREFIX = "CPL";
+    public static final String PREFIX = "QUOTA";
 
     private final Category category;
 
