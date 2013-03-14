@@ -62,7 +62,34 @@ import java.util.Map;
 public class ResourceDescription {
 
     /** The empty resource description */
-    public static final ResourceDescription EMPTY_RESOURCE_DESCRIPTION = new EmptyResourceDescription();
+    public static final ResourceDescription EMPTY_RESOURCE_DESCRIPTION = new ResourceDescription() {
+
+        @Override
+        public boolean containsProperty(final String propertyName) {
+            return false;
+        }
+
+        @Override
+        public ResourceDescription put(final String propertyName, final Object propertyValue) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public ResourceDescription remove(final String propertyName) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public ResourceDescription putProperties(final Map<? extends String, ? extends Object> properties) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Object getProperty(final String propertyName) {
+            return null;
+        }
+
+    };
 
     /**
      * Gets the empty resource description.
@@ -151,42 +178,6 @@ public class ResourceDescription {
      */
     public Object getProperty(final String propertyName) {
         return properties.get(propertyName);
-    }
-
-    private static final class EmptyResourceDescription extends ResourceDescription {
-
-        /**
-         * Initializes a new {@link ResourceDescription.EmptyResourceDescription}.
-         */
-        public EmptyResourceDescription() {
-            super(null);
-        }
-
-        @Override
-        public boolean containsProperty(final String propertyName) {
-            return false;
-        }
-
-        @Override
-        public ResourceDescription put(final String propertyName, final Object propertyValue) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public ResourceDescription remove(final String propertyName) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public ResourceDescription putProperties(final Map<? extends String, ? extends Object> properties) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Object getProperty(final String propertyName) {
-            return null;
-        }
-
     }
 
 }
