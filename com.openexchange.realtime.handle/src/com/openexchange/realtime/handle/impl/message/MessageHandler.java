@@ -50,7 +50,6 @@
 package com.openexchange.realtime.handle.impl.message;
 
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
@@ -117,8 +116,10 @@ public class MessageHandler extends AbstractStrategyHandler<Message> {
                 MessageDispatcher messageDispatcher = getMessageDispatcher();
                 Map<ID, OXException> failed = messageDispatcher.send(stanza, resources);
                 if (!failed.isEmpty()) {
-                    OXException exception = failed.values().iterator().next();
-                    if (DispatchExceptionCode.RESOURCE_OFFLINE.equals(exception) || DispatchExceptionCode.UNKNOWN_CHANNEL.equals(exception)) {
+                    OXException oxException = failed.values().iterator().next();
+                    if (DispatchExceptionCode.RESOURCE_OFFLINE.equals(oxException) || DispatchExceptionCode.UNKNOWN_CHANNEL.equals(oxException)) {
+                        storeMessage(to, stanza);
+                    } else {
                         sendServiceUnavailable(stanza);
                     }
                 }
@@ -160,7 +161,15 @@ public class MessageHandler extends AbstractStrategyHandler<Message> {
                 MessageDispatcher messageDispatcher = getMessageDispatcher();
                 Map<ID, OXException> failed = messageDispatcher.send(stanza, receivers);
                 if (failed.size() == receivers.size()) {
-                    sendServiceUnavailable(stanza);
+                    for (Map.Entry<ID, OXException> failure : failed.entrySet()) {
+                        ID id = failure.getKey();
+                        OXException oxException = failure.getValue();
+                        if (DispatchExceptionCode.RESOURCE_OFFLINE.equals(oxException) || DispatchExceptionCode.UNKNOWN_CHANNEL.equals(oxException)) {
+                            storeMessage(id, stanza);
+                        } else {
+                            sendServiceUnavailable(stanza);
+                        }
+                    }
                 }
             }
         } catch (Exception e) {
