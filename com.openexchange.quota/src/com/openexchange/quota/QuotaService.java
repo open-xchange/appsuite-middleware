@@ -74,7 +74,8 @@ public interface QuotaService {
      * <p>
      * 
      * @param resource The resource
-     * @param desc The resource description (if needed to determine resource's quota)
+     * @param desc The resource description (if needed to determine resource's quota); or
+     *            {@link ResourceDescription#getEmptyResourceDescription()} if none needed
      * @param session The user session
      * @return The quota
      * @throws OXException If querying quota fails
