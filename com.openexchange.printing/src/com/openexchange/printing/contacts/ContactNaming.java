@@ -51,36 +51,51 @@ package com.openexchange.printing.contacts;
 
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.printing.DateFormatter;
-import com.openexchange.printing.TemplateLabels;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.groupware.contact.helpers.ContactField;
 
-public class ContactHelper {
-	private final DateFormatter formatters;
-	private final TemplateLabels labels;
-	private ContactNaming naming;
+public class ContactNaming {
 
-	public ContactHelper(Map<String, Object> contact, Locale locale,
-			TimeZone timezone, Context ctx, ServiceLookup services)
-			throws OXException {
-		super();
-		this.formatters = new DateFormatter(locale, timezone);
-		this.labels     = new TemplateLabels(locale, services);
-		this.naming		= new ContactNaming(locale);
+	private Locale locale;
+
+	public ContactNaming(Locale locale) {
+		this.locale = locale;
+	}
+	
+	public String getFullname(Map<String, Object> contact) {
+		//TODO: Create i18n version - frontend has a nice one in io.ox.contacts/util#getFullName
+		if (contact.containsKey(ContactField.DISPLAY_NAME.getAjaxName()))
+			return (String) contact.get(ContactField.DISPLAY_NAME.getAjaxName());
+		
+		if (	!(contact.containsKey(ContactField.GIVEN_NAME.getAjaxName()) || contact.containsKey(ContactField.SUR_NAME.getAjaxName()))
+			&& contact.containsKey(ContactField.COMPANY.getAjaxName())) {
+			return (String) contact.get(ContactField.COMPANY.getAjaxName());
+		}
+			
+		StringBuilder bob = new StringBuilder();
+		
+		if (contact.containsKey(ContactField.TITLE.getAjaxName())){
+			bob.append(contact.get(ContactField.TITLE.getAjaxName()));
+			bob.append(" ");
+		}
+		if (contact.containsKey(ContactField.GIVEN_NAME.getAjaxName())) {
+			bob.append(contact.get(ContactField.GIVEN_NAME.getAjaxName()));
+			bob.append(" ");
+		}
+		if (contact.containsKey(ContactField.MIDDLE_NAME.getAjaxName())) {
+			bob.append(contact.get(ContactField.MIDDLE_NAME.getAjaxName()));
+			bob.append(" ");
+		}
+		if (contact.containsKey(ContactField.SUR_NAME.getAjaxName())) {
+			bob.append(contact.get(ContactField.SUR_NAME.getAjaxName()));
+			bob.append(" ");
+		}
+		if (contact.containsKey(ContactField.SUFFIX.getAjaxName())) {
+			bob.append(contact.get(ContactField.SUFFIX.getAjaxName()));
+			bob.append(" ");
+		}
+		
+		return bob.substring(0, bob.lastIndexOf(" ")).toString();
 	}
 
-	public ContactNaming getNaming() {
-		return naming;
-	}
-	public DateFormatter getFormatters() {
-		return formatters;
-	}
-
-	public TemplateLabels getLabels() {
-		return labels;
-	}
 }
