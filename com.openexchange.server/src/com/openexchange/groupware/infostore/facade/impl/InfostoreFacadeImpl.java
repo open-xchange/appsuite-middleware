@@ -71,6 +71,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.ReuseReadConProvider;
 import com.openexchange.database.tx.DBService;
@@ -131,6 +132,12 @@ import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexFacadeService;
 import com.openexchange.index.StandardIndexDocument;
 import com.openexchange.log.LogFactory;
+import com.openexchange.quota.Quota;
+import com.openexchange.quota.QuotaExceptionCodes;
+import com.openexchange.quota.QuotaService;
+import com.openexchange.quota.QuotaType;
+import com.openexchange.quota.Resource;
+import com.openexchange.quota.ResourceDescription;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -486,23 +493,40 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
     @Override
     public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final ServerSession sessionObj) throws OXException {
-        security.checkFolderId(document.getFolderId(), sessionObj.getContext());
+        final Context context = sessionObj.getContext();
+        security.checkFolderId(document.getFolderId(), context);
 
         boolean wasCreation = false;
         if (document.getId() == InfostoreFacade.NEW) {
             wasCreation = true;
             final EffectivePermission isperm = security.getFolderPermission(
                 document.getFolderId(),
-                sessionObj.getContext(),
+                context,
                 getUser(sessionObj),
                 getUserConfiguration(sessionObj));
             if (!isperm.canCreateObjects()) {
                 throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
             }
+
+            // Check quota
+            {
+                final QuotaService quotaService = ServerServiceRegistry.getInstance().getService(QuotaService.class);
+                if (null != quotaService) {
+                    final Quota quota = quotaService.getQuotaFor(Resource.INFOSTORE_FILES, ResourceDescription.getEmptyResourceDescription(), sessionObj);
+                    final long quotaValue = quota.getQuota(QuotaType.AMOUNT);
+                    if (quotaValue > 0) {
+                        final long used = getUsedQuota(context);
+                        if (used > 0 && used >= quotaValue) {
+                            throw QuotaExceptionCodes.QUOTA_EXCEEDED.create();
+                        }
+                    }
+                }
+            }
+
             setDefaults(document);
 
             VALIDATION.validate(document);
-            CheckSizeSwitch.checkSizes(document, getProvider(), sessionObj.getContext());
+            CheckSizeSwitch.checkSizes(document, getProvider(), context);
 
             final boolean titleAlso = document.getFileName() != null && document.getTitle() != null && document.getFileName().equals(document.getTitle());
 
@@ -510,7 +534,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 document.getFileName(),
                 document.getFolderId(),
                 document.getId(),
-                sessionObj.getContext(), true);
+                context, true);
 
             document.setFileName(reservation.getFilename());
             if(titleAlso) {
@@ -521,13 +545,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 Connection writeCon = null;
                 try {
                     startDBTransaction();
-                    writeCon = getWriteConnection(sessionObj.getContext());
-                    document.setId(getId(sessionObj.getContext(), writeCon));
+                    writeCon = getWriteConnection(context);
+                    document.setId(getId(context, writeCon));
                     commitDBTransaction();
                 } catch (final SQLException e) {
                     throw InfostoreExceptionCodes.NEW_ID_FAILED.create(e);
                 } finally {
-                    releaseWriteConnection(sessionObj.getContext(), writeCon);
+                    releaseWriteConnection(context, writeCon);
                     finishDBTransaction();
                 }
 
@@ -546,7 +570,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 }
 
                 final CreateDocumentAction createAction = new CreateDocumentAction();
-                createAction.setContext(sessionObj.getContext());
+                createAction.setContext(context);
                 createAction.setDocuments(Arrays.asList(document));
                 createAction.setProvider(this);
                 createAction.setQueryCatalog(QUERIES);
@@ -562,7 +586,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 version0.setFilestoreLocation(null);
 
                 CreateVersionAction createVersionAction = new CreateVersionAction();
-                createVersionAction.setContext(sessionObj.getContext());
+                createVersionAction.setContext(context);
                 createVersionAction.setDocuments(Arrays.asList(version0));
                 createVersionAction.setProvider(this);
                 createVersionAction.setQueryCatalog(QUERIES);
@@ -571,7 +595,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
                 if (data != null) {
                     final SaveFileWithQuotaAction saveFile = new SaveFileWithQuotaAction();
-                    final QuotaFileStorage qfs = getFileStorage(sessionObj.getContext());
+                    final QuotaFileStorage qfs = getFileStorage(context);
                     saveFile.setStorage(qfs);
                     saveFile.setSizeHint(document.getFileSize());
                     saveFile.setIn(data);
@@ -585,7 +609,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     }
 
                     createVersionAction = new CreateVersionAction();
-                    createVersionAction.setContext(sessionObj.getContext());
+                    createVersionAction.setContext(context);
                     createVersionAction.setDocuments(Arrays.asList(document));
                     createVersionAction.setProvider(this);
                     createVersionAction.setQueryCatalog(QUERIES);
@@ -594,7 +618,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
                 }
 
-                indexDocument(sessionObj.getContext(), sessionObj.getUserId(), document.getId(), -1L, wasCreation);
+                indexDocument(context, sessionObj.getUserId(), document.getId(), -1L, wasCreation);
             } finally {
                 if (reservation != null) {
                     reservation.destroySilently();
@@ -602,6 +626,26 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
             }
         } else {
             saveDocument(document, data, sequenceNumber, nonNull(document), sessionObj);
+        }
+    }
+
+    private long getUsedQuota(final Context context) throws OXException {
+        Connection readCon = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            readCon = getReadConnection(context);
+            stmt = readCon.prepareStatement("SELECT COUNT(id) from infostore where cid=?");
+            stmt.setLong(1, context.getContextId());
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getLong(1) : -1L;
+        } catch (final SQLException e) {
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            if (null != readCon) {
+                releaseReadConnection(context, readCon);
+            }
         }
     }
 
