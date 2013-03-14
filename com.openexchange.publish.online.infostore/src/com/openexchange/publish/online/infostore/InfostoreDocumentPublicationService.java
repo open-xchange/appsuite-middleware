@@ -131,13 +131,13 @@ public class InfostoreDocumentPublicationService extends AbstractPublicationServ
         super.modifyOutgoing(publication);
         publication.getConfiguration().put(URL, PREFIX+"/"+publication.getContext().getContextId()+"/"+publication.getConfiguration().get(SECRET));
         publication.getConfiguration().remove(SECRET);
-        
-        DocumentMetadata metadata = InfostorePublicationServlet.loadDocumentMetadata(publication);
-        publication.setDisplayName((metadata.getTitle() != null) ? metadata.getTitle() : metadata.getFileName());
-        
-        publication.setEntityId(IDMangler.mangle(metadata.getId() + "", metadata.getFolderId() + ""));
-        
-        
+
+        if (null != publication.getEntityId()) {
+            // Valid entity identifier needed in order to load associated document's meta-data
+            DocumentMetadata metadata = InfostorePublicationServlet.loadDocumentMetadata(publication);
+            publication.setDisplayName((metadata.getTitle() == null) ? metadata.getFileName() : metadata.getTitle());
+            publication.setEntityId(IDMangler.mangle(metadata.getId() + "", metadata.getFolderId() + ""));            
+        }
     }
 
     public Publication getPublication(Context ctx, String secret) throws OXException {
