@@ -70,8 +70,8 @@ public enum Resource {
      */
     CONTACT,
     /**
-     * The quota resource for documents.
+     * The quota resource for files.
      */
-    FILE_STORAGE,
+    FILES,
 
 }
