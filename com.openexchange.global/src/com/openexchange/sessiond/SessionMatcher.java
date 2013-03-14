@@ -90,6 +90,7 @@ public interface SessionMatcher {
      * 
      * @return The flags or <code>null</code> for no flags at all
      * @see #NO_FLAGS
+     * @see #ALL_FLAGS
      */
     Set<Flag> flags();
 
