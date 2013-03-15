@@ -798,28 +798,43 @@ public class AJAXRequestData {
     }
 
     /**
-     * Finds out if a parameter is set
+     * Signals if a parameter is set
+     * 
+     * @return <code>true</code> if set; otherwise <code>false</code>
      */
     public boolean isSet(final String paramName) {
         return params.containsKey(paramName);
     }
 
     /**
-     * Sets a header value
+     * Sets a header value.
+     * 
+     * @param header The header name
+     * @param value The header value
      */
     public void setHeader(final String header, final String value) {
-        headers.put(header, value);
+        if (!isEmpty(header)) {
+            if (null == value) {
+                headers.remove(header);
+            } else {
+                headers.put(header, value);
+            }            
+        }
     }
 
     /**
-     * Gets a header value
+     * Gets a header value.
+     * 
+     * @return The header value or <code>null</code>
      */
     public String getHeader(final String header) {
         return headers.get(header);
     }
 
     /**
-     * Gets a header value
+     * Gets a (coerced) header value
+     * 
+     * @return The header value or <code>null</code>
      */
     public <T> T getHeader(final String header, final Class<T> coerceTo) {
         return ServerServiceRegistry.getInstance().getService(StringParser.class).parse(getHeader(header), coerceTo);
