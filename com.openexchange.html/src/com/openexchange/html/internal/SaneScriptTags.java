@@ -1,0 +1,230 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.html.internal;
+
+import java.net.URLDecoder;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * {@link SaneScriptTags}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class SaneScriptTags {
+
+    /**
+     * Initializes a new {@link SaneScriptTags}.
+     */
+    private SaneScriptTags() {
+        super();
+    }
+
+//    public static void main(String[] args) {
+//        String s = "<scr<script><!--</script><script>--></script>ipt src=http://www.host.de/download/xss-neu/xss.js></script/><<<<   script   >boo<   /script   >";
+//        boolean[] a = new boolean[] { true };
+//        while (a[0]) {
+//            a[0] = false;
+//            s = saneScriptTags(s, a);
+//        }
+//        System.out.println(s);
+//    }
+
+    /**
+     * Sanitizes specified HTML content by script tags
+     *
+     * @param html The HTML content
+     * @param sanitized The sanitized flag
+     * @return The sanitized HTML content
+     */
+    public static String saneScriptTags(final String html, final boolean[] sanitized) {
+        if (isEmpty(html)) {
+            return html;
+        }
+        String s = html;
+        s = decode(s);
+        s = dropConcatenations(s);
+        s = dropScriptTags(s, sanitized);
+        return s;
+    }
+
+    private static final Pattern PAT_URLDECODE_ENTITIES = Pattern.compile("%([0-9a-fA-F]{2})");
+    private static final Pattern PAT_URLDECODE_PERCENT = Pattern.compile("%25");
+    private static final Set<String> REPLACEES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("3c", "3e", "2b", "22")));
+
+    private static String decode(final String html) {
+        if (html.indexOf('%') < 0) {
+            return html;
+        }
+        final String ret = PAT_URLDECODE_PERCENT.matcher(html).replaceAll("%");
+        final Matcher m = PAT_URLDECODE_ENTITIES.matcher(ret);
+        if (!m.find()) {
+            return ret;
+        }
+        final StringBuffer sb = new StringBuffer(ret.length());
+        do {
+            final String entity = toLowerCase(m.group(1));
+            if (REPLACEES.contains(entity)) {
+                m.appendReplacement(sb, Matcher.quoteReplacement(Character.toString((char) Integer.parseInt(m.group(1), 16))));
+            } else {
+                m.appendReplacement(sb, "$0");
+            }
+        } while (m.find());
+        m.appendTail(sb);
+        return sb.toString();
+    }
+
+    private static String urlDecode(final String html) {
+        try {
+            return URLDecoder.decode(html, "UTF-8");
+        } catch (final Exception e) {
+            final Matcher m = PAT_URLDECODE_ENTITIES.matcher(html);
+            if (!m.find()) {
+                return html;
+            }
+            final StringBuffer sb = new StringBuffer(html.length());
+            do {
+                m.appendReplacement(sb, Matcher.quoteReplacement(Character.toString((char) Integer.parseInt(m.group(1), 16))));
+            } while (m.find());
+            m.appendTail(sb);
+            return sb.toString();
+        }
+    }
+
+    private static final Pattern PAT_CONCAT = Pattern.compile("[\"\u201d\u201c]\\+[\"\u201d\u201c]");
+
+    private static String dropConcatenations(final String html) {
+        if (html.indexOf('+') < 0) {
+            return html;
+        }
+        final Matcher m = PAT_CONCAT.matcher(html);
+        if (!m.find()) {
+            return html;
+        }
+        final StringBuffer sb = new StringBuffer(html.length());
+        do {
+            m.appendReplacement(sb, "");
+        } while (m.find());
+        m.appendTail(sb);
+        return sb.toString();
+    }
+
+    private static final Pattern PATTERN_SCRIPT_TAG;
+    private static final Pattern PATTERN_SCRIPT_TAG_START;
+    private static final Pattern PATTERN_SCRIPT_TAG_END;
+    static {
+        final String regexScriptStart = "<+[\\s]*script[^>]*>";
+        final String regexScriptEnd = "<+[\\s]*/script[^>]*>";
+        PATTERN_SCRIPT_TAG = Pattern.compile(regexScriptStart + ".*?" + regexScriptEnd, Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+        PATTERN_SCRIPT_TAG_START = Pattern.compile(regexScriptStart, Pattern.CASE_INSENSITIVE);
+        PATTERN_SCRIPT_TAG_END = Pattern.compile(regexScriptEnd, Pattern.CASE_INSENSITIVE);
+    }
+
+    private static String dropScriptTags(final String htmlContent, final boolean[] sanitized) {
+        Matcher m = PATTERN_SCRIPT_TAG.matcher(htmlContent);
+        if (m.find()) {
+            final StringBuffer sb = new StringBuffer(htmlContent.length());
+            do {
+                m.appendReplacement(sb, "");
+                sanitized[0] = true;
+            } while (m.find());
+            m.appendTail(sb);
+            return sb.toString();
+        }
+        m = PATTERN_SCRIPT_TAG_START.matcher(htmlContent);
+        if (!m.find()) {
+            return htmlContent;
+        }
+        final StringBuffer sb = new StringBuffer(htmlContent.length());
+        do {
+            m.appendReplacement(sb, "");
+            sanitized[0] = true;
+        } while (m.find());
+        m.appendTail(sb);
+        m = PATTERN_SCRIPT_TAG_END.matcher(sb.toString());
+        if (!m.find()) {
+            return sb.toString();
+        }
+        sb.setLength(0);
+        do {
+            m.appendReplacement(sb, "");
+            sanitized[0] = true;
+        } while (m.find());
+        m.appendTail(sb);
+        return sb.toString();
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    private static String toLowerCase(final CharSequence chars) {
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
+    }
+
+}
