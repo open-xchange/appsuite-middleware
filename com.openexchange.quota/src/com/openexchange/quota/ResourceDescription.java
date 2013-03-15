@@ -58,8 +58,9 @@ import java.util.Set;
 /**
  * {@link ResourceDescription} - A resource description.
  * <p>
- * A simple property container capable to carry POJOs.
- *
+ * A simple property container capable to carry arbitrary objects (<a href="http://en.wikipedia.org/wiki/Plain_Old_Java_Object">POJO</a>s
+ * preferred).
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ResourceDescription {
