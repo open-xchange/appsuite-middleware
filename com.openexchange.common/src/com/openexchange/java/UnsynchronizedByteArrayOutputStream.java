@@ -49,6 +49,7 @@
 
 package com.openexchange.java;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -177,6 +178,16 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
         System.arraycopy(buf, discardSize, newbuf, 0, newbuf.length);
         buf = newbuf;
         count = newbuf.length;
+    }
+
+    /**
+     * Creates a newly allocated <tt>ByteArrayInputStream</tt>. Its size is the current size of this output stream and the valid contents of
+     * the buffer have been copied into it.
+     *
+     * @return The current contents of this output stream, as a <tt>ByteArrayInputStream</tt>.
+     */
+    public ByteArrayInputStream toByteArrayInputStream() {
+        return new UnsynchronizedByteArrayInputStream(buf, 0, count);
     }
 
     /**
