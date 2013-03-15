@@ -193,11 +193,14 @@ public final class SaneScriptTags {
         } while (m.find());
         m.appendTail(sb);
         m = PATTERN_SCRIPT_TAG_END.matcher(sb.toString());
+        if (!m.find()) {
+            return sb.toString();
+        }
         sb.setLength(0);
-        while (m.find()) {
+        do {
             m.appendReplacement(sb, "");
             sanitized[0] = true;
-        }
+        } while (m.find());
         m.appendTail(sb);
         return sb.toString();
     }
