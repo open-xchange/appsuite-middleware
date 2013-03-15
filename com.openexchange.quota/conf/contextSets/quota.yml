@@ -1,5 +1,5 @@
 premium:
-    com.openexchange.quota.calendar=-1
-    com.openexchange.quota.task=-1
-    com.openexchange.quota.contact=-1
-    com.openexchange.quota.infostore=-1
+    com.openexchange.quota.calendar: -1
+    com.openexchange.quota.task: -1
+    com.openexchange.quota.contact: -1
+    com.openexchange.quota.infostore: -1
