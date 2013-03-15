@@ -188,6 +188,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     private String cssPrefix;
 
+    private boolean changed = false;
+
     /**
      * Initializes a new {@link FilterJerichoHandler}.
      */
@@ -272,6 +274,19 @@ public final class FilterJerichoHandler implements JerichoHandler {
      */
     public boolean isImageURLFound() {
         return imageURLFound;
+    }
+
+    /**
+     * Checks whether changes were performed.
+     * <p>
+     * TODO: Implement appropriately! Not yet ready!
+     *
+     * @return <code>true</code> if changes were performed; otherwise <code>false</code>
+     * @deprecated Implement appropriately! Not yet ready!
+     */
+    @Deprecated
+    public boolean isChanged() {
+        return changed;
     }
 
     /**

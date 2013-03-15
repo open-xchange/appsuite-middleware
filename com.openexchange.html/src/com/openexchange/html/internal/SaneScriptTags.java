@@ -76,16 +76,17 @@ public final class SaneScriptTags {
      * Sanitizes specified HTML content by script tags
      *
      * @param html The HTML content
+     * @param sanitized The sanitized flag
      * @return The sanitized HTML content
      */
-    public static String saneScriptTags(final String html) {
+    public static String saneScriptTags(final String html, final boolean[] sanitized) {
         if (isEmpty(html)) {
             return html;
         }
         String s = html;
-        s = decode(s);
-        s = dropConcatenations(s);
-        s = dropScriptTags(s);
+        s = decode(s, sanitized);
+        s = dropConcatenations(s, sanitized);
+        s = dropScriptTags(s, sanitized);
         return s;
     }
 
@@ -93,11 +94,11 @@ public final class SaneScriptTags {
     private static final Pattern PAT_URLDECODE_PERCENT = Pattern.compile("%25");
     private static final Set<String> REPLACEES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("3c", "3e", "2b", "22")));
 
-    private static String decode(final String html) {
+    private static String decode(final String html, final boolean[] sanitized) {
         if (html.indexOf('%') < 0) {
             return html;
         }
-        String ret = PAT_URLDECODE_PERCENT.matcher(html).replaceAll("%");
+        final String ret = PAT_URLDECODE_PERCENT.matcher(html).replaceAll("%");
         final Matcher m = PAT_URLDECODE_ENTITIES.matcher(ret);
         if (!m.find()) {
             return ret;
@@ -110,6 +111,7 @@ public final class SaneScriptTags {
             } else {
                 m.appendReplacement(sb, "$0");
             }
+            sanitized[0] = true;
         } while (m.find());
         m.appendTail(sb);
         return sb.toString();
@@ -134,7 +136,7 @@ public final class SaneScriptTags {
 
     private static final Pattern PAT_CONCAT = Pattern.compile("[\"\u201d\u201c]\\+[\"\u201d\u201c]");
 
-    private static String dropConcatenations(final String html) {
+    private static String dropConcatenations(final String html, final boolean[] sanitized) {
         final Matcher m = PAT_CONCAT.matcher(html);
         if (!m.find()) {
             return html;
@@ -142,6 +144,7 @@ public final class SaneScriptTags {
         final StringBuffer sb = new StringBuffer(html.length());
         do {
             m.appendReplacement(sb, "");
+            sanitized[0] = true;
         } while (m.find());
         m.appendTail(sb);
         return sb.toString();
@@ -151,7 +154,7 @@ public final class SaneScriptTags {
         "<+script[^>]*>" + ".*?" + "</script>",
         Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
-    private static String dropScriptTags(final String htmlContent) {
+    private static String dropScriptTags(final String htmlContent, final boolean[] sanitized) {
         final Matcher m = PATTERN_SCRIPT_TAG.matcher(htmlContent);
         if (!m.find()) {
             return htmlContent;
@@ -159,6 +162,7 @@ public final class SaneScriptTags {
         final StringBuffer sb = new StringBuffer(htmlContent.length());
         do {
             m.appendReplacement(sb, "");
+            sanitized[0] = true;
         } while (m.find());
         m.appendTail(sb);
         return sb.toString();
