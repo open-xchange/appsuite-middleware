@@ -77,7 +77,11 @@ public class TaskTemplateHelperFactory implements TemplateHelperFactory {
 	@Override
 	public Object create(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter, Map<String, Object> rootObject) throws OXException {			
 
-		TimeZone tz = TimeZone.getTimeZone( requestData.isSet("timezone") ? requestData.getParameter("timezone") : session.getUser().getTimeZone() );			    
-		return new TaskHelper((Map<String, Object>) result.getResultObject(), session.getUser().getLocale(), tz, session.getContext(), services);
+		TimeZone tz = TimeZone.getTimeZone( requestData.isSet("timezone") ? requestData.getParameter("timezone") : session.getUser().getTimeZone() );
+		if (result.getResultObject() instanceof Map) {
+			return new TaskHelper((Map<String, Object>) result.getResultObject(), session.getUser().getLocale(), tz, session.getContext(), services);
+		} else {
+			return new TaskHelper(null, session.getUser().getLocale(), tz, session.getContext(), services);
+		}
 	}
 }

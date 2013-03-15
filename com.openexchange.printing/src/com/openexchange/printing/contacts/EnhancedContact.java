@@ -117,8 +117,9 @@ public class EnhancedContact {
 			bob.append(contact.get(ContactField.SUFFIX.getAjaxName()));
 			bob.append(" ");
 		}
-		
-		return bob.substring(0, bob.lastIndexOf(" ")).toString();
+		if (bob.lastIndexOf(" ") > 0)
+			return bob.substring(0, bob.lastIndexOf(" ")).toString();
+		return "";
 	}
 	
 	
@@ -147,7 +148,7 @@ public class EnhancedContact {
 	
 	
 	public List<String> getCellphones(List<String> ids, List<String> values) {
-		return getStandardPhones(lists2contact(ids, values));
+		return getCellphones(lists2contact(ids, values));
 	}
 	
 	public List<String> getCellphones(Map<String, Object> contact) {
