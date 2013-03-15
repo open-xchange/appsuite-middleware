@@ -89,15 +89,16 @@ public class DistributedFileServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String uri = req.getRequestURI();
+        String id = crop(uri);
 
-        if (!fileManagement.containsLocal(uri)) {
+        if (!fileManagement.containsLocal(id)) {
             return;
         }
 
         InputStream inStream = null;
         OutputStream outStream = null;
         try {
-            ManagedFile file = fileManagement.getByID(uri);
+            ManagedFile file = fileManagement.getByID(id);
             inStream = new BufferedInputStream(file.getInputStream());
             resp.setContentType(file.getContentType());
 
@@ -113,6 +114,11 @@ public class DistributedFileServlet extends HttpServlet {
             inStream.close();
             outStream.close();
         }
+    }
+
+    private String crop(String uri) {
+        String[] split = uri.split("/");
+        return split[split.length-1];
     }
 
     @Override
