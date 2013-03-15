@@ -51,11 +51,9 @@ package com.openexchange.contacts.json.converters;
 
 import java.util.List;
 import java.util.Map;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -141,9 +139,9 @@ public class ContactJSONResultConverter implements ResultConverter {
             /*
              * get requested column IDs
              */
-            int[] columnIDs = RequestTools.getColumnsAsIntArray(requestData, "columns");
-            ContactField[] fields = null != columnIDs ? ContactMapper.getInstance().getFields(columnIDs) : 
-            	ContactMapper.getInstance().getAllFields();        
+            int[] columnIDs = RequestTools.getColumnsAsIntArray(requestData);
+            ContactField[] fields = null != columnIDs ? ContactMapper.getInstance().getFields(columnIDs) :
+            	ContactMapper.getInstance().getAllFields();
             /*
              * Convert list of contacts
              */

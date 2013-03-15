@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 12
+%define        ox_release 14
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -191,8 +191,11 @@ if [ ${1:-0} -eq 2 ]; then
 
     ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
     ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
-    ox_update_permissions "/opt/open-xchange/etc/configdb.properties" root:open-xchange 640
-    ox_update_permissions "/opt/open-xchange/etc/mail.properties" root:open-xchange 640
+    PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties"
+    for FILE in $PROTECT
+    do
+        ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
+    done
     ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
 fi
 
@@ -222,6 +225,10 @@ fi
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Mon Mar 04 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-03-08
+* Tue Feb 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-02-22
 * Mon Jan 21 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-01-24
 * Thu Jan 03 2013 Marcus Klein <marcus.klein@open-xchange.com>

@@ -56,8 +56,9 @@ package com.openexchange.admin.rmi.dataobjects;
  */
 public interface PasswordMechObject {
 
-    public static final String CRYPT_MECH = "{CRYPT}";
-    public static final String SHA_MECH = "{SHA}";
+    public static final String CRYPT_MECH = "{CRYPT}".intern();
+    public static final String SHA_MECH = "{SHA}".intern();
+    public static final String BCRYPT_MECH = "{BCRYPT}".intern();
 
     /**
      * @return the passwordMech

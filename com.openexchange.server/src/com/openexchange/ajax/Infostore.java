@@ -62,7 +62,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -82,7 +81,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
-import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.GetSwitch;
 import com.openexchange.groupware.infostore.database.impl.SetSwitch;
@@ -98,9 +96,11 @@ import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.UploadServletException;
@@ -602,10 +602,13 @@ public class Infostore extends PermissionServlet {
                 String contentDisposition = null;
                 if (null == contentDisposition) {
                     final StringBuilder sb = new StringBuilder(32).append("attachment");
-                    DownloadUtility.appendFilenameParameter(metadata.getFileName(), SAVE_AS_TYPE, userAgent, sb);
+                    DownloadUtility.appendFilenameParameter(metadata.getFileName(), null, userAgent, sb);
                     res.setHeader("Content-Disposition", sb.toString());
                 } else {
-                    Tools.setHeaderForFileDownload(userAgent, res, metadata.getFileName());
+                    final StringBuilder sb = new StringBuilder(32).append(contentDisposition);
+                    DownloadUtility.appendFilenameParameter(metadata.getFileName(), null, userAgent, sb);
+                    res.setHeader("Content-Disposition", sb.toString());
+                    // Tools.setHeaderForFileDownload(userAgent, res, metadata.getFileName());
                 }
                 res.setContentType(contentType);
             } else {

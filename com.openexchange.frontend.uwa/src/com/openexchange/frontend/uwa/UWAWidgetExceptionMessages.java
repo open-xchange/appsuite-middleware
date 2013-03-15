@@ -65,6 +65,9 @@ public final class UWAWidgetExceptionMessages implements LocalizableStrings {
     public static final String NOT_FOUND_MSG = "The uwa widget with the id %1$s could not be found";
     public static final String PROTECTED_MSG = "The widget with the id %1$s is protected and only positional information can be updated";
 
+    // The string cannot be parsed to a valid URL.
+    public static final String INVALID_URL_MSG = "The string cannot be parsed to a valid URL.";
+
 
     /**
      * Initializes a new {@link UWAWidgetExceptionMessages}.

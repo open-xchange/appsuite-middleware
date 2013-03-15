@@ -65,6 +65,30 @@ import java.io.InputStream;
 public class Streams {
 
     /**
+     * Writes specified input stream's content to a <code>ByteArrayOutputStream</code> array.
+     *
+     * @param is The input stream to read from
+     * @return A newly created <code>byte</code> array carrying input stream's bytes.
+     * @throws IOException If an I/O error occurs
+     */
+    public static ByteArrayOutputStream stream2ByteArrayOutputStream(final InputStream is) throws IOException {
+        if (null == is) {
+            return null;
+        }
+        try {
+            final ByteArrayOutputStream bos = newByteArrayOutputStream(4096);
+            final int buflen = 2048;
+            final byte[] buf = new byte[buflen];
+            for (int read; (read = is.read(buf, 0, buflen)) > 0;) {
+                bos.write(buf, 0, read);
+            }
+            return bos;
+        } finally {
+            close(is);
+        }
+    }
+
+    /**
      * Converts specified input stream to a <code>byte</code> array.
      *
      * @param is The input stream to read from

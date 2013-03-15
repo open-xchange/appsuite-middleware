@@ -50,6 +50,7 @@
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -67,7 +68,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.log.LogFactory;
-import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -120,7 +120,7 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     /**
      * Returns the remembered session.
-     * 
+     *
      * @param req The Servlet request.
      * @return The remembered session
      */
@@ -133,8 +133,18 @@ public class APIResponseRenderer implements ResponseRenderer {
     }
 
     /**
+     * Gets the locale for given HTTP request
+     *
+     * @param req The request
+     * @return The locale
+     */
+    protected static Locale localeFrom(final HttpServletRequest req) {
+        return localeFrom(getSession(req));
+    }
+
+    /**
      * Gets the locale for given server session
-     * 
+     *
      * @param session The server session
      * @return The locale
      */
@@ -154,7 +164,7 @@ public class APIResponseRenderer implements ResponseRenderer {
      * <li>The HTTP Servlet request has the <code>"respondWithHTML"</code> parameter set to <code>"true"</code></li>
      * <li>The HTTP Servlet request contains non-<code>null</code> <code>"callback"</code> parameter</li>
      * </ul>
-     * 
+     *
      * @param response The response to write
      * @param action The request's action
      * @param req The HTTP Servlet request
@@ -164,32 +174,69 @@ public class APIResponseRenderer implements ResponseRenderer {
         writeResponse(response, action, req, resp, false);
     }
 
+    /*-
+     *      <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+     *      <html>
+     *       <head>
+     *        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+     *        <script type="text/javascript">
+     *          (parent.callback_**action** || window.opener && window.opener.callback_**action**)(**json**)
+     *        </script>
+     *       </head>
+     *      </html>
+     *
+     */
+
+    private static final char[] JS_FRAGMENT_PART1 = ("<!DOCTYPE HTML PUBLIC "
+        + "\"-//W3C//DTD HTML 4.01//EN\" "
+        + "\"http://www.w3.org/TR/html4/strict.dtd\"><html><head>"
+        + "<META http-equiv=\"Content-Type\" "
+        + "content=\"text/html; charset=UTF-8\">"
+        + "<script type=\"text/javascript\">"
+        + "(parent.callback_").toCharArray();
+
+    private static final char[] JS_FRAGMENT_PART2 = " || window.opener && window.opener.callback_".toCharArray();
+
+    private static final char[] JS_FRAGMENT_PART3 = ")</script></head></html>".toCharArray();
+
     private static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp, final boolean plainJson) {
         try {
-            final ServerSession session = getSession(req);
             if (plainJson) {
-                ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
+                ResponseWriter.write(response, resp.getWriter(), localeFrom(req));
             } else if (isMultipartContent(req) || isRespondWithHTML(req) || req.getParameter(CALLBACK) != null) {
                 resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
                 String callback = req.getParameter(CALLBACK);
                 if (callback == null) {
                     callback = action;
                 }
-                final Writer w = new UnsynchronizedStringWriter();
-                ResponseWriter.write(response, w, localeFrom(session));
+                // Write: PART1 + <action> + PART2 + <action> + ")(" + <json> + PART3
+                final PrintWriter writer = resp.getWriter();
+                writer.write(JS_FRAGMENT_PART1);
+                writer.write(callback);
+                writer.write(JS_FRAGMENT_PART2);
+                writer.write(callback);
+                writer.write(")(");
+                ResponseWriter.write(response, new EscapingWriter(writer), localeFrom(req));
+                writer.write(JS_FRAGMENT_PART3);
+                /*-
+                 * Previous code:
+                 *
+                final Writer w = new AllocatingStringWriter();
+                ResponseWriter.write(response, w, localeFrom(getSession(req)));
                 resp.getWriter().print(substituteJS(w.toString(), callback));
+                 *
+                 */
             } else if (req.getParameter(JSONP) != null) {
-                final String call = req.getParameter(JSONP);
-
-                final Writer w = new UnsynchronizedStringWriter();
-                ResponseWriter.write(response, w, localeFrom(session));
-
-                final StringBuilder sb = new StringBuilder(call);
-                sb.append('(').append(w.toString()).append(");");
                 resp.setContentType("text/javascript");
-                resp.getWriter().write(sb.toString());
+                final String call = req.getParameter(JSONP);
+                // Write: <call> + "(" + <json> + ")"
+                final PrintWriter writer = resp.getWriter();
+                writer.write(call);
+                writer.write('(');
+                ResponseWriter.write(response, writer, localeFrom(req));
+                writer.write(')');
             } else {
-                ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
+                ResponseWriter.write(response, resp.getWriter(), localeFrom(req));
             }
         } catch (final JSONException e) {
             LOG.error(e.getMessage(), e);
@@ -210,7 +257,7 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     /**
      * Utility method that determines whether the request contains multipart content
-     * 
+     *
      * @param request The request to be evaluated.
      * @return <code>true</code> if the request is multipart; <code>false</code> otherwise.
      */
@@ -236,8 +283,113 @@ public class APIResponseRenderer implements ResponseRenderer {
     private static final Pattern RPL_ACTION = Pattern.compile("**action**", Pattern.LITERAL);
 
     private static String substituteJS(final String json, final String action) {
-        return RPL_ACTION.matcher(RPL_JSON.matcher(JS_FRAGMENT).replaceAll(Matcher.quoteReplacement(json))).replaceAll(
+        return RPL_ACTION.matcher(RPL_JSON.matcher(JS_FRAGMENT).replaceAll(Matcher.quoteReplacement(json.replaceAll(Pattern.quote("</") , "<\\/")))).replaceAll(
             Matcher.quoteReplacement(action));
+    }
+
+    /**
+     * Escapes <tt>"&lt;/"</tt> char sequence to <tt>"&lt;\/"</tt>.
+     *
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     */
+    private static final class EscapingWriter extends Writer {
+
+        private int prev;
+        private final Writer writer;
+
+        protected EscapingWriter(final Writer writer) {
+            super();
+            this.writer = writer;
+            prev = 0;
+        }
+
+        @Override
+        public void write(final int c) throws IOException {
+            if ('<' == c) {
+                prev = c;
+            } else if ('/' == c) {
+                if (prev > 0) {
+                    //  </   -->   <\/
+                    writer.write("<\\/");
+                    prev = 0;
+                } else {
+                    writer.write(c);
+                }
+            } else {
+                if (prev > 0) {
+                    writer.write('<');
+                    prev = 0;
+                }
+                writer.write(c);
+            }
+        }
+
+        @Override
+        public void write(final char[] cbuf) throws IOException {
+            write(cbuf, 0, cbuf.length);
+        }
+
+        @Override
+        public void write(final char[] cbuf, final int off, final int len) throws IOException {
+            for (int i = off, end = off + len; i < end; i++) {
+                write(cbuf[i]);
+            }
+        }
+
+        @Override
+        public void write(final String str) throws IOException {
+            write(str, 0, str.length());
+        }
+
+        @Override
+        public void write(final String str, final int off, final int len) throws IOException {
+            for (int i = off, end = off + len; i < end; i++) {
+                write(str.charAt(i));
+            }
+        }
+
+        @Override
+        public Writer append(final CharSequence csq) throws IOException {
+            if (csq == null) {
+                write("null");
+            } else {
+                write(csq.toString());
+            }
+            return this;
+        }
+
+        @Override
+        public Writer append(final CharSequence csq, final int start, final int end) throws IOException {
+            CharSequence cs = (csq == null ? "null" : csq);
+            write(cs.subSequence(start, end).toString());
+            return this;
+        }
+
+        @Override
+        public Writer append(final char c) throws IOException {
+            write(c);
+            return this;
+        }
+
+        @Override
+        public void flush() throws IOException {
+            if ('<' == prev) {
+                writer.write('<');
+                prev = '\0';
+            }
+            writer.flush();
+        }
+
+        @Override
+        public void close() throws IOException {
+            writer.close();
+        }
+
+        @Override
+        public String toString() {
+            return writer.toString();
+        }
+
     }
 
 }

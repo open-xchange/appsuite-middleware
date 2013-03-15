@@ -52,6 +52,7 @@ package com.openexchange.admin.tools;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import javax.mail.internet.AddressException;
+import com.damienmiller.BCrypt;
 import com.openexchange.admin.rmi.dataobjects.PasswordMechObject;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -159,6 +160,8 @@ public class GenericChecks {
             return UnixCrypt.matches(crypted, clear);
         } else if("{SHA}".equals(mech)) {
             return SHACrypt.makeSHAPasswd(clear).equals(crypted);
+        } else if("{BCRYPT}".equals(mech)) {
+            return BCrypt.checkpw(clear, crypted);
         } else {
             return false;
         }

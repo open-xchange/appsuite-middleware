@@ -77,6 +77,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
+import com.damienmiller.BCrypt;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -597,26 +598,32 @@ public class AdminCache {
      * @throws UnsupportedEncodingException
      */
     public String encryptPassword(final PasswordMechObject user) throws StorageException, NoSuchAlgorithmException, UnsupportedEncodingException {
-        String passwd = null;
-        if (user.getPasswordMech() == null) {
+        String passwordMech = user.getPasswordMech();
+        if (isEmpty(passwordMech) || "null".equals(toLowerCase(passwordMech))) {
             String pwmech = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
             pwmech = "{" + pwmech + "}";
             if (pwmech.equalsIgnoreCase(PasswordMechObject.CRYPT_MECH)) {
-                user.setPasswordMech(PasswordMechObject.CRYPT_MECH);
+                passwordMech = PasswordMechObject.CRYPT_MECH;
             } else if (pwmech.equalsIgnoreCase(PasswordMechObject.SHA_MECH)) {
-                user.setPasswordMech(PasswordMechObject.SHA_MECH);
+                passwordMech = PasswordMechObject.SHA_MECH;
+            } else if (pwmech.equalsIgnoreCase(PasswordMechObject.BCRYPT_MECH)) {
+                passwordMech = PasswordMechObject.BCRYPT_MECH;
             } else {
                 log.warn("WARNING: unknown password mechanism " + pwmech + " using SHA");
-                user.setPasswordMech(PasswordMechObject.SHA_MECH);
+                passwordMech = PasswordMechObject.SHA_MECH;
             }
         }
-        if (user.getPasswordMech().equals(PasswordMechObject.CRYPT_MECH)) {
+        user.setPasswordMech(passwordMech);
+        final String passwd;
+        if (PasswordMechObject.CRYPT_MECH.equals(passwordMech)) {
             passwd = UnixCrypt.crypt(user.getPassword());
-        } else if (user.getPasswordMech().equals(PasswordMechObject.SHA_MECH)) {
+        } else if (PasswordMechObject.SHA_MECH.equals(passwordMech)) {
             passwd = SHACrypt.makeSHAPasswd(user.getPassword());
+        } else if (PasswordMechObject.BCRYPT_MECH.equals(passwordMech)) {
+            passwd = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
         } else {
-            log.error("unsupported password mechanism: " + user.getPasswordMech());
-            throw new StorageException("unsupported password mechanism: " + user.getPasswordMech());
+            log.error("unsupported password mechanism: " + passwordMech);
+            throw new StorageException("unsupported password mechanism: " + passwordMech);
         }
         return passwd;
     }
@@ -720,6 +727,33 @@ public class AdminCache {
 
     public boolean isMasterAdmin(final Credentials auth) {
         return masterAuthenticationDisabled || getMasterCredentials().getLogin().equals(auth.getLogin());
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

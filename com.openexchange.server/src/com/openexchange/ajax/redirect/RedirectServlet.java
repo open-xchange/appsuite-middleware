@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.redirect;
 
+import static com.openexchange.ajax.AJAXServlet.encodeUrl;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -82,7 +83,7 @@ public class RedirectServlet extends HttpServlet {
         }
 
         if (isServerRelative(location)) {
-            resp.sendRedirect(location);
+            resp.sendRedirect(encodeUrl(location, true));
             return;
         }
 
@@ -95,7 +96,7 @@ public class RedirectServlet extends HttpServlet {
 
         location = assumeRelative(referer, location);
 
-        resp.sendRedirect(location);
+        resp.sendRedirect(encodeUrl(location, true));
 
     }
 
