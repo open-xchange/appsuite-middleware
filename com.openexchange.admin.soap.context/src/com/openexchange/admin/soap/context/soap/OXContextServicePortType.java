@@ -30,6 +30,14 @@ public interface OXContextServicePortType {
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception;
 
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
+    @Action(input = "urn:changeQuota", output = "urn:changeQuotaResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:changeQuotaStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:changeQuotaInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:changeQuotaInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:changeQuotaNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:changeQuotaRemoteException")})
+    @WebMethod(action = "urn:changeQuota")
+    public void changeQuota(
+        @WebParam(partName = "parameters", name = "changeQuota", targetNamespace = "http://soap.admin.openexchange.com")
+        ChangeQuota parameters
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception;
+
+    @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
     @Action(input = "urn:changeCapabilities", output = "urn:changeCapabilitiesResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:changeCapabilitiesStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:changeCapabilitiesInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:changeCapabilitiesInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:changeCapabilitiesNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:changeCapabilitiesRemoteException")})
     @WebMethod(action = "urn:changeCapabilities")
     public void changeCapabilities(

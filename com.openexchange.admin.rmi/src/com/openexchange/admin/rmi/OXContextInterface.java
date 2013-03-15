@@ -400,6 +400,21 @@ public interface OXContextInterface extends Remote {
     public void changeCapabilities(Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
 
     /**
+     * Changes specified context's capabilities.
+     *
+     * @param ctx The context
+     * @param module The module to apply quota to
+     * @param quotaValue The quota value to set
+     * @param auth The credentials
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws StorageException
+     * @throws InvalidDataException
+     */
+    public void changeQuota(Context ctx, String module, long quotaValue, Credentials auth) throws RemoteException,InvalidCredentialsException,NoSuchContextException,StorageException, InvalidDataException;
+
+    /**
      * Change module access rights for ALL users in the specified context.<br>
      * IF you want to change data of a context like quota etc.<br>
      * use Method change(final Context ctx, final Credentials auth)
