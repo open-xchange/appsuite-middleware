@@ -342,6 +342,7 @@ public final class QuotaActivator extends HousekeepingActivator {
             throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(contextId, con);
         }
     }
 
