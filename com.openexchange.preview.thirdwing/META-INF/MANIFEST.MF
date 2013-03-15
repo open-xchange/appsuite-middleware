@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.openexchange.preview.thirdwing
 Bundle-SymbolicName: com.openexchange.preview.thirdwing
-Bundle-Version: 7.0.1
+Bundle-Version: 7.2.0
 Bundle-Activator: com.openexchange.preview.thirdwing.osgi.ThirdwingPreviewActivator
 Bundle-Vendor: Open-Xchange AG
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

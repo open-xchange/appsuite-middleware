@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Addressmemory Plug-in
 Bundle-SymbolicName: com.openexchange.contactcollector
-Bundle-Version: 7.0.2
+Bundle-Version: 7.2.0
 Bundle-Activator: com.openexchange.contactcollector.osgi.ContactCollectorActivator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

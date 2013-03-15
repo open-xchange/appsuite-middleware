@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Caldav Plug-in
 Bundle-SymbolicName: com.openexchange.caldav
-Bundle-Version: 7.0.2
+Bundle-Version: 7.2.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.api2,

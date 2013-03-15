@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Slim JSON interface for App Manifests
 Bundle-SymbolicName: com.openexchange.apps.manifests.json
-Bundle-Version: 7.0.2
+Bundle-Version: 7.2.0
 Bundle-Activator: com.openexchange.apps.manifests.json.osgi.ManifestJSONActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

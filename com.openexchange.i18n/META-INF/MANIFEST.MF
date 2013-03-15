@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange I18n
-Bundle-Version: 7.0.2
+Bundle-Version: 7.2.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-SymbolicName: com.openexchange.i18n
 Bundle-Activator: com.openexchange.i18n.osgi.I18nActivator
