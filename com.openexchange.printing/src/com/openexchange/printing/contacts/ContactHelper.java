@@ -62,6 +62,7 @@ import com.openexchange.server.ServiceLookup;
 public class ContactHelper {
 	private final DateFormatter formatters;
 	private final TemplateLabels labels;
+	private ContactNaming naming;
 
 	public ContactHelper(Map<String, Object> contact, Locale locale,
 			TimeZone timezone, Context ctx, ServiceLookup services)
@@ -69,8 +70,12 @@ public class ContactHelper {
 		super();
 		this.formatters = new DateFormatter(locale, timezone);
 		this.labels     = new TemplateLabels(locale, services);
+		this.naming		= new ContactNaming(locale);
 	}
 
+	public ContactNaming getNaming() {
+		return naming;
+	}
 	public DateFormatter getFormatters() {
 		return formatters;
 	}
