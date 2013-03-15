@@ -112,6 +112,7 @@ import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.filemanagement.DistributedFileManagement;
 import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderDeleteListenerServiceTrackerCustomizer;
@@ -252,7 +253,7 @@ public final class ServerActivator extends HousekeepingActivator {
         CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class, IDBasedFileAccessFactory.class,
         FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class, CryptoService.class, HttpService.class,
         SystemNameService.class, ImageTransformationService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
-        TextXtractService.class, SecretEncryptionFactoryService.class, QuotaService.class };
+        TextXtractService.class, SecretEncryptionFactoryService.class, QuotaService.class, DistributedFileManagement.class };
 
     private static volatile BundleContext CONTEXT;
 

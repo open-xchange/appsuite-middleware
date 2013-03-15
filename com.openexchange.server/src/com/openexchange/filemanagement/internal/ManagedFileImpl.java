@@ -70,7 +70,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
+public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ManagedFileImpl.class));
 
@@ -98,7 +98,7 @@ final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
      * @param id The unique ID
      * @param file The kept file
      */
-    ManagedFileImpl(final String id, final File file) {
+    public ManagedFileImpl(final String id, final File file) {
         super();
         this.id = id;
         this.file = file;
