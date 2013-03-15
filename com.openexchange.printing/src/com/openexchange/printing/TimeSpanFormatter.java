@@ -76,6 +76,25 @@ public class TimeSpanFormatter extends DateFormatter {
 		return formatInterval(timespanThingy);
 	}
 
+
+	public String formatDate(Date startDate, Date endDate, boolean isFullTime) {
+	
+		if (isFullTime) {
+			endDate = new Date(endDate.getTime() - 1000);
+		}
+	
+		if (differentDays(startDate, endDate)) {
+			if (isFullTime) {
+				return String.format("%s - %s", formatDate(startDate, utc),
+						formatDate(endDate, utc));
+			} else {
+				return String.format("%s - %s", formatDate(startDate),
+						formatDate(endDate));
+			}
+		} else {
+			return formatDate(startDate);
+		}
+	}
 	public String formatDate(Map<String, Object> appointment) {
 		Date startDate = new Date((Long) appointment.get("start_date"));
 		Date endDate = new Date((Long) appointment.get("end_date"));
