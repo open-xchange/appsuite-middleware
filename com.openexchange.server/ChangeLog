@@ -1,3 +1,7 @@
+* 2013-03-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25332: Fixed entries in quota.yml file
+
 * 2013-03-14 - marcus.klein@open-xchange.com
 
  - Story 30395131: Added methods to database service for returning writable connections without incrementing the replication monitor
