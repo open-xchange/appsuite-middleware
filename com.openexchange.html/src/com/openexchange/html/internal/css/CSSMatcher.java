@@ -426,28 +426,30 @@ public final class CSSMatcher {
                 } else {
                     boolean fst = true;
                     for (final String selector : SPLIT_COMMA.split(wordi, 0)) {
-                        if (fst) {
-                            fst = false;
-                        } else {
-                            builder.append(',');
+                        if (!isEmpty(selector)) {                            
+                            if (fst) {
+                                fst = false;
+                            } else {
+                                builder.append(',');
+                            }
+                            final char first = selector.charAt(0);
+                            if ('.' == first) {
+                                // .class -> #prefix .prefix-class
+                                builder.append('#').append(cssPrefix).append(' ');
+                                builder.append('.').append(cssPrefix).append('-');
+                                builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper)).append(' ');
+                            } else if ('#' == first) {
+                                // #id -> #prefix #prefix-id
+                                builder.append('#').append(cssPrefix).append(' ');
+                                builder.append('#').append(cssPrefix).append('-');
+                                builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper)).append(' ');
+                            } else {
+                                // element -> #prefix element
+                                builder.append('#').append(cssPrefix).append(' ');
+                                builder.append(replaceDotsAndHashes(selector, cssPrefix, helper)).append(' ');
+                            }
                         }
-                        final char first = selector.charAt(0);
-                        if ('.' == first) {
-                            // .class -> #prefix .prefix-class
-                            builder.append('#').append(cssPrefix).append(' ');
-                            builder.append('.').append(cssPrefix).append('-');
-                            builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper)).append(' ');
-                        } else if ('#' == first) {
-                            // #id -> #prefix #prefix-id
-                            builder.append('#').append(cssPrefix).append(' ');
-                            builder.append('#').append(cssPrefix).append('-');
-                            builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper)).append(' ');
-                        } else {
-                            // element -> #prefix element
-                            builder.append('#').append(cssPrefix).append(' ');
-                            builder.append(replaceDotsAndHashes(selector, cssPrefix, helper)).append(' ');
-                        }
-                    }
+                    } // End of for loop
                 }
             }
         }

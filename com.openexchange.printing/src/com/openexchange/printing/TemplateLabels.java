@@ -67,5 +67,9 @@ public class TemplateLabels {
     private String getString(String s) {
         return StringHelper.valueOf(locale).getString(s);
     }
+    
+    public String i18n(String s) {
+    	return getString(s);
+    }
 
 }

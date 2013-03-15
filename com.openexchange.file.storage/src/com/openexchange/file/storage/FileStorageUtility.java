@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,78 +47,69 @@
  *
  */
 
-package com.openexchange.printing;
+package com.openexchange.file.storage;
 
-import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
-import com.openexchange.calendar.itip.Messages;
-import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.StringAllocator;
+import java.net.MalformedURLException;
+import com.openexchange.exception.OXException;
+
 
 /**
- * {@link CalendarFormatter}
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
- *         Laguna</a>
+ * {@link FileStorageUtility} - Utility class for file storage module.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class TimeSpanFormatter extends DateFormatter {
-	
-	private Map<String, Object> timespanThingy;
+public final class FileStorageUtility {
 
-	public TimeSpanFormatter(Map<String, Object> timeSpanThingy, Locale locale, TimeZone tz) {
-		super(locale, tz);
-		this.timespanThingy = timeSpanThingy;
-	}
+    /**
+     * Initializes a new {@link FileStorageUtility}.
+     */
+    private FileStorageUtility() {
+        super();
+    }
 
-	public String getInterval() {
-		return formatInterval(timespanThingy);
-	}
+    /**
+     * Checks given file's URL string for syntactical correctness.
+     * 
+     * @param file The file whose URL to cehck
+     * @throws OXException If URL string is invalid
+     */
+    public static void checkUrl(final File file) throws OXException {
+        checkUrl(file.getURL());
+    }
 
+    /**
+     * Checks given URL string for syntactical correctness.
+     * 
+     * @param sUrl The URL string
+     * @throws OXException If URL string is invalid
+     */
+    public static void checkUrl(final String sUrl) throws OXException {
+        if (isEmpty(sUrl)) {
+            // Nothing to check
+            return;
+        }
+        try {
+            final java.net.URL url = new java.net.URL(sUrl);
+            final String protocol = url.getProtocol();
+            if (!"http".equals(protocol) && !"https".equals(protocol)) {
+                throw new MalformedURLException("Only http & https protocols supported.");
+            }
+        } catch (final MalformedURLException e) {
+            throw FileStorageExceptionCodes.INVALID_URL.create(e, sUrl, e.getMessage());
+        }
+    }
 
-	public String formatDate(Date startDate, Date endDate, boolean isFullTime) {
-	
-		if (isFullTime) {
-			endDate = new Date(endDate.getTime() - 1000);
-		}
-	
-		if (differentDays(startDate, endDate)) {
-			if (isFullTime) {
-				return String.format("%s - %s", formatDate(startDate, utc),
-						formatDate(endDate, utc));
-			} else {
-				return String.format("%s - %s", formatDate(startDate),
-						formatDate(endDate));
-			}
-		} else {
-			return formatDate(startDate);
-		}
-	}
-	public String formatDate(Map<String, Object> appointment) {
-		Date startDate = new Date((Long) appointment.get("start_date"));
-		Date endDate = new Date((Long) appointment.get("end_date"));
-		return formatDate(startDate, endDate, isFullTime());
-	}
-
-	public String formatInterval(Map<String, Object> appointment) {
-		if (isFullTime()) {
-			return StringHelper.valueOf(locale).getString(Messages.FULL_TIME);
-		}
-		Date startDate = new Date((Long) appointment.get("start_date"));
-		Date endDate = new Date((Long) appointment.get("end_date"));
-		return formatInterval(startDate, endDate, isFullTime());
-	}
-
-	public String getDateSpec() {
-		StringAllocator b = new StringAllocator();
-		b.append(formatDate(timespanThingy));
-		return b.toString();
-	}
-
-	private boolean isFullTime() {
-		Boolean fullTime = (Boolean) timespanThingy.get("full_time");
-		return fullTime == null || fullTime;
-	}
+    /** Checks for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
 
 }

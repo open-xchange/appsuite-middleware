@@ -60,18 +60,35 @@ public enum Resource {
     /**
      * The quota resource for tasks.
      */
-    TASK,
+    TASK("task"),
     /**
      * The quota resource for appointments.
      */
-    CALENDAR,
+    CALENDAR("calendar"),
     /**
      * The quota resource for contact.
      */
-    CONTACT,
+    CONTACT("contact"),
     /**
      * The quota resource for infostore files.
      */
-    INFOSTORE_FILES,
+    INFOSTORE_FILES("infostore"),
+
+    ;
+
+    private final String identifier;
+
+    private Resource(final String identifier) {
+        this.identifier = identifier;
+    }
+
+    /**
+     * Gets the identifier
+     *
+     * @return The identifier
+     */
+    public String getIdentifier() {
+        return identifier;
+    }
 
 }

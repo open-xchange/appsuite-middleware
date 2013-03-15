@@ -55,12 +55,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
-import java.util.Map;
 import java.util.TimeZone;
 
 import com.openexchange.calendar.itip.Messages;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.StringAllocator;
 
 public class DateFormatter {
 
@@ -69,7 +67,7 @@ public class DateFormatter {
 	protected DateFormat weekdayFormat;
 	protected Locale locale;
 	protected TimeZone timezone;
-	private final TimeZone utc = TimeZone.getTimeZone("UTC");
+	protected final TimeZone utc = TimeZone.getTimeZone("UTC");
 
 	public DateFormatter(Locale locale, TimeZone tz) {
 		super();
@@ -86,24 +84,8 @@ public class DateFormatter {
 		}
 	}
 
-
-	public String formatDate(Date startDate, Date endDate, boolean isFullTime) {
-	
-		if (isFullTime) {
-			endDate = new Date(endDate.getTime() - 1000);
-		}
-	
-		if (differentDays(startDate, endDate)) {
-			if (isFullTime) {
-				return String.format("%s - %s", formatDate(startDate, utc),
-						formatDate(endDate, utc));
-			} else {
-				return String.format("%s - %s", formatDate(startDate),
-						formatDate(endDate));
-			}
-		} else {
-			return formatDate(startDate);
-		}
+	public String formatDate(long timestamp) {
+		return formatDate(new Date(timestamp));
 	}
 
 	public String formatDate(Date date) {
@@ -146,7 +128,7 @@ public class DateFormatter {
 		}
 	}
 
-	private boolean differentDays(Date startDate, Date endDate) {
+	protected boolean differentDays(Date startDate, Date endDate) {
 		GregorianCalendar cal1 = new GregorianCalendar();
 		cal1.setTime(startDate);
 		cal1.setTimeZone(timezone);

@@ -52,7 +52,6 @@ package com.openexchange.printing.tasks;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.printing.DateFormatter;
@@ -62,28 +61,27 @@ import com.openexchange.printing.TimeSpanFormatter;
 import com.openexchange.server.ServiceLookup;
 
 public class TaskHelper {
-	private final DateFormatter formatters;
-	private final EnhancedTaskOrAppointment enhanced;
-	private final TemplateLabels labels;
 
-	public TaskHelper(Map<String, Object> task, Locale locale,
-			TimeZone timezone, Context ctx, ServiceLookup services)
-			throws OXException {
-		super();
-		this.formatters = new TimeSpanFormatter(task, locale, timezone);
-		this.enhanced   = new EnhancedTaskOrAppointment(task, services, ctx);
-		this.labels     = new TemplateLabels(locale, services);
-	}
+    private final DateFormatter formatters;
+    private final EnhancedTaskOrAppointment enhanced;
+    private final TemplateLabels labels;
 
-	public DateFormatter getFormatters() {
-		return formatters;
-	}
+    public TaskHelper(Map<String, Object> task, Locale locale, TimeZone timezone, Context ctx, ServiceLookup services) throws OXException {
+        super();
+        this.formatters = new TimeSpanFormatter(task, locale, timezone);
+        this.enhanced = new EnhancedTaskOrAppointment(task, services, ctx);
+        this.labels = new TemplateLabels(locale, services);
+    }
 
-	public EnhancedTaskOrAppointment getEnhanced() {
-		return enhanced;
-	}
+    public DateFormatter getFormatters() {
+        return formatters;
+    }
 
-	public TemplateLabels getLabels() {
-		return labels;
-	}
+    public EnhancedTaskOrAppointment getEnhanced() {
+        return enhanced;
+    }
+
+    public TemplateLabels getLabels() {
+        return labels;
+    }
 }

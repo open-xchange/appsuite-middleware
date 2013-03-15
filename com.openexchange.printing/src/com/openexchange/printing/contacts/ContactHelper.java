@@ -52,7 +52,6 @@ package com.openexchange.printing.contacts;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.printing.DateFormatter;
@@ -60,22 +59,27 @@ import com.openexchange.printing.TemplateLabels;
 import com.openexchange.server.ServiceLookup;
 
 public class ContactHelper {
-	private final DateFormatter formatters;
-	private final TemplateLabels labels;
 
-	public ContactHelper(Map<String, Object> contact, Locale locale,
-			TimeZone timezone, Context ctx, ServiceLookup services)
-			throws OXException {
-		super();
-		this.formatters = new DateFormatter(locale, timezone);
-		this.labels     = new TemplateLabels(locale, services);
-	}
+    private final DateFormatter formatters;
+    private final TemplateLabels labels;
+    private final ContactNaming naming;
 
-	public DateFormatter getFormatters() {
-		return formatters;
-	}
+    public ContactHelper(Map<String, Object> contact, Locale locale, TimeZone timezone, Context ctx, ServiceLookup services) throws OXException {
+        super();
+        this.formatters = new DateFormatter(locale, timezone);
+        this.labels = new TemplateLabels(locale, services);
+        this.naming = new ContactNaming(locale);
+    }
 
-	public TemplateLabels getLabels() {
-		return labels;
-	}
+    public ContactNaming getNaming() {
+        return naming;
+    }
+
+    public DateFormatter getFormatters() {
+        return formatters;
+    }
+
+    public TemplateLabels getLabels() {
+        return labels;
+    }
 }

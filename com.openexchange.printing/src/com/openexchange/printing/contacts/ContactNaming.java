@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,78 +47,55 @@
  *
  */
 
-package com.openexchange.printing;
+package com.openexchange.printing.contacts;
 
-import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
-import com.openexchange.calendar.itip.Messages;
-import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.StringAllocator;
 
-/**
- * {@link CalendarFormatter}
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
- *         Laguna</a>
- */
-public class TimeSpanFormatter extends DateFormatter {
+import com.openexchange.groupware.contact.helpers.ContactField;
+
+public class ContactNaming {
+
+	private Locale locale;
+
+	public ContactNaming(Locale locale) {
+		this.locale = locale;
+	}
 	
-	private Map<String, Object> timespanThingy;
-
-	public TimeSpanFormatter(Map<String, Object> timeSpanThingy, Locale locale, TimeZone tz) {
-		super(locale, tz);
-		this.timespanThingy = timeSpanThingy;
-	}
-
-	public String getInterval() {
-		return formatInterval(timespanThingy);
-	}
-
-
-	public String formatDate(Date startDate, Date endDate, boolean isFullTime) {
-	
-		if (isFullTime) {
-			endDate = new Date(endDate.getTime() - 1000);
+	public String getFullname(Map<String, Object> contact) {
+		//TODO: Create i18n version - frontend has a nice one in io.ox.contacts/util#getFullName
+		if (contact.containsKey(ContactField.DISPLAY_NAME.getAjaxName()))
+			return (String) contact.get(ContactField.DISPLAY_NAME.getAjaxName());
+		
+		if (	!(contact.containsKey(ContactField.GIVEN_NAME.getAjaxName()) || contact.containsKey(ContactField.SUR_NAME.getAjaxName()))
+			&& contact.containsKey(ContactField.COMPANY.getAjaxName())) {
+			return (String) contact.get(ContactField.COMPANY.getAjaxName());
 		}
-	
-		if (differentDays(startDate, endDate)) {
-			if (isFullTime) {
-				return String.format("%s - %s", formatDate(startDate, utc),
-						formatDate(endDate, utc));
-			} else {
-				return String.format("%s - %s", formatDate(startDate),
-						formatDate(endDate));
-			}
-		} else {
-			return formatDate(startDate);
+			
+		StringBuilder bob = new StringBuilder();
+		
+		if (contact.containsKey(ContactField.TITLE.getAjaxName())){
+			bob.append(contact.get(ContactField.TITLE.getAjaxName()));
+			bob.append(" ");
 		}
-	}
-	public String formatDate(Map<String, Object> appointment) {
-		Date startDate = new Date((Long) appointment.get("start_date"));
-		Date endDate = new Date((Long) appointment.get("end_date"));
-		return formatDate(startDate, endDate, isFullTime());
-	}
-
-	public String formatInterval(Map<String, Object> appointment) {
-		if (isFullTime()) {
-			return StringHelper.valueOf(locale).getString(Messages.FULL_TIME);
+		if (contact.containsKey(ContactField.GIVEN_NAME.getAjaxName())) {
+			bob.append(contact.get(ContactField.GIVEN_NAME.getAjaxName()));
+			bob.append(" ");
 		}
-		Date startDate = new Date((Long) appointment.get("start_date"));
-		Date endDate = new Date((Long) appointment.get("end_date"));
-		return formatInterval(startDate, endDate, isFullTime());
-	}
-
-	public String getDateSpec() {
-		StringAllocator b = new StringAllocator();
-		b.append(formatDate(timespanThingy));
-		return b.toString();
-	}
-
-	private boolean isFullTime() {
-		Boolean fullTime = (Boolean) timespanThingy.get("full_time");
-		return fullTime == null || fullTime;
+		if (contact.containsKey(ContactField.MIDDLE_NAME.getAjaxName())) {
+			bob.append(contact.get(ContactField.MIDDLE_NAME.getAjaxName()));
+			bob.append(" ");
+		}
+		if (contact.containsKey(ContactField.SUR_NAME.getAjaxName())) {
+			bob.append(contact.get(ContactField.SUR_NAME.getAjaxName()));
+			bob.append(" ");
+		}
+		if (contact.containsKey(ContactField.SUFFIX.getAjaxName())) {
+			bob.append(contact.get(ContactField.SUFFIX.getAjaxName()));
+			bob.append(" ");
+		}
+		
+		return bob.substring(0, bob.lastIndexOf(" ")).toString();
 	}
 
 }
