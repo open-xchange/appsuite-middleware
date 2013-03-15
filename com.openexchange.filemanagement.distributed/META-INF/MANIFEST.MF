@@ -9,6 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.hazelcast.config,
  com.hazelcast.core,
  com.openexchange.config,
+ com.openexchange.dispatcher,
  com.openexchange.exception,
  com.openexchange.filemanagement,
  com.openexchange.filemanagement.internal,

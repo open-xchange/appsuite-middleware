@@ -5,6 +5,7 @@ import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.filemanagement.DistributedFileManagement;
 import com.openexchange.filemanagement.distributed.DistributedFileManagementImpl;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
@@ -23,7 +24,7 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastInstance.class, HazelcastConfigurationService.class, ConfigurationService.class };
+        return new Class<?>[] { HazelcastInstance.class, HazelcastConfigurationService.class, ConfigurationService.class, DispatcherPrefixService.class };
     }
 
     @Override
@@ -31,6 +32,7 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
         LOG.info("Starting bundle: com.openexchange.filemanagement.distributed");
 
         HazelcastConfigurationService hazelcastConfig = getService(HazelcastConfigurationService.class);
+        final String prefix = getService(DispatcherPrefixService.class).getPrefix();
         if (hazelcastConfig.isEnabled()) {
             track(HazelcastInstance.class, new SimpleRegistryListener<HazelcastInstance>() {
 
@@ -38,6 +40,7 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
                 public void added(ServiceReference<HazelcastInstance> ref, HazelcastInstance service) {
                     DistributedFileManagementImpl.setHazelcastInstance(service);
                     String address = service.getCluster().getLocalMember().getInetSocketAddress().getHostName();
+                    address += prefix;
                     context.registerService(DistributedFileManagement.class, new DistributedFileManagementImpl(DistributedFileManagementActivator.this, address), null);
                 }
 

@@ -77,7 +77,7 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
 
     private static AtomicReference<HazelcastInstance> REFERENCE = new AtomicReference<HazelcastInstance>();
 
-    private static final String PATH = "/distributedFiles";
+    private static final String PATH = "distributedFiles";
 
     public static void setHazelcastInstance(HazelcastInstance hazelcastInstance) {
         DistributedFileManagementImpl.REFERENCE.set(hazelcastInstance);
