@@ -124,7 +124,7 @@ public class EnhancedTaskOrAppointment {
 				} else if (participant.get("type") == Integer.valueOf(Participant.EXTERNAL_USER)) {
 					Integer status = (Integer) participant.get("status");
 					getList(status).add(
-						new SimpleParticipant().setDisplayName(participant.get("display_name") + " <" + participant.get("mail") + ">"));
+						new SimpleParticipant().setDisplayName(participant.get("display_name") + " (" + participant.get("mail") + ")"));
 				}
 				
 			}
