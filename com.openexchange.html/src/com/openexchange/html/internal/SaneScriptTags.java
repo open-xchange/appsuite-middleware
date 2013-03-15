@@ -164,8 +164,8 @@ public final class SaneScriptTags {
     private static final Pattern PATTERN_SCRIPT_TAG_START;
     private static final Pattern PATTERN_SCRIPT_TAG_END;
     static {
-        final String regexScriptStart = "<+[^s]*script[^>]*>";
-        final String regexScriptEnd = "<+[^/]*/script[^>]*>";
+        final String regexScriptStart = "<+[\\s]*script[^>]*>";
+        final String regexScriptEnd = "<+[\\s]*/script[^>]*>";
         PATTERN_SCRIPT_TAG = Pattern.compile(regexScriptStart + ".*?" + regexScriptEnd, Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
         PATTERN_SCRIPT_TAG_START = Pattern.compile(regexScriptStart, Pattern.CASE_INSENSITIVE);
         PATTERN_SCRIPT_TAG_END = Pattern.compile(regexScriptEnd, Pattern.CASE_INSENSITIVE);
