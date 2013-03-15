@@ -50,20 +50,23 @@
 package com.openexchange.printing.contacts;
 
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.TimeZone;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.templating.TemplateHelperFactory;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 public class ContactTemplateHelperFactory implements TemplateHelperFactory {
 
-	private ServiceLookup services;
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(ContactTemplateHelperFactory.class);
+
+	private final ServiceLookup services;
 	
     public ContactTemplateHelperFactory(ServiceLookup services) {
         this.services = services;
@@ -76,8 +79,23 @@ public class ContactTemplateHelperFactory implements TemplateHelperFactory {
 
 	@Override
 	public Object create(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter, Map<String, Object> rootObject) throws OXException {			
-
-		TimeZone tz = TimeZone.getTimeZone( requestData.isSet("timezone") ? requestData.getParameter("timezone") : session.getUser().getTimeZone() );			    
-		return new ContactHelper((Map<String, Object>) result.getResultObject(), session.getUser().getLocale(), tz, session.getContext(), services);
+		try {
+            TimeZone tz = TimeZone.getTimeZone( requestData.isSet("timezone") ? requestData.getParameter("timezone") : session.getUser().getTimeZone() );			    
+            final Map<String, Object> map;
+            {
+                final Object resultObject = result.getResultObject();
+                if (!(resultObject instanceof Map)) {
+                    map = Collections.emptyMap();
+                    LOG.warn(resultObject.getClass().getName() + " is not a " + Map.class.getName() + "!");
+                } else {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> tmp = (Map<String, Object>) resultObject;
+                    map = tmp;
+                }
+            }
+            return new ContactHelper(map, session.getUser().getLocale(), tz, session.getContext(), services);
+        } catch (final RuntimeException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
 	}
 }

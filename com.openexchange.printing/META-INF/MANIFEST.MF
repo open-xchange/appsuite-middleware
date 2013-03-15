@@ -18,11 +18,13 @@ Import-Package: com.openexchange.ajax.osgi,
  com.openexchange.html,
  com.openexchange.i18n,
  com.openexchange.java,
+ com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.templating,
  com.openexchange.tools.session,
- org.osgi.framework;version="1.3.0"
+ org.apache.commons.logging,
+ org.osgi.framework
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.openexchange.server
