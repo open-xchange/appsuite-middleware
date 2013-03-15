@@ -331,11 +331,11 @@ public final class QuotaActivator extends HousekeepingActivator {
             if (!rs.next()) {
                 return null;
             }
-            final Long retval = Long.valueOf(rs.getLong(1));
+            final long retval = rs.getLong(1);
             if (rs.wasNull()) {
                 return null;
             }
-            return retval;
+            return Long.valueOf(retval <= 0 ? Quota.UNLIMITED : retval);
         } catch (final SQLException e) {
             throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {

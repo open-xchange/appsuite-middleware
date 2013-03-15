@@ -113,6 +113,12 @@ public class Change extends ChangeCore {
         if ((null != capabilitiesToAdd && !capabilitiesToAdd.isEmpty()) || (null != capabilitiesToRemove && !capabilitiesToRemove.isEmpty())) {
             oxctx.changeCapabilities(ctx, capabilitiesToAdd, capabilitiesToRemove, auth);
         }
+
+        final String module = parseAndSetQuotaModule(parser);
+        final Long quotaValue = parseAndSetQuotaValue(parser);
+        if (null != module && null != quotaValue) {
+            oxctx.changeQuota(ctx, module, quotaValue.longValue(), auth);
+        }
     }
 
     @Override
@@ -124,5 +130,7 @@ public class Change extends ChangeCore {
         setModuleAccessOptions(parser);
         setCapsToAdd(parser);
         setCapsToRemove(parser);
+        setQuotaModule(parser);
+        setQuotaValue(parser);
     }
 }
