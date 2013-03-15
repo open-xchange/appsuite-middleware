@@ -305,7 +305,7 @@ public final class AllAction extends AppointmentAction {
             if (leftHandLimit > 0 || rightHandLimit > 0) {
                 final int size = appointmentList.size();
                 final int fromIndex = leftHandLimit > 0 ? leftHandLimit : 0;
-                final int toIndex = rightHandLimit > 0 ? size : rightHandLimit;
+                final int toIndex = rightHandLimit > 0 ? (rightHandLimit > size ? size : rightHandLimit) : size;
                 if ((fromIndex) > size) {
                     appointmentList = Collections.<Appointment> emptyList();
                 } else if (fromIndex >= toIndex) {
@@ -317,7 +317,7 @@ public final class AllAction extends AppointmentAction {
                     if (toIndex < size) {
                         appointmentList = appointmentList.subList(fromIndex, toIndex);
                     } else if (fromIndex > 0) {
-                        appointmentList = appointmentList.subList(0, size);
+                        appointmentList = appointmentList.subList(fromIndex, size);
                     }
                 }
             }
