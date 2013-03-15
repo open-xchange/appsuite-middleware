@@ -2,6 +2,7 @@
 
  - Fix for bug 25332: Fixed entries in quota.yml file
  - Fix for bug 25334: Fixed possible 'java.lang.StringIndexOutOfBoundsException' when parsing CSS selectors
+ - Fix for bug 25321: Repetitive sanitizing of HTML content until no further replacement/change has been performed
 
 * 2013-03-14 - marcus.klein@open-xchange.com
 
