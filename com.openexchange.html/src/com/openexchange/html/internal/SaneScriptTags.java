@@ -72,6 +72,16 @@ public final class SaneScriptTags {
         super();
     }
 
+    public static void main(String[] args) {
+        String s = "<scr<script><!--</script><script>--></script>ipt src=http://www.host.de/download/xss-neu/xss.js></script/><<<<   script   >boo<   /script   >";
+        boolean[] a = new boolean[] { true };
+        while (a[0]) {
+            a[0] = false;
+            s = saneScriptTags(s, a);
+        }
+        System.out.println(s);
+    }
+
     /**
      * Sanitizes specified HTML content by script tags
      *
@@ -150,12 +160,29 @@ public final class SaneScriptTags {
         return sb.toString();
     }
 
-    private static final Pattern PATTERN_SCRIPT_TAG = Pattern.compile(
-        "<+script[^>]*>" + ".*?" + "</script>",
-        Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_SCRIPT_TAG;
+    private static final Pattern PATTERN_SCRIPT_TAG_START;
+    private static final Pattern PATTERN_SCRIPT_TAG_END;
+    static {
+        final String regexScriptStart = "<+[^s]*script[^>]*>";
+        final String regexScriptEnd = "<+[^/]*/script[^>]*>";
+        PATTERN_SCRIPT_TAG = Pattern.compile(regexScriptStart + ".*?" + regexScriptEnd, Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+        PATTERN_SCRIPT_TAG_START = Pattern.compile(regexScriptStart, Pattern.CASE_INSENSITIVE);
+        PATTERN_SCRIPT_TAG_END = Pattern.compile(regexScriptEnd, Pattern.CASE_INSENSITIVE);
+    }
 
     private static String dropScriptTags(final String htmlContent, final boolean[] sanitized) {
-        final Matcher m = PATTERN_SCRIPT_TAG.matcher(htmlContent);
+        Matcher m = PATTERN_SCRIPT_TAG.matcher(htmlContent);
+        if (m.find()) {
+            final StringBuffer sb = new StringBuffer(htmlContent.length());
+            do {
+                m.appendReplacement(sb, "");
+                sanitized[0] = true;
+            } while (m.find());
+            m.appendTail(sb);
+            return sb.toString();
+        }
+        m = PATTERN_SCRIPT_TAG_START.matcher(htmlContent);
         if (!m.find()) {
             return htmlContent;
         }
@@ -164,6 +191,13 @@ public final class SaneScriptTags {
             m.appendReplacement(sb, "");
             sanitized[0] = true;
         } while (m.find());
+        m.appendTail(sb);
+        m = PATTERN_SCRIPT_TAG_END.matcher(sb.toString());
+        sb.setLength(0);
+        while (m.find()) {
+            m.appendReplacement(sb, "");
+            sanitized[0] = true;
+        }
         m.appendTail(sb);
         return sb.toString();
     }
