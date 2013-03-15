@@ -76,6 +76,10 @@ public class EnhancedTaskOrAppointment {
 	private final Map<String, Object> taskOrAppointment;
 	private final Context ctx;
 
+	public EnhancedTaskOrAppointment(ServiceLookup services, Context ctx) throws OXException {
+		this(null, services, ctx);
+	}
+	
 	public EnhancedTaskOrAppointment(Map<String, Object> taskOrAppointment, ServiceLookup services, Context ctx) throws OXException {
 		super();
 		this.services = services;

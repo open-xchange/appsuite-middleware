@@ -62,17 +62,17 @@ public class ContactHelper {
 
     private final DateFormatter formatters;
     private final TemplateLabels labels;
-    private final ContactNaming naming;
+    private final EnhancedContact enhanced;
 
     public ContactHelper(Map<String, Object> contact, Locale locale, TimeZone timezone, Context ctx, ServiceLookup services) throws OXException {
         super();
         this.formatters = new DateFormatter(locale, timezone);
         this.labels = new TemplateLabels(locale, services);
-        this.naming = new ContactNaming(locale);
+        this.enhanced = new EnhancedContact(locale);
     }
 
-    public ContactNaming getNaming() {
-        return naming;
+    public EnhancedContact getEnhanced() {
+        return enhanced;
     }
 
     public DateFormatter getFormatters() {
