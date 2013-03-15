@@ -78,7 +78,7 @@ public class DistributedFileServlet extends HttpServlet {
 
     private int port;
 
-    public static final String PATH = "/distributedFiles";
+    public static final String PATH = "distributedFiles";
 
     public DistributedFileServlet(ServiceLookup services) {
         this.services = services;

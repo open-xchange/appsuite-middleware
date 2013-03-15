@@ -107,10 +107,10 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
         InputStream retval = null;
         if (url != null) {
             try {
-                InputStream inputStream = loadFile(url);
+                InputStream inputStream = loadFile("http://" + url + "/" + id);
                 retval = inputStream;
             } catch (IOException e) {
-                // TODO:
+                e.printStackTrace();
             }
         }
 
