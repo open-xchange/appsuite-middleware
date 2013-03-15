@@ -153,9 +153,9 @@ import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.UndoableAction;
 
 /**
- * DatabaseImpl
+ * {@link InfostoreFacadeImpl}
  *
- * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
