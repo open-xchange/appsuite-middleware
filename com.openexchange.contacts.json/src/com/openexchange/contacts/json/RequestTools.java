@@ -188,6 +188,9 @@ public class RequestTools {
                 }
                 // Read subsequent chunks
                 while ((read = fis.read(buf, 0, buflen)) > 0) {
+                    if (com.openexchange.java.HTMLDetector.containsHTMLTags(buf, 0, read)) {
+                        throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), mimeType);
+                    }
                     outputStream.write(buf, 0, read);
                 }
             }
