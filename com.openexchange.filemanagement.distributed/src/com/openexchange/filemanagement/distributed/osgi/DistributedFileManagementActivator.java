@@ -3,12 +3,10 @@ package com.openexchange.filemanagement.distributed.osgi;
 
 import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpService;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.filemanagement.DistributedFileManagement;
 import com.openexchange.filemanagement.distributed.DistributedFileManagementImpl;
-import com.openexchange.filemanagement.distributed.servlet.DistributedFileServlet;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -25,7 +23,7 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastInstance.class, HazelcastConfigurationService.class, ConfigurationService.class, HttpService.class };
+        return new Class<?>[] { HazelcastInstance.class, HazelcastConfigurationService.class, ConfigurationService.class };
     }
 
     @Override
@@ -51,9 +49,6 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
         }
 
         openTrackers();
-
-        HttpService service = getService(HttpService.class);
-        service.registerServlet(DistributedFileServlet.PATH, new DistributedFileServlet(this), null, null);
     }
 
     @Override

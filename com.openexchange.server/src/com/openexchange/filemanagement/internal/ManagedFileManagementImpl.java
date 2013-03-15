@@ -433,7 +433,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
                 return null;
             }
 
-            return getDistributed().get(id);
+            return createManagedFile(id, getDistributed().get(id));
         } catch (OXException e) {
             return null;
         }

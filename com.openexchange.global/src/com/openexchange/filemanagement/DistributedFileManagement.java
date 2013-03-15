@@ -49,6 +49,7 @@
 
 package com.openexchange.filemanagement;
 
+import java.io.InputStream;
 import com.openexchange.exception.OXException;
 
 /**
@@ -62,7 +63,7 @@ public interface DistributedFileManagement {
 
     public void unregister(String id) throws OXException;
 
-    public ManagedFile get(String id) throws OXException;
+    public InputStream get(String id) throws OXException;
 
     public boolean exists(String id) throws OXException;
 

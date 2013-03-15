@@ -59,9 +59,6 @@ import com.hazelcast.core.IMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.DistributedFileManagement;
-import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.filemanagement.distributed.servlet.DistributedFileServlet;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
@@ -78,9 +75,9 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
 
     private ServiceLookup services;
 
-    private ManagedFileManagement fileManagement;
+    private static AtomicReference<HazelcastInstance> REFERENCE = new AtomicReference<HazelcastInstance>();
 
-    private static AtomicReference<HazelcastInstance> REFERENCE = new AtomicReference<HazelcastInstance>();;
+    private static final String PATH = "/distributedFiles";
 
     public static void setHazelcastInstance(HazelcastInstance hazelcastInstance) {
         DistributedFileManagementImpl.REFERENCE.set(hazelcastInstance);
@@ -92,7 +89,6 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
         this.mapName = services.getService(ConfigurationService.class).getProperty(
             "com.openexchange.filemanagement.distributed.mapName",
             "distributedFiles-0");
-        this.fileManagement = services.getService(ManagedFileManagement.class);
     }
 
     @Override
@@ -106,17 +102,13 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
     }
 
     @Override
-    public ManagedFile get(String id) throws OXException {
-        if (fileManagement.containsLocal(id)) {
-            return fileManagement.getByID(id);
-        }
-
+    public InputStream get(String id) throws OXException {
         String url = map().get(id);
-        ManagedFile retval = null;
+        InputStream retval = null;
         if (url != null) {
             try {
                 InputStream inputStream = loadFile(url);
-                retval = fileManagement.createManagedFile(id, inputStream);
+                retval = inputStream;
             } catch (IOException e) {
                 // TODO:
             }
@@ -127,11 +119,6 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
 
     @Override
     public void touch(String id) throws OXException {
-        if (fileManagement.containsLocal(id)) {
-            fileManagement.getByID(id);
-            return;
-        }
-
         String url = map().get(id);
         if (url != null) {
             try {
@@ -151,11 +138,6 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
 
     @Override
     public void remove(String id) throws OXException {
-        if (fileManagement.containsLocal(id)) {
-            fileManagement.removeByID(id);
-            return;
-        }
-
         String url = map().get(id);
         if (url != null) {
             try {
@@ -170,7 +152,7 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
     }
 
     private String getURI() {
-        return address + "/" + DistributedFileServlet.PATH;
+        return address + PATH;
     }
 
     private IMap<String, String> map() throws OXException {
