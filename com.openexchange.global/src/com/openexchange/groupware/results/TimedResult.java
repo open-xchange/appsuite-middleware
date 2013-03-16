@@ -52,9 +52,24 @@ package com.openexchange.groupware.results;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.iterator.SearchIterator;
 
+/**
+ * A pair of {@link SearchIterator} and the most recent last-changed time stamp of involved items.
+ */
 public interface TimedResult<T> {
 
+    /**
+     * Gets the results as an {@link SearchIterator iterator}.
+     * 
+     * @return The results
+     * @throws OXException If returning results fails
+     */
     SearchIterator<T> results() throws OXException;
 
+    /**
+     * Gets the most recent last-changed time stamp of involved items.
+     * 
+     * @return The time stamp
+     * @throws OXException If time stamp cannot be returned
+     */
     long sequenceNumber() throws OXException;
 }
