@@ -159,13 +159,13 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 
     @Override
     public void removeDocument(final long folderId, final long date,
-            final ServerSession sessionObj) throws OXException {
+            final ServerSession session) throws OXException {
         virtualFolder();
     }
 
     @Override
-    public int[] removeDocument(final int[] id, final long date, final ServerSession sessionObj) {
-        return id;
+    public int[] removeDocument(final int[] ids, final long date, final ServerSession session) {
+        return ids;
     }
 
     @Override
@@ -174,32 +174,32 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public int[] removeVersion(final int id, final int[] versionId, final ServerSession sessionObj) {
-        return versionId;
+    public int[] removeVersion(final int id, final int[] versionIds, final ServerSession session) {
+        return versionIds;
     }
 
     @Override
-    public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final ServerSession sessionObj) throws OXException {
+    public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final ServerSession session) throws OXException {
         virtualFolder();
     }
 
     @Override
-    public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final Metadata[] modifiedColumns, final ServerSession sessionObj) throws OXException {
+    public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final Metadata[] modifiedColumns, final ServerSession session) throws OXException {
         virtualFolder();
     }
 
     @Override
-    public void saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final ServerSession sessionObj) throws OXException {
+    public void saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final ServerSession session) throws OXException {
         virtualFolder();
     }
 
     @Override
-    public void saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final Metadata[] modifiedColumns, final ServerSession sessionObj) throws OXException {
+    public void saveDocumentMetadata(final DocumentMetadata document, final long sequenceNumber, final Metadata[] modifiedColumns, final ServerSession session) throws OXException {
         virtualFolder();
     }
 
     @Override
-    public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final Metadata[] modifiedColumns, final boolean ignoreVersion, final ServerSession sessionObj) throws OXException {
+    public void saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final Metadata[] modifiedColumns, final boolean ignoreVersion, final ServerSession session) throws OXException {
         virtualFolder();
     }
 

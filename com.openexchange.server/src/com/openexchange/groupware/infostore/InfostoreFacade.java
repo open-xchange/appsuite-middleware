@@ -62,49 +62,280 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.TransactionAware;
 
+/**
+ * {@link InfostoreFacade} - Access to infostore documents.
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Some JavaDoc
+ */
 public interface InfostoreFacade extends TransactionAware{
 
-    /**
-	 * Special Version used if you want to retrieve the latest version of an infostore document
-	 */
+    /** Special Version used if you want to retrieve the latest version of an infostore document */
 	public static int CURRENT_VERSION = -1;
+
+	/** The identifier marking a new infostore document.*/
 	public static int NEW = -1;
 
+	/** Ascending sort order */
 	public static final int ASC = 1;
+
+	/** Descending sort order */
 	public static final int DESC = -1;
 
+	/**
+	 * Checks if denoted document exists.
+	 * 
+	 * @param id The identifier
+	 * @param version The version
+	 * @param ctx The context
+	 * @param user The user
+	 * @param userConfig The user configuration
+	 * @return <code>true</code> if exists; otherwise <code>false</code>
+	 * @throws OXException If checking for existence fails
+	 * @see #CURRENT_VERSION
+	 */
 	public boolean exists(int id, int version, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
+	/**
+	 * Gets the denoted document's meta data information.
+	 * 
+	 * @param id The identifier
+	 * @param version The version
+	 * @param ctx The context
+     * @param user The user
+     * @param userConfig The user configuration
+	 * @return The meta data
+	 * @throws OXException If operation fails
+	 */
 	public DocumentMetadata getDocumentMetadata(int id, int version, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, ServerSession sessionObj) throws OXException ; // No modifiedColumns means all columns
-	public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, ServerSession sessionObj) throws OXException ;
 
+	/**
+     * Saves given document meta data.
+     * <p>
+     * <b>Note</b>: No <tt>modifiedColumns</tt> means all columns.
+     * 
+     * @param document The meta data of the document
+     * @param sequenceNumber The sequence number; e.g. client most recent time stamp
+     * @param session The session
+     * @throws OXException If save operation fails
+     */
+	public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, ServerSession session) throws OXException;
+
+	/**
+	 * Saves given document meta data
+	 * 
+	 * @param document The meta data of the document
+	 * @param sequenceNumber The sequence number; e.g. client most recent time stamp
+	 * @param modifiedColumns The columns to modify
+	 * @param session The session
+	 * @throws OXException If save operation fails
+	 */
+	public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException;
+
+	/**
+	 * Gets the document's binary content.
+	 * 
+	 * @param id The identifier
+	 * @param version The version
+	 * @param ctx The context
+     * @param user The user
+     * @param userConfig The user configuration
+	 * @return The document's binary content
+	 * @throws OXException If retrieving binary content fails
+	 */
 	public InputStream getDocument(int id, int version, Context ctx, User user, UserConfiguration userConfig) throws OXException;
-	public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession sessionObj) throws OXException;
-	public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession sessionObj) throws OXException;
-	public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, ServerSession sessionObj) throws OXException;
 
-	public void removeDocument(long folderId, long date, ServerSession sessionObj) throws OXException;
-	public int[] removeDocument(int id[], long date, ServerSession sessionObj) throws OXException;
-	public int[] removeVersion(int id, int[] versionId, ServerSession sessionObj) throws OXException;
+	/**
+     * Saves given document meta data and binary content (if not <code>null</code>).
+     * 
+     * @param document The document meta data
+     * @param data The optional binary content or <code>null</code>
+     * @param sequenceNumber The sequence number; e.g. client most recent time stamp
+     * @param session The session
+     * @throws OXException If save operation fails
+     */
+	public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession session) throws OXException;
 
+	/**
+     * Saves given document meta data and binary content (if not <code>null</code>).
+     * 
+     * @param document The document meta data
+     * @param data The optional binary content or <code>null</code>
+     * @param sequenceNumber The sequence number; e.g. client most recent time stamp
+     * @param modifiedColumns The columns to modify
+     * @param session The session
+     * @throws OXException If save operation fails
+     */
+	public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException;
+
+	/**
+	 * Saves given document meta data and binary content (if not <code>null</code>).
+	 * 
+	 * @param document The document meta data
+	 * @param data The optional binary content or <code>null</code>
+	 * @param sequenceNumber The sequence number; e.g. client most recent time stamp
+     * @param modifiedColumns The columns to modify
+     * @param ignoreVersion Whether the version shall <b>NOT</b> be updated
+     * @param session The session
+     * @throws OXException If save operation fails
+	 */
+	public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, ServerSession session) throws OXException;
+
+	/**
+	 * Removes all documents contained in specified folder.
+	 * 
+	 * @param folderId The identifier of the folder to clear
+	 * @param date The client's time stamp
+	 * @param session The session
+	 * @throws OXException If remove operation fails
+	 */
+	public void removeDocument(long folderId, long date, ServerSession session) throws OXException;
+
+	/**
+	 * Removes denoted documents.
+	 * 
+	 * @param ids The identifiers of the documents to remove
+	 * @param date The client's time stamp
+	 * @param session The session
+	 * @return The identifiers of those documents that could <b>not</b> be deleted successfully
+	 * @throws OXException If remove operation fails
+	 */
+	public int[] removeDocument(int ids[], long date, ServerSession session) throws OXException;
+
+	/**
+	 * Removes denoted versions.
+	 * 
+	 * @param id The document identifier
+	 * @param versionIds The identifiers of the versions to remove
+	 * @param session The session
+	 * @return The identifiers of those versions that could <b>not</b> be deleted successfully
+     * @throws OXException If remove operation fails
+	 */
+	public int[] removeVersion(int id, int[] versionIds, ServerSession session) throws OXException;
+
+	/**
+	 * Gets the folder's documents.
+	 * 
+	 * @param folderId The folder identifier
+	 * @param ctx The context 
+	 * @param user The user
+	 * @param userConfig The user configuration
+	 * @return The folder's documents
+	 * @throws OXException If retrieval fails
+	 */
 	public TimedResult<DocumentMetadata> getDocuments(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+
+	/**
+	 * Gets the folder's documents.
+	 * 
+	 * @param folderId The folder identifier
+	 * @param columns The columns to set in returned documents
+     * @param ctx The context 
+     * @param user The user
+     * @param userConfig The user configuration
+     * @return The folder's documents
+     * @throws OXException If retrieval fails
+	 */
 	public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
-	// order is either ASC or DESC
+	/**
+	 * Gets the sorted folder's documents.
+	 * 
+	 * @param folderId The folder identifier
+     * @param columns The columns to set in returned documents
+	 * @param sort The sort-by field
+	 * @param order The order; see {@link #ASC} or {@link #DESC}
+	 * @param ctx The context 
+     * @param user The user
+     * @param userConfig The user configuration
+     * @return The folder's documents
+     * @throws OXException If retrieval fails
+	 */
 	public TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
+	/**
+     * Gets the document's versions.
+     * 
+     * @param id The document identifier
+     * @param ctx The context 
+     * @param user The user
+     * @param userConfig The user configuration
+     * @return The document's version
+     * @throws OXException If retrieval fails
+     */
 	public TimedResult<DocumentMetadata> getVersions(int id, Context ctx, User user, UserConfiguration userConfig) throws OXException;
+
+	/**
+     * Gets the document's versions.
+     * 
+     * @param id The document identifier
+     * @param columns The columns to set in returned documents
+     * @param ctx The context 
+     * @param user The user
+     * @param userConfig The user configuration
+     * @return The document's versions
+     * @throws OXException If retrieval fails
+     */
 	public TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
-	// order is either ASC or DESC
+	/**
+     * Gets the document's versions.
+     * 
+     * @param id The document identifier
+     * @param columns The columns to set in returned documents
+     * @param sort The sort-by field
+     * @param order The order; see {@link #ASC} or {@link #DESC}
+     * @param ctx The context 
+     * @param user The user
+     * @param userConfig The user configuration
+     * @return The document's versions
+     * @throws OXException If retrieval fails
+     */
 	public TimedResult<DocumentMetadata> getVersions(int id, Metadata[] columns, Metadata sort, int order, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
+	/**
+     * Gets the specified documents.
+     * 
+     * @param ids The identifiers
+     * @param columns The columns to set in returned documents
+     * @param ctx The context 
+     * @param user The user
+     * @param userConfig The user configuration
+     * @return The documents
+     * @throws OXException If retrieval fails
+     */
 	public TimedResult<DocumentMetadata> getDocuments(int[] ids, Metadata[] columns, Context ctx, User user, UserConfiguration userConfig) throws IllegalAccessException, OXException;
 
+	/**
+	 * Gets the folder's updated & deleted documents.
+	 * 
+	 * @param folderId The folder identifier
+	 * @param updateSince The time stamp to consider
+	 * @param columns The columns to set in returned documents
+	 * @param ignoreDeleted Whether to ignore deleted ones
+	 * @param ctx The context 
+     * @param user The user
+     * @param userConfig The user configuration
+	 * @return The matching changed/deleted documents
+	 * @throws OXException If retrieval fails
+	 */
 	public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, boolean ignoreDeleted, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
-	// order is either ASC or DESC
+	/**
+     * Gets the folder's updated & deleted documents.
+     * 
+     * @param folderId The folder identifier
+     * @param updateSince The time stamp to consider
+     * @param columns The columns to set in returned documents
+     * @param sort The sort-by field
+     * @param order The order; see {@link #ASC} or {@link #DESC}
+     * @param ignoreDeleted Whether to ignore deleted ones
+     * @param ctx The context 
+     * @param user The user
+     * @param userConfig The user configuration
+     * @return The matching changed/deleted documents
+     * @throws OXException If retrieval fails
+     */
 	public Delta<DocumentMetadata> getDelta(long folderId, long updateSince, Metadata[] columns, Metadata sort, int order, boolean ignoreDeleted, Context ctx, User user, UserConfiguration userConfig) throws OXException;
 
 	public int countDocuments(long folderId, Context ctx, User user, UserConfiguration userConfig) throws OXException;

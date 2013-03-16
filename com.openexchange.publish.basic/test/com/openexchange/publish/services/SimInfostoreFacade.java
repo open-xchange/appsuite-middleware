@@ -212,12 +212,12 @@ public class SimInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public void removeDocument(long folderId, long date, ServerSession sessionObj) throws OXException {
+    public void removeDocument(long folderId, long date, ServerSession session) throws OXException {
         // Nothing to do
     }
 
     @Override
-    public int[] removeDocument(int[] id, long date, ServerSession sessionObj) throws OXException {
+    public int[] removeDocument(int[] ids, long date, ServerSession session) throws OXException {
         // Nothing to do
         return null;
     }
@@ -228,33 +228,33 @@ public class SimInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public int[] removeVersion(int id, int[] versionId, ServerSession sessionObj) throws OXException {
+    public int[] removeVersion(int id, int[] versionIds, ServerSession session) throws OXException {
         // Nothing to do
         return null;
     }
 
     @Override
-    public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession sessionObj) throws OXException {
+    public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession session) throws OXException {
         // Nothing to do
     }
 
     @Override
-    public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession sessionObj) throws OXException {
+    public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException {
         // Nothing to do
     }
 
     @Override
-    public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, ServerSession sessionObj) throws OXException {
+    public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, ServerSession session) throws OXException {
         // Nothing to do
     }
 
     @Override
-    public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, ServerSession sessionObj) throws OXException {
+    public void saveDocumentMetadata(DocumentMetadata document, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException {
         // Nothing to do
     }
 
     @Override
-    public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, ServerSession sessionObj) throws OXException {
+    public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, ServerSession session) throws OXException {
         // Nothing to do
     }
 
