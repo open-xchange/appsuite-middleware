@@ -207,7 +207,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public void lock(int id, long diff, ServerSession sessionObj) throws OXException {
+    public void lock(int id, long diff, ServerSession session) throws OXException {
         // Nothing to do
     }
 
@@ -223,7 +223,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public void removeUser(int id, Context context, ServerSession session) throws OXException {
+    public void removeUser(int userId, Context context, ServerSession session) throws OXException {
         // Nothing to do
     }
 
@@ -269,7 +269,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public void unlock(int id, ServerSession sessionObj) throws OXException {
+    public void unlock(int id, ServerSession session) throws OXException {
         // Nothing to do
     }
 

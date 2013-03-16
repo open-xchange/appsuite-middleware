@@ -150,7 +150,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public void lock(final int id, final long diff, final ServerSession sessionObj)
+    public void lock(final int id, final long diff, final ServerSession session)
             throws OXException {
         virtualFolder();
     }
@@ -167,7 +167,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public void removeUser(final int id, final Context context, final ServerSession session) {
+    public void removeUser(final int userId, final Context context, final ServerSession session) {
         // Nothing to do.
     }
 
@@ -202,7 +202,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public void unlock(final int id, final ServerSession sessionObj) {
+    public void unlock(final int id, final ServerSession session) {
         // Nothing to do.
     }
 
