@@ -1560,8 +1560,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     }
 
     @Override
-    public void removeUser(final int id, final Context ctx, final ServerSession session) throws OXException {
-        db.removeUser(id, ctx, session, lockManager);
+    public void removeUser(final int userId, final Context ctx, final ServerSession session) throws OXException {
+        db.removeUser(userId, ctx, session, lockManager);
     }
 
     private int getId(final Context context, final Connection writeCon) throws SQLException {
