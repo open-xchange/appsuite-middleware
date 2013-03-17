@@ -61,20 +61,6 @@ public final class PreviewCacheCreateTableService extends AbstractCreateTableImp
 
     private static final String TABLE_PREVIEW = "preview";
 
-    private static final String CREATE_PREVIEW = "CREATE TABLE "+TABLE_PREVIEW+" (" +
-        " cid INT4 unsigned NOT NULL," +
-        " user INT4 unsigned NOT NULL," +
-        " id VARCHAR(128) CHARACTER SET latin1 NOT NULL," +
-        " size BIGINT(64) NOT NULL," +
-        " createdAt BIGINT(64) NOT NULL," +
-        " fileName VARCHAR(128) COLLATE utf8_unicode_ci DEFAULT NULL," +
-        " fileType VARCHAR(32) CHARACTER SET latin1 DEFAULT NULL," +
-        " data BLOB," +
-        " PRIMARY KEY (cid, user, id)," +
-        " INDEX `globaldocument` (cid, id)," +
-        " INDEX `user` (cid, user)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-
     /**
      * Gets the table names.
      *
@@ -90,7 +76,19 @@ public final class PreviewCacheCreateTableService extends AbstractCreateTableImp
      * @return The CREATE statements
      */
     public static String[] getCreateStmts() {
-        return new String[] { CREATE_PREVIEW };
+        return new String[] { "CREATE TABLE "+TABLE_PREVIEW+" (" +
+            " cid INT4 unsigned NOT NULL," +
+            " user INT4 unsigned NOT NULL," +
+            " id VARCHAR(128) CHARACTER SET latin1 NOT NULL," +
+            " size BIGINT(64) NOT NULL," +
+            " createdAt BIGINT(64) NOT NULL," +
+            " fileName VARCHAR(128) COLLATE utf8_unicode_ci DEFAULT NULL," +
+            " fileType VARCHAR(32) CHARACTER SET latin1 DEFAULT NULL," +
+            " data BLOB," +
+            " PRIMARY KEY (cid, user, id)," +
+            " INDEX `globaldocument` (cid, id)," +
+            " INDEX `user` (cid, user)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
     }
 
     /**
