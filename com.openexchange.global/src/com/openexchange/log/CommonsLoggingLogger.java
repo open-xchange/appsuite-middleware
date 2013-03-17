@@ -52,11 +52,28 @@ package com.openexchange.log;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 import org.apache.commons.logging.Log;
 
 
 /**
- * {@link CommonsLoggingLogger}
+ * {@link CommonsLoggingLogger} - java.util.logging.Logger implementation delegating to Commons-Logging.
+ * <p>
+ * Methods {@link java.util.logging.Logger#setParent(Logger)}, {@link java.util.logging.Logger#getParent()},
+ * {@link java.util.logging.Logger#setUseParentHandlers(boolean)} and {@link java.util.logging.Logger#getUseParentHandlers()} are not
+ * overridden.
+ * <p>
+ * Level mapping inspired by {@link org.slf4j.bridge.SLF4JBridgeHandler}:
+ *
+ * <pre>
+ * FINEST  -&gt; TRACE
+ * FINER   -&gt; DEBUG
+ * FINE    -&gt; DEBUG
+ * CONFIG  -&gt; DEBUG
+ * INFO    -&gt; INFO
+ * WARN ING -&gt; WARN
+ * SEVER   -&gt; ERROR
+ * </pre>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
