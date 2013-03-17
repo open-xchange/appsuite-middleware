@@ -49,6 +49,7 @@
 
 package com.openexchange.templating.osgi;
 
+import java.lang.reflect.Field;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -61,16 +62,23 @@ import com.openexchange.templating.converter.TemplatedResultConverter;
 import com.openexchange.templating.impl.OXIntegration;
 import com.openexchange.templating.impl.TemplateServiceImpl;
 import com.openexchange.tools.strings.StringParser;
+import freemarker.log.OXFreemarkerLoggerFactory;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class Activator extends HousekeepingActivator {
+public class TemplatingActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(Activator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TemplatingActivator.class));
 
     @Override
     public void startBundle() throws Exception {
+        // Set freemarker's logger
+        {
+            final Field extendedProviderField = freemarker.log.Logger.class.getDeclaredField("factory");
+            extendedProviderField.setAccessible(true);
+            extendedProviderField.set(null, new OXFreemarkerLoggerFactory());
+        }
 
         ConfigurationService config = getService(ConfigurationService.class);
         final OXIntegration integration = new OXIntegration(getService(InfostoreFacade.class));
