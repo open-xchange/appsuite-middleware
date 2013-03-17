@@ -86,14 +86,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class PreviewImageResultConverter extends AbstractPreviewResultConverter {
 
-    private final PreviewCache previewCache;
-    
     /**
      * Initializes a new {@link PreviewImageResultConverter}.
      */
     public PreviewImageResultConverter() {
         super();
-        previewCache = AbstractPreviewResultConverter.getPreviewCache();
     }
 
     @Override
@@ -115,9 +112,10 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         try {
             // Check cache first
+            final PreviewCache previewCache = AbstractPreviewResultConverter.getPreviewCache();
             final String eTag = requestData.getETag();
             final boolean isValidEtag = !isEmpty(eTag);
-            if (isValidEtag) {
+            if (null != previewCache && isValidEtag) {
                 final String cacheKey = generatePreviewCacheKey(eTag, requestData, new String[0]);
                 final CachedPreview cachedPreview = previewCache.get(cacheKey, session.getUserId(), session.getContextId());
                 if (null != cachedPreview) {
@@ -169,13 +167,12 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             // (Asynchronously) Put to cache if ETag is available
             final String fileName = previewDocument.getMetaData().get("resourcename");
             int size = -1;
-            if (isValidEtag) {
+            if (null != previewCache && isValidEtag) {
                 final byte[] bytes = Streams.stream2bytes(thumbnail);
                 thumbnail = Streams.newByteArrayInputStream(bytes);
                 size = bytes.length;
                 // Specify task
                 final String cacheKey = generatePreviewCacheKey(eTag, requestData, new String[0]);
-                final PreviewCache previewCache = this.previewCache;
                 final AbstractTask<Void> task = new AbstractTask<Void>() {
 
                     @Override

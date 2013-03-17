@@ -163,8 +163,8 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         sb.append('-').append(requestData.getAction());
         sb.append('-').append(requestData.getSession().getContextId());
         if (optParameters != null) {
-            for (String name : optParameters) {
-                String parameter = requestData.getParameter(name);
+            for (final String name : optParameters) {
+                final String parameter = requestData.getParameter(name);
                 if (!isEmpty(parameter)) {
                     sb.append('-').append(parameter);
                 }
@@ -181,7 +181,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             final PreviewCache previewCache = getPreviewCache();
             final String eTag = requestData.getETag();
             final boolean isValidEtag = !isEmpty(eTag);
-            if (isValidEtag) {
+            if (null != previewCache && isValidEtag) {
                 final String cacheKey = generatePreviewCacheKey(eTag, requestData, "pages");
                 final CachedPreview cachedPreview = previewCache.get(cacheKey, session.getUserId(), session.getContextId());
                 if (null != cachedPreview) {
@@ -261,59 +261,61 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                 }
                 previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session, pages);
                 // Put to cache
-                if (isValidEtag) {
+                if (null != previewCache && isValidEtag) {
                     final List<String> content = previewDocument.getContent();
-                    final int size = null == content ? 0 : content.size();
-                    if (size > 0) {
-                        final String cacheKey = generatePreviewCacheKey(eTag, requestData, "pages");
-                        final byte[] bytes;
-                        if (1 == content.size()) {
-                            bytes = toAsciiBytes(toAsciiString(Base64.encodeBase64(content.get(0).getBytes(UTF8))));
-                        } else {
-                            final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(8192 << 1);
-                            baos.write(toAsciiBytes(toAsciiString(Base64.encodeBase64(content.get(0).getBytes(UTF8)))));
-                            final byte[] delim = DELIM;
-                            for (int i = 1; i < size; i++) {
-                                baos.write(delim);
-                                baos.write(toAsciiBytes(toAsciiString(Base64.encodeBase64(content.get(i).getBytes(UTF8)))));
-                            }
-                            bytes = baos.toByteArray();
-                        }
-                        final String fileName = fileHolder.getName();
-                        final String fileType = fileHolder.getContentType();
-                        // Specify task
-                        final Task<Void> task = new AbstractTask<Void>() {
-
-                            @Override
-                            public Void call() throws OXException {
-                                final CachedPreview preview = new CachedPreview(bytes, fileName, fileType, bytes.length);
-                                previewCache.save(cacheKey, preview, session.getUserId(), session.getContextId());
-                                return null;
-                            }
-                        };
-                        // Acquire thread pool service
-                        final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
-                        if (null == threadPool) {
-                            final Thread thread = Thread.currentThread();
-                            boolean ran = false;
-                            task.beforeExecute(thread);
-                            try {
-                                task.call();
-                                ran = true;
-                                task.afterExecute(null);
-                            } catch (final Exception ex) {
-                                if (!ran) {
-                                    task.afterExecute(ex);
+                    if (null != content) {
+                        final int size = content.size();
+                        if (size > 0) {
+                            final String cacheKey = generatePreviewCacheKey(eTag, requestData, "pages");
+                            final byte[] bytes;
+                            if (1 == content.size()) {
+                                bytes = toAsciiBytes(toAsciiString(Base64.encodeBase64(content.get(0).getBytes(UTF8))));
+                            } else {
+                                final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(8192 << 1);
+                                baos.write(toAsciiBytes(toAsciiString(Base64.encodeBase64(content.get(0).getBytes(UTF8)))));
+                                final byte[] delim = DELIM;
+                                for (int i = 1; i < size; i++) {
+                                    baos.write(delim);
+                                    baos.write(toAsciiBytes(toAsciiString(Base64.encodeBase64(content.get(i).getBytes(UTF8)))));
                                 }
-                                // Else the exception occurred within
-                                // afterExecute itself in which case we don't
-                                // want to call it again.
-                                throw (ex instanceof OXException ? (OXException) ex : AjaxExceptionCodes.UNEXPECTED_ERROR.create(
-                                    ex,
-                                    ex.getMessage()));
+                                bytes = baos.toByteArray();
                             }
-                        } else {
-                            threadPool.submit(task);
+                            final String fileName = fileHolder.getName();
+                            final String fileType = fileHolder.getContentType();
+                            // Specify task
+                            final Task<Void> task = new AbstractTask<Void>() {
+
+                                @Override
+                                public Void call() throws OXException {
+                                    final CachedPreview preview = new CachedPreview(bytes, fileName, fileType, bytes.length);
+                                    previewCache.save(cacheKey, preview, session.getUserId(), session.getContextId());
+                                    return null;
+                                }
+                            };
+                            // Acquire thread pool service
+                            final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+                            if (null == threadPool) {
+                                final Thread thread = Thread.currentThread();
+                                boolean ran = false;
+                                task.beforeExecute(thread);
+                                try {
+                                    task.call();
+                                    ran = true;
+                                    task.afterExecute(null);
+                                } catch (final Exception ex) {
+                                    if (!ran) {
+                                        task.afterExecute(ex);
+                                    }
+                                    // Else the exception occurred within
+                                    // afterExecute itself in which case we don't
+                                    // want to call it again.
+                                    throw (ex instanceof OXException ? (OXException) ex : AjaxExceptionCodes.UNEXPECTED_ERROR.create(
+                                        ex,
+                                        ex.getMessage()));
+                                }
+                            } else {
+                                threadPool.submit(task);
+                            }
                         }
                     }
                 }
@@ -337,6 +339,8 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             }
         } catch (final IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(fileHolder);
         }
@@ -461,9 +465,9 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
     /**
      * Computes the failure function using a boot-strapping process, where the pattern is matched against itself.
      */
-    private int[] computeFailure(byte[] pattern) {
+    private int[] computeFailure(final byte[] pattern) {
         final int length = pattern.length;
-        int[] failure = new int[length];
+        final int[] failure = new int[length];
         int j = 0;
         for (int i = 1; i < length; i++) {
             while (j > 0 && pattern[j] != pattern[i]) {
