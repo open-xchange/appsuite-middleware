@@ -124,13 +124,14 @@ public class DistributedFileServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String uri = req.getRequestURI();
+        String id = crop(uri);
 
-        if (!fileManagement.containsLocal(uri)) {
+        if (!fileManagement.containsLocal(id)) {
             return;
         }
 
         try {
-            fileManagement.getByID(uri);
+            fileManagement.getByID(id);
         } catch (OXException e) {
             e.printStackTrace();
         }
@@ -139,13 +140,14 @@ public class DistributedFileServlet extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String uri = req.getRequestURI();
+        String id = crop(uri);
 
-        if (!fileManagement.containsLocal(uri)) {
+        if (!fileManagement.containsLocal(id)) {
             return;
         }
 
         try {
-            fileManagement.removeByID(uri);
+            fileManagement.removeByID(id);
         } catch (OXException e) {
             e.printStackTrace();
         }

@@ -122,7 +122,7 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
         String url = map().get(id);
         if (url != null) {
             try {
-                URL remoteUrl = new URL(url);
+                URL remoteUrl = new URL("http://" + url + "/" + id);
                 HttpURLConnection con = (HttpURLConnection) remoteUrl.openConnection();
                 con.setRequestMethod("POST");
                 con.connect();
@@ -141,7 +141,7 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
         String url = map().get(id);
         if (url != null) {
             try {
-                URL remoteUrl = new URL(url);
+                URL remoteUrl = new URL("http://" + url + "/" + id);
                 HttpURLConnection con = (HttpURLConnection) remoteUrl.openConnection();
                 con.setRequestMethod("DELETE");
                 con.connect();
