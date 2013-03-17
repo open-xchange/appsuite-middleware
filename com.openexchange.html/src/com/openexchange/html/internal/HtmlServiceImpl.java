@@ -469,21 +469,22 @@ public final class HtmlServiceImpl implements HtmlService {
         try {
             final long st = DEBUG ? System.currentTimeMillis() : 0L;
             String html = htmlContent;
-            // Determine the definition to use
-            final String definition;
-            {
-                String confName = optConfigName;
-                if (null != confName && !confName.endsWith(".properties")) {
-                    confName += ".properties";
-                }
-                definition = null == confName ? null : getConfiguration().getText(confName);
-            }
             // Perform one-shot sanitizing
             html = replaceHexEntities(html);
             html = processDownlevelRevealedConditionalComments(html);
             html = dropDoubleAccents(html);
             // CSS- and tag-wise sanitizing
             {
+                // Determine the definition to use
+                final String definition;
+                {
+                    String confName = optConfigName;
+                    if (null != confName && !confName.endsWith(".properties")) {
+                        confName += ".properties";
+                    }
+                    definition = null == confName ? null : getConfiguration().getText(confName);
+                }
+                // Handle HTML content
                 final FilterJerichoHandler handler = null == definition ? new FilterJerichoHandler(html.length()) : new FilterJerichoHandler(html.length(), definition);
                 JerichoParser.parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix));
                 if (dropExternalImages && null != modified) {
