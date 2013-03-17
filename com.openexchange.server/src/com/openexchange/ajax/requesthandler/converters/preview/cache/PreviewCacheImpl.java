@@ -69,7 +69,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * {@link PreviewCacheImpl} - The preview document cache.
+ * {@link PreviewCacheImpl} - The database-backed preview cache implementation for documents.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -128,12 +128,12 @@ public final class PreviewCacheImpl implements PreviewCache {
             con.setAutoCommit(false);
             committed = false;
             final long now = System.currentTimeMillis();
+            int pos = 1;
             if (exists) {
                 /*
                  * Update
                  */
                 stmt = con.prepareStatement("UPDATE preview SET data = ?, size = ?, createdAt = ?, fileName = ?, fileType = ? WHERE cid = ? AND user = ? AND id = ?");
-                int pos = 1;
                 stmt.setBinaryStream(pos++, Streams.newByteArrayInputStream(bytes));
                 stmt.setLong(pos++, bytes.length);
                 stmt.setLong(pos++, now);
@@ -150,13 +150,11 @@ public final class PreviewCacheImpl implements PreviewCache {
                 stmt.setLong(pos++, contextId);
                 stmt.setLong(pos++, userId);
                 stmt.setString(pos++, id);
-                stmt.executeUpdate();
             } else {
                 /*
                  * Insert
                  */
                 stmt = con.prepareStatement("INSERT INTO preview (cid, user, id, size, createdAt, data, fileName, fileType) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-                int pos = 1;
                 stmt.setLong(pos++, contextId);
                 stmt.setLong(pos++, userId);
                 stmt.setString(pos++, id);
@@ -173,8 +171,8 @@ public final class PreviewCacheImpl implements PreviewCache {
                 } else {
                     stmt.setString(pos++, optType);
                 }
-                stmt.executeUpdate();
             }
+            stmt.executeUpdate();
             con.commit();
             committed = true;
             return true;

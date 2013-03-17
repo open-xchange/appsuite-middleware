@@ -72,7 +72,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.converters.preview.cache.PreviewCacheImpl;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
@@ -101,11 +100,20 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-abstract class AbstractPreviewResultConverter implements ResultConverter {
+public abstract class AbstractPreviewResultConverter implements ResultConverter {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractPreviewResultConverter.class));
 
-    private static final AtomicReference<PreviewCache> CACHE_REF = new AtomicReference<PreviewCache>(new PreviewCacheImpl());
+    private static final AtomicReference<PreviewCache> CACHE_REF = new AtomicReference<PreviewCache>();
+
+    /**
+     * Sets the preview cache reference.
+     * 
+     * @param ref The reference
+     */
+    public static void setPreviewCache(final PreviewCache ref) {
+        CACHE_REF.set(ref);
+    }
 
     /**
      * Gets the preview cache reference.
