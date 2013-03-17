@@ -419,6 +419,9 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         if (null == mf || mf.isDeleted()) {
             throw ManagedFileExceptionErrorMessage.NOT_FOUND.create(id);
         }
+        if (getDistributed().exists(id)) {
+            getDistributed().touch(id);
+        }
         mf.touch();
         return mf;
     }
@@ -488,6 +491,13 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
     }
 
     void removeFromFiles(final String id) {
+        if (getDistributed() != null) {
+            try {
+                getDistributed().unregister(id);
+            } catch (OXException e) {
+                // Do nothing.
+            }
+        }
         files.remove(id);
     }
 
