@@ -72,15 +72,15 @@ public final class SaneScriptTags {
         super();
     }
 
-    public static void main(String[] args) {
-        String s = "<scr<script><!--</script><script>--></script>ipt src=http://www.host.de/download/xss-neu/xss.js></script/><<<<   script   >boo<   /script   >";
-        boolean[] a = new boolean[] { true };
-        while (a[0]) {
-            a[0] = false;
-            s = saneScriptTags(s, a);
-        }
-        System.out.println(s);
-    }
+//    public static void main(String[] args) {
+//        String s = "<scr<script><!--</script><script>--></script>ipt src=http://www.host.de/download/xss-neu/xss.js></script/><<<<   script   >boo<   /script   >";
+//        boolean[] a = new boolean[] { true };
+//        while (a[0]) {
+//            a[0] = false;
+//            s = saneScriptTags(s, a);
+//        }
+//        System.out.println(s);
+//    }
 
     /**
      * Sanitizes specified HTML content by script tags
@@ -94,8 +94,8 @@ public final class SaneScriptTags {
             return html;
         }
         String s = html;
-        s = decode(s, sanitized);
-        s = dropConcatenations(s, sanitized);
+        s = decode(s);
+        s = dropConcatenations(s);
         s = dropScriptTags(s, sanitized);
         return s;
     }
@@ -104,7 +104,7 @@ public final class SaneScriptTags {
     private static final Pattern PAT_URLDECODE_PERCENT = Pattern.compile("%25");
     private static final Set<String> REPLACEES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("3c", "3e", "2b", "22")));
 
-    private static String decode(final String html, final boolean[] sanitized) {
+    private static String decode(final String html) {
         if (html.indexOf('%') < 0) {
             return html;
         }
@@ -121,7 +121,6 @@ public final class SaneScriptTags {
             } else {
                 m.appendReplacement(sb, "$0");
             }
-            sanitized[0] = true;
         } while (m.find());
         m.appendTail(sb);
         return sb.toString();
@@ -146,7 +145,10 @@ public final class SaneScriptTags {
 
     private static final Pattern PAT_CONCAT = Pattern.compile("[\"\u201d\u201c]\\+[\"\u201d\u201c]");
 
-    private static String dropConcatenations(final String html, final boolean[] sanitized) {
+    private static String dropConcatenations(final String html) {
+        if (html.indexOf('+') < 0) {
+            return html;
+        }
         final Matcher m = PAT_CONCAT.matcher(html);
         if (!m.find()) {
             return html;
@@ -154,7 +156,6 @@ public final class SaneScriptTags {
         final StringBuffer sb = new StringBuffer(html.length());
         do {
             m.appendReplacement(sb, "");
-            sanitized[0] = true;
         } while (m.find());
         m.appendTail(sb);
         return sb.toString();

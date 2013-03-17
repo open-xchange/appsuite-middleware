@@ -478,28 +478,24 @@ public final class HtmlServiceImpl implements HtmlService {
                 }
                 definition = null == confName ? null : getConfiguration().getText(confName);
             }
+            // Perform one-shot sanitizing
+            html = replaceHexEntities(html);
+            html = processDownlevelRevealedConditionalComments(html);
+            html = dropDoubleAccents(html);
+            // CSS- and tag-wise sanitizing
+            {
+                final FilterJerichoHandler handler = null == definition ? new FilterJerichoHandler(html.length()) : new FilterJerichoHandler(html.length(), definition);
+                JerichoParser.parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix));
+                if (dropExternalImages && null != modified) {
+                    modified[0] |= handler.isImageURLFound();
+                }
+                html = handler.getHTML();
+            }
             // Repetitive sanitizing until no further replacement/changes performed
-            boolean first = true;
             final boolean[] sanitized = new boolean[] { true };
             while (sanitized[0]) {
                 sanitized[0] = false;
                 // Start sanitizing round
-                html = replaceHexEntities(html, sanitized);
-                html = processDownlevelRevealedConditionalComments(html, sanitized);
-                html = dropDoubleAccents(html, sanitized);
-                // Only one-time CSS- and tag-wise sanitizing
-                if (first) {
-                    final FilterJerichoHandler handler = null == definition ? new FilterJerichoHandler(html.length()) : new FilterJerichoHandler(html.length(), definition);
-                    JerichoParser.parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix));
-                    if (dropExternalImages && null != modified) {
-                        modified[0] |= handler.isImageURLFound();
-                    }
-                    if (handler.isChanged()) {
-                        sanitized[0] = true;
-                    }
-                    html = handler.getHTML();
-                    first = false;
-                }
                 html = SaneScriptTags.saneScriptTags(html, sanitized);
             }
             if (DEBUG) {
@@ -514,14 +510,11 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     private static final Pattern PATTERN_TAG = Pattern.compile("<\\w+?[^>]*>");
-
     private static final Pattern PATTERN_DOUBLE_ACCENTS = Pattern.compile(Pattern.quote("\u0060\u0060")+"|"+Pattern.quote("\u00b4\u00b4"));
-
     private static final Pattern PATTERN_ACCENT1 = Pattern.compile(Pattern.quote("\u0060"));
-
     private static final Pattern PATTERN_ACCENT2 = Pattern.compile(Pattern.quote("\u00b4"));
 
-    private static String dropDoubleAccents(final String html, final boolean[] sanitized) {
+    private static String dropDoubleAccents(final String html) {
         if (null == html || (html.indexOf('\u0060') < 0 && html.indexOf('\u00b4') < 0)) {
             return html;
         }
@@ -545,7 +538,6 @@ public final class HtmlServiceImpl implements HtmlService {
                 }
             }
             lastMatch = m.end();
-            sanitized[0] = true;
         } while (m.find());
         sb.append(html.substring(lastMatch));
         String ret = PATTERN_ACCENT1.matcher(sb.toString()).replaceAll("&#96;");
@@ -1200,7 +1192,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 html = sb.toString();
             }
         }
-        html = processDownlevelRevealedConditionalComments(html, new boolean[1]);
+        html = processDownlevelRevealedConditionalComments(html);
         // html = removeXHTMLCData(html);
         /*
          * Check URLs
@@ -1354,15 +1346,14 @@ public final class HtmlServiceImpl implements HtmlService {
      * </pre>
      *
      * @param htmlContent The HTML content possibly containing downlevel-revealed conditional comments
-     * @param sanitized The sanitized flag
      * @return The HTML content whose downlevel-revealed conditional comments contain valid HTML for non-IE browsers
      */
-    private static String processDownlevelRevealedConditionalComments(final String htmlContent, final boolean[] sanitized) {
-        final String ret = processDownlevelRevealedConditionalComments0(htmlContent, PATTERN_CC2, sanitized);
-        return processDownlevelRevealedConditionalComments0(ret, PATTERN_CC, sanitized);
+    private static String processDownlevelRevealedConditionalComments(final String htmlContent) {
+        final String ret = processDownlevelRevealedConditionalComments0(htmlContent, PATTERN_CC2);
+        return processDownlevelRevealedConditionalComments0(ret, PATTERN_CC);
     }
 
-    private static String processDownlevelRevealedConditionalComments0(final String htmlContent, final Pattern p, final boolean[] sanitized) {
+    private static String processDownlevelRevealedConditionalComments0(final String htmlContent, final Pattern p) {
         final Matcher m = p.matcher(htmlContent);
         if (!m.find()) {
             /*
@@ -1389,7 +1380,6 @@ public final class HtmlServiceImpl implements HtmlService {
                 }
             }
             lastMatch = m.end();
-            sanitized[0] = true;
         } while (m.find());
         sb.append(htmlContent.substring(lastMatch));
         return sb.toString();
@@ -1412,12 +1402,12 @@ public final class HtmlServiceImpl implements HtmlService {
      * @return The validated HTML content
      */
     private static String validate(final String htmlContent) {
-        return validateWithHtmlCleaner(replaceHexEntities(htmlContent, new boolean[1]));
+        return validateWithHtmlCleaner(replaceHexEntities(htmlContent));
     }
 
     private static final Pattern PAT_HEX_ENTITIES = Pattern.compile("&#x([0-9a-fA-F]+);", Pattern.CASE_INSENSITIVE);
 
-    private static String replaceHexEntities(final String validated, final boolean[] sanitized) {
+    private static String replaceHexEntities(final String validated) {
         final Matcher m = PAT_HEX_ENTITIES.matcher(validated);
         if (!m.find()) {
             return validated;
@@ -1437,7 +1427,6 @@ public final class HtmlServiceImpl implements HtmlService {
                 tmp.setLength(0);
                 tmp.append("&#");
             }
-            sanitized[0] = true;
         } while (m.find());
         mr.appendTail(builder);
         return builder.toString();
