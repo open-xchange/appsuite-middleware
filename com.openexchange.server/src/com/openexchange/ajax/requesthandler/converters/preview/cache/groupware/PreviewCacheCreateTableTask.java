@@ -96,11 +96,10 @@ public class PreviewCacheCreateTableTask extends UpdateTaskAdapter {
             final String[] createStmts = PreviewCacheCreateTableService.getCreateStmts();
             for (int i = 0; i < tableNames.length; i++) {
                 try {
-                    if (tableExists(writeCon, tableNames[i])) {
-                        continue;
+                    if (!tableExists(writeCon, tableNames[i])) {
+                        stmt = writeCon.prepareStatement(createStmts[i]);
+                        stmt.executeUpdate();
                     }
-                    stmt = writeCon.prepareStatement(createStmts[i]);
-                    stmt.executeUpdate();
                 } catch (final SQLException e) {
                     throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
                 }

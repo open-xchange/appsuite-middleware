@@ -49,19 +49,42 @@
 
 package com.openexchange.printing.contacts;
 
+import java.sql.Types;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import com.openexchange.groupware.contact.helpers.ContactField;
 
-public class ContactNaming {
-
+public class EnhancedContact {
+	
 	private Locale locale;
 
-	public ContactNaming(Locale locale) {
+	public EnhancedContact(Locale locale) {
 		this.locale = locale;
 	}
+
+
+	protected Map<String, Object> lists2contact(List<String> keys, List<String> values) {
+		Map<String, Object> contact = new HashMap<String, Object>();
+		
+		for (int i = 0, length = keys.size(); i < length; i++) {
+				contact.put(keys.get(i), values.get(i));
+		}
+		
+		return contact ;
+	}
 	
+	
+	
+	public String getFullname(List<String> ids, List<String> values) {
+		return getFullname(lists2contact(ids, values));
+	}
+	
+	@SuppressWarnings("deprecation")
 	public String getFullname(Map<String, Object> contact) {
 		//TODO: Create i18n version - frontend has a nice one in io.ox.contacts/util#getFullName
 		if (contact.containsKey(ContactField.DISPLAY_NAME.getAjaxName()))
@@ -94,8 +117,52 @@ public class ContactNaming {
 			bob.append(contact.get(ContactField.SUFFIX.getAjaxName()));
 			bob.append(" ");
 		}
-		
-		return bob.substring(0, bob.lastIndexOf(" ")).toString();
+		if (bob.lastIndexOf(" ") > 0)
+			return bob.substring(0, bob.lastIndexOf(" ")).toString();
+		return "";
 	}
-
+	
+	
+	
+	public List<String> getStandardPhones(List<String> ids, List<String> values) {
+		return getStandardPhones(lists2contact(ids, values));
+	}
+	
+	public List<String> getStandardPhones(Map<String, Object> contact) {
+		List<ContactField> desiredFields = Arrays.asList(
+			ContactField.TELEPHONE_BUSINESS1, 
+			ContactField.TELEPHONE_BUSINESS2,
+			ContactField.TELEPHONE_COMPANY,
+			ContactField.TELEPHONE_HOME1,
+			ContactField.TELEPHONE_HOME2);
+		List<String> phones = new LinkedList<String>();
+		
+		for(ContactField field: desiredFields) {
+			String key = String.valueOf(field.getAjaxName());
+			if(contact.containsKey(key))
+				phones.add((String) contact.get(key));
+		}
+		
+		return phones;
+	}
+	
+	
+	public List<String> getCellphones(List<String> ids, List<String> values) {
+		return getCellphones(lists2contact(ids, values));
+	}
+	
+	public List<String> getCellphones(Map<String, Object> contact) {
+		List<ContactField> desiredFields = Arrays.asList(
+			ContactField.CELLULAR_TELEPHONE1,
+			ContactField.CELLULAR_TELEPHONE2);
+		List<String> phones = new LinkedList<String>();
+		
+		for(ContactField field: desiredFields) {
+			String key = String.valueOf(field.getAjaxName());
+			if(contact.containsKey(key))
+				phones.add((String) contact.get(key));
+		}
+		
+		return phones;
+	}
 }

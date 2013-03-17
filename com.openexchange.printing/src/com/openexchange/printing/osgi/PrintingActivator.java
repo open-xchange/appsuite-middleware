@@ -55,12 +55,13 @@ import com.openexchange.printing.contacts.ContactTemplateHelperFactory;
 import com.openexchange.printing.email.EmailTemplateHelperFactory;
 import com.openexchange.printing.tasks.TaskTemplateHelperFactory;
 import com.openexchange.templating.TemplateHelperFactory;
+import com.openexchange.user.UserService;
 
 public class PrintingActivator extends AJAXModuleActivator {
 
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return new Class[]{ I18nService.class};
+		return new Class[]{ I18nService.class, UserService.class};
 	}
 
 	@Override

@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview.cache.osgi;
 
+import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewResultConverter;
+import com.openexchange.ajax.requesthandler.converters.preview.cache.PreviewCacheImpl;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheCreateTableService;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheCreateTableTask;
 import com.openexchange.ajax.requesthandler.converters.preview.cache.groupware.PreviewCacheDeleteListener;
@@ -57,10 +59,11 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.preview.cache.PreviewCache;
 
 
 /**
- * {@link PreviewCacheActivator} - Activator for preview image cache.
+ * {@link PreviewCacheActivator} - Activator for preview document cache.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -80,12 +83,21 @@ public final class PreviewCacheActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        final PreviewCacheImpl cacheImpl = new PreviewCacheImpl();
+        registerService(PreviewCache.class, cacheImpl);
+        AbstractPreviewResultConverter.setPreviewCache(cacheImpl);
         /*
          * Register update task, create table job and delete listener
          */
         registerService(CreateTableService.class, new PreviewCacheCreateTableService());
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PreviewCacheCreateTableTask()));
         registerService(DeleteListener.class, new PreviewCacheDeleteListener());
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        AbstractPreviewResultConverter.setPreviewCache(null);
+        super.stopBundle();
     }
 
 }

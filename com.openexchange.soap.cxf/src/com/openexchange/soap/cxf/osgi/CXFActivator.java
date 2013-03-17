@@ -53,6 +53,7 @@ import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.cxf.Bus;
 import org.apache.cxf.BusFactory;
+import org.apache.cxf.common.logging.LogUtils;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -61,6 +62,7 @@ import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.soap.cxf.interceptor.TransformGenericElementsInterceptor;
+import com.openexchange.soap.cxf.logger.CommonsLoggingLogger;
 
 /**
  * {@link CXFActivator} - The activator for CXF bundle.
@@ -80,6 +82,7 @@ public class CXFActivator extends HousekeepingActivator {
         final Log log = com.openexchange.log.Log.loggerFor(CXFActivator.class);
         try {
             log.info("Starting Bundle: com.openexchange.soap.cxf");
+            LogUtils.setLoggerClass(CommonsLoggingLogger.class);
             final BundleContext context = this.context;
             final String alias = "/webservices";
             final String alias2 = "/servlet/axis2/services";

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,88 @@
  *
  */
 
-package com.openexchange.printing.tasks;
+package freemarker.log;
 
+import org.apache.commons.logging.Log;
+import freemarker.log.Logger;
 
-import java.util.Map;
-import java.util.TimeZone;
+/**
+ * {@link OXFreemarkerLogger}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class OXFreemarkerLogger extends Logger {
 
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.templating.TemplateHelperFactory;
-import com.openexchange.tools.session.ServerSession;
+    private final Log logger;
 
-public class TaskTemplateHelperFactory implements TemplateHelperFactory {
-
-	private ServiceLookup services;
-	
-    public TaskTemplateHelperFactory(ServiceLookup services) {
-        this.services = services;
+    public OXFreemarkerLogger(Log logger) {
+        super();
+        this.logger = logger;
     }
-    
-	@Override
-	public String getName() {
-		return "tasks";
-	}
 
-	@Override
-	public Object create(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter, Map<String, Object> rootObject) throws OXException {			
+    @Override
+    public void debug(String message) {
+        logger.debug(message);
+    }
 
-		TimeZone tz = TimeZone.getTimeZone( requestData.isSet("timezone") ? requestData.getParameter("timezone") : session.getUser().getTimeZone() );
-		if (result.getResultObject() instanceof Map) {
-			return new TaskHelper((Map<String, Object>) result.getResultObject(), session.getUser().getLocale(), tz, session.getContext(), services);
-		} else {
-			return new TaskHelper(null, session.getUser().getLocale(), tz, session.getContext(), services);
-		}
-	}
+    @Override
+    public void debug(String message, Throwable t) {
+        logger.debug(message, t);
+    }
+
+    @Override
+    public void info(String message) {
+        logger.info(message);
+    }
+
+    @Override
+    public void info(String message, Throwable t) {
+        logger.info(message, t);
+    }
+
+    @Override
+    public void warn(String message) {
+        logger.warn(message);
+    }
+
+    @Override
+    public void warn(String message, Throwable t) {
+        logger.warn(message, t);
+    }
+
+    @Override
+    public void error(String message) {
+        logger.error(message);
+    }
+
+    @Override
+    public void error(String message, Throwable t) {
+        logger.error(message, t);
+    }
+
+    @Override
+    public boolean isDebugEnabled() {
+        return logger.isDebugEnabled();
+    }
+
+    @Override
+    public boolean isInfoEnabled() {
+        return logger.isInfoEnabled();
+    }
+
+    @Override
+    public boolean isWarnEnabled() {
+        return logger.isWarnEnabled();
+    }
+
+    @Override
+    public boolean isErrorEnabled() {
+        return logger.isErrorEnabled();
+    }
+
+    @Override
+    public boolean isFatalEnabled() {
+        return logger.isFatalEnabled();
+    }
+
 }

@@ -50,6 +50,8 @@
 package com.openexchange.printing;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -58,6 +60,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.tasks.TaskField;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
@@ -76,12 +79,21 @@ public class EnhancedTaskOrAppointment {
 	private final Map<String, Object> taskOrAppointment;
 	private final Context ctx;
 
+	public EnhancedTaskOrAppointment(ServiceLookup services, Context ctx) throws OXException {
+		this(null, services, ctx);
+	}
+	
 	public EnhancedTaskOrAppointment(Map<String, Object> taskOrAppointment, ServiceLookup services, Context ctx) throws OXException {
 		super();
 		this.services = services;
 		this.taskOrAppointment = taskOrAppointment;
 		this.ctx = ctx;
+		if (taskOrAppointment != null)
+			initialize(taskOrAppointment);
 
+	}
+
+	private void initialize(Map<String, Object> taskOrAppointment2) throws OXException {
 		List<Object> users = (List<Object>) taskOrAppointment.get("users");
 		if (users != null) {
 			for (Object o : users) {
@@ -107,10 +119,14 @@ public class EnhancedTaskOrAppointment {
 		if (participants != null) {
 			for (Object o : participants) {
 				Map<String, Object> participant = (Map<String, Object>) o;
-				if (participant.get("type") == Integer
-						.valueOf(Participant.RESOURCE)) {
+				if (participant.get("type") == Integer.valueOf(Participant.RESOURCE)) {
 					resources.add(resolveResource(participant));
+				} else if (participant.get("type") == Integer.valueOf(Participant.EXTERNAL_USER)) {
+					Integer status = (Integer) participant.get("status");
+					getList(status).add(
+						new SimpleParticipant().setDisplayName(participant.get("display_name") + " (" + participant.get("mail") + ")"));
 				}
+				
 			}
 		}
 	}
@@ -208,4 +224,17 @@ public class EnhancedTaskOrAppointment {
 		return new SimpleParticipant().setDisplayName(displayName);
 	}
 
+	
+	
+	// applying for the price for the Worlds Ugliest Hack
+	public EnhancedTaskOrAppointment resolveAllParticipants(final List<Object> users, final List<Object> participants, final List<Object> confirmations) throws OXException {
+		
+		Map<String,Object> dummyTOA = new HashMap<String,Object>(){{
+				put("users", users);
+				put("participants", participants);
+				put("confirmations", participants);
+		}};
+		
+		return new EnhancedTaskOrAppointment(dummyTOA, services, ctx);
+	}
 }
