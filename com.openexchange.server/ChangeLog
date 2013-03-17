@@ -1,3 +1,9 @@
+* 2013-03-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25350: Reduced repetitive behavior to necessary sanitizing steps
+ - Fix for bug 25348: Check for possible user-sensitive information and adjust category if any found
+ - Fix for bug 25329: Set 3rd party libraries' logging system to Open-Xchange one
+
 * 2013-03-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 25332: Fixed entries in quota.yml file
