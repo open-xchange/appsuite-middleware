@@ -253,7 +253,7 @@ public final class ServerActivator extends HousekeepingActivator {
         CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class, IDBasedFileAccessFactory.class,
         FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class, CryptoService.class, HttpService.class,
         SystemNameService.class, ImageTransformationService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
-        TextXtractService.class, SecretEncryptionFactoryService.class, QuotaService.class, DistributedFileManagement.class };
+        TextXtractService.class, SecretEncryptionFactoryService.class, QuotaService.class };
 
     private static volatile BundleContext CONTEXT;
 
@@ -448,6 +448,9 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Folder Delete Listener Service Tracker
         track(FolderDeleteListenerService.class, new FolderDeleteListenerServiceTrackerCustomizer(context));
+        
+        // Distributed files
+        track(DistributedFileManagement.class, new DistributedFilesListener());
 
         /*
          * Register EventHandler

@@ -422,7 +422,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         if (null == mf || mf.isDeleted()) {
             throw ManagedFileExceptionErrorMessage.NOT_FOUND.create(id);
         }
-        if (getDistributed().exists(id)) {
+        if (getDistributed() != null && getDistributed().exists(id)) {
             getDistributed().touch(id);
         }
         mf.touch();

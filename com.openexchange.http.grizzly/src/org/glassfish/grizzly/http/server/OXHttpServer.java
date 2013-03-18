@@ -143,8 +143,10 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.grizzly.ssl.SSLFilter;
 import org.glassfish.grizzly.threadpool.DefaultWorkerThread;
 import org.glassfish.grizzly.threadpool.ThreadPoolProbe;
+import org.glassfish.grizzly.utils.Charsets;
 import org.glassfish.grizzly.utils.DelayedExecutor;
 import org.glassfish.grizzly.utils.IdleTimeoutFilter;
+import com.openexchange.http.grizzly.GrizzlyConfig;
 
 
 /**
@@ -694,6 +696,10 @@ public class OXHttpServer extends HttpServer {
             }
 
             config.setTraceEnabled(config.isTraceEnabled() || listener.isTraceEnabled());
+            config.setMaxFormPostSize(listener.getMaxFormPostSize());
+            config.setMaxBufferedPostSize(listener.getMaxBufferedPostSize());
+            config.setDefaultQueryEncoding(Charsets.lookupCharset(GrizzlyConfig.getInstance().getDefaultEncoding()));
+            
 
             webServerFilter.setHttpHandler(httpHandlerChain);
 
