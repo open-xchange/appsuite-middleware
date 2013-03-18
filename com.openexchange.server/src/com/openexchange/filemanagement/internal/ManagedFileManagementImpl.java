@@ -304,6 +304,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         return createManagedFile(null, inputStream);
     }
     
+    @Override
     public ManagedFile createManagedFile(String id, InputStream inputStream) throws OXException {
         return createManagedFile0(id, inputStream, true, null);
     }
@@ -313,13 +314,14 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         return createManagedFile0(null, inputStream, true, optExtension);
     }
 
-    private ManagedFile createManagedFile0(String id, final InputStream inputStream, final boolean closeStream, final String optExtension) throws OXException {
+    private ManagedFile createManagedFile0(final String identifier, final InputStream inputStream, final boolean closeStream, final String optExtension) throws OXException {
         if (null == inputStream) {
             throw new IllegalArgumentException("Missing input stream.");
         }
         ManagedFile mf = null;
         File tmpFile = null;
         File directory = null;
+        String id = identifier;
         do {
             directory = tmpDirReference.get();
             try {
@@ -374,6 +376,7 @@ final class ManagedFileManagementImpl implements ManagedFileManagement {
         return mf;
     }
     
+    @Override
     public boolean containsLocal(String id) {
         ManagedFile mf = files.get(id);
         if (null == mf || mf.isDeleted()) {
