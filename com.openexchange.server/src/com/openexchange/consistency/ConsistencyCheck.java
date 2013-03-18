@@ -94,6 +94,10 @@ public class ConsistencyCheck {
             } else {
                 System.exit( dontKnowWhatToList() );
             }
+        } else if (lexer.consume("checkconfigdb")) {
+            config.setAction("checkconfigdb");
+        } else if (lexer.consume("repairconfigdb")) {
+            config.setAction("repairconfigdb");
         } else {
             System.exit( noaction() );
         }
@@ -101,63 +105,65 @@ public class ConsistencyCheck {
         lexer.noise("errors");
         lexer.noise("in");
 
-        if(lexer.consume("database")) {
-            config.setSource("database");
-            if (! parseId(lexer, config)) {
-                System.exit( noid() );
-            }
-        } else if (lexer.consume("filestore")) {
-            config.setSource("filestore");
-            if (! parseId(lexer, config)) {
-                System.exit( noid() );
-            }
-        } else if (lexer.consume("context")) {
-            config.setSource("context");
-            if (! parseId(lexer, config)) {
-                System.exit( noid() );
-            }
-        } else if (lexer.consume("all") || lexer.consume("everywhere")) {
-            config.setSource("all");
-        } else {
-            System.exit( noproblemsource() );
-        }
-
-        lexer.noise("with");
-        lexer.noise("policies");
-
-        while(!lexer.eol()) {
-            if(lexer.consume("missing_file_for_infoitem")) {
-                lexer.noise(":");
-                if(lexer.consume("create_dummy")){
-                    config.addPolicy("missing_file_for_infoitem" , "create_dummy");
-                } else if(lexer.consume("delete")) {
-                    config.addPolicy("missing_file_for_infoitem" , "delete");
-                } else {
-                    System.exit( unknownAction("missing_file_for_infoitem", lexer.getCurrent(), "create_dummy, delete") );
+        if( !config.getAction().equals("checkconfigdb") && !config.getAction().equals("repairconfigdb") ) {
+            if(lexer.consume("database")) {
+                config.setSource("database");
+                if (! parseId(lexer, config)) {
+                    System.exit( noid() );
                 }
-            } else if (lexer.consume("missing_file_for_attachment")) {
-                lexer.noise(":");
-                if(lexer.consume("create_dummy")){
-                    config.addPolicy("missing_file_for_attachment" , "create_dummy");
-                } else if(lexer.consume("delete")) {
-                    config.addPolicy("missing_file_for_attachment" , "delete");
-                } else {
-                    System.exit( unknownAction("missing_file_for_infoitem", lexer.getCurrent(), "create_dummy, delete") );
+            } else if (lexer.consume("filestore")) {
+                config.setSource("filestore");
+                if (! parseId(lexer, config)) {
+                    System.exit( noid() );
                 }
-            } else if (lexer.consume("missing_entry_for_file")) {
-                lexer.noise(":");
-                if(lexer.consume("create_admin_infoitem")){
-                    config.addPolicy("missing_entry_for_file" , "create_admin_infoitem");
-                } else if(lexer.consume("delete")) {
-                    config.addPolicy("missing_entry_for_file" , "delete");
-                } else {
-                    System.exit( unknownAction("missing_file_for_infoitem", lexer.getCurrent(), "create_admin_infoitem, delete") );
+            } else if (lexer.consume("context")) {
+                config.setSource("context");
+                if (! parseId(lexer, config)) {
+                    System.exit( noid() );
                 }
+            } else if (lexer.consume("all") || lexer.consume("everywhere")) {
+                config.setSource("all");
             } else {
-                System.exit( unknownCondition(lexer.getCurrent(), "missing_file_for_infoitem, missing_file_for_attachment, missing_entry_for_file") );
+                System.exit( noproblemsource() );
+            }
+
+            lexer.noise("with");
+            lexer.noise("policies");
+
+            while(!lexer.eol()) {
+                if(lexer.consume("missing_file_for_infoitem")) {
+                    lexer.noise(":");
+                    if(lexer.consume("create_dummy")){
+                        config.addPolicy("missing_file_for_infoitem" , "create_dummy");
+                    } else if(lexer.consume("delete")) {
+                        config.addPolicy("missing_file_for_infoitem" , "delete");
+                    } else {
+                        System.exit( unknownAction("missing_file_for_infoitem", lexer.getCurrent(), "create_dummy, delete") );
+                    }
+                } else if (lexer.consume("missing_file_for_attachment")) {
+                    lexer.noise(":");
+                    if(lexer.consume("create_dummy")){
+                        config.addPolicy("missing_file_for_attachment" , "create_dummy");
+                    } else if(lexer.consume("delete")) {
+                        config.addPolicy("missing_file_for_attachment" , "delete");
+                    } else {
+                        System.exit( unknownAction("missing_file_for_infoitem", lexer.getCurrent(), "create_dummy, delete") );
+                    }
+                } else if (lexer.consume("missing_entry_for_file")) {
+                    lexer.noise(":");
+                    if(lexer.consume("create_admin_infoitem")){
+                        config.addPolicy("missing_entry_for_file" , "create_admin_infoitem");
+                    } else if(lexer.consume("delete")) {
+                        config.addPolicy("missing_entry_for_file" , "delete");
+                    } else {
+                        System.exit( unknownAction("missing_file_for_infoitem", lexer.getCurrent(), "create_admin_infoitem, delete") );
+                    }
+                } else {
+                    System.exit( unknownCondition(lexer.getCurrent(), "missing_file_for_infoitem, missing_file_for_attachment, missing_entry_for_file") );
+                }
             }
         }
-
+        
         try {
             config.run();
             System.out.println("Done");
@@ -204,7 +210,11 @@ public class ConsistencyCheck {
     }
 
     private static int noaction() {
-        System.err.println("Please specify an action (either \"list missing\", \"list unassigned\" or \"repair\" ");
+        final String ls = System.getProperty("line.separator");
+        System.err.println("Please specify an action, either"+ls+"\"list missing\", \"list unassigned\", \"repair\", \"checkconfigdb\" or \"repairconfigdb\"" + ls +
+        		"You can also specify the hostname of the open-xchange server, optionally."+ls +
+        		"Example:" + ls +
+        		"checkconsistency in host 10.10.10.10 list missing [...]");
         return 1;
     }
 
@@ -234,12 +244,11 @@ public class ConsistencyCheck {
         }
 
         public boolean consume(final String expect) {
-            if(lookahead(expect)) {
-                advance();
-                return true;
-            } else {
+            if (!lookahead(expect)) {
                 return false;
             }
+            advance();
+            return true;
         }
 
         public boolean lookahead(final Pattern p) {
@@ -248,12 +257,11 @@ public class ConsistencyCheck {
 
         public Matcher consume(final Pattern p) {
             final Matcher m = p.matcher(getCurrent());
-            if(m.find()) {
-                advance();
-                return m;
-            } else {
+            if(!m.find()) {
                 return null;
             }
+            advance();
+            return m;
         }
 
         public void noise(final String token) {
@@ -266,6 +274,11 @@ public class ConsistencyCheck {
     }
 
     private static final class Configuration {
+        
+        public String getAction() {
+            return action;
+        }
+
         private String host;
         private int port = 9999 ;
         private String action;
@@ -307,6 +320,10 @@ public class ConsistencyCheck {
                 listMissing();
             } else if ("listUnassigned".equals(action)) {
                 listUnassigned();
+            } else if ("checkconfigdb".equals(action)) {
+                checkAndRepairConfigDB(false);
+            } else if ("repairconfigdb".equals(action)) {
+                checkAndRepairConfigDB(true);
             } else {
                 repair();
             }
@@ -323,7 +340,7 @@ public class ConsistencyCheck {
                     result = consistency.listMissingFilesInFilestore(sourceId);
                 } else if ("context".equals(source)) {
                     result = new HashMap<Integer, List<String>>();
-                    result.put(sourceId, consistency.listMissingFilesInContext(sourceId));
+                    result.put(Integer.valueOf(sourceId), consistency.listMissingFilesInContext(sourceId));
                 } else if ("all".equals(source)) {
                     result = consistency.listAllMissingFiles();
                 }
@@ -365,12 +382,12 @@ public class ConsistencyCheck {
         }
 
         private void disconnect() {
-            try {
-                if(jmxConnector != null) {
+            if (null != jmxConnector) {
+                try {
                     jmxConnector.close();
+                } catch (final Exception e) {
+                    // Ignore
                 }
-            } catch (final IOException e) {
-                //IGNORE
             }
         }
 
@@ -385,6 +402,26 @@ public class ConsistencyCheck {
             final ObjectName name = MBeanNamer.getName();
 
             consistency = new MBeanConsistency(mbsc, name);
+        }
+
+        private void checkAndRepairConfigDB(final boolean repair) throws IOException, MalformedObjectNameException, NullPointerException, MBeanException {
+
+            List<String> result = null;
+            try {
+                connect();
+                result = consistency.checkOrRepairConfigDB(repair);
+            } finally {
+                disconnect();
+            }
+            
+            if( null != result && result.size() > 0) {
+                for(final String ctx : result) {
+                    System.out.println(ctx);
+                }
+                if( ! repair ) {
+                    System.out.println("Now run repairconfigdb to remove these inconsistent contexts from configdb");
+                }
+            }
         }
 
         private void listUnassigned() throws MBeanException, IOException, MalformedObjectNameException, NullPointerException {
