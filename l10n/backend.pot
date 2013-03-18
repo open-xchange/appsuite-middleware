@@ -2832,7 +2832,6 @@ msgstr ""
 #. %1$d is replaced with the unique context identifier.
 #. %2$s is replaced with the context name.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/context/ContextExceptionMessages.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/context/ContextExceptionMessages.java:64
 msgid "Context %1$d, %1$s is disabled."
 msgstr ""
 
