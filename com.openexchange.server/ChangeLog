@@ -1,6 +1,7 @@
 * 2013-03-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 25286: Proper output for "-j" option
+ - Fix for bug 22867: Drop obsolete subscription source in JSON layer if returned by queried service
 
 * 2013-03-17 - thorben.betten@open-xchange.com
 
