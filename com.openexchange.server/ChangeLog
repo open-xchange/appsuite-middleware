@@ -1,3 +1,7 @@
+* 2013-03-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25286: Proper output for "-j" option
+
 * 2013-03-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 25350: Reduced repetitive behavior to necessary sanitizing steps
