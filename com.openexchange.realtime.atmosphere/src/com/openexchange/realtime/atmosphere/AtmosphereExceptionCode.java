@@ -79,12 +79,14 @@ public enum AtmosphereExceptionCode implements OXExceptionCode {
     ERROR_WHILE_CONVERTING(AtmosphereExceptionMessage.ERROR_WHILE_CONVERTING_MSG, CATEGORY_ERROR, 8),
     /** The following obligatory element is missing: \"%1$s\" */
     OBLIGATORY_ELEMENT_MISSING(AtmosphereExceptionMessage.OBLIGATORY_ELEMENT_MISSING_MSG, CATEGORY_ERROR, 9),
-    /** Malformed Presence Data \"%1$s\" */
+    /** Malformed Presence Data */
     PRESENCE_DATA_MALFORMED(AtmosphereExceptionMessage.PRESENCE_DATA_MALFORMED_MSG, CATEGORY_ERROR, 10),
     /** Malformed Presence Element: \"%1$s\" */
     PRESENCE_DATA_ELEMENT_MALFORMED(AtmosphereExceptionMessage.PRESENCE_DATA_ELEMENT_MALFORMED_MSG, CATEGORY_ERROR, 11),
     /** Illegal value \"%1$s\" for key \"%2$s\" in: \"%3$s\" */
-    ILLEGAL_VALUE(AtmosphereExceptionMessage.ILLEGAL_VALUE_MSG, CATEGORY_ERROR, 12)
+    ILLEGAL_VALUE(AtmosphereExceptionMessage.ILLEGAL_VALUE_MSG, CATEGORY_ERROR, 12),
+    /** Malformed POST Data \"%1$s\" */
+    POST_DATA_MALFORMED(AtmosphereExceptionMessage.POST_DATA_MALFORMED_MSG, CATEGORY_ERROR, 13),
     ;
 
     private final String message;
