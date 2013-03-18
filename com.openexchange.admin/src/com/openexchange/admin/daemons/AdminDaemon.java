@@ -338,7 +338,7 @@ public class AdminDaemon {
             oxlogin_v2 = new com.openexchange.admin.rmi.impl.OXLogin(context);
             oxadmincore = new OXAdminCoreImpl(context);
             oxtaskmgmt = new OXTaskMgmtImpl();
-            oxpublication = new OXPublication(null, null);
+            oxpublication = new OXPublication();
 
             services.add(context.registerService(Remote.class, oxuser_v2, null));
             services.add(context.registerService(Remote.class, oxgrp_v2, null));

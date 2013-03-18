@@ -54,7 +54,10 @@ import com.openexchange.admin.rmi.OXPublicationInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Publication;
+import com.openexchange.admin.rmi.exceptions.MissingServiceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchPublicationException;
+import com.openexchange.admin.services.AdminServiceRegistry;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
@@ -69,28 +72,34 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
 
     private final static Log log = LogFactory.getLog(OXPublication.class);
 
-    private final ContextService contexts;
+    private ContextService contexts;
 
-    private final PublicationTargetDiscoveryService discovery;
+    private PublicationTargetDiscoveryService discovery;
 
-    public OXPublication(final PublicationTargetDiscoveryService discoveryS, final ContextService contextS) {
+    public OXPublication() {
         super();
         if (log.isInfoEnabled()) {
             log.info("Class loaded: " + this.getClass().getName());
         }
-        this.discovery = discoveryS;
-        this.contexts = contextS;
     }
 
+    public void setDiscoveryService(PublicationTargetDiscoveryService discovery){
+        this.discovery = discovery;
+    }
+    
+    public void setContextService(ContextService contexts){
+        this.contexts = contexts;
+    }
+    
     @Override
-    public Publication getpublication(String url, Credentials auth) throws NoSuchPublicationException {
+    public Publication getpublication(String url, Credentials auth) throws NoSuchPublicationException, MissingServiceException {
+        getServices();
         try {
             for (PublicationTarget pubTar : discovery.listTargets()) {
                 final PublicationService publicationService = pubTar.getPublicationService();
                 if (null != publicationService) {
                     com.openexchange.publish.Publication currentPublication = publicationService.resolveUrl(contexts, url);
                     if (null != currentPublication) {
-                        
                         return parsePublication(currentPublication);
                     }
                 }
@@ -101,8 +110,24 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
         throw new NoSuchPublicationException("no Publication with URL " + url + " found");
     }
 
+    private void getServices() throws MissingServiceException {
+        if (null == discovery){
+            discovery = AdminServiceRegistry.getInstance().getService(PublicationTargetDiscoveryService.class);
+            if (null == discovery){
+                throw new MissingServiceException("PublicationTargetDiscoveryService is missing or not started yet");
+            }
+        }
+        if (null == contexts){
+            contexts = AdminServiceRegistry.getInstance().getService(ContextService.class);
+            if (null == contexts){
+                throw new MissingServiceException("ContextService is missing or not started yet");
+            }
+        }
+    }
+
     @Override
-    public boolean deletePublication(String url, Credentials auth) throws NoSuchPublicationException {
+    public boolean deletePublication(String url, Credentials auth) throws NoSuchPublicationException, MissingServiceException {
+        getServices();
         try {
             for (PublicationTarget pubTar : discovery.listTargets()) {
                 final PublicationService publicationService = pubTar.getPublicationService();
