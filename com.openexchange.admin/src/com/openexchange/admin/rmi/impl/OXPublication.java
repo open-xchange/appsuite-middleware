@@ -79,7 +79,7 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
     }
     
     @Override
-    public Publication getpublication(String url, Credentials auth) throws NoSuchPublicationException, MissingServiceException {
+    public Publication getPublication(String url, Credentials auth) throws NoSuchPublicationException, MissingServiceException {
         PublicationTargetDiscoveryService discovery = AdminServiceRegistry.getInstance().getService(PublicationTargetDiscoveryService.class);
         if (null == discovery){
             throw new MissingServiceException("PublicationTargetDiscoveryService is missing or not started yet");

@@ -83,7 +83,7 @@ public interface OXPublicationInterface extends Remote {
      * @throws NoSuchPublicationException 
      * @throws MissingServiceException 
      */
-    public Publication getpublication(final String url, final Credentials auth) throws NoSuchPublicationException, MissingServiceException;
+    public Publication getPublication(final String url, final Credentials auth) throws NoSuchPublicationException, MissingServiceException;
     
     /**
      * This method will delete a Publication
