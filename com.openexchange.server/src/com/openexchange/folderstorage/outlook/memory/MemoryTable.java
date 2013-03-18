@@ -357,11 +357,11 @@ public final class MemoryTable {
     public MemoryTree initializeTree(final int treeId, final int userId, final int contextId) throws OXException {
         final DatabaseService databaseService = Utility.getDatabaseService();
         // Get a connection
-        final Connection con = databaseService.getWritable(contextId);
+        final Connection con = databaseService.getReadOnly(contextId);
         try {
             return initializeTree(treeId, userId, contextId, con);
         } finally {
-            databaseService.backWritable(contextId, con);
+            databaseService.backReadOnly(contextId, con);
         }
     }
 
