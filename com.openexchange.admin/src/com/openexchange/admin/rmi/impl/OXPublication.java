@@ -94,7 +94,8 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
                 if (null != publicationService) {
                     com.openexchange.publish.Publication currentPublication = publicationService.resolveUrl(contexts, url);
                     if (null != currentPublication) {
-                        return parsePublication(currentPublication);
+                        String description = publicationService.getInformation(currentPublication);
+                        return parsePublication(currentPublication, description);
                     }
                 }
             }
@@ -131,7 +132,7 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
         throw new NoSuchPublicationException("no Publication with URL " + url + " found");
     }
 
-    private Publication parsePublication(com.openexchange.publish.Publication input) {
+    private Publication parsePublication(com.openexchange.publish.Publication input, String description) {
         Publication pub = new Publication();
         pub.setContext(new Context(Integer.valueOf(input.getContext().getContextId())));
         pub.setEntityId(input.getEntityId());
@@ -139,6 +140,7 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
         pub.setUserId(Integer.valueOf(input.getUserId()));
         pub.setModule(input.getModule());
         pub.setName(input.getDisplayName());
+        pub.setDescription(description);
         return pub;
     }
 

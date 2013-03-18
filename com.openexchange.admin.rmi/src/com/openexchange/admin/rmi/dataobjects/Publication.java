@@ -62,7 +62,7 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
      */
     private static final long serialVersionUID = -1272376727507395566L;
     
-    private int userId;
+    private Integer userId;
     private boolean userIdSet = false;
 
     private Context context;
@@ -82,8 +82,6 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
 
     private String description;
     private boolean descriptionSet = false;
-
-    private final Boolean enabled = null;
 
     public String getEntityId() {
         return entityId;
@@ -220,10 +218,121 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
      * @param description The description to set
      */
     public void setDescription(String description) {
-        if (null == name) {
+        if (null == description) {
             this.descriptionSet = true;
         }
         this.description = description;
+    }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((context == null) ? 0 : context.hashCode());
+        result = prime * result + (contextSet ? 1231 : 1237);
+        result = prime * result + ((description == null) ? 0 : description.hashCode());
+        result = prime * result + (descriptionSet ? 1231 : 1237);
+        result = prime * result + ((entityId == null) ? 0 : entityId.hashCode());
+        result = prime * result + (entityIdSet ? 1231 : 1237);
+        result = prime * result + ((module == null) ? 0 : module.hashCode());
+        result = prime * result + (moduleSet ? 1231 : 1237);
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + (idSet ? 1231 : 1237);
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + (nameSet ? 1231 : 1237);
+        result = prime * result + ((userId == null) ? 0 : userId.hashCode());
+        result = prime * result + (userIdSet ? 1231 : 1237);
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (!(obj instanceof Publication)) {
+            return false;
+        }
+        final Publication other = (Publication) obj;
+        if (context == null) {
+            if (other.context != null) {
+                return false;
+            }
+        } else if (!context.equals(other.context)) {
+            return false;
+        }
+        if (contextSet != other.contextSet) {
+            return false;
+        }
+        if (description == null) {
+            if (other.description != null) {
+                return false;
+            }
+        } else if (!description.equals(other.description)) {
+            return false;
+        }
+        if (descriptionSet != other.descriptionSet) {
+            return false;
+        }
+        if (entityId == null) {
+            if (other.entityId != null) {
+                return false;
+            }
+        } else if (!entityId.equals(other.entityId)) {
+            return false;
+        }
+        if (entityIdSet != other.entityIdSet) {
+            return false;
+        }
+        if (id == null) {
+            if (other.id != null) {
+                return false;
+            }
+        } else if (!id.equals(other.id)) {
+            return false;
+        }
+        if (idSet != other.idSet) {
+            return false;
+        }
+        if (module == null) {
+            if (other.module != null) {
+                return false;
+            }
+        } else if (!module.equals(other.module)) {
+            return false;
+        }
+        if (moduleSet != other.moduleSet) {
+            return false;
+        }
+        if (name == null) {
+            if (other.name != null) {
+                return false;
+            }
+        } else if (!name.equals(other.name)) {
+            return false;
+        }
+        if (nameSet != other.nameSet) {
+            return false;
+        }if (userId == null) {
+            if (other.userId != null) {
+                return false;
+            }
+        } else if (!userId.equals(other.userId)) {
+            return false;
+        }
+        if (userIdSet != other.userIdSet) {
+            return false;
+        }
+        return true;
     }
 
 }
