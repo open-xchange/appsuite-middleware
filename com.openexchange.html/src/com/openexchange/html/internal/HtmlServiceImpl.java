@@ -468,33 +468,42 @@ public final class HtmlServiceImpl implements HtmlService {
     public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix) {
         try {
             final long st = DEBUG ? System.currentTimeMillis() : 0L;
-            String confName = optConfigName;
-            if (null != confName && !confName.endsWith(".properties")) {
-                confName += ".properties";
-            }
-            String html = replaceHexEntities(htmlContent);
+            String html = htmlContent;
+            // Perform one-shot sanitizing
+            html = replaceHexEntities(html);
             html = processDownlevelRevealedConditionalComments(html);
             html = dropDoubleAccents(html);
-            // html = replaceHexNbsp(html);
-            final FilterJerichoHandler handler;
+            // CSS- and tag-wise sanitizing
             {
-                final String definition = null == confName ? null : getConfiguration().getText(confName);
-                if (null == definition) {
-                    handler = new FilterJerichoHandler(html.length());
-                } else {
-                    handler = new FilterJerichoHandler(html.length(), definition);
+                // Determine the definition to use
+                final String definition;
+                {
+                    String confName = optConfigName;
+                    if (null != confName && !confName.endsWith(".properties")) {
+                        confName += ".properties";
+                    }
+                    definition = null == confName ? null : getConfiguration().getText(confName);
                 }
+                // Handle HTML content
+                final FilterJerichoHandler handler = null == definition ? new FilterJerichoHandler(html.length()) : new FilterJerichoHandler(html.length(), definition);
+                JerichoParser.parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix));
+                if (dropExternalImages && null != modified) {
+                    modified[0] |= handler.isImageURLFound();
+                }
+                html = handler.getHTML();
             }
-            JerichoParser.parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix));
-            if (dropExternalImages && null != modified) {
-                modified[0] |= handler.isImageURLFound();
+            // Repetitive sanitizing until no further replacement/changes performed
+            final boolean[] sanitized = new boolean[] { true };
+            while (sanitized[0]) {
+                sanitized[0] = false;
+                // Start sanitizing round
+                html = SaneScriptTags.saneScriptTags(html, sanitized);
             }
-            final String retval = SaneScriptTags.saneScriptTags(handler.getHTML());
             if (DEBUG) {
                 final long dur = System.currentTimeMillis() - st;
                 LOG.debug("\tHTMLServiceImpl.sanitize() took " + dur + "msec.");
             }
-            return retval;
+            return html;
         } catch (final ParsingDeniedException e) {
             LOG.warn("HTML content will be returned un-sanitized. Reason: "+e.getMessage(), e);
             return htmlContent;
@@ -502,11 +511,8 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     private static final Pattern PATTERN_TAG = Pattern.compile("<\\w+?[^>]*>");
-
     private static final Pattern PATTERN_DOUBLE_ACCENTS = Pattern.compile(Pattern.quote("\u0060\u0060")+"|"+Pattern.quote("\u00b4\u00b4"));
-
     private static final Pattern PATTERN_ACCENT1 = Pattern.compile(Pattern.quote("\u0060"));
-
     private static final Pattern PATTERN_ACCENT2 = Pattern.compile(Pattern.quote("\u00b4"));
 
     private static String dropDoubleAccents(final String html) {

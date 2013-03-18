@@ -446,6 +446,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_CAPABILITIES_TO_ADD = "capabilities-to-add";
     protected static final String OPT_CAPABILITIES_TO_REMOVE = "capabilities-to-remove";
 
+    protected static final String OPT_QUOTA_MODULE = "quota-module";
+    protected static final String OPT_QUOTA_VALUE = "quota-value";
+
     protected static final String OPT_ACCESS_CALENDAR = "access-calendar";
     protected static final String OPT_ACCESS_CONTACTS = "access-contacts";
     protected static final String OPT_ACCESS_DELEGATE_TASKS = "access-delegate-tasks";
@@ -630,6 +633,9 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     protected CLIOption capsToAdd = null;
     protected CLIOption capsToRemove = null;
+
+    protected CLIOption quotaModule = null;
+    protected CLIOption quotaValue = null;
 
     // access to modules
     protected CLIOption accessCalendarOption = null;
@@ -1851,6 +1857,14 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.capsToRemove = setLongOpt(parser,OPT_CAPABILITIES_TO_REMOVE,"The capabilities to remove as a comma-separated string; e.g. \"cap2, cap2\"", true, false,false);
     }
 
+    protected void setQuotaModule(final AdminParser parser) {
+        this.quotaModule = setLongOpt(parser,OPT_QUOTA_MODULE,"The identifier of the module to which to apply the quota value", true, false,false);
+    }
+
+    protected void setQuotaValue(final AdminParser parser) {
+        this.quotaValue = setLongOpt(parser,OPT_QUOTA_VALUE,"The quota value; zero is unlimited", true, false,false);
+    }
+
     protected final void setAliasesOption(final AdminParser admp){
         this.aliasesOption = setShortLongOpt(admp,OPT_ALIASES_SHORT,OPT_ALIASES_LONG,"Email aliases of the user", true, NeededQuadState.notneeded);
     }
@@ -1937,6 +1951,33 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     public String parseAndSetAccessCombinationName(final AdminParser parser) {
         return (String) parser.getOptionValue(this.accessRightsCombinationName);
+    }
+
+    public String parseAndSetQuotaModule(final AdminParser parser) {
+        if (null == quotaModule) {
+            setQuotaModule(parser);
+        }
+        final Object object = parser.getOptionValue(quotaModule);
+        if (null == object) {
+            return null;
+        }
+        final String tmp = object.toString().trim();
+        return isEmpty(tmp) ? null : tmp;
+    }
+
+    public Long parseAndSetQuotaValue(final AdminParser parser) {
+        if (null == quotaValue) {
+            setQuotaValue(parser);
+        }
+        final Object object = parser.getOptionValue(quotaValue);
+        if (null == object) {
+            return null;
+        }
+        try {
+            return Long.valueOf(object.toString().trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     public Set<String> parseAndSetCapabilitiesToAdd(final AdminParser parser) {

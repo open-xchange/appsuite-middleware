@@ -53,7 +53,7 @@ import java.io.InputStream;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link PreviewCache} - The preview document cache.
+ * {@link PreviewCache} - The preview cache for documents.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -62,11 +62,11 @@ public interface PreviewCache {
     /**
      * Stores given preview document's binary content.
      * 
-     * @param id The identifier
+     * @param id The identifier (cache key) for the cached document
      * @param preview The cached preview
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @return <code>true</code> on insertion or <code>false</code> if impossible to store
+     * @return <code>true</code> if successfully saved; otherwise <code>false</code> if impossible to store (e.g. due to quota restrictions)
      * @throws OXException If operations fails
      */
     boolean save(String id, CachedPreview preview, int userId, int contextId) throws OXException;
@@ -74,13 +74,13 @@ public interface PreviewCache {
     /**
      * Stores given preview document's binary content.
      * 
-     * @param id The identifier
+     * @param id The identifier (cache key) for the cached document
      * @param in The binary stream
      * @param optName The optional file name
      * @param optType The optional file MIME type; e.g. <code>"image/jpeg"</code>
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @return <code>true</code> on insertion or <code>false</code> if impossible to store
+     * @return <code>true</code> if successfully saved; otherwise <code>false</code> if impossible to store (e.g. due to quota restrictions)
      * @throws OXException If operations fails
      */
     boolean save(String id, InputStream in, String optName, String optType, int userId, int contextId) throws OXException;
@@ -88,13 +88,13 @@ public interface PreviewCache {
     /**
      * Stores given preview document's binary content.
      * 
-     * @param id The identifier
+     * @param id The identifier (cache key) for the cached document
      * @param bytes The binary content
      * @param optName The optional file name
      * @param optType The optional file MIME type; e.g. <code>"image/jpeg"</code>
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @return <code>true</code> on insertion or <code>false</code> if impossible to store
+     * @return <code>true</code> if successfully saved; otherwise <code>false</code> if impossible to store (e.g. due to quota restrictions)
      * @throws OXException If operations fails
      */
     boolean save(String id, byte[] bytes, String optName, String optType, int userId, int contextId) throws OXException;
@@ -121,12 +121,12 @@ public interface PreviewCache {
     boolean ensureUnexceededContextQuota(long desiredSize, long total, long totalPerDocument, int contextId, String ignoree) throws OXException;
 
     /**
-     * Gets the preview document's binary content.
+     * Gets the preview document.
      * 
      * @param id The document identifier
      * @param userId The user identifier or <code>-1</code> for context-global document
      * @param contextId The context identifier
-     * @return The binary content or <code>null</code>
+     * @return The preview document or <code>null</code>
      * @throws OXException If retrieving document data fails
      */
     CachedPreview get(String id, int userId, int contextId) throws OXException;
@@ -134,7 +134,7 @@ public interface PreviewCache {
     /**
      * Tests for existence of denoted preview document.
      * 
-     * @param id The identifier
+     * @param id The identifier (cache key) for the cached document
      * @param userId The user identifier or <code>-1</code> for context-global document
      * @param contextId The context identifier
      * @return <code>true</code> if exists; otherwise <code>false</code>

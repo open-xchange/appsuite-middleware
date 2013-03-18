@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.converters.preview.cache.groupware;
+package com.openexchange.groupware.update.tasks.quota;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.tableExists;
@@ -64,16 +64,16 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link PreviewCacheCreateTableTask}
+ * {@link QuotaCreateTableTask}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class PreviewCacheCreateTableTask extends UpdateTaskAdapter {
+public class QuotaCreateTableTask extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link PreviewCacheCreateTableTask}.
+     * Initializes a new {@link QuotaCreateTableTask}.
      */
-    public PreviewCacheCreateTableTask() {
+    public QuotaCreateTableTask() {
         super();
     }
 
@@ -92,14 +92,15 @@ public class PreviewCacheCreateTableTask extends UpdateTaskAdapter {
             writeCon.setAutoCommit(false); // BEGIN
             restoreAutoCommit = true;
             rollback = true;
-            final String[] tableNames = PreviewCacheCreateTableService.getTablesToCreate();
-            final String[] createStmts = PreviewCacheCreateTableService.getCreateStmts();
+            final String[] tableNames = QuotaCreateTableService.getTablesToCreate();
+            final String[] createStmts = QuotaCreateTableService.getCreateStmts();
             for (int i = 0; i < tableNames.length; i++) {
                 try {
-                    if (!tableExists(writeCon, tableNames[i])) {
-                        stmt = writeCon.prepareStatement(createStmts[i]);
-                        stmt.executeUpdate();
+                    if (tableExists(writeCon, tableNames[i])) {
+                        continue;
                     }
+                    stmt = writeCon.prepareStatement(createStmts[i]);
+                    stmt.executeUpdate();
                 } catch (final SQLException e) {
                     throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
                 }

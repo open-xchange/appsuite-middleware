@@ -62,6 +62,7 @@ import javax.mail.SendFailedException;
 import javax.mail.Store;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.api.MailConfig;
@@ -394,6 +395,10 @@ public class MimeMailException extends OXException {
                 }
                 return MimeMailExceptionCode.QUOTA_EXCEEDED.create(e, appendInfo(nextException.getMessage(), folder));
             } else if (nextException instanceof com.sun.mail.iap.CommandFailedException) {
+                Category category = MimeMailExceptionCode.PROCESSING_ERROR.getCategory();
+                if (toLowerCase(e.getMessage()).indexOf("[inuse]") >= 0) {
+                    category = CATEGORY_USER_INPUT;
+                }
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.PROCESSING_ERROR_WE_EXT.create(
                         e,
@@ -401,10 +406,14 @@ public class MimeMailException extends OXException {
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()),
-                        appendInfo(skipTag(nextException.getMessage()), folder));
+                        appendInfo(skipTag(nextException.getMessage()), folder)).setCategory(category);
                 }
-                return MimeMailExceptionCode.PROCESSING_ERROR_WE.create(e, appendInfo(skipTag(nextException.getMessage()), folder));
+                return MimeMailExceptionCode.PROCESSING_ERROR_WE.create(e, appendInfo(skipTag(nextException.getMessage()), folder)).setCategory(category);
             } else if (nextException instanceof com.sun.mail.iap.BadCommandException) {
+                Category category = MimeMailExceptionCode.PROCESSING_ERROR.getCategory();
+                if (toLowerCase(e.getMessage()).indexOf("[inuse]") >= 0) {
+                    category = CATEGORY_USER_INPUT;
+                }
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.PROCESSING_ERROR_EXT.create(
                         e,
@@ -412,10 +421,14 @@ public class MimeMailException extends OXException {
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()),
-                        appendInfo(nextException.getMessage(), folder));
+                        appendInfo(nextException.getMessage(), folder)).setCategory(category);
                 }
-                return MimeMailExceptionCode.PROCESSING_ERROR.create(e, appendInfo(nextException.getMessage(), folder));
+                return MimeMailExceptionCode.PROCESSING_ERROR.create(e, appendInfo(nextException.getMessage(), folder)).setCategory(category);
             } else if (nextException instanceof com.sun.mail.iap.ProtocolException) {
+                Category category = MimeMailExceptionCode.PROCESSING_ERROR.getCategory();
+                if (toLowerCase(e.getMessage()).indexOf("[inuse]") >= 0) {
+                    category = CATEGORY_USER_INPUT;
+                }
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.PROCESSING_ERROR_EXT.create(
                         e,
@@ -423,9 +436,9 @@ public class MimeMailException extends OXException {
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()),
-                        appendInfo(nextException.getMessage(), folder));
+                        appendInfo(nextException.getMessage(), folder)).setCategory(category);
                 }
-                return MimeMailExceptionCode.PROCESSING_ERROR.create(e, appendInfo(nextException.getMessage(), folder));
+                return MimeMailExceptionCode.PROCESSING_ERROR.create(e, appendInfo(nextException.getMessage(), folder)).setCategory(category);
             } else if (nextException instanceof java.io.IOException) {
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.IO_ERROR_EXT.create(

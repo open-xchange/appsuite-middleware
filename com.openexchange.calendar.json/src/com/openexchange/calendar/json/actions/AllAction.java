@@ -141,9 +141,6 @@ public final class AllAction extends AppointmentAction {
 
         final boolean bRecurrenceMaster = Boolean.parseBoolean(req.getParameter(RECURRENCE_MASTER));
 
-//        final int leftHandLimit = req.optInt(AJAXServlet.LEFT_HAND_LIMIT);
-//        final int rightHandLimit = req.optInt(AJAXServlet.RIGHT_HAND_LIMIT);
-
         final TimeZone timeZone;
         {
             final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
@@ -171,7 +168,7 @@ public final class AllAction extends AppointmentAction {
             }
 
             Date lastModified = new Date(0);
-            final List<Appointment> appointmentList = new ArrayList<Appointment>();
+            List<Appointment> appointmentList = new ArrayList<Appointment>();
             while (it.hasNext()) {
                 Appointment appointment = it.next();
                 boolean written = false;
@@ -298,6 +295,29 @@ public final class AllAction extends AppointmentAction {
                     Collections.reverse(objectList);
                     for (final DateOrderObject dateOrderObject : objectList) {
                         checkAndAddAppointment(appointmentList, (Appointment) dateOrderObject.getObject(), startUTC, endUTC, calColl);
+                    }
+                }
+            }
+
+            final int leftHandLimit = req.optInt(AJAXServlet.LEFT_HAND_LIMIT);
+            final int rightHandLimit = req.optInt(AJAXServlet.RIGHT_HAND_LIMIT);
+
+            if (leftHandLimit > 0 || rightHandLimit > 0) {
+                final int size = appointmentList.size();
+                final int fromIndex = leftHandLimit > 0 ? leftHandLimit : 0;
+                final int toIndex = rightHandLimit > 0 ? (rightHandLimit > size ? size : rightHandLimit) : size;
+                if ((fromIndex) > size) {
+                    appointmentList = Collections.<Appointment> emptyList();
+                } else if (fromIndex >= toIndex) {
+                    appointmentList = Collections.<Appointment> emptyList();
+                } else {
+                    /*
+                     * Check if end index is out of range
+                     */
+                    if (toIndex < size) {
+                        appointmentList = appointmentList.subList(fromIndex, toIndex);
+                    } else if (fromIndex > 0) {
+                        appointmentList = appointmentList.subList(fromIndex, size);
                     }
                 }
             }

@@ -47,29 +47,27 @@
  *
  */
 
-package com.openexchange.groupware.results;
+package freemarker.log;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.iterator.SearchIterator;
+
 
 /**
- * A pair of {@link SearchIterator} and the most recent last-changed time stamp of involved items.
+ * {@link OXFreemarkerLoggerFactory}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface TimedResult<T> {
-
+public final class OXFreemarkerLoggerFactory implements LoggerFactory {
+    
     /**
-     * Gets the results as an {@link SearchIterator iterator}.
-     * 
-     * @return The results
-     * @throws OXException If returning results fails
+     * Initializes a new {@link OXFreemarkerLoggerFactory}.
      */
-    SearchIterator<T> results() throws OXException;
+    public OXFreemarkerLoggerFactory() {
+        super();
+    }
 
-    /**
-     * Gets the most recent last-changed time stamp of involved items.
-     * 
-     * @return The time stamp
-     * @throws OXException If time stamp cannot be returned
-     */
-    long sequenceNumber() throws OXException;
+    @Override
+    public Logger getLogger(String category) {
+        return new OXFreemarkerLogger(com.openexchange.log.Log.loggerFor(category));
+    }
+
 }

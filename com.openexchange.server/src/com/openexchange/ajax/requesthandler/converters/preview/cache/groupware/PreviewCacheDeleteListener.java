@@ -71,8 +71,6 @@ public class PreviewCacheDeleteListener implements DeleteListener {
             deleteUserEntriesFromDB(event, writeCon);
         } else if (event.getType() == DeleteEvent.TYPE_CONTEXT) {
             deleteContextEntriesFromDB(event, writeCon);
-        } else {
-            return;
         }
     }
 
@@ -80,9 +78,8 @@ public class PreviewCacheDeleteListener implements DeleteListener {
         final int contextId = event.getContext().getContextId();
         PreparedStatement stmt = null;
         try {
-            final int pos = 1;
             stmt = writeCon.prepareStatement("DELETE FROM preview WHERE cid = ?");
-            stmt.setInt(pos, contextId);
+            stmt.setInt(1, contextId);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -97,8 +94,8 @@ public class PreviewCacheDeleteListener implements DeleteListener {
         final int contextId = event.getContext().getContextId();
         PreparedStatement stmt = null;
         try {
-            int pos = 1;
             stmt = writeCon.prepareStatement("DELETE FROM preview WHERE cid = ? AND user = ?");
+            int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos, event.getId());
             stmt.executeUpdate();

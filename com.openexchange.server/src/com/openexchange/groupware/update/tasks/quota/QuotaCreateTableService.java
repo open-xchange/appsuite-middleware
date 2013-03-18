@@ -47,29 +47,65 @@
  *
  */
 
-package com.openexchange.groupware.results;
+package com.openexchange.groupware.update.tasks.quota;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.database.AbstractCreateTableImpl;
+
 
 /**
- * A pair of {@link SearchIterator} and the most recent last-changed time stamp of involved items.
+ * {@link QuotaCreateTableService}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface TimedResult<T> {
+public final class QuotaCreateTableService extends AbstractCreateTableImpl {
+
+    private static final String TABLE_QUOTA_CONTEXT = "quota_context";
+
+    private static final String CREATE_QUOTA_CONTEXT = "CREATE TABLE "+TABLE_QUOTA_CONTEXT+" (" +
+        " cid INT4 unsigned NOT NULL," +
+        " module VARCHAR(32) character set latin1 NOT NULL," +
+        " value INT4 unsigned NOT NULL," +
+        " PRIMARY KEY (cid, module)" +
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     /**
-     * Gets the results as an {@link SearchIterator iterator}.
-     * 
-     * @return The results
-     * @throws OXException If returning results fails
+     * Gets the table names.
+     *
+     * @return The table names.
      */
-    SearchIterator<T> results() throws OXException;
+    public static String[] getTablesToCreate() {
+        return new String[] { TABLE_QUOTA_CONTEXT };
+    }
 
     /**
-     * Gets the most recent last-changed time stamp of involved items.
-     * 
-     * @return The time stamp
-     * @throws OXException If time stamp cannot be returned
+     * Gets the CREATE-TABLE statements.
+     *
+     * @return The CREATE statements
      */
-    long sequenceNumber() throws OXException;
+    public static String[] getCreateStmts() {
+        return new String[] { CREATE_QUOTA_CONTEXT };
+    }
+
+    /**
+     * Initializes a new {@link QuotaCreateTableService}.
+     */
+    public QuotaCreateTableService() {
+        super();
+    }
+
+    @Override
+    public String[] requiredTables() {
+        return NO_TABLES;
+    }
+
+    @Override
+    public String[] tablesToCreate() {
+        return getTablesToCreate();
+    }
+
+    @Override
+    protected String[] getCreateStatements() {
+        return getCreateStmts();
+    }
+
 }

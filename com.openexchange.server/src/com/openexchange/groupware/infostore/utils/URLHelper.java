@@ -50,15 +50,25 @@
 package com.openexchange.groupware.infostore.utils;
 
 import java.util.regex.Pattern;
+import com.openexchange.java.StringAllocator;
 
 public class URLHelper {
 
 	private static final Pattern SCHEMA_PATTERN = Pattern.compile("^\\S+?:(//)?");
 	private static final Pattern MAYBE_MAIL = Pattern.compile("\\S+?@\\S+?\\.\\w+$");
 
+	/**
+	 * Generates an appropriate URL from passed <i>maybe URL</i>.
+	 * 
+	 * @param url The <i>maybe URL</i>
+	 * @return An appropriate URL
+	 */
 	public String process(final String url) {
+	    if (null == url) {
+            return null;
+        }
 		if(!hasSchema(url)) {
-			return isMail(url) ? "mailto:"+url : "http://"+url;
+			return new StringAllocator(url.length() + 8).append(isMail(url) ? "mailto:" : "http://").append(url).toString();
 		}
 		return url;
 	}

@@ -47,29 +47,88 @@
  *
  */
 
-package com.openexchange.groupware.results;
+package freemarker.log;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.iterator.SearchIterator;
+import org.apache.commons.logging.Log;
+import freemarker.log.Logger;
 
 /**
- * A pair of {@link SearchIterator} and the most recent last-changed time stamp of involved items.
+ * {@link OXFreemarkerLogger}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface TimedResult<T> {
+public final class OXFreemarkerLogger extends Logger {
 
-    /**
-     * Gets the results as an {@link SearchIterator iterator}.
-     * 
-     * @return The results
-     * @throws OXException If returning results fails
-     */
-    SearchIterator<T> results() throws OXException;
+    private final Log logger;
 
-    /**
-     * Gets the most recent last-changed time stamp of involved items.
-     * 
-     * @return The time stamp
-     * @throws OXException If time stamp cannot be returned
-     */
-    long sequenceNumber() throws OXException;
+    public OXFreemarkerLogger(Log logger) {
+        super();
+        this.logger = logger;
+    }
+
+    @Override
+    public void debug(String message) {
+        logger.debug(message);
+    }
+
+    @Override
+    public void debug(String message, Throwable t) {
+        logger.debug(message, t);
+    }
+
+    @Override
+    public void info(String message) {
+        logger.info(message);
+    }
+
+    @Override
+    public void info(String message, Throwable t) {
+        logger.info(message, t);
+    }
+
+    @Override
+    public void warn(String message) {
+        logger.warn(message);
+    }
+
+    @Override
+    public void warn(String message, Throwable t) {
+        logger.warn(message, t);
+    }
+
+    @Override
+    public void error(String message) {
+        logger.error(message);
+    }
+
+    @Override
+    public void error(String message, Throwable t) {
+        logger.error(message, t);
+    }
+
+    @Override
+    public boolean isDebugEnabled() {
+        return logger.isDebugEnabled();
+    }
+
+    @Override
+    public boolean isInfoEnabled() {
+        return logger.isInfoEnabled();
+    }
+
+    @Override
+    public boolean isWarnEnabled() {
+        return logger.isWarnEnabled();
+    }
+
+    @Override
+    public boolean isErrorEnabled() {
+        return logger.isErrorEnabled();
+    }
+
+    @Override
+    public boolean isFatalEnabled() {
+        return logger.isFatalEnabled();
+    }
+
 }

@@ -128,6 +128,44 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     @Override
+    public void changeQuota(final Context ctx, final String module, final long quotaValue, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
+        if (isEmpty(module)) {
+            throw new InvalidDataException("No valid module specified.");
+        }
+
+        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+
+        new BasicAuthenticator(context).doAuthentication(auth);
+
+        try {
+            setIdOrGetIDFromNameAndIdObject(null, ctx);
+        } catch (final NoSuchObjectException e) {
+            throw new NoSuchContextException(e);
+        }
+
+        final long quota = quotaValue <= 0 ? -1L : quotaValue;
+
+        log.debug(ctx+" - "+module + " - " + quota);
+
+        try {
+            if (!tool.existsContext(ctx)) {
+                throw new NoSuchContextException();
+            }
+
+            callPluginMethod("changeQuota", ctx, module, Long.valueOf(quota), auth);
+
+            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            oxcox.changeQuota(ctx, module, quota, auth);
+        } catch (final StorageException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    @Override
     public void changeCapabilities(Context ctx, Set<String> capsToAdd, Set<String> capsToRemove, Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         if ((null == capsToAdd || capsToAdd.isEmpty()) && (null == capsToRemove || capsToRemove.isEmpty())) {
             throw new InvalidDataException("No capabilities specified.");
@@ -1348,5 +1386,18 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     @Override
     public boolean checkExists(final Context ctx, Credentials auth) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException {
         return exists(ctx, auth);
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 }

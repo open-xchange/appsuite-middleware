@@ -47,29 +47,54 @@
  *
  */
 
-package com.openexchange.groupware.results;
+package com.openexchange.groupware.update.tasks.quota;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
- * A pair of {@link SearchIterator} and the most recent last-changed time stamp of involved items.
+ * {@link QuotaDeleteListener}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface TimedResult<T> {
+public class QuotaDeleteListener implements DeleteListener {
 
-    /**
-     * Gets the results as an {@link SearchIterator iterator}.
-     * 
-     * @return The results
-     * @throws OXException If returning results fails
-     */
-    SearchIterator<T> results() throws OXException;
+    @Override
+    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
+        if (event.getType() == DeleteEvent.TYPE_USER) {
+            deleteUserEntriesFromDB(event, writeCon);
+        } else if (event.getType() == DeleteEvent.TYPE_CONTEXT) {
+            deleteContextEntriesFromDB(event, writeCon);
+        } else {
+            return;
+        }
+    }
 
-    /**
-     * Gets the most recent last-changed time stamp of involved items.
-     * 
-     * @return The time stamp
-     * @throws OXException If time stamp cannot be returned
-     */
-    long sequenceNumber() throws OXException;
+    private void deleteContextEntriesFromDB(final DeleteEvent event, final Connection writeCon) throws OXException {
+        final int contextId = event.getContext().getContextId();
+        PreparedStatement stmt = null;
+        try {
+            final int pos = 1;
+            stmt = writeCon.prepareStatement("DELETE FROM quota_context WHERE cid = ?");
+            stmt.setInt(pos, contextId);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final Exception e) {
+            throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private void deleteUserEntriesFromDB(final DeleteEvent event, final Connection writeCon) throws OXException {
+        // Nothing to do
+    }
+
 }
