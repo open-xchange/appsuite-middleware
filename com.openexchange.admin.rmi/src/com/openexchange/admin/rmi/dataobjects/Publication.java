@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.rmi.dataobjects;
 
-import com.openexchange.admin.rmi.dataobjects.Context;
 
 /**
  * {@link Publication}
@@ -64,30 +63,27 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
     private static final long serialVersionUID = -1272376727507395566L;
     
     private int userId;
-    
     private boolean userIdSet = false;
 
     private Context context;
-    
     private boolean contextSet = false;
 
     private Integer id;
-    
     private boolean idSet = false;
 
     private String entityId;
-    
     private boolean entityIdSet = false;
 
     private String module;
-    
     private boolean moduleSet = false;
 
     private String name;
-    
     private boolean nameSet = false;
 
-    private Boolean enabled = null;
+    private String description;
+    private boolean descriptionSet = false;
+
+    private final Boolean enabled = null;
 
     public String getEntityId() {
         return entityId;
@@ -209,8 +205,25 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
         return null;
     }
 
+    /**
+     * Gets the description
+     *
+     * @return The description
+     */
+    public String getDescription() {
+        return description;
+    }
 
-
-
+    /**
+     * Sets the description
+     *
+     * @param description The description to set
+     */
+    public void setDescription(String description) {
+        if (null == name) {
+            this.descriptionSet = true;
+        }
+        this.description = description;
+    }
 
 }

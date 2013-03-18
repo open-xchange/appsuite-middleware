@@ -57,7 +57,6 @@ import com.openexchange.admin.rmi.dataobjects.Publication;
 import com.openexchange.admin.rmi.exceptions.MissingServiceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchPublicationException;
 import com.openexchange.admin.services.AdminServiceRegistry;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
@@ -72,28 +71,23 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
 
     private final static Log log = LogFactory.getLog(OXPublication.class);
 
-    private ContextService contexts;
-
-    private PublicationTargetDiscoveryService discovery;
-
     public OXPublication() {
         super();
         if (log.isInfoEnabled()) {
             log.info("Class loaded: " + this.getClass().getName());
         }
     }
-
-    public void setDiscoveryService(PublicationTargetDiscoveryService discovery){
-        this.discovery = discovery;
-    }
-    
-    public void setContextService(ContextService contexts){
-        this.contexts = contexts;
-    }
     
     @Override
     public Publication getpublication(String url, Credentials auth) throws NoSuchPublicationException, MissingServiceException {
-        getServices();
+        PublicationTargetDiscoveryService discovery = AdminServiceRegistry.getInstance().getService(PublicationTargetDiscoveryService.class);
+        if (null == discovery){
+            throw new MissingServiceException("PublicationTargetDiscoveryService is missing or not started yet");
+        }
+        ContextService contexts = AdminServiceRegistry.getInstance().getService(ContextService.class);
+        if (null == contexts){
+            throw new MissingServiceException("ContextService is missing or not started yet");
+        }
         try {
             for (PublicationTarget pubTar : discovery.listTargets()) {
                 final PublicationService publicationService = pubTar.getPublicationService();
@@ -110,24 +104,16 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
         throw new NoSuchPublicationException("no Publication with URL " + url + " found");
     }
 
-    private void getServices() throws MissingServiceException {
-        if (null == discovery){
-            discovery = AdminServiceRegistry.getInstance().getService(PublicationTargetDiscoveryService.class);
-            if (null == discovery){
-                throw new MissingServiceException("PublicationTargetDiscoveryService is missing or not started yet");
-            }
-        }
-        if (null == contexts){
-            contexts = AdminServiceRegistry.getInstance().getService(ContextService.class);
-            if (null == contexts){
-                throw new MissingServiceException("ContextService is missing or not started yet");
-            }
-        }
-    }
-
     @Override
     public boolean deletePublication(String url, Credentials auth) throws NoSuchPublicationException, MissingServiceException {
-        getServices();
+        PublicationTargetDiscoveryService discovery = AdminServiceRegistry.getInstance().getService(PublicationTargetDiscoveryService.class);
+        if (null == discovery){
+            throw new MissingServiceException("PublicationTargetDiscoveryService is missing or not started yet");
+        }
+        ContextService contexts = AdminServiceRegistry.getInstance().getService(ContextService.class);
+        if (null == contexts){
+            throw new MissingServiceException("ContextService is missing or not started yet");
+        }
         try {
             for (PublicationTarget pubTar : discovery.listTargets()) {
                 final PublicationService publicationService = pubTar.getPublicationService();
@@ -147,10 +133,10 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
 
     private Publication parsePublication(com.openexchange.publish.Publication input) {
         Publication pub = new Publication();
-        pub.setContext(new Context(input.getContext().getContextId()));
+        pub.setContext(new Context(Integer.valueOf(input.getContext().getContextId())));
         pub.setEntityId(input.getEntityId());
-        pub.setId(input.getId());
-        pub.setUserId(input.getUserId());
+        pub.setId(Integer.valueOf(input.getId()));
+        pub.setUserId(Integer.valueOf(input.getUserId()));
         pub.setModule(input.getModule());
         pub.setName(input.getDisplayName());
         return pub;
