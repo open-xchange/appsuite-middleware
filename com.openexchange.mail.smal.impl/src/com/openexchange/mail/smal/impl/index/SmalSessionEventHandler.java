@@ -232,16 +232,16 @@ public class SmalSessionEventHandler implements EventHandler {
                     .folder(folder.getFullname())
                     .build();
                 indexingService.scheduleJob(false, jobInfo, IndexingService.NOW, interval, priority);
-
-                JobInfo checkDeletedJobInfo = MailJobInfo.newBuilder(CheckForDeletedFoldersJob.class)
-                    .accountId(account.getId())
-                    .contextId(contextId)
-                    .userId(userId)
-                    .primaryPassword(session.getPassword())
-                    .password(decryptedPW)
-                    .build();
-                indexingService.scheduleJob(false, checkDeletedJobInfo, IndexingService.NOW, interval, IndexingService.DEFAULT_PRIORITY);
             }
+            
+            JobInfo checkDeletedJobInfo = MailJobInfo.newBuilder(CheckForDeletedFoldersJob.class)
+                .accountId(account.getId())
+                .contextId(contextId)
+                .userId(userId)
+                .primaryPassword(session.getPassword())
+                .password(decryptedPW)
+                .build();
+            indexingService.scheduleJob(false, checkDeletedJobInfo, IndexingService.NOW, interval, IndexingService.DEFAULT_PRIORITY);
         }
     }
 
