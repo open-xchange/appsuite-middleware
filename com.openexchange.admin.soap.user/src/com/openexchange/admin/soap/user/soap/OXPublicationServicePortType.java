@@ -30,4 +30,13 @@ public interface OXPublicationServicePortType {
         GetPublication parameters
     ) throws RemoteException_Exception, MissingServiceException_Exception, NoSuchPublicationException_Exception;
 
+    @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
+    @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
+    @Action(input = "urn:deletePublication", output = "urn:deletePublicationResponse", fault = {@FaultAction(className = RemoteException_Exception.class, value = "urn:deletePublicationRemoteException"), @FaultAction(className = MissingServiceException_Exception.class, value = "urn:deletePublicationMissingServiceException"), @FaultAction(className = NoSuchPublicationException_Exception.class, value = "urn:deletePublicationNoSuchPublicationException")})
+    @WebMethod(action = "urn:deletePublication")
+    public void deletePublication(
+        @WebParam(partName = "parameters", name = "deletePublication", targetNamespace = "http://soap.admin.openexchange.com")
+        DeletePublication parameters
+    ) throws RemoteException_Exception, MissingServiceException_Exception, NoSuchPublicationException_Exception;
+
 }
