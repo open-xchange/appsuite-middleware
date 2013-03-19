@@ -49,20 +49,76 @@
 
 package com.openexchange.service.indexing.impl.internal;
 
+import java.io.Serializable;
+import java.util.Date;
+import java.util.concurrent.Callable;
+import org.apache.commons.logging.Log;
+import org.quartz.JobDetail;
+import org.quartz.ObjectAlreadyExistsException;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.Trigger;
+import org.quartz.service.QuartzService;
+import com.openexchange.service.indexing.JobInfo;
+
 
 /**
- * {@link JobConstants}
+ * {@link ScheduleJobCallable}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class JobConstants {
+public class ScheduleJobCallable implements Callable<Object>, Serializable {
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ScheduleJobCallable.class);
 
-    public static final String JOB_INFO = "jobInfo";
+    private static final long serialVersionUID = 5900667348491833307L;
     
-    public static final String START_DATE = "startDate";
+    private final JobInfo jobInfo;
+
+    private final Date startDate;
+
+    private final long interval;
+
+    private final int priority;
     
-    public static final String PRIORITY = "priority";
-    
-    public static final String INTERVAL = "interval";
+    public ScheduleJobCallable(JobInfo jobInfo, Date startDate, long interval, int priority) {
+        super();
+        this.jobInfo = jobInfo;
+        this.startDate = startDate;
+        this.interval = interval;
+        this.priority = priority;
+    }
+
+    @Override
+    public Object call() throws Exception {
+        if (LOG.isDebugEnabled()) {
+            if (LOG.isTraceEnabled()) {
+                Exception exception = new Exception();
+                LOG.trace("Scheduling job: " + jobInfo.toString() + ".", exception);
+            } else {
+                LOG.debug("Scheduling job: " + jobInfo.toString() + ".");
+            }
+        }
+        
+        try {
+            JobDetail jobDetail = Tools.buildJob(jobInfo, RunOrRescheduleAtTargetJob.class);
+            Trigger targetTrigger = Tools.buildTrigger(jobDetail.getKey(), jobInfo, startDate, interval, priority);
+            QuartzService quartzService = Services.getService(QuartzService.class);
+            Scheduler scheduler = quartzService.getLocalScheduler();
+            scheduler.addJob(jobDetail, true);
+            try {
+                scheduler.scheduleJob(targetTrigger);
+            } catch (SchedulerException e) {
+                if (e instanceof ObjectAlreadyExistsException) {
+                    LOG.info("Could not schedule trigger " + targetTrigger.getKey() + ". It already exists.");
+                } else {
+                    throw e;
+                }
+            }
+        } catch (Throwable t) {
+            LOG.error(t.getMessage(), t);
+        }
+        return null;
+    }
 
 }

@@ -49,20 +49,59 @@
 
 package com.openexchange.service.indexing.impl.internal;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import org.apache.commons.logging.Log;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.impl.matchers.GroupMatcher;
+import org.quartz.service.QuartzService;
+
 
 /**
- * {@link JobConstants}
+ * {@link UnscheduleAllJobsCallable}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class JobConstants {
+public class UnscheduleAllJobsCallable implements Callable<Object>, Serializable {
+    
+    private static final long serialVersionUID = -3020268885605197578L;
 
-    public static final String JOB_INFO = "jobInfo";
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(UnscheduleAllJobsCallable.class);
     
-    public static final String START_DATE = "startDate";
+    private final int contextId;
     
-    public static final String PRIORITY = "priority";
-    
-    public static final String INTERVAL = "interval";
+    private final int userId;
+
+    public UnscheduleAllJobsCallable(int contextId, int userId) {
+        super();
+        this.contextId = contextId;
+        this.userId = userId;
+    }
+
+    @Override
+    public Object call() throws Exception {
+        try {
+            QuartzService quartzService = Services.getService(QuartzService.class);
+            Scheduler scheduler = quartzService.getLocalScheduler();
+            if (contextId > 0 && userId > 0) {
+                if (userId > 0) {
+                    String jobGroup = Tools.generateJobGroup(contextId, userId);
+                    Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(jobGroup));
+                    scheduler.deleteJobs(new ArrayList<JobKey>(jobKeys));
+                } else {
+                    String jobGroup = Tools.generateJobGroup(contextId);
+                    Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupStartsWith(jobGroup));
+                    scheduler.deleteJobs(new ArrayList<JobKey>(jobKeys));
+                }
+            }
+        } catch (Throwable t) {
+            LOG.error(t.getMessage(), t);
+        }
+        
+        return null;
+    }
 
 }

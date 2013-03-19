@@ -49,20 +49,44 @@
 
 package com.openexchange.service.indexing.impl.internal;
 
+import java.io.Serializable;
+import java.util.concurrent.Callable;
+import org.apache.commons.logging.Log;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.service.QuartzService;
+import com.openexchange.service.indexing.JobInfo;
+
 
 /**
- * {@link JobConstants}
+ * {@link UnscheduleJobCallable}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class JobConstants {
+public class UnscheduleJobCallable implements Callable<Object>, Serializable {
+    
+    private static final long serialVersionUID = 5612808787423998180L;
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(UnscheduleJobCallable.class);
+    
+    private final JobInfo jobInfo;
 
-    public static final String JOB_INFO = "jobInfo";
-    
-    public static final String START_DATE = "startDate";
-    
-    public static final String PRIORITY = "priority";
-    
-    public static final String INTERVAL = "interval";
+    public UnscheduleJobCallable(JobInfo jobInfo) {
+        super();
+        this.jobInfo = jobInfo;
+    }
+
+    @Override
+    public Object call() throws Exception {
+        try {
+            JobKey jobKey = Tools.generateJobKey(jobInfo);
+            QuartzService quartzService = Services.getService(QuartzService.class);
+            Scheduler scheduler = quartzService.getLocalScheduler();
+            scheduler.deleteJob(jobKey);
+        } catch (Throwable t) {
+            LOG.error(t.getMessage(), t);
+        }
+        return null;
+    }
 
 }
