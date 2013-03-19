@@ -76,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "id", description = "Object ID of the requested appointment."),
     @Parameter(name = "folder", description = "Object ID of the folder, whose contents are queried."),
-    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for appointments are defined in Common object data, Detailed task and appointment data and Detailed appointment data. The alias \"all\" uses the predefined columnset [1, 20, 207, 206, 2]."),
+    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for appointments are defined in Common object data, Detailed task and appointment data and Detailed appointment data. The alias \"all\" uses the predefined columnset [1, 20, 207, 206, 2].")
     }, responseDescription = "Response with timestamp: An array with appointment data. Each array element describes one appointment and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public class ChangeExceptionsAction extends AppointmentAction {
 
