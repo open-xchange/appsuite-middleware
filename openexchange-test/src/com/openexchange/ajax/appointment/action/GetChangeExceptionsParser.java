@@ -47,54 +47,29 @@
  *
  */
 
-package com.openexchange.ajax.appointment;
+package com.openexchange.ajax.appointment.action;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.appointment.bugtests.AppointmentBugTestSuite;
-import com.openexchange.ajax.appointment.recurrence.RecurrenceTestSuite;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractColumnsParser;
 
-public class AppointmentAJAXSuite extends TestSuite{
+/**
+ * {@link GetChangeExceptionsParser}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ */
+public class GetChangeExceptionsParser extends AbstractColumnsParser<GetChangeExceptionsResponse> {
 
-    private AppointmentAJAXSuite() {
-        super();
+    protected GetChangeExceptionsParser(boolean failOnError, int[] columns) {
+        super(failOnError, columns);
     }
 
-    public static Test suite(){
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(ConfirmTest.class);
-        tests.addTestSuite(ConfirmOthers.class);
-        tests.addTestSuite(CopyTest.class);
-        tests.addTestSuite(DeleteTest.class);
-        tests.addTestSuite(GetTest.class);
-        tests.addTestSuite(FreeBusyTest.class);
-        tests.addTestSuite(HasTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(MoveTest.class);
-        tests.addTestSuite(NewTest.class);
-        tests.addTestSuite(SearchTest.class);
-        tests.addTestSuite(UpdateTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(ConflictTest.class);
-        tests.addTestSuite(MultipleTest.class);
-        tests.addTestSuite(PortalSearchTest.class);
-        tests.addTestSuite(FunambolTest.class);
-        tests.addTestSuite(NewListTest.class);
-        tests.addTestSuite(UserStory2173Test.class);
-        tests.addTestSuite(CalendarTestManagerTest.class);
-        tests.addTestSuite(UserStory1085Test.class);
-        tests.addTestSuite(AppointmentAttachmentTests.class);
-        tests.addTestSuite(ConfirmationsTest.class);
-        tests.addTestSuite(SharedFoldersShowOwnersPrivateAppointmentsAsBlocks.class);
-        tests.addTestSuite(CreatedByTest.class);
-        tests.addTestSuite(AllAliasTest.class);
-        tests.addTestSuite(ListAliasTest.class);
-        tests.addTestSuite(DeleteMultipleAppointmentTest.class);
-        tests.addTestSuite(GetChangeExceptionsTest.class);
-        tests.addTest(RecurrenceTestSuite.suite());
-        tests.addTest(AppointmentBugTestSuite.suite());
-        tests.addTest(NewAppointmentHttpApiTestSuite.suite());
-        return tests;
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.ajax.framework.AbstractColumnsParser#instantiateResponse(com.openexchange.ajax.container.Response)
+     */
+    @Override
+    protected GetChangeExceptionsResponse instantiateResponse(Response response) {
+        return new GetChangeExceptionsResponse(response);
     }
+
 }

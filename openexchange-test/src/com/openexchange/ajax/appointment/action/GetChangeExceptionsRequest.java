@@ -47,54 +47,64 @@
  *
  */
 
-package com.openexchange.ajax.appointment;
+package com.openexchange.ajax.appointment.action;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.appointment.bugtests.AppointmentBugTestSuite;
-import com.openexchange.ajax.appointment.recurrence.RecurrenceTestSuite;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-public class AppointmentAJAXSuite extends TestSuite{
+/**
+ * {@link GetChangeExceptionsRequest}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ */
+public class GetChangeExceptionsRequest extends AbstractAppointmentRequest<GetChangeExceptionsResponse> {
 
-    private AppointmentAJAXSuite() {
-        super();
+    private int folderId;
+
+    private int objectId;
+
+    private int[] columns;
+
+    private boolean failOnError;
+
+    public GetChangeExceptionsRequest(int folderId, int objectId, int[] columns) {
+        this(folderId, objectId, columns, true);
+    }
+    
+    public GetChangeExceptionsRequest(int folderId, int objectId, int[] columns, boolean failOnError) {
+        this.folderId = folderId;
+        this.objectId = objectId;
+        this.columns = columns;
+        this.failOnError = failOnError;
     }
 
-    public static Test suite(){
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(ConfirmTest.class);
-        tests.addTestSuite(ConfirmOthers.class);
-        tests.addTestSuite(CopyTest.class);
-        tests.addTestSuite(DeleteTest.class);
-        tests.addTestSuite(GetTest.class);
-        tests.addTestSuite(FreeBusyTest.class);
-        tests.addTestSuite(HasTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(MoveTest.class);
-        tests.addTestSuite(NewTest.class);
-        tests.addTestSuite(SearchTest.class);
-        tests.addTestSuite(UpdateTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(ConflictTest.class);
-        tests.addTestSuite(MultipleTest.class);
-        tests.addTestSuite(PortalSearchTest.class);
-        tests.addTestSuite(FunambolTest.class);
-        tests.addTestSuite(NewListTest.class);
-        tests.addTestSuite(UserStory2173Test.class);
-        tests.addTestSuite(CalendarTestManagerTest.class);
-        tests.addTestSuite(UserStory1085Test.class);
-        tests.addTestSuite(AppointmentAttachmentTests.class);
-        tests.addTestSuite(ConfirmationsTest.class);
-        tests.addTestSuite(SharedFoldersShowOwnersPrivateAppointmentsAsBlocks.class);
-        tests.addTestSuite(CreatedByTest.class);
-        tests.addTestSuite(AllAliasTest.class);
-        tests.addTestSuite(ListAliasTest.class);
-        tests.addTestSuite(DeleteMultipleAppointmentTest.class);
-        tests.addTestSuite(GetChangeExceptionsTest.class);
-        tests.addTest(RecurrenceTestSuite.suite());
-        tests.addTest(AppointmentBugTestSuite.suite());
-        tests.addTest(NewAppointmentHttpApiTestSuite.suite());
-        return tests;
+    @Override
+    public Method getMethod() {
+        return Method.GET;
     }
+
+    @Override
+    public Parameter[] getParameters() throws IOException, JSONException {
+        final List<Parameter> parameterList = new ArrayList<Parameter>();
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GETCHANGEEXCEPTIONS));
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folderId)));
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_ID, objectId));
+        return parameterList.toArray(new Parameter[parameterList.size()]);
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends GetChangeExceptionsResponse> getParser() {
+        return new GetChangeExceptionsParser(failOnError, columns);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
 }

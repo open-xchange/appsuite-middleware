@@ -1,3 +1,7 @@
+* 2013-03-19 - martin.herfurth@open-xchange.com
+
+ - Story 46455255: New calendar action: getChangeExceptions
+
 * 2013-03-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 25286: Proper output for "-j" option

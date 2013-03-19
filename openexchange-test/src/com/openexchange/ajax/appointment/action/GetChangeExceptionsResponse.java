@@ -47,54 +47,33 @@
  *
  */
 
-package com.openexchange.ajax.appointment;
+package com.openexchange.ajax.appointment.action;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.appointment.bugtests.AppointmentBugTestSuite;
-import com.openexchange.ajax.appointment.recurrence.RecurrenceTestSuite;
+import java.util.Arrays;
+import java.util.List;
+import java.util.TimeZone;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.AppointmentTest;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractColumnsResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Appointment;
 
-public class AppointmentAJAXSuite extends TestSuite{
+/**
+ * {@link GetChangeExceptionsResponse}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ */
+public class GetChangeExceptionsResponse extends AbstractColumnsResponse {
 
-    private AppointmentAJAXSuite() {
-        super();
+    protected GetChangeExceptionsResponse(Response response) {
+        super(response);
     }
 
-    public static Test suite(){
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(ConfirmTest.class);
-        tests.addTestSuite(ConfirmOthers.class);
-        tests.addTestSuite(CopyTest.class);
-        tests.addTestSuite(DeleteTest.class);
-        tests.addTestSuite(GetTest.class);
-        tests.addTestSuite(FreeBusyTest.class);
-        tests.addTestSuite(HasTest.class);
-        tests.addTestSuite(ListTest.class);
-        tests.addTestSuite(MoveTest.class);
-        tests.addTestSuite(NewTest.class);
-        tests.addTestSuite(SearchTest.class);
-        tests.addTestSuite(UpdateTest.class);
-        tests.addTestSuite(UpdatesTest.class);
-        tests.addTestSuite(ConflictTest.class);
-        tests.addTestSuite(MultipleTest.class);
-        tests.addTestSuite(PortalSearchTest.class);
-        tests.addTestSuite(FunambolTest.class);
-        tests.addTestSuite(NewListTest.class);
-        tests.addTestSuite(UserStory2173Test.class);
-        tests.addTestSuite(CalendarTestManagerTest.class);
-        tests.addTestSuite(UserStory1085Test.class);
-        tests.addTestSuite(AppointmentAttachmentTests.class);
-        tests.addTestSuite(ConfirmationsTest.class);
-        tests.addTestSuite(SharedFoldersShowOwnersPrivateAppointmentsAsBlocks.class);
-        tests.addTestSuite(CreatedByTest.class);
-        tests.addTestSuite(AllAliasTest.class);
-        tests.addTestSuite(ListAliasTest.class);
-        tests.addTestSuite(DeleteMultipleAppointmentTest.class);
-        tests.addTestSuite(GetChangeExceptionsTest.class);
-        tests.addTest(RecurrenceTestSuite.suite());
-        tests.addTest(AppointmentBugTestSuite.suite());
-        tests.addTest(NewAppointmentHttpApiTestSuite.suite());
-        return tests;
+    public List<Appointment> getAppointments(final TimeZone timeZone) throws OXException, JSONException {
+        Appointment[] objects = AppointmentTest.jsonArray2AppointmentArray((JSONArray) getData(), getColumns(), timeZone);
+        return Arrays.asList(objects);
     }
+
 }
