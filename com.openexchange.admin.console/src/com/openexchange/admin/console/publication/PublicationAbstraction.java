@@ -46,54 +46,45 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.rmi;
+package com.openexchange.admin.console.publication;
 
-import java.rmi.Remote;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Publication;
-import com.openexchange.admin.rmi.exceptions.MissingServiceException;
-import com.openexchange.admin.rmi.exceptions.NoSuchPublicationException;
+import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
+import com.openexchange.admin.console.user.UserAbstraction;
+import com.openexchange.admin.rmi.OXPublicationInterface;
 
-/**
- *
- * This interface defines methods for checking and deleting Publications by Users.<br><br>
- *
- * <b>Example:</b>
- * <pre>
- * final OXPublicationInterface iface = (OXPublicationInterface)Naming.lookup("rmi:///oxhost/"+OXPublicationInterface.RMI_NAME);
- *
- * </pre
- *
- *
- * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
- *
- */
-public interface OXPublicationInterface extends Remote {
+public abstract class PublicationAbstraction extends UserAbstraction {
 
-    /**
-     * RMI name to be used in the naming lookup.
-     */
-    public static final String RMI_NAME = "OXPublication";
-    
-    /**
-     * This method returns a Publication for a given Url
-     *
-     * @return Publication if Publication is found
-     * @throws OXException 
-     * @throws NoSuchPublicationException 
-     * @throws MissingServiceException 
-     */
-    public Publication getPublication(final String url, final Credentials auth) throws RemoteException, NoSuchPublicationException, MissingServiceException;
-    
-    /**
-     * This method will delete a Publication
-     *
-     * @return true if the publication is deleted, false if not
-     * @throws OXException 
-     * @throws NoSuchPublicationException 
-     * @throws MissingServiceException 
-     */
-    public boolean deletePublication(final String url, final Credentials auth) throws RemoteException, NoSuchPublicationException, MissingServiceException;
-    
+    protected static final String OPT_PUBLICATION_URL = "publication-url";
+
+    protected CLIOption publicationUrl;
+
+    protected PublicationAbstraction() {
+        super();
+    }
+
+    public String parseAndSetPublicationUrl(final AdminParser parser) {
+        return (String) parser.getOptionValue(this.publicationUrl);
+    }
+
+    protected final OXPublicationInterface getPublicationInterface() throws NotBoundException, MalformedURLException, RemoteException {
+        return (OXPublicationInterface) Naming.lookup(RMI_HOSTNAME + OXPublicationInterface.RMI_NAME);
+    }
+
+    protected final void setOptions(final AdminParser parser) {
+        setDefaultCommandLineOptions(parser);
+        setPublicationUrlOption(parser);
+        setFurtherOptions(parser);
+    }
+
+    protected final void setPublicationUrlOption(final AdminParser parser) {
+        this.publicationUrl = setLongOpt(parser,OPT_PUBLICATION_URL,"The publication's URL", true, true, false);
+    }
+
+    protected abstract void setFurtherOptions(final AdminParser parser);
+
 }

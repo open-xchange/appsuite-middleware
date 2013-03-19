@@ -46,54 +46,34 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.rmi;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Publication;
-import com.openexchange.admin.rmi.exceptions.MissingServiceException;
-import com.openexchange.admin.rmi.exceptions.NoSuchPublicationException;
+package com.openexchange.ajax.appointment.action;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.TimeZone;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.AppointmentTest;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractColumnsResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Appointment;
 
 /**
- *
- * This interface defines methods for checking and deleting Publications by Users.<br><br>
- *
- * <b>Example:</b>
- * <pre>
- * final OXPublicationInterface iface = (OXPublicationInterface)Naming.lookup("rmi:///oxhost/"+OXPublicationInterface.RMI_NAME);
- *
- * </pre
- *
- *
- * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
- *
+ * {@link GetChangeExceptionsResponse}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public interface OXPublicationInterface extends Remote {
+public class GetChangeExceptionsResponse extends AbstractColumnsResponse {
 
-    /**
-     * RMI name to be used in the naming lookup.
-     */
-    public static final String RMI_NAME = "OXPublication";
-    
-    /**
-     * This method returns a Publication for a given Url
-     *
-     * @return Publication if Publication is found
-     * @throws OXException 
-     * @throws NoSuchPublicationException 
-     * @throws MissingServiceException 
-     */
-    public Publication getPublication(final String url, final Credentials auth) throws RemoteException, NoSuchPublicationException, MissingServiceException;
-    
-    /**
-     * This method will delete a Publication
-     *
-     * @return true if the publication is deleted, false if not
-     * @throws OXException 
-     * @throws NoSuchPublicationException 
-     * @throws MissingServiceException 
-     */
-    public boolean deletePublication(final String url, final Credentials auth) throws RemoteException, NoSuchPublicationException, MissingServiceException;
-    
+    protected GetChangeExceptionsResponse(Response response) {
+        super(response);
+    }
+
+    public List<Appointment> getAppointments(final TimeZone timeZone) throws OXException, JSONException {
+        Appointment[] objects = AppointmentTest.jsonArray2AppointmentArray((JSONArray) getData(), getColumns(), timeZone);
+        return Arrays.asList(objects);
+    }
+
 }

@@ -70,6 +70,8 @@ import com.openexchange.ajax.appointment.action.AppointmentInsertResponse;
 import com.openexchange.ajax.appointment.action.ConfirmRequest;
 import com.openexchange.ajax.appointment.action.ConfirmResponse;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
+import com.openexchange.ajax.appointment.action.GetChangeExceptionsRequest;
+import com.openexchange.ajax.appointment.action.GetChangeExceptionsResponse;
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.HasRequest;
@@ -310,6 +312,19 @@ public class CalendarTestManager implements TestManager {
             e.printStackTrace();
             return null;
         }
+    }
+    
+    public List<Appointment> getChangeExceptions(int folderId, int objectId, int[] columns) {
+        GetChangeExceptionsRequest request = new GetChangeExceptionsRequest(folderId, objectId, columns);
+        GetChangeExceptionsResponse response = execute(request);
+        extractInfo(response);
+        try {
+            return response.getAppointments(timezone);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        
     }
 
     public void update(Appointment updatedAppointment) {

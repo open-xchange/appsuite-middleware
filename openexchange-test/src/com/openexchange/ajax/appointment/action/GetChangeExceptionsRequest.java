@@ -46,54 +46,65 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.rmi;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Publication;
-import com.openexchange.admin.rmi.exceptions.MissingServiceException;
-import com.openexchange.admin.rmi.exceptions.NoSuchPublicationException;
+package com.openexchange.ajax.appointment.action;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- *
- * This interface defines methods for checking and deleting Publications by Users.<br><br>
- *
- * <b>Example:</b>
- * <pre>
- * final OXPublicationInterface iface = (OXPublicationInterface)Naming.lookup("rmi:///oxhost/"+OXPublicationInterface.RMI_NAME);
- *
- * </pre
- *
- *
- * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
- *
+ * {@link GetChangeExceptionsRequest}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public interface OXPublicationInterface extends Remote {
+public class GetChangeExceptionsRequest extends AbstractAppointmentRequest<GetChangeExceptionsResponse> {
 
-    /**
-     * RMI name to be used in the naming lookup.
-     */
-    public static final String RMI_NAME = "OXPublication";
+    private int folderId;
+
+    private int objectId;
+
+    private int[] columns;
+
+    private boolean failOnError;
+
+    public GetChangeExceptionsRequest(int folderId, int objectId, int[] columns) {
+        this(folderId, objectId, columns, true);
+    }
     
-    /**
-     * This method returns a Publication for a given Url
-     *
-     * @return Publication if Publication is found
-     * @throws OXException 
-     * @throws NoSuchPublicationException 
-     * @throws MissingServiceException 
-     */
-    public Publication getPublication(final String url, final Credentials auth) throws RemoteException, NoSuchPublicationException, MissingServiceException;
-    
-    /**
-     * This method will delete a Publication
-     *
-     * @return true if the publication is deleted, false if not
-     * @throws OXException 
-     * @throws NoSuchPublicationException 
-     * @throws MissingServiceException 
-     */
-    public boolean deletePublication(final String url, final Credentials auth) throws RemoteException, NoSuchPublicationException, MissingServiceException;
-    
+    public GetChangeExceptionsRequest(int folderId, int objectId, int[] columns, boolean failOnError) {
+        this.folderId = folderId;
+        this.objectId = objectId;
+        this.columns = columns;
+        this.failOnError = failOnError;
+    }
+
+    @Override
+    public Method getMethod() {
+        return Method.GET;
+    }
+
+    @Override
+    public Parameter[] getParameters() throws IOException, JSONException {
+        final List<Parameter> parameterList = new ArrayList<Parameter>();
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GETCHANGEEXCEPTIONS));
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(folderId)));
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        parameterList.add(new Parameter(AJAXServlet.PARAMETER_ID, objectId));
+        return parameterList.toArray(new Parameter[parameterList.size()]);
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends GetChangeExceptionsResponse> getParser() {
+        return new GetChangeExceptionsParser(failOnError, columns);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
 }

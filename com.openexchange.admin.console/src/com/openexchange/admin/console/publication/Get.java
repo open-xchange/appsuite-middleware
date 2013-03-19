@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,54 +46,40 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.rmi;
 
-import java.rmi.Remote;
+package com.openexchange.admin.console.publication;
+
 import java.rmi.RemoteException;
+import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.rmi.OXPublicationInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Publication;
-import com.openexchange.admin.rmi.exceptions.MissingServiceException;
-import com.openexchange.admin.rmi.exceptions.NoSuchPublicationException;
+import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
+
 
 /**
+ * {@link Get}
  *
- * This interface defines methods for checking and deleting Publications by Users.<br><br>
- *
- * <b>Example:</b>
- * <pre>
- * final OXPublicationInterface iface = (OXPublicationInterface)Naming.lookup("rmi:///oxhost/"+OXPublicationInterface.RMI_NAME);
- *
- * </pre
- *
- *
- * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface OXPublicationInterface extends Remote {
+public final class Get extends GetCore {
 
     /**
-     * RMI name to be used in the naming lookup.
+     * Initializes a new {@link Get}.
      */
-    public static final String RMI_NAME = "OXPublication";
-    
-    /**
-     * This method returns a Publication for a given Url
-     *
-     * @return Publication if Publication is found
-     * @throws OXException 
-     * @throws NoSuchPublicationException 
-     * @throws MissingServiceException 
-     */
-    public Publication getPublication(final String url, final Credentials auth) throws RemoteException, NoSuchPublicationException, MissingServiceException;
-    
-    /**
-     * This method will delete a Publication
-     *
-     * @return true if the publication is deleted, false if not
-     * @throws OXException 
-     * @throws NoSuchPublicationException 
-     * @throws MissingServiceException 
-     */
-    public boolean deletePublication(final String url, final Credentials auth) throws RemoteException, NoSuchPublicationException, MissingServiceException;
-    
+    public Get() {
+        super();
+    }
+
+    @Override
+    protected void maincall(AdminParser parser, OXPublicationInterface oxpub, Publication pub, Credentials auth) throws RemoteException, DuplicateExtensionException {
+        String url = parseAndSetPublicationUrl(parser);
+        pub.setUrl(url);
+    }
+
+    @Override
+    protected void setFurtherOptions(AdminParser parser) {
+        // No further options
+    }
+
 }
