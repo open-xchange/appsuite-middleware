@@ -47,102 +47,30 @@
  *
  */
 
-package com.openexchange.capabilities;
+package com.openexchange.mailfilter.internal;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link Capability} - Represents a capability.
+ * {@link MailFilterChecker}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class Capability {
+public class MailFilterChecker implements CapabilityChecker {
 
-    private String id;
-    private boolean backendSupport;
-    private final Map<String, String> attributes = new HashMap<String, String>();
-
-    /**
-     * Initializes a new {@link Capability}.
-     */
-    public Capability(String id) {
-        this(id, true);
-    }
-
-    /**
-     * Initializes a new {@link Capability}.
-     */
-    public Capability(String id, boolean backendSupport) {
-        super();
-        this.id = id;
-        this.backendSupport = backendSupport;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public boolean isSupportedByBackend() {
-        return backendSupport;
-    }
-
-    public Capability setBackendSupport(boolean backendSupport) {
-        this.backendSupport = backendSupport;
-        return this;
-    }
-
-    public Map<String, String> getAttributes() {
-        return attributes;
-    }
-
-    public Capability set(String key, String value) {
-        attributes.put(key, value);
-        return this;
-    }
-
-    public String getAttribute(String key) {
-        return attributes.get(key);
-    }
-
-    public void learnFrom(Capability otherCapability) {
-        attributes.putAll(otherCapability.attributes);
-    }
+    public static final String CAPABILITY = "mailfilter";
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof CapabilityService)) {
-            return false;
-        }
-        Capability other = (Capability) obj;
-        if (id == null) {
-            if (other.id != null) {
+    public boolean isEnabled(String capability, ServerSession session) throws OXException {
+        if (capability.equals(CAPABILITY)) {
+            if (session.isAnonymous()) {
                 return false;
             }
-        } else if (!id.equals(other.id)) {
-            return false;
         }
         return true;
-    }
-    
-    @Override
-    public String toString() {
-        return id;
     }
 
 }

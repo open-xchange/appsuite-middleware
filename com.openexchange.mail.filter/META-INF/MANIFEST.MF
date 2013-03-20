@@ -9,6 +9,7 @@ Bundle-Activator: com.openexchange.mailfilter.osgi.Activator
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.container,
  com.openexchange.ajax.writer,
+ com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.configuration,
  com.openexchange.dispatcher,
