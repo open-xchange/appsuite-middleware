@@ -50,10 +50,12 @@
 package com.openexchange.service.indexing.impl.internal;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
+import org.quartz.Trigger;
 import org.quartz.service.QuartzService;
 import com.openexchange.service.indexing.JobInfo;
 
@@ -82,7 +84,14 @@ public class UnscheduleJobCallable implements Callable<Object>, Serializable {
             JobKey jobKey = Tools.generateJobKey(jobInfo);
             QuartzService quartzService = Services.getService(QuartzService.class);
             Scheduler scheduler = quartzService.getLocalScheduler();
-            scheduler.deleteJob(jobKey);
+            List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
+            for (Trigger trigger : triggers) {
+                scheduler.unscheduleJob(trigger.getKey());
+            }
+            
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Unscheduled " + triggers.size() + " triggers for job " + jobKey.toString() + ".");
+            }
         } catch (Throwable t) {
             LOG.error(t.getMessage(), t);
         }

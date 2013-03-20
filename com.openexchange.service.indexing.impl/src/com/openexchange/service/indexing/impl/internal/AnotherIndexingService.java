@@ -74,6 +74,11 @@ public class AnotherIndexingService implements IndexingService {
 
     @Override
     public void scheduleJob(boolean async, final JobInfo info, final Date startDate, final long repeatInterval, final int priority) throws OXException {
+        if (LOG.isTraceEnabled()) {
+            String at = startDate == null ? "now" : startDate.toString();
+            LOG.trace("Scheduling job " + info.toString() + " at " + at + " with interval " + repeatInterval + " and priority " + priority + ".");
+        }
+        
         Task<Object> task = new TaskAdapter(new ScheduleJobCallable(info, startDate, repeatInterval, priority));
         try {
             if (async) {
@@ -89,6 +94,10 @@ public class AnotherIndexingService implements IndexingService {
 
     @Override
     public void unscheduleJob(boolean async, JobInfo info) throws OXException {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Unscheduling job " + info.toString());
+        }
+        
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         ExecutorService executorService = hazelcast.getExecutorService();
         FutureTask<Object> task = new DistributedTask<Object>(new UnscheduleJobCallable(info), hazelcast.getCluster().getMembers());
@@ -97,6 +106,10 @@ public class AnotherIndexingService implements IndexingService {
 
     @Override
     public void unscheduleAllForUser(boolean async, int contextId, int userId) throws OXException {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Unscheduling all jobs for user " + userId + " in context " + contextId + ".");
+        }
+        
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         ExecutorService executorService = hazelcast.getExecutorService();
         FutureTask<Object> task = new DistributedTask<Object>(new UnscheduleAllJobsCallable(contextId, userId), hazelcast.getCluster().getMembers());
@@ -105,6 +118,10 @@ public class AnotherIndexingService implements IndexingService {
 
     @Override
     public void unscheduleAllForContext(boolean async, int contextId) throws OXException {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Unscheduling all jobs for context " + contextId + ".");
+        }
+        
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         ExecutorService executorService = hazelcast.getExecutorService();
         FutureTask<Object> task = new DistributedTask<Object>(new UnscheduleAllJobsCallable(contextId, -1), hazelcast.getCluster().getMembers());

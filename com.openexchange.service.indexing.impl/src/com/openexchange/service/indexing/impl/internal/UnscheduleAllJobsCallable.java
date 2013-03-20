@@ -50,12 +50,13 @@
 package com.openexchange.service.indexing.impl.internal;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
+import org.quartz.Trigger;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.service.QuartzService;
 
@@ -90,11 +91,33 @@ public class UnscheduleAllJobsCallable implements Callable<Object>, Serializable
                 if (userId > 0) {
                     String jobGroup = Tools.generateJobGroup(contextId, userId);
                     Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(jobGroup));
-                    scheduler.deleteJobs(new ArrayList<JobKey>(jobKeys));
+                    int count = 0;
+                    for (JobKey jobKey : jobKeys) {
+                        List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
+                        count += triggers.size();
+                        for (Trigger trigger : triggers) {
+                            scheduler.unscheduleJob(trigger.getKey());
+                        }
+                    }
+                    
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Unscheduled " + count + " triggers for " + jobKeys.size() + " jobs for user " + userId + " in context " + contextId + ".");
+                    }
                 } else {
                     String jobGroup = Tools.generateJobGroup(contextId);
                     Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupStartsWith(jobGroup));
-                    scheduler.deleteJobs(new ArrayList<JobKey>(jobKeys));
+                    int count = 0;
+                    for (JobKey jobKey : jobKeys) {
+                        List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
+                        count += triggers.size();
+                        for (Trigger trigger : triggers) {
+                            scheduler.unscheduleJob(trigger.getKey());
+                        }
+                    }
+                    
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Unscheduled " + count + " triggers for " + jobKeys.size() + " jobs for user " + userId + " in context " + contextId + ".");
+                    }
                 }
             }
         } catch (Throwable t) {
