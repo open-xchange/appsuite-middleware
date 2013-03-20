@@ -736,6 +736,15 @@ public final class SMTPTransport extends MailTransport {
         } catch (final MessagingException e) {
             boolean throwIt = true;
             if (e.getNextException() instanceof javax.activation.UnsupportedDataTypeException) {
+                // Did we encounter "no object DCH for MIME type xxxxx/yyyy" ?
+                if (toLowerCase(e.getNextException().getMessage()).indexOf("no object dch") >= 0) {
+                    MailInitialization.MailcapInitialization.getInstance().start();
+                    try {
+                        transport.sendMessage(smtpMessage, recipients);
+                    } catch (final MessagingException me) {
+                        throw MimeMailException.handleMessagingException(e, smtpConfig);
+                    }
+                }
                 try {
                     final String cts = smtpMessage.getHeader("Content-Type", null);
                     if ((null != cts) && cts.startsWith("multipart/")) {
@@ -749,7 +758,7 @@ public final class SMTPTransport extends MailTransport {
                     }
                 } catch (final Exception ignore) {
                     // Ignore
-                    LOG.warn("Attempt to recover from \"" + e.getNextException().getMessage() + "\" failed.", ignore);
+                    LOG.warn("Failed attempt to recover from \"" + e.getNextException().getMessage() + "\".", ignore);
                 }
             }
             if (throwIt) {
@@ -936,6 +945,20 @@ public final class SMTPTransport extends MailTransport {
             }
         }
         return sb.toString();
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
     private static boolean isEmpty(final String string) {
