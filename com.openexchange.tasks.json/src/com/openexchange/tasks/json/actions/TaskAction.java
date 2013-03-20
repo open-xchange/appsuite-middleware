@@ -183,7 +183,7 @@ public abstract class TaskAction implements AJAXActionService {
                     }
                     participants[pos] = new UserParticipant(foundUser.getId());
                 } catch (final OXException e) {
-                    log.error(e); // ...and continue doing this for the remaining users
+                    //log.error(e); // ...and continue doing this for the remaining users
                 }
             }
         }
