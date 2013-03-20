@@ -332,13 +332,17 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     private void loadUserConfiguration(Cache cache, TIntObjectMap<UserConfiguration> map, Context ctx, int[] userIds, int[][] groups, boolean extendedPermissions) throws OXException {
+        if (null == userIds || 0 == userIds.length) {
+            return;
+        }
         final UserConfiguration[] loaded;
-        if (0 == userIds.length) {
-            loaded = new UserConfiguration[0];
-        } else if (extendedPermissions) {
+        if (extendedPermissions) {
             loaded = getUserConfigurationWithoutExtended(cache, ctx, userIds, groups);
         } else {
             loaded = delegateStorage.getUserConfigurationWithoutExtended(ctx, userIds, groups);
+        }
+        if (null == loaded) {
+            return;
         }
         for (UserConfiguration userConfig : loaded) {
             int userId = userConfig.getUserId();

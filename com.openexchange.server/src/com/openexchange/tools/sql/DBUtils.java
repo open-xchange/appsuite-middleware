@@ -296,11 +296,15 @@ public final class DBUtils {
      * @return the ready to use SQL statement.
      */
     public static String getIN(final String sql, final int length) {
-        final StringBuilder retval = new StringBuilder(sql);
-        for (int i = 0; i < length; i++) {
-            retval.append("?,");
+        if (length <= 0) {
+            return sql;
         }
-        retval.setCharAt(retval.length() - 1, ')');
+        final StringBuilder retval = new StringBuilder(sql);
+        retval.append('?');
+        for (int i = 1; i < length; i++) {
+            retval.append(",?");
+        }
+        retval.append(')');
         return retval.toString();
     }
 
