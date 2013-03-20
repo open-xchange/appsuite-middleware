@@ -50,6 +50,7 @@
 package com.openexchange.service.indexing.impl.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -149,6 +150,11 @@ public class IndexingServiceMBeanImpl extends StandardMBean implements IndexingS
         } finally {
             Thread.currentThread().setContextClassLoader(tmp);
         }
+    }
+    
+    @Override
+    public List<String> getLocalScheduledJobs() throws MBeanException {
+        return Collections.emptyList();
     }
 
     @Override
