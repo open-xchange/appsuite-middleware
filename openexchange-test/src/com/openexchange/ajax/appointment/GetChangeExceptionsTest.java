@@ -91,6 +91,7 @@ public class GetChangeExceptionsTest extends AbstractAJAXSession {
         appointment.setEndDate(D("01.05.2013 09:00"));
         appointment.setRecurrenceType(Appointment.DAILY);
         appointment.setInterval(1);
+        appointment.setAlarm(30);
         appointment.setParentFolderID(getClient().getValues().getPrivateAppointmentFolder());
         appointment.setIgnoreConflicts(true);
         appointment.setTitle("Change Exception test");
@@ -106,7 +107,7 @@ public class GetChangeExceptionsTest extends AbstractAJAXSession {
         exception1.setIgnoreConflicts(true);
         exception1.setLastModified(new Date(Long.MAX_VALUE));
         exception1.setRecurrencePosition(2);
-        exception1.setTitle("Exception 1");
+        exception1.setAlarm(30);
 
         UpdateRequest updateRequest = new UpdateRequest(exception1, getClient().getValues().getTimeZone());
         getClient().execute(updateRequest);
@@ -118,14 +119,14 @@ public class GetChangeExceptionsTest extends AbstractAJAXSession {
         exception2.setIgnoreConflicts(true);
         exception2.setLastModified(new Date(Long.MAX_VALUE));
         exception2.setRecurrencePosition(5);
-        exception2.setTitle("Exception 2");
+        exception2.setAlarm(30);
 
         updateRequest = new UpdateRequest(exception2, getClient().getValues().getTimeZone());
         getClient().execute(updateRequest);
     }
 
     public void testGetChangeExceptions() throws Exception {
-        int[] columns = new int[] { Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.TITLE };
+        int[] columns = new int[] { Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.TITLE, Appointment.ALARM };
         GetChangeExceptionsRequest request = new GetChangeExceptionsRequest(
             appointment.getParentFolderID(),
             appointment.getObjectID(),

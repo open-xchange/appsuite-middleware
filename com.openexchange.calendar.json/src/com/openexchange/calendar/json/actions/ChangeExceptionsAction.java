@@ -107,7 +107,7 @@ public class ChangeExceptionsAction extends AppointmentAction {
         }
 
         final CalendarCollectionService collection = getService(CalendarCollectionService.class);
-        final CalendarDataObject[] appointments = collection.getChangeExceptionsByRecurrence(id, columns, session);
+        final CalendarDataObject[] appointments = collection.getChangeExceptionsByRecurrence(id, _appointmentFields, session);
 
         return new AJAXRequestResult(Arrays.asList(appointments), timestamp, "appointment");
     }
