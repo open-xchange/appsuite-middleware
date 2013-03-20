@@ -46,54 +46,47 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.rmi;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Publication;
-import com.openexchange.admin.rmi.exceptions.MissingServiceException;
-import com.openexchange.admin.rmi.exceptions.NoSuchPublicationException;
+package com.openexchange.service.indexing.impl.internal;
+
+import java.io.Serializable;
+import java.util.concurrent.Callable;
+import org.apache.commons.logging.Log;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.service.QuartzService;
+import com.openexchange.service.indexing.JobInfo;
+
 
 /**
+ * {@link UnscheduleJobCallable}
  *
- * This interface defines methods for checking and deleting Publications by Users.<br><br>
- *
- * <b>Example:</b>
- * <pre>
- * final OXPublicationInterface iface = (OXPublicationInterface)Naming.lookup("rmi:///oxhost/"+OXPublicationInterface.RMI_NAME);
- *
- * </pre
- *
- *
- * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
- *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface OXPublicationInterface extends Remote {
+public class UnscheduleJobCallable implements Callable<Object>, Serializable {
+    
+    private static final long serialVersionUID = 5612808787423998180L;
+    
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(UnscheduleJobCallable.class);
+    
+    private final JobInfo jobInfo;
 
-    /**
-     * RMI name to be used in the naming lookup.
-     */
-    public static final String RMI_NAME = "OXPublication";
-    
-    /**
-     * This method returns a Publication for a given Url
-     *
-     * @return Publication if Publication is found
-     * @throws OXException 
-     * @throws NoSuchPublicationException 
-     * @throws MissingServiceException 
-     */
-    public Publication getPublication(final String url, final Credentials auth) throws RemoteException, NoSuchPublicationException, MissingServiceException;
-    
-    /**
-     * This method will delete a Publication
-     *
-     * @return true if the publication is deleted, false if not
-     * @throws OXException 
-     * @throws NoSuchPublicationException 
-     * @throws MissingServiceException 
-     */
-    public boolean deletePublication(final String url, final Credentials auth) throws RemoteException, NoSuchPublicationException, MissingServiceException;
-    
+    public UnscheduleJobCallable(JobInfo jobInfo) {
+        super();
+        this.jobInfo = jobInfo;
+    }
+
+    @Override
+    public Object call() throws Exception {
+        try {
+            JobKey jobKey = Tools.generateJobKey(jobInfo);
+            QuartzService quartzService = Services.getService(QuartzService.class);
+            Scheduler scheduler = quartzService.getLocalScheduler();
+            scheduler.deleteJob(jobKey);
+        } catch (Throwable t) {
+            LOG.error(t.getMessage(), t);
+        }
+        return null;
+    }
+
 }

@@ -69,45 +69,46 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ChangeExceptionsAction}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 @Action(method = RequestMethod.GET, name = "getChangeExceptions", description = "Get all Change Exceptions of a particulat appointment series.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "id", description = "Object ID of the requested appointment."),
     @Parameter(name = "folder", description = "Object ID of the folder, whose contents are queried."),
-    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for appointments are defined in Common object data, Detailed task and appointment data and Detailed appointment data. The alias \"all\" uses the predefined columnset [1, 20, 207, 206, 2]."), }, responseDescription = "Response with timestamp: An array with appointment data. Each array element describes one appointment and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
+    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for appointments are defined in Common object data, Detailed task and appointment data and Detailed appointment data. The alias \"all\" uses the predefined columnset [1, 20, 207, 206, 2].")
+    }, responseDescription = "Response with timestamp: An array with appointment data. Each array element describes one appointment and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public class ChangeExceptionsAction extends AppointmentAction {
 
     /**
      * Initializes a new {@link ChangeExceptionsAction}.
-     * 
+     *
      * @param services
      */
-    public ChangeExceptionsAction(ServiceLookup services) {
+    public ChangeExceptionsAction(final ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(AppointmentAJAXRequest req) throws OXException, JSONException {
-        int id = req.checkInt(AJAXServlet.PARAMETER_ID);
-        int inFolder = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
-        int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
+    protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
+        final int id = req.checkInt(AJAXServlet.PARAMETER_ID);
+        final int inFolder = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
+        final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
 
-        ServerSession session = req.getSession();
-        AppointmentSQLInterface appointmentSql = getService().createAppointmentSql(session);
+        final ServerSession session = req.getSession();
+        final AppointmentSQLInterface appointmentSql = getService().createAppointmentSql(session);
 
         Date timestamp = null;
         try {
-            CalendarDataObject master = appointmentSql.getObjectById(id, inFolder); // Check for read rights.
+            final CalendarDataObject master = appointmentSql.getObjectById(id, inFolder); // Check for read rights.
             timestamp = master.getLastModified();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
         }
 
-        CalendarCollectionService collection = getService(CalendarCollectionService.class);
-        CalendarDataObject[] appointments = collection.getChangeExceptionsByRecurrence(id, columns, session);
-        
+        final CalendarCollectionService collection = getService(CalendarCollectionService.class);
+        final CalendarDataObject[] appointments = collection.getChangeExceptionsByRecurrence(id, columns, session);
+
         return new AJAXRequestResult(Arrays.asList(appointments), timestamp, "appointment");
     }
 

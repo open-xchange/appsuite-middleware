@@ -83,8 +83,28 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
     private String description;
     private boolean descriptionSet = false;
 
+    private String url;
+
     public String getEntityId() {
         return entityId;
+    }
+    
+    /**
+     * Gets the url
+     *
+     * @return The url
+     */
+    public String getUrl() {
+        return url;
+    }
+    
+    /**
+     * Sets the url
+     *
+     * @param url The url to set
+     */
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public void setEntityId(final String entityId) {
@@ -224,9 +244,6 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
         this.description = description;
     }
     
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -248,9 +265,6 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
         return result;
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -334,5 +348,39 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
         }
         return true;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(256);
+        builder.append("Publication [");
+        if (userId != null) {
+            builder.append("userId=").append(userId).append(", ");
+        }
+        if (context != null) {
+            builder.append("context=").append(context).append(", ");
+        }
+        if (id != null) {
+            builder.append("id=").append(id).append(", ");
+        }
+        if (entityId != null) {
+            builder.append("entityId=").append(entityId).append(", ");
+        }
+        if (module != null) {
+            builder.append("module=").append(module).append(", ");
+        }
+        if (name != null) {
+            builder.append("name=").append(name).append(", ");
+        }
+        if (description != null) {
+            builder.append("description=").append(description).append(", ");
+        }
+        if (url != null) {
+            builder.append("url=").append(url);
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
+    
 
 }

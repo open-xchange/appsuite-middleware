@@ -82,11 +82,11 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
     public Publication getPublication(String url, Credentials auth) throws NoSuchPublicationException, MissingServiceException {
         PublicationTargetDiscoveryService discovery = AdminServiceRegistry.getInstance().getService(PublicationTargetDiscoveryService.class);
         if (null == discovery){
-            throw new MissingServiceException("PublicationTargetDiscoveryService is missing or not started yet");
+            throw new MissingServiceException(PublicationTargetDiscoveryService.class.getSimpleName()+" is missing or not started yet");
         }
         ContextService contexts = AdminServiceRegistry.getInstance().getService(ContextService.class);
         if (null == contexts){
-            throw new MissingServiceException("ContextService is missing or not started yet");
+            throw new MissingServiceException(ContextService.class.getSimpleName()+" is missing or not started yet");
         }
         try {
             for (PublicationTarget pubTar : discovery.listTargets()) {
@@ -102,18 +102,18 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
         } catch (OXException e) {
             log.error(e.getMessage(), e);
         }
-        throw new NoSuchPublicationException("no Publication with URL " + url + " found");
+        throw new NoSuchPublicationException("No such publication with URL \"" + url + "\" found");
     }
 
     @Override
     public boolean deletePublication(String url, Credentials auth) throws NoSuchPublicationException, MissingServiceException {
         PublicationTargetDiscoveryService discovery = AdminServiceRegistry.getInstance().getService(PublicationTargetDiscoveryService.class);
         if (null == discovery){
-            throw new MissingServiceException("PublicationTargetDiscoveryService is missing or not started yet");
+            throw new MissingServiceException(PublicationTargetDiscoveryService.class.getSimpleName()+" is missing or not started yet");
         }
         ContextService contexts = AdminServiceRegistry.getInstance().getService(ContextService.class);
         if (null == contexts){
-            throw new MissingServiceException("ContextService is missing or not started yet");
+            throw new MissingServiceException(ContextService.class.getSimpleName()+" is missing or not started yet");
         }
         try {
             for (PublicationTarget pubTar : discovery.listTargets()) {
