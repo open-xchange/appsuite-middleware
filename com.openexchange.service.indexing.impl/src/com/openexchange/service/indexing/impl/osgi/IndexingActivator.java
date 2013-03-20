@@ -49,12 +49,16 @@
 
 package com.openexchange.service.indexing.impl.osgi;
 
+import java.util.Map;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.quartz.service.QuartzService;
+import com.hazelcast.config.Config;
+import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -144,8 +148,10 @@ public class IndexingActivator extends HousekeepingActivator {
 
     private void registerMBean() throws NotCompliantMBeanException {
         try {
+            HazelcastInstance hazelcast = getService(HazelcastInstance.class);
+            String mapName = discoverMonitoringMapName(hazelcast.getConfig());
             indexingMBeanName = new ObjectName(IndexingServiceMBean.DOMAIN, IndexingServiceMBean.KEY, IndexingServiceMBean.VALUE);
-            indexingMBean = new AnotherIndexingServiceMBeanImpl();
+            indexingMBean = new AnotherIndexingServiceMBeanImpl(mapName);
             track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
 
                 @Override
@@ -169,6 +175,20 @@ public class IndexingActivator extends HousekeepingActivator {
         } catch (MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
         }
+    }
+    
+    private static String discoverMonitoringMapName(Config config) throws IllegalStateException {
+        Map<String, MapConfig> mapConfigs = config.getMapConfigs();
+        if (null != mapConfigs && 0 < mapConfigs.size()) {
+            for (String mapName : mapConfigs.keySet()) {
+                if (mapName.startsWith("indexingServiceMonitoring-")) {
+                    LOG.info("Using distributed map '" + mapName + "'.");
+                    return mapName;
+                }
+            }
+        }
+        String msg = "No distributed indexingServiceMonitoring map found in hazelcast configuration";
+        throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR));
     }
 
 }

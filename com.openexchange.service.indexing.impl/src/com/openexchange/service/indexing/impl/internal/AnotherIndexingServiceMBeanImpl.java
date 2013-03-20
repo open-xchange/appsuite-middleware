@@ -50,9 +50,9 @@
 package com.openexchange.service.indexing.impl.internal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
@@ -65,8 +65,10 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerListener;
 import org.quartz.Trigger;
+import org.quartz.Trigger.CompletedExecutionInstruction;
 import org.quartz.Trigger.TriggerState;
 import org.quartz.TriggerKey;
+import org.quartz.TriggerListener;
 import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.service.QuartzService;
 import com.hazelcast.core.HazelcastInstance;
@@ -79,16 +81,26 @@ import com.openexchange.service.indexing.IndexingServiceMBean;
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class AnotherIndexingServiceMBeanImpl extends StandardMBean implements IndexingServiceMBean, SchedulerListener {
+public class AnotherIndexingServiceMBeanImpl extends StandardMBean implements IndexingServiceMBean, SchedulerListener, TriggerListener {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(AnotherIndexingServiceMBeanImpl.class);
 
-    public AnotherIndexingServiceMBeanImpl() throws NotCompliantMBeanException {
+    private final String monitoringMapName;
+    
+    public AnotherIndexingServiceMBeanImpl(String monitoringMapName) throws NotCompliantMBeanException {
         super(IndexingServiceMBean.class);
+        this.monitoringMapName = monitoringMapName;
         try {
             QuartzService quartzService = Services.getService(QuartzService.class);
             Scheduler scheduler = quartzService.getLocalScheduler();
             scheduler.getListenerManager().addSchedulerListener(this);
+            scheduler.getListenerManager().addTriggerListener(this);
+            /*
+             * Clean stale jobs that may exist from a possible crash
+             */
+            MultiMap<String, String> jobs = getClusterWideJobMap();
+            String nodeKey = getNodeKey();
+            jobs.remove(nodeKey);
         } catch (Throwable t) {
             LOG.warn("Could not register scheduler listener. Monitoring will return incorrect values!", t);
         }
@@ -137,10 +149,22 @@ public class AnotherIndexingServiceMBeanImpl extends StandardMBean implements In
     @Override
     public List<String> getAllScheduledJobs() throws MBeanException {
         try {
+            /*
+             * We iterate only through all entries of which we know their cluster member.
+             * This allows entries of removed cluster nodes to be evicted after some time.
+             */
             List<String> jobNames = new ArrayList<String>();
+            HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
+            Set<Member> members = hazelcast.getCluster().getMembers();
             MultiMap<String, String> jobs = getClusterWideJobMap();
-            for (Entry<String, String> entry : jobs.entrySet()) {
-                jobNames.add(entry.getValue());
+            for (Member member : members) {
+                String nodeName = Tools.resolveSocketAddress(member.getInetSocketAddress());
+                Collection<String> forNode = jobs.get(nodeName);
+                if (forNode != null && !forNode.isEmpty()) {
+                    for (String job : forNode) {
+                        jobNames.add(nodeName + ": " + job);
+                    }
+                }
             }
 
             return jobNames;
@@ -178,7 +202,7 @@ public class AnotherIndexingServiceMBeanImpl extends StandardMBean implements In
             List<String> allJobs = getAllScheduledJobs();
             List<String> jobNames = new ArrayList<String>();
             for (String job : allJobs) {
-                if (job.startsWith(triggerGroup)) {
+                if (job.contains(triggerGroup)) {
                     jobNames.add(job);
                 }
             }
@@ -213,6 +237,9 @@ public class AnotherIndexingServiceMBeanImpl extends StandardMBean implements In
         }
     }
 
+    /*
+     * SchedulerListener Implementation
+     */
     @Override
     public void jobScheduled(Trigger trigger) {
         try {
@@ -259,104 +286,85 @@ public class AnotherIndexingServiceMBeanImpl extends StandardMBean implements In
     }
 
     @Override
-    public void triggerPaused(TriggerKey triggerKey) {
-        // TODO Auto-generated method stub
+    public void triggerPaused(TriggerKey triggerKey) {}
 
+    @Override
+    public void triggersPaused(String triggerGroup) {}
+
+    @Override
+    public void triggerResumed(TriggerKey triggerKey) {}
+
+    @Override
+    public void triggersResumed(String triggerGroup) {}
+
+    @Override
+    public void jobAdded(JobDetail jobDetail) {}
+
+    @Override
+    public void jobDeleted(JobKey jobKey) {}
+
+    @Override
+    public void jobPaused(JobKey jobKey) {}
+
+    @Override
+    public void jobsPaused(String jobGroup) {}
+
+    @Override
+    public void jobResumed(JobKey jobKey) {}
+
+    @Override
+    public void jobsResumed(String jobGroup) {}
+
+    @Override
+    public void schedulerError(String msg, SchedulerException cause) {}
+
+    @Override
+    public void schedulerInStandbyMode() {}
+
+    @Override
+    public void schedulerStarted() {}
+
+    @Override
+    public void schedulerShutdown() {}
+
+    @Override
+    public void schedulerShuttingdown() {}
+
+    @Override
+    public void schedulingDataCleared() {}
+    
+    /*
+     * TriggerListener Implementation
+     */
+    @Override
+    public String getName() {
+        return getClass().getName();
     }
 
     @Override
-    public void triggersPaused(String triggerGroup) {
-        // TODO Auto-generated method stub
-
+    public void triggerFired(Trigger trigger, JobExecutionContext context) {
+        /*
+         * We touch this nodes entry to prevent it from being evicted
+         */
+        String nodeKey = getNodeKey();
+        MultiMap<String,String> jobs = getClusterWideJobMap();
+        jobs.containsKey(nodeKey);
     }
 
     @Override
-    public void triggerResumed(TriggerKey triggerKey) {
-        // TODO Auto-generated method stub
-
+    public boolean vetoJobExecution(Trigger trigger, JobExecutionContext context) {
+        return false;
     }
 
     @Override
-    public void triggersResumed(String triggerGroup) {
-        // TODO Auto-generated method stub
-
-    }
+    public void triggerMisfired(Trigger trigger) {}
 
     @Override
-    public void jobAdded(JobDetail jobDetail) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void jobDeleted(JobKey jobKey) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void jobPaused(JobKey jobKey) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void jobsPaused(String jobGroup) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void jobResumed(JobKey jobKey) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void jobsResumed(String jobGroup) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void schedulerError(String msg, SchedulerException cause) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void schedulerInStandbyMode() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void schedulerStarted() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void schedulerShutdown() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void schedulerShuttingdown() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void schedulingDataCleared() {
-        // TODO Auto-generated method stub
-
-    }
-
+    public void triggerComplete(Trigger trigger, JobExecutionContext context, CompletedExecutionInstruction triggerInstructionCode) {}
+    
     private MultiMap<String, String> getClusterWideJobMap() {
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        return hazelcast.getMultiMap("indexingServiceMonitoring-0");
+        return hazelcast.getMultiMap(monitoringMapName);
     }
 
     private String getNodeKey() {
