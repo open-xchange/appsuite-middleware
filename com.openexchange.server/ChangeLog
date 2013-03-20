@@ -1,6 +1,7 @@
 * 2013-03-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 25393: Added null guard
+ - Fix for bug 23815: Restored previous behavior of 'com.openexchange.groupware.userconfiguration.UserConfiguration.hasPermission(int)'
 
 * 2013-03-20 - martin.herfurth@open-xchange.com
 
