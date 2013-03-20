@@ -58,15 +58,18 @@ import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import org.apache.commons.logging.Log;
+import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerListener;
+import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.Trigger.CompletedExecutionInstruction;
 import org.quartz.Trigger.TriggerState;
+import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
 import org.quartz.TriggerListener;
 import org.quartz.impl.matchers.GroupMatcher;
@@ -95,12 +98,32 @@ public class AnotherIndexingServiceMBeanImpl extends StandardMBean implements In
             Scheduler scheduler = quartzService.getLocalScheduler();
             scheduler.getListenerManager().addSchedulerListener(this);
             scheduler.getListenerManager().addTriggerListener(this);
+            
             /*
-             * Clean stale jobs that may exist from a possible crash
+             * Clean stale jobs that may exist from a possible crash and schedule a consistency job
              */
             MultiMap<String, String> jobs = getClusterWideJobMap();
             String nodeKey = getNodeKey();
             jobs.remove(nodeKey);
+            
+            JobDetail consistencyJob = JobBuilder.newJob(MonitoringMapConsistencyJob.class)
+                .withIdentity(MonitoringMapConsistencyJob.class.getName())
+                .usingJobData(MonitoringMapConsistencyJob.JOB_MAP, monitoringMapName)
+                .usingJobData(MonitoringMapConsistencyJob.NODE_NAME, getNodeKey())
+                .build();
+            
+            Trigger consistencyTrigger = TriggerBuilder.newTrigger()
+                .forJob(consistencyJob)
+                .withIdentity(MonitoringMapConsistencyJob.class.getName())
+                .withSchedule(SimpleScheduleBuilder.repeatHourlyForever().withMisfireHandlingInstructionFireNow())
+                .build();
+            
+            try {
+                scheduler.addJob(consistencyJob, true);
+                scheduler.scheduleJob(consistencyTrigger);
+            } catch (SchedulerException e) {
+                LOG.warn("Could not schedule monitoring consistency job.", e);
+            }
         } catch (Throwable t) {
             LOG.warn("Could not register scheduler listener. Monitoring will return incorrect values!", t);
         }

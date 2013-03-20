@@ -103,6 +103,10 @@ public class SmalSessionEventHandler implements EventHandler {
             String topic = event.getTopic();
             if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {
                 Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                if (session.isTransient()) {
+                    return;
+                }
+                
                 int contextId = session.getContextId();
                 int userId = session.getUserId();
                 ConfigViewFactory config = SmalServiceLookup.getServiceStatic(ConfigViewFactory.class);
