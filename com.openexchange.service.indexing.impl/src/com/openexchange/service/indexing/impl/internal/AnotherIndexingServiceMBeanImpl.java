@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
@@ -66,6 +67,7 @@ import org.quartz.SchedulerListener;
 import org.quartz.Trigger;
 import org.quartz.Trigger.TriggerState;
 import org.quartz.TriggerKey;
+import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.service.QuartzService;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
@@ -80,7 +82,7 @@ import com.openexchange.service.indexing.IndexingServiceMBean;
 public class AnotherIndexingServiceMBeanImpl extends StandardMBean implements IndexingServiceMBean, SchedulerListener {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(AnotherIndexingServiceMBeanImpl.class);
-    
+
     public AnotherIndexingServiceMBeanImpl() throws NotCompliantMBeanException {
         super(IndexingServiceMBean.class);
         try {
@@ -149,6 +151,27 @@ public class AnotherIndexingServiceMBeanImpl extends StandardMBean implements In
     }
 
     @Override
+    public List<String> getLocalScheduledJobs() throws MBeanException {
+        try {
+            List<String> names = new ArrayList<String>();
+            QuartzService quartzService = Services.getService(QuartzService.class);
+            Scheduler scheduler = quartzService.getLocalScheduler();
+            List<String> groups = scheduler.getTriggerGroupNames();
+            for (String group : groups) {
+                Set<TriggerKey> triggerKeys = scheduler.getTriggerKeys(GroupMatcher.triggerGroupEquals(group));
+                for (TriggerKey k : triggerKeys) {
+                    names.add(k.toString());
+                }
+            }
+
+            return names;
+        } catch (Exception e) {
+            LOG.info(e.getMessage(), e);
+            throw new MBeanException(e);
+        }
+    }
+
+    @Override
     public List<String> getScheduledJobs(int contextId, int userId) throws MBeanException {
         try {
             String triggerGroup = Tools.generateTriggerGroup(contextId, userId);
@@ -193,6 +216,10 @@ public class AnotherIndexingServiceMBeanImpl extends StandardMBean implements In
     @Override
     public void jobScheduled(Trigger trigger) {
         try {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Trigger was added: " + trigger.getKey().toString());
+            }
+
             MultiMap<String, String> jobs = getClusterWideJobMap();
             String nodeKey = getNodeKey();
             jobs.put(nodeKey, trigger.getKey().toString());
@@ -204,6 +231,10 @@ public class AnotherIndexingServiceMBeanImpl extends StandardMBean implements In
     @Override
     public void jobUnscheduled(TriggerKey triggerKey) {
         try {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Trigger was removed: " + triggerKey.toString());
+            }
+
             MultiMap<String, String> jobs = getClusterWideJobMap();
             String nodeKey = getNodeKey();
             jobs.remove(nodeKey, triggerKey.toString());
@@ -214,8 +245,17 @@ public class AnotherIndexingServiceMBeanImpl extends StandardMBean implements In
 
     @Override
     public void triggerFinalized(Trigger trigger) {
-        // TODO Auto-generated method stub
+        try {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Trigger finalized: " + trigger.getKey().toString());
+            }
 
+            MultiMap<String, String> jobs = getClusterWideJobMap();
+            String nodeKey = getNodeKey();
+            jobs.remove(nodeKey, trigger.getKey().toString());
+        } catch (Throwable t) {
+            LOG.warn(t.getMessage(), t);
+        }
     }
 
     @Override

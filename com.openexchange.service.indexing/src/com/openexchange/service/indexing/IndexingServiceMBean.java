@@ -96,6 +96,14 @@ public interface IndexingServiceMBean {
      * @throws MBeanException
      */
     List<String> getAllScheduledJobs() throws MBeanException;
+    
+    /**
+     * Gets all jobs that are scheduled locally.
+     *
+     * @return The list of job names.
+     * @throws MBeanException
+     */
+    List<String> getLocalScheduledJobs() throws MBeanException;
 
     /**
      * Gets the jobs that are scheduled in the cluster for the given user.
