@@ -112,6 +112,10 @@ public class MonitoringMapConsistencyJob implements Job {
                 }
             }
             
+            for (String job : localJobs) {
+                monitoredJobs.put(nodeName, job);
+            }
+            
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Removed " + removed + " jobs from monitoring map.");
             }
