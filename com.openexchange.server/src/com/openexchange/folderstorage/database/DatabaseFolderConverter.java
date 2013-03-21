@@ -56,6 +56,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountManager;
@@ -74,6 +75,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.preferences.ServerUserSetting;
@@ -212,6 +214,22 @@ public final class DatabaseFolderConverter {
         return null;
     }
 
+    private static volatile Boolean preferDisplayName;
+    private static boolean preferDisplayName() {
+        Boolean tmp = preferDisplayName;
+        if (null == tmp) {
+            synchronized (DatabaseFolderConverter.class) {
+                tmp = preferDisplayName;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = null == service ? Boolean.FALSE : Boolean.valueOf(service.getBoolProperty("com.openexchange.folderstorage.database.preferDisplayName", false));
+                    preferDisplayName = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
     /**
      * Converts specified {@link FolderObject} instance to a {@link DatabaseFolder} instance.
      *
@@ -273,6 +291,24 @@ public final class DatabaseFolderConverter {
                 } else if (module == FolderObject.CALENDAR) {
                     retval = new LocalizedDatabaseFolder(fo);
                     retval.setName(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME);
+                } else if (module == FolderObject.INFOSTORE && preferDisplayName()) {
+                    final int ownerId = fo.getCreatedBy();
+                    if (user.getId() == ownerId) {
+                        // Requestor is owner
+                        retval = new LocalizedDatabaseFolder(fo);
+                        retval.setName(user.getDisplayName());
+                    } else {
+                        DatabaseFolder tmp = null;
+                        try {
+                            final User owner = UserStorage.getInstance().getUser(ownerId, ctx);
+                            tmp = new LocalizedDatabaseFolder(fo);
+                            tmp.setName(owner.getDisplayName());
+                        } catch (final Exception ignore) {
+                            // Ignore
+                            tmp = new DatabaseFolder(fo);
+                        }
+                        retval = tmp;
+                    }
                 } else {
                     retval = new DatabaseFolder(fo);
                 }
