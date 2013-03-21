@@ -893,10 +893,19 @@ public final class UserConfiguration implements Serializable, Cloneable {
     /**
      * Calculates if the user configuration allows the participant dialog.
      *
-     * @return <code>true</code> if the participant dialog should be shown.
+     * @return <code>true</code> if the user configuration allows the participant dialog.
      */
     public boolean hasParticipantsDialog() {
         return hasConflictHandling();
+    }
+
+    /**
+     * Calculates if the user configuration allows the groupware functionality.
+     *
+     * @return <code>true</code> if the user configuration allows the groupware functionality.
+     */
+    public boolean hasGroupware() {
+        return hasFullSharedFolderAccess() || hasFullPublicFolderAccess();
     }
 
     /**
