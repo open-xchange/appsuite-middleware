@@ -1,3 +1,11 @@
+* 2013-03-21 - marc.arens@open-xchange.com
+
+ - Fix for bug 25395: German Umlauts typed in OX Text broken on server
+ 
+ * 2013-03-18 - marc.arens@open-xchange.com
+
+ - Fix for bug 25016: oxnotifier login doesn't work if grizzly is configured with ajp
+ 
 * 2013-03-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 25350: Reduced repetitive behavior to necessary sanitizing steps
