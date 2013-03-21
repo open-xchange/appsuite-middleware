@@ -291,23 +291,27 @@ public final class DatabaseFolderConverter {
                 } else if (module == FolderObject.CALENDAR) {
                     retval = new LocalizedDatabaseFolder(fo);
                     retval.setName(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME);
-                } else if (module == FolderObject.INFOSTORE && preferDisplayName()) {
-                    final int ownerId = fo.getCreatedBy();
-                    if (user.getId() == ownerId) {
-                        // Requestor is owner
-                        retval = new LocalizedDatabaseFolder(fo);
-                        retval.setName(user.getDisplayName());
-                    } else {
-                        DatabaseFolder tmp = null;
-                        try {
-                            final User owner = UserStorage.getInstance().getUser(ownerId, ctx);
-                            tmp = new LocalizedDatabaseFolder(fo);
-                            tmp.setName(owner.getDisplayName());
-                        } catch (final Exception ignore) {
-                            // Ignore
-                            tmp = new DatabaseFolder(fo);
+                } else if (module == FolderObject.INFOSTORE) {
+                    if (preferDisplayName()) {
+                        final int ownerId = fo.getCreatedBy();
+                        if (user.getId() == ownerId) {
+                            // Requestor is owner
+                            retval = new LocalizedDatabaseFolder(fo);
+                            retval.setName(user.getDisplayName());
+                        } else {
+                            DatabaseFolder tmp = null;
+                            try {
+                                final User owner = UserStorage.getInstance().getUser(ownerId, ctx);
+                                tmp = new LocalizedDatabaseFolder(fo);
+                                tmp.setName(owner.getDisplayName());
+                            } catch (final Exception ignore) {
+                                // Ignore
+                                tmp = new DatabaseFolder(fo);
+                            }
+                            retval = tmp;
                         }
-                        retval = tmp;
+                    } else {
+                        retval = new DatabaseFolder(fo);
                     }
                 } else {
                     retval = new DatabaseFolder(fo);
