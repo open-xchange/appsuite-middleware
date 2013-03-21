@@ -3,6 +3,7 @@
  - Fix for bug 25374: Disable Halo linkedIn if non-email-capable API key/secret is configured
  - Fix for bug 15313: Added property to 'spamassassin.properties' to define whether confirmed-spam/confirmed-ham folders shall be unsubscribed or not. Default is true.
  - Fix for bug 25407: Adjusted category accordingly to let proper error message be displayed to user
+ - Fix for bug 25413: Improved check for possible file-attachments
 
 * 2013-03-20 - thorben.betten@open-xchange.com
 
