@@ -373,7 +373,9 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.ServerVersion.class,
             com.openexchange.groupware.settings.tree.UiWebPath.class,
             com.openexchange.groupware.settings.tree.TaskNotification.class,
-            com.openexchange.groupware.settings.tree.TimeZone.class
+            com.openexchange.groupware.settings.tree.TimeZone.class,
+            com.openexchange.groupware.settings.tree.LocationLogout.class,
+            com.openexchange.groupware.settings.tree.LocationError.class,
         };
     }
 
