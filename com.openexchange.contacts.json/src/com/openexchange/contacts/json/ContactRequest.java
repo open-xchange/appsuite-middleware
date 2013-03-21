@@ -73,6 +73,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.SpecialAlphanumSortContactComparator;
 import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.search.Operand;
@@ -224,6 +225,16 @@ public class ContactRequest {
     	}
     	if (null != mandatoryFields) {
     		fields = Arrays.add(fields, mandatoryFields);
+    	}
+    	/*
+    	 * check for special handling
+    	 */
+    	for (int i = 0; i < columnIDs.length; i++) {
+    	    if (Contact.IMAGE1_URL == columnIDs[i]) {
+    	        columnIDs[i] = Contact.NUMBER_OF_IMAGES; // query NUMBER_OF_IMAGES to set image URL afterwards
+    	    } else if (DataObject.LAST_MODIFIED_UTC == columnIDs[i]) {
+                columnIDs[i] = DataObject.LAST_MODIFIED; // query LAST_MODIFIED to set image URL afterwards
+    	    }
     	}
     	/*
     	 * get mapped fields

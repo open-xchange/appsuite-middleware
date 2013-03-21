@@ -62,12 +62,16 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import javax.activation.CommandMap;
 import javax.activation.DataHandler;
+import javax.activation.MailcapCommandMap;
 import javax.mail.Address;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
@@ -97,7 +101,6 @@ import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -135,6 +138,46 @@ import com.sun.mail.smtp.SMTPMessage;
 public final class SMTPTransport extends MailTransport {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SMTPTransport.class));
+
+    static {
+        /*-
+         * Add handlers for main MIME types
+         *
+            #
+            #
+            # Default mailcap file for the JavaMail System.
+            #
+            # JavaMail content-handlers:
+            #
+            text/plain;;            x-java-content-handler=com.sun.mail.handlers.text_plain
+            text/html;;             x-java-content-handler=com.sun.mail.handlers.text_html
+            text/xml;;              x-java-content-handler=com.sun.mail.handlers.text_xml
+            multipart/*;;           x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true
+            message/rfc822;;        x-java-content-handler=com.sun.mail.handlers.message_rfc822
+            #
+            # can't support image types because java.awt.Toolkit doesn't work on servers
+            #
+            #image/gif;;            x-java-content-handler=com.sun.mail.handlers.image_gif
+            #image/jpeg;;           x-java-content-handler=com.sun.mail.handlers.image_jpeg
+         */
+        final MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
+        final Set<String> types = new HashSet<String>(java.util.Arrays.asList(mc.getMimeTypes()));
+        if (!types.contains("text/html")) {
+            mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
+        }
+        if (!types.contains("text/xml")) {
+            mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
+        }
+        if (!types.contains("text/plain")) {
+            mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
+        }
+        if (!types.contains("multipart/*")) {
+            mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true");
+        }
+        if (!types.contains("message/rfc822")) {
+            mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
+        }
+    }
 
     /**
      * The SMTP protocol name.
@@ -456,7 +499,15 @@ public final class SMTPTransport extends MailTransport {
             return;
         }
         SMTPConfig smtpConfig = null;
+        // There is an issue in the OSGi framework preventing the MailCap
+        // from loading correctly. When getting the session here,
+        // temporarily set the ClassLoader to the loader inside the bundle
+        // that houses javax.mail. Reset at the end.
+        // ClassLoader tcl = Thread.currentThread().getContextClassLoader();
         try {
+            // Set the ClassLoader to the javax.mail bundle loader.
+            // Thread.currentThread().setContextClassLoader(MailMessage.class.getClassLoader());
+            // Go ahead...
             final InternetAddress dispNotification = srcMail.getDispositionNotification();
             if (dispNotification == null) {
                 throw SMTPExceptionCode.MISSING_NOTIFICATION_HEADER.create(MessageHeaders.HDR_DISP_TO, Long.valueOf(srcMail.getMailId()));
@@ -589,13 +640,24 @@ public final class SMTPTransport extends MailTransport {
             }
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, smtpConfig);
+        } finally {
+            // Restore the ClassLoader
+            // Thread.currentThread().setContextClassLoader(tcl);
         }
     }
 
     @Override
     public MailMessage sendRawMessage(final byte[] asciiBytes, final Address[] allRecipients) throws OXException {
         final SMTPConfig smtpConfig = getTransportConfig0();
+        // There is an issue in the OSGi framework preventing the MailCap
+        // from loading correctly. When getting the session here,
+        // temporarily set the ClassLoader to the loader inside the bundle
+        // that houses javax.mail. Reset at the end.
+        // ClassLoader tcl = Thread.currentThread().getContextClassLoader();
         try {
+            // Set the ClassLoader to the javax.mail bundle loader.
+            // Thread.currentThread().setContextClassLoader(Address.class.getClassLoader());
+            // Go ahead...
             final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession(), MimeHeaderNameChecker.sanitizeHeaderNames(asciiBytes));
             smtpMessage.removeHeader("x-original-headers");
             /*
@@ -641,13 +703,24 @@ public final class SMTPTransport extends MailTransport {
             return MimeMessageConverter.convertMessage(smtpMessage);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, smtpConfig);
+        } finally {
+            // Restore the ClassLoader
+            // Thread.currentThread().setContextClassLoader(tcl);
         }
     }
 
     @Override
     public MailMessage sendMailMessage(final ComposedMailMessage composedMail, final ComposeType sendType, final Address[] allRecipients) throws OXException {
         final SMTPConfig smtpConfig = getTransportConfig0();
+        // There is an issue in the OSGi framework preventing the MailCap
+        // from loading correctly. When getting the session here,
+        // temporarily set the ClassLoader to the loader inside the bundle
+        // that houses javax.mail. Reset at the end.
+        // ClassLoader tcl = Thread.currentThread().getContextClassLoader();
         try {
+            // Set the ClassLoader to the javax.mail bundle loader.
+            // Thread.currentThread().setContextClassLoader(ComposedMailMessage.class.getClassLoader());
+            // Go ahead...
             final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession());
             /*
              * Fill message dependent on send type
@@ -727,6 +800,9 @@ public final class SMTPTransport extends MailTransport {
             throw MimeMailException.handleMessagingException(e, smtpConfig);
         } catch (final IOException e) {
             throw SMTPExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }  finally {
+            // Restore the ClassLoader
+            // Thread.currentThread().setContextClassLoader(tcl);
         }
     }
 
@@ -736,6 +812,11 @@ public final class SMTPTransport extends MailTransport {
         } catch (final MessagingException e) {
             boolean throwIt = true;
             if (e.getNextException() instanceof javax.activation.UnsupportedDataTypeException) {
+                // Check for "no object DCH for MIME type xxxxx/yyyy"
+                if (toLowerCase(e.getNextException().getMessage()).indexOf("no object dch") >= 0) {
+                    // Not able to recover from "no object DCH for MIME type xxxxx/yyyy"
+                    throw MimeMailException.handleMessagingException(e, smtpConfig);
+                }
                 try {
                     final String cts = smtpMessage.getHeader("Content-Type", null);
                     if ((null != cts) && cts.startsWith("multipart/")) {
@@ -749,7 +830,7 @@ public final class SMTPTransport extends MailTransport {
                     }
                 } catch (final Exception ignore) {
                     // Ignore
-                    LOG.warn("Attempt to recover from \"" + e.getNextException().getMessage() + "\" failed.", ignore);
+                    LOG.warn("Failed attempt to recover from \"" + e.getNextException().getMessage() + "\".", ignore);
                 }
             }
             if (throwIt) {
@@ -775,12 +856,10 @@ public final class SMTPTransport extends MailTransport {
     protected void shutdown() {
         SMTPSessionProperties.resetDefaultSessionProperties();
         SMTPCapabilityCache.tearDown();
-        MailInitialization.MailcapInitialization.getInstance().stop();
     }
 
     @Override
     protected void startup() {
-        MailInitialization.MailcapInitialization.getInstance().start();
         SMTPCapabilityCache.init();
     }
 
@@ -936,6 +1015,20 @@ public final class SMTPTransport extends MailTransport {
             }
         }
         return sb.toString();
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
     private static boolean isEmpty(final String string) {

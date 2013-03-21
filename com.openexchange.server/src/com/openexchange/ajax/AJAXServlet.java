@@ -279,6 +279,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String ACTION_REFRESH_SECRET = "refreshSecret";
 
     public static final String ACTION_TERMSEARCH = "advancedSearch";
+    
+    public static final String ACTION_GETCHANGEEXCEPTIONS = "getChangeExceptions";
 
     /**
      * The parameter 'from' specifies index of starting entry in list of objects dependent on given order criteria and folder id

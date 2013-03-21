@@ -92,8 +92,8 @@ public class XMPPChannel implements Channel {
     }
 
     @Override
-    public void send(Stanza stanza) throws OXException {
-        XMPPDelivery recipient = connections.get(stanza.getTo());
+    public void send(Stanza stanza, ID id) throws OXException {
+        XMPPDelivery recipient = connections.get(id);
         for (XMPPExtension extension : extensions) {
             if (extension.canHandle(stanza)) {
                 if (recipient == null) {

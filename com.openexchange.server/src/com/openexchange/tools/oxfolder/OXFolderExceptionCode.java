@@ -451,12 +451,12 @@ public enum OXFolderExceptionCode implements OXExceptionCode {
     /**
      * User %1$s is not allowed to share folder %2$s in context %3$s due to user configuration
      */
-    SHARE_FORBIDDEN(OXFolderExceptionMessage.SHARE_FORBIDDEN_MSG, Category.CATEGORY_CONFIGURATION, 72),
+    SHARE_FORBIDDEN(OXFolderExceptionMessage.SHARE_FORBIDDEN_MSG, Category.CATEGORY_PERMISSION_DENIED, 72),
     /**
      * The permissions for the user %1$s are limited. It is not possible to grant this user the wanted permissions for the folder %2$s in
      * context %3$s.
      */
-    UNAPPLICABLE_FOLDER_PERM(OXFolderExceptionMessage.UNAPPLICABLE_FOLDER_PERM_MSG, Category.CATEGORY_CONFIGURATION, 73),
+    UNAPPLICABLE_FOLDER_PERM(OXFolderExceptionMessage.UNAPPLICABLE_FOLDER_PERM_MSG, Category.CATEGORY_PERMISSION_DENIED, 73),
     /**
      * Folder %1$s in context %2$s contains a hidden subfolder. User %3$s has no delete rights for this subfolder and consequently cannot
      * delete its parent folder.

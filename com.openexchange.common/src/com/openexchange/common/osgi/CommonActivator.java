@@ -49,10 +49,6 @@
 
 package com.openexchange.common.osgi;
 
-import java.util.HashSet;
-import java.util.Set;
-import javax.activation.CommandMap;
-import javax.activation.MailcapCommandMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
@@ -74,11 +70,11 @@ public final class CommonActivator implements BundleActivator {
     }
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
         final Log logger = LogFactory.getLog(CommonActivator.class);
         logger.info("Starting bundle: com.openexchange.common");
         try {
-            initializeMailCap();
+            // Add any start-up operations here
         } catch (final Exception e) {
             logger.info("Starting bundle 'com.openexchange.common' failed: " + e.getMessage(), e);
             throw e;
@@ -86,7 +82,7 @@ public final class CommonActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public void stop(final BundleContext context) throws Exception {
         final Log logger = LogFactory.getLog(CommonActivator.class);
         logger.info("Stopping bundle: com.openexchange.common");
         try {
@@ -94,55 +90,6 @@ public final class CommonActivator implements BundleActivator {
         } catch (final Exception e) {
             logger.info("Stopping bundle 'com.openexchange.common' failed: " + e.getMessage(), e);
             throw e;
-        }
-    }
-
-    private void initializeMailCap() {
-        /*-
-         * Add handlers for main MIME types
-         *
-            #
-            #
-            # Default mailcap file for the JavaMail System.
-            #
-            # JavaMail content-handlers:
-            #
-            text/plain;;            x-java-content-handler=com.sun.mail.handlers.text_plain
-            text/html;;             x-java-content-handler=com.sun.mail.handlers.text_html
-            text/xml;;              x-java-content-handler=com.sun.mail.handlers.text_xml
-            multipart/*;;           x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true
-            message/rfc822;;        x-java-content-handler=com.sun.mail.handlers.message_rfc822
-            #
-            # can't support image types because java.awt.Toolkit doesn't work on servers
-            #
-            #image/gif;;            x-java-content-handler=com.sun.mail.handlers.image_gif
-            #image/jpeg;;           x-java-content-handler=com.sun.mail.handlers.image_jpeg
-         */
-        final MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
-        final Set<String> types = new HashSet<String>(java.util.Arrays.asList(mc.getMimeTypes()));
-        boolean apply = false;
-        if (!types.contains("text/html")) {
-            mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
-            apply = true;
-        }
-        if (!types.contains("text/xml")) {
-            mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
-            apply = true;
-        }
-        if (!types.contains("text/plain")) {
-            mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
-            apply = true;
-        }
-        if (!types.contains("multipart/*")) {
-            mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true");
-            apply = true;
-        }
-        if (!types.contains("message/rfc822")) {
-            mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
-            apply = true;
-        }
-        if (apply) {
-            CommandMap.setDefaultCommandMap(mc);
         }
     }
 

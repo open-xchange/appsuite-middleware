@@ -55,10 +55,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -127,7 +125,7 @@ public class UserContactResultConverter implements ResultConverter {
 			List<UserContact> userContacts = (List<UserContact>)resultObject;
             JSONArray jsonArray = new JSONArray();
             for (final UserContact userContact :  userContacts) {
-            	jsonArray.put(userContact.serialize(columnIDs, timeZoneID, attributeParameters));
+            	jsonArray.put(userContact.serialize(session, columnIDs, timeZoneID, attributeParameters));
 			}
 			resultObject = jsonArray;
 		}

@@ -50,6 +50,7 @@
 package com.openexchange.publish;
 
 import java.util.Collection;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
@@ -67,6 +68,14 @@ public interface PublicationService {
     public Publication load(Context ctx, int publicationId) throws OXException;
     public void delete(Publication publication) throws OXException;
     public PublicationTarget getTarget() throws OXException;
-
+    /**
+     * This Method should only be used by the admin daemon to get a Publication by its URL
+     * @param service needs to be provided, as publications do not provide a way to determine the context
+     * @param URL the URL for a Publication
+     * @return the Publication if found, else null
+     * @throws OXException
+     */
+    public Publication resolveUrl(final ContextService service, String URL) throws OXException;
+    public String getInformation(Publication publication);
 
 }

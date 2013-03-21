@@ -65,15 +65,15 @@ import com.openexchange.groupware.contexts.Context;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class WhiteboardContextService implements ServiceTrackerCustomizer, ContextService {
+public class WhiteboardContextService implements ServiceTrackerCustomizer<ContextService, ContextService>, ContextService {
 
     private final BundleContext context;
-    private final ServiceTracker tracker;
+    private final ServiceTracker<ContextService, ContextService> tracker;
     private ContextService delegate;
 
     public WhiteboardContextService(BundleContext context) {
         this.context = context;
-        this.tracker = new ServiceTracker(context, ContextService.class.getName(), this);
+        this.tracker = new ServiceTracker<ContextService, ContextService>(context, ContextService.class, this);
         tracker.open();
     }
 
@@ -82,18 +82,18 @@ public class WhiteboardContextService implements ServiceTrackerCustomizer, Conte
     }
 
     @Override
-    public Object addingService(ServiceReference reference) {
-        delegate = (ContextService) context.getService(reference);
+    public ContextService addingService(ServiceReference<ContextService> reference) {
+        delegate = context.getService(reference);
         return delegate;
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(ServiceReference<ContextService> reference, ContextService service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(ServiceReference<ContextService> reference, ContextService service) {
         context.ungetService(reference);
         delegate = null;
     }
@@ -132,11 +132,11 @@ public class WhiteboardContextService implements ServiceTrackerCustomizer, Conte
         if(delegate != null) {
             return delegate;
         }
-        ServiceReference serviceReference = context.getServiceReference(ContextService.class.getName());
+        ServiceReference<ContextService> serviceReference = context.getServiceReference(ContextService.class);
         if(serviceReference == null) {
             return null;
         }
-        return (ContextService) context.getService(serviceReference);
+        return context.getService(serviceReference);
     }
 
 

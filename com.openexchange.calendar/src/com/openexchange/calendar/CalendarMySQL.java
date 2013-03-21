@@ -1649,6 +1649,9 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     private void checkQuota(Session session) throws OXException {
+        if (services == null) {
+            return;
+        }
         QuotaService quotaService = services.getService(QuotaService.class);
         if (null != quotaService) {
             Quota quota = quotaService.getQuotaFor(Resource.CALENDAR, session);

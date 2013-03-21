@@ -262,7 +262,7 @@ public class LdapContactCache {
                 customProperties.put(((String)entry.getKey()).replace("[REGIONNAME]", regionName), entry.getValue());
             }
         }
-        LdapServiceLookup.getService(CacheService.class).loadConfiguration(properties);
+        LdapServiceLookup.getService(CacheService.class).loadConfiguration(customProperties);
     }
 
     private Cache getCache() throws OXException {

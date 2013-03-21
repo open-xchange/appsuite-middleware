@@ -54,25 +54,29 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
-import javax.management.Attribute;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
+import javax.management.MBeanServerInvocationHandler;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.TabularDataSupport;
+import com.openexchange.report.Constants;
 import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;
 import com.openexchange.report.client.container.ContextModuleAccessCombination;
 import com.openexchange.report.client.container.MacDetail;
 import com.openexchange.report.client.container.Total;
+import com.openexchange.report.internal.LoginCounterMBean;
 
 public class ObjectHandler {
 
@@ -89,79 +93,53 @@ public class ObjectHandler {
 
         return (retval);
     }
+    
+    public static ClientLoginCount getClientLoginCount(final MBeanServerConnection mbsc) throws IOException, InstanceNotFoundException, ReflectionException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, InvalidAttributeValueException {
+        return getClientLoginCount(mbsc, false);
+    }
 
-    public static ClientLoginCount getClientLoginCount(final MBeanServerConnection mbsc, final boolean forYear) throws IOException, InstanceNotFoundException, ReflectionException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, InvalidAttributeValueException {
-        final ClientLoginCount retval = new ClientLoginCount();
-
-        // method parameters for LoginCounterMBean.getNumberOfLogins()
-        final Object[] gnl_params = new Object[2];
-        final String[] gnl_signature = new String[2];
-
-        gnl_signature[0] = "java.util.Date";
-        gnl_signature[1] = "java.util.Date";
-
-        final Calendar c = Calendar.getInstance();
-
+    public static ClientLoginCount getClientLoginCount(final MBeanServerConnection mbsc, final boolean forYear) throws MBeanException {
+        ClientLoginCount retval = new ClientLoginCount();
+        LoginCounterMBean lcProxy = loginCounterProxy(mbsc);
+        
+        Calendar cal = Calendar.getInstance();
+        Date startDate = null;
+        Date endDate = null;
         if (forYear) {
-            gnl_params[1] = c.getTime(); // endDate
-            c.add(Calendar.YEAR, -1);
-            gnl_params[0] = c.getTime(); // startDate
+            endDate = cal.getTime();
+            cal.add(Calendar.YEAR, -1);
+            startDate = cal.getTime();
         } else {
-            gnl_params[1] = c.getTime(); // endDate
-            c.add(Calendar.DATE, -30);
-            gnl_params[0] = c.getTime(); // startDate
+            endDate = cal.getTime();
+            cal.add(Calendar.DATE, -30);
+            startDate = cal.getTime();
         }
-        mbsc.setAttribute(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), new Attribute("DeviceWildcard", "USM-EAS"));
-        final int usmeas = (Integer) mbsc.invoke(
-            new ObjectName("com.openexchange.reporting", "name", "Login Counter"),
-            "getNumberOfLogins",
-            gnl_params,
-            gnl_signature);
-        retval.setUsmeas(Integer.toString(usmeas));
+        
+        Map<String, Integer> usmEasResult = lcProxy.getNumberOfLogins(startDate, endDate, true, "USM-EAS");
+        Integer usmEas = usmEasResult.get(LoginCounterMBean.SUM);
+        retval.setUsmeas(usmEas.toString());
+        
+        Map<String, Integer> olox2Result = lcProxy.getNumberOfLogins(startDate, endDate, true, "OpenXchange.HTTPClient.OXAddIn");
+        Integer olox2 = olox2Result.get(LoginCounterMBean.SUM);
+        retval.setOlox2(olox2.toString());
+        
+        Map<String, Integer> mobileAppResult = lcProxy.getNumberOfLogins(startDate, endDate, true, "com.openexchange.mobileapp");
+        Integer mobileApp = mobileAppResult.get(LoginCounterMBean.SUM);
+        retval.setMobileapp(mobileApp.toString());
 
-        mbsc.setAttribute(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), new Attribute(
-            "DeviceWildcard",
-            "OpenXchange.HTTPClient.OXAddIn"));
-        final int olox2 = (Integer) mbsc.invoke(
-            new ObjectName("com.openexchange.reporting", "name", "Login Counter"),
-            "getNumberOfLogins",
-            gnl_params,
-            gnl_signature);
-        retval.setOlox2(Integer.toString(olox2));
+        Map<String, Integer> cardDavResults = lcProxy.getNumberOfLogins(startDate, endDate, true, "CARDDAV");
+        Integer cardDav = cardDavResults.get(LoginCounterMBean.SUM);
+        retval.setCarddav(cardDav.toString());
 
-        mbsc.setAttribute(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), new Attribute(
-            "DeviceWildcard",
-            "com.openexchange.mobileapp"));
-        final int mobileapp = (Integer) mbsc.invoke(
-            new ObjectName("com.openexchange.reporting", "name", "Login Counter"),
-            "getNumberOfLogins",
-            gnl_params,
-            gnl_signature);
-        retval.setMobileapp(Integer.toString(mobileapp));
-
-        mbsc.setAttribute(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), new Attribute("DeviceWildcard", "CARDDAV"));
-        final int carddav = (Integer) mbsc.invoke(
-            new ObjectName("com.openexchange.reporting", "name", "Login Counter"),
-            "getNumberOfLogins",
-            gnl_params,
-            gnl_signature);
-        retval.setCarddav(Integer.toString(carddav));
-
-        mbsc.setAttribute(new ObjectName("com.openexchange.reporting", "name", "Login Counter"), new Attribute("DeviceWildcard", "CALDAV"));
-        final int caldav = (Integer) mbsc.invoke(
-            new ObjectName("com.openexchange.reporting", "name", "Login Counter"),
-            "getNumberOfLogins",
-            gnl_params,
-            gnl_signature);
-        retval.setCaldav(Integer.toString(caldav));
+        Map<String, Integer> calDavResults = lcProxy.getNumberOfLogins(startDate, endDate, true, "CALDAV");
+        Integer calDav = calDavResults.get(LoginCounterMBean.SUM);
+        retval.setCaldav(calDav.toString());
 
         return retval;
     }
-
-    public static ClientLoginCount getClientLoginCount(final MBeanServerConnection mbsc) throws IOException, InstanceNotFoundException, ReflectionException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, InvalidAttributeValueException {
-
-        return getClientLoginCount(mbsc, false);
-
+    
+    private static LoginCounterMBean loginCounterProxy(MBeanServerConnection mbsc) {
+        return MBeanServerInvocationHandler.newProxyInstance(mbsc, Constants.LOGIN_COUNTER_NAME, LoginCounterMBean.class, false);
     }
 
     protected static List<MacDetail> getMacObjects(final MBeanServerConnection mbsc) throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {

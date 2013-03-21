@@ -142,35 +142,6 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 	}
 
     @Override
-    public ContactField[] getFields(int[] columnIDs, EnumSet<ContactField> illegalFields, ContactField... mandatoryFields) throws OXException {
-		if (null == columnIDs) {
-			throw new IllegalArgumentException("columnIDs");
-		}
-		final List<ContactField> fields = new ArrayList<ContactField>();
-		for (int columnID : columnIDs) {
-			final ContactField field = this.getMappedField(columnID);
-			if (null != field) {
-			    if (null == illegalFields || false == illegalFields.contains(field)) {
-	                fields.add(field);
-			    }
-            } else if (Contact.IMAGE1_URL == columnID) {
-            	fields.add(ContactField.NUMBER_OF_IMAGES); // query NUMBER_OF_IMAGES to set image URL afterwards
-                fields.add(ContactField.LAST_MODIFIED); // query LAST_MODIFIED to set image URL afterwards
-            } else if (DataObject.LAST_MODIFIED_UTC == columnID) {
-            	fields.add(ContactField.LAST_MODIFIED); // query LAST_MODIFIED to set last modified utc afterwards
-            } else {
-            	throw OXException.notFound("No mapping for column ID: " + Integer.toString(columnID));
-            }
-		}
-        if (null != mandatoryFields) {
-            for (final ContactField field : mandatoryFields) {
-				fields.add(field);
-            }
-        }
-        return fields.toArray(newArray(fields.size()));
-    }
-
-    @Override
 	public Contact newInstance() {
 		return new Contact();
 	}

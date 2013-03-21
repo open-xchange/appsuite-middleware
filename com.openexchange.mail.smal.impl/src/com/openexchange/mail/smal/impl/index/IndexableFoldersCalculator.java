@@ -79,7 +79,7 @@ public class IndexableFoldersCalculator {
         MailAccount mailAccount = storageService.getMailAccount(accountId, userId, contextId);
         String mailServer = mailAccount.getMailServer();
         if (!mailAccount.isDefaultAccount() && AccountBlacklist.isServerBlacklisted(mailServer)) {
-            return Collections.EMPTY_SET;
+            return Collections.emptySet();
         }
 
         Set<MailFolder> allFolders = new HashSet<MailFolder>();
