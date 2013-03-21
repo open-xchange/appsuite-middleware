@@ -556,6 +556,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             final ArrayList<String> returntypes = new ArrayList<String>();
 
             boolean prg_contacts_update_needed = false;
+            boolean displayNameUpdate = false;
 
             for (final MethodAndNames methodandname : methodlist) {
                 // First we have to check which return value we have. We have to
@@ -574,6 +575,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         methodlist2.add(method);
                         returntypes.add(returntype);
                         if ("field01".equals(fieldName)) {
+                            displayNameUpdate = true;
                             contact_query.append("field90");
                             contact_query.append("=?, ");
                             methodlist2.add(method);
@@ -899,13 +901,24 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     CacheService.class);
                 if (null != cacheService) {
                     try {
-                        final CacheKey key = cacheService.newCacheKey(contextId, userId);
+                        CacheKey key = cacheService.newCacheKey(contextId, userId);
                         Cache cache = cacheService.getCache("User");
                         cache.remove(key);
                         cache = cacheService.getCache("UserConfiguration");
                         cache.remove(key);
                         cache = cacheService.getCache("UserSettingMail");
                         cache.remove(key);
+                        if (displayNameUpdate) {
+                            final int fuid = getDefaultInfoStoreFolder(usrdata, ctx, con);
+                            if (fuid > 0) {
+                                cache = cacheService.getCache("OXFolderCache");
+                                key = cacheService.newCacheKey(contextId, fuid);
+                                cache.remove(key);
+                                cache = cacheService.getCache("GlobalFolderCache");
+                                key = cacheService.newCacheKey(1, "0", Integer.toString(fuid));
+                                cache.removeFromGroup(key, Integer.toString(contextId));
+                            }
+                        }
                     } catch (final OXException e) {
                         log.error(e.getMessage(), e);
                     } finally {
@@ -994,6 +1007,24 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             } catch (final PoolException exp) {
                 log.error("Pool Error pushing ox write connection to pool!", exp);
             }
+        }
+    }
+
+    private int getDefaultInfoStoreFolder(final User user, final Context ctx, final Connection con) {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT fuid FROM oxfolder_tree WHERE cid=? AND created_from=? AND module=? AND default_flag > 0");
+            int pos = 1;
+            stmt.setInt(pos++, ctx.getId().intValue());
+            stmt.setInt(pos++, user.getId().intValue());
+            stmt.setInt(pos, FolderObject.INFOSTORE);
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : -1;
+        } catch (final Exception e) {
+            return -1;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
