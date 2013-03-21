@@ -58,7 +58,11 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import javax.activation.CommandMap;
 import javax.activation.DataHandler;
+import javax.activation.MailcapCommandMap;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -78,7 +82,6 @@ import com.openexchange.java.Streams;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -112,8 +115,44 @@ public class MailObject {
     private static volatile UnknownHostException warnSpam;
 
     static {
-        // Ensure every mail-related stuff is orderly started
-        MailInitialization.MailcapInitialization.getInstance().start();
+        /*-
+         * Add handlers for main MIME types
+         *
+            #
+            #
+            # Default mailcap file for the JavaMail System.
+            #
+            # JavaMail content-handlers:
+            #
+            text/plain;;            x-java-content-handler=com.sun.mail.handlers.text_plain
+            text/html;;             x-java-content-handler=com.sun.mail.handlers.text_html
+            text/xml;;              x-java-content-handler=com.sun.mail.handlers.text_xml
+            multipart/*;;           x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true
+            message/rfc822;;        x-java-content-handler=com.sun.mail.handlers.message_rfc822
+            #
+            # can't support image types because java.awt.Toolkit doesn't work on servers
+            #
+            #image/gif;;            x-java-content-handler=com.sun.mail.handlers.image_gif
+            #image/jpeg;;           x-java-content-handler=com.sun.mail.handlers.image_jpeg
+         */
+        final MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
+        final Set<String> types = new HashSet<String>(java.util.Arrays.asList(mc.getMimeTypes()));
+        if (!types.contains("text/html")) {
+            mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
+        }
+        if (!types.contains("text/xml")) {
+            mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
+        }
+        if (!types.contains("text/plain")) {
+            mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
+        }
+        if (!types.contains("multipart/*")) {
+            mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true");
+        }
+        if (!types.contains("message/rfc822")) {
+            mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
+        }
+        // Host name initialization
         try {
             staticHostName = InetAddress.getLocalHost().getCanonicalHostName();
         } catch (final UnknownHostException e) {

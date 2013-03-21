@@ -147,7 +147,6 @@ public final class MailInitialization implements Initialization, CacheAvailabili
             if (!types.contains("message/rfc822")) {
                 mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
             }
-            CommandMap.setDefaultCommandMap(mc);
         }
     }
 
