@@ -543,6 +543,9 @@ public final class MimeMessageUtility {
      * @throws IOException If an I/O error occurs
      */
     public static boolean hasAttachments(final Multipart mp, final String subtype) throws MessagingException, OXException, IOException {
+        if (null == mp) {
+            return false;
+        }
         if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(subtype)) {
             if (mp.getCount() > 2) {
                 return true;
