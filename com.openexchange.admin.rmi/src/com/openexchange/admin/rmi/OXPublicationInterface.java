@@ -46,36 +46,50 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.admin.rmi;
 
-package com.openexchange.publish;
-
-import java.util.Collection;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import java.rmi.Remote;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Publication;
+import com.openexchange.admin.rmi.exceptions.NoSuchPublicationException;
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ *
+ * This interface defines methods for checking and deleting Publications by Users.<br><br>
+ *
+ * <b>Example:</b>
+ * <pre>
+ * final OXPublicationInterface iface = (OXPublicationInterface)Naming.lookup("rmi:///oxhost/"+OXPublicationInterface.RMI_NAME);
+ *
+ * </pre
+ *
+ *
+ * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
+ *
  */
-public interface PublicationService {
+public interface OXPublicationInterface extends Remote {
 
-    public void create(Publication publication) throws OXException;
-    public void update(Publication publication) throws OXException;
-    public Collection<Publication> getAllPublications(Context ctx, int userId, String module) throws OXException;
-    public Collection<Publication> getAllPublications(Context ctx) throws OXException;
-    public Collection<Publication> getAllPublications(Context ctx, String entityId) throws OXException;
-    public boolean knows(Context ctx, int publicationId) throws OXException;
-    public Publication load(Context ctx, int publicationId) throws OXException;
-    public void delete(Publication publication) throws OXException;
-    public PublicationTarget getTarget() throws OXException;
     /**
-     * This Method should only be used by the admin daemon to get a Publication by its URL
-     * @param service needs to be provided, as publications do not provide a way to determine the context
-     * @param URL the URL for a Publication
-     * @return the Publication if found, else null
-     * @throws OXException
+     * RMI name to be used in the naming lookup.
      */
-    public Publication resolveUrl(final ContextService service, String URL) throws OXException;
-    public String getInformation(Publication publication);
-
+    public static final String RMI_NAME = "OXPublication";
+    
+    /**
+     * This method returns a Publication for a given Url
+     *
+     * @return Publication if Publication is found
+     * @throws OXException 
+     * @throws NoSuchPublicationException 
+     */
+    public Publication getpublication(final String url, final Credentials auth) throws NoSuchPublicationException;
+    
+    /**
+     * This method will delete a Publication
+     *
+     * @return true if the publication is deleted, false if not
+     * @throws OXException 
+     * @throws NoSuchPublicationException 
+     */
+    public boolean deletePublication(final String url, final Credentials auth) throws NoSuchPublicationException;
+    
 }

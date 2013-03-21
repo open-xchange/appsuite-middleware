@@ -59,7 +59,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.json.JSONObject;
+import com.openexchange.context.ContextService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
@@ -190,6 +193,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
     public void beforeUpdate(final Publication publication) throws OXException {
         super.beforeUpdate(publication);
         final Publication oldPublication = loadInternally(publication.getContext(), publication.getId());
+        publication.getConfiguration().remove(URL);
         addSecretIfNeeded(publication, oldPublication);
         removeSecretIfNeeded(publication);
     }
@@ -198,6 +202,14 @@ public class OXMFPublicationService extends AbstractPublicationService {
     public void modifyOutgoing(final Publication publication) throws OXException {
         super.modifyOutgoing(publication);
 
+        updateUrl(publication);
+
+        publication.getConfiguration().remove(SECRET);
+
+        publication.setDisplayName( (String) publication.getConfiguration().get(SITE));
+    }
+
+    private void updateUrl(final Publication publication) {
         final Map<String, Object> configuration = publication.getConfiguration();
 
         final StringBuilder urlBuilder = new StringBuilder(rootURL);
@@ -208,10 +220,6 @@ public class OXMFPublicationService extends AbstractPublicationService {
         }
 
         publication.getConfiguration().put(URL, urlBuilder.toString());
-
-        publication.getConfiguration().remove(SECRET);
-
-        publication.setDisplayName( (String) publication.getConfiguration().get(SITE));
     }
 
     protected String normalizeSiteName(final String siteName) {
@@ -317,6 +325,38 @@ public class OXMFPublicationService extends AbstractPublicationService {
             }
             return withoutInfostore;
         }
+    }
+
+    @Override
+    public Publication resolveUrl(final ContextService service, String URL) throws OXException {
+        String re1=".*?";   // Non-greedy match on filler
+        String re2="("+rootURL+")";    // Word 1
+        String re3="(\\/)"; // Any Single Character 2
+        String re4="(\\d+)";    // Integer Number 1
+        String re5="(\\/)"; // Any Single Character 3
+        String re6="((?:[a-z][a-z]+))"; // Word 3
+        
+        Pattern p = Pattern.compile(re1+re2+re3+re4+re5+re6,Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        Matcher m = p.matcher(URL);
+        if (m.find())
+        {
+            String contextId=m.group(3);
+            String site=m.group(5);
+            
+            final Context ctx = service.getContext(Integer.parseInt(contextId));
+            return getPublication(ctx, site);
+        }
+       
+        return null;
+    }
+
+    @Override
+    public String getInformation(Publication publication) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Publication:").append("/n");
+        sb.append("Context: " + publication.getContext().getContextId()).append("/n");
+        sb.append("UserID:  " + publication.getUserId()).append("/n");
+        return sb.toString();
     }
 
 }

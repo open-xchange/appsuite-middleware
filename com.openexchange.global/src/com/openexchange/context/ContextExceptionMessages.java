@@ -47,35 +47,23 @@
  *
  */
 
-package com.openexchange.publish;
+package com.openexchange.context;
 
-import java.util.Collection;
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link ContextExceptionMessages}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface PublicationService {
+public class ContextExceptionMessages implements LocalizableStrings {
 
-    public void create(Publication publication) throws OXException;
-    public void update(Publication publication) throws OXException;
-    public Collection<Publication> getAllPublications(Context ctx, int userId, String module) throws OXException;
-    public Collection<Publication> getAllPublications(Context ctx) throws OXException;
-    public Collection<Publication> getAllPublications(Context ctx, String entityId) throws OXException;
-    public boolean knows(Context ctx, int publicationId) throws OXException;
-    public Publication load(Context ctx, int publicationId) throws OXException;
-    public void delete(Publication publication) throws OXException;
-    public PublicationTarget getTarget() throws OXException;
-    /**
-     * This Method should only be used by the admin daemon to get a Publication by its URL
-     * @param service needs to be provided, as publications do not provide a way to determine the context
-     * @param URL the URL for a Publication
-     * @return the Publication if found, else null
-     * @throws OXException
-     */
-    public Publication resolveUrl(final ContextService service, String URL) throws OXException;
-    public String getInformation(Publication publication);
+    // This message will be logged if a context is disabled and some user of that context tries to login.
+    // %1$d is replaced with the unique context identifier.
+    // %2$s is replaced with the context name.
+    public static final String CONTEXT_DISABLED_MSG = "Context %1$d, %1$s is disabled.";
 
+    private ContextExceptionMessages() {
+        super();
+    }
 }
