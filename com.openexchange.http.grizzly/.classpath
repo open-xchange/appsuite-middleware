@@ -3,7 +3,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-comet-2.2.22-SNAPSHOT-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-comet-2.2.22-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-framework-2.2.22-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-framework-2.2.22-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-framework-2.2.22-SNAPSHOT.jar" sourcepath="lib/grizzly-framework-2.2.22-SNAPSHOT-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-2.2.22-SNAPSHOT-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-2.2.22-SNAPSHOT.jar" sourcepath="lib/grizzly-http-2.2.22-SNAPSHOT-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-ajp-2.2.22-SNAPSHOT-sources.jar"/>
