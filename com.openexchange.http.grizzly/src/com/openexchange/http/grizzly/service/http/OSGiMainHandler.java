@@ -527,10 +527,15 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         return osgiServletHandler;
     }
 
+    /*
+     * alias = /pathTo/theServlet
+     * originalAlias = /pathTo/theServlet/additional/path/info
+     */
     private void updateMappingInfo(final Request request, final String alias, final String originalAlias) {
-
         final MappingData mappingData = request.obtainMappingData();
-        mappingData.contextPath.setString("/");
+        //Change contextPath from "/" to the empty Sring for the default context in the httpservice
+        mappingData.contextPath.setString("");
+        
         mappingData.wrapperPath.setString(alias);
 
         if (alias.length() != originalAlias.length()) {
