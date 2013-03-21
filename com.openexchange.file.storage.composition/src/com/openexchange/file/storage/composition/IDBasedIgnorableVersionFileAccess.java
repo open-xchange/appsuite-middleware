@@ -82,6 +82,6 @@ public interface IDBasedIgnorableVersionFileAccess extends IDBasedFileAccess {
      * @param ignoreVersion Whether a new version is supposed to be set if binary content is available; or <code>true</code> to keep version as is
      * @throws OXException If operation fails
      */
-    public void saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns, boolean ignoreVersion) throws OXException;
+    void saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns, boolean ignoreVersion) throws OXException;
 
 }
