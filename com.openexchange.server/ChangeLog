@@ -10,6 +10,7 @@
  - Fix for bug 25413: Improved check for possible file-attachments
  - Fix for bug 25439: Check proper user configuration permissions whether resources/groups are accessible in participants dialog
  - Fix for bug 25221: Ignore FETCH responses that miss requested items
+ - Fix for bug 23408: Checking insert position when composing line-wise SIEVE script
 
 * 2013-03-20 - thorben.betten@open-xchange.com
 
