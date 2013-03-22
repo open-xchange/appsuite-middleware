@@ -9,6 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.sun.istack.internal,
  com.sun.xml.internal.ws,
  com.sun.xml.internal.ws.addressing,
  com.sun.xml.internal.ws.api,
