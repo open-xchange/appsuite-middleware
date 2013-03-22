@@ -1,3 +1,7 @@
+* 2013-03-22 - marc.arens@open-xchange.com
+
+ - Fix for bug 25025: open-xchange-grizzly doesn't send echo header
+ 
 * 2013-03-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 25437: Proper check if specified full name denotes account's trash folder
