@@ -76,8 +76,8 @@ import com.openexchange.tools.session.ServerSession;
 public class ImageGetAction implements AJAXActionService {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(ImageGetAction.class);
-
     private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final boolean WARN = LOG.isWarnEnabled();
 
     /**
      * Initializes a new {@link ImageGetAction}.
@@ -152,8 +152,8 @@ public class ImageGetAction implements AJAXActionService {
             requestResult = new AJAXRequestResult();
             outputImageData(dataSource, imageLocation, session, requestResult);
         } catch (OXException e) {
-            if (DEBUG) {
-                LOG.debug("Writing image data failed.", e);
+            if (WARN) {
+                LOG.warn("Writing image data failed.", e);
             }
             throw AjaxExceptionCodes.BAD_REQUEST.create(e, new Object[0]);
         }
