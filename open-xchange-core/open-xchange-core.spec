@@ -215,6 +215,20 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1389
+# -----------------------------------------------------------------------
+pfile=/opt/open-xchange/etc/foldercache.properties
+if ! ox_exists_property com.openexchange.folderstorage.database.preferDisplayName $pfile; then
+    ox_set_property com.openexchange.folderstorage.database.preferDisplayName false $pfile
+fi
+
+# SoftwareChange_Request-1328
+# -----------------------------------------------------------------------
+pfile=/opt/open-xchange/etc/mdns.properties
+if ! ox_exists_property com.openexchange.mdns.interface $pfile; then
+    ox_set_property com.openexchange.mdns.interface '' $pfile
+fi
+
 # SoftwareChange_Request-1335
 pfile=/opt/open-xchange/etc/paths.perfMap
 if ! grep "modules/mail/defaultaddress" $pfile > /dev/null; then

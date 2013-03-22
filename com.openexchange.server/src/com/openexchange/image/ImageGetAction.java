@@ -76,8 +76,8 @@ import com.openexchange.tools.session.ServerSession;
 public class ImageGetAction implements AJAXActionService {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(ImageGetAction.class);
-
     private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final boolean WARN = LOG.isWarnEnabled();
 
     /**
      * Initializes a new {@link ImageGetAction}.
@@ -150,24 +150,22 @@ public class ImageGetAction implements AJAXActionService {
                 return requestResult;
             }
             requestResult = new AJAXRequestResult();
-            outputImageData(dataSource, imageLocation, session, requestResult);
+            obtainImageData(dataSource, imageLocation, session, requestResult);
         } catch (OXException e) {
-            if (DEBUG) {
-                LOG.debug("Writing image data failed.", e);
+            if (WARN) {
+                LOG.warn("Retrieving image failed.", e);
             }
             throw AjaxExceptionCodes.BAD_REQUEST.create(e, new Object[0]);
         }
         return requestResult;
     }
 
-    private static void outputImageData(ImageDataSource dataSource, ImageLocation imageLocation, Session session, AJAXRequestResult requestResult) throws OXException {
+    private static void obtainImageData(ImageDataSource dataSource, ImageLocation imageLocation, Session session, AJAXRequestResult requestResult) throws OXException {
         Data<InputStream> data = dataSource.getData(InputStream.class, dataSource.generateDataArgumentsFrom(imageLocation), session);
-        String ct;
-        String fileName;
 
         DataProperties dataProperties = data.getDataProperties();
-        ct = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
-        fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
+        String ct = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
+        String fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
 
         InputStream in = data.getData();
         FileHolder fileHolder = new FileHolder(in, -1, ct, fileName);
