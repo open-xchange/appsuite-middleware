@@ -360,7 +360,8 @@ public class AJPv13TaskWatcher {
             if (null == trace) {
                 return;
             }
-            for (int i = 0; i < trace.length && i < MAX_STACK_TRACE_ELEMENTS; i++) {
+            final int length = (MAX_STACK_TRACE_ELEMENTS <= trace.length) ? MAX_STACK_TRACE_ELEMENTS : trace.length;
+            for (int i = 0; i < length; i++) {
                 final StackTraceElement ste = trace[i];
                 final String className = ste.getClassName();
                 if (null != className) {
