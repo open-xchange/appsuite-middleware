@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.api;
 
+import static com.openexchange.mail.utils.MailFolderUtility.sanitizeFullName;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
@@ -114,35 +115,37 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      */
     @Override
     public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
-        return searchMessages(folder, indexRange, sortField, order, null, fields);
+        return searchMessages(sanitizeFullName(folder), indexRange, sortField, order, null, fields);
     }
 
     @Override
     public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws OXException {
-        final MailMessage mail = getMessage(folder, mailId, false);
+        final String fn = sanitizeFullName(folder);
+        final MailMessage mail = getMessage(fn, mailId, false);
         if (null == mail) {
-            throw MailExceptionCode.MAIL_NOT_FOUND.create(mailId, folder);
+            throw MailExceptionCode.MAIL_NOT_FOUND.create(mailId, fn);
         }
         final MailPartHandler handler = new MailPartHandler(sequenceId);
         new MailMessageParser().parseMailMessage(mail, handler);
         final MailPart ret = handler.getMailPart();
         if (ret == null) {
-            throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(sequenceId, mailId, folder);
+            throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(sequenceId, mailId, fn);
         }
         return ret;
     }
 
     @Override
     public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
-        final MailMessage mail = getMessage(folder, mailId, false);
+        final String fn = sanitizeFullName(folder);
+        final MailMessage mail = getMessage(fn, mailId, false);
         if (null == mail) {
-            throw MailExceptionCode.MAIL_NOT_FOUND.create(mailId, folder);
+            throw MailExceptionCode.MAIL_NOT_FOUND.create(mailId, fn);
         }
         final ImageMessageHandler handler = new ImageMessageHandler(contentId);
         new MailMessageParser().parseMailMessage(mail, handler);
         final MailPart ret = handler.getImagePart();
         if (ret == null) {
-            throw MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.create(contentId, mailId, folder);
+            throw MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.create(contentId, mailId, fn);
         }
         return ret;
     }
@@ -165,9 +168,9 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
         for (int i = 0; i < length; i++) {
             String text = null;
             try {
-               text = textFinder.getText(getMessage(folder, mailIds[i], false));
+               text = textFinder.getText(getMessage(sanitizeFullName(folder), mailIds[i], false));
             } catch (Throwable t) {
-                LOG.warn("Error while getting primary content for mail '" + mailIds[i] + "' in folder '" + folder + "'. Returning null.", t);
+                LOG.warn("Error while getting primary content for mail '" + mailIds[i] + "' in folder '" + sanitizeFullName(folder) + "'. Returning null.", t);
             }
 
             retval[i] = text;
@@ -194,14 +197,15 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      */
     @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
-        final MailMessage[] mails = getMessages(folder, new String[] { mailId }, FIELDS_FULL);
+        final String fn = sanitizeFullName(folder);
+        final MailMessage[] mails = getMessages(fn, new String[] { mailId }, FIELDS_FULL);
         if ((mails == null) || (mails.length == 0) || (mails[0] == null)) {
             return null;
         }
         final MailMessage mail = mails[0];
         if (!mail.isSeen() && markSeen) {
             mail.setPrevSeen(false);
-            updateMessageFlags(folder, new String[] { mailId }, MailMessage.FLAG_SEEN, true);
+            updateMessageFlags(fn, new String[] { mailId }, MailMessage.FLAG_SEEN, true);
             mail.setFlag(MailMessage.FLAG_SEEN, true);
             mail.setUnreadMessages(mail.getUnreadMessages() <= 0 ? 0 : mail.getUnreadMessages() - 1);
         }
@@ -235,7 +239,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
         if (limit == 0) {
             return EMPTY_RETVAL;
         }
-        return searchMessages(folder, limit < 0 ? IndexRange.NULL : new IndexRange(0, limit), sortField, order, TERM_FLAG_SEEN, fields);
+        return searchMessages(sanitizeFullName(folder), limit < 0 ? IndexRange.NULL : new IndexRange(0, limit), sortField, order, TERM_FLAG_SEEN, fields);
     }
 
     /**
@@ -255,7 +259,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      */
     @Override
     public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
-        final String[] ids = copyMessages(sourceFolder, destFolder, mailIds, fast);
+        final String[] ids = copyMessages(sanitizeFullName(sourceFolder), sanitizeFullName(destFolder), mailIds, fast);
         deleteMessages(sourceFolder, mailIds, true);
         return ids;
     }
@@ -265,6 +269,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
 
     @Override
     public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws OXException {
+        final String fn = sanitizeFullName(draftFullname);
         final String uid;
         try {
             final MailMessage filledMail = MimeMessageConverter.fillComposedMailMessage(draftMail);
@@ -272,7 +277,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
             /*
              * Append message to draft folder
              */
-            uid = appendMessages(draftFullname, new MailMessage[] { filledMail })[0];
+            uid = appendMessages(fn, new MailMessage[] { filledMail })[0];
         } finally {
             draftMail.cleanUp();
         }
@@ -280,14 +285,14 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
          * Check for draft-edit operation: Delete old version
          */
         final MailPath msgref = draftMail.getMsgref();
-        if (msgref != null && draftFullname.equals(msgref.getFolder())) {
+        if (msgref != null && fn.equals(msgref.getFolder())) {
             deleteMessages(msgref.getFolder(), new String[] { msgref.getMailID() }, true);
             draftMail.setMsgref(null);
         }
         /*
          * Return draft mail
          */
-        return getMessage(draftFullname, uid, true);
+        return getMessage(fn, uid, true);
     }
 
     @Override

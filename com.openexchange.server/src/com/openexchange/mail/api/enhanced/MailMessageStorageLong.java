@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.api.enhanced;
 
+import static com.openexchange.mail.utils.MailFolderUtility.sanitizeFullName;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -88,7 +89,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
 
     @Override
     public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws OXException {
-        return longs2uids(appendMessagesLong(destFolder, msgs));
+        return longs2uids(appendMessagesLong(sanitizeFullName(destFolder), msgs));
     }
 
     /**
@@ -103,7 +104,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
 
     @Override
     public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
-        return longs2uids(copyMessagesLong(sourceFolder, destFolder, uids2longs(mailIds), fast));
+        return longs2uids(copyMessagesLong(sanitizeFullName(sourceFolder), sanitizeFullName(destFolder), uids2longs(mailIds), fast));
     }
 
     /**
@@ -126,7 +127,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
 
     @Override
     public void deleteMessages(final String folder, final String[] mailIds, final boolean hardDelete) throws OXException {
-        deleteMessagesLong(folder, uids2longs(mailIds), hardDelete);
+        deleteMessagesLong(sanitizeFullName(folder), uids2longs(mailIds), hardDelete);
     }
 
     /**
@@ -163,13 +164,13 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      */
     @Override
     public MailMessage[] getAllMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
-        return searchMessages(folder, indexRange, sortField, order, null, fields);
+        return searchMessages(sanitizeFullName(folder), indexRange, sortField, order, null, fields);
     }
 
     @Override
     public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws OXException {
         try {
-            return getAttachmentLong(folder, parseUnsignedLong(mailId), sequenceId);
+            return getAttachmentLong(sanitizeFullName(folder), parseUnsignedLong(mailId), sequenceId);
         } catch (final NumberFormatException e) {
             LOG.error("UID cannot be parsed to a number: " + mailId, e);
             return null;
@@ -189,13 +190,14 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      */
     public MailPart getAttachmentLong(final String folder, final long mailId, final String sequenceId) throws OXException {
         final MailPartHandler handler = new MailPartHandler(sequenceId);
-        final MailMessage mail = getMessageLong(folder, mailId, false);
+        final String fn = sanitizeFullName(folder);
+        final MailMessage mail = getMessageLong(fn, mailId, false);
         if (null == mail) {
-            throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(mailId), folder);
+            throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(mailId), fn);
         }
         new MailMessageParser().parseMailMessage(mail, handler);
         if (handler.getMailPart() == null) {
-            throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(sequenceId, Long.valueOf(mailId), folder);
+            throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(sequenceId, Long.valueOf(mailId), fn);
         }
         return handler.getMailPart();
     }
@@ -203,7 +205,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     @Override
     public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
         try {
-            return getImageAttachmentLong(folder, parseUnsignedLong(mailId), contentId);
+            return getImageAttachmentLong(sanitizeFullName(folder), parseUnsignedLong(mailId), contentId);
         } catch (final NumberFormatException e) {
             LOG.error("UID cannot be parsed to a number: " + mailId, e);
             return null;
@@ -224,21 +226,22 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      */
     public MailPart getImageAttachmentLong(final String folder, final long mailId, final String contentId) throws OXException {
         final ImageMessageHandler handler = new ImageMessageHandler(contentId);
-        final MailMessage mail = getMessageLong(folder, mailId, false);
+        final String fn = sanitizeFullName(folder);
+        final MailMessage mail = getMessageLong(fn, mailId, false);
         if (null == mail) {
-            throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(mailId), folder);
+            throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(mailId), fn);
         }
         new MailMessageParser().parseMailMessage(mail, handler);
         final MailPart imagePart = handler.getImagePart();
         if (null == imagePart) {
-            throw MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.create(contentId, Long.valueOf(mailId), folder);
+            throw MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.create(contentId, Long.valueOf(mailId), fn);
         }
         return imagePart;
     }
 
     @Override
     public String[] getPrimaryContents(final String folder, final String[] mailIds) throws OXException {
-        return getPrimaryContentsLong(folder, uids2longs(mailIds));
+        return getPrimaryContentsLong(sanitizeFullName(folder), uids2longs(mailIds));
     }
 
     /**
@@ -258,9 +261,9 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         for (int i = 0; i < length; i++) {
             String text = null;
             try {
-                text = textFinder.getText(getMessageLong(folder, mailIds[i], false));
+                text = textFinder.getText(getMessageLong(sanitizeFullName(folder), mailIds[i], false));
             } catch (Throwable t) {
-                LOG.warn("Error while getting primary content for mail '" + mailIds[i] + "' in folder '" + folder + "'. Returning null.", t);
+                LOG.warn("Error while getting primary content for mail '" + mailIds[i] + "' in folder '" + sanitizeFullName(folder) + "'. Returning null.", t);
             }
 
             retval[i] = text;
@@ -271,7 +274,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
         try {
-            return getMessageLong(folder, parseUnsignedLong(mailId), markSeen);
+            return getMessageLong(sanitizeFullName(folder), parseUnsignedLong(mailId), markSeen);
         } catch (final NumberFormatException e) {
             LOG.error("UID cannot be parsed to a number: " + mailId, e);
             return null;
@@ -296,14 +299,15 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @throws OXException If message could not be returned
      */
     public MailMessage getMessageLong(final String folder, final long mailId, final boolean markSeen) throws OXException {
-        final MailMessage[] mails = getMessagesLong(folder, new long[] { mailId }, FIELDS_FULL);
+        final String fn = sanitizeFullName(folder);
+        final MailMessage[] mails = getMessagesLong(fn, new long[] { mailId }, FIELDS_FULL);
         if ((mails == null) || (mails.length == 0) || (mails[0] == null)) {
             return null;
         }
         final MailMessage mail = mails[0];
         if (!mail.isSeen() && markSeen) {
             mail.setPrevSeen(false);
-            updateMessageFlagsLong(folder, new long[] { mailId }, MailMessage.FLAG_SEEN, true);
+            updateMessageFlagsLong(fn, new long[] { mailId }, MailMessage.FLAG_SEEN, true);
             mail.setFlag(MailMessage.FLAG_SEEN, true);
             mail.setUnreadMessages(mail.getUnreadMessages() <= 0 ? 0 : mail.getUnreadMessages() - 1);
         }
@@ -312,7 +316,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
 
     @Override
     public MailMessage[] getMessages(final String folder, final String[] mailIds, final MailField[] fields) throws OXException {
-        return getMessagesLong(folder, uids2longs(mailIds), fields);
+        return getMessagesLong(sanitizeFullName(folder), uids2longs(mailIds), fields);
     }
 
     /**
@@ -374,12 +378,12 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         if (limit == 0) {
             return EMPTY_RETVAL;
         }
-        return searchMessages(folder, limit < 0 ? IndexRange.NULL : new IndexRange(0, limit), sortField, order, TERM_FLAG_SEEN, fields);
+        return searchMessages(sanitizeFullName(folder), limit < 0 ? IndexRange.NULL : new IndexRange(0, limit), sortField, order, TERM_FLAG_SEEN, fields);
     }
 
     @Override
     public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
-        return longs2uids(moveMessagesLong(sourceFolder, destFolder, uids2longs(mailIds), fast));
+        return longs2uids(moveMessagesLong(sanitizeFullName(sourceFolder), sanitizeFullName(destFolder), uids2longs(mailIds), fast));
     }
 
     /**
@@ -398,8 +402,10 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @throws OXException If messages cannot be copied.
      */
     public long[] moveMessagesLong(final String sourceFolder, final String destFolder, final long[] mailIds, final boolean fast) throws OXException {
-        final long[] ids = copyMessagesLong(sourceFolder, destFolder, mailIds, fast);
-        deleteMessagesLong(sourceFolder, mailIds, true);
+        final String srcFolder = sanitizeFullName(sourceFolder);
+        final String dstFolder = sanitizeFullName(destFolder);
+        final long[] ids = copyMessagesLong(srcFolder, dstFolder, mailIds, fast);
+        deleteMessagesLong(srcFolder, mailIds, true);
         return ids;
     }
 
@@ -422,6 +428,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      */
     @Override
     public MailMessage saveDraft(final String draftFullName, final ComposedMailMessage draftMail) throws OXException {
+        final String draftFn = sanitizeFullName(draftFullName);
         final String uid;
         try {
             final MailMessage filledMail = MimeMessageConverter.fillComposedMailMessage(draftMail);
@@ -429,7 +436,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
             /*
              * Append message to draft folder
              */
-            uid = appendMessages(draftFullName, new MailMessage[] { filledMail })[0];
+            uid = appendMessages(draftFn, new MailMessage[] { filledMail })[0];
         } finally {
             draftMail.cleanUp();
         }
@@ -437,14 +444,14 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
          * Check for draft-edit operation: Delete old version
          */
         final MailPath msgref = draftMail.getMsgref();
-        if (msgref != null && draftFullName.equals(msgref.getFolder())) {
+        if (msgref != null && draftFn.equals(msgref.getFolder())) {
             deleteMessages(msgref.getFolder(), new String[] { msgref.getMailID() }, true);
             draftMail.setMsgref(null);
         }
         /*
          * Return draft mail
          */
-        return getMessage(draftFullName, uid, true);
+        return getMessage(draftFn, uid, true);
     }
 
     /**
@@ -488,7 +495,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      */
     @Override
     public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws OXException {
-        updateMessageColorLabelLong(folder, uids2longs(mailIds), colorLabel);
+        updateMessageColorLabelLong(sanitizeFullName(folder), uids2longs(mailIds), colorLabel);
     }
 
     /**
@@ -513,7 +520,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
 
     @Override
     public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws OXException {
-        updateMessageFlagsLong(folder, uids2longs(mailIds), flags, set);
+        updateMessageFlagsLong(sanitizeFullName(folder), uids2longs(mailIds), flags, set);
     }
 
     /**
@@ -609,10 +616,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
             return DEFAULT;
         }
         final int max = s.length();
-        if (max <= 0) {
-            return DEFAULT;
-        }
-        if (s.charAt(0) == '-') {
+        if (max <= 0 || '-' == s.charAt(0)) {
             return DEFAULT;
         }
 
