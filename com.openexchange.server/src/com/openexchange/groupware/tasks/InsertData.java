@@ -132,7 +132,7 @@ public final class InsertData {
         if (null == quotaService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(QuotaService.class);
         }
-        Quota quota = quotaService.getQuotaFor(Resource.TASK, ResourceDescription.EMPTY_RESOURCE_DESCRIPTION, session);
+        Quota quota = quotaService.getQuotaFor(Resource.TASK, ResourceDescription.getEmptyResourceDescription(), session);
         long amount = quota.getQuota(QuotaType.AMOUNT);
         if (amount > 0) {
             int numberOfTasks = storage.countTasks(ctx);

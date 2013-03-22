@@ -66,7 +66,7 @@ import java.util.Set;
 public class ResourceDescription {
 
     /** The empty resource description */
-    public static final ResourceDescription EMPTY_RESOURCE_DESCRIPTION = new ResourceDescription() {
+    private static final ResourceDescription EMPTY_RESOURCE_DESCRIPTION = new ResourceDescription() {
 
         @Override
         public boolean containsProperty(final String propertyName) {
