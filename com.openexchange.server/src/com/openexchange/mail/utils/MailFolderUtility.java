@@ -68,6 +68,13 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 public final class MailFolderUtility {
 
     /**
+     * Virtual full name of mailbox's root folder
+     *
+     * @value "default"
+     */
+    private static final String DEFAULT_FOLDER_ID = MailFolder.DEFAULT_FOLDER_ID;
+
+    /**
      * Initializes a new {@link MailFolderUtility}.
      */
     private MailFolderUtility() {
@@ -94,7 +101,7 @@ public final class MailFolderUtility {
         return BASE64MailboxDecoder.decode(encoded);
     }
 
-    private static final int LEN = MailFolder.DEFAULT_FOLDER_ID.length();
+    private static final int LEN = DEFAULT_FOLDER_ID.length();
 
     /**
      * Parses specified full name argument to an appropriate instance of {@link FullnameArgument}.
@@ -114,7 +121,7 @@ public final class MailFolderUtility {
         if (fullnameArgument == null) {
             return null;
         }
-        if (!fullnameArgument.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+        if (!fullnameArgument.startsWith(DEFAULT_FOLDER_ID)) {
             return new FullnameArgument(fullnameArgument);
         }
         final int len = fullnameArgument.length();
@@ -137,7 +144,7 @@ public final class MailFolderUtility {
             throw err;
         }
         if (index >= len) {
-            return new FullnameArgument(accountId, MailFolder.DEFAULT_FOLDER_ID);
+            return new FullnameArgument(accountId, DEFAULT_FOLDER_ID);
         }
         return new FullnameArgument(accountId, fullnameArgument.substring(index + 1));
     }
@@ -177,21 +184,21 @@ public final class MailFolderUtility {
             return null;
         }
         final int length = fullname.length();
-        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || (0 == length)) {
+        if (DEFAULT_FOLDER_ID.equals(fullname) || (0 == length)) {
             return new com.openexchange.java.StringAllocator(length + 4).append(fullname).append(accountId).toString();
         }
-        if (fullname.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+        if (fullname.startsWith(DEFAULT_FOLDER_ID)) {
             /*
              * Ensure given account ID is contained
              */
             final String tmpFullname = prepareMailFolderParam(fullname).getFullname();
-            if (MailFolder.DEFAULT_FOLDER_ID.equals(tmpFullname)) {
+            if (DEFAULT_FOLDER_ID.equals(tmpFullname)) {
                 return new com.openexchange.java.StringAllocator(length + 4).append(fullname).append(tmpFullname).toString();
             }
-            return new com.openexchange.java.StringAllocator(LEN + length + 4).append(MailFolder.DEFAULT_FOLDER_ID).append(accountId).append(
+            return new com.openexchange.java.StringAllocator(LEN + length + 4).append(DEFAULT_FOLDER_ID).append(accountId).append(
                 MailProperties.getInstance().getDefaultSeparator()).append(tmpFullname).toString();
         }
-        return new com.openexchange.java.StringAllocator(LEN + length + 4).append(MailFolder.DEFAULT_FOLDER_ID).append(accountId).append(
+        return new com.openexchange.java.StringAllocator(LEN + length + 4).append(DEFAULT_FOLDER_ID).append(accountId).append(
             MailProperties.getInstance().getDefaultSeparator()).append(fullname).toString();
     }
 
@@ -229,7 +236,7 @@ public final class MailFolderUtility {
         }
         sb.append(')');
         // Appendix: <sep> + "default" + <number> + <sep> + <rest>
-        sb.append("[./]").append(MailFolder.DEFAULT_FOLDER_ID).append("[0-9]+[./](.+)");
+        sb.append("[./]").append(DEFAULT_FOLDER_ID).append("[0-9]+[./](.+)");
         P_FOLDER = Pattern.compile(sb.toString());
     }
 
@@ -247,8 +254,8 @@ public final class MailFolderUtility {
      * @return The possibly sanitized full name
      */
     public static String sanitizeFullName(final String fullName) {
-        if (null == fullName) {
-            return null;
+        if (null == fullName || fullName.indexOf(DEFAULT_FOLDER_ID) < 0) {
+            return fullName;
         }
         final Matcher m = P_FOLDER.matcher(fullName);
         return m.matches() ? m.group(1) : fullName;
