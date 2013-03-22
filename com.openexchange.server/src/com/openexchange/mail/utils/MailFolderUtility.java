@@ -49,11 +49,14 @@
 
 package com.openexchange.mail.utils;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 
@@ -208,6 +211,47 @@ public final class MailFolderUtility {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private static final Pattern P_FOLDER;
+    static {
+        final StringBuilder sb = new StringBuilder(64);
+        // List of known folders
+        sb.append("(?:");
+        boolean first = true;
+        for (final String name : UnifiedInboxManagement.KNOWN_FOLDERS) {
+            if (first) {
+                first = false;
+            } else {
+                sb.append('|');
+            }
+            sb.append(name);
+        }
+        sb.append(')');
+        // Appendix: <sep> + "default" + <number> + <sep> + <rest>
+        sb.append("[./]").append(MailFolder.DEFAULT_FOLDER_ID).append("[0-9]+[./](.+)");
+        P_FOLDER = Pattern.compile(sb.toString());
+    }
+
+    /**
+     * Sanitizes given folder full name.
+     * <p>
+     * Common problem are messed-up folder full names like:
+     * <pre>
+     *   "INBOX/default0/actual/folder/path"
+     *     ==&gt;
+     *   "actual/folder/path"
+     * </pre>
+     * 
+     * @param fullName The full name
+     * @return The possibly sanitized full name
+     */
+    public static String sanitizeFullName(final String fullName) {
+        if (isEmpty(fullName)) {
+            return null;
+        }
+        final Matcher m = P_FOLDER.matcher(fullName);
+        return m.matches() ? m.group(1) : fullName;
     }
 
 }
