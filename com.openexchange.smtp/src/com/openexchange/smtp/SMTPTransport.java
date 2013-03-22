@@ -815,6 +815,8 @@ public final class SMTPTransport extends MailTransport {
                 // Check for "no object DCH for MIME type xxxxx/yyyy"
                 if (toLowerCase(e.getNextException().getMessage()).indexOf("no object dch") >= 0) {
                     // Not able to recover from "no object DCH for MIME type xxxxx/yyyy"
+                    // TODO: Use mime4j to transport message data
+                    // See: http://james.apache.org/mime4j/samples.html
                     throw MimeMailException.handleMessagingException(e, smtpConfig);
                 }
                 try {
