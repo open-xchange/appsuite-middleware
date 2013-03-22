@@ -325,7 +325,7 @@ public abstract class AbstractAttachmentTest extends AttachmentTest {
 
 		GetMethodWebRequest req = documentRequest(sessionId, folderId, attachedId, moduleId, clean.get(0).getId(), null);
 		WebResponse resp = getWebConversation().getResource(req);
-		assertEquals("text/plain",resp.getContentType());
+		assertEquals("application/octet-stream",resp.getContentType());
 
 		req = documentRequest(sessionId, folderId, attachedId, moduleId, clean.get(0).getId(), "application/octet-stream");
 		resp = getWebConversation().getResource(req);
