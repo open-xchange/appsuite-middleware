@@ -61,6 +61,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import org.apache.commons.logging.Log;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -102,32 +103,19 @@ import com.openexchange.user.UserService;
  */
 public final class UnifiedInboxMessageStorage extends MailMessageStorage implements ISimplifiedThreadStructure {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UnifiedInboxMessageStorage.class));
-
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(UnifiedInboxMessageStorage.class);
     private static final boolean DEBUG = LOG.isDebugEnabled();
-
-    /**
-     * Serial version UID
-     */
-    private static final long serialVersionUID = 1467121647337217270L;
 
     /*-
      * Members
      */
 
     private final Session session;
-
     private final int user;
-
     private final int cid;
-
     private final Context ctx;
-
     private final UnifiedInboxAccess access;
-
     private Locale locale;
-
     private UnifiedInboxMessageCopier copier;
 
     /**
@@ -175,6 +163,19 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             copier = new UnifiedInboxMessageCopier(session, access);
         }
         return copier;
+    }
+
+    private List<MailAccount> getAccounts() throws OXException {
+        final MailAccountStorageService srv = UnifiedInboxServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+        final MailAccount[] tmp = srv.getUserMailAccounts(user, cid);
+        final List<MailAccount> accounts = new ArrayList<MailAccount>(tmp.length);
+        final int thisAccountId = access.getAccountId();
+        for (final MailAccount mailAccount : tmp) {
+            if (mailAccount.isUnifiedINBOXEnabled() && thisAccountId != mailAccount.getId()) {
+                accounts.add(mailAccount);
+            }
+        }
+        return accounts;
     }
 
     @Override
@@ -392,18 +393,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
-            final List<MailAccount> accounts;
-            {
-                final MailAccountStorageService storageService =
-                    UnifiedInboxServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
-                final MailAccount[] tmp = storageService.getUserMailAccounts(user, cid);
-                accounts = new ArrayList<MailAccount>(tmp.length);
-                for (final MailAccount mailAccount : tmp) {
-                    if (access.getAccountId() != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
-                        accounts.add(mailAccount);
-                    }
-                }
-            }
+            final List<MailAccount> accounts = getAccounts();
             final int undelegatedAccountId = access.getAccountId();
             final boolean descending = OrderDirection.DESC.equals(order);
             final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE :  sortField;
@@ -720,18 +710,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
-            final List<MailAccount> accounts;
-            {
-                final MailAccountStorageService storageService =
-                    UnifiedInboxServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
-                final MailAccount[] tmp = storageService.getUserMailAccounts(user, cid);
-                accounts = new ArrayList<MailAccount>(tmp.length);
-                for (final MailAccount mailAccount : tmp) {
-                    if (access.getAccountId() != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
-                        accounts.add(mailAccount);
-                    }
-                }
-            }
+            final List<MailAccount> accounts = getAccounts();
             final MailFields mfs = new MailFields(fields);
             mfs.add(MailField.getField(sortField.getField()));
             final MailField[] checkedFields = mfs.toArray();
@@ -858,18 +837,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
-            final List<MailAccount> accounts;
-            {
-                final MailAccountStorageService storageService =
-                    UnifiedInboxServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
-                final MailAccount[] tmp = storageService.getUserMailAccounts(user, cid);
-                accounts = new ArrayList<MailAccount>(tmp.length);
-                for (final MailAccount mailAccount : tmp) {
-                    if (access.getAccountId() != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
-                        accounts.add(mailAccount);
-                    }
-                }
-            }
+            final List<MailAccount> accounts = getAccounts();
             final MailFields mfs = new MailFields(fields);
             mfs.add(MailField.getField(sortField.getField()));
             final MailField[] checkedFields = mfs.toArray();
@@ -986,7 +954,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
             return mails;
         } finally {
-                closeSafe(mailAccess);
+            closeSafe(mailAccess);
         }
     }
 
@@ -996,20 +964,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
         if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(fullName)) {
-            final MailAccount[] accounts;
-            {
-                final MailAccountStorageService storageService =
-                    UnifiedInboxServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
-                final MailAccount[] tmp = storageService.getUserMailAccounts(user, cid);
-                final List<MailAccount> l = new ArrayList<MailAccount>(tmp.length);
-                for (final MailAccount mailAccount : tmp) {
-                    if (access.getAccountId() != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
-                        l.add(mailAccount);
-                    }
-                }
-                accounts = l.toArray(new MailAccount[l.size()]);
-            }
-            final int length = accounts.length;
+            final List<MailAccount> accounts = getAccounts();
+            final int length = accounts.size();
             final int undelegatedAccountId = access.getAccountId();
             final Executor executor = ThreadPools.getThreadPool().getExecutor();
             final TrackingCompletionService<List<MailMessage>> completionService =
@@ -1024,7 +980,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             final int accountId = mailAccount.getId();
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
-                            // Get real fullname
+                            // Get real full name
                             final String fn = UnifiedInboxUtility.determineAccountFullname(mailAccess, fullName);
                             // Check if denoted account has such a default folder
                             if (fn == null) {

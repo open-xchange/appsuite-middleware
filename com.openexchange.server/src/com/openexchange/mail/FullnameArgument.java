@@ -59,28 +59,27 @@ import com.openexchange.mailaccount.MailAccount;
 public final class FullnameArgument {
 
     private final int accountId;
-
-    private final String fullname;
+    private final String fullName;
 
     /**
      * Initializes a new {@link FullnameArgument} with default account ID.
      *
-     * @param fullname The full name
+     * @param fullName The full name
      */
-    public FullnameArgument(final String fullname) {
-        this(MailAccount.DEFAULT_ID, fullname);
+    public FullnameArgument(final String fullName) {
+        this(MailAccount.DEFAULT_ID, fullName);
     }
 
     /**
      * Initializes a new {@link FullnameArgument}.
      *
      * @param accountId The account ID
-     * @param fullname The full name
+     * @param fullName The full name
      */
-    public FullnameArgument(final int accountId, final String fullname) {
+    public FullnameArgument(final int accountId, final String fullName) {
         super();
         this.accountId = accountId;
-        this.fullname = fullname;
+        this.fullName = fullName;
     }
 
     /**
@@ -98,7 +97,16 @@ public final class FullnameArgument {
      * @return The full name
      */
     public String getFullname() {
-        return fullname;
+        return fullName;
+    }
+
+    /**
+     * Gets the full name.
+     *
+     * @return The full name
+     */
+    public String getFullName() {
+        return fullName;
     }
 
     @Override
@@ -106,7 +114,7 @@ public final class FullnameArgument {
         final int prime = 31;
         int result = 1;
         result = prime * result + accountId;
-        result = prime * result + ((fullname == null) ? 0 : fullname.hashCode());
+        result = prime * result + ((fullName == null) ? 0 : fullName.hashCode());
         return result;
     }
 
@@ -125,11 +133,11 @@ public final class FullnameArgument {
         if (accountId != other.accountId) {
             return false;
         }
-        if (fullname == null) {
-            if (other.fullname != null) {
+        if (fullName == null) {
+            if (other.fullName != null) {
                 return false;
             }
-        } else if (!fullname.equals(other.fullname)) {
+        } else if (!fullName.equals(other.fullName)) {
             return false;
         }
         return true;
@@ -137,6 +145,6 @@ public final class FullnameArgument {
 
     @Override
     public String toString() {
-        return new com.openexchange.java.StringAllocator(32).append("Account-ID=").append(accountId).append(" Fullname=").append(fullname).toString();
+        return new com.openexchange.java.StringAllocator(32).append("Account-ID=").append(accountId).append(" Full-Name=").append(fullName).toString();
     }
 }

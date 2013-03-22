@@ -312,7 +312,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             if (hardDelete) {
                 messageStorage.deleteMessages(fullname, mailIds.toArray(new String[0]), true);
             } else {
-                messageStorage.moveMessages(fullname, folderStorage.getTrashFolder(), mailIds.toArray(new String[0]), true);
+                final String trashFolder = folderStorage.getTrashFolder();
+                if (fullname.equals(trashFolder)) {
+                    // Also perform hard-delete when compacting trash folder
+                    messageStorage.deleteMessages(fullname, mailIds.toArray(new String[0]), true);
+                } else {
+                    messageStorage.moveMessages(fullname, trashFolder, mailIds.toArray(new String[0]), true);
+                }
             }
         }
         postEvent(accountId, fullname, true);
