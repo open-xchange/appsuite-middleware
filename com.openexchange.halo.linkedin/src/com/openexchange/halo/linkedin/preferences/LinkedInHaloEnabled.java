@@ -47,43 +47,58 @@
  *
  */
 
-package com.openexchange.halo.linkedin.osgi;
+package com.openexchange.halo.linkedin.preferences;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.contact.ContactService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.halo.HaloContactDataSource;
-import com.openexchange.halo.linkedin.LinkedinInboxDataSource;
-import com.openexchange.halo.linkedin.LinkedinProfileDataSource;
-import com.openexchange.halo.linkedin.LinkedinUpdatesDataSource;
-import com.openexchange.halo.linkedin.preferences.LinkedInHaloEnabled;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.linkedin.LinkedInService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
 
 /**
- * {@link LinkedinHaloActivator}
+ * {@link LinkedInHaloEnabled} - The setting whether VoipNow is enabled for a certain user.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class LinkedinHaloActivator extends HousekeepingActivator {
+public class LinkedInHaloEnabled implements PreferencesItemService {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { LinkedInService.class, OAuthService.class, ContactService.class, UserService.class, ConfigurationService.class };
+    /** The enabled flag */
+    final boolean enabled;
+
+    /**
+     * Initializes a new {@link LinkedInHaloEnabled}.
+     */
+    public LinkedInHaloEnabled(final boolean enabled) {
+        super();
+        this.enabled = enabled;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        final ConfigurationService cs = getService(ConfigurationService.class);
-        final boolean enabledMailCapableKey = cs.getBoolProperty("com.openexchange.halo.linkedin.enabledMailCapableKey", false);
-        registerService(PreferencesItemService.class, new LinkedInHaloEnabled(enabledMailCapableKey));
-        if (enabledMailCapableKey) {
-            registerService(HaloContactDataSource.class, new LinkedinProfileDataSource(this));
-            registerService(HaloContactDataSource.class, new LinkedinInboxDataSource(this));
-            registerService(HaloContactDataSource.class, new LinkedinUpdatesDataSource(this));
-        }
+    public String[] getPath() {
+        return new String[] { "modules", "halo", "linkedin", "module" };
+    }
+
+    @Override
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+
+            @Override
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
+                setting.setSingleValue(Boolean.valueOf(enabled));
+            }
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return true;
+            }
+        };
     }
 
 }
