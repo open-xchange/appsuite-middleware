@@ -247,7 +247,7 @@ public final class MailFolderUtility {
      * @return The possibly sanitized full name
      */
     public static String sanitizeFullName(final String fullName) {
-        if (isEmpty(fullName)) {
+        if (null == fullName) {
             return null;
         }
         final Matcher m = P_FOLDER.matcher(fullName);
