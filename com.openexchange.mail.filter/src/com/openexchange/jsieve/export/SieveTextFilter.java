@@ -59,6 +59,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
+import com.openexchange.log.LogFactory;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.parser.generated.Node;
 import org.apache.jsieve.parser.generated.ParseException;
@@ -74,7 +75,6 @@ import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.visitors.InternalVisitor;
 import com.openexchange.jsieve.visitors.Visitor;
 import com.openexchange.jsieve.visitors.Visitor.OwnType;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mailfilter.ajax.Credentials;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
 
@@ -634,30 +634,30 @@ public final class SieveTextFilter {
     }
 
     private List<String> interweaving(final List<OwnType> noncommentedoutput, final List<OwnType> commentedoutput, final ArrayList<Rule> rules) {
-        final List<String> lines = new ArrayList<String>();
-        lines.add(FIRST_LINE + (new Date()).toString());
+        final List<String> retval = new ArrayList<String>();
+        retval.add(FIRST_LINE + (new Date()).toString());
         for (final OwnType owntype : noncommentedoutput) {
             final int linenumber = owntype.getLinenumber();
             final String string = owntype.getOutput().toString();
-            final int size = lines.size();
+            final int size = retval.size();
             if (linenumber > size + 1) {
-                fillup(lines, linenumber - (size + 1));
+                fillup(retval, linenumber - (size + 1));
             }
-            lines.addAll(stringToList(string));
+            retval.addAll(stringToList(string));
         }
         for (final OwnType owntype : commentedoutput) {
             int linenumber = owntype.getLinenumber() - 1;
             final String string = owntype.getOutput().toString();
-            final int size = lines.size();
+            final int size = retval.size();
             if (linenumber >= size) {
-                fillup(lines, linenumber - (size - 1));
+                fillup(retval, linenumber - (size - 1));
             }
             final List<String> stringToListComment = stringToListComment(string);
-            while (null != lines.get(linenumber) && !("".equals(lines.get(linenumber)))) {
+            while (null != retval.get(linenumber) && !("".equals(retval.get(linenumber)))) {
                 linenumber++;
             }
-            removeEmptyLines(lines, linenumber, stringToListComment.size());
-            lines.addAll(linenumber, stringToListComment);
+            removeEmptyLines(retval, linenumber, stringToListComment.size());
+            retval.addAll(linenumber, stringToListComment);
         }
 
         for (final Rule rule : rules) {
@@ -665,31 +665,25 @@ public final class SieveTextFilter {
             final String text = rule.getText();
             if (null != text) {
                 final int line = ruleComment.getLine();
-                final int size = lines.size();
+                final int size = retval.size();
                 if (line > size) {
-                    fillup(lines, line - size);
+                    fillup(retval, line - size);
                 }
                 final ArrayList<String> stringToList = stringToList(text);
-                removeEmptyLines(lines, line, stringToList.size());
-                lines.addAll(line, stringToList);
+                removeEmptyLines(retval, line, stringToList.size());
+                retval.addAll(line, stringToList);
             }
             if (null != ruleComment) {
-                int line = ruleComment.getLine();
-                {
-                    String cur = lines.get(line - 1);
-                    while (cur.length() > 0) {
-                        cur = lines.get(++line - 1);
-                    }
-                }
+                final int line = ruleComment.getLine();
                 final String rulename2 = ruleComment.getRulename();
                 // The nth line is the n-1th position inside the array
-                lines.add(line - 1, FLAG_TAG + listToCommaSeparatedString(ruleComment.getFlags()) + SEPARATOR + UNIQUE_ID + ruleComment.getUniqueid() + SEPARATOR
+                retval.add(line - 1, FLAG_TAG + listToCommaSeparatedString(ruleComment.getFlags()) + SEPARATOR + UNIQUE_ID + ruleComment.getUniqueid() + SEPARATOR
                         + RULENAME_TAG + ((null != rulename2) ? rulename2 : ""));
-                searchEmptyLineAndRemove(lines, ruleComment.getLine() - 1);
+                searchEmptyLineAndRemove(retval, line - 1);
             }
         }
 
-        return lines;
+        return retval;
     }
 
     private void removeEmptyLines(final List<String> retval, final int line, final int linescount) {
