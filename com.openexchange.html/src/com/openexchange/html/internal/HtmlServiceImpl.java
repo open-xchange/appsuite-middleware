@@ -52,6 +52,7 @@ package com.openexchange.html.internal;
 import gnu.inet.encoding.IDNAException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -90,9 +91,6 @@ import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
-import com.openexchange.java.AllocatingStringWriter;
-import com.openexchange.java.Charsets;
-import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.proxy.ImageContentTypeRestriction;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
@@ -386,7 +384,7 @@ public final class HtmlServiceImpl implements HtmlService {
             urlStr.startsWith("www.") || urlStr.startsWith("news.") ? new StringBuilder("http://").append(urlStr).toString() : urlStr).getHost();
         if (null != host && !isAscii(host)) {
             final String encodedHost = gnu.inet.encoding.IDNA.toASCII(host);
-            urlStr = Pattern.compile(Pattern.quote(host)).matcher(urlStr).replaceFirst(com.openexchange.java.Strings.quoteReplacement(encodedHost));
+            urlStr = Pattern.compile(Pattern.quote(host)).matcher(urlStr).replaceFirst(Matcher.quoteReplacement(encodedHost));
         }
         /*
          * Still contains any non-ascii character?
@@ -468,33 +466,42 @@ public final class HtmlServiceImpl implements HtmlService {
     public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix) {
         try {
             final long st = DEBUG ? System.currentTimeMillis() : 0L;
-            String confName = optConfigName;
-            if (null != confName && !confName.endsWith(".properties")) {
-                confName += ".properties";
-            }
-            String html = replaceHexEntities(htmlContent);
+            String html = htmlContent;
+            // Perform one-shot sanitizing
+            html = replaceHexEntities(html);
             html = processDownlevelRevealedConditionalComments(html);
             html = dropDoubleAccents(html);
-            // html = replaceHexNbsp(html);
-            final FilterJerichoHandler handler;
+            // CSS- and tag-wise sanitizing
             {
-                final String definition = null == confName ? null : getConfiguration().getText(confName);
-                if (null == definition) {
-                    handler = new FilterJerichoHandler(html.length());
-                } else {
-                    handler = new FilterJerichoHandler(html.length(), definition);
+                // Determine the definition to use
+                final String definition;
+                {
+                    String confName = optConfigName;
+                    if (null != confName && !confName.endsWith(".properties")) {
+                        confName += ".properties";
+                    }
+                    definition = null == confName ? null : getConfiguration().getText(confName);
                 }
+                // Handle HTML content
+                final FilterJerichoHandler handler = null == definition ? new FilterJerichoHandler(html.length()) : new FilterJerichoHandler(html.length(), definition);
+                JerichoParser.parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix));
+                if (dropExternalImages && null != modified) {
+                    modified[0] |= handler.isImageURLFound();
+                }
+                html = handler.getHTML();
             }
-            JerichoParser.parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix));
-            if (dropExternalImages && null != modified) {
-                modified[0] |= handler.isImageURLFound();
+            // Repetitive sanitizing until no further replacement/changes performed
+            final boolean[] sanitized = new boolean[] { true };
+            while (sanitized[0]) {
+                sanitized[0] = false;
+                // Start sanitizing round
+                html = SaneScriptTags.saneScriptTags(html, sanitized);
             }
-            final String retval = SaneScriptTags.saneScriptTags(handler.getHTML());
             if (DEBUG) {
                 final long dur = System.currentTimeMillis() - st;
                 LOG.debug("\tHTMLServiceImpl.sanitize() took " + dur + "msec.");
             }
-            return retval;
+            return html;
         } catch (final ParsingDeniedException e) {
             LOG.warn("HTML content will be returned un-sanitized. Reason: "+e.getMessage(), e);
             return htmlContent;
@@ -502,11 +509,8 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     private static final Pattern PATTERN_TAG = Pattern.compile("<\\w+?[^>]*>");
-
     private static final Pattern PATTERN_DOUBLE_ACCENTS = Pattern.compile(Pattern.quote("\u0060\u0060")+"|"+Pattern.quote("\u00b4\u00b4"));
-
     private static final Pattern PATTERN_ACCENT1 = Pattern.compile(Pattern.quote("\u0060"));
-
     private static final Pattern PATTERN_ACCENT2 = Pattern.compile(Pattern.quote("\u00b4"));
 
     private static String dropDoubleAccents(final String html) {
@@ -564,8 +568,8 @@ public final class HtmlServiceImpl implements HtmlService {
             LOG.warn("Stack-overflow during processing HTML content.", soe);
             // Retry with Tika framework
             try {
-                return extractFrom(new UnsynchronizedByteArrayInputStream(htmlContent.getBytes(Charsets.ISO_8859_1)));
-            } catch (final OXException e) {
+                return extractFrom(new java.io.ByteArrayInputStream(htmlContent.getBytes("ISO-8859-1")));
+            } catch (final Exception e) {
                 LOG.error("Error during processing HTML content.", e);
                 return "";
             }
@@ -598,9 +602,9 @@ public final class HtmlServiceImpl implements HtmlService {
         do {
             final String tail = m.group(1);
             if (null == tail || "</hr>".equals(tail)) {
-                m.appendReplacement(sb, com.openexchange.java.Strings.quoteReplacement(repl));
+                m.appendReplacement(sb, Matcher.quoteReplacement(repl));
             } else {
-                m.appendReplacement(sb, com.openexchange.java.Strings.quoteReplacement(repl + tail.substring(0, tail.length() - 5)));
+                m.appendReplacement(sb, Matcher.quoteReplacement(repl + tail.substring(0, tail.length() - 5)));
             }
         } while (m.find());
         m.appendTail(sb);
@@ -939,7 +943,7 @@ public final class HtmlServiceImpl implements HtmlService {
             /*
              * Serialize
              */
-            final AllocatingStringWriter writer = new AllocatingStringWriter(htmlContent.length());
+            final StringWriter writer = new StringWriter(htmlContent.length());
             SERIALIZER.write(htmlNode, writer, "UTF-8");
             return writer.toString();
         } catch (final UnsupportedEncodingException e) {
@@ -1123,9 +1127,9 @@ public final class HtmlServiceImpl implements HtmlService {
                     final byte[] responseBody = get.getResponseBody();
                     try {
                         final String charSet = get.getResponseCharSet();
-                        css.append(new String(responseBody, null == charSet ? Charsets.ISO_8859_1 : Charsets.forName(charSet)));
+                        css.append(new String(responseBody, null == charSet ? "ISO-8859-1" : charSet));
                     } catch (final UnsupportedCharsetException e) {
-                        css.append(new String(responseBody, Charsets.ISO_8859_1));
+                        css.append(new String(responseBody, "ISO-8859-1"));
                     }
                 }
             } catch (final HttpException e) {
@@ -1285,7 +1289,7 @@ public final class HtmlServiceImpl implements HtmlService {
             StringBuilder tmp = null;
             do {
                 // Un-quote
-                final String match = com.openexchange.java.Strings.quoteReplacement(PATTERN_UNQUOTE2.matcher(
+                final String match = Matcher.quoteReplacement(PATTERN_UNQUOTE2.matcher(
                     PATTERN_UNQUOTE1.matcher(m.group(2)).replaceAll("<!--")).replaceAll("-->"));
                 // Check for additional HTML comments
                 if (PATTERN_XHTML_COMMENT.matcher(m.group(2)).replaceAll("").indexOf(endingComment) == -1) {
@@ -1495,16 +1499,16 @@ public final class HtmlServiceImpl implements HtmlService {
             /*
              * Serialize
              */
-            final AllocatingStringWriter writer = new AllocatingStringWriter(htmlContent.length());
+            final StringWriter writer = new StringWriter(htmlContent.length());
             SERIALIZER.write(htmlNode, writer, "UTF-8");
-            final com.openexchange.java.StringAllocator builder = writer.getAllocator();
+            final StringBuffer buffer = writer.getBuffer();
             /*
              * Insert DOCTYPE if absent
              */
-            if (builder.indexOf("<!DOCTYPE") < 0) {
-                builder.insert(0, DOCTYPE_DECL);
+            if (buffer.indexOf("<!DOCTYPE") < 0) {
+                buffer.insert(0, DOCTYPE_DECL);
             }
-            return builder.toString();
+            return buffer.toString();
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
             LOG.error("HtmlCleaner library failed to pretty-print HTML content with an unsupported encoding: " + e.getMessage(), e);

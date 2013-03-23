@@ -56,7 +56,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.java.StringAllocator;
 
 /**
  * {@link SaneScriptTags}
@@ -72,20 +71,31 @@ public final class SaneScriptTags {
         super();
     }
 
+//    public static void main(String[] args) {
+//        String s = "<scr<script><!--</script><script>--></script>ipt src=http://www.host.de/download/xss-neu/xss.js></script/><<<<   script   >boo<   /script   >";
+//        boolean[] a = new boolean[] { true };
+//        while (a[0]) {
+//            a[0] = false;
+//            s = saneScriptTags(s, a);
+//        }
+//        System.out.println(s);
+//    }
+
     /**
      * Sanitizes specified HTML content by script tags
      *
      * @param html The HTML content
+     * @param sanitized The sanitized flag
      * @return The sanitized HTML content
      */
-    public static String saneScriptTags(final String html) {
+    public static String saneScriptTags(final String html, final boolean[] sanitized) {
         if (isEmpty(html)) {
             return html;
         }
         String s = html;
         s = decode(s);
         s = dropConcatenations(s);
-        s = dropScriptTags(s);
+        s = dropScriptTags(s, sanitized);
         return s;
     }
 
@@ -97,7 +107,7 @@ public final class SaneScriptTags {
         if (html.indexOf('%') < 0) {
             return html;
         }
-        String ret = PAT_URLDECODE_PERCENT.matcher(html).replaceAll("%");
+        final String ret = PAT_URLDECODE_PERCENT.matcher(html).replaceAll("%");
         final Matcher m = PAT_URLDECODE_ENTITIES.matcher(ret);
         if (!m.find()) {
             return ret;
@@ -106,7 +116,7 @@ public final class SaneScriptTags {
         do {
             final String entity = toLowerCase(m.group(1));
             if (REPLACEES.contains(entity)) {
-                m.appendReplacement(sb, com.openexchange.java.Strings.quoteReplacement(Character.toString((char) Integer.parseInt(m.group(1), 16))));
+                m.appendReplacement(sb, Matcher.quoteReplacement(Character.toString((char) Integer.parseInt(m.group(1), 16))));
             } else {
                 m.appendReplacement(sb, "$0");
             }
@@ -125,7 +135,7 @@ public final class SaneScriptTags {
             }
             final StringBuffer sb = new StringBuffer(html.length());
             do {
-                m.appendReplacement(sb, com.openexchange.java.Strings.quoteReplacement(Character.toString((char) Integer.parseInt(m.group(1), 16))));
+                m.appendReplacement(sb, Matcher.quoteReplacement(Character.toString((char) Integer.parseInt(m.group(1), 16))));
             } while (m.find());
             m.appendTail(sb);
             return sb.toString();
@@ -135,6 +145,9 @@ public final class SaneScriptTags {
     private static final Pattern PAT_CONCAT = Pattern.compile("[\"\u201d\u201c]\\+[\"\u201d\u201c]");
 
     private static String dropConcatenations(final String html) {
+        if (html.indexOf('+') < 0) {
+            return html;
+        }
         final Matcher m = PAT_CONCAT.matcher(html);
         if (!m.find()) {
             return html;
@@ -147,18 +160,46 @@ public final class SaneScriptTags {
         return sb.toString();
     }
 
-    private static final Pattern PATTERN_SCRIPT_TAG = Pattern.compile(
-        "<+script[^>]*>" + ".*?" + "</script>",
-        Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_SCRIPT_TAG;
+    private static final Pattern PATTERN_SCRIPT_TAG_START;
+    private static final Pattern PATTERN_SCRIPT_TAG_END;
+    static {
+        final String regexScriptStart = "<+[\\s]*script[^>]*>";
+        final String regexScriptEnd = "<+[\\s]*/script[^>]*>";
+        PATTERN_SCRIPT_TAG = Pattern.compile(regexScriptStart + ".*?" + regexScriptEnd, Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+        PATTERN_SCRIPT_TAG_START = Pattern.compile(regexScriptStart, Pattern.CASE_INSENSITIVE);
+        PATTERN_SCRIPT_TAG_END = Pattern.compile(regexScriptEnd, Pattern.CASE_INSENSITIVE);
+    }
 
-    private static String dropScriptTags(final String htmlContent) {
-        final Matcher m = PATTERN_SCRIPT_TAG.matcher(htmlContent);
+    private static String dropScriptTags(final String htmlContent, final boolean[] sanitized) {
+        Matcher m = PATTERN_SCRIPT_TAG.matcher(htmlContent);
+        if (m.find()) {
+            final StringBuffer sb = new StringBuffer(htmlContent.length());
+            do {
+                m.appendReplacement(sb, "");
+                sanitized[0] = true;
+            } while (m.find());
+            m.appendTail(sb);
+            return sb.toString();
+        }
+        m = PATTERN_SCRIPT_TAG_START.matcher(htmlContent);
         if (!m.find()) {
             return htmlContent;
         }
         final StringBuffer sb = new StringBuffer(htmlContent.length());
         do {
             m.appendReplacement(sb, "");
+            sanitized[0] = true;
+        } while (m.find());
+        m.appendTail(sb);
+        m = PATTERN_SCRIPT_TAG_END.matcher(sb.toString());
+        if (!m.find()) {
+            return sb.toString();
+        }
+        sb.setLength(0);
+        do {
+            m.appendReplacement(sb, "");
+            sanitized[0] = true;
         } while (m.find());
         m.appendTail(sb);
         return sb.toString();
@@ -178,7 +219,7 @@ public final class SaneScriptTags {
 
     private static String toLowerCase(final CharSequence chars) {
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
