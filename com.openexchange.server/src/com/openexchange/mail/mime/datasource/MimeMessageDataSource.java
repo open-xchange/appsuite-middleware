@@ -55,9 +55,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import javax.activation.DataSource;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -66,9 +70,16 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimePart;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.dom.BinaryBody;
+import org.apache.james.mime4j.dom.Body;
+import org.apache.james.mime4j.dom.Entity;
+import org.apache.james.mime4j.dom.Header;
 import org.apache.james.mime4j.dom.Message;
 import org.apache.james.mime4j.dom.MessageWriter;
 import org.apache.james.mime4j.dom.TextBody;
+import org.apache.james.mime4j.dom.address.Address;
+import org.apache.james.mime4j.dom.address.AddressList;
+import org.apache.james.mime4j.dom.address.Mailbox;
+import org.apache.james.mime4j.dom.address.MailboxList;
 import org.apache.james.mime4j.message.AbstractEntity;
 import org.apache.james.mime4j.message.BodyPart;
 import org.apache.james.mime4j.message.DefaultMessageWriter;
@@ -101,10 +112,9 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MimeMessageDataSource implements DataSource {
+public final class MimeMessageDataSource implements DataSource, CleanUp {
 
     private static volatile File directory;
-
     private static File directory() {
         File tmp = directory;
         if (null == tmp) {
@@ -121,8 +131,7 @@ public final class MimeMessageDataSource implements DataSource {
     }
 
     private static volatile Field filesToDelete;
-
-    private static Field filesToDelete() {
+    static Field filesToDelete() {
         Field tmp = filesToDelete;
         if (null == tmp) {
             synchronized (MimeMessageDataSource.class) {
@@ -196,6 +205,7 @@ public final class MimeMessageDataSource implements DataSource {
     /**
      * Cleans-up this data source.
      */
+    @Override
     public void cleanUp() {
         StorageProvider tempStore = this.tempStore;
         if (null != tempStore) {
@@ -255,6 +265,24 @@ public final class MimeMessageDataSource implements DataSource {
     }
 
     // ----------------------------------------------------------------------------------------------------- //
+
+    /**
+     * Maps given MIME part to specified mime4j instance.
+     * 
+     * @param mimeMessage The MIME message (source)
+     * @param optConfig The mail configuration
+     * @param optSession The user session
+     * @return The resulting message with {@link CleanUp} support
+     * @throws OXException If mapping fails
+     */
+    public static Message mime4jOf(final MimeMessage mimeMessage, final MailConfig optConfig, final Session optSession) throws OXException {
+        final MessageImpl message = new MessageImpl();
+        final StorageProvider tempStore = new TempFileStorageProvider("open-xchange-", ".tmp", directory());
+        final StorageProvider provider = new ThresholdStorageProvider(tempStore, 8192);
+        final StorageBodyFactory bodyFactory = new StorageBodyFactory(provider, null);
+        mime4jOf(mimeMessage, message, bodyFactory, optConfig, optSession);
+        return new CleanUpMessageImpl(message, tempStore);
+    }
 
     /**
      * Maps given MIME part to specified mime4j instance.
@@ -372,6 +400,347 @@ public final class MimeMessageDataSource implements DataSource {
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
         }
         return builder.toString();
+    }
+
+    // --------------------------------- Helper class -------------------------------------- //
+
+    private static final class CleanUpMessageImpl extends MessageImpl implements CleanUp {
+
+        private final MessageImpl message;
+        private volatile StorageProvider tempStore;
+
+        CleanUpMessageImpl(final MessageImpl message, final StorageProvider tempStore) {
+            super();
+            this.message = message;
+            this.tempStore = tempStore;
+        }
+
+        @Override
+        public void cleanUp() {
+            StorageProvider tempStore = this.tempStore;
+            if (null != tempStore) {
+                synchronized (this) {
+                    tempStore = this.tempStore;
+                    if (null != tempStore) {
+                        try {
+                            @SuppressWarnings("unchecked") final Set<File> filesToDelete = (Set<File>) filesToDelete().get(null);
+                            synchronized (filesToDelete) {
+                                for (final Iterator<File> iterator = filesToDelete.iterator(); iterator.hasNext();) {
+                                    final File file = iterator.next();
+                                    if (file.delete()) {
+                                        iterator.remove();
+                                    }
+                                }
+                            }
+                            this.tempStore = null;
+                        } catch (final Exception e) {
+                            // Ignore
+                        }
+                    }
+                }
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return message.hashCode();
+        }
+
+        @Override
+        public String getMessageId() {
+            return message.getMessageId();
+        }
+
+        @Override
+        public Entity getParent() {
+            return message.getParent();
+        }
+
+        @Override
+        public void setParent(final Entity parent) {
+            message.setParent(parent);
+        }
+
+        @Override
+        public void createMessageId(final String hostname) {
+            message.createMessageId(hostname);
+        }
+
+        @Override
+        public Header getHeader() {
+            return message.getHeader();
+        }
+
+        @Override
+        public void setHeader(final Header header) {
+            message.setHeader(header);
+        }
+
+        @Override
+        public Body getBody() {
+            return message.getBody();
+        }
+
+        @Override
+        public String getSubject() {
+            return message.getSubject();
+        }
+
+        @Override
+        public void setBody(final Body body) {
+            message.setBody(body);
+        }
+
+        @Override
+        public void setSubject(final String subject) {
+            message.setSubject(subject);
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            return message.equals(obj);
+        }
+
+        @Override
+        public Body removeBody() {
+            return message.removeBody();
+        }
+
+        @Override
+        public void setMessage(final Message message) {
+            ((AbstractEntity) message).setMessage(message);
+        }
+
+        @Override
+        public Date getDate() {
+            return message.getDate();
+        }
+
+        @Override
+        public void setMultipart(final org.apache.james.mime4j.dom.Multipart multipart) {
+            message.setMultipart(multipart);
+        }
+
+        @Override
+        public void setDate(final Date date) {
+            message.setDate(date);
+        }
+
+        @Override
+        public void setDate(final Date date, final TimeZone zone) {
+            message.setDate(date, zone);
+        }
+
+        @Override
+        public void setMultipart(final org.apache.james.mime4j.dom.Multipart multipart, final Map<String, String> parameters) {
+            message.setMultipart(multipart, parameters);
+        }
+
+        @Override
+        public Mailbox getSender() {
+            return message.getSender();
+        }
+
+        @Override
+        public void setText(final TextBody textBody) {
+            message.setText(textBody);
+        }
+
+        @Override
+        public void setSender(final Mailbox sender) {
+            message.setSender(sender);
+        }
+
+        @Override
+        public MailboxList getFrom() {
+            return message.getFrom();
+        }
+
+        @Override
+        public void setText(final TextBody textBody, final String subtype) {
+            message.setText(textBody, subtype);
+        }
+
+        @Override
+        public void setFrom(final Mailbox from) {
+            message.setFrom(from);
+        }
+
+        @Override
+        public void setFrom(final Mailbox... from) {
+            message.setFrom(from);
+        }
+
+        @Override
+        public void setBody(final Body body, final String mimeType) {
+            message.setBody(body, mimeType);
+        }
+
+        @Override
+        public void setFrom(final Collection<Mailbox> from) {
+            message.setFrom(from);
+        }
+
+        @Override
+        public AddressList getTo() {
+            return message.getTo();
+        }
+
+        @Override
+        public void setBody(final Body body, final String mimeType, final Map<String, String> parameters) {
+            message.setBody(body, mimeType, parameters);
+        }
+
+        @Override
+        public void setTo(final Address to) {
+            message.setTo(to);
+        }
+
+        @Override
+        public void setTo(final Address... to) {
+            message.setTo(to);
+        }
+
+        @Override
+        public String getMimeType() {
+            return message.getMimeType();
+        }
+
+        @Override
+        public void setTo(final Collection<? extends Address> to) {
+            message.setTo(to);
+        }
+
+        @Override
+        public AddressList getCc() {
+            return message.getCc();
+        }
+
+        @Override
+        public String getCharset() {
+            return message.getCharset();
+        }
+
+        @Override
+        public String toString() {
+            return message.toString();
+        }
+
+        @Override
+        public void setCc(final Address cc) {
+            message.setCc(cc);
+        }
+
+        @Override
+        public String getContentTransferEncoding() {
+            return message.getContentTransferEncoding();
+        }
+
+        @Override
+        public void setCc(final Address... cc) {
+            message.setCc(cc);
+        }
+
+        @Override
+        public void setContentTransferEncoding(final String contentTransferEncoding) {
+            message.setContentTransferEncoding(contentTransferEncoding);
+        }
+
+        @Override
+        public void setCc(final Collection<? extends Address> cc) {
+            message.setCc(cc);
+        }
+
+        @Override
+        public String getDispositionType() {
+            return message.getDispositionType();
+        }
+
+        @Override
+        public AddressList getBcc() {
+            return message.getBcc();
+        }
+
+        @Override
+        public void setBcc(final Address bcc) {
+            message.setBcc(bcc);
+        }
+
+        @Override
+        public void setContentDisposition(final String dispositionType) {
+            message.setContentDisposition(dispositionType);
+        }
+
+        @Override
+        public void setBcc(final Address... bcc) {
+            message.setBcc(bcc);
+        }
+
+        @Override
+        public void setContentDisposition(final String dispositionType, final String filename) {
+            message.setContentDisposition(dispositionType, filename);
+        }
+
+        @Override
+        public void setBcc(final Collection<? extends Address> bcc) {
+            message.setBcc(bcc);
+        }
+
+        @Override
+        public AddressList getReplyTo() {
+            return message.getReplyTo();
+        }
+
+        @Override
+        public void setContentDisposition(final String dispositionType, final String filename, final long size) {
+            message.setContentDisposition(dispositionType, filename, size);
+        }
+
+        @Override
+        public void setReplyTo(final Address replyTo) {
+            message.setReplyTo(replyTo);
+        }
+
+        @Override
+        public void setReplyTo(final Address... replyTo) {
+            message.setReplyTo(replyTo);
+        }
+
+        @Override
+        public void setReplyTo(final Collection<? extends Address> replyTo) {
+            message.setReplyTo(replyTo);
+        }
+
+        @Override
+        public void setContentDisposition(final String dispositionType, final String filename, final long size, final Date creationDate, final Date modificationDate, final Date readDate) {
+            message.setContentDisposition(dispositionType, filename, size, creationDate, modificationDate, readDate);
+        }
+
+        @Override
+        public String getFilename() {
+            return message.getFilename();
+        }
+
+        @Override
+        public void setFilename(final String filename) {
+            message.setFilename(filename);
+        }
+
+        @Override
+        public boolean isMimeType(final String type) {
+            return message.isMimeType(type);
+        }
+
+        @Override
+        public boolean isMultipart() {
+            return message.isMultipart();
+        }
+
+        @Override
+        public void dispose() {
+            message.dispose();
+        }
+
     }
 
 }
