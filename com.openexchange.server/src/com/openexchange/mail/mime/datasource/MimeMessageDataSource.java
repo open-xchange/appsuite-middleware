@@ -107,8 +107,8 @@ import com.openexchange.session.Session;
 /**
  * {@link MimeMessageDataSource} - A MIME message data source.
  * <p>
- * Converts a {@link MimeMessage} to a mime4j {@link Message} and writes it using {@link MessageWriter}. This bypasses the need for JAF
- * look-up.
+ * Converts a {@link MimeMessage} to a <a href="http://james.apache.org/mime4j/">mime4j</a> {@link Message} and writes it using
+ * {@link MessageWriter}. This bypasses the need for JAF look-up.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
