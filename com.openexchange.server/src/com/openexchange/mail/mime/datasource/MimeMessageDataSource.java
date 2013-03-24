@@ -335,8 +335,8 @@ public final class MimeMessageDataSource implements DataSource {
         if (start <= 0) {
             return null;
         }
-        final int pos2 = sContentType.indexOf(';', start);
-        return pos2 < 0 ? sContentType.substring(start) : sContentType.substring(start, pos2);
+        final int pos = sContentType.indexOf(';', start);
+        return pos < 0 ? sContentType.substring(start) : sContentType.substring(start, pos);
     }
 
     private static String tryGetContent(final MimePart mimePart) {
