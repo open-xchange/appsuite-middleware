@@ -739,7 +739,6 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
         public void dispose() {
             message.dispose();
         }
-
-    }
+    } // End of class CleanUpMessageImpl
 
 }
