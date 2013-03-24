@@ -104,6 +104,7 @@ import com.openexchange.session.Session;
 public final class MimeMessageDataSource implements DataSource {
 
     private static volatile File directory;
+
     private static File directory() {
         File tmp = directory;
         if (null == tmp) {
@@ -120,6 +121,7 @@ public final class MimeMessageDataSource implements DataSource {
     }
 
     private static volatile Field filesToDelete;
+
     private static Field filesToDelete() {
         Field tmp = filesToDelete;
         if (null == tmp) {
@@ -154,6 +156,21 @@ public final class MimeMessageDataSource implements DataSource {
 
     /** The temp store */
     private volatile StorageProvider tempStore;
+
+    /**
+     * Initializes a new {@link MimeMessageDataSource}.
+     * <p>
+     * <b>Note</b>: {@link #cleanUp()}
+     * 
+     * @param mimeMessage The source MIME message
+     * @param optConfig The optional mail configuration (for improved error messages)
+     * @param optSession The optional session (for improved error messages)
+     * @throws OXException If initialization fails
+     * @see #cleanUp()
+     */
+    public MimeMessageDataSource(final MimeMessage mimeMessage) throws OXException {
+        this(mimeMessage, null, null);
+    }
 
     /**
      * Initializes a new {@link MimeMessageDataSource}.
@@ -225,6 +242,16 @@ public final class MimeMessageDataSource implements DataSource {
     @Override
     public OutputStream getOutputStream() throws IOException {
         throw new IOException(this.getClass().getName() + ".getOutputStream() is not implemented");
+    }
+
+    /**
+     * Output to given byte stream.
+     * 
+     * @throws IOException If an error occurs while writing to the stream
+     */
+    public void writeTo(final OutputStream os) throws IOException {
+        final MessageWriter messageWriter = new DefaultMessageWriter();
+        messageWriter.writeMessage(message, os);
     }
 
     // ----------------------------------------------------------------------------------------------------- //

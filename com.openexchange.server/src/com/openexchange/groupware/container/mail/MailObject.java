@@ -93,6 +93,7 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.mime.datasource.MimeMessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -590,16 +591,20 @@ public class MailObject {
             /*
              * Finally transport mail
              */
+            MimeMessageDataSource cleanUp = null;
             final MailTransport transport = MailTransport.getInstance(session);
             try {
                 final ByteArrayOutputStream bos = Streams.newByteArrayOutputStream(2048);
-                writeTo(msg, bos);
+                cleanUp = writeTo(msg, bos);
                 transport.sendRawMessage(bos.toByteArray());
                 if (DEBUG) {
                     LOG.debug("Sent mail:\n" + new String(bos.toByteArray()));
                 }
             } finally {
                 transport.close();
+                if (null != cleanUp) {
+                    cleanUp.cleanUp();
+                }
             }
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
@@ -608,30 +613,19 @@ public class MailObject {
         }
     }
 
-    private void writeTo(final MimeMessage msg, final ByteArrayOutputStream bos) throws IOException, MessagingException {
+    private MimeMessageDataSource writeTo(final MimeMessage msg, final ByteArrayOutputStream bos) throws IOException, MessagingException {
         try {
             msg.writeTo(bos);
+            return null;
         } catch (final javax.activation.UnsupportedDataTypeException e) {
-            final String cts = msg.getHeader("Content-Type", null);
-            if (null == cts || !cts.startsWith("multipart/")) {
-                throw e;
-            }
-            boolean throwIt = false;
             try {
-                final Multipart multipart = (Multipart) msg.getContent();
-                final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(2048);
-                multipart.writeTo(baos);
-                msg.setDataHandler(new DataHandler(new MessageDataSource(Streams.asInputStream(baos), multipart.getContentType())));
-                saveChangesSafe(msg);
-                bos.reset();
-                msg.writeTo(bos);
-                throwIt = false;
+                final MimeMessageDataSource dataSource = new MimeMessageDataSource(msg);
+                dataSource.writeTo(bos);
+                return dataSource;
             } catch (final Exception ignore) {
                 // Ignore
             }
-            if (throwIt) {
-                throw e;
-            }
+            throw e;
         }
     }
 
