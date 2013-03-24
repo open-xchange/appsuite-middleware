@@ -50,6 +50,7 @@
 package com.openexchange.mail.mime.datasource;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -72,8 +73,12 @@ import org.apache.james.mime4j.message.HeaderImpl;
 import org.apache.james.mime4j.message.MessageImpl;
 import org.apache.james.mime4j.message.MultipartImpl;
 import org.apache.james.mime4j.storage.StorageBodyFactory;
+import org.apache.james.mime4j.storage.StorageProvider;
+import org.apache.james.mime4j.storage.TempFileStorageProvider;
+import org.apache.james.mime4j.storage.ThresholdStorageProvider;
 import org.apache.james.mime4j.stream.RawFieldParser;
 import org.apache.james.mime4j.util.ByteArrayBuffer;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -95,6 +100,25 @@ import com.openexchange.session.Session;
  */
 public final class MimeMessageDataSource implements DataSource {
 
+    private static volatile StorageBodyFactory bodyFactory;
+    private static StorageBodyFactory bodyFactory() {
+        StorageBodyFactory tmp = bodyFactory;
+        if (null == tmp) {
+            synchronized (MimeMessageDataSource.class) {
+                tmp = bodyFactory;
+                if (null == tmp) {
+                    final String property = ServerConfig.getProperty(ServerConfig.Property.UploadDirectory);
+                    final File directory = new File(null == property ? "/tmp" : property);
+                    final StorageProvider tempStore = new TempFileStorageProvider("open-xchange-", ".tmp", directory);
+                    final StorageProvider provider = new ThresholdStorageProvider(tempStore, 8192);
+                    tmp = new StorageBodyFactory(provider, null);
+                    bodyFactory = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
     /** The mime4j message */
     private final MessageImpl message;
 
@@ -109,7 +133,7 @@ public final class MimeMessageDataSource implements DataSource {
     public MimeMessageDataSource(final MimeMessage mimeMessage, final MailConfig optConfig, final Session optSession) throws OXException {
         super();
         message = new MessageImpl();
-        mime4jOf(mimeMessage, message, new StorageBodyFactory(), optConfig, optSession);
+        mime4jOf(mimeMessage, message, bodyFactory(), optConfig, optSession);
     }
 
     @Override
@@ -164,7 +188,10 @@ public final class MimeMessageDataSource implements DataSource {
                 entity.setMessage(mime4jMessage);
             } else if (contentType.startsWith("text/")) {
                 // A text part
-                final String text = MessageUtility.readMimePart(mimePart, contentType);
+                String text = tryGetContent(mimePart);
+                if (null == text) {
+                    text = MessageUtility.readMimePart(mimePart, contentType);
+                }
                 final TextBody textBody = bodyFactory.textBody(text, contentType.getCharsetParameter());
                 entity.setBody(textBody, contentType.getBaseType());
             } else {
@@ -215,6 +242,18 @@ public final class MimeMessageDataSource implements DataSource {
         }
         final int pos2 = sContentType.indexOf(';', start);
         return pos2 < 0 ? sContentType.substring(start) : sContentType.substring(start, pos2);
+    }
+
+    private static String tryGetContent(final MimePart mimePart) {
+        try {
+            final Object content = mimePart.getContent();
+            if (content instanceof String) {
+                return content.toString();
+            }
+            return null;
+        } catch (final Exception e) {
+            return null;
+        }
     }
 
     private static String toLowerCase(final CharSequence chars) {
