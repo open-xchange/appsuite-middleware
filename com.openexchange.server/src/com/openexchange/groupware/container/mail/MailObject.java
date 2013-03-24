@@ -620,6 +620,7 @@ public class MailObject {
         } catch (final javax.activation.UnsupportedDataTypeException e) {
             try {
                 final MimeMessageDataSource dataSource = new MimeMessageDataSource(msg);
+                bos.reset();
                 dataSource.writeTo(bos);
                 return dataSource;
             } catch (final Exception ignore) {
