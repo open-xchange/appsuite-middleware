@@ -95,11 +95,15 @@ import com.openexchange.session.Session;
  */
 public final class MimeMessageDataSource implements DataSource {
 
+    /** The mime4j message */
     private final MessageImpl message;
 
     /**
      * Initializes a new {@link MimeMessageDataSource}.
      * 
+     * @param mimeMessage The source MIME message
+     * @param optConfig The optional mail configuration (for improved error messages)
+     * @param optSession The optional session (for improved error messages)
      * @throws OXException If initialization fails
      */
     public MimeMessageDataSource(final MimeMessage mimeMessage, final MailConfig optConfig, final Session optSession) throws OXException {
@@ -130,6 +134,8 @@ public final class MimeMessageDataSource implements DataSource {
     public OutputStream getOutputStream() throws IOException {
         throw new IOException(this.getClass().getName() + ".getOutputStream() is not implemented");
     }
+
+    // ----------------------------------------------------------------------------------------------------- //
 
     private static void mime4jOf(final MimePart mimePart, final AbstractEntity entity, final StorageBodyFactory bodyFactory, final MailConfig mailConfig, final Session session) throws OXException {
         try {
