@@ -256,6 +256,16 @@ public final class MimeMessageDataSource implements DataSource {
 
     // ----------------------------------------------------------------------------------------------------- //
 
+    /**
+     * Maps given MIME part to specified mime4j instance.
+     * 
+     * @param mimePart The MIME part (source)
+     * @param entity The mime4j instance (destination)
+     * @param bodyFactory The body factory
+     * @param mailConfig The mail configuration
+     * @param session The user session
+     * @throws OXException If mapping fails
+     */
     private static void mime4jOf(final MimePart mimePart, final AbstractEntity entity, final StorageBodyFactory bodyFactory, final MailConfig mailConfig, final Session session) throws OXException {
         try {
             // Almighty Content-Type
