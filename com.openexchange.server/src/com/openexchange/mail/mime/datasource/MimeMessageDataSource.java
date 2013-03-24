@@ -164,7 +164,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
     private final MessageImpl message;
 
     /** The temp store */
-    private volatile StorageProvider tempStore;
+    private final StorageProvider tempStore;
 
     /**
      * Initializes a new {@link MimeMessageDataSource}.
@@ -207,26 +207,24 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
      */
     @Override
     public void cleanUp() {
-        StorageProvider tempStore = this.tempStore;
+        final MessageImpl message = this.message;
+        if (null != message) {
+            message.dispose();
+        }
+        final StorageProvider tempStore = this.tempStore;
         if (null != tempStore) {
-            synchronized (this) {
-                tempStore = this.tempStore;
-                if (null != tempStore) {
-                    try {
-                        @SuppressWarnings("unchecked") final Set<File> filesToDelete = (Set<File>) filesToDelete().get(null);
-                        synchronized (filesToDelete) {
-                            for (final Iterator<File> iterator = filesToDelete.iterator(); iterator.hasNext();) {
-                                final File file = iterator.next();
-                                if (file.delete()) {
-                                    iterator.remove();
-                                }
-                            }
+            try {
+                @SuppressWarnings("unchecked") final Set<File> filesToDelete = (Set<File>) filesToDelete().get(null);
+                synchronized (filesToDelete) {
+                    for (final Iterator<File> iterator = filesToDelete.iterator(); iterator.hasNext();) {
+                        final File file = iterator.next();
+                        if (file.delete()) {
+                            iterator.remove();
                         }
-                        this.tempStore = null;
-                    } catch (final Exception e) {
-                        // Ignore
                     }
                 }
+            } catch (final Exception e) {
+                // Ignore
             }
         }
     }
@@ -407,7 +405,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
     private static final class CleanUpMessageImpl extends MessageImpl implements CleanUp {
 
         private final MessageImpl message;
-        private volatile StorageProvider tempStore;
+        private final StorageProvider tempStore;
 
         CleanUpMessageImpl(final MessageImpl message, final StorageProvider tempStore) {
             super();
@@ -417,26 +415,20 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
 
         @Override
         public void cleanUp() {
-            StorageProvider tempStore = this.tempStore;
+            final StorageProvider tempStore = this.tempStore;
             if (null != tempStore) {
-                synchronized (this) {
-                    tempStore = this.tempStore;
-                    if (null != tempStore) {
-                        try {
-                            @SuppressWarnings("unchecked") final Set<File> filesToDelete = (Set<File>) filesToDelete().get(null);
-                            synchronized (filesToDelete) {
-                                for (final Iterator<File> iterator = filesToDelete.iterator(); iterator.hasNext();) {
-                                    final File file = iterator.next();
-                                    if (file.delete()) {
-                                        iterator.remove();
-                                    }
-                                }
+                try {
+                    @SuppressWarnings("unchecked") final Set<File> filesToDelete = (Set<File>) filesToDelete().get(null);
+                    synchronized (filesToDelete) {
+                        for (final Iterator<File> iterator = filesToDelete.iterator(); iterator.hasNext();) {
+                            final File file = iterator.next();
+                            if (file.delete()) {
+                                iterator.remove();
                             }
-                            this.tempStore = null;
-                        } catch (final Exception e) {
-                            // Ignore
                         }
                     }
+                } catch (final Exception e) {
+                    // Ignore
                 }
             }
         }
