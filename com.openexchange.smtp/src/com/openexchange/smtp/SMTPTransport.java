@@ -112,6 +112,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.mime.datasource.MimeMessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.config.ITransportProperties;
@@ -639,7 +640,7 @@ public final class SMTPTransport extends MailTransport {
                 transport.close();
             }
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, smtpConfig);
+            throw MimeMailException.handleMessagingException(e, smtpConfig, session);
         } finally {
             // Restore the ClassLoader
             // Thread.currentThread().setContextClassLoader(tcl);
@@ -698,11 +699,11 @@ public final class SMTPTransport extends MailTransport {
                     transport.close();
                 }
             } catch (final MessagingException e) {
-                throw MimeMailException.handleMessagingException(e, smtpConfig);
+                throw MimeMailException.handleMessagingException(e, smtpConfig, session);
             }
             return MimeMessageConverter.convertMessage(smtpMessage);
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, smtpConfig);
+            throw MimeMailException.handleMessagingException(e, smtpConfig, session);
         } finally {
             // Restore the ClassLoader
             // Thread.currentThread().setContextClassLoader(tcl);
@@ -797,7 +798,7 @@ public final class SMTPTransport extends MailTransport {
             }
             return MimeMessageConverter.convertMessage(smtpMessage);
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, smtpConfig);
+            throw MimeMailException.handleMessagingException(e, smtpConfig, session);
         } catch (final IOException e) {
             throw SMTPExceptionCode.IO_ERROR.create(e, e.getMessage());
         }  finally {
@@ -814,10 +815,9 @@ public final class SMTPTransport extends MailTransport {
             if (e.getNextException() instanceof javax.activation.UnsupportedDataTypeException) {
                 // Check for "no object DCH for MIME type xxxxx/yyyy"
                 if (toLowerCase(e.getNextException().getMessage()).indexOf("no object dch") >= 0) {
-                    // Not able to recover from "no object DCH for MIME type xxxxx/yyyy"
-                    // TODO: Use mime4j to transport message data
-                    // See: http://james.apache.org/mime4j/samples.html
-                    throw MimeMailException.handleMessagingException(e, smtpConfig);
+                    // Not able to recover from JAF's "no object DCH for MIME type xxxxx/yyyy" error
+                    // Perform the alternative transport with custom JAF DataHandler
+                    transportAlt(smtpMessage, recipients, transport, smtpConfig);
                 }
                 try {
                     final String cts = smtpMessage.getHeader("Content-Type", null);
@@ -836,8 +836,18 @@ public final class SMTPTransport extends MailTransport {
                 }
             }
             if (throwIt) {
-                throw MimeMailException.handleMessagingException(e, smtpConfig);
+                throw MimeMailException.handleMessagingException(e, smtpConfig, session);
             }
+        }
+    }
+
+    private void transportAlt(final SMTPMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
+        try {
+            final MimeMessageDataSource dataSource = new MimeMessageDataSource(smtpMessage, smtpConfig, session);
+            smtpMessage.setDataHandler(new DataHandler(dataSource));
+            transport.sendMessage(smtpMessage, recipients);
+        } catch (final MessagingException me) {
+            throw MimeMailException.handleMessagingException(me, smtpConfig, session);
         }
     }
 
@@ -937,7 +947,7 @@ public final class SMTPTransport extends MailTransport {
                 throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, config.getServer(), e.getMessage());
             }
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, config);
+            throw MimeMailException.handleMessagingException(e, config, session);
         } finally {
             if (close) {
                 try {
