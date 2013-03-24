@@ -114,6 +114,9 @@ import com.openexchange.session.Session;
  */
 public final class MimeMessageDataSource implements DataSource, CleanUp {
 
+    private static final String SUFFIX = ".tmp";
+    private static final String PREFIX = "open-xchange-";
+
     private static volatile File directory;
     private static File directory() {
         File tmp = directory;
@@ -195,7 +198,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
     public MimeMessageDataSource(final MimeMessage mimeMessage, final MailConfig optConfig, final Session optSession) throws OXException {
         super();
         message = new MessageImpl();
-        final StorageProvider tempStore = new TempFileStorageProvider("open-xchange-", ".tmp", directory());
+        final StorageProvider tempStore = new TempFileStorageProvider(PREFIX, SUFFIX, directory());
         final StorageProvider provider = new ThresholdStorageProvider(tempStore, 8192);
         final StorageBodyFactory bodyFactory = new StorageBodyFactory(provider, null);
         mime4jOf(mimeMessage, message, bodyFactory, optConfig, optSession);
@@ -275,7 +278,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
      */
     public static Message mime4jOf(final MimeMessage mimeMessage, final MailConfig optConfig, final Session optSession) throws OXException {
         final MessageImpl message = new MessageImpl();
-        final StorageProvider tempStore = new TempFileStorageProvider("open-xchange-", ".tmp", directory());
+        final StorageProvider tempStore = new TempFileStorageProvider(PREFIX, SUFFIX, directory());
         final StorageProvider provider = new ThresholdStorageProvider(tempStore, 8192);
         final StorageBodyFactory bodyFactory = new StorageBodyFactory(provider, null);
         mime4jOf(mimeMessage, message, bodyFactory, optConfig, optSession);
@@ -319,7 +322,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
                 entity.setMessage(mime4jMessage);
             } else if (contentType.startsWith("text/")) {
                 // A text part
-                String text = tryGetContent(mimePart);
+                String text = tryGetStringContent(mimePart);
                 if (null == text) {
                     text = MessageUtility.readMimePart(mimePart, contentType);
                 }
@@ -375,7 +378,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
         return pos < 0 ? sContentType.substring(start) : sContentType.substring(start, pos);
     }
 
-    private static String tryGetContent(final MimePart mimePart) {
+    private static String tryGetStringContent(final MimePart mimePart) {
         try {
             final Object content = mimePart.getContent();
             if (content instanceof String) {
@@ -415,6 +418,10 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
 
         @Override
         public void cleanUp() {
+            final MessageImpl message = this.message;
+            if (null != message) {
+                message.dispose();
+            }
             final StorageProvider tempStore = this.tempStore;
             if (null != tempStore) {
                 try {
