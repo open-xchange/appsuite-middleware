@@ -846,6 +846,17 @@ public final class SMTPTransport extends MailTransport {
             final MimeMessageDataSource dataSource = new MimeMessageDataSource(smtpMessage, smtpConfig, session);
             smtpMessage.setDataHandler(new DataHandler(dataSource));
             transport.sendMessage(smtpMessage, recipients);
+            invokeLater(new Runnable() {
+                
+                @Override
+                public void run() {
+                    try {
+                        dataSource.cleanUp();
+                    } catch (final Exception e) {
+                        // Ignore
+                    }
+                }
+            });
         } catch (final MessagingException me) {
             throw MimeMailException.handleMessagingException(me, smtpConfig, session);
         }

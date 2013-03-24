@@ -54,7 +54,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Set;
 import javax.activation.DataSource;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -100,19 +103,46 @@ import com.openexchange.session.Session;
  */
 public final class MimeMessageDataSource implements DataSource {
 
-    private static volatile StorageBodyFactory bodyFactory;
-    private static StorageBodyFactory bodyFactory() {
-        StorageBodyFactory tmp = bodyFactory;
+    private static volatile File directory;
+    private static File directory() {
+        File tmp = directory;
         if (null == tmp) {
             synchronized (MimeMessageDataSource.class) {
-                tmp = bodyFactory;
+                tmp = directory;
                 if (null == tmp) {
                     final String property = ServerConfig.getProperty(ServerConfig.Property.UploadDirectory);
-                    final File directory = new File(null == property ? "/tmp" : property);
-                    final StorageProvider tempStore = new TempFileStorageProvider("open-xchange-", ".tmp", directory);
-                    final StorageProvider provider = new ThresholdStorageProvider(tempStore, 8192);
-                    tmp = new StorageBodyFactory(provider, null);
-                    bodyFactory = tmp;
+                    tmp = new File(null == property ? "/tmp" : property);
+                    directory = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
+    private static volatile Field filesToDelete;
+    private static Field filesToDelete() {
+        Field tmp = filesToDelete;
+        if (null == tmp) {
+            synchronized (MimeMessageDataSource.class) {
+                tmp = filesToDelete;
+                if (null == tmp) {
+                    Class<?> innerClass = null;
+                    final Class<?>[] classes = TempFileStorageProvider.class.getDeclaredClasses();
+                    for (int i = 0; null == innerClass && i < classes.length; i++) {
+                        final Class<?> clazz = classes[i];
+                        if (clazz.getName().endsWith("TempFileStorage")) {
+                            innerClass = clazz;
+                        }
+                    }
+                    if (null != innerClass) {
+                        try {
+                            tmp = innerClass.getDeclaredField("filesToDelete");
+                            tmp.setAccessible(true);
+                            filesToDelete = tmp;
+                        } catch (final Exception e) {
+                            // Ignore
+                        }
+                    }
                 }
             }
         }
@@ -122,18 +152,56 @@ public final class MimeMessageDataSource implements DataSource {
     /** The mime4j message */
     private final MessageImpl message;
 
+    /** The temp store */
+    private volatile StorageProvider tempStore;
+
     /**
      * Initializes a new {@link MimeMessageDataSource}.
+     * <p>
+     * <b>Note</b>: {@link #cleanUp()}
      * 
      * @param mimeMessage The source MIME message
      * @param optConfig The optional mail configuration (for improved error messages)
      * @param optSession The optional session (for improved error messages)
      * @throws OXException If initialization fails
+     * @see #cleanUp()
      */
     public MimeMessageDataSource(final MimeMessage mimeMessage, final MailConfig optConfig, final Session optSession) throws OXException {
         super();
         message = new MessageImpl();
-        mime4jOf(mimeMessage, message, bodyFactory(), optConfig, optSession);
+        final StorageProvider tempStore = new TempFileStorageProvider("open-xchange-", ".tmp", directory());
+        final StorageProvider provider = new ThresholdStorageProvider(tempStore, 8192);
+        final StorageBodyFactory bodyFactory = new StorageBodyFactory(provider, null);
+        mime4jOf(mimeMessage, message, bodyFactory, optConfig, optSession);
+        this.tempStore = tempStore;
+    }
+
+    /**
+     * Cleans-up this data source.
+     */
+    public void cleanUp() {
+        StorageProvider tempStore = this.tempStore;
+        if (null != tempStore) {
+            synchronized (this) {
+                tempStore = this.tempStore;
+                if (null != tempStore) {
+                    try {
+                        @SuppressWarnings("unchecked") final Set<File> filesToDelete = (Set<File>) filesToDelete().get(null);
+                        synchronized (filesToDelete) {
+                            for (final Iterator<File> iterator = filesToDelete.iterator(); iterator.hasNext();) {
+                                final File file = iterator.next();
+                                if (file.delete()) {
+                                    iterator.remove();
+                                }
+                            }
+                        }
+                        this.tempStore = null;
+                    } catch (final Exception e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
     }
 
     @Override
