@@ -155,17 +155,17 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
     /**
      * The number of {@link MailAccess} instances which may be concurrently active/opened per account for a user.
      */
-    private final int queueCapacity;
+    private final int fallbackQueueCapacity;
 
     /**
      * Prevent instantiation.
-     * @queueCapacity The max. queue capacity
      *
+     * @param fallbackQueueCapacity The max. queue capacity
      * @throws OXException If an error occurs
      */
-    private EnqueueingMailAccessCache(final int queueCapacity) throws OXException {
+    private EnqueueingMailAccessCache(final int fallbackQueueCapacity) throws OXException {
         super();
-        this.queueCapacity = queueCapacity;
+        this.fallbackQueueCapacity = fallbackQueueCapacity;
         map = new NonBlockingHashMap<Key, MailAccessQueue>();
         final int configuredIdleSeconds = MailProperties.getInstance().getMailAccessCacheIdleSeconds();
         defaultIdleSeconds = configuredIdleSeconds <= 0 ? 7 : configuredIdleSeconds;
@@ -226,11 +226,12 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
         final Key key = keyFor(accountId, session);
         MailAccessQueue accessQueue = map.get(key);
         if (null == accessQueue || accessQueue.isDeprecated()) {
+            // First check capacity boundary per mail provider and fall back to default if check fails
             int capacity;
             try {
                 capacity = MailProviderRegistry.getMailProviderBySession(session, accountId).getProtocol().getMaxCount(mailAccess.getMailConfig().getServer(), MailAccount.DEFAULT_ID == accountId);
             } catch (final OXException e) {
-                capacity = queueCapacity;
+                capacity = fallbackQueueCapacity;
             }
             final MailAccessQueue tmp = capacity > 0 ? (1 == capacity ? new SingletonMailAccessQueue() : new MailAccessQueueImpl(capacity)) : new MailAccessQueueImpl(-1);
             accessQueue = map.putIfAbsent(key, tmp);
@@ -252,10 +253,10 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
                     final int size = accessQueue.size();
                     if (size == 1) {
                         LOG.debug(new com.openexchange.java.StringAllocator("Queued ONE mail access for ").append(key).toString());
-                    } else if (size > queueCapacity) {
+                    } else if (size > accessQueue.getCapacity()) {
                         LOG.debug(new com.openexchange.java.StringAllocator("\n\tExceeded queue capacity! Detected ").append(size).append(" mail access(es) for ").append(
                             key).append('\n').toString());
-                    } else if (size == queueCapacity) {
+                    } else if (size == accessQueue.getCapacity()) {
                         LOG.debug(new com.openexchange.java.StringAllocator("\n\tReached queue capacity! Queued ").append(size).append(" mail access(es) for ").append(
                             key).append('\n').toString());
                     } else {
