@@ -66,6 +66,11 @@ public class SetSwitch implements AttributeSwitch {
 
     private Object value;
 
+    /**
+     * Initializes a new {@link SetSwitch}.
+     * 
+     * @param desc The account description
+     */
     public SetSwitch(final MailAccountDescription desc) {
         super();
         this.desc = desc;
