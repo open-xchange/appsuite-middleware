@@ -818,8 +818,7 @@ public final class SMTPTransport extends MailTransport {
                 if (toLowerCase(e.getNextException().getMessage()).indexOf("no object dch") >= 0) {
                     // Not able to recover from JAF's "no object DCH for MIME type xxxxx/yyyy" error
                     // Perform the alternative transport with custom JAF DataHandler
-                    final String replacement = Matcher.quoteReplacement("javax.activation.DataContentHandler");
-                    LOG.warn(e.getNextException().getMessage().replaceFirst("[dD][cC][hH]", replacement));
+                    LOG.warn(e.getNextException().getMessage().replaceFirst("[dD][cC][hH]", Matcher.quoteReplacement("javax.activation.DataContentHandler")));
                     transportAlt(smtpMessage, recipients, transport, smtpConfig);
                 }
                 try {

@@ -623,8 +623,7 @@ public class MailObject {
             if (toLowerCase(e.getMessage()).indexOf("no object dch") >= 0) {
                 // Not able to recover from JAF's "no object DCH for MIME type xxxxx/yyyy" error
                 // Perform the alternative transport with custom JAF DataHandler
-                final String replacement = Matcher.quoteReplacement("javax.activation.DataContentHandler");
-                LOG.warn(e.getMessage().replaceFirst("[dD][cC][hH]", replacement));
+                LOG.warn(e.getMessage().replaceFirst("[dD][cC][hH]", Matcher.quoteReplacement("javax.activation.DataContentHandler")));
                 try {
                     final MimeMessageDataSource dataSource = new MimeMessageDataSource(msg);
                     bos.reset();
