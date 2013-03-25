@@ -96,7 +96,7 @@ public class IndexingServiceImpl implements IndexingService {
         boolean isSolrNode = config.getBoolProperty(SolrProperties.IS_NODE, false);
         int threads = config.getIntProperty(IndexingProperties.WORKER_THREADS, 5);
         QuartzService quartzService = Services.getService(QuartzService.class);
-        scheduler = quartzService.getClusteredScheduler(SCHEDULER_NAME, isSolrNode, threads);
+        scheduler = null;
     }
 
     @Override
@@ -300,7 +300,7 @@ public class IndexingServiceImpl implements IndexingService {
 
     public void shutdown() {
         QuartzService quartzService = Services.getService(QuartzService.class);
-        quartzService.releaseClusteredScheduler(SCHEDULER_NAME);
+//        quartzService.releaseClusteredScheduler(SCHEDULER_NAME);
     }
 
     private static final class TaskAdapter implements Task<Void> {

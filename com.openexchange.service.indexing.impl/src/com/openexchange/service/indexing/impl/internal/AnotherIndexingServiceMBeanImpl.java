@@ -95,7 +95,7 @@ public class AnotherIndexingServiceMBeanImpl extends StandardMBean implements In
         this.monitoringMapName = monitoringMapName;
         try {
             QuartzService quartzService = Services.getService(QuartzService.class);
-            Scheduler scheduler = quartzService.getLocalScheduler();
+            Scheduler scheduler = quartzService.getScheduler(SchedulerConfig.getSchedulerName(), SchedulerConfig.start(), SchedulerConfig.getThreadCount());
             scheduler.getListenerManager().addSchedulerListener(this);
             scheduler.getListenerManager().addTriggerListener(this);
             
@@ -133,7 +133,7 @@ public class AnotherIndexingServiceMBeanImpl extends StandardMBean implements In
     public List<String> getAllLocalRunningJobs() throws MBeanException {
         QuartzService quartzService = Services.getService(QuartzService.class);
         try {
-            Scheduler scheduler = quartzService.getLocalScheduler();
+            Scheduler scheduler = quartzService.getScheduler(SchedulerConfig.getSchedulerName(), SchedulerConfig.start(), SchedulerConfig.getThreadCount());
             List<JobExecutionContext> jobs = scheduler.getCurrentlyExecutingJobs();
             List<String> jobNames = new ArrayList<String>();
             for (JobExecutionContext context : jobs) {
@@ -152,7 +152,7 @@ public class AnotherIndexingServiceMBeanImpl extends StandardMBean implements In
     public List<String> getLocalRunningJobs(int contextId, int userId) throws MBeanException {
         try {
             QuartzService quartzService = Services.getService(QuartzService.class);
-            Scheduler scheduler = quartzService.getLocalScheduler();
+            Scheduler scheduler = quartzService.getScheduler(SchedulerConfig.getSchedulerName(), SchedulerConfig.start(), SchedulerConfig.getThreadCount());
             List<String> names = new ArrayList<String>();
             List<JobExecutionContext> currentlyExecutingJobs = scheduler.getCurrentlyExecutingJobs();
             for (JobExecutionContext job : currentlyExecutingJobs) {
@@ -202,7 +202,7 @@ public class AnotherIndexingServiceMBeanImpl extends StandardMBean implements In
         try {
             List<String> names = new ArrayList<String>();
             QuartzService quartzService = Services.getService(QuartzService.class);
-            Scheduler scheduler = quartzService.getLocalScheduler();
+            Scheduler scheduler = quartzService.getScheduler(SchedulerConfig.getSchedulerName(), SchedulerConfig.start(), SchedulerConfig.getThreadCount());
             List<String> groups = scheduler.getTriggerGroupNames();
             for (String group : groups) {
                 Set<TriggerKey> triggerKeys = scheduler.getTriggerKeys(GroupMatcher.triggerGroupEquals(group));
@@ -241,7 +241,7 @@ public class AnotherIndexingServiceMBeanImpl extends StandardMBean implements In
     public List<String> getTriggerStatesForJob(String jobGroup, String jobName) throws MBeanException {
         try {
             QuartzService quartzService = Services.getService(QuartzService.class);
-            Scheduler scheduler = quartzService.getLocalScheduler();
+            Scheduler scheduler = quartzService.getScheduler(SchedulerConfig.getSchedulerName(), SchedulerConfig.start(), SchedulerConfig.getThreadCount());
             List<String> states = new ArrayList<String>();
             List<? extends Trigger> triggersOfJob = scheduler.getTriggersOfJob(new JobKey(jobName, jobGroup));
             for (Trigger t : triggersOfJob) {

@@ -49,53 +49,41 @@
 
 package com.openexchange.service.indexing.impl.internal;
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.concurrent.Callable;
-import org.apache.commons.logging.Log;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.Trigger;
-import org.quartz.service.QuartzService;
-import com.openexchange.service.indexing.JobInfo;
-
 
 /**
- * {@link UnscheduleJobCallable}
+ * {@link SchedulerConfig}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class UnscheduleJobCallable implements Callable<Object>, Serializable {
+public class SchedulerConfig {
     
-    private static final long serialVersionUID = 5612808787423998180L;
+    private static String schedulerName = "";
     
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(UnscheduleJobCallable.class);
+    private static int threadCount = 0;
     
-    private final JobInfo jobInfo;
-
-    public UnscheduleJobCallable(JobInfo jobInfo) {
-        super();
-        this.jobInfo = jobInfo;
+    private static boolean start = false;
+    
+    public static String getSchedulerName() {
+        return schedulerName;
+    }
+    
+    public static int getThreadCount() {
+        return threadCount;
+    }
+    
+    public static boolean start() {
+        return start;
     }
 
-    @Override
-    public Object call() throws Exception {
-        try {
-            JobKey jobKey = Tools.generateJobKey(jobInfo);
-            QuartzService quartzService = Services.getService(QuartzService.class);
-            Scheduler scheduler = quartzService.getScheduler(SchedulerConfig.getSchedulerName(), SchedulerConfig.start(), SchedulerConfig.getThreadCount());
-            List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
-            for (Trigger trigger : triggers) {
-                scheduler.unscheduleJob(trigger.getKey());
-            }
-            
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Unscheduled " + triggers.size() + " triggers for job " + jobKey.toString() + ".");
-            }
-        } catch (Throwable t) {
-            LOG.error(t.getMessage(), t);
-        }
-        return null;
+    public static void setSchedulerName(String schedulerName) {
+        SchedulerConfig.schedulerName = schedulerName;
     }
-
+    
+    public static void setThreadCount(int threadCount) {
+        SchedulerConfig.threadCount = threadCount;
+    }
+    
+    public static void setStart(boolean start) {
+        SchedulerConfig.start = start;
+    }
 }
