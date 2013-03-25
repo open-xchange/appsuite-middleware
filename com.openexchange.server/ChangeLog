@@ -1,3 +1,7 @@
+* 2013-03-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25421: Invoke 'OXFolderAdminHelper.propagateUserModification()' if use's display name was changed
+
 * 2013-03-25 - martin.herfurth@open-xchange.com
 
  - Fix for bug 25499: Fixed NullPointerException.
