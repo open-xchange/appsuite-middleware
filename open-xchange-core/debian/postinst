@@ -119,6 +119,12 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
 fi
 
 
+# SoftwareChange_Request-1365
+pfile=/opt/open-xchange/etc/configdb.properties
+if ! ox_exists_property com.openexchange.database.replicationMonitor $pfile; then
+    ox_set_property com.openexchange.database.replicationMonitor true $pfile
+fi
+
 # SoftwareChange_Request-1389
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/foldercache.properties
