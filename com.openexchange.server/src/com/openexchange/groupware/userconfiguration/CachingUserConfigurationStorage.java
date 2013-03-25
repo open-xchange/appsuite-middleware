@@ -289,7 +289,9 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         List<UserConfiguration> retval = new ArrayList<UserConfiguration>(map.size());
         for (int userId : userIds) {
             final UserConfiguration userConfiguration = map.get(userId);
-            retval.add(null == userConfiguration ? null : userConfiguration.clone());
+            if (null != userConfiguration) {
+                retval.add(userConfiguration.clone());
+            }
         }
         return retval.toArray(new UserConfiguration[map.size()]);
     }
