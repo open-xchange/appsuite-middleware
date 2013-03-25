@@ -92,6 +92,7 @@ import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -847,7 +848,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Check if debug should be enabled
              */
-            final boolean certainUser = false; // ("imap.googlemail.com".equals(config.getServer()) && 17 == session.getUserId());
+            final boolean certainUser = ("devel-mail.netline.de".equals(config.getServer()) && 17 == session.getUserId());
             if (certainUser || Boolean.parseBoolean(imapSession.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
                 imapSession.setDebug(true);
                 imapSession.setDebugOut(System.out);
@@ -879,6 +880,15 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             maxCount = getMaxCount();
             try {
                 imapStore = new AccessedIMAPStore(this, connectIMAPStore(maxCount > 0), imapSession);
+                if (DEBUG) {
+                    final String lineSeparator = System.getProperty("line.separator");
+                    final StringAllocator sb = new StringAllocator(1024);
+                    sb.append(lineSeparator).append(lineSeparator);
+                    sb.append("Queued: ").append(MailAccess.getMailAccessCache().numberOfMailAccesses(session, accountId)).append(lineSeparator);
+                    appendStackTrace(new Throwable().getStackTrace(), lineSeparator, sb);
+                    sb.append(lineSeparator).append(lineSeparator);
+                    LOG.debug(sb.toString());
+                }
                 final long currentValidity = getCurrentValidity(accountId, session);
                 imapStore.setValidity(currentValidity);
                 validity = currentValidity;
@@ -1465,6 +1475,38 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private static final int MAX_STACK_TRACE_ELEMENTS = 1000;
+
+    private static void appendStackTrace(final StackTraceElement[] trace, final String lineSeparator, final com.openexchange.java.StringAllocator sb) {
+        if (null == trace) {
+            return;
+        }
+        final int length = (MAX_STACK_TRACE_ELEMENTS <= trace.length) ? MAX_STACK_TRACE_ELEMENTS : trace.length;
+        for (int i = 0; i < length; i++) {
+            final StackTraceElement ste = trace[i];
+            final String className = ste.getClassName();
+            if (null != className) {
+                sb.append("    at ").append(className).append('.').append(ste.getMethodName());
+                if (ste.isNativeMethod()) {
+                    sb.append("(Native Method)");
+                } else {
+                    final String fileName = ste.getFileName();
+                    if (null == fileName) {
+                        sb.append("(Unknown Source)");
+                    } else {
+                        final int lineNumber = ste.getLineNumber();
+                        sb.append('(').append(fileName);
+                        if (lineNumber >= 0) {
+                            sb.append(':').append(lineNumber);
+                        }
+                        sb.append(')');
+                    }
+                }
+                sb.append(lineSeparator);
+            }
+        }
     }
 
 }
