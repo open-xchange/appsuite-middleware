@@ -288,7 +288,8 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     private static UserConfiguration[] convert(TIntObjectMap<UserConfiguration> map, int[] userIds) {
         List<UserConfiguration> retval = new ArrayList<UserConfiguration>(map.size());
         for (int userId : userIds) {
-            retval.add(map.get(userId).clone());
+            final UserConfiguration userConfiguration = map.get(userId);
+            retval.add(null == userConfiguration ? null : userConfiguration.clone());
         }
         return retval.toArray(new UserConfiguration[map.size()]);
     }
