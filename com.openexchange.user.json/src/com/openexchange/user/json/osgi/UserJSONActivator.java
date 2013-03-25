@@ -52,6 +52,7 @@ package com.openexchange.user.json.osgi;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.contact.ContactService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.user.UserService;
@@ -110,6 +111,10 @@ public class UserJSONActivator extends AJAXModuleActivator {
                     context,
                     ServiceRegistry.getInstance(),
                     ContactService.class));
+            track(DatabaseService.class, new RegistryServiceTrackerCustomizer<DatabaseService>(
+                context,
+                ServiceRegistry.getInstance(),
+                DatabaseService.class));
             openTrackers();
         } catch (final Exception e) {
             final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UserJSONActivator.class));

@@ -53,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.Connection;
 import java.util.Date;
 import java.util.Locale;
 import javax.activation.MimetypesFileTypeMap;
@@ -63,6 +64,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.mapping.ContactMapper;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.Type;
 import com.openexchange.documentation.annotations.Action;
@@ -74,6 +77,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Streams;
+import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -174,10 +178,9 @@ public final class UpdateAction extends AbstractUserAction {
 	                }
 	            }
 	        }
-	        contactService.updateUser(session, Integer.toString(Constants.USER_ADDRESS_BOOK_FOLDER_ID), Integer.toString(contactId),
-	        		parsedUserContact, clientLastModified);
+	        contactService.updateUser(session, Integer.toString(Constants.USER_ADDRESS_BOOK_FOLDER_ID), Integer.toString(contactId), parsedUserContact, clientLastModified);
 	        /*
-	         * Update user if necessary, too
+	         * Update user, too, if necessary
 	         */
 	        final String parsedTimeZone = parsedUser.getTimeZone();
 	        final Locale parsedLocale = parsedUser.getLocale();
@@ -190,6 +193,37 @@ public final class UpdateAction extends AbstractUserAction {
 	            }
 	            userService.updateUser(parsedUser, session.getContext());
 	        }
+	        /*
+	         * Check what has been updated
+	         */
+	        if (parsedUserContact.containsDisplayName() && null != parsedUserContact.getDisplayName()) {
+	            // Update folder name if display-name was changed
+                final DatabaseService service = com.openexchange.user.json.services.ServiceRegistry.getInstance().getService(DatabaseService.class);
+                if (null != service) {
+                    final int contextId = session.getContextId();
+                    Connection con = null;
+                    boolean rollback = false;
+                    try {
+                        con = service.getWritable(contextId);
+                        con.setAutoCommit(false);
+                        rollback = true;
+                        final int[] changedfields = new int[] { Contact.DISPLAY_NAME };
+                        OXFolderAdminHelper.propagateUserModification(id, changedfields, System.currentTimeMillis(), con, con, contextId);
+                        con.commit();
+                        rollback = false;
+                    } catch (final Exception ignore) {
+                        // Ignore
+                    } finally {
+                        if (null != con) {
+                            if (rollback) {
+                                Databases.rollback(con);
+                            }
+                            Databases.autocommit(con);
+                            service.backWritable(contextId, con);
+                        }
+                    }
+                }
+            }
 	        /*
 	         * Return contact last-modified from server
 	         */
