@@ -1,6 +1,7 @@
 * 2013-03-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 25421: Invoke 'OXFolderAdminHelper.propagateUserModification()' if use's display name was changed
+ - Fix for bug 25487: Fixed condition check
 
 * 2013-03-25 - martin.herfurth@open-xchange.com
 
