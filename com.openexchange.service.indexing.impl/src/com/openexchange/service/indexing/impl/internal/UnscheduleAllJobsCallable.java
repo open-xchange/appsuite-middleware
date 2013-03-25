@@ -86,7 +86,7 @@ public class UnscheduleAllJobsCallable implements Callable<Object>, Serializable
     public Object call() throws Exception {
         try {
             QuartzService quartzService = Services.getService(QuartzService.class);
-            Scheduler scheduler = quartzService.getLocalScheduler();
+            Scheduler scheduler = quartzService.getScheduler(SchedulerConfig.getSchedulerName(), SchedulerConfig.start(), SchedulerConfig.getThreadCount());
             if (contextId > 0 && userId > 0) {
                 if (userId > 0) {
                     String jobGroup = Tools.generateJobGroup(contextId, userId);

@@ -77,6 +77,7 @@ import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.IndexingServiceMBean;
 import com.openexchange.service.indexing.impl.internal.AnotherIndexingService;
 import com.openexchange.service.indexing.impl.internal.AnotherIndexingServiceMBeanImpl;
+import com.openexchange.service.indexing.impl.internal.SchedulerConfig;
 import com.openexchange.service.indexing.impl.internal.Services;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
@@ -119,6 +120,18 @@ public class IndexingActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: com.openexchange.service.indexing");
         Services.setServiceLookup(this);
+        
+        /*
+         * Preconfigure scheduler
+         */
+        ConfigurationService config = getService(ConfigurationService.class);
+        int threadCount = config.getIntProperty("com.openexchange.service.indexing.workerThreads", 3);
+        SchedulerConfig.setSchedulerName("com.openexchange.service.indexing");
+        SchedulerConfig.setThreadCount(threadCount);
+        SchedulerConfig.setStart(true);
+        QuartzService quartzService = getService(QuartzService.class);
+        quartzService.getScheduler(SchedulerConfig.getSchedulerName(), SchedulerConfig.start(), SchedulerConfig.getThreadCount());
+        
         serviceImpl = new AnotherIndexingService();
         addService(IndexingService.class, serviceImpl);
         registerService(IndexingService.class, serviceImpl);

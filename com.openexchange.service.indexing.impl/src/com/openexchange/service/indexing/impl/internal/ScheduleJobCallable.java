@@ -104,7 +104,7 @@ public class ScheduleJobCallable implements Callable<Object>, Serializable {
             JobDetail jobDetail = Tools.buildJob(jobInfo, RunOrRescheduleAtTargetJob.class);
             Trigger targetTrigger = Tools.buildTrigger(jobDetail.getKey(), jobInfo, startDate, interval, priority);
             QuartzService quartzService = Services.getService(QuartzService.class);
-            Scheduler scheduler = quartzService.getLocalScheduler();
+            Scheduler scheduler = quartzService.getScheduler(SchedulerConfig.getSchedulerName(), SchedulerConfig.start(), SchedulerConfig.getThreadCount());
             scheduler.addJob(jobDetail, true);
             try {
                 scheduler.scheduleJob(targetTrigger);

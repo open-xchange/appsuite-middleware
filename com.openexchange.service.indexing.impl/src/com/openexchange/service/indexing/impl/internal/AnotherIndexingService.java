@@ -69,9 +69,9 @@ import com.openexchange.threadpool.ThreadRenamer;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class AnotherIndexingService implements IndexingService {
-
+    
     private static final Log LOG = com.openexchange.log.Log.loggerFor(AnotherIndexingService.class);
-
+    
     @Override
     public void scheduleJob(boolean async, final JobInfo info, final Date startDate, final long repeatInterval, final int priority) throws OXException {
         if (LOG.isTraceEnabled()) {
