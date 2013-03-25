@@ -1,3 +1,9 @@
+open-xchange-gui-help-plugin (6.22.1-14) unstable; urgency=low
+
+  * Build for patch 2013-04-04
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 25 Mar 2013 15:25:07 +0100
+
 open-xchange-gui-help-plugin (6.22.1-13) unstable; urgency=low
 
   * Build for patch 2013-03-07
