@@ -802,9 +802,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error(e.getMessage(), e);
                 }
             }
-            final boolean certainPassword = false; //("emailmx.open-xchange.com".equals(config.getServer()) && 17 == session.getUserId());
+            final boolean certainPassword = false; //("10.20.30.205".equals(config.getServer()) && 17 == session.getUserId());
             if (certainPassword) {
-                tmpPass = "oxuser1";
+                tmpPass = "secret";
             }
             final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
             /*
@@ -848,7 +848,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Check if debug should be enabled
              */
-            final boolean certainUser = ("devel-mail.netline.de".equals(config.getServer()) && 17 == session.getUserId());
+            final boolean certainUser = false; // ("devel-mail.netline.de".equals(config.getServer()) && 17 == session.getUserId());
             if (certainUser || Boolean.parseBoolean(imapSession.getProperty(MimeSessionPropertyNames.PROP_MAIL_DEBUG))) {
                 imapSession.setDebug(true);
                 imapSession.setDebugOut(System.out);
@@ -884,7 +884,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     final String lineSeparator = System.getProperty("line.separator");
                     final StringAllocator sb = new StringAllocator(1024);
                     sb.append(lineSeparator).append(lineSeparator);
-                    sb.append("Queued: ").append(MailAccess.getMailAccessCache().numberOfMailAccesses(session, accountId)).append(lineSeparator);
+                    sb.append("IMAP login performed...").append(lineSeparator);
+                    sb.append("Queued in cache: ").append(MailAccess.getMailAccessCache().numberOfMailAccesses(session, accountId)).append(lineSeparator);
                     appendStackTrace(new Throwable().getStackTrace(), lineSeparator, sb);
                     sb.append(lineSeparator).append(lineSeparator);
                     LOG.debug(sb.toString());

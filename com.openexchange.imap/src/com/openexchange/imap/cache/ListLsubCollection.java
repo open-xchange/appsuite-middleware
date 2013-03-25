@@ -69,8 +69,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
+import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.mime.MimeMailException;
 import com.sun.mail.iap.Argument;
@@ -296,6 +298,36 @@ final class ListLsubCollection {
         }
     }
 
+    private static volatile Integer initAclThreshold;
+    private static int initAclThreshold() {
+        Integer tmp = initAclThreshold;
+        if (null == tmp) {
+            synchronized (ListLsubCollection.class) {
+                tmp = initAclThreshold;
+                if (null == tmp) {
+                    final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+                    tmp = Integer.valueOf(null == service ? 500 : service.getIntProperty("com.openexchange.imap.initAclThreshold", 500));
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    private static volatile Integer initStatusThreshold;
+    private static int initStatusThreshold() {
+        Integer tmp = initStatusThreshold;
+        if (null == tmp) {
+            synchronized (ListLsubCollection.class) {
+                tmp = initStatusThreshold;
+                if (null == tmp) {
+                    final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+                    tmp = Integer.valueOf(null == service ? 500 : service.getIntProperty("com.openexchange.imap.initStatusThreshold", 500));
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
     private void init(final boolean clearMaps, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl, final IMAPStore imapStore) throws MessagingException {
         if (clearMaps) {
             listMap.clear();
@@ -392,27 +424,29 @@ final class ListLsubCollection {
                 primary = listMap;
                 lookup = lsubMap;
             }
-            /*
-             * Gather STATUS for each entry
-             */
-            for (final Iterator<ListLsubEntryImpl> iter = primary.values().iterator(); iter.hasNext();) {
-                final ListLsubEntryImpl listEntry = iter.next();
-                if (listEntry.canOpen()) {
-                    try {
-                        final String fullName = listEntry.getFullName();
-                        final int[] status = IMAPCommandsCollection.getStatus(fullName, imapFolder);
-                        if (null != status) {
-                            listEntry.setStatus(status);
-                            final ListLsubEntryImpl lsubEntry = lookup.get(fullName);
-                            if (null != lsubEntry) {
-                                lsubEntry.setStatus(status);
+            if (primary.size() <= initStatusThreshold()) {
+                /*
+                 * Gather STATUS for each entry
+                 */
+                for (final Iterator<ListLsubEntryImpl> iter = primary.values().iterator(); iter.hasNext();) {
+                    final ListLsubEntryImpl listEntry = iter.next();
+                    if (listEntry.canOpen()) {
+                        try {
+                            final String fullName = listEntry.getFullName();
+                            final int[] status = IMAPCommandsCollection.getStatus(fullName, imapFolder);
+                            if (null != status) {
+                                listEntry.setStatus(status);
+                                final ListLsubEntryImpl lsubEntry = lookup.get(fullName);
+                                if (null != lsubEntry) {
+                                    lsubEntry.setStatus(status);
+                                }
                             }
+                        } catch (final Exception e) {
+                            // Swallow failed STATUS command
+                            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ListLsubCollection.class)).debug(
+                                "STATUS command failed for " + imapFolder.getStore().toString(),
+                                e);
                         }
-                    } catch (final Exception e) {
-                        // Swallow failed STATUS command
-                        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ListLsubCollection.class)).debug(
-                            "STATUS command failed for " + imapFolder.getStore().toString(),
-                            e);
                     }
                 }
             }
@@ -467,6 +501,9 @@ final class ListLsubCollection {
             primary = listMap;
             lookup = lsubMap;
         }
+        if (primary.size() > initAclThreshold()) {
+            return;
+        }
         /*
          * Perform GETACL command for each entry
          */
@@ -483,9 +520,7 @@ final class ListLsubCollection {
                     }
                 } catch (final Exception e) {
                     // Swallow failed ACL command
-                    com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class)).debug(
-                        "ACL/MYRIGHTS command failed for " + imapFolder.getStore().toString(),
-                        e);
+                    LOG.debug("ACL/MYRIGHTS command failed for " + imapFolder.getStore().toString(), e);
                 }
             }
         }
@@ -737,6 +772,7 @@ final class ListLsubCollection {
         }
         final Response response = r[r.length - 1];
         if (response.isOK()) {
+            final long st = DEBUG ? System.currentTimeMillis() : -1L;
             final ConcurrentMap<String, ListLsubEntryImpl> map = lsub ? lsubMap : listMap;
             final Map<String, List<ListLsubEntryImpl>> parentMap = new HashMap<String, List<ListLsubEntryImpl>>(4);
             final ListLsubEntryImpl rootEntry = map.get(ROOT_FULL_NAME);
@@ -821,6 +857,10 @@ final class ListLsubCollection {
              * Dispatch remaining untagged responses
              */
             protocol.notifyResponseHandlers(r);
+            if (DEBUG) {
+                final long d = System.currentTimeMillis() - st;
+                LOG.debug(command + " cache filled within " + d + "msec.");
+            }
         } else {
             /*
              * Dispatch remaining untagged responses
