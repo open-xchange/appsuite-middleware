@@ -1080,7 +1080,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 }
 
                 if (prepareURL(attributes, Attribute.TRANSPORT_URL_ATTRIBUTES, Attribute.TRANSPORT_URL_LITERAL)) {
-                    if (storageVersion != null) {
+                    if (null == storageVersion) {
                         storageVersion = getMailAccount(mailAccount.getId(), user, cid, con);
                     }
                     final MailAccountGetSwitch getSwitch = new MailAccountGetSwitch(storageVersion);

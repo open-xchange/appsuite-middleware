@@ -61,8 +61,18 @@ public class MailAccountGetSwitch implements AttributeSwitch {
 
     private final MailAccount account;
 
-    public MailAccountGetSwitch(final MailAccount desc) {
-        account = desc;
+    /**
+     * Initializes a new {@link MailAccountGetSwitch}.
+     * 
+     * @param account The account to read from
+     * @throws IllegalArgumentException If passed account is <code>null</code>
+     */
+    public MailAccountGetSwitch(final MailAccount account) {
+        super();
+        if (null == account) {
+            throw new IllegalArgumentException("account is null.");
+        }
+        this.account = account;
     }
 
     @Override
