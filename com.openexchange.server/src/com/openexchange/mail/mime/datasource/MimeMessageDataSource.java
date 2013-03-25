@@ -239,7 +239,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
 
     @Override
     public InputStream getInputStream() throws IOException {
-        final MessageWriter messageWriter = new DefaultMessageWriter();
+        final MessageWriter messageWriter = DEFAULT_MESSAGE_WRITER;
         final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(8192);
         messageWriter.writeMessage(message, out);
         return Streams.asInputStream(out);
@@ -261,11 +261,26 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
      * @throws IOException If an error occurs while writing to the stream
      */
     public void writeTo(final OutputStream os) throws IOException {
-        final MessageWriter messageWriter = new DefaultMessageWriter();
-        messageWriter.writeMessage(message, os);
+        writeTo(message, os);
     }
 
     // ----------------------------------------------------------------------------------------------------- //
+
+    private static final DefaultMessageWriter DEFAULT_MESSAGE_WRITER = new DefaultMessageWriter();
+
+    /**
+     * Output to given byte stream.
+     * 
+     * @param message The message to write
+     * @param os The output stream to wrote to
+     * @throws IOException If an error occurs while writing to the stream
+     */
+    public static void writeTo(final Message message, final OutputStream os) throws IOException {
+        if (null == message || null == os) {
+            return;
+        }
+        DEFAULT_MESSAGE_WRITER.writeMessage(message, os);
+    }
 
     /**
      * Maps given MIME part to specified mime4j instance.
