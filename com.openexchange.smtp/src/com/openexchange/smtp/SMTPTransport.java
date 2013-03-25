@@ -52,7 +52,6 @@ package com.openexchange.smtp;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -97,7 +96,6 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
-import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
@@ -112,7 +110,6 @@ import com.openexchange.mail.mime.MimeHeaderNameChecker;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.datasource.MimeMessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
@@ -812,34 +809,18 @@ public final class SMTPTransport extends MailTransport {
         try {
             transport.sendMessage(smtpMessage, recipients);
         } catch (final MessagingException e) {
-            boolean throwIt = true;
             if (e.getNextException() instanceof javax.activation.UnsupportedDataTypeException) {
                 // Check for "no object DCH for MIME type xxxxx/yyyy"
-                if (toLowerCase(e.getNextException().getMessage()).indexOf("no object dch") >= 0) {
+                final String message = e.getNextException().getMessage();
+                if (toLowerCase(message).indexOf("no object dch") >= 0) {
                     // Not able to recover from JAF's "no object DCH for MIME type xxxxx/yyyy" error
                     // Perform the alternative transport with custom JAF DataHandler
-                    LOG.warn(e.getNextException().getMessage().replaceFirst("[dD][cC][hH]", Matcher.quoteReplacement("javax.activation.DataContentHandler")));
+                    LOG.warn(message.replaceFirst("[dD][cC][hH]", Matcher.quoteReplacement("javax.activation.DataContentHandler")));
                     transportAlt(smtpMessage, recipients, transport, smtpConfig);
-                }
-                try {
-                    final String cts = smtpMessage.getHeader("Content-Type", null);
-                    if ((null != cts) && cts.startsWith("multipart/")) {
-                            final Multipart multipart = (Multipart) smtpMessage.getContent();
-                            final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(8192);
-                            multipart.writeTo(baos);
-                            smtpMessage.setDataHandler(new DataHandler(new MessageDataSource(Streams.asInputStream(baos), multipart.getContentType())));
-                            saveChangesSafe(smtpMessage);
-                            transport.sendMessage(smtpMessage, recipients);
-                            throwIt = false;
-                    }
-                } catch (final Exception ignore) {
-                    // Ignore
-                    LOG.warn("Failed attempt to recover from \"" + e.getNextException().getMessage() + "\".", ignore);
+                    return;
                 }
             }
-            if (throwIt) {
-                throw MimeMailException.handleMessagingException(e, smtpConfig, session);
-            }
+            throw MimeMailException.handleMessagingException(e, smtpConfig, session);
         }
     }
 
