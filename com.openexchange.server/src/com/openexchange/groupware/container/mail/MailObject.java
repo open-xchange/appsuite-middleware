@@ -60,6 +60,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
 import javax.activation.CommandMap;
 import javax.activation.DataHandler;
 import javax.activation.MailcapCommandMap;
@@ -618,13 +619,20 @@ public class MailObject {
             msg.writeTo(bos);
             return null;
         } catch (final javax.activation.UnsupportedDataTypeException e) {
-            try {
-                final MimeMessageDataSource dataSource = new MimeMessageDataSource(msg);
-                bos.reset();
-                dataSource.writeTo(bos);
-                return dataSource;
-            } catch (final Exception ignore) {
-                // Ignore
+            // Check for "no object DCH for MIME type xxxxx/yyyy"
+            if (toLowerCase(e.getMessage()).indexOf("no object dch") >= 0) {
+                // Not able to recover from JAF's "no object DCH for MIME type xxxxx/yyyy" error
+                // Perform the alternative transport with custom JAF DataHandler
+                final String replacement = Matcher.quoteReplacement("javax.activation.DataContentHandler");
+                LOG.warn(e.getMessage().replaceFirst("[dD][cC][hH]", replacement));
+                try {
+                    final MimeMessageDataSource dataSource = new MimeMessageDataSource(msg);
+                    bos.reset();
+                    dataSource.writeTo(bos);
+                    return dataSource;
+                } catch (final Exception ignore) {
+                    // Ignore
+                }
             }
             throw e;
         }
@@ -767,5 +775,18 @@ public class MailObject {
         return arr;
     }
 
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
+    }
 
 }

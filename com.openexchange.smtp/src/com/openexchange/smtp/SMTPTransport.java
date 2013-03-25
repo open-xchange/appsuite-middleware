@@ -69,6 +69,7 @@ import java.util.Properties;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.regex.Matcher;
 import javax.activation.CommandMap;
 import javax.activation.DataHandler;
 import javax.activation.MailcapCommandMap;
@@ -817,6 +818,8 @@ public final class SMTPTransport extends MailTransport {
                 if (toLowerCase(e.getNextException().getMessage()).indexOf("no object dch") >= 0) {
                     // Not able to recover from JAF's "no object DCH for MIME type xxxxx/yyyy" error
                     // Perform the alternative transport with custom JAF DataHandler
+                    final String replacement = Matcher.quoteReplacement("javax.activation.DataContentHandler");
+                    LOG.warn(e.getNextException().getMessage().replaceFirst("[dD][cC][hH]", replacement));
                     transportAlt(smtpMessage, recipients, transport, smtpConfig);
                 }
                 try {
