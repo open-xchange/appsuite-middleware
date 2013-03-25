@@ -1,3 +1,7 @@
+* 2013-03-25 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 25499: Fixed NullPointerException.
+
 * 2013-03-22 - marc.arens@open-xchange.com
 
  - Fix for bug 25025: open-xchange-grizzly doesn't send echo header
