@@ -81,7 +81,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PreviewImageResultConverter}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class PreviewImageResultConverter extends AbstractPreviewResultConverter {
@@ -133,7 +133,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                         result.setResultObject(responseFileHolder, "file");
                     } else {
                         final FileHolder responseFileHolder = new FileHolder(inputStream, cachedPreview.getSize(), contentType, cachedPreview.getFileName());
-                        result.setResultObject(responseFileHolder, "file");                        
+                        result.setResultObject(responseFileHolder, "file");
                     }
                     return;
                 }
@@ -149,12 +149,13 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
 
             final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
 
-            final DataProperties dataProperties = new DataProperties(4);
+            final DataProperties dataProperties = new DataProperties(6);
             dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder));
             dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
             dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
             dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
-
+            dataProperties.put("PreviewType", requestData.getModule().equals("files") ? "DetailView" : "Thumbnail");
+            dataProperties.put("PreviewWidth", requestData.getParameter("width"));
             final PreviewDocument previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session, 1);
 
             requestData.setFormat("file");
