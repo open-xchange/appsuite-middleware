@@ -69,6 +69,7 @@ import com.openexchange.mail.json.actions.EditAction;
 import com.openexchange.mail.json.actions.ExpungeAction;
 import com.openexchange.mail.json.actions.GetAction;
 import com.openexchange.mail.json.actions.GetAttachmentAction;
+import com.openexchange.mail.json.actions.GetAttachmentTokenAction;
 import com.openexchange.mail.json.actions.GetForwardAction;
 import com.openexchange.mail.json.actions.GetMailCountAction;
 import com.openexchange.mail.json.actions.GetMultipleAttachmentAction;
@@ -117,6 +118,7 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
         actions.put("updates", new GetUpdatesAction(services));
         actions.put("forward", new GetForwardAction(services));
         actions.put("attachment", new GetAttachmentAction(services));
+        actions.put("attachmentToken", new GetAttachmentTokenAction(services));
         actions.put("zip_attachments", new GetMultipleAttachmentAction(services));
         actions.put("zip_messages", new GetMultipleMessagesAction(services));
         actions.put("saveVersit", new GetVersitAction(services));
