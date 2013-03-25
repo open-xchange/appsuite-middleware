@@ -5,7 +5,7 @@ LOGGINGPROPERTIES=@loggingproperties@
 OSGIPATH=@oxgroupwaresysconfdir@/osgi
 
 # This properties sets the java options given to the groupware on start
-JAVA_XTRAOPTS="-Dsun.net.inetaddr.ttl=3600 -Dnetworkaddress.cache.ttl=3600 -Dnetworkaddress.cache.negative.ttl=10 -server -Djava.awt.headless=true -Xmx512M -XX:MaxPermSize=256m -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly ÐXX:NewRation=3 -XX:+UseTLAB -XX:+DisableExplicitGC -Dosgi.compatibility.bootdelegation=false"
+JAVA_XTRAOPTS="-Dsun.net.inetaddr.ttl=3600 -Dnetworkaddress.cache.ttl=3600 -Dnetworkaddress.cache.negative.ttl=10 -server -Djava.awt.headless=true -Xmx512M -XX:MaxPermSize=256m -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:CMSInitiatingOccupancyFraction=75 -XX:+UseCMSInitiatingOccupancyOnly ÐXX:NewRatio=3 -XX:+UseTLAB -XX:+DisableExplicitGC -Dosgi.compatibility.bootdelegation=false"
 JAVA_OXCMD_OPTS="-Djava.net.preferIPv4Stack=true"
 
 # Maximum number of open Files for the groupware
