@@ -1,3 +1,9 @@
+open-xchange-admin-contextrestore (6.22.0-10) unstable; urgency=low
+
+  * Build for patch 2013-04-04
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Mon, 25 Mar 2013 14:25:29 +0100
+
 open-xchange-admin-contextrestore (6.22.0-9) unstable; urgency=low
 
   * Build for patch 2013-03-08

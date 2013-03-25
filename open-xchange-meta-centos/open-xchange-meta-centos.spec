@@ -3,7 +3,7 @@ Name:           open-xchange-meta-centos
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
 Version:	@OXVERSION@
-%define		ox_release 8
+%define		ox_release 9
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -40,6 +40,8 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Mon Mar 25 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-04-04
 * Mon Mar 04 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-03-08
 * Tue Feb 26 2013 Carsten Hoeger <choeger@open-xchange.com>
