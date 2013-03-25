@@ -108,6 +108,7 @@ public class GetChangeExceptionsTest extends AbstractAJAXSession {
         exception1.setLastModified(new Date(Long.MAX_VALUE));
         exception1.setRecurrencePosition(2);
         exception1.setAlarm(30);
+        exception1.setTitle("Exception 1");
 
         UpdateRequest updateRequest = new UpdateRequest(exception1, getClient().getValues().getTimeZone());
         getClient().execute(updateRequest);
@@ -120,6 +121,7 @@ public class GetChangeExceptionsTest extends AbstractAJAXSession {
         exception2.setLastModified(new Date(Long.MAX_VALUE));
         exception2.setRecurrencePosition(5);
         exception2.setAlarm(30);
+        exception2.setTitle("Exception 2");
 
         updateRequest = new UpdateRequest(exception2, getClient().getValues().getTimeZone());
         getClient().execute(updateRequest);
@@ -161,7 +163,7 @@ public class GetChangeExceptionsTest extends AbstractAJAXSession {
             columns,
             false);
 
-        GetChangeExceptionsResponse response = new AJAXClient(User.User2).execute(request);
+        GetChangeExceptionsResponse response = new AJAXClient(User.User4).execute(request);
         assertTrue("Missing error.", response.hasError());
         OXException oxException = response.getException();
         assertEquals("Wrong error.", OXCachingExceptionCode.CATEGORY_PERMISSION_DENIED, oxException.getCategory());
