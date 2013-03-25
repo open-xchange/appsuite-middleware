@@ -189,17 +189,19 @@ public class RdbContactStorage extends DefaultContactStorage {
             EffectivePermission permission = folder.getEffectiveUserPermission(
                 serverSession.getUserId(), serverSession.getUserConfiguration(), connection);
             if (false == permission.canCreateObjects()) {
-                throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(parse(folderId), contextID, serverSession.getUserId());
+                throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(Integer.valueOf(parse(folderId)), Integer.valueOf(contextID), Integer.valueOf(serverSession.getUserId()));
             }
             /*
              * check quota restrictions
              */
-            QuotaService quotaService = RdbServiceLookup.getService(QuotaService.class, true);
-            Quota quota = quotaService.getQuotaFor(Resource.CONTACT, ResourceDescription.getEmptyResourceDescription(), session);
-            if (null != quota) {
-                long quotaValue = quota.getQuota(QuotaType.AMOUNT);
-                if (0 < quotaValue && quotaValue <= executor.count(connection, Table.CONTACTS, contextID)) {
-                    throw QuotaExceptionCodes.QUOTA_EXCEEDED.create();
+            QuotaService quotaService = RdbServiceLookup.getService(QuotaService.class);
+            if (null != quotaService) {
+                Quota quota = quotaService.getQuotaFor(Resource.CONTACT, ResourceDescription.getEmptyResourceDescription(), session);
+                if (null != quota) {
+                    long quotaValue = quota.getQuota(QuotaType.AMOUNT);
+                    if (0 < quotaValue && quotaValue <= executor.count(connection, Table.CONTACTS, contextID)) {
+                        throw QuotaExceptionCodes.QUOTA_EXCEEDED.create();
+                    }
                 }
             }
             /*

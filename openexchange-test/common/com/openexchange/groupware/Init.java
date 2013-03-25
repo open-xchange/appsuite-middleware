@@ -161,6 +161,7 @@ import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.I18nServices;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
@@ -824,6 +825,7 @@ public final class Init {
             };
             services.put(QuotaService.class, quotaService);
             TestServiceRegistry.getInstance().addService(QuotaService.class, quotaService);
+            ServerServiceRegistry.getInstance().addService(QuotaService.class, quotaService);
         }
     }
 
