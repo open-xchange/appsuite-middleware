@@ -47,55 +47,47 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.internal;
+package com.openexchange.service.indexing.impl.internal.nonclustered;
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.concurrent.Callable;
-import org.apache.commons.logging.Log;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.Trigger;
-import org.quartz.service.QuartzService;
-import com.openexchange.service.indexing.JobInfo;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.JobExecutionContext;
+import com.openexchange.exception.OXException;
+import com.openexchange.service.indexing.impl.internal.Services;
 
 
 /**
- * {@link UnscheduleJobCallable}
+ * {@link ProgressiveRecurrenceTest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class UnscheduleJobCallable implements Callable<Object>, Serializable {
+public class ProgressiveRecurrenceTest {
     
-    private static final long serialVersionUID = 5612808787423998180L;
-    
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(UnscheduleJobCallable.class);
-    
-    private final JobInfo jobInfo;
-
-    public UnscheduleJobCallable(JobInfo jobInfo) {
-        super();
-        this.jobInfo = jobInfo;
+    @BeforeClass
+    public static void beforeClass() {
+        Services.setServiceLookup(new MockServiceLookup());
     }
-
-    @Override
-    public Object call() throws Exception {
-        try {
-            JobKey jobKey = Tools.generateJobKey(jobInfo);
-            QuartzService quartzService = Services.getService(QuartzService.class);
-            Scheduler scheduler = quartzService.getScheduler(SchedulerConfig.getSchedulerName(), SchedulerConfig.start(), SchedulerConfig.getThreadCount());
-            List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
-            for (Trigger trigger : triggers) {
-                scheduler.unscheduleJob(trigger.getKey());
-            }
-            
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Unscheduled " + triggers.size() + " triggers for job " + jobKey.toString() + ".");
-            }
-        } catch (Throwable t) {
-            LOG.error(t.getMessage(), t);
+    
+    @AfterClass
+    public static void afterClass() {
+        Services.setServiceLookup(null);
+    }
+    
+    @Test
+    public void testProgressiveRecurrence() throws Exception {
+        /*
+         * TODO: test with a scheduler listener if the progressive re-scheduling works as expected.
+         */
+    }
+    
+    @DisallowConcurrentExecution
+    public static final class TestJob extends ProgressiveRecurringJob {
+        @Override
+        protected boolean perform(JobExecutionContext context, JobInfoWrapper infoWrapper) throws OXException {
+            return true;
         }
-        return null;
     }
 
 }

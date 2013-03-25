@@ -47,83 +47,80 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.internal;
+package com.openexchange.service.indexing.impl.internal.nonclustered;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Set;
+import java.util.Date;
 import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
-import org.quartz.JobKey;
+import org.quartz.JobDetail;
+import org.quartz.ObjectAlreadyExistsException;
 import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.quartz.Trigger;
-import org.quartz.impl.matchers.GroupMatcher;
 import org.quartz.service.QuartzService;
+import com.openexchange.service.indexing.JobInfo;
+import com.openexchange.service.indexing.impl.internal.SchedulerConfig;
+import com.openexchange.service.indexing.impl.internal.Services;
+import com.openexchange.service.indexing.impl.internal.Tools;
 
 
 /**
- * {@link UnscheduleAllJobsCallable}
+ * {@link ScheduleJobCallable}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class UnscheduleAllJobsCallable implements Callable<Object>, Serializable {
+public class ScheduleJobCallable implements Callable<Object>, Serializable {
     
-    private static final long serialVersionUID = -3020268885605197578L;
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(ScheduleJobCallable.class);
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(UnscheduleAllJobsCallable.class);
+    private static final long serialVersionUID = 5900667348491833307L;
     
-    private final int contextId;
-    
-    private final int userId;
+    private final JobInfo jobInfo;
 
-    public UnscheduleAllJobsCallable(int contextId, int userId) {
+    private final Date startDate;
+
+    private final long interval;
+
+    private final int priority;
+    
+    public ScheduleJobCallable(JobInfo jobInfo, Date startDate, long interval, int priority) {
         super();
-        this.contextId = contextId;
-        this.userId = userId;
+        this.jobInfo = jobInfo;
+        this.startDate = startDate;
+        this.interval = interval;
+        this.priority = priority;
     }
 
     @Override
     public Object call() throws Exception {
+        if (LOG.isDebugEnabled()) {
+            if (LOG.isTraceEnabled()) {
+                Exception exception = new Exception();
+                LOG.trace("Scheduling job: " + jobInfo.toString() + ".", exception);
+            } else {
+                LOG.debug("Scheduling job: " + jobInfo.toString() + ".");
+            }
+        }
+        
         try {
+            JobDetail jobDetail = Tools.buildJob(jobInfo, RunOrRescheduleAtTargetJob.class);
+            Trigger targetTrigger = Tools.buildTrigger(jobDetail.getKey(), jobInfo, startDate, interval, priority);
             QuartzService quartzService = Services.getService(QuartzService.class);
             Scheduler scheduler = quartzService.getScheduler(SchedulerConfig.getSchedulerName(), SchedulerConfig.start(), SchedulerConfig.getThreadCount());
-            if (contextId > 0 && userId > 0) {
-                if (userId > 0) {
-                    String jobGroup = Tools.generateJobGroup(contextId, userId);
-                    Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupEquals(jobGroup));
-                    int count = 0;
-                    for (JobKey jobKey : jobKeys) {
-                        List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
-                        count += triggers.size();
-                        for (Trigger trigger : triggers) {
-                            scheduler.unscheduleJob(trigger.getKey());
-                        }
-                    }
-                    
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Unscheduled " + count + " triggers for " + jobKeys.size() + " jobs for user " + userId + " in context " + contextId + ".");
-                    }
+            scheduler.addJob(jobDetail, true);
+            try {
+                scheduler.scheduleJob(targetTrigger);
+            } catch (SchedulerException e) {
+                if (e instanceof ObjectAlreadyExistsException) {
+                    LOG.info("Could not schedule trigger " + targetTrigger.getKey() + ". It already exists.");
                 } else {
-                    String jobGroup = Tools.generateJobGroup(contextId);
-                    Set<JobKey> jobKeys = scheduler.getJobKeys(GroupMatcher.jobGroupStartsWith(jobGroup));
-                    int count = 0;
-                    for (JobKey jobKey : jobKeys) {
-                        List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
-                        count += triggers.size();
-                        for (Trigger trigger : triggers) {
-                            scheduler.unscheduleJob(trigger.getKey());
-                        }
-                    }
-                    
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Unscheduled " + count + " triggers for " + jobKeys.size() + " jobs for user " + userId + " in context " + contextId + ".");
-                    }
+                    throw e;
                 }
             }
         } catch (Throwable t) {
             LOG.error(t.getMessage(), t);
         }
-        
         return null;
     }
 

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.internal;
+package com.openexchange.service.indexing.impl.internal.nonclustered;
 
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
@@ -76,6 +76,9 @@ import com.openexchange.index.solr.ModuleSet;
 import com.openexchange.service.indexing.IndexingJob;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
+import com.openexchange.service.indexing.impl.internal.JobConstants;
+import com.openexchange.service.indexing.impl.internal.Services;
+import com.openexchange.service.indexing.impl.internal.Tools;
 import com.openexchange.solr.SolrCoreIdentifier;
 
 /**

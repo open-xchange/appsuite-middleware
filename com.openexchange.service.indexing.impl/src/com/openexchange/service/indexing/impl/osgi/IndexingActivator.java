@@ -75,10 +75,11 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.IndexingServiceMBean;
-import com.openexchange.service.indexing.impl.internal.AnotherIndexingService;
-import com.openexchange.service.indexing.impl.internal.AnotherIndexingServiceMBeanImpl;
+import com.openexchange.service.indexing.impl.internal.IndexingProperties;
 import com.openexchange.service.indexing.impl.internal.SchedulerConfig;
 import com.openexchange.service.indexing.impl.internal.Services;
+import com.openexchange.service.indexing.impl.internal.nonclustered.AnotherIndexingService;
+import com.openexchange.service.indexing.impl.internal.nonclustered.AnotherIndexingServiceMBeanImpl;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
@@ -125,7 +126,7 @@ public class IndexingActivator extends HousekeepingActivator {
          * Preconfigure scheduler
          */
         ConfigurationService config = getService(ConfigurationService.class);
-        int threadCount = config.getIntProperty("com.openexchange.service.indexing.workerThreads", 3);
+        int threadCount = config.getIntProperty(IndexingProperties.WORKER_THREADS, 3);
         SchedulerConfig.setSchedulerName("com.openexchange.service.indexing");
         SchedulerConfig.setThreadCount(threadCount);
         SchedulerConfig.setStart(true);

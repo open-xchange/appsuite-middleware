@@ -78,6 +78,26 @@ public interface IndexingService {
 
 
     /**
+     * Schedules a job with a progressive interval. If the the job is already known, it will be updated.
+     * That means the timeout and the interval will be reset. The progression starts again.
+     * After every run the next fire time is based on the last interval and the progression rate.
+     *
+     * @param info The information needed to run this job.
+     * @param startDate The start date of the job. May be <code>null</code> to run immediately.
+     * @param timeout The timeout in ms. Must be > 0. A job will be removed automatically after 
+     * this amount of time if the job was not updated in the meantime.
+     * @param progressionRate The progression rate in percent. Must be > 0. The new interval is always increased by this value.
+     * @param initialInterval The initial repeat interval in milliseconds. Must be > 0. The first run starts at startDate.
+     * The second one at startDate + initialInterval. Every further runs start time is calculated based on the progression
+     * rate and the initial interval.
+     * @param priority The priority. If two jobs shall be started at the same time, the one with the higher priority wins.
+     * See {@link IndexingService#DEFAULT_PRIORITY}.
+     * @param onlyResetProgression If <code>true</code> only the progression and job timeout will be reset. No triggers will be activated.
+     * @throws OXException 
+     */
+    void scheduleJobWithProgressiveInterval(JobInfo info, Date startDate, long timeout, long initialInterval, int progressionRate, int priority, boolean onlyResetProgression) throws OXException;
+    
+    /**
      * Schedules an indexing job.
      *
      * @param async If <code>true</code> the call returns immediately and the scheduling will be performed asynchronously.

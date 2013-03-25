@@ -47,18 +47,30 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.internal;
+package com.openexchange.service.indexing.impl.internal.nonclustered;
 
 import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 import org.apache.commons.logging.Log;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleScheduleBuilder;
+import org.quartz.SimpleTrigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.service.QuartzService;
 import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.exception.OXException;
 import com.openexchange.service.indexing.IndexingService;
 import com.openexchange.service.indexing.JobInfo;
+import com.openexchange.service.indexing.impl.internal.SchedulerConfig;
+import com.openexchange.service.indexing.impl.internal.Services;
+import com.openexchange.service.indexing.impl.internal.Tools;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -69,27 +81,89 @@ import com.openexchange.threadpool.ThreadRenamer;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class AnotherIndexingService implements IndexingService {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(AnotherIndexingService.class);
-    
+
+    @Override
+    public void scheduleJobWithProgressiveInterval(JobInfo info, Date startDate, long timeout, long initialInterval, int progressionRate, int priority, boolean onlyResetProgression) throws OXException {
+        if (startDate == null) {
+            startDate = new Date();
+        }
+
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Scheduling job " + info.toString() + " at " + startDate + "." +
+                "\n    Initial interval: " + initialInterval +
+                "\n    Progression rate: " + progressionRate +
+                "\n    Timeout: " + timeout +
+                "\n    Priority: " + priority);
+        }
+
+        if (timeout <= 0) {
+            throw new IllegalArgumentException("Parameter 'timeout' must be > 0.");
+        }
+
+        if (initialInterval <= 0) {
+            throw new IllegalArgumentException("Parameter 'initialInterval' must be > 0.");
+        }
+
+        if (progressionRate <= 0) {
+            throw new IllegalArgumentException("Parameter 'progressionRate' must be > 0.");
+        }
+
+        JobInfoWrapper infoWrapper = new JobInfoWrapper(info, timeout, initialInterval, progressionRate);
+        JobKey jobKey = Tools.generateJobKey(info);
+        RecurringJobsManager.addOrUpdateJob(jobKey.toString(), infoWrapper);
+        if (!onlyResetProgression) {
+            JobDetail jobDetail = JobBuilder.newJob(ProgressiveRecurringJob.class)
+                .withIdentity(jobKey)
+                .build();
+
+            String triggerName = info.toUniqueId() + "/withProgressiveInterval";
+            SimpleTrigger trigger = TriggerBuilder.newTrigger()
+                .forJob(jobDetail.getKey())
+                .withIdentity(triggerName, Tools.generateTriggerGroup(info.contextId, info.userId))
+                .startAt(startDate)
+                .withPriority(priority)
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow())
+                .build();
+
+            QuartzService quartzService = Services.getService(QuartzService.class);
+            Scheduler scheduler = quartzService.getScheduler(
+                SchedulerConfig.getSchedulerName(),
+                SchedulerConfig.start(),
+                SchedulerConfig.getThreadCount());
+            try {
+                scheduler.addJob(jobDetail, true);
+                if (scheduler.checkExists(trigger.getKey())) {
+                    scheduler.rescheduleJob(trigger.getKey(), trigger);
+                } else {
+                    scheduler.scheduleJob(trigger);
+                }
+            } catch (SchedulerException e) {
+                throw new OXException(e);
+            }
+        }
+    }
+
     @Override
     public void scheduleJob(boolean async, final JobInfo info, final Date startDate, final long repeatInterval, final int priority) throws OXException {
-        if (LOG.isTraceEnabled()) {
-            String at = startDate == null ? "now" : startDate.toString();
-            LOG.trace("Scheduling job " + info.toString() + " at " + at + " with interval " + repeatInterval + " and priority " + priority + ".");
-        }
-        
-        Task<Object> task = new TaskAdapter(new ScheduleJobCallable(info, startDate, repeatInterval, priority));
-        try {
-            if (async) {
-                ThreadPoolService threadPoolService = getThreadPoolService();
-                threadPoolService.submit(task);
-            } else {
-                task.call();
-            }
-        } catch (Throwable t) {
-            LOG.error(t.getMessage(), t);
-        }
+        return;
+        //        if (LOG.isTraceEnabled()) {
+        //            String at = startDate == null ? "now" : startDate.toString();
+        //            LOG.trace("Scheduling job " + info.toString() + " at " + at + " with interval " + repeatInterval + " and priority " + priority + ".");
+        //        }
+        //        
+        //        Task<Object> task = new TaskAdapter(new ScheduleJobCallable(info, startDate, repeatInterval, priority));
+        //        try {
+        //            if (async) {
+        //                ThreadPoolService threadPoolService = getThreadPoolService();
+        //                threadPoolService.submit(task);
+        //            } else {
+        //                task.call();
+        //            }
+        //        } catch (Throwable t) {
+        //            LOG.error(t.getMessage(), t);
+        //        }
     }
 
     @Override
@@ -97,7 +171,7 @@ public class AnotherIndexingService implements IndexingService {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Unscheduling job " + info.toString());
         }
-        
+
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         ExecutorService executorService = hazelcast.getExecutorService();
         FutureTask<Object> task = new DistributedTask<Object>(new UnscheduleJobCallable(info), hazelcast.getCluster().getMembers());
@@ -109,10 +183,12 @@ public class AnotherIndexingService implements IndexingService {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Unscheduling all jobs for user " + userId + " in context " + contextId + ".");
         }
-        
+
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         ExecutorService executorService = hazelcast.getExecutorService();
-        FutureTask<Object> task = new DistributedTask<Object>(new UnscheduleAllJobsCallable(contextId, userId), hazelcast.getCluster().getMembers());
+        FutureTask<Object> task = new DistributedTask<Object>(
+            new UnscheduleAllJobsCallable(contextId, userId),
+            hazelcast.getCluster().getMembers());
         executorService.submit(task);
     }
 
@@ -121,10 +197,12 @@ public class AnotherIndexingService implements IndexingService {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Unscheduling all jobs for context " + contextId + ".");
         }
-        
+
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         ExecutorService executorService = hazelcast.getExecutorService();
-        FutureTask<Object> task = new DistributedTask<Object>(new UnscheduleAllJobsCallable(contextId, -1), hazelcast.getCluster().getMembers());
+        FutureTask<Object> task = new DistributedTask<Object>(
+            new UnscheduleAllJobsCallable(contextId, -1),
+            hazelcast.getCluster().getMembers());
         executorService.submit(task);
     }
 

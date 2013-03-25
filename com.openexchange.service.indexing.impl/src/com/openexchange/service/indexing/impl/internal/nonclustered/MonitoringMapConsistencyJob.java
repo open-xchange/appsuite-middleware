@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.internal;
+package com.openexchange.service.indexing.impl.internal.nonclustered;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -63,6 +63,7 @@ import org.quartz.TriggerKey;
 import org.quartz.impl.matchers.GroupMatcher;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.MultiMap;
+import com.openexchange.service.indexing.impl.internal.Services;
 
 
 /**

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.internal;
+package com.openexchange.service.indexing.impl.internal.nonclustered;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -78,6 +78,9 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MultiMap;
 import com.openexchange.service.indexing.IndexingServiceMBean;
+import com.openexchange.service.indexing.impl.internal.SchedulerConfig;
+import com.openexchange.service.indexing.impl.internal.Services;
+import com.openexchange.service.indexing.impl.internal.Tools;
 
 /**
  * {@link AnotherIndexingServiceMBeanImpl}

@@ -334,4 +334,10 @@ public class IndexingServiceImpl implements IndexingService {
         }
 
     }
+
+    @Override
+    public void scheduleJobWithProgressiveInterval(JobInfo info, Date startDate, long timeout, long initialInterval, int progressionRate, int priority, boolean b) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
 }
