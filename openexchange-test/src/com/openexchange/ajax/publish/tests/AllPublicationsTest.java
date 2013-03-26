@@ -163,7 +163,8 @@ public class AllPublicationsTest extends AbstractPublicationTest {
     	String contactModule = "contacts";
 
     	FolderObject infostoreFolder = createDefaultInfostoreFolder("Folder for Publication-"+System.currentTimeMillis());
-
+    	String infostoreModule = "infostore";
+    	
     	// create and upload a new Infostore item.
     	InfostoreTestManager infoMgr = getInfostoreManager();
         FolderObject infostorePublicationFolder = createDefaultInfostoreFolder("Second Folder for Publication-"+System.currentTimeMillis());
@@ -186,7 +187,7 @@ public class AllPublicationsTest extends AbstractPublicationTest {
         contactPublication.setDisplayName("My Contact Publication");
         expectedPublications.add(contactPublication);
 
-        Publication infostorePublication = generateInfostoreFolderPublication(String.valueOf(infostoreFolder.getObjectID()), discovery);
+        Publication infostorePublication = generatePublication(infostoreModule,String.valueOf(infostoreFolder.getObjectID()), discovery);
         infostorePublication.setDisplayName("My InfostoreFolder Publication");
         expectedPublications.add(infostorePublication);
 

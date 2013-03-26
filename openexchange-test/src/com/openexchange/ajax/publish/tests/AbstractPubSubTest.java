@@ -173,26 +173,29 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
         return pub;
     }
 
-    protected Publication generateInfostoreFolderPublication(String folder, SimPublicationTargetDiscoveryService discovery) {
-        DynamicFormDescription form = generateOXMFFormDescription();
-
-        PublicationTarget target = new PublicationTarget();
-        target.setFormDescription(form);
-        target.setId("com.openexchange.publish.online.infostore.document");
-
-        Map<String, Object> config = new HashMap<String, Object>();
-        config.put("siteName", "publication");
-        config.put("protected", Boolean.valueOf(true));
-
-        discovery.addTarget(target);
-
-        Publication pub = new Publication();
-        pub.setModule("infostore/object");
-        pub.setEntityId(folder);
-        pub.setTarget(target);
-        pub.setConfiguration(config);
-        return pub;
-    }
+    
+//      This does not work anymore, since com.openexchange.publish.online.infostore.document will only allow one document at a time and no folders
+//    
+//    protected Publication generateInfostoreFolderPublication(String folder, SimPublicationTargetDiscoveryService discovery) {
+//        DynamicFormDescription form = generateOXMFFormDescription();
+//
+//        PublicationTarget target = new PublicationTarget();
+//        target.setFormDescription(form);
+//        target.setId("com.openexchange.publish.online.infostore.document");
+//
+//        Map<String, Object> config = new HashMap<String, Object>();
+//        config.put("siteName", "publication-"+System.currentTimeMillis());
+//        config.put("protected", Boolean.valueOf(true));
+//
+//        discovery.addTarget(target);
+//
+//        Publication pub = new Publication();
+//        pub.setModule("infostore/object");
+//        pub.setEntityId(folder);
+//        pub.setTarget(target);
+//        pub.setConfiguration(config);
+//        return pub;
+//    }
 
     protected Publication generateInfostoreItemPublication(String objId, SimPublicationTargetDiscoveryService discovery) {
         DynamicFormDescription form = generateOXMFFormDescription();
@@ -202,7 +205,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
         target.setId("com.openexchange.publish.online.infostore.document");
 
         Map<String, Object> config = new HashMap<String, Object>();
-        config.put("siteName", "publication");
+        config.put("siteName", "publication-"+System.currentTimeMillis());
         config.put("protected", Boolean.valueOf(true));
 
         discovery.addTarget(target);
