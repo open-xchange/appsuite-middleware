@@ -49,11 +49,20 @@
 
 package com.openexchange.realtime.atmosphere.impl;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import org.atmosphere.cpr.AtmosphereRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.Login;
+import com.openexchange.ajax.login.HashCalculator;
+import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.Log;
+import com.openexchange.realtime.RealtimeExceptionCodes;
+import com.openexchange.realtime.atmosphere.AtmosphereConfig;
 import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
 import com.openexchange.server.ServiceExceptionCode;
@@ -64,17 +73,22 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link SessionValidator}
+ * {@link SessionValidator} - Validate session information of incoming realtime requests like done in the
+ * com.openexchange.ajax.SessionServlet
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class SessionValidator {
+    
+    private static final org.apache.commons.logging.Log LOG = Log.loggerFor(SessionValidator.class);
+    
+    private AtmosphereConfig atmosphereConfig;
+    
+    private AtmosphereServiceRegistry atmosphereServiceRegistry;
 
     private final AtmosphereRequest request;
 
     private final String postData;
-
-    private AtmosphereServiceRegistry services;
 
     private boolean isAlreadyValidated = false;
 
@@ -100,7 +114,8 @@ public class SessionValidator {
     public SessionValidator(AtmosphereRequest request, String postData) {
         this.request = request;
         this.postData = postData;
-        this.services = AtmosphereServiceRegistry.getInstance();
+        this.atmosphereServiceRegistry = AtmosphereServiceRegistry.getInstance();
+        this.atmosphereConfig = AtmosphereConfig.getInstance();
     }
 
     /**
@@ -138,7 +153,7 @@ public class SessionValidator {
     private ServerSession getValidatedServerSession() throws OXException {
         String sessionId = getSessionId();
         ServerSession serverSession = getServerSessionFromSessionId(sessionId);
-        validateServerSession(serverSession);
+        validateServerSession(request, serverSession);
         this.isAlreadyValidated = true;
         return serverSession;
     }
@@ -154,11 +169,110 @@ public class SessionValidator {
      * @return false if the session was invalid, true if the request contains session,
      * @throws OXException
      */
-    private void validateServerSession(ServerSession serverSession) throws OXException {
-//        getSecret
-//        validateSecret
-//        getIp
-//        validateIP
+    private void validateServerSession(HttpServletRequest request, ServerSession serverSession) throws OXException {
+//        session id <-> serverssionid
+//        ipcheck
+//        context enabled
+        checkSecret(atmosphereConfig.getCookieHashSource(), request, serverSession);
+        // validateIP
+    }
+    
+    
+    /**
+     * Check if 
+     * @param sessionId
+     * @param session
+     * @throws OXException
+     */
+    private void matchIDs(String sessionId, ServerSession session) throws OXException {
+        if (!sessionId.equals(session.getSessionID())) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Request's session identifier \"" + sessionId + "\" differs from the one indicated by SessionD service \"" + session.getSessionID() + "\".");
+            }
+            throw SessionExceptionCodes.WRONG_SESSION.create();
+        }
+
+    }
+    
+    /**
+     * Check if the context associated with the ServerSession is locked.
+     * @param session The ServerSession containing the context
+     * @throws OXException If the Context is locked
+     */
+    private void checkContext(ServerSession session) throws OXException {
+        final Context ctx = session.getContext();
+        if (!ctx.isEnabled()) {
+            SessiondService sessiondService = atmosphereServiceRegistry.getService(SessiondService.class);
+            if(sessiondService != null) {
+                sessiondService.removeSession(sessionId);
+            } else {
+                if(LOG.isWarnEnabled())
+                LOG.warn("Couldn't remove Session " + sessionId + " from SessionD", RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(SessiondService.class.getName()));
+            }
+            if (LOG.isInfoEnabled()) {
+                LOG.info("The context " + ctx.getContextId() + " associated with session is locked.");
+            }
+            throw SessionExceptionCodes.CONTEXT_LOCKED.create();
+        }
+    }
+    
+    private void checkIP() throws OXException {
+        
+    }
+    
+    
+    
+    public static void checkSecret(final CookieHashSource source, final HttpServletRequest req, final Session session) throws OXException {
+        final String secret = extractSecret(source, req, session.getHash(), session.getClient());
+        if (secret == null || !session.getSecret().equals(secret)) {
+            if (LOG.isInfoEnabled() && null != secret) {
+                LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");
+            }
+            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
+        }
+    }
+    
+    /**
+     * Extracts the secret string from specified cookies using given hash string.
+     *
+     * @param req the HTTP servlet request object.
+     * @param hash remembered hash from session.
+     * @param client the remembered client from the session.
+     * @return The secret string or <code>null</code>
+     */
+    public static String extractSecret(final CookieHashSource cookieHash, final HttpServletRequest req, final String hash, final String client) {
+        final Cookie[] cookies = req.getCookies();
+        if (null != cookies) {
+            final String cookieName = Login.SECRET_PREFIX + getHash(cookieHash, req, hash, client);
+            for (final Cookie cookie : cookies) {
+                if (cookieName.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Didn't found an appropriate Cookie for name \"" + cookieName + "\" (CookieHashSource=" + cookieHash.toString() + ") which provides the session secret.");
+            }
+        } else if (LOG.isInfoEnabled()) {
+            LOG.info("Missing Cookies in HTTP request. No session secret can be looked up.");
+        }
+        return null;
+    }
+    
+    /**
+     * Gets the appropriate hash for specified request.
+     *
+     * @param cookieHash defines how the cookie should be found.
+     * @param req The HTTP request
+     * @param hash The previously remembered hash
+     * @param client The client identifier
+     * @return The appropriate hash
+     */
+    public static String getHash(final CookieHashSource cookieHash, final HttpServletRequest req, final String hash, final String client) {
+        if (CookieHashSource.REMEMBER == cookieHash) {
+            return hash;
+        }
+        // Default is calculate
+        return HashCalculator.getInstance().getHash(req, client);
     }
 
     /**
@@ -252,7 +366,7 @@ public class SessionValidator {
             throw new IllegalArgumentException("Invalid parameter: sessionInfo");
         }
 
-        SessiondService sessiondService = services.getService(SessiondService.class);
+        SessiondService sessiondService = atmosphereServiceRegistry.getService(SessiondService.class);
         if (sessiondService == null) {
             throw OXExceptionFactory.getInstance().create(ServiceExceptionCode.SERVICE_UNAVAILABLE, SessiondService.class);
         }
