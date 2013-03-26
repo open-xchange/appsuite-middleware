@@ -49,66 +49,20 @@
 
 package com.openexchange.service.indexing.impl.internal.nonclustered;
 
-import java.util.concurrent.TimeUnit;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IMap;
-import com.openexchange.service.indexing.impl.internal.Services;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 
 /**
- * {@link RecurringJobsManager}
+ * {@link UnitTests}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class RecurringJobsManager {
-    
-    static final String JOB_MAP = "recurringJobs-0";
-    
-    /**
-     * Returns true, if job was added and false if it was just updated.
-     */
-    public static boolean addOrUpdateJob(String jobId, JobInfoWrapper infoWrapper) {
-        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        IMap<String, JobInfoWrapper> recurringJobs = hazelcast.getMap(JOB_MAP);
-        long ttl = infoWrapper.getJobTimeout();
-        if (ttl <= 0) {
-            ttl = 0;
-        }
-        JobInfoWrapper old = recurringJobs.put(jobId, infoWrapper, ttl, TimeUnit.MILLISECONDS);
-        if (old == null) {
-            return true;
-        }
-        
-        return false;
-    }
-    
-    public static boolean touchJob(String jobId) {
-        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        IMap<String, JobInfoWrapper> recurringJobs = hazelcast.getMap(JOB_MAP);
-        JobInfoWrapper infoWrapper = recurringJobs.get(jobId);
-        if (infoWrapper == null) {
-            return false;
-        }
-        
-        infoWrapper.touch();
-        long ttl = infoWrapper.getJobTimeout();
-        if (ttl <= 0) {
-            ttl = 0;
-        }
-        recurringJobs.set(jobId, infoWrapper, ttl, TimeUnit.MILLISECONDS);
-        return true;
-    }
-    
-    public static JobInfoWrapper getJob(String jobId) {
-        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        IMap<String, JobInfoWrapper> recurringJobs = hazelcast.getMap(JOB_MAP);
-        return recurringJobs.get(jobId);
-    }
-    
-    public static int getJobCount() {
-        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        IMap<String, JobInfoWrapper> recurringJobs = hazelcast.getMap(JOB_MAP);
-        return recurringJobs.size();
-    }
+@RunWith(Suite.class)
+@SuiteClasses({
+    ProgressiveRecurrenceTest.class
+})
+public class UnitTests {
 
 }

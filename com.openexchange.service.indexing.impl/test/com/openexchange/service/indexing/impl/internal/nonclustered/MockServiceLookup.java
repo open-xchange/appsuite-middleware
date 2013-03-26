@@ -120,7 +120,7 @@ public class MockServiceLookup implements ServiceLookup {
                 localProperties.put("org.quartz.scheduler.rmi.proxy", false);
                 localProperties.put("org.quartz.scheduler.wrapJobExecutionInUserTransaction", false);
                 localProperties.put("org.quartz.threadPool.class", "org.quartz.simpl.SimpleThreadPool");
-                localProperties.put("org.quartz.threadPool.threadCount", 3);
+                localProperties.put("org.quartz.threadPool.threadCount", "3");
                 localProperties.put("org.quartz.threadPool.threadPriority", "5");
                 localProperties.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", true);
                 localProperties.put("org.quartz.jobStore.misfireThreshold", "60000");
