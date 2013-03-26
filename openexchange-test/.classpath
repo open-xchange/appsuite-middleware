@@ -102,5 +102,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.caching.events"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.java"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.database"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.quota"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/javax.mail"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

@@ -24,7 +24,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/ical4j-1.0.1.jar" sourcepath="source/ical4j-1.0.1-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/ical4j-zoneinfo-outlook-1.0.2.jar" sourcepath="source/ical4j-zoneinfo-outlook-1.0.2-src.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/jboss-jms-api.jar" sourcepath="source/jboss-jms-api-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/mail-1.4.5.jar" sourcepath="lib/mail-1.4.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-core-0.7.2.jar" sourcepath="source/apache-mime4j-core-0.7.2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-dom-0.7.2.jar" sourcepath="source/apache-mime4j-dom-0.7.2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/apache-mime4j-storage-0.7.2.jar" sourcepath="source/apache-mime4j-storage-0.7.2-sources.jar"/>
@@ -37,7 +36,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/commons-collections-3.2.1.jar" sourcepath="source/commons-collections-3.2.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/trove-3.0.3.jar" sourcepath="source/trove-3.0.3-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/chardet-1.1.jar" sourcepath="source/chardet-1.1-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/tnef-1.8.0.jar" sourcepath="source/tnef-1.8.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-fileupload-1.2.1.jar" sourcepath="lib/commons-fileupload-1.2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-httpclient-3.1.jar" sourcepath="source/commons-httpclient-3.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jakarta-slide-webdavlib-2.1.jar"/>
