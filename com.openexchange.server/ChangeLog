@@ -5,6 +5,7 @@
  - Fix for bug 25542: Avoid ArrayIndexOutOfBoundsException when accessing array
  - Fix for bug 25541: Dropped unresolveable dependency
  - Fix for bug 25518: Added another content type to ignore on preview generation
+ - Fixes for bug 25528 & bug 25478: Added entries to 'paths.perfMap' mapping file
 
 * 2013-03-26 - marcus.klein@open-xchange.com
 
