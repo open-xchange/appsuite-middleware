@@ -56,6 +56,7 @@ import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
+import org.quartz.Scheduler;
 import org.quartz.service.QuartzService;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
@@ -80,6 +81,7 @@ import com.openexchange.service.indexing.impl.internal.SchedulerConfig;
 import com.openexchange.service.indexing.impl.internal.Services;
 import com.openexchange.service.indexing.impl.internal.nonclustered.AnotherIndexingService;
 import com.openexchange.service.indexing.impl.internal.nonclustered.AnotherIndexingServiceMBeanImpl;
+import com.openexchange.service.indexing.impl.internal.nonclustered.MonitoringMBeanImpl;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
@@ -99,6 +101,10 @@ public class IndexingActivator extends HousekeepingActivator {
     private AnotherIndexingServiceMBeanImpl indexingMBean;
 
     private AnotherIndexingService serviceImpl;
+
+    private MonitoringMBeanImpl secondMBean;
+
+    private ObjectName secondMBeanName;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -131,7 +137,7 @@ public class IndexingActivator extends HousekeepingActivator {
         SchedulerConfig.setThreadCount(threadCount);
         SchedulerConfig.setStart(true);
         QuartzService quartzService = getService(QuartzService.class);
-        quartzService.getScheduler(SchedulerConfig.getSchedulerName(), SchedulerConfig.start(), SchedulerConfig.getThreadCount());
+        Scheduler scheduler = quartzService.getScheduler(SchedulerConfig.getSchedulerName(), SchedulerConfig.start(), SchedulerConfig.getThreadCount());
         
         serviceImpl = new AnotherIndexingService();
         addService(IndexingService.class, serviceImpl);
@@ -141,7 +147,7 @@ public class IndexingActivator extends HousekeepingActivator {
 //        sessionProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
 //        registerService(EventHandler.class, new SessionEventHandler(), sessionProperties);
 
-        registerMBean();
+        registerMBean(scheduler);
         openTrackers();
     }
 
@@ -160,18 +166,21 @@ public class IndexingActivator extends HousekeepingActivator {
 //        }
     }
 
-    private void registerMBean() throws NotCompliantMBeanException {
+    private void registerMBean(Scheduler scheduler) throws NotCompliantMBeanException {
         try {
             HazelcastInstance hazelcast = getService(HazelcastInstance.class);
             String mapName = discoverMonitoringMapName(hazelcast.getConfig());
             indexingMBeanName = new ObjectName(IndexingServiceMBean.DOMAIN, IndexingServiceMBean.KEY, IndexingServiceMBean.VALUE);
             indexingMBean = new AnotherIndexingServiceMBeanImpl(mapName);
+            secondMBeanName = new ObjectName(IndexingServiceMBean.DOMAIN, IndexingServiceMBean.KEY, "AdditionalMonitoring");
+            secondMBean = new MonitoringMBeanImpl(scheduler);
             track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
 
                 @Override
                 public void added(ServiceReference<ManagementService> ref, ManagementService service) {
                     try {
                         service.registerMBean(indexingMBeanName, indexingMBean);
+                        service.registerMBean(secondMBeanName, secondMBean);
                     } catch (OXException e) {
                         LOG.error(e.getMessage(), e);
                     }
@@ -181,6 +190,7 @@ public class IndexingActivator extends HousekeepingActivator {
                 public void removed(ServiceReference<ManagementService> ref, ManagementService service) {
                     try {
                         service.unregisterMBean(indexingMBeanName);
+                        service.unregisterMBean(secondMBeanName);
                     } catch (OXException e) {
                         LOG.warn(e.getMessage(), e);
                     }

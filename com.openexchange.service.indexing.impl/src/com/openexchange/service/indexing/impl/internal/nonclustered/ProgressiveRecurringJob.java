@@ -175,11 +175,12 @@ public class ProgressiveRecurringJob implements Job {
         }
         
         if (executor.equals(hazelcast.getCluster().getLocalMember())) {
-            if (isExecutionAllowed(jobInfo)) {
-                executeJob(jobInfo);
+            if (!isExecutionAllowed(jobInfo)) {
+                LOG.info("Execution of job " + jobInfo.toString() + " was not allowed. Skipping...");
+                return false;
             }
             
-            LOG.info("Execution of job " + jobInfo.toString() + " was not allowed. Skipping...");
+            executeJob(jobInfo);
             return true;
         }
         

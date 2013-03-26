@@ -49,58 +49,25 @@
 
 package com.openexchange.service.indexing.impl.internal.nonclustered;
 
-import java.util.concurrent.TimeUnit;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IMap;
-import com.openexchange.service.indexing.impl.internal.Services;
-
+import java.util.List;
+import java.util.Map;
+import javax.management.MBeanException;
 
 /**
- * {@link RecurringJobsManager}
+ * {@link MonitoringMBean}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class RecurringJobsManager {
-    
-    private static final String JOB_MAP = "recurringJobs-0";
-    
-    public static void addOrUpdateJob(String jobId, JobInfoWrapper infoWrapper) {
-        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        IMap<String, JobInfoWrapper> recurringJobs = hazelcast.getMap(JOB_MAP);
-        long ttl = infoWrapper.getJobTimeout();
-        if (ttl <= 0) {
-            ttl = 0;
-        }
-        recurringJobs.set(jobId, infoWrapper, ttl, TimeUnit.MILLISECONDS);
-    }
-    
-    public static boolean touchJob(String jobId) {
-        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        IMap<String, JobInfoWrapper> recurringJobs = hazelcast.getMap(JOB_MAP);
-        JobInfoWrapper infoWrapper = recurringJobs.get(jobId);
-        if (infoWrapper == null) {
-            return false;
-        }
-        
-        infoWrapper.touch();
-        long ttl = infoWrapper.getJobTimeout();
-        if (ttl <= 0) {
-            ttl = 0;
-        }
-        recurringJobs.set(jobId, infoWrapper, ttl, TimeUnit.MILLISECONDS);
-        return true;
-    }
-    
-    public static JobInfoWrapper getJob(String jobId) {
-        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        IMap<String, JobInfoWrapper> recurringJobs = hazelcast.getMap(JOB_MAP);
-        return recurringJobs.get(jobId);
-    }
-    
-    public static int getJobCount() {
-        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        IMap<String, JobInfoWrapper> recurringJobs = hazelcast.getMap(JOB_MAP);
-        return recurringJobs.size();
-    }
+public interface MonitoringMBean {
+
+    public int getStoredJobs() throws MBeanException;
+
+    public int getLocalTriggers() throws MBeanException;
+
+    public int getRunningJobs() throws MBeanException;
+
+    public Map<String, String> getRunningJobDetails() throws MBeanException;
+
+    public List<String> getLocalTriggerDetails() throws MBeanException;
 
 }
