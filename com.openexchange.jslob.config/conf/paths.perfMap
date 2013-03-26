@@ -26,6 +26,7 @@ modules/mail/sendaddress > io.ox/mail//defaultSendAddress
 modules/mail/appendmailtext > io.ox/mail//appendMailText
 modules/mail/deletemail > io.ox/mail//deleteMail
 modules/mail/forwardmessage > io.ox/mail//forwardMessage
+modules/mail/allowhtmlimages > io.ox/mail//allowHtmlImages
 mail/folder > io.ox/mail//folder
 mail/vcard > io.ox/mail//vcard
 ui/mail/replyTo > io.ox/mail//showReplyTo
