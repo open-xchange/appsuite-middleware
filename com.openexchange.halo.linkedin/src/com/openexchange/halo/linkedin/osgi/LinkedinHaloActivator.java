@@ -49,6 +49,7 @@
 
 package com.openexchange.halo.linkedin.osgi;
 
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.groupware.settings.PreferencesItemService;
@@ -71,7 +72,7 @@ public class LinkedinHaloActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { LinkedInService.class, OAuthService.class, ContactService.class, UserService.class, ConfigurationService.class };
+        return new Class[] { LinkedInService.class, OAuthService.class, ContactService.class, UserService.class, ConfigurationService.class, CapabilityService.class };
     }
 
     @Override
@@ -80,6 +81,7 @@ public class LinkedinHaloActivator extends HousekeepingActivator {
         final boolean enabledMailCapableKey = cs.getBoolProperty("com.openexchange.halo.linkedin.enabledMailCapableKey", false);
         registerService(PreferencesItemService.class, new LinkedInHaloEnabled(enabledMailCapableKey));
         if (enabledMailCapableKey) {
+            getService(CapabilityService.class).declareCapability("linkedinPlus");
             registerService(HaloContactDataSource.class, new LinkedinProfileDataSource(this));
             registerService(HaloContactDataSource.class, new LinkedinInboxDataSource(this));
             registerService(HaloContactDataSource.class, new LinkedinUpdatesDataSource(this));
