@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-freebusy
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 2
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -58,7 +58,17 @@ done
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Mar 26 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+First release candidate for 7.2.0
+* Fri Mar 15 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+prepare for 7.2.0
+* Thu Jan 10 2013 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+prepare for 7.0.1
+* Tue Dec 04 2012 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+prepare for 7.0.0 release
 * Tue Nov 13 2012 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 First release candidate for EDP drop #6
+* Fri Oct 26 2012 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+prepare for 6.22.1
 * Thu Oct 18 2012 Tobias Friedrich <tobias.friedrich@open-xchange.com>
-Initial release
+prepare for 6.23.0
