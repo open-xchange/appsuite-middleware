@@ -57,7 +57,6 @@ import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.linkedin.LinkedinInboxDataSource;
 import com.openexchange.halo.linkedin.LinkedinProfileDataSource;
 import com.openexchange.halo.linkedin.LinkedinUpdatesDataSource;
-import com.openexchange.halo.linkedin.preferences.LinkedInHaloEnabled;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -79,7 +78,6 @@ public class LinkedinHaloActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         final ConfigurationService cs = getService(ConfigurationService.class);
         final boolean enabledMailCapableKey = cs.getBoolProperty("com.openexchange.halo.linkedin.enabledMailCapableKey", false);
-        registerService(PreferencesItemService.class, new LinkedInHaloEnabled(enabledMailCapableKey));
         if (enabledMailCapableKey) {
             getService(CapabilityService.class).declareCapability("linkedinPlus");
             registerService(HaloContactDataSource.class, new LinkedinProfileDataSource(this));
