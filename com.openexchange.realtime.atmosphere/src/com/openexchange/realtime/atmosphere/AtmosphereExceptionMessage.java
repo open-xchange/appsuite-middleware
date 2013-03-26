@@ -82,4 +82,6 @@ public class AtmosphereExceptionMessage implements LocalizableStrings {
     public static final String PRESENCE_DATA_ELEMENT_MALFORMED_MSG = "Malformed Presence Element: \"%1$s\"";
     /** Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\" */
     public static final String ILLEGAL_VALUE_MSG = "Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\"";
+    /** Malformed POST Data" */
+    public static final String POST_DATA_MALFORMED_MSG = "Malformed POST Data";
 }

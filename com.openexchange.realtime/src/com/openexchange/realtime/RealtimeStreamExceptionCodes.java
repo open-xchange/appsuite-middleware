@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere;
+package com.openexchange.realtime;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -55,53 +55,56 @@ import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link AtmosphereExceptionCode}
+ * {@link RealtimeStreamExceptionCodes} - Error codes for realtime framework.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public enum AtmosphereExceptionCode implements OXExceptionCode {
+public enum RealtimeStreamExceptionCodes implements OXExceptionCode {
+    /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
+    NO_APPROPRIATE_CHANNEL(RealtimeExceptionMessages.NO_APPROPRIATE_CHANNEL, Category.EnumCategory.CONNECTIVITY, 2),
+    /** The following needed service is missing: "%1$s" */
+    NEEDED_SERVICE_MISSING(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 3),
+    /** Unexpected error: %1$s */
+    UNEXPECTED_ERROR(RealtimeExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 4),
+    /** Invalid ID. Resource identifier is missing. */
+    INVALID_ID(RealtimeExceptionMessages.INVALID_ID, CATEGORY_ERROR, 5),
 
-    /** The session information didn't match any ServerSession. */
-    SESSIONINFO_DIDNT_MATCH_SERVERSESSION(AtmosphereExceptionMessage.SESSIONINFO_DIDNT_MATCH_SERVERSESSION_MSG, CATEGORY_ERROR, 1),
-    /** Missing key \"%1$s\" in: \"%2$s\" */
-    MISSING_KEY(AtmosphereExceptionMessage.MISSING_KEY_MSG, CATEGORY_ERROR, 2),
-    /** Could not find a builder for the specified element: . \"%1$s\" */
-    MISSING_BUILDER_FOR_ELEMENT(AtmosphereExceptionMessage.MISSING_BUILDER_FOR_ELEMENT_MSG, CATEGORY_ERROR, 3),
-    /** Error while building Stanza: \"%1$s\" */
-    ERROR_WHILE_BUILDING(AtmosphereExceptionMessage.ERROR_WHILE_BUILDING_MSG, CATEGORY_ERROR, 4),
-    /** Could not find a transformer for the PayloadElement: \"%1$s\" */
-    MISSING_TRANSFORMER_FOR_PAYLOADELEMENT(AtmosphereExceptionMessage.MISSING_TRANSFORMER_FOR_PAYLOADELEMENT_MSG, CATEGORY_ERROR, 5),
-    /** Could not find an initializer for the specified stanza: . \"%1$s\" */
-    MISSING_INITIALIZER_FOR_STANZA(AtmosphereExceptionMessage.MISSING_INITIALIZER_FOR_STANZA_MSG, CATEGORY_ERROR, 6),
-    /** Error while transforming a PayloadElement: \"%1$s, %2$s\" */
-    ERROR_WHILE_TRANSFORMING(AtmosphereExceptionMessage.ERROR_WHILE_TRANSFORMING_MSG, CATEGORY_ERROR, 7),
-    /** Error while converting PayloadElement data: \"%1$s\" */
-    ERROR_WHILE_CONVERTING(AtmosphereExceptionMessage.ERROR_WHILE_CONVERTING_MSG, CATEGORY_ERROR, 8),
-    /** The following obligatory element is missing: \"%1$s\" */
-    OBLIGATORY_ELEMENT_MISSING(AtmosphereExceptionMessage.OBLIGATORY_ELEMENT_MISSING_MSG, CATEGORY_ERROR, 9),
-    /** Malformed Presence Data */
-    PRESENCE_DATA_MALFORMED(AtmosphereExceptionMessage.PRESENCE_DATA_MALFORMED_MSG, CATEGORY_ERROR, 10),
-    /** Malformed Presence Element: \"%1$s\" */
-    PRESENCE_DATA_ELEMENT_MALFORMED(AtmosphereExceptionMessage.PRESENCE_DATA_ELEMENT_MALFORMED_MSG, CATEGORY_ERROR, 11),
-    /** Illegal value \"%1$s\" for key \"%2$s\" in: \"%3$s\" */
-    ILLEGAL_VALUE(AtmosphereExceptionMessage.ILLEGAL_VALUE_MSG, CATEGORY_ERROR, 12),
-    /** Malformed POST Data \"%1$s\" */
-    POST_DATA_MALFORMED(AtmosphereExceptionMessage.POST_DATA_MALFORMED_MSG, CATEGORY_ERROR, 13),
+    STREAM_BAD_FORMAT(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 1),
+    STREAM_BAD_NAMESPACE_PREFIX(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 2),
+    STREAM_CONFLICT(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 3),
+    STREAM_CONNECTION_TIMEOUT(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 4),
+    STREAM_HOST_GONE(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 5),
+    STREAM_HOST_UNKNOWN(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 6),
+    STREAM_IMPROPER_ADDRESSING(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 7),
+    STREAM_INTERNAL_SERVER_ERROR(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 8),
+    STREAM_INVALID_FROM(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 9),
+    STREAM_INVALID_ID(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 10),
+    STREAM_INVALID_NAMESPACE(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 10),
+    STREAM_INVALID_XML(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 11),
+    STREAM_NOT_AUTHORIZED(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 12),
+    STREAM_POLICY_VIOLATION(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 13),
+    STREAM_REMOTE_CONNECT_FAILED(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 14),
+    STREAM_RESOURCE_CONSTRAINT(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 15),
+    STREAM_RESTRICTED_XML(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 16),
+    STREAM_SEE_OTHER_HOST(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 17),
+    STREAM_SYSTEM_SHUTDOWN(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 18),
+    STREAM_UNDEFINED_CONDITION(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 19),
+    STREAM_UNSUPPORTED_ENCODING(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 20),
+    STREAM_UNSUPPORTED_STANZA_TYPE(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 21),
+    STREAM_UNSUPPORTED_VERSION(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 22),
+    STREAM_XML_NOT_WELL_FORMED(RealtimeExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 23)
     ;
 
-    private final String message;
-    private final int number;
-    private final Category category;
+    private int number;
 
-    private AtmosphereExceptionCode(final String message, final Category category, final int detailNumber) {
+    private Category category;
+
+    private String message;
+
+    private RealtimeStreamExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
-        number = detailNumber;
+        this.number = detailNumber;
         this.category = category;
-    }
-
-    @Override
-    public boolean equals(OXException e) {
-        return OXExceptionFactory.getInstance().equals(this, e);
     }
 
     @Override
@@ -116,12 +119,17 @@ public enum AtmosphereExceptionCode implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "ATMOSPHERE";
+        return "RT_STREAM";
     }
 
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public boolean equals(final OXException e) {
+        return OXExceptionFactory.getInstance().equals(this, e);
     }
 
     /**
@@ -153,4 +161,5 @@ public enum AtmosphereExceptionCode implements OXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
+
 }

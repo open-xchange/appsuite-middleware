@@ -47,41 +47,30 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl;
+package com.openexchange.realtime.atmosphere.payload.converter;
 
-import org.apache.commons.logging.Log;
-import org.atmosphere.cpr.Broadcaster;
-import org.atmosphere.cpr.BroadcasterLifeCyclePolicyListener;
+import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link ShoutingBroadcasterPolicyListener} - Debugging Lifecycle Listener
+ * {@link OXExceptionToJSONConverter}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class ShoutingBroadcasterPolicyListener implements BroadcasterLifeCyclePolicyListener {
+public class OXExceptionToJSONConverter extends AbstractPOJOConverter {
 
-    private final static Log LOG = com.openexchange.log.Log.loggerFor(ShoutingBroadcasterPolicyListener.class);
-    private final Broadcaster broadcaster;
-
-    public ShoutingBroadcasterPolicyListener(Broadcaster broadcaster) {
-        this.broadcaster = broadcaster;
-        LOG.info("\n\nHEY HEY, ADDED SHOUTINGBORADCASTLISTENER TO BROADCASTER: "+broadcaster.getID()+"\n\n");
+    @Override
+    public String getInputFormat() {
+        return OXException.class.getSimpleName();
     }
 
     @Override
-    public void onEmpty() {
-        LOG.info("\n\nHEY HEY, THIS THING IS EMPTY! BROADCASTER: "+broadcaster.getID()+"\n\n");
-    }
-
-    @Override
-    public void onIdle() {
-        LOG.info("\n\nHEY HEY, THIS THING IS IDLE! BROADCASTER: "+broadcaster.getID()+"\n\n");
-    }
-
-    @Override
-    public void onDestroy() {
-        LOG.info("\n\nHEY HEY, THIS THING WILL BE DESTROYED! BROADCASTER: "+broadcaster.getID()+"\n\n");
+    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
+        OXException oxe = (OXException) data;
+        String transformed = oxe.getMessage();
+        return transformed;
     }
 
 }

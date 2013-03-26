@@ -52,11 +52,13 @@ package com.openexchange.realtime.atmosphere.osgi;
 
 import org.osgi.framework.BundleContext;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.http.grizzly.service.atmosphere.AtmosphereService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.atmosphere.AtmosphereConfig;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.ByteToJSONConverter;
@@ -77,14 +79,14 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SessiondService.class, AtmosphereService.class, MessageDispatcher.class, SimpleConverter.class, ResourceDirectory.class, StanzaQueueService.class,  PayloadTreeConverter.class, CapabilityService.class };
+        return new Class<?>[] { ConfigurationService.class, SessiondService.class, AtmosphereService.class, MessageDispatcher.class, SimpleConverter.class, ResourceDirectory.class, StanzaQueueService.class,  PayloadTreeConverter.class, CapabilityService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         AtmosphereServiceRegistry.SERVICES.set(this);
-
-        openTrackers();
+        AtmosphereConfig atmosphereConfig = AtmosphereConfig.getInstance();
+        atmosphereConfig.start();
 
         AtmosphereService atmosphereService = getService(AtmosphereService.class);
         RTAtmosphereHandler handler = new RTAtmosphereHandler();
