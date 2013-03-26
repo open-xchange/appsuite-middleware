@@ -802,7 +802,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error(e.getMessage(), e);
                 }
             }
-            final boolean certainPassword = ("10.20.30.205".equals(config.getServer()) && 17 == session.getUserId());
+            final boolean certainPassword = false; //("10.20.30.205".equals(config.getServer()) && 17 == session.getUserId());
             if (certainPassword) {
                 tmpPass = "secret";
             }
