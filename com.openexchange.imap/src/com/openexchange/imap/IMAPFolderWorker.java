@@ -80,7 +80,6 @@ import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
-import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IMAPStore;
@@ -112,7 +111,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             this.error = e;
             this.stamp = System.currentTimeMillis();
         }
-    }
+    } // End of class FailFastError
 
     private static final ConcurrentMap<String, FailFastError> FAIL_FAST = new NonBlockingHashMap<String, FailFastError>();
 
@@ -157,26 +156,17 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     /*
      * Fields
      */
+
     protected final AccessedIMAPStore imapStore;
-
     protected final Session session;
-
     protected final int accountId;
-
     protected final Context ctx;
-
     protected final IMAPAccess imapAccess;
-
     protected final UserSettingMail usm;
-
     protected final IMAPConfig imapConfig;
-
     protected final ACLExtension aclExtension;
-
     protected IMAPFolder imapFolder;
-
     protected final Set<IMAPFolder> otherFolders;
-
     protected int holdsMessages = -1;
 
     /**
