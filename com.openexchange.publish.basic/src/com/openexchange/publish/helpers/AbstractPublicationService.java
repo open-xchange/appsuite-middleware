@@ -49,10 +49,14 @@
 
 package com.openexchange.publish.helpers;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
+import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
 import com.openexchange.publish.PublicationService;
@@ -70,6 +74,8 @@ public abstract class AbstractPublicationService implements PublicationService {
     public static enum Permission {
         CREATE, DELETE, UPDATE;
     }
+
+    private static Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractPublicationService.class));
 
     public static SecurityStrategy ALLOW_ALL = new AllowEverything();
 
@@ -106,26 +112,49 @@ public abstract class AbstractPublicationService implements PublicationService {
     @Override
     public Collection<Publication> getAllPublications(final Context ctx) throws OXException {
         final List<Publication> publications = STORAGE.getPublications(ctx, getTarget().getId());
+        List<Publication> returnPublications = new ArrayList<Publication>();
         for (final Publication publication : publications) {
-            modifyOutgoing(publication);
+            /* as some publications are not working anymore, we should at least filter out the not working ones and write them to LOG */
+            try {
+                modifyOutgoing(publication);
+                returnPublications.add(publication);
+            } catch (OXException e) {
+                if (InfostoreExceptionCodes.NOT_EXIST.equals(e)){
+                    LOG.info(e.getLogMessage());
+                } else {
+                    throw e;
+                }
+            }
         }
-        afterLoad(publications);
-        return publications;
+        afterLoad(returnPublications);
+        return returnPublications;
     }
 
     @Override
     public Collection<Publication> getAllPublications(final Context ctx, final String entityId) throws OXException {
         final List<Publication> publications = STORAGE.getPublications(ctx, getTarget().getModule(), entityId);
+        List<Publication> returnPublications = new ArrayList<Publication>();
         for (final Publication publication : publications) {
-            modifyOutgoing(publication);
+            /* as some publications are not working anymore, we should at least filter out the not working ones and write them to LOG */
+            try {
+                modifyOutgoing(publication);
+                returnPublications.add(publication);
+            } catch (OXException e) {
+                if (InfostoreExceptionCodes.NOT_EXIST.equals(e)){
+                    LOG.info(e.getLogMessage());
+                } else {
+                    throw e;
+                }
+            }
         }
-        afterLoad(publications);
-        return publications;
+        afterLoad(returnPublications);
+        return returnPublications;
     }
 
     @Override
     public Collection<Publication> getAllPublications(final Context ctx, final int userId, final String module) throws OXException {
     	List<Publication> publications;
+    	List<Publication> returnPublications = new ArrayList<Publication>();
     	if (module == null) {
     		publications = STORAGE.getPublicationsOfUser(ctx, userId);
     	} else {
@@ -133,10 +162,20 @@ public abstract class AbstractPublicationService implements PublicationService {
     	}
 
     	for (final Publication publication : publications) {
-            modifyOutgoing(publication);
+    	    /* as some publications are not working anymore, we should at least filter out the not working ones and write them to LOG */
+            try {
+                modifyOutgoing(publication);
+                returnPublications.add(publication);
+            } catch (OXException e) {
+                if (InfostoreExceptionCodes.NOT_EXIST.equals(e)){
+                    LOG.info(e.getLogMessage());
+                } else {
+                    throw e;
+                }
+            }
         }
-        afterLoad(publications);
-        return publications;
+        afterLoad(returnPublications);
+        return returnPublications;
     }
 
     @Override
