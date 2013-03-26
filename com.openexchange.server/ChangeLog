@@ -1,6 +1,7 @@
 * 2013-03-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 25495: Close currently opened folder immediately
+ - Fix for bug 25552: Declare capability "linkedinPlus" once mail-capable LinkedIn API key is available
 
 * 2013-03-26 - marcus.klein@open-xchange.com
 
