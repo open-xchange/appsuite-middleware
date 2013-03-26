@@ -67,6 +67,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.preview.ContentTypeChecker;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.preview.PreviewOutput;
@@ -150,7 +151,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
 
             final DataProperties dataProperties = new DataProperties(7);
-            dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder));
+            dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null));
             dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
             dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
             dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
@@ -225,12 +226,14 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         "application/octet-stream",
         "application/vnd",
         "application/vnd.ms-word.document.12n",
+        "application/vnd.ms-word.document.12",
         "application/odt",
         "application/x-pdf")));
 
-    private String getContentType(final IFileHolder fileHolder) {
+    private String getContentType(final IFileHolder fileHolder, final ContentTypeChecker checker) {
         String contentType = getLowerCaseBaseType(fileHolder.getContentType());
-        if (isEmpty(contentType) || INVALIDS.contains(contentType)) {
+        if (isEmpty(contentType) || INVALIDS.contains(contentType) || (null != checker && checker.isValid(contentType))) {
+            // Determine Content-Type by file name
             contentType = MimeType2ExtMap.getContentType(fileHolder.getName());
         }
         return contentType == null ? "application/octet-stream" : contentType;
