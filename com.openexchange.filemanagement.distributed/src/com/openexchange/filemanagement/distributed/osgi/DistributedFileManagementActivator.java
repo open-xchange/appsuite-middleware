@@ -1,8 +1,12 @@
 
 package com.openexchange.filemanagement.distributed.osgi;
 
+import java.util.Map;
 import org.apache.commons.logging.Log;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
+import com.hazelcast.config.Config;
+import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -40,8 +44,9 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
                 public void added(ServiceReference<HazelcastInstance> ref, HazelcastInstance service) {
                     DistributedFileManagementImpl.setHazelcastInstance(service);
                     String address = service.getCluster().getLocalMember().getInetSocketAddress().getHostName();
+                    String mapName = discoverMapName(service.getConfig());
                     address += prefix;
-                    context.registerService(DistributedFileManagement.class, new DistributedFileManagementImpl(DistributedFileManagementActivator.this, address), null);
+                    context.registerService(DistributedFileManagement.class, new DistributedFileManagementImpl(DistributedFileManagementActivator.this, address, mapName), null);
                 }
 
                 @Override
@@ -58,6 +63,20 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         LOG.info("Stopping bundle: com.openexchange.filemanagement.distributed");
         super.stopBundle();
+    }
+
+    private static String discoverMapName(Config config) throws IllegalStateException {
+        Map<String, MapConfig> mapConfigs = config.getMapConfigs();
+        if (null != mapConfigs && 0 < mapConfigs.size()) {
+            for (String mapName : mapConfigs.keySet()) {
+                if (mapName.startsWith("distributedFiles-")) {
+                    LOG.info("Using distributed map '" + mapName + "'.");
+                    return mapName;
+                }
+            }
+        }
+        String msg = "No distributed file map found in hazelcast configuration";
+        throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR));
     }
 
 }
