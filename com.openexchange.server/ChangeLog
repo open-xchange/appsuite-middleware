@@ -2,6 +2,7 @@
 
  - Fix for bug 25495: Close currently opened folder immediately
  - Fix for bug 25552: Declare capability "linkedinPlus" once mail-capable LinkedIn API key is available
+ - Fix for bug 25542: Avoid ArrayIndexOutOfBoundsException when accessing array
 
 * 2013-03-26 - marcus.klein@open-xchange.com
 
