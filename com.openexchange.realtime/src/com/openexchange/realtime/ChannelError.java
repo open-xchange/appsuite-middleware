@@ -47,51 +47,14 @@
  *
  */
 
-package com.openexchange.realtime.handle.impl;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.util.IdLookup;
-import com.openexchange.realtime.util.IdLookup.UserAndContext;
+package com.openexchange.realtime;
 
 
 /**
- * {@link HandlerUtils}
+ * {@link ChannelError}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class HandlerUtils {
-    
-    public static boolean applyPrivacyLists(Stanza stanza) {
-        /*
-         * TODO:
-         * If the hostname of the domain identifier portion of the JID contained in the 'to' attribute of an inbound stanza matches 
-         * a hostname of the server itself and the JID contained in the 'to' attribute is of the form <user@example.com> or 
-         * <user@example.com/resource>, the server MUST first apply any privacy lists that are in force
-         */
-        return true;
-    }
-
-    public static boolean isInboundStanza(Stanza stanza) {
-        // TODO: Really check if the id addresses a OX resource.
-        return true;
-    }
-
-    public static boolean addressesValidOXUser(Stanza stanza) {
-        ID to = stanza.getTo();
-        if (to == null) {
-            return false;
-        }
-        if ("synthetic".equals(to.getProtocol())) {
-            return true;
-        }
-        try {
-            UserAndContext userAndContextID = IdLookup.getUserAndContextIDs(to);
-            return true;
-        } catch (OXException e) {
-            return false;
-        }
-    }
+public class ChannelError {
 
 }

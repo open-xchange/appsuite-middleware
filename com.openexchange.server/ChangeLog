@@ -1,8 +1,15 @@
+* 2013-03-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25495: Close currently opened folder immediately
+ - Fix for bug 25552: Declare capability "linkedinPlus" once mail-capable LinkedIn API key is available
+ - Fix for bug 25542: Avoid ArrayIndexOutOfBoundsException when accessing array
+ - Fix for bug 25541: Dropped unresolveable dependency
+
 * 2013-03-26 - marcus.klein@open-xchange.com
 
  - Fix for bug 24709: Removed duplicate org.apache.log4j bundle.
 
-* 2013-03-22 - thorben.betten@open-xchange.com
+* 2013-03-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 25421: Invoke 'OXFolderAdminHelper.propagateUserModification()' if user's display name was changed
  - Fix for bug 25487: Fixed condition check

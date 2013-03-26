@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere;
+package com.openexchange.realtime;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -55,53 +55,56 @@ import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link AtmosphereExceptionCode}
+ * {@link RealtimeStanzaExceptionCodes} - Stanza error codes for the realtime framework.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public enum AtmosphereExceptionCode implements OXExceptionCode {
-
-    /** The session information didn't match any ServerSession. */
-    SESSIONINFO_DIDNT_MATCH_SERVERSESSION(AtmosphereExceptionMessage.SESSIONINFO_DIDNT_MATCH_SERVERSESSION_MSG, CATEGORY_ERROR, 1),
-    /** Missing key \"%1$s\" in: \"%2$s\" */
-    MISSING_KEY(AtmosphereExceptionMessage.MISSING_KEY_MSG, CATEGORY_ERROR, 2),
-    /** Could not find a builder for the specified element: . \"%1$s\" */
-    MISSING_BUILDER_FOR_ELEMENT(AtmosphereExceptionMessage.MISSING_BUILDER_FOR_ELEMENT_MSG, CATEGORY_ERROR, 3),
-    /** Error while building Stanza: \"%1$s\" */
-    ERROR_WHILE_BUILDING(AtmosphereExceptionMessage.ERROR_WHILE_BUILDING_MSG, CATEGORY_ERROR, 4),
-    /** Could not find a transformer for the PayloadElement: \"%1$s\" */
-    MISSING_TRANSFORMER_FOR_PAYLOADELEMENT(AtmosphereExceptionMessage.MISSING_TRANSFORMER_FOR_PAYLOADELEMENT_MSG, CATEGORY_ERROR, 5),
-    /** Could not find an initializer for the specified stanza: . \"%1$s\" */
-    MISSING_INITIALIZER_FOR_STANZA(AtmosphereExceptionMessage.MISSING_INITIALIZER_FOR_STANZA_MSG, CATEGORY_ERROR, 6),
-    /** Error while transforming a PayloadElement: \"%1$s, %2$s\" */
-    ERROR_WHILE_TRANSFORMING(AtmosphereExceptionMessage.ERROR_WHILE_TRANSFORMING_MSG, CATEGORY_ERROR, 7),
-    /** Error while converting PayloadElement data: \"%1$s\" */
-    ERROR_WHILE_CONVERTING(AtmosphereExceptionMessage.ERROR_WHILE_CONVERTING_MSG, CATEGORY_ERROR, 8),
-    /** The following obligatory element is missing: \"%1$s\" */
-    OBLIGATORY_ELEMENT_MISSING(AtmosphereExceptionMessage.OBLIGATORY_ELEMENT_MISSING_MSG, CATEGORY_ERROR, 9),
-    /** Malformed Presence Data */
-    PRESENCE_DATA_MALFORMED(AtmosphereExceptionMessage.PRESENCE_DATA_MALFORMED_MSG, CATEGORY_ERROR, 10),
-    /** Malformed Presence Element: \"%1$s\" */
-    PRESENCE_DATA_ELEMENT_MALFORMED(AtmosphereExceptionMessage.PRESENCE_DATA_ELEMENT_MALFORMED_MSG, CATEGORY_ERROR, 11),
-    /** Illegal value \"%1$s\" for key \"%2$s\" in: \"%3$s\" */
-    ILLEGAL_VALUE(AtmosphereExceptionMessage.ILLEGAL_VALUE_MSG, CATEGORY_ERROR, 12),
-    /** Malformed POST Data \"%1$s\" */
-    POST_DATA_MALFORMED(AtmosphereExceptionMessage.POST_DATA_MALFORMED_MSG, CATEGORY_ERROR, 13),
+public enum RealtimeStanzaExceptionCodes implements OXExceptionCode {
+    /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
+    NO_APPROPRIATE_CHANNEL(RealtimeStanzaExceptionMessages.NO_APPROPRIATE_CHANNEL, Category.EnumCategory.CONNECTIVITY, 2),
+    /** The following needed service is missing: "%1$s" */
+    NEEDED_SERVICE_MISSING(RealtimeStanzaExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 3),
+    /** Unexpected error: %1$s */
+    UNEXPECTED_ERROR(RealtimeStanzaExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 4),
+    /** Invalid ID. Resource identifier is missing. */
+    INVALID_ID(RealtimeStanzaExceptionMessages.INVALID_ID, CATEGORY_ERROR, 5),
+    
+    //--- elements from stanza error namespace http://xmpp.org/rfcs/rfc3920.html#def C.7.
+    STANZA_BAD_REQUEST(RealtimeStanzaExceptionMessages.STANZA_BAD_REQUEST_MSG, CATEGORY_USER_INPUT, 6),
+    STANZA_CONFILCT(RealtimeStanzaExceptionMessages.STANZA_CONFILCT_MSG, CATEGORY_SERVICE_DOWN, 7),
+    STANZA_FEATURE_NOT_IMPLEMENTED(RealtimeStanzaExceptionMessages.STANZA_FEATURE_NOT_IMPLEMENTED_MSG, CATEGORY_SERVICE_DOWN, 8),
+    STANZA_FORBIDDEN(RealtimeStanzaExceptionMessages.STANZA_FORBIDDEN_MSG, CATEGORY_SERVICE_DOWN, 9),
+    STANZA_GONE(RealtimeStanzaExceptionMessages.STANZA_GONE_MSG, CATEGORY_SERVICE_DOWN, 10),
+    STANZA_INTERNAL_SERVER_ERROR(RealtimeStanzaExceptionMessages.STANZA_INTERNAL_SERVER_ERROR_MSG, CATEGORY_SERVICE_DOWN, 11),
+    STANZA_ITEM_NOT_FOUND(RealtimeStanzaExceptionMessages.STANZA_ITEM_NOT_FOUND_MSG, CATEGORY_SERVICE_DOWN, 12),
+    STANZA_JID_MALFORMED(RealtimeStanzaExceptionMessages.STANZA_JID_MALFORMED_MSG, CATEGORY_SERVICE_DOWN, 13),
+    STANZA_NOT_ACCEPTABLE(RealtimeStanzaExceptionMessages.STANZA_NOT_ACCEPTABLE_MSG, CATEGORY_SERVICE_DOWN, 14),
+    STANZA_NOT_AUTHORIZED(RealtimeStanzaExceptionMessages.STANZA_NOT_AUTHORIZED_MSG, CATEGORY_SERVICE_DOWN, 15),
+    STANZA_NOT_ALLOWED(RealtimeStanzaExceptionMessages.STANZA_NOT_ALLOWED_MSG, CATEGORY_SERVICE_DOWN, 16),
+    STANZA_PAYMENT_REQUIRED(RealtimeStanzaExceptionMessages.STANZA_PAYMENT_REQUIRED_MSG, CATEGORY_SERVICE_DOWN, 17),
+    STANZA_POLICY_VIOLATION(RealtimeStanzaExceptionMessages.STANZA_POLICY_VIOLATION_MSG, CATEGORY_SERVICE_DOWN, 18),
+    STANZA_RECIPIENT_UNAVAILABLE(RealtimeStanzaExceptionMessages.STANZA_RECIPIENT_UNAVAILABLE_MSG, CATEGORY_SERVICE_DOWN, 19),
+    STANZA_REDIRECT(RealtimeStanzaExceptionMessages.STANZA_REDIRECT_MSG, CATEGORY_SERVICE_DOWN, 20),
+    STANZA_REGISTRATION_REQUIRED(RealtimeStanzaExceptionMessages.STANZA_REGISTRATION_REQUIRED_MSG, CATEGORY_SERVICE_DOWN, 21),
+    STANZA_REMOTE_SERVER_NOT_FOUND(RealtimeStanzaExceptionMessages.STANZA_REMOTE_SERVER_NOT_FOUND_MSG, CATEGORY_SERVICE_DOWN, 22),
+    STANZA_REMOTE_SERVER_TIMEOUT(RealtimeStanzaExceptionMessages.STANZA_REMOTE_SERVER_TIMEOUT_MSG, CATEGORY_SERVICE_DOWN, 23),
+    STANZA_RESOURCE_CONSTRAINT(RealtimeStanzaExceptionMessages.STANZA_RESOURCE_CONSTRAINT_MSG, CATEGORY_SERVICE_DOWN, 24),
+    STANZA_SERVICE_UNAVAILABLE(RealtimeStanzaExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 25),
+    STANZA_SUBSCRIPTION_REQUIRED(RealtimeStanzaExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 26),
+    STANZA_UNDEFINED_CONDITION(RealtimeStanzaExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 27),
+    STANZA_UNEXPECTED_REQUEST(RealtimeStanzaExceptionMessages.NEEDED_SERVICE_MISSING_MSG, CATEGORY_SERVICE_DOWN, 28),
     ;
+    
+    private int number;
 
-    private final String message;
-    private final int number;
-    private final Category category;
+    private Category category;
 
-    private AtmosphereExceptionCode(final String message, final Category category, final int detailNumber) {
+    private String message;
+
+    private RealtimeStanzaExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
-        number = detailNumber;
+        this.number = detailNumber;
         this.category = category;
-    }
-
-    @Override
-    public boolean equals(OXException e) {
-        return OXExceptionFactory.getInstance().equals(this, e);
     }
 
     @Override
@@ -116,12 +119,17 @@ public enum AtmosphereExceptionCode implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "ATMOSPHERE";
+        return "RT_STANZA";
     }
 
     @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public boolean equals(final OXException e) {
+        return OXExceptionFactory.getInstance().equals(this, e);
     }
 
     /**
@@ -153,4 +161,5 @@ public enum AtmosphereExceptionCode implements OXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
+
 }

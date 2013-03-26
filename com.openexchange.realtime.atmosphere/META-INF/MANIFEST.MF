@@ -6,8 +6,12 @@ Bundle-Version: 6.22.0.0
 Bundle-Activator: com.openexchange.realtime.atmosphere.osgi.AtmosphereRTActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.authentication,
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.login,
+ com.openexchange.authentication,
  com.openexchange.capabilities,
+ com.openexchange.config,
+ com.openexchange.configuration,
  com.openexchange.conversion,
  com.openexchange.conversion.simple,
  com.openexchange.exception,
@@ -30,6 +34,7 @@ Import-Package: com.openexchange.authentication,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.sessiond,
+ com.openexchange.sessiond.impl,
  com.openexchange.sessionstorage,
  com.openexchange.tools.session,
  javax.servlet,

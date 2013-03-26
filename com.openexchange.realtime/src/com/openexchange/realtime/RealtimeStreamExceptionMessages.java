@@ -47,51 +47,58 @@
  *
  */
 
-package com.openexchange.realtime.handle.impl;
+package com.openexchange.realtime;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.util.IdLookup;
-import com.openexchange.realtime.util.IdLookup.UserAndContext;
-
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link HandlerUtils}
+ * {@link RealtimeStreamExceptionMessages} - Translatable error messages.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
-public class HandlerUtils {
+public class RealtimeStreamExceptionMessages implements LocalizableStrings {
+
+    /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
+    public static final String NO_APPROPRIATE_CHANNEL = "No appropriate channel found for recipient %1$s with payload namespace %2$s";
+
+    /** The following needed service is missing: \"%1$s\" */
+    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
+
+    // Unexpected error: %1$s
+    public static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
+
+    /** Invalid ID. Resource identifier is missing. */
+    public static final String INVALID_ID = "Invalid ID. Resource identifier is missing.";
     
-    public static boolean applyPrivacyLists(Stanza stanza) {
-        /*
-         * TODO:
-         * If the hostname of the domain identifier portion of the JID contained in the 'to' attribute of an inbound stanza matches 
-         * a hostname of the server itself and the JID contained in the 'to' attribute is of the form <user@example.com> or 
-         * <user@example.com/resource>, the server MUST first apply any privacy lists that are in force
-         */
-        return true;
-    }
-
-    public static boolean isInboundStanza(Stanza stanza) {
-        // TODO: Really check if the id addresses a OX resource.
-        return true;
-    }
-
-    public static boolean addressesValidOXUser(Stanza stanza) {
-        ID to = stanza.getTo();
-        if (to == null) {
-            return false;
-        }
-        if ("synthetic".equals(to.getProtocol())) {
-            return true;
-        }
-        try {
-            UserAndContext userAndContextID = IdLookup.getUserAndContextIDs(to);
-            return true;
-        } catch (OXException e) {
-            return false;
-        }
-    }
-
+    /*
+    <xs:group name='streamErrorGroup'>
+    <xs:choice>
+      <xs:element ref='bad_format'/>
+      <xs:element ref='bad_namespace_prefix'/>
+      <xs:element ref='conflict'/>
+      <xs:element ref='connection_timeout'/>
+      <xs:element ref='host_gone'/>
+      <xs:element ref='host_unknown'/>
+      <xs:element ref='improper_addressing'/>
+      <xs:element ref='internal_server_error'/>
+      <xs:element ref='invalid_from'/>
+      <xs:element ref='invalid_id'/>
+      <xs:element ref='invalid_namespace'/>
+      <xs:element ref='invalid_xml'/>
+      <xs:element ref='not_authorized'/>
+      <xs:element ref='policy_violation'/>
+      <xs:element ref='remote_connection_failed'/>
+      <xs:element ref='resource_constraint'/>
+      <xs:element ref='restricted_xml'/>
+      <xs:element ref='see_other_host'/>
+      <xs:element ref='system_shutdown'/>
+      <xs:element ref='undefined_condition'/>
+      <xs:element ref='unsupported_encoding'/>
+      <xs:element ref='unsupported_stanza_type'/>
+      <xs:element ref='unsupported_version'/>
+      <xs:element ref='xml_not_well_formed'/>
+    </xs:choice>
+    </xs:group>
+    */
 }
