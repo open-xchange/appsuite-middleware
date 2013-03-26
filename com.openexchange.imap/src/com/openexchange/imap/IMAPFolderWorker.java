@@ -351,13 +351,9 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             closeOtherFolders();
         }
         final boolean isDefaultFolder = DEFAULT_FOLDER_ID.equals(fullName);
-        final boolean isIdenticalFolder;
-        if (isDefaultFolder) {
-            isIdenticalFolder = (imapFolder == null ? false : 0 == imapFolder.getFullName().length());
-        } else {
-            isIdenticalFolder = (imapFolder == null ? false : fullName.equals(imapFolder.getFullName()));
-        }
         if (imapFolder != null) {
+            final String imapFolderFullname = imapFolder.getFullName();
+            final boolean isIdenticalFolder = isDefaultFolder ? 0 == imapFolderFullname.length() : fullName.equals(imapFolderFullname);
             /*
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
@@ -399,7 +395,6 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                  * Folder is closed here
                  */
                 if (isIdenticalFolder) {
-                    final String imapFolderFullname = imapFolder.getFullName();
                     try {
                         if ((imapFolder.getType() & Folder.HOLDS_MESSAGES) == 0) { // NoSelect
                             throw IMAPException.create(
@@ -431,7 +426,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                     openFolder(desiredMode, imapFolder);
                     return imapFolder;
                 }
-            }
+            } // End of synchronized
         }
         final IMAPFolder retval = (isDefaultFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName));
         if (imapStore.notifyRecent() && (desiredMode == Folder.READ_WRITE)) {
