@@ -112,8 +112,8 @@ public class AnotherIndexingService implements IndexingService {
 
         JobInfoWrapper infoWrapper = new JobInfoWrapper(info, timeout, initialInterval, progressionRate);
         JobKey jobKey = Tools.generateJobKey(info);
-        RecurringJobsManager.addOrUpdateJob(jobKey.toString(), infoWrapper);
-        if (!onlyResetProgression) {
+        boolean added = RecurringJobsManager.addOrUpdateJob(jobKey.toString(), infoWrapper);
+        if (!onlyResetProgression || added) {
             JobDetail jobDetail = JobBuilder.newJob(ProgressiveRecurringJob.class)
                 .withIdentity(jobKey)
                 .build();

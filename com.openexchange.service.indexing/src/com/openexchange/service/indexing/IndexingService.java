@@ -92,7 +92,8 @@ public interface IndexingService {
      * rate and the initial interval.
      * @param priority The priority. If two jobs shall be started at the same time, the one with the higher priority wins.
      * See {@link IndexingService#DEFAULT_PRIORITY}.
-     * @param onlyResetProgression If <code>true</code> only the progression and job timeout will be reset. No triggers will be activated.
+     * @param onlyResetProgression If <code>true</code> only the progression and job timeout will be reset and no triggers will be activated.
+     * If the job was unknown before, triggers will be added nevertheless to ensure proper indexing.
      * @throws OXException 
      */
     void scheduleJobWithProgressiveInterval(JobInfo info, Date startDate, long timeout, long initialInterval, int progressionRate, int priority, boolean onlyResetProgression) throws OXException;

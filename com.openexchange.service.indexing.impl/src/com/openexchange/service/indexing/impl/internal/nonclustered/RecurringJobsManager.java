@@ -64,14 +64,22 @@ public class RecurringJobsManager {
     
     private static final String JOB_MAP = "recurringJobs-0";
     
-    public static void addOrUpdateJob(String jobId, JobInfoWrapper infoWrapper) {
+    /**
+     * Returns true, if job was added and false if it was just updated.
+     */
+    public static boolean addOrUpdateJob(String jobId, JobInfoWrapper infoWrapper) {
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         IMap<String, JobInfoWrapper> recurringJobs = hazelcast.getMap(JOB_MAP);
         long ttl = infoWrapper.getJobTimeout();
         if (ttl <= 0) {
             ttl = 0;
         }
-        recurringJobs.set(jobId, infoWrapper, ttl, TimeUnit.MILLISECONDS);
+        JobInfoWrapper old = recurringJobs.put(jobId, infoWrapper, ttl, TimeUnit.MILLISECONDS);
+        if (old == null) {
+            return true;
+        }
+        
+        return false;
     }
     
     public static boolean touchJob(String jobId) {
