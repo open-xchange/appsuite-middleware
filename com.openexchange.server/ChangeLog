@@ -1,3 +1,7 @@
+* 2013-03-26 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24709: Removed duplicate org.apache.log4j bundle.
+
 * 2013-03-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 25421: Invoke 'OXFolderAdminHelper.propagateUserModification()' if user's display name was changed

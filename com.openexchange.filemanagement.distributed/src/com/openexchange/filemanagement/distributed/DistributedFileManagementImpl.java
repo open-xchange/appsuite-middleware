@@ -83,12 +83,10 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
         DistributedFileManagementImpl.REFERENCE.set(hazelcastInstance);
     }
 
-    public DistributedFileManagementImpl(ServiceLookup services, String address) {
+    public DistributedFileManagementImpl(ServiceLookup services, String address, String mapName) {
         this.services = services;
         this.address = address;
-        this.mapName = services.getService(ConfigurationService.class).getProperty(
-            "com.openexchange.filemanagement.distributed.mapName",
-            "distributedFiles-0");
+        this.mapName = mapName;
     }
 
     @Override

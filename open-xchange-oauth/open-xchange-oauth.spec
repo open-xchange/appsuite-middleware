@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 6
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -84,6 +84,10 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Tue Mar 26 2013 Steffen Templin <marcus.klein@open-xchange.com>
+First release candidate for 7.2.0
+* Fri Mar 15 2013 Steffen Templin <marcus.klein@open-xchange.com>
+prepare for 7.2.0
 * Tue Mar 12 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Sixth release candidate for 6.22.2/7.0.2
 * Mon Mar 11 2013 Steffen Templin <marcus.klein@open-xchange.com>
@@ -95,9 +99,9 @@ Third release candidate for 6.22.2/7.0.2
 * Thu Mar 07 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Second release candidate for 6.22.2/7.0.2
 * Mon Mar 04 2013 Steffen Templin <marcus.klein@open-xchange.com>
-Build for patch 2013-03-08
-* Fri Mar 01 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2013-03-07
+* Mon Mar 04 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2013-03-08
 * Fri Mar 01 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2013-03-07
 * Wed Feb 27 2013 Steffen Templin <marcus.klein@open-xchange.com>

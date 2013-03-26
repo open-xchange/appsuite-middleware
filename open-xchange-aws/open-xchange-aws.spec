@@ -54,5 +54,9 @@ ox_update_permissions /opt/open-xchange/etc/aws.properties root:open-xchange 640
 /opt/open-xchange/sbin/setupautoscaling
 
 %changelog
+* Tue Mar 26 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+First release candidate for 7.2.0
+* Fri Mar 15 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+prepare for 7.2.0
 * Tue Sep 11 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Initial release
