@@ -112,6 +112,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,com.openexchange.utils"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,com.openexchange.version"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,com.openexchange.xml"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,javax.mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,org.apache.tika"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,org.ho.jyaml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,org.javasimon"/>
