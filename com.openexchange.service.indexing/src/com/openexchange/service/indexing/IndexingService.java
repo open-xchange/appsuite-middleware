@@ -111,15 +111,6 @@ public interface IndexingService {
     void scheduleJob(boolean async, JobInfo info, Date startDate, long repeatInterval, int priority) throws OXException;
 
     /**
-     * Deletes an indexing job from the scheduler.
-     *
-     * @param async If <code>true</code> the call returns immediately and the unscheduling will be performed asynchronously.
-     * @param info The information needed to delete this job.
-     * @throws OXException
-     */
-    void unscheduleJob(boolean async, JobInfo info) throws OXException;
-
-    /**
      * Deletes all jobs for a given user from the scheduler.
      *
      * @param async If <code>true</code> the call returns immediately and the unscheduling will be performed asynchronously.
