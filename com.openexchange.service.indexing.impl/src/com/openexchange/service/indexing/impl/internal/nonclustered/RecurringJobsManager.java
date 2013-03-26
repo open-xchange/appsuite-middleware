@@ -67,7 +67,11 @@ public class RecurringJobsManager {
     public static void addOrUpdateJob(String jobId, JobInfoWrapper infoWrapper) {
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         IMap<String, JobInfoWrapper> recurringJobs = hazelcast.getMap(JOB_MAP);
-        recurringJobs.set(jobId, infoWrapper, 0, TimeUnit.SECONDS);
+        long ttl = infoWrapper.getJobTimeout();
+        if (ttl <= 0) {
+            ttl = 0;
+        }
+        recurringJobs.set(jobId, infoWrapper, ttl, TimeUnit.MILLISECONDS);
     }
     
     public static boolean touchJob(String jobId) {
@@ -79,7 +83,11 @@ public class RecurringJobsManager {
         }
         
         infoWrapper.touch();
-        recurringJobs.set(jobId, infoWrapper, 0, TimeUnit.SECONDS);
+        long ttl = infoWrapper.getJobTimeout();
+        if (ttl <= 0) {
+            ttl = 0;
+        }
+        recurringJobs.set(jobId, infoWrapper, ttl, TimeUnit.MILLISECONDS);
         return true;
     }
     
