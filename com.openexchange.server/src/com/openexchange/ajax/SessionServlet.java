@@ -629,6 +629,14 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
+    /**
+     * Check if the secret encoded in the open-xchange-secret Cookie matches the secret saved in the Session.
+     * 
+     * @param source    The configured CookieHashSource
+     * @param req       The incoming HttpServletRequest
+     * @param session   The Session object looked up for the incoming request
+     * @throws OXException If the secrets differ
+     */
     public static void checkSecret(final CookieHashSource source, final HttpServletRequest req, final Session session) throws OXException {
         final String secret = extractSecret(source, req, session.getHash(), session.getClient());
         if (secret == null || !session.getSecret().equals(secret)) {
