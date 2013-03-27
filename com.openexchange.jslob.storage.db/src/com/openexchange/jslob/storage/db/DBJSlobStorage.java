@@ -630,6 +630,8 @@ public final class DBJSlobStorage implements JSlobStorage {
                 committed = true;
                 return insert;
             } catch (final DataTruncation e) {
+                // A BLOB can be 65535 bytes maximum.
+                // If you need more consider using a MEDIUMBLOB for 16777215 bytes or a LONGBLOB for 4294967295
                 throw JSlobExceptionCodes.JSLOB_TOO_BIG.create(e, id.getId());
             } catch (final SQLException e) {
                 throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
