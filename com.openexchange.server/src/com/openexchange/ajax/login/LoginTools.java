@@ -121,21 +121,19 @@ public final class LoginTools {
     public static String addFragmentParameter(String usedUIWebPath, String param, String value) {
         String retval = usedUIWebPath;
         final int fragIndex = retval.indexOf('#');
-
-        // First get rid of the query String, so we can re-append it later
+        // First get rid off the query String, so we can re-append it later
         final int questionMarkIndex = retval.indexOf('?', fragIndex);
         String query = "";
         if (questionMarkIndex > 0) {
             query = retval.substring(questionMarkIndex);
             retval = retval.substring(0, questionMarkIndex);
         }
-        // Now let's see, if this url already contains a fragment
+        // Now let's see, if this URL already contains a fragment
         if (retval.indexOf('#') < 0) {
             // Apparently it didn't, so we can append our own
             return retval + '#' + param + '=' + value + query;
         }
-        // Alright, we already have a fragment, let's append a new parameter
-
+        // Ok, we already have a fragment, let's append a new parameter
         return retval + '&' + param + '=' + value + query;
     }
 
