@@ -51,6 +51,9 @@ package com.openexchange.ajax.requesthandler;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,6 +67,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.RequestConstants;
@@ -175,6 +179,9 @@ public class AJAXRequestData {
     /** The path prefix; &lt;prefix&gt; + <code>'/'</code> + &lt;module&gt; */
     private String prefix;
 
+    /** The optional <code>HttpServletResponse</code> instance */
+    private HttpServletResponse resp;
+
     /**
      * Initializes a new {@link AJAXRequestData}.
      * 
@@ -251,6 +258,23 @@ public class AJAXRequestData {
     }
 
     /**
+     * Sets the <code>HttpServletResponse</code> instance to enable support for:
+     * <ul>
+     * <li> {@link #optOutputStream()} </li>
+     * <li> {@link #optWriter()} </li>
+     * <li> {@link #setCharacterEncoding(String)} </li>
+     * <ul>
+     * <p>
+     * 
+     * @param resp The <code>HttpServletResponse</code> instance
+     * @return This request data with <code>HttpServletResponse</code> instance applied
+     */
+    public AJAXRequestData setHttpServletResponse(final HttpServletResponse resp) {
+        this.resp = resp;
+        return this;
+    }
+
+    /**
      * Examines specified {@code HttpServletRequest} instance.
      * 
      * @param servletRequest The HTTP Servlet request to examine
@@ -285,6 +309,86 @@ public class AJAXRequestData {
             thisDecoratorIds.add(decoratorId);
         }
         return this;
+    }
+
+    /**
+     * Returns a {@link OutputStream} suitable for writing binary data in the response. The servlet container does not encode the
+     * binary data.
+     * <p>
+     * Calling flush() on the OutputStream commits the response. Either this method or {@link #getWriter} may be called to write the
+     * body, not both.
+     * 
+     * @return A {@link OutputStream} for writing binary data or <code>null</code>
+     * @throws IllegalStateException If the <code>getWriter</code> method has already been called
+     * @throws IOException If an input or output exception occurred
+     * @see #optWriter()
+     */
+    public OutputStream optOutputStream() throws IOException {
+        if (null != resp) {
+            return resp.getOutputStream();
+        }
+        return null;
+    }
+
+    /**
+     * Returns a <code>PrintWriter</code> object that can send character text to the client. The <code>PrintWriter</code> uses the character
+     * encoding returned by {@link #getCharacterEncoding}. If the response's character encoding has not been specified as described in
+     * <code>getCharacterEncoding</code> (i.e., the method just returns the default value <code>ISO-8859-1</code>), <code>getWriter</code>
+     * updates it to <code>ISO-8859-1</code>.
+     * <p>
+     * Calling flush() on the <code>PrintWriter</code> commits the response.
+     * <p>
+     * Either this method or {@link #getOutputStream} may be called to write the body, not both.
+     * 
+     * @return A <code>PrintWriter</code> object that can return character data to the client or <code>null</code>
+     * @throws UnsupportedEncodingException If the character encoding is invalid
+     * @throws IllegalStateException If the <code>getOutputStream</code> method has already been called
+     * @throws IOException If an input or output exception occurred
+     * @see #getOutputStream
+     * @see #setCharacterEncoding
+     */
+    public PrintWriter optWriter() throws IOException {
+        if (null != resp) {
+            return resp.getWriter();
+        }
+        return null;
+    }
+
+    /**
+     * Sets the character encoding (MIME charset) of the response being sent to the client, for example, to UTF-8.
+     * <p>
+     * This method can be called repeatedly to change the character encoding. This method has no effect if it is called after
+     * <code>optWriter</code> has been called or after the response has been committed.
+     * 
+     * @param charset A String specifying only the character set defined by IANA Character Sets
+     *            (http://www.iana.org/assignments/character-sets)
+     * @return <code>true</code> if set; otherwise <code>false</code>
+     */
+    public boolean setResponseCharacterEncoding(final String charset) {
+        final HttpServletResponse resp = this.resp;
+        if (null != resp) {
+            resp.setCharacterEncoding(charset);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Sets specified header.
+     * <p>
+     * Requires a valid {@link HttpServletResponse} instance to be available; otherwise this is a no-op.
+     * 
+     * @param name The name
+     * @param value The value
+     * @return <code>true</code> if set; otherwise <code>false</code>
+     */
+    public boolean setResponseHeader(final String name, final String value) {
+        final HttpServletResponse resp = this.resp;
+        if (null != resp) {
+            resp.setHeader(name, value);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -539,7 +643,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the value mapped to given parameter name.
-     *
+     * 
      * @param name The parameter name
      * @return The value mapped to given parameter name
      * @throws NullPointerException If name is <code>null</code>
@@ -551,7 +655,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the value mapped to given parameter name.
-     *
+     * 
      * @param name The parameter name
      * @return The value mapped to given parameter name
      * @throws NullPointerException If name is <code>null</code>
@@ -818,7 +922,7 @@ public class AJAXRequestData {
                 headers.remove(header);
             } else {
                 headers.put(header, value);
-            }            
+            }
         }
     }
 
@@ -1183,13 +1287,13 @@ public class AJAXRequestData {
      * Sets the path prefix.
      * <p>
      * &lt;prefix&gt; + <code>'/'</code> + &lt;module&gt;
-     *
+     * 
      * @param prefix The prefix
      */
     public void setPrefix(String prefix) {
         this.prefix = prefix;
     }
-    
+
     /**
      * Gets the path prefix.
      * <p>

@@ -71,7 +71,7 @@ public interface Exporter {
 	 * @param optionalParams: Params that might be needed by a specific implementor of this interface. Note: The format was chosen to be congruent with HTTP-GET
 	 * @return true, if the given folders can be exported in the given format; false otherwise
 	 */
-	public abstract boolean canExport(ServerSession sessObj, Format format, String folder, Map<String, String[]> optionalParams) throws OXException;
+	boolean canExport(ServerSession sessObj, Format format, String folder, Map<String, Object> optionalParams) throws OXException;
 
 	/**
 	 *
@@ -83,8 +83,7 @@ public interface Exporter {
 	 * @return InputStream in requested format.
 	 * @throws OXException
 	 */
-	public abstract SizedInputStream exportData(ServerSession sessObj, Format format, String folder,
-			int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws OXException;
+	SizedInputStream exportData(ServerSession sessObj, Format format, String folder, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
 
 	/**
 	 *
@@ -97,7 +96,6 @@ public interface Exporter {
 	 * @return InputStream in requested format.
 	 * @throws OXException
 	 */
-	public abstract SizedInputStream exportData(ServerSession sessObj, Format format, String folder, int objectId,
-			int[] fieldsToBeExported, Map<String, String[]> optionalParams) throws OXException;
+	SizedInputStream exportData(ServerSession sessObj, Format format, String folder, int objectId, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException;
 
 }

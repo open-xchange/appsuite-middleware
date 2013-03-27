@@ -196,6 +196,10 @@ public class DefaultDispatcher implements Dispatcher {
         AJAXRequestResult result;
         try {
             result = action.perform(modifiedRequestData, session);
+            if (AJAXRequestResult.ResultType.DIRECT == result.getType()) {
+                // No further processing
+                return result;
+            }
         } catch (final IllegalStateException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {

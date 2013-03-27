@@ -58,6 +58,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -117,8 +118,25 @@ public class AJAXRequestDataTools {
      * @throws IOException If an I/O error occurs
      * @throws OXException If an OX error occurs
      */
-    public AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session, final String prefix) throws IOException, OXException {
-        final AJAXRequestData retval = new AJAXRequestData();
+    public final AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session, final String prefix) throws IOException, OXException {
+        return parseRequest(req, preferStream, isFileUpload, session, prefix, null);
+    }
+
+    /**
+     * Parses an appropriate {@link AJAXRequestData} instance from specified arguments.
+     *
+     * @param req The HTTP Servlet request
+     * @param preferStream Whether to prefer request's stream instead of parsing its body data to an appropriate (JSON) object
+     * @param isFileUpload Whether passed request is considered as a file upload
+     * @param session The associated session
+     * @param prefix The part of request's URI considered as prefix; &lt;prefix&gt; + <code>'/'</code> + &lt;module&gt;
+     * @param optResp The optional HTTP Servlet response
+     * @return An appropriate {@link AJAXRequestData} instance
+     * @throws IOException If an I/O error occurs
+     * @throws OXException If an OX error occurs
+     */
+    public AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session, final String prefix, final HttpServletResponse optResp) throws IOException, OXException {
+        final AJAXRequestData retval = new AJAXRequestData().setHttpServletResponse(optResp);
         parseHostName(retval, req, session);
         retval.setMultipart(isFileUpload);
         /*

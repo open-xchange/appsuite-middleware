@@ -51,8 +51,10 @@ package com.openexchange.importexport.exporters;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Map;
 import org.apache.commons.logging.Log;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -195,7 +197,7 @@ public class VCardExporter implements Exporter {
     };
 
     @Override
-    public boolean canExport(final ServerSession session, final Format format, final String folder, final Map<String, String[]> optionalParams) throws OXException {
+    public boolean canExport(final ServerSession session, final Format format, final String folder, final Map<String, Object> optionalParams) throws OXException {
         if (!format.equals(Format.VCARD)) {
             return false;
         }
@@ -228,38 +230,26 @@ public class VCardExporter implements Exporter {
     }
 
     @Override
-    public SizedInputStream exportData(final ServerSession session, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws OXException {
-        final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
+    public SizedInputStream exportData(final ServerSession session, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
         try {
-            if (fieldsToBeExported == null) {
-                fieldsToBeExported = _contactFields;
-            }
-
-            final VersitDefinition contactDef = Versit.getDefinition("text/vcard");
-            final VersitDefinition.Writer versitWriter = contactDef.getWriter(byteArrayOutputStream, "UTF-8");
-            final OXContainerConverter oxContainerConverter = new OXContainerConverter(session);
-
-            final int folderId = Integer.parseInt(folder);
-            //final TimeZone timeZone = TimeZoneUtils.getTimeZone(sessObj.getUserObject().getTimeZone());
-            //final String mail = sessObj.getUserObject().getMail();
-
-            //final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
-            ContactField[] fields = ContactMapper.getInstance().getFields(fieldsToBeExported, null, (ContactField[])null);
-            final SearchIterator<Contact> searchIterator = ImportExportServices.getContactService().getAllContacts(session, Integer.toString(folderId), fields);
-
-            try {
-                while (searchIterator.hasNext()) {
-                    exportContact(oxContainerConverter, contactDef, versitWriter, searchIterator.next());
-                }
-                versitWriter.flush();
-            } finally {
-                closeVersitResources(oxContainerConverter, versitWriter);
-                try {
-                    searchIterator.close();
-                } catch (final SearchIteratorException e) {
-                    LOG.error(e.getMessage(), e);
+            final AJAXRequestData requestData = (AJAXRequestData) optionalParams.get("__requestData");
+            if (null != requestData) {
+                // Try to stream
+                final OutputStream out = requestData.optOutputStream();
+                if (null != out) {
+                    requestData.setResponseHeader("Content-Type", Format.VCARD.getMimeType() + "; charset=UTF-8");
+                    requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + Format.VCARD.getFullName() + "." + Format.VCARD.getExtension());
+                    export2out(session, folder, fieldsToBeExported, out);
+                    return null;
                 }
             }
+            // No streaming support possible
+            final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
+            export2out(session, folder, fieldsToBeExported, byteArrayOutputStream);
+            return new SizedInputStream(
+                new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray()),
+                byteArrayOutputStream.size(),
+                Format.VCARD);
         } catch (final NumberFormatException e) {
             throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
         } catch (final ConverterException e) {
@@ -267,15 +257,42 @@ public class VCardExporter implements Exporter {
         } catch (final IOException e) {
             throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
         }
+    }
 
-        return new SizedInputStream(
-                new UnsynchronizedByteArrayInputStream(byteArrayOutputStream.toByteArray()),
-                byteArrayOutputStream.size(),
-                Format.VCARD);
+    private void export2out(final ServerSession session, final String folder, int[] fieldsToBeExported, final OutputStream out) throws IOException, ConverterException, OXException {
+        if (fieldsToBeExported == null) {
+            fieldsToBeExported = _contactFields;
+        }
+
+        final VersitDefinition contactDef = Versit.getDefinition("text/vcard");
+        final VersitDefinition.Writer versitWriter = contactDef.getWriter(out, "UTF-8");
+        final OXContainerConverter oxContainerConverter = new OXContainerConverter(session);
+
+        final int folderId = Integer.parseInt(folder);
+        //final TimeZone timeZone = TimeZoneUtils.getTimeZone(sessObj.getUserObject().getTimeZone());
+        //final String mail = sessObj.getUserObject().getMail();
+
+        //final ContactSQLInterface contactSql = new RdbContactSQLInterface(sessObj);
+        ContactField[] fields = ContactMapper.getInstance().getFields(fieldsToBeExported, null, (ContactField[])null);
+        final SearchIterator<Contact> searchIterator = ImportExportServices.getContactService().getAllContacts(session, Integer.toString(folderId), fields);
+
+        try {
+            while (searchIterator.hasNext()) {
+                exportContact(oxContainerConverter, contactDef, versitWriter, searchIterator.next());
+            }
+            versitWriter.flush();
+        } finally {
+            closeVersitResources(oxContainerConverter, versitWriter);
+            try {
+                searchIterator.close();
+            } catch (final SearchIteratorException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
     }
 
     @Override
-    public SizedInputStream exportData(final ServerSession session, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, String[]> optionalParams) throws OXException {
+    public SizedInputStream exportData(final ServerSession session, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
         final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
         try {
             final VersitDefinition contactDef = Versit.getDefinition("text/vcard");
