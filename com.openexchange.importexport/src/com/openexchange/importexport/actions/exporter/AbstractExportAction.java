@@ -50,9 +50,7 @@
 package com.openexchange.importexport.actions.exporter;
 
 import static com.openexchange.java.Autoboxing.I2i;
-
 import java.util.List;
-
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -67,8 +65,7 @@ import com.openexchange.tools.session.ServerSession;
 public abstract class AbstractExportAction implements AJAXActionService {
 
 	@Override
-	public AJAXRequestResult perform(AJAXRequestData requestData,
-			ServerSession session) throws OXException {
+	public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
 		return perform(new ExportRequest(requestData, session));
 	}
 
