@@ -50,9 +50,11 @@
 package com.openexchange.importexport.actions.exporter;
 
 import static com.openexchange.java.Autoboxing.I2i;
-
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.List;
-
+import java.util.Map;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -66,22 +68,46 @@ import com.openexchange.tools.session.ServerSession;
 
 public abstract class AbstractExportAction implements AJAXActionService {
 
-	@Override
-	public AJAXRequestResult perform(AJAXRequestData requestData,
-			ServerSession session) throws OXException {
-		return perform(new ExportRequest(requestData, session));
-	}
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        return perform(new ExportRequest(requestData, session));
+    }
 
-	public abstract Format getFormat();
+    public abstract Format getFormat();
 
-	public abstract Exporter getExporter();
+    public abstract Exporter getExporter();
 
-	private AJAXRequestResult perform(ExportRequest req) throws OXException {
-		List<Integer> cols = req.getColumns();
-		SizedInputStream sis = getExporter().exportData(req.getSession(), getFormat(), req.getFolder(), cols != null ? I2i(cols) : null, null);
+    private AJAXRequestResult perform(ExportRequest req) throws OXException {
+        List<Integer> cols = req.getColumns();
 
-		AJAXRequestResult result = new AJAXRequestResult();
-		result.setResultObject(new FileHolder(sis, sis.getSize(), sis.getFormat().getMimeType(), "export."+sis.getFormat().getExtension()), "file");
-		return result;
-	}
+        final Map<String, Object> optionalParams;
+        {
+            final AJAXRequestData request = req.getRequest();
+            OutputStream out = null;
+            try {
+                out = request.optOutputStream();
+            } catch (IOException e) {
+                // Ignore
+            }
+            if (null == out) {
+                optionalParams = null;
+            } else {
+                optionalParams = new HashMap<String, Object>(1);
+                optionalParams.put("__requestData", request);
+            }
+        }
+
+        SizedInputStream sis = getExporter().exportData(req.getSession(), getFormat(), req.getFolder(), cols != null ? I2i(cols) : null, optionalParams);
+
+        if (null == sis) {
+            // Streamed
+            return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
+        }
+
+        AJAXRequestResult result = new AJAXRequestResult();
+        result.setResultObject(
+            new FileHolder(sis, sis.getSize(), sis.getFormat().getMimeType(), "export." + sis.getFormat().getExtension()),
+            "file");
+        return result;
+    }
 }

@@ -126,7 +126,7 @@ public class AJAXRequestResult {
         }
 
         @Override
-        public void setType(final ResultType resultType) {
+        public AJAXRequestResult setType(final ResultType resultType) {
             throw new UnsupportedOperationException("Method not allowed for empty AJAX request result.");
         }
 
@@ -173,8 +173,17 @@ public class AJAXRequestResult {
         /**
          * An <i>ETag</i> request result.
          */
-        ETAG;
+        ETAG,
+        /**
+         * The special result directly responded to client.
+         */
+        DIRECT;
     }
+
+    /**
+     * The special response object signaling a direct response has been performed.
+     */
+    public static final Object DIRECT_OBJECT = new Object();
 
     private ResultType resultType;
 
@@ -251,10 +260,15 @@ public class AJAXRequestResult {
         headers = new LinkedHashMap<String, String>(8);
         parameters = new HashMap<String, Object>(8);
         responseProperties = new HashMap<String, Object>(4);
-        this.resultObject = resultObject;
         this.timestamp = null == timestamp ? null : new Date(timestamp.getTime());
         this.format = null == format ? JSON : format;
-        resultType = ResultType.COMMON;
+        if ("direct".equals(format)) {
+            resultType = ResultType.DIRECT;
+            this.resultObject = DIRECT_OBJECT;
+        } else {
+            resultType = ResultType.COMMON;
+            this.resultObject = resultObject;
+        }
         expires = -1;
     }
 
@@ -333,9 +347,11 @@ public class AJAXRequestResult {
      * Sets the result type
      *
      * @param resultType The result type to set
+     * @return This result with type applied
      */
-    public void setType(final ResultType resultType) {
+    public AJAXRequestResult setType(final ResultType resultType) {
         this.resultType = resultType;
+        return this;
     }
 
     /**

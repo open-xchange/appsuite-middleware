@@ -51,6 +51,7 @@ package com.openexchange.indexedSearch.json.rest;
 
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
@@ -99,20 +100,20 @@ public abstract class AbstractRestServlet extends DispatcherServlet {
         }
 
         @Override
-        public AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session, final String prefix) throws IOException, OXException {
+        public AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session, final String prefix, final HttpServletResponse optResp) throws IOException, OXException {
             if (isFileUpload) {
-                return super.parseRequest(req, preferStream, isFileUpload, session, prefix);
+                return super.parseRequest(req, preferStream, isFileUpload, session, prefix, optResp);
             }
             /*
              * Parse dependent on HTTP method and/or servlet path
              */
             final Method method = Method.valueOf(req);
             if (null == method) {
-                return super.parseRequest(req, preferStream, isFileUpload, session, prefix);
+                return super.parseRequest(req, preferStream, isFileUpload, session, prefix, optResp);
             }
             final MethodHandler methodHandler = servlet.getMethodHandler(method);
             if (null == methodHandler) {
-                return super.parseRequest(req, preferStream, isFileUpload, session, prefix);
+                return super.parseRequest(req, preferStream, isFileUpload, session, prefix, optResp);
             }
             return methodHandler.parseRequest(req, session, servlet);
         }

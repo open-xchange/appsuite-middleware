@@ -274,6 +274,11 @@ public class DispatcherServlet extends SessionServlet {
     private static final AJAXRequestResult.ResultType ETAG = AJAXRequestResult.ResultType.ETAG;
 
     /**
+     * The <code>direct</code> result type.
+     */
+    private static final AJAXRequestResult.ResultType DIRECT = AJAXRequestResult.ResultType.DIRECT;
+
+    /**
      * Handles given HTTP request and generates an appropriate result using referred {@link AJAXActionService}.
      *
      * @param httpRequest The HTTP request to handle
@@ -303,7 +308,7 @@ public class DispatcherServlet extends SessionServlet {
                 /*
                  * Parse AJAXRequestData
                  */
-                requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, PREFIX.get());
+                requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, PREFIX.get(), httpResponse);
                 requestData.setSession(session);
             }
             /*
@@ -321,6 +326,10 @@ public class DispatcherServlet extends SessionServlet {
                 httpResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
                 final long expires = result.getExpires();
                 Tools.setETag(requestData.getETag(), expires > 0 ? new Date(System.currentTimeMillis() + expires) : null, httpResponse);
+                return;
+            }
+            if (DIRECT.equals(result.getType())) {
+                // No further processing
                 return;
             }
             /*

@@ -2,6 +2,8 @@
 
  - Fix for bug 25561: Check possibly URL-encodings in Content-Type value
  - Fix for bug 24889: Register preference items regardless of enabled/disabled status
+ - Fix for bug 25589: Added streaming support when exporting vCards
+ - Fix fir bug 25587: Denied output of GMX crawler
 
 * 2013-03-26 - thorben.betten@open-xchange.com
 
