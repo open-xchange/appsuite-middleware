@@ -8,7 +8,7 @@ BuildRequires:  open-xchange-spamhandler-spamassassin >= @OXVERSION@
 BuildRequires:  open-xchange-parallels >= @OXVERSION@
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 6
+%define         ox_release 5
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -49,8 +49,6 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/bundles/*
 
 %changelog
-* Mon Mar 25 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-04-04
 * Mon Mar 04 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-03-07
 * Tue Feb 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
