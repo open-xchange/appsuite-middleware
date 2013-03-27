@@ -92,7 +92,8 @@ public interface IndexingService {
      * rate and the initial interval.
      * @param priority The priority. If two jobs shall be started at the same time, the one with the higher priority wins.
      * See {@link IndexingService#DEFAULT_PRIORITY}.
-     * @param onlyResetProgression If <code>true</code> only the progression and job timeout will be reset. No triggers will be activated.
+     * @param onlyResetProgression If <code>true</code> only the progression and job timeout will be reset and no triggers will be activated.
+     * If the job was unknown before, triggers will be added nevertheless to ensure proper indexing.
      * @throws OXException 
      */
     void scheduleJobWithProgressiveInterval(JobInfo info, Date startDate, long timeout, long initialInterval, int progressionRate, int priority, boolean onlyResetProgression) throws OXException;
@@ -108,15 +109,6 @@ public interface IndexingService {
      * @throws OXException
      */
     void scheduleJob(boolean async, JobInfo info, Date startDate, long repeatInterval, int priority) throws OXException;
-
-    /**
-     * Deletes an indexing job from the scheduler.
-     *
-     * @param async If <code>true</code> the call returns immediately and the unscheduling will be performed asynchronously.
-     * @param info The information needed to delete this job.
-     * @throws OXException
-     */
-    void unscheduleJob(boolean async, JobInfo info) throws OXException;
 
     /**
      * Deletes all jobs for a given user from the scheduler.

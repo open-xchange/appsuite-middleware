@@ -740,8 +740,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return uri;
     }
 
-    private static final URLCodec URL_CODEC = new URLCodec(CharEncoding.ISO_8859_1);
-
     /**
      * BitSet of www-form-url safe characters.
      */
@@ -864,6 +862,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             return s;
         }
     }
+
+    private static final URLCodec URL_CODEC = new URLCodec(CharEncoding.ISO_8859_1);
 
     /**
      * URL decodes given string.

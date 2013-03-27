@@ -53,6 +53,8 @@ import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeEnvelope
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import java.io.Serializable;
 import java.util.Iterator;
+import org.apache.commons.codec.CharEncoding;
+import org.apache.commons.codec.DecoderException;
 
 /**
  * {@link ParameterizedHeader} - Super class for headers which can hold a parameter list such as <code>Content-Type</code>.
@@ -203,6 +205,10 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
             // Possibly mail-safe encoded
             paramHdr = decodeEnvelopeHeader(paramHdr).trim();
         }
+        if (paramHdr.indexOf('%') >= 0) {
+            // Possibly mail-safe encoded
+            paramHdr = decodeUrl(paramHdr);
+        }
         int length = paramHdr.length();
         if (length > 0) {
             int lastPos = length - 1;
@@ -217,5 +223,33 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
             }
         }
         return paramHdr;
+    }
+
+    private static final org.apache.commons.codec.net.URLCodec URL_CODEC = new org.apache.commons.codec.net.URLCodec(CharEncoding.ISO_8859_1);
+
+    /**
+     * URL decodes given string.
+     * <p>
+     * Using <code>org.apache.commons.codec.net.URLCodec</code>.
+     */
+    private static String decodeUrl(final String s) {
+        try {
+            return isEmpty(s) ? s : (URL_CODEC.decode(s));
+        } catch (final DecoderException e) {
+            return s;
+        }
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 }

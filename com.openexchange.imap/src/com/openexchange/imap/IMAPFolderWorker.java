@@ -49,7 +49,6 @@
 
 package com.openexchange.imap;
 
-import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -81,7 +80,6 @@ import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.session.Session;
-import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IMAPStore;
@@ -113,7 +111,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             this.error = e;
             this.stamp = System.currentTimeMillis();
         }
-    }
+    } // End of class FailFastError
 
     private static final ConcurrentMap<String, FailFastError> FAIL_FAST = new NonBlockingHashMap<String, FailFastError>();
 
@@ -158,26 +156,17 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     /*
      * Fields
      */
+
     protected final AccessedIMAPStore imapStore;
-
     protected final Session session;
-
     protected final int accountId;
-
     protected final Context ctx;
-
     protected final IMAPAccess imapAccess;
-
     protected final UserSettingMail usm;
-
     protected final IMAPConfig imapConfig;
-
     protected final ACLExtension aclExtension;
-
     protected IMAPFolder imapFolder;
-
     protected final Set<IMAPFolder> otherFolders;
-
     protected int holdsMessages = -1;
 
     /**
@@ -215,7 +204,6 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     @Override
     public void releaseResources() throws OXException {
         closeIMAPFolder();
-        closeOtherFolders();
     }
 
     /**
@@ -307,6 +295,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     protected void resetIMAPFolder() {
         holdsMessages = -1;
         imapFolder = null;
+        closeOtherFolders();
     }
 
     /**
@@ -341,6 +330,8 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         return setAndOpenFolder(null, fullName, desiredMode);
     }
 
+    private static final String DEFAULT_FOLDER_ID = MailFolder.DEFAULT_FOLDER_ID;
+
     /**
      * Sets and opens (only if exists) the folder in a safe manner, checks if selectable and for right {@link Right#READ}
      *
@@ -356,14 +347,13 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             throw MailExceptionCode.MISSING_FULLNAME.create();
         }
         checkFailFast(imapStore, fullName);
-        final boolean isDefaultFolder = DEFAULT_FOLDER_ID.equals(fullName);
-        final boolean isIdenticalFolder;
-        if (isDefaultFolder) {
-            isIdenticalFolder = (imapFolder == null ? false : imapFolder instanceof DefaultFolder);
-        } else {
-            isIdenticalFolder = (imapFolder == null ? false : imapFolder.getFullName().equals(fullName));
+        if (imapFolder == this.imapFolder) {
+            closeOtherFolders();
         }
+        final boolean isDefaultFolder = DEFAULT_FOLDER_ID.equals(fullName);
         if (imapFolder != null) {
+            final String imapFolderFullname = imapFolder.getFullName();
+            final boolean isIdenticalFolder = isDefaultFolder ? 0 == imapFolderFullname.length() : fullName.equals(imapFolderFullname);
             /*
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
@@ -384,14 +374,10 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                         return imapFolder;
                     }
                     /*
-                     * Folder is open, but not appropriate. Add to opened folders for possible later use if not identical full name
+                     * Folder is open, so close folder
                      */
                     try {
-                        if (isIdenticalFolder) {
-                            imapFolder.close(false/*Folder.READ_WRITE == mode*/);
-                        } else {
-                            addOpenedFolder(imapFolder);
-                        }
+                        imapFolder.close(false/*Folder.READ_WRITE == mode*/);
                     } finally {
                         if (imapFolder == this.imapFolder) {
                             resetIMAPFolder();
@@ -409,7 +395,6 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                  * Folder is closed here
                  */
                 if (isIdenticalFolder) {
-                    final String imapFolderFullname = imapFolder.getFullName();
                     try {
                         if ((imapFolder.getType() & Folder.HOLDS_MESSAGES) == 0) { // NoSelect
                             throw IMAPException.create(
@@ -441,7 +426,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                     openFolder(desiredMode, imapFolder);
                     return imapFolder;
                 }
-            }
+            } // End of synchronized
         }
         final IMAPFolder retval = (isDefaultFolder ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName));
         if (imapStore.notifyRecent() && (desiredMode == Folder.READ_WRITE)) {

@@ -47,58 +47,21 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.internal.nonclustered;
-
-import java.io.Serializable;
-import java.util.List;
-import java.util.concurrent.Callable;
-import org.apache.commons.logging.Log;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.Trigger;
-import org.quartz.service.QuartzService;
-import com.openexchange.service.indexing.JobInfo;
-import com.openexchange.service.indexing.impl.internal.SchedulerConfig;
-import com.openexchange.service.indexing.impl.internal.Services;
-import com.openexchange.service.indexing.impl.internal.Tools;
+package com.openexchange.preview;
 
 
 /**
- * {@link UnscheduleJobCallable}
+ * {@link ContentTypeChecker} - Checks a given <code>Content-Type</code> for validity.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class UnscheduleJobCallable implements Callable<Object>, Serializable {
-    
-    private static final long serialVersionUID = 5612808787423998180L;
-    
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(UnscheduleJobCallable.class);
-    
-    private final JobInfo jobInfo;
+public interface ContentTypeChecker extends PreviewService {
 
-    public UnscheduleJobCallable(JobInfo jobInfo) {
-        super();
-        this.jobInfo = jobInfo;
-    }
-
-    @Override
-    public Object call() throws Exception {
-        try {
-            JobKey jobKey = Tools.generateJobKey(jobInfo);
-            QuartzService quartzService = Services.getService(QuartzService.class);
-            Scheduler scheduler = quartzService.getScheduler(SchedulerConfig.getSchedulerName(), SchedulerConfig.start(), SchedulerConfig.getThreadCount());
-            List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
-            for (Trigger trigger : triggers) {
-                scheduler.unscheduleJob(trigger.getKey());
-            }
-            
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Unscheduled " + triggers.size() + " triggers for job " + jobKey.toString() + ".");
-            }
-        } catch (Throwable t) {
-            LOG.error(t.getMessage(), t);
-        }
-        return null;
-    }
-
+    /**
+     * Checks if specified <code>Content-Type</code> is valid.
+     * 
+     * @param contentType The <code>Content-Type</code> to check
+     * @return <code>true</code> if valid; otherwise <code>false</code>
+     */
+    boolean isValid(String contentType);
 }

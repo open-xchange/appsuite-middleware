@@ -111,9 +111,9 @@ public class AnotherIndexingService implements IndexingService {
         }
 
         JobInfoWrapper infoWrapper = new JobInfoWrapper(info, timeout, initialInterval, progressionRate);
-        JobKey jobKey = Tools.generateJobKey(info);
-        RecurringJobsManager.addOrUpdateJob(jobKey.toString(), infoWrapper);
-        if (!onlyResetProgression) {
+        JobKey jobKey = Tools.generateJobKey(info, null);
+        boolean added = RecurringJobsManager.addOrUpdateJob(jobKey.toString(), infoWrapper);
+        if (!onlyResetProgression || added) {
             JobDetail jobDetail = JobBuilder.newJob(ProgressiveRecurringJob.class)
                 .withIdentity(jobKey)
                 .build();
@@ -147,35 +147,22 @@ public class AnotherIndexingService implements IndexingService {
 
     @Override
     public void scheduleJob(boolean async, final JobInfo info, final Date startDate, final long repeatInterval, final int priority) throws OXException {
-        return;
-        //        if (LOG.isTraceEnabled()) {
-        //            String at = startDate == null ? "now" : startDate.toString();
-        //            LOG.trace("Scheduling job " + info.toString() + " at " + at + " with interval " + repeatInterval + " and priority " + priority + ".");
-        //        }
-        //        
-        //        Task<Object> task = new TaskAdapter(new ScheduleJobCallable(info, startDate, repeatInterval, priority));
-        //        try {
-        //            if (async) {
-        //                ThreadPoolService threadPoolService = getThreadPoolService();
-        //                threadPoolService.submit(task);
-        //            } else {
-        //                task.call();
-        //            }
-        //        } catch (Throwable t) {
-        //            LOG.error(t.getMessage(), t);
-        //        }
-    }
-
-    @Override
-    public void unscheduleJob(boolean async, JobInfo info) throws OXException {
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Unscheduling job " + info.toString());
+            String at = startDate == null ? "now" : startDate.toString();
+            LOG.trace("Scheduling job " + info.toString() + " at " + at + " with interval " + repeatInterval + " and priority " + priority + ".");
         }
 
-        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-        ExecutorService executorService = hazelcast.getExecutorService();
-        FutureTask<Object> task = new DistributedTask<Object>(new UnscheduleJobCallable(info), hazelcast.getCluster().getMembers());
-        executorService.submit(task);
+        Task<Object> task = new TaskAdapter(new ScheduleJobCallable(info, startDate, repeatInterval, priority));
+        try {
+            if (async) {
+                ThreadPoolService threadPoolService = getThreadPoolService();
+                threadPoolService.submit(task);
+            } else {
+                task.call();
+            }
+        } catch (Throwable t) {
+            LOG.error(t.getMessage(), t);
+        }
     }
 
     @Override

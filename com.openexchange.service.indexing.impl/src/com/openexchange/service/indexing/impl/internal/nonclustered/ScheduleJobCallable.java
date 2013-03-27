@@ -53,29 +53,34 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.concurrent.Callable;
 import org.apache.commons.logging.Log;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.ObjectAlreadyExistsException;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.TriggerKey;
 import org.quartz.service.QuartzService;
 import com.openexchange.service.indexing.JobInfo;
+import com.openexchange.service.indexing.impl.internal.JobConstants;
 import com.openexchange.service.indexing.impl.internal.SchedulerConfig;
 import com.openexchange.service.indexing.impl.internal.Services;
 import com.openexchange.service.indexing.impl.internal.Tools;
 
-
 /**
  * {@link ScheduleJobCallable}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ScheduleJobCallable implements Callable<Object>, Serializable {
-    
+
     private static final Log LOG = com.openexchange.log.Log.loggerFor(ScheduleJobCallable.class);
 
     private static final long serialVersionUID = 5900667348491833307L;
-    
+
     private final JobInfo jobInfo;
 
     private final Date startDate;
@@ -83,7 +88,7 @@ public class ScheduleJobCallable implements Callable<Object>, Serializable {
     private final long interval;
 
     private final int priority;
-    
+
     public ScheduleJobCallable(JobInfo jobInfo, Date startDate, long interval, int priority) {
         super();
         this.jobInfo = jobInfo;
@@ -102,18 +107,54 @@ public class ScheduleJobCallable implements Callable<Object>, Serializable {
                 LOG.debug("Scheduling job: " + jobInfo.toString() + ".");
             }
         }
-        
+
         try {
-            JobDetail jobDetail = Tools.buildJob(jobInfo, RunOrRescheduleAtTargetJob.class);
-            Trigger targetTrigger = Tools.buildTrigger(jobDetail.getKey(), jobInfo, startDate, interval, priority);
+            JobDataMap jobData = new JobDataMap();
+            jobData.put(JobConstants.JOB_INFO, jobInfo);
+            JobDetail jobDetail = JobBuilder.newJob(RunOrRescheduleAtTargetJob.class)
+                .withIdentity(Tools.generateJobKey(jobInfo, "oneShot"))
+                .usingJobData(jobData)
+                .build();
+
+            Date tmpDate = startDate;
+            if (tmpDate == null) {
+                tmpDate = new Date();
+            }
+
+            TriggerKey key = new TriggerKey(generateTriggerName(jobInfo, tmpDate, interval), Tools.generateTriggerGroup(
+                jobInfo.contextId,
+                jobInfo.userId));
+            TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger()
+                .forJob(jobDetail.getKey())
+                .withIdentity(key)
+                .startAt(tmpDate)
+                .withPriority(priority)
+                .usingJobData(JobConstants.START_DATE, tmpDate.getTime())
+                .usingJobData(JobConstants.INTERVAL, interval)
+                .usingJobData(JobConstants.PRIORITY, priority);
+
+            if (interval > 0L) {
+                triggerBuilder.withSchedule(
+                    SimpleScheduleBuilder.simpleSchedule()
+                        .withIntervalInMilliseconds(interval)
+                        .repeatForever()
+                        .withMisfireHandlingInstructionFireNow());
+            } else {
+                triggerBuilder.withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow());
+            }
+            Trigger trigger = triggerBuilder.build();
+
             QuartzService quartzService = Services.getService(QuartzService.class);
-            Scheduler scheduler = quartzService.getScheduler(SchedulerConfig.getSchedulerName(), SchedulerConfig.start(), SchedulerConfig.getThreadCount());
+            Scheduler scheduler = quartzService.getScheduler(
+                SchedulerConfig.getSchedulerName(),
+                SchedulerConfig.start(),
+                SchedulerConfig.getThreadCount());
             scheduler.addJob(jobDetail, true);
             try {
-                scheduler.scheduleJob(targetTrigger);
+                scheduler.scheduleJob(trigger);
             } catch (SchedulerException e) {
                 if (e instanceof ObjectAlreadyExistsException) {
-                    LOG.info("Could not schedule trigger " + targetTrigger.getKey() + ". It already exists.");
+                    LOG.info("Could not schedule trigger " + trigger.getKey() + ". It already exists.");
                 } else {
                     throw e;
                 }
@@ -122,6 +163,20 @@ public class ScheduleJobCallable implements Callable<Object>, Serializable {
             LOG.error(t.getMessage(), t);
         }
         return null;
+    }
+
+    private String generateTriggerName(JobInfo info, Date startDate, long repeatInterval) {
+        StringBuilder sb = new StringBuilder(info.toUniqueId());
+        sb.append('/');
+        if (repeatInterval > 0L) {
+            sb.append("withInterval/");
+            sb.append(repeatInterval);
+        } else {
+            sb.append("oneShot/");
+            sb.append(startDate.getTime());
+        }
+
+        return sb.toString();
     }
 
 }

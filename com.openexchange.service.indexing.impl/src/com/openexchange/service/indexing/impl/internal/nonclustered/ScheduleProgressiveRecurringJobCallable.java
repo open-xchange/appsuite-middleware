@@ -92,7 +92,7 @@ public class ScheduleProgressiveRecurringJobCallable implements Callable<Object>
     @Override
     public Object call() throws Exception {
         JobDetail jobDetail = JobBuilder.newJob(ProgressiveRecurringJob.class)
-            .withIdentity(Tools.generateJobKey(jobInfo))
+            .withIdentity(Tools.generateJobKey(jobInfo, null))
             .build();
         
         String triggerName = jobInfo.toUniqueId() + "/withProgressiveInterval";

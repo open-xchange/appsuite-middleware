@@ -507,7 +507,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                 unread = mailAccess.getMessageStorage().getUnreadMessages(ensuredFullName, MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID, -1).length;
                 total = mailAccess.getMessageStorage().searchMessages(ensuredFullName, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS_ID).length;
             }
-            return new int[] {total,unread};
+            return new int[] { total, unread };
         } catch (final OXException e) {
             if (DEBUG) {
                 LOG.debug("Cannot return up-to-date total counter.", e);

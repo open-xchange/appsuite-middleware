@@ -212,6 +212,10 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         } else {
             userConfig = getUserConfigurationWithoutExtended(cache, ctx, userId, groups);
         }
+        if (null == userConfig) {
+            // TODO: or -->   throw UserConfigurationCodes.NOT_FOUND.create(Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
+            return getFallback().getUserConfiguration(userId, groups, ctx, initExtendedPermissions);
+        }
         return userConfig;
     }
 
@@ -265,7 +269,8 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
      * Convenience method for calling the single array style implementation.
      */
     private UserConfiguration getUserConfigurationWithoutExtended(Cache cache, Context ctx, int userId, int[] groups) throws OXException {
-        return getUserConfigurationWithoutExtended(cache, ctx, new int[] { userId }, new int[][] { groups })[0];
+        final UserConfiguration[] ret = getUserConfigurationWithoutExtended(cache, ctx, new int[] { userId }, new int[][] { groups });
+        return null == ret || 0 == ret.length ? null : ret[0];
     }
 
     private static TIntObjectMap<UserConfiguration> getCachedUserConfiguration(Cache cache, Context ctx, int[] userIds, boolean extendedPermissions) {

@@ -51,6 +51,7 @@ package com.openexchange.image;
 
 import java.io.InputStream;
 import java.util.Map.Entry;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -61,6 +62,7 @@ import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -154,6 +156,9 @@ public class ImageGetAction implements AJAXActionService {
         } catch (OXException e) {
             if (WARN) {
                 LOG.warn("Retrieving image failed.", e);
+            }
+            if (ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e)) {
+                throw AjaxExceptionCodes.HTTP_ERROR.create(e, Integer.valueOf(HttpServletResponse.SC_NOT_FOUND), e.getSoleMessage());
             }
             throw AjaxExceptionCodes.BAD_REQUEST.create(e, new Object[0]);
         }

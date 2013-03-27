@@ -23,6 +23,12 @@ modules/mail/defaultFolder > io.ox/mail//defaultFolder
 modules/mail/addresses > io.ox/mail//addresses
 modules/mail/defaultaddress > io.ox/mail//defaultaddress
 modules/mail/sendaddress > io.ox/mail//defaultSendAddress
+modules/mail/appendmailtext > io.ox/mail//appendMailTextOnReply
+modules/mail/deletemail > io.ox/mail//removeDeletedPermanently
+modules/mail/forwardmessage > io.ox/mail//forwardMessageAs
+modules/mail/allowhtmlimages > io.ox/mail//allowHtmlImages
+modules/mail/emoticons > io.ox/mail//displayEmomticons
+modules/mail/colorquoted > io.ox/mail//isColorQuoted
 mail/folder > io.ox/mail//folder
 mail/vcard > io.ox/mail//vcard
 ui/mail/replyTo > io.ox/mail//showReplyTo

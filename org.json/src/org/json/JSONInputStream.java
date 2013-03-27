@@ -58,7 +58,7 @@ import org.json.helpers.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link JSONInputStream} - Directly converts a given {@link JSONValue} to a readable input stream.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONInputStream extends InputStream {
@@ -67,9 +67,34 @@ public final class JSONInputStream extends InputStream {
 
     private static interface Bufferer {
 
+        /**
+         * Gets the closing character
+         * 
+         * @return The closing character
+         */
         char getClosing();
+
+        /**
+         * Signals if there is another element to write
+         * 
+         * @return <code>true</code> if further element available; otherwise <code>false</code>
+         */
         boolean hasNext();
+
+        /**
+         * Gets the next element to write
+         * 
+         * @return The next element
+         * @throws IOException If next element cannot be returned
+         */
         Object next() throws IOException;
+
+        /**
+         * Attempts to write more bytes.
+         * 
+         * @return <code>true</code> if more bytes available to write; otherwise <code>false</code> if no more bytes are available
+         * @throws IOException If an I/O error occurs
+         */
         boolean writeMoreBytes() throws IOException;
     }
 
@@ -234,7 +259,7 @@ public final class JSONInputStream extends InputStream {
 
     /**
      * Initializes a new {@link JSONInputStream}.
-     *
+     * 
      * @param jsonValue The JSON value to read from
      * @param charset The charset
      */

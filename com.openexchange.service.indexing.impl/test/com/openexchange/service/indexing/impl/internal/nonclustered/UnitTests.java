@@ -47,58 +47,22 @@
  *
  */
 
-package com.openexchange.halo.linkedin.preferences;
+package com.openexchange.service.indexing.impl.internal.nonclustered;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.session.Session;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+
 
 /**
- * {@link LinkedInHaloEnabled} - The setting whether VoipNow is enabled for a certain user.
+ * {@link UnitTests}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class LinkedInHaloEnabled implements PreferencesItemService {
-
-    /** The enabled flag */
-    final boolean enabled;
-
-    /**
-     * Initializes a new {@link LinkedInHaloEnabled}.
-     */
-    public LinkedInHaloEnabled(final boolean enabled) {
-        super();
-        this.enabled = enabled;
-    }
-
-    @Override
-    public String[] getPath() {
-        return new String[] { "modules", "halo", "linkedin", "module" };
-    }
-
-    @Override
-    public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
-
-            @Override
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                setting.setSingleValue(Boolean.valueOf(enabled));
-            }
-
-            /**
-             * {@inheritDoc}
-             */
-            @Override
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return true;
-            }
-        };
-    }
+@RunWith(Suite.class)
+@SuiteClasses({
+    ProgressiveRecurrenceTest.class
+})
+public class UnitTests {
 
 }

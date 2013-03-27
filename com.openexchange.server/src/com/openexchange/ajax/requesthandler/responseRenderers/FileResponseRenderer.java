@@ -188,7 +188,18 @@ public class FileResponseRenderer implements ResponseRenderer {
                 if (contentType == null) {
                     resp.setContentType(checkedDownload.getContentType());
                 } else {
-                    resp.setContentType(contentType);
+                    final String checkedContentType = checkedDownload.getContentType();
+                    if (SAVE_AS_TYPE.equals(checkedContentType)) {
+                        resp.setContentType(contentType);
+                    } else {
+                        if (toLowerCase(checkedContentType).startsWith(toLowerCase(contentType))) {
+                            resp.setContentType(contentType);
+                        } else {
+                            // Specified Content-Type does NOT match file's real MIME type
+                            // Therefore ignore it due to security reasons (see bug #25343)
+                            resp.setContentType(checkedContentType);
+                        }
+                    }
                 }
                 documentData = checkedDownload.getInputStream();
             }

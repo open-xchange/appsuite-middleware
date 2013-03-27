@@ -50,16 +50,7 @@
 package com.openexchange.service.indexing.impl.internal;
 
 import java.net.InetSocketAddress;
-import java.util.Date;
-import org.quartz.Job;
-import org.quartz.JobBuilder;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
 import org.quartz.JobKey;
-import org.quartz.SimpleScheduleBuilder;
-import org.quartz.Trigger;
-import org.quartz.TriggerBuilder;
-import org.quartz.TriggerKey;
 import com.openexchange.service.indexing.JobInfo;
 
 
@@ -70,52 +61,14 @@ import com.openexchange.service.indexing.JobInfo;
  */
 public class Tools {
     
-    public static JobDetail buildJob(JobInfo info, Class<? extends Job> quartzJob) {
-        JobDataMap jobData = new JobDataMap();
-        jobData.put(JobConstants.JOB_INFO, info);
-        JobDetail jobDetail = JobBuilder.newJob(quartzJob)
-            .withIdentity(generateJobKey(info))
-            .usingJobData(jobData)
-            .build();
-        return jobDetail;
-    }
-    
-    public static Trigger buildTrigger(JobKey jobKey, JobInfo info, Date startDate, long repeatInterval, int priority) {
-        Date tmpDate = startDate;
-        if (tmpDate == null) {
-            tmpDate = new Date();
-        }
-        
-        TriggerBuilder<Trigger> triggerBuilder = TriggerBuilder.newTrigger()
-            .forJob(jobKey)
-            .withIdentity(generateTriggerKey(info, tmpDate, repeatInterval))
-            .startAt(tmpDate)
-            .withPriority(priority)
-            .usingJobData(JobConstants.START_DATE, tmpDate.getTime())
-            .usingJobData(JobConstants.INTERVAL, repeatInterval)
-            .usingJobData(JobConstants.PRIORITY, priority);
-        
-        
-        if (repeatInterval > 0L) {
-            triggerBuilder.withSchedule(
-                SimpleScheduleBuilder.simpleSchedule()
-                .withIntervalInMilliseconds(repeatInterval)
-                .repeatForever()
-                .withMisfireHandlingInstructionIgnoreMisfires());
+    public static JobKey generateJobKey(JobInfo info, String suffix) {
+        String name;
+        if (suffix == null) {
+            name = info.toUniqueId();
         } else {
-            triggerBuilder.withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionIgnoreMisfires());
+            name = info.toUniqueId() + '/' + suffix;
         }
-        Trigger trigger = triggerBuilder.build();
-        return trigger;
-    }
-    
-    public static JobKey generateJobKey(JobInfo info) {
-        JobKey key = new JobKey(info.toUniqueId(), generateJobGroup(info.contextId, info.userId));
-        return key;
-    }
-
-    public static TriggerKey generateTriggerKey(JobInfo info, Date startDate, long repeatInterval) {
-        TriggerKey key = new TriggerKey(generateTriggerName(info, startDate, repeatInterval), generateTriggerGroup(info.contextId, info.userId));
+        JobKey key = new JobKey(name, generateJobGroup(info.contextId, info.userId));
         return key;
     }
 
@@ -131,29 +84,6 @@ public class Tools {
         return "indexingTriggers/" + contextId + '/' + userId;
     }
 
-    public static String generateTriggerName(JobInfo info, Date startDate, long repeatInterval) {
-        StringBuilder sb = new StringBuilder(info.toUniqueId());
-        sb.append('/');
-        if (repeatInterval > 0L) {
-            sb.append("withInterval/");
-            sb.append(repeatInterval);
-        } else {
-            /*
-             * Two one shot triggers within the same quarter of an hour have the same trigger key.
-             * This avoids triggering jobs too often.
-             */
-            sb.append("oneShot/");
-            long now = startDate.getTime();
-            long millisSinceLastFullHour = now % (60000L * 60);
-            long lastFullHourInMillis = now - millisSinceLastFullHour;
-            long quarters = millisSinceLastFullHour / 60000L / 15;
-            long time = lastFullHourInMillis + (quarters * 15 * 60000L);
-            sb.append(time);
-        }
-
-        return sb.toString();
-    }
-    
     public static String resolveSocketAddress(InetSocketAddress addr) {
         if (addr.isUnresolved()) {
             return addr.getHostName();
