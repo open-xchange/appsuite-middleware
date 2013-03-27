@@ -185,7 +185,7 @@ public final class MIMEStructureHandler implements StructureHandler {
     }
 
     /**
-     * Sets whether a JSON array is enforced for a multipart even if it only consists of one part.
+     * Sets whether a JSON array is enforced for a <code>multipart</code> even if it only consists of one part.
      *
      * @param forceJSONArray4Multipart <code>true</code> to enforce a JSON array; otherwise <code>false</code>
      * @return This handler with new behavior applied
@@ -319,7 +319,10 @@ public final class MIMEStructureHandler implements StructureHandler {
             final JSONObject bodyObject = new JSONObject();
             final JSONObject headerObject = new JSONObject();
             fillBodyPart(bodyObject, part, headerObject, null);
-            bodyObject.put("type", headerObject.getJSONObject(CONTENT_TYPE).getString("type"));
+            final JSONObject jType = headerObject.optJSONObject(CONTENT_TYPE);
+            if (null != jType) {
+                bodyObject.put("type", jType.getString("type"));
+            }
             /*
              * Add body object to parental structure object
              */
