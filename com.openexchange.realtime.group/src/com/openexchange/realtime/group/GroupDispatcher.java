@@ -58,6 +58,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.Log;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.ComponentHandle;
 import com.openexchange.realtime.Component.EvictionPolicy;
@@ -80,6 +81,8 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class GroupDispatcher implements ComponentHandle {
+    
+    private static final org.apache.commons.logging.Log LOG = Log.loggerFor(GroupDispatcher.class);
     
     public static ServiceLookup services = null;
     
@@ -207,8 +210,11 @@ public class GroupDispatcher implements ComponentHandle {
      * 
      * A selector provided in this stanza will be added to all stanzas sent by this group, so clients can know
      * the message was part of a given group.
+     * 
+     * @param id    The id of the client joining the the Group
+     * @param stamp The selector used in the Stanza to join the group
      */
-    public void join(ID id, String stamp) throws OXException {
+    public void join(ID id, String stamp) {
         if (ids.contains(id)) {
             return;
         }
@@ -221,6 +227,11 @@ public class GroupDispatcher implements ComponentHandle {
         boolean first = ids.isEmpty();
         
         ids.add(id);
+        
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("joining:"+id.toString());
+        }
+        
         stamps.put(id, stamp);
         id.on("dispose", LEAVE);
         if (first) {
@@ -246,6 +257,11 @@ public class GroupDispatcher implements ComponentHandle {
      */
     public void leave(ID id) throws OXException {
         beforeLeave(id);
+        
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("leavinging:"+id.toString());
+        }
+        
         id.off("dispose", LEAVE);
         ids.remove(id);
         stamps.remove(id);
