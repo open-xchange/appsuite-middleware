@@ -1,3 +1,9 @@
+open-xchange-push-imapidle (7.0.1-6) unstable; urgency=low
+
+  * Build for patch 2013-04-04
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 27 Mar 2013 15:06:15 +0100
+
 open-xchange-push-imapidle (7.0.1-5) unstable; urgency=low
 
   * Build for patch 2013-03-07
