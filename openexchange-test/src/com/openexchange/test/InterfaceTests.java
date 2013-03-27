@@ -87,7 +87,7 @@ public final class InterfaceTests {
         tests.addTest(com.openexchange.ajax.links.LinksTestSuite.suite());
         tests.addTest(com.openexchange.ajax.mail.MailTestSuite.suite());
         tests.addTest(com.openexchange.ajax.mail.filter.MailFilterTestSuite.suite());
-        // tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.redirect.RedirectTests.class)); deactivated for release
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.redirect.RedirectTests.class));
         tests.addTest(com.openexchange.ajax.reminder.ReminderAJAXSuite.suite());
         tests.addTest(com.openexchange.ajax.session.SessionTestSuite.suite());
         tests.addTest(com.openexchange.ajax.task.TaskTestSuite.suite());
