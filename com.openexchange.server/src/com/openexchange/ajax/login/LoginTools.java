@@ -60,6 +60,7 @@ import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.AJAXServlet;
@@ -97,13 +98,19 @@ public final class LoginTools {
         return AJAXServlet.encodeUrl(s, forAnchor);
     }
 
+    private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n|(?:%0[aA])?%0[dD]");
+    private static final Pattern PATTERN_DSLASH = Pattern.compile("(?:/|%2[fF]){2}");
+
     public static String generateRedirectURL(String uiWebPathParam, String shouldStore, String sessionId, String uiWebPath) {
         String retval = uiWebPathParam;
         if (null == retval) {
             retval = uiWebPath;
         }
         // Prevent HTTP response splitting.
-        retval = retval.replaceAll("[\n\r]", "");
+        retval = PATTERN_CRLF.matcher(retval).replaceAll("");
+        // All double slash strings ("//") should be replaced by a single slash ("/")
+        // since it is interpreted by the Browser as "http://".
+        retval = PATTERN_DSLASH.matcher(retval).replaceAll("/");
         retval = addFragmentParameter(retval, PARAMETER_SESSION, sessionId);
         if (shouldStore != null) {
             retval = addFragmentParameter(retval, "store", shouldStore);
