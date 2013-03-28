@@ -53,7 +53,9 @@ import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import junit.framework.Assert;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.quartz.DisallowConcurrentExecution;
@@ -87,13 +89,13 @@ public class ProgressiveRecurrenceTest {
 
     private static final String SYNCHRONIZER = "synchronizer";
 
-    @BeforeClass
-    public static void beforeClass() {
+    @Before
+    public void before() {
         Services.setServiceLookup(new MockServiceLookup());
     }
 
-    @AfterClass
-    public static void afterClass() {
+    @After
+    public void after() {
         Services.setServiceLookup(null);
     }
 
