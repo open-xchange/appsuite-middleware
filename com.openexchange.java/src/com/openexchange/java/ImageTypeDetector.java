@@ -51,6 +51,8 @@ package com.openexchange.java;
 
 /**
  * {@link ImageTypeDetector} - Detects MIME type of passed image bytes.
+ * <p>
+ * See <a href="http://www.garykessler.net/library/file_sigs.html">http://www.garykessler.net/library/file_sigs.html</a>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
