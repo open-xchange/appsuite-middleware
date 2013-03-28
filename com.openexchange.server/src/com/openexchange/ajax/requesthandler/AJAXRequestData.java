@@ -161,6 +161,9 @@ public class AJAXRequestData {
     /** The eTag */
     private String eTag;
 
+    /** The <code>User-Agent</code> value */
+    private String userAgent;
+
     /** The expires millis */
     private long expires;
 
@@ -248,6 +251,7 @@ public class AJAXRequestData {
         copy.remoteAddress = remoteAddress;
         copy.route = route;
         copy.servletRequestUri = servletRequestUri;
+        copy.userAgent = userAgent;
         /*
          * Not sure about following members, therefore leave to null
          */
@@ -255,6 +259,24 @@ public class AJAXRequestData {
         copy.uploadEvent = null;
         copy.uploadStreamProvider = null;
         return copy;
+    }
+    
+    /**
+     * Sets the <code>User-Agent</code> value
+     * 
+     * @param userAgent The <code>User-Agent</code> value
+     */
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+    
+    /**
+     * Gets the <code>User-Agent</code> value
+     * 
+     * @return The <code>User-Agent</code> value
+     */
+    public String getUserAgent() {
+        return userAgent;
     }
 
     /**
