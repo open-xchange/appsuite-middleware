@@ -140,9 +140,8 @@ public class IndexingServiceImpl implements IndexingService {
         long lastRun = old.getLastRun();
         long interval = old.getInterval();
         long now = System.currentTimeMillis();
-        long safetyGap = 60 * 60000L;
         long diff = now - (lastRun + interval);
-        if (diff > safetyGap) {
+        if (diff > 0) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Job " + old.getJobInfo().toString() + " was misfired for " + diff + 
                     "ms. Re-adding trigger and job on session reactivation.");
