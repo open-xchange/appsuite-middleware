@@ -50,8 +50,10 @@
 package com.openexchange.mail.json.actions;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -62,6 +64,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.container.TmpFileFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
@@ -108,6 +111,9 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 }, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this attachment, except the parameter save is set to 1.")
 @DispatcherNotes(allowPublicSession = true)
 public final class GetAttachmentAction extends AbstractMailAction implements ETagAwareAJAXActionService {
+
+    /** The in-memory threshold */
+    private static final int IN_MEMORY_THRESHOLD = 500 * 1024; // 500KB
 
     /**
      * Initializes a new {@link GetAttachmentAction}.
@@ -202,20 +208,36 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             /*
              * Read from stream
              */
-            @SuppressWarnings("resource")
-            ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
+            ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
+            TmpFileFileHolder tmpFileFileHolder = null;
             /*
-             * Write from content's input stream to byte array output stream
+             * Write from content's input stream to (byte array) output stream
              */
-            try {
-                final int buflen = 0xFFFF;
-                final byte[] buffer = new byte[buflen];
-                for (int len; (len = attachmentInputStream.read(buffer, 0, buflen)) > 0;) {
-                    out.write(buffer, 0, len);
+            {
+                OutputStream out = baos;
+                try {
+                    int count = 0;
+                    final int inMemoryThreshold = IN_MEMORY_THRESHOLD;
+                    final int buflen = 0xFFFF; // 64KB
+                    final byte[] buffer = new byte[buflen];
+                    for (int len; (len = attachmentInputStream.read(buffer, 0, buflen)) > 0;) {
+                        if (null == tmpFileFileHolder) {
+                            // Count bytes to outsource to file if threshold is exceeded
+                            count += len;
+                            if (count > inMemoryThreshold) {
+                                tmpFileFileHolder = new TmpFileFileHolder();
+                                out = new FileOutputStream(tmpFileFileHolder.getTmpFile());
+                                out.write(baos.toByteArray());
+                                baos = null;
+                            }
+                        }
+                        out.write(buffer, 0, len);
+                    }
+                    out.flush();
+                } finally {
+                    Streams.close(attachmentInputStream);
+                    Streams.close(out);
                 }
-                out.flush();
-            } finally {
-                Streams.close(attachmentInputStream);
             }
             /*
              * Create file holder
@@ -226,11 +248,18 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     requestData.setFormat("file");
                 }
             }
-            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(out.toByteArray());
-            out = null;
-            fileHolder.setName(mailPart.getFileName());
-            fileHolder.setContentType(saveToDisk ? "application/octet-stream" : mailPart.getContentType().toString());
-            final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+            final AJAXRequestResult result;
+            if (null == baos) {
+                tmpFileFileHolder.setName(mailPart.getFileName());
+                tmpFileFileHolder.setContentType(saveToDisk ? "application/octet-stream" : mailPart.getContentType().toString());
+                result = new AJAXRequestResult(tmpFileFileHolder, "file");
+            } else {
+                final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(baos.toByteArray());
+                baos = null;
+                fileHolder.setName(mailPart.getFileName());
+                fileHolder.setContentType(saveToDisk ? "application/octet-stream" : mailPart.getContentType().toString());
+                result = new AJAXRequestResult(fileHolder, "file");
+            }
             /*
              * Set ETag
              */
