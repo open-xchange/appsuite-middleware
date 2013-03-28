@@ -50,79 +50,63 @@
 package com.openexchange.service.indexing;
 
 import java.util.List;
+import java.util.Map;
 import javax.management.MBeanException;
 import javax.management.ObjectName;
 
-
 /**
- * {@link IndexingServiceMBean} - A MBean for monitoring indexing jobs.
+ * {@link JobMonitoringMBean} - A MBean for monitoring indexing jobs.
  * The {@link ObjectName} under that the instance of this MBean is registered is created like this:<br>
- * <code>new ObjectName(IndexingServiceMBean.DOMAIN, IndexingServiceMBean.KEY, IndexingServiceMBean.VALUE);</code>.
+ * <code>new ObjectName(JobMonitoringMBean.DOMAIN, JobMonitoringMBean.KEY, JobMonitoringMBean.VALUE);</code>.
  * Any JMX client should instantiate it in the same way to avoid naming errors.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface IndexingServiceMBean {
+public interface JobMonitoringMBean {
+    
+    static final String DOMAIN = "com.openexchange.service.indexing";
 
-    public static final String DOMAIN = "com.openexchange.service.indexing";
+    static final String KEY = "type";
 
-    public static final String KEY = "type";
+    static final String VALUE = "indexingServiceMonitoring";
 
-    public static final String VALUE = "indexingServiceMonitoring";
+    /**
+     * @return The number of jobs stored in the cluster.
+     * @throws MBeanException
+     */
+    int getStoredJobs() throws MBeanException;
+    
+    /**
+     * @return A list of names of all jobs stored in the cluster.
+     * @throws MBeanException
+     */
+    List<String> getStoredJobDetails() throws MBeanException;
 
+    /**
+     * @return The number of jobs that are stored locally on this node.
+     * @throws MBeanException
+     */
+    int getLocalJobs() throws MBeanException;
+    
+    /**
+     * @return A list of names of the jobs that are stored locally on this node.
+     * @throws MBeanException
+     */
+    List<String> getLocalJobDetails() throws MBeanException;
+
+    /**
+     * @return The number of currently running jobs on this node.
+     * @throws MBeanException
+     */
+    int getRunningJobs() throws MBeanException;
 
     /**
      * Returns the names of all currently running jobs on this node.
+     * The maps key is the name of the jobs trigger. The value is the name of the job itself.
      *
-     * @return The list of job names.
+     * @return The job names.
      * @throws MBeanException
      */
-    List<String> getAllLocalRunningJobs() throws MBeanException;
-
-    /**
-     * Returns the names of currently running jobs for the given user on this node.
-     *
-     * @param contextId The users context id.
-     * @param userId The users id.
-     * @return The list of job names.
-     * @throws MBeanException
-     */
-    List<String> getLocalRunningJobs(int contextId, int userId) throws MBeanException;
-
-    /**
-     * Gets all jobs that are scheduled in the cluster.
-     *
-     * @return The list of job names.
-     * @throws MBeanException
-     */
-    List<String> getAllScheduledJobs() throws MBeanException;
-    
-    /**
-     * Gets all jobs that are scheduled locally.
-     *
-     * @return The list of job names.
-     * @throws MBeanException
-     */
-    List<String> getLocalScheduledJobs() throws MBeanException;
-
-    /**
-     * Gets the jobs that are scheduled in the cluster for the given user.
-     *
-     * @param contextId The users context id.
-     * @param userId The users id.
-     * @return The list of job names.
-     * @throws MBeanException
-     */
-    List<String> getScheduledJobs(int contextId, int userId) throws MBeanException;
-    
-    /**
-     * Returns a human-readable list of all triggers and their states for the given job.
-     * 
-     * @param jobGroup The job group.
-     * @param jobName The job name.
-     * @return The list of triggers.
-     * @throws MBeanException
-     */
-    List<String> getTriggerStatesForJob(String jobGroup, String jobName) throws MBeanException;
+    Map<String, String> getRunningJobDetails() throws MBeanException;
 
 }

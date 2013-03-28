@@ -52,6 +52,7 @@ package com.openexchange.service.indexing.monitoring.console;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.Map;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
@@ -67,7 +68,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-import com.openexchange.service.indexing.IndexingServiceMBean;
+import com.openexchange.service.indexing.JobMonitoringMBean;
 
 
 /**
@@ -101,37 +102,56 @@ public class IndexingServiceMonitoringCLT {
             JMXServiceURL url = new JMXServiceURL(JMX_URL);
             jmxConnector = JMXConnectorFactory.connect(url, null);
             MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
-            IndexingServiceMBean proxy = indexingServiceMBeanProxy(mbsc);
-            List<String> scheduledJobs = null;
-            List<String> runningJobs = null;
-            if (cmd.hasOption('s')) {
-                scheduledJobs = proxy.getAllScheduledJobs();
-            } else if (cmd.hasOption('r')) {
-                runningJobs = proxy.getAllLocalRunningJobs();
+            JobMonitoringMBean proxy = indexingServiceMBeanProxy(mbsc);
+            StringBuilder sb = new StringBuilder();
+            if (cmd.hasOption('d')) {
+                List<String> storedJobs = null;
+                Map<String, String> runningJobs = null;
+                if (cmd.hasOption('s')) {
+                    storedJobs = proxy.getStoredJobDetails();
+                } else if (cmd.hasOption('r')) {
+                    runningJobs = proxy.getRunningJobDetails();
+                } else {
+                    storedJobs = proxy.getStoredJobDetails();
+                    runningJobs = proxy.getRunningJobDetails();
+                }
+                
+                if (storedJobs != null) {
+                    sb.append("All scheduled jobs: ").append(storedJobs.size()).append('\n');
+                    for (String job : storedJobs) {
+                        sb.append("    ").append(job).append('\n');
+                    }
+                    sb.append('\n');
+                }
+                
+                if (runningJobs != null) {
+                    sb.append("Currently running jobs on this node: ").append(runningJobs.size()).append('\n');
+                    for (String job : runningJobs.keySet()) {
+                        sb.append("    ").append(job).append('\n');
+                    }
+                }
             } else {
-                scheduledJobs = proxy.getAllScheduledJobs();
-                runningJobs = proxy.getAllLocalRunningJobs();
-            }
-            
-            if (scheduledJobs != null) {
-                System.out.println("All scheduled jobs: " + scheduledJobs.size());
-                if (cmd.hasOption('d')) {
-                    for (String job : scheduledJobs) {
-                        System.out.println("    " + job);
-                    }
+                int storedJobs = -1;
+                int runningJobs = -1;
+                if (cmd.hasOption('s')) {
+                    storedJobs = proxy.getStoredJobs();
+                } else if (cmd.hasOption('r')) {
+                    runningJobs = proxy.getRunningJobs();
+                } else {
+                    storedJobs = proxy.getStoredJobs();
+                    runningJobs = proxy.getRunningJobs();
+                }
+                
+                if (storedJobs >= 0) {
+                    sb.append("All scheduled jobs: ").append(storedJobs).append('\n');
+                }
+                
+                if (runningJobs >= 0) {
+                    sb.append("Currently running jobs on this node: ").append(runningJobs).append('\n');
                 }
             }
             
-            System.out.println();
-            if (runningJobs != null) {
-                System.out.println("Currently running jobs on this node: " + runningJobs.size());
-                if (cmd.hasOption('d')) {
-                    for (String job : runningJobs) {
-                        System.out.println("    " + job);
-                    }
-                }
-            }
-
+            System.out.print(sb.toString());
             return 0;
         } catch (ParseException e) {
             printHelp(options);
@@ -159,11 +179,11 @@ public class IndexingServiceMonitoringCLT {
         }
     }
 
-    private static IndexingServiceMBean indexingServiceMBeanProxy(MBeanServerConnection mbsc) throws MalformedObjectNameException {
-        IndexingServiceMBean mBean = MBeanServerInvocationHandler.newProxyInstance(mbsc, new ObjectName(
-            IndexingServiceMBean.DOMAIN,
-            IndexingServiceMBean.KEY,
-            IndexingServiceMBean.VALUE), IndexingServiceMBean.class, false);
+    private static JobMonitoringMBean indexingServiceMBeanProxy(MBeanServerConnection mbsc) throws MalformedObjectNameException {
+        JobMonitoringMBean mBean = MBeanServerInvocationHandler.newProxyInstance(mbsc, new ObjectName(
+            JobMonitoringMBean.DOMAIN,
+            JobMonitoringMBean.KEY,
+            JobMonitoringMBean.VALUE), JobMonitoringMBean.class, false);
 
         return mBean;
     }

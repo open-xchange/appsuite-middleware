@@ -76,13 +76,13 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadRenamer;
 
 /**
- * {@link AnotherIndexingService}
+ * {@link IndexingServiceImpl}
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class AnotherIndexingService implements IndexingService {
+public class IndexingServiceImpl implements IndexingService {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(AnotherIndexingService.class);
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(IndexingServiceImpl.class);
 
     @Override
     public void scheduleJobWithProgressiveInterval(JobInfo info, Date startDate, long timeout, long initialInterval, int progressionRate, int priority, boolean onlyResetProgression) throws OXException {

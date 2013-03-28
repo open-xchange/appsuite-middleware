@@ -49,6 +49,8 @@
 
 package com.openexchange.service.indexing.impl.internal.nonclustered;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
@@ -109,6 +111,12 @@ public class RecurringJobsManager {
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         IMap<String, JobInfoWrapper> recurringJobs = hazelcast.getMap(JOB_MAP);
         return recurringJobs.size();
+    }
+    
+    public static List<String> getJobIds() {
+        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
+        IMap<String, JobInfoWrapper> recurringJobs = hazelcast.getMap(JOB_MAP);
+        return new ArrayList<String>(recurringJobs.keySet());
     }
 
 }
