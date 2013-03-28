@@ -67,6 +67,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.Utils;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.images.ImageTransformationService;
@@ -192,11 +193,17 @@ public class FileResponseRenderer implements ResponseRenderer {
                     if (SAVE_AS_TYPE.equals(checkedContentType)) {
                         resp.setContentType(contentType);
                     } else {
-                        if (toLowerCase(checkedContentType).startsWith(toLowerCase(contentType))) {
+                        final String primaryType1 = getPrimaryType(checkedContentType);
+                        final String primaryType2 = getPrimaryType(contentType);
+                        if (toLowerCase(primaryType1).startsWith(toLowerCase(primaryType2))) {
                             resp.setContentType(contentType);
                         } else {
                             // Specified Content-Type does NOT match file's real MIME type
                             // Therefore ignore it due to security reasons (see bug #25343)
+                            final StringAllocator sb = new StringAllocator(128);
+                            sb.append("Denied parameter \"").append(PARAMETER_CONTENT_TYPE).append("\" due to security constraints (");
+                            sb.append(contentType).append(" vs. ").append(checkedContentType).append(").");
+                            LOG.warn(sb.toString());
                             resp.setContentType(checkedContentType);
                         }
                     }
@@ -360,6 +367,14 @@ public class FileResponseRenderer implements ResponseRenderer {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private String getPrimaryType(final String contentType) {
+        if (isEmpty(contentType)) {
+            return contentType;
+        }
+        final int pos = contentType.indexOf('/');
+        return pos > 0 ? contentType.substring(0, pos) : contentType;
     }
 
 }
