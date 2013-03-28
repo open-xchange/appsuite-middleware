@@ -189,11 +189,16 @@ public class RequestTools {
                 }
                 // Read subsequent chunks
                 while ((read = fis.read(buf, 0, buflen)) > 0) {
+                    if (com.openexchange.java.HTMLDetector.containsHTMLTags(buf, 0, read)) {
+                        throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), mimeType);
+                    }
                     outputStream.write(buf, 0, read);
                 }
             }
-            // Final check for image's width & height
-            isValidImage(Streams.asInputStream(outputStream));
+            // Final check for image's width & height using javax.imageio.*
+            if (!isValidImage(Streams.asInputStream(outputStream))) {
+                throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), mimeType);
+            }
             contact.setImage1(outputStream.toByteArray());
             contact.setImageContentType(null == mimeType ? checkedMimeType : mimeType);
         } catch (final FileNotFoundException e) {
@@ -230,13 +235,12 @@ public class RequestTools {
     }
 
     private static boolean isValidImage(final InputStream data) {
-        java.awt.image.BufferedImage bimg = null;
         try {
-            bimg = javax.imageio.ImageIO.read(data);
+            final java.awt.image.BufferedImage bimg = javax.imageio.ImageIO.read(data);
+            return (bimg != null && bimg.getHeight() > 0 && bimg.getWidth() > 0);
         } catch (final Exception e) {
             return false;
         }
-        return (bimg != null && bimg.getHeight() > 0 && bimg.getWidth() > 0);
     }
 
     /**
