@@ -60,6 +60,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,open-xchange-push-imapidle"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,open-xchange-push-mailnotify"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,open-xchange-push-malpoll"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,open-xchange-realtime-atmosphere"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,open-xchange-realtime-core"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,open-xchange-recaptcha"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,open-xchange-report-client"/>

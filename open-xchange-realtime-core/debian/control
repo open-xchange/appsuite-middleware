@@ -8,6 +8,5 @@ Homepage: http://www.open-xchange.com
 
 Package: open-xchange-realtime-core
 Architecture: all
-Pre-Depends: open-xchange-core (>= @OXVERSION@)
-Depends: ${misc:Depends}
+Depends: ${misc:Depends}, open-xchange-core (>= @OXVERSION@)
 Description: Common realtime framework component bundles
