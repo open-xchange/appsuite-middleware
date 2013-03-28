@@ -1,3 +1,7 @@
+* 2013-03-28 - marcus.klein@open-xchange.com
+
+ - Fix for bug 25099: Used strings from the XML schema elements needs to be interned when using IBM Java.
+
 * 2013-03-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 25596: Reduced capacity of the queue used by log service
