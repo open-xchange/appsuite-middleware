@@ -1,3 +1,7 @@
+* 2013-03-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25596: Reduced capacity of the queue used by log service
+
 * 2013-03-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 25561: Check possible URL-encodings in Content-Type value
