@@ -220,8 +220,12 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             /*
              * Create file holder
              */
-            if(!req.getRequest().getFormat().equals("preview_image"))
-                req.getRequest().setFormat("file");
+            {
+                final AJAXRequestData requestData = req.getRequest();
+                if(!"preview_image".equals(requestData.getFormat())) {
+                    requestData.setFormat("file");
+                }
+            }
             final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(out.toByteArray());
             out = null;
             fileHolder.setName(mailPart.getFileName());
