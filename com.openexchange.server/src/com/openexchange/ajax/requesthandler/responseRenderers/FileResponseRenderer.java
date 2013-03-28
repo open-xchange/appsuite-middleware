@@ -127,26 +127,26 @@ public class FileResponseRenderer implements ResponseRenderer {
     @Override
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
         IFileHolder file = (IFileHolder) result.getResultObject();
-        final String fileContentType = file.getContentType();
-        final String fileName = file.getName();
-        // Check certain parameters
-        String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
-        if (null == contentType) {
-            contentType = fileContentType;
-        }
-        String delivery = req.getParameter(DELIVERY);
-        if (delivery == null) {
-            delivery = file.getDelivery();
-        }
-        String contentDisposition = req.getParameter(PARAMETER_CONTENT_DISPOSITION);
-        if (null == contentDisposition) {
-            contentDisposition = file.getDisposition();
-        } else {
-            contentDisposition = Utils.encodeUrl(contentDisposition);
-        }
-        // Write to Servlet's output stream
         InputStream documentData = null;
         try {
+            final String fileContentType = file.getContentType();
+            final String fileName = file.getName();
+            // Check certain parameters
+            String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
+            if (null == contentType) {
+                contentType = fileContentType;
+            }
+            String delivery = req.getParameter(DELIVERY);
+            if (delivery == null) {
+                delivery = file.getDelivery();
+            }
+            String contentDisposition = req.getParameter(PARAMETER_CONTENT_DISPOSITION);
+            if (null == contentDisposition) {
+                contentDisposition = file.getDisposition();
+            } else {
+                contentDisposition = Utils.encodeUrl(contentDisposition);
+            }
+            // Write to Servlet's output stream
             file = transformIfImage(request, file, delivery);
             if (null == file) {
                 // Quit with 404
