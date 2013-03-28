@@ -425,33 +425,43 @@ public final class CSSMatcher {
                     builder.append(wordi);
                 } else {
                     boolean fst = true;
-                    for (final String selector : SPLIT_COMMA.split(wordi, 0)) {
-                        if (!isEmpty(selector)) {                            
-                            if (fst) {
-                                fst = false;
-                            } else {
-                                builder.append(',');
+                    final String[] splits = SPLIT_COMMA.split(wordi, 0);
+                    if (1 == splits.length) {
+                        final String selector = wordi;
+                        handleSelector(cssPrefix, builder, helper, selector);
+                    } else {
+                        for (final String selector : splits) {
+                            if (!isEmpty(selector)) {
+                                if (fst) {
+                                    fst = false;
+                                } else {
+                                    builder.append(',');
+                                }
+                                handleSelector(cssPrefix, builder, helper, selector);
                             }
-                            final char first = selector.charAt(0);
-                            if ('.' == first) {
-                                // .class -> #prefix .prefix-class
-                                builder.append('#').append(cssPrefix).append(' ');
-                                builder.append('.').append(cssPrefix).append('-');
-                                builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper)).append(' ');
-                            } else if ('#' == first) {
-                                // #id -> #prefix #prefix-id
-                                builder.append('#').append(cssPrefix).append(' ');
-                                builder.append('#').append(cssPrefix).append('-');
-                                builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper)).append(' ');
-                            } else {
-                                // element -> #prefix element
-                                builder.append('#').append(cssPrefix).append(' ');
-                                builder.append(replaceDotsAndHashes(selector, cssPrefix, helper)).append(' ');
-                            }
-                        }
-                    } // End of for loop
-                }
+                        } // End of for comma loop
+                    } // End of else clause
+                } // End of word loop
             }
+        }
+    }
+
+    private static void handleSelector(final String cssPrefix, final StringBuilder builder, final StringBuilder helper, final String selector) {
+        final char first = selector.charAt(0);
+        if ('.' == first) {
+            // .class -> #prefix .prefix-class
+            builder.append('#').append(cssPrefix).append(' ');
+            builder.append('.').append(cssPrefix).append('-');
+            builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper)).append(' ');
+        } else if ('#' == first) {
+            // #id -> #prefix #prefix-id
+            builder.append('#').append(cssPrefix).append(' ');
+            builder.append('#').append(cssPrefix).append('-');
+            builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper)).append(' ');
+        } else {
+            // element -> #prefix element
+            builder.append('#').append(cssPrefix).append(' ');
+            builder.append(replaceDotsAndHashes(selector, cssPrefix, helper)).append(' ');
         }
     }
 

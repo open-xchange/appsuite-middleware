@@ -130,7 +130,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
                     content = htmlService.dropScriptTagsInHeader(content);
                     if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                         final boolean[] modified = new boolean[1];
-                        final String cssPrefix = "ox-" + HtmlProcessing.getHash(Long.toString(System.currentTimeMillis()));
+                        final String cssPrefix = "ox-" + HtmlProcessing.getHash(Long.toString(System.currentTimeMillis()), 10);
                         final boolean externalImagesAllowed = usm.isAllowHTMLImages();
                         content = htmlService.checkBaseTag(content, externalImagesAllowed);
                         if (HtmlProcessing.useSanitize()) {
