@@ -92,6 +92,13 @@ public final class ImageTypeDetector {
     private static final byte[] PREFIX_JPEG = { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0 };
 
     /**
+     * ff d8 ff e1
+     * 
+     * Exif data available.
+     */
+    private static final byte[] PREFIX_JPEG2 = { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE1 };
+
+    /**
      * 49 49 4e 31
      */
     private static final byte[] PREFIX_NIFF = { (byte) 0x49, (byte) 0x49, (byte) 0x4E, (byte) 0x31 };
@@ -436,7 +443,7 @@ public final class ImageTypeDetector {
             throw new IndexOutOfBoundsException();
         }
         // Check image MIME type
-        if (startsWith(PREFIX_JPEG, bytes, off, len)) {
+        if (startsWith(PREFIX_JPEG, bytes, off, len) || startsWith(PREFIX_JPEG2, bytes, off, len)) {
             return "image/jpeg";
         }
         if (startsWith(PREFIX_BITMAP, bytes, off, len)) {
