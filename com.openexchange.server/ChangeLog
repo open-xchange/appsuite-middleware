@@ -4,6 +4,7 @@
  - Fix for bug 25560: Handle possible connect error to Sieve server more gracefully
  - Fix for bug 25346: Support for all contact fields by user JSON interface
  - Fix for bug 25571: Handle absent contact
+ - Fix for bug 24724: Pass stack trace as separate argument to log routine, rather than appending it into log message
 
 * 2013-03-27 - thorben.betten@open-xchange.com
 
