@@ -201,7 +201,12 @@ public class AppsLoadServlet extends HttpServlet {
             });
 
             if (data == null) {
-                data = ("define('" + escapeName(module) + "', function () { throw new Error(\"Could not read '" + escapeName(name) + "'\"); });\n").getBytes(Charsets.UTF_8);
+                int len = module.length() - 3;
+                String moduleName = module;
+                if (format == null && ".js".equals(module.substring(len))) {
+                    moduleName = module.substring(0, len);
+                }
+                data = ("define('" + escapeName(moduleName) + "', function () {\n    throw new Error(\"Could not read '" + escapeName(name) + "'\");\n});\n").getBytes(Charsets.UTF_8);
             }
 
             out.write(data);
