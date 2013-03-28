@@ -89,9 +89,6 @@ public final class TmpFileFileHolder implements IFileHolder {
 
     @Override
     public void close() throws IOException {
-        if (null == tmpFile) {
-            return;
-        }
         tmpFile.delete();
     }
 
