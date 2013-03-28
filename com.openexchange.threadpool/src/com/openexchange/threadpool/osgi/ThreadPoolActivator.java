@@ -114,13 +114,15 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             /*
              * Initialize thread pool
              */
-            final ThreadPoolProperties init = new ThreadPoolProperties().init(getService(ConfigurationService.class));
+            final ConfigurationService confService = getService(ConfigurationService.class);
+            final ThreadPoolProperties init = new ThreadPoolProperties().init(confService);
             final ThreadPoolServiceImpl threadPool = ThreadPoolServiceImpl.newInstance(init);
             this.threadPool = threadPool;
             if (init.isPrestartAllCoreThreads()) {
                 threadPool.prestartAllCoreThreads();
             }
-            final LogServiceImpl logService = new LogServiceImpl(threadPool);
+            final int queueCapacity = confService.getIntProperty("com.openexchange.log.queueCapacity", -1);
+            final LogServiceImpl logService = new LogServiceImpl(threadPool, queueCapacity);
             this.logService = logService;
             Log.set(logService);
             /*
@@ -139,7 +141,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             /*
              * Register SessionThreadCounter service
              */
-            final int notifyThreashold = getService(ConfigurationService.class).getIntProperty("com.openexchange.session.maxThreadNotifyThreshold", -1);
+            final int notifyThreashold = confService.getIntProperty("com.openexchange.session.maxThreadNotifyThreshold", -1);
             final SessionThreadCounterImpl counterImpl = new SessionThreadCounterImpl(notifyThreashold, this);
             registerService(SessionThreadCounter.class, counterImpl);
             SessionThreadCounter.REFERENCE.set(counterImpl);
