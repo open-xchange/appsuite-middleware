@@ -92,9 +92,9 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
 
     public static final AtomicReference<TimerService> REF_TIMER = new AtomicReference<TimerService>();
 
-    private ThreadPoolServiceImpl threadPool;
+    private volatile ThreadPoolServiceImpl threadPool;
 
-    private LogServiceImpl logService;
+    private volatile LogServiceImpl logService;
 
     /**
      * Initializes a new {@link ThreadPoolActivator}.
@@ -115,11 +115,13 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
              * Initialize thread pool
              */
             final ThreadPoolProperties init = new ThreadPoolProperties().init(getService(ConfigurationService.class));
-            threadPool = ThreadPoolServiceImpl.newInstance(init);
+            final ThreadPoolServiceImpl threadPool = ThreadPoolServiceImpl.newInstance(init);
+            this.threadPool = threadPool;
             if (init.isPrestartAllCoreThreads()) {
                 threadPool.prestartAllCoreThreads();
             }
-            logService = new LogServiceImpl(threadPool);
+            final LogServiceImpl logService = new LogServiceImpl(threadPool);
+            this.logService = logService;
             Log.set(logService);
             /*
              * Service trackers
@@ -267,11 +269,13 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             /*
              * Stop thread pool
              */
+            final LogServiceImpl logService = this.logService;
             if (null != logService) {
                 logService.stop();
-                logService = null;
+                this.logService = null;
                 Log.set(null);
             }
+            final ThreadPoolServiceImpl threadPool = this.threadPool;
             if (null != threadPool) {
                 try {
                     threadPool.shutdownNow();
@@ -279,7 +283,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
                 } catch (final InterruptedException e) {
                     Thread.currentThread().interrupt();
                 } finally {
-                    threadPool = null;
+                    this.threadPool = null;
                 }
             }
         } catch (final Exception e) {
