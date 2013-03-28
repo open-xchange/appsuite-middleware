@@ -61,28 +61,37 @@ public class OXSieveHandlerException extends Exception {
 	private static final long serialVersionUID = 2990692657778743217L;
 
 	private final String sieveHost;
-
 	private final int sieveHostPort;
-
 	private final SIEVEResponse.Code sieveResponseCode;
 
+    /**
+     * Initializes a new {@link OXSieveHandlerException}
+     * 
+     * @param message The message
+     * @param sieveHost The sieve host name
+     * @param sieveHostPort The sieve host port
+     */
+    public OXSieveHandlerException(final String message, final String sieveHost, final int sieveHostPort, SIEVEResponse.Code responseCode) {
+        super(message);
+        this.sieveHost = sieveHost;
+        this.sieveHostPort = sieveHostPort;
+        this.sieveResponseCode = responseCode;
+    }
 
     /**
-	 * Initializes a new {@link OXSieveHandlerException}
-	 *
-	 * @param message
-	 *            The message
-	 * @param sieveHost
-	 *            The sieve host name
-	 * @param sieveHostPort
-	 *            The sieve host port
-	 */
-	public OXSieveHandlerException(final String message, final String sieveHost, final int sieveHostPort, SIEVEResponse.Code responseCode) {
-		super(message);
-		this.sieveHost = sieveHost;
-		this.sieveHostPort = sieveHostPort;
-		this.sieveResponseCode = responseCode;
-	}
+     * Initializes a new {@link OXSieveHandlerException}
+     * 
+     * @param message The message
+     * @param sieveHost The sieve host name
+     * @param sieveHostPort The sieve host port
+     * @param cause The cause
+     */
+    public OXSieveHandlerException(final String message, final String sieveHost, final int sieveHostPort, SIEVEResponse.Code responseCode, Throwable cause) {
+        super(message, cause);
+        this.sieveHost = sieveHost;
+        this.sieveHostPort = sieveHostPort;
+        this.sieveResponseCode = responseCode;
+    }
 
 	/**
 	 * Gets the name of the sieve host for which this exception was thrown
