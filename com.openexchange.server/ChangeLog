@@ -5,6 +5,7 @@
  - Fix for bug 25346: Support for all contact fields by user JSON interface
  - Fix for bug 25571: Handle absent contact
  - Fix for bug 24724: Pass stack trace as separate argument to log routine, rather than appending it into log message
+ - Fix for bug 25581: Allow passed "content_type" parameter if its primary type matches the one of the validated MIME type
 
 * 2013-03-27 - thorben.betten@open-xchange.com
 
