@@ -1,4 +1,3 @@
 opt/open-xchange/etc/solr.properties
 opt/open-xchange/etc/indexing-service.properties
 opt/open-xchange/etc/smal.properties
-opt/open-xchange/etc/hazelcast/indexingServiceMonitoring.properties

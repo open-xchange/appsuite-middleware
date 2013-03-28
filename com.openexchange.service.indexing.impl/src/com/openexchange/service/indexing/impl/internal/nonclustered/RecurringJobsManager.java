@@ -64,7 +64,7 @@ import com.openexchange.service.indexing.impl.internal.Services;
  */
 public class RecurringJobsManager {
     
-    static final String JOB_MAP = "recurringJobs-1";
+    static final String JOB_MAP = "recurringJobs-2";
     
     public static JobInfoWrapper addOrUpdateJob(String jobId, JobInfoWrapper infoWrapper) {
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
@@ -73,7 +73,13 @@ public class RecurringJobsManager {
         if (ttl <= 0) {
             ttl = 0;
         }
-        JobInfoWrapper old = recurringJobs.put(jobId, infoWrapper, ttl, TimeUnit.MILLISECONDS);
+        
+        JobInfoWrapper old = recurringJobs.get(jobId);
+        if (old != null) {
+            infoWrapper.updateLastRun(old.getLastRun());
+        }
+        
+        recurringJobs.set(jobId, infoWrapper, ttl, TimeUnit.MILLISECONDS);
         return old;
     }
     

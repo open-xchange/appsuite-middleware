@@ -47,7 +47,6 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/solr.properties
 %config(noreplace) /opt/open-xchange/etc/indexing-service.properties
 %config(noreplace) /opt/open-xchange/etc/smal.properties
-%config(noreplace) /opt/open-xchange/etc/hazelcast/indexingServiceMonitoring.properties
 %dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/*
 %dir /opt/open-xchange/sbin/
