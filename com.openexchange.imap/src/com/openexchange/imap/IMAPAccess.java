@@ -93,6 +93,7 @@ import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -885,10 +886,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     final StringAllocator sb = new StringAllocator(1024);
                     sb.append(lineSeparator).append(lineSeparator);
                     sb.append("IMAP login performed...").append(lineSeparator);
-                    sb.append("Queued in cache: ").append(MailAccess.getMailAccessCache().numberOfMailAccesses(session, accountId)).append(lineSeparator);
-                    appendStackTrace(new Throwable().getStackTrace(), lineSeparator, sb);
-                    sb.append(lineSeparator).append(lineSeparator);
-                    LOG.debug(sb.toString());
+                    sb.append("Queued in cache: ").append(MailAccess.getMailAccessCache().numberOfMailAccesses(session, accountId));
+                    if (Log.appendTraceToMessage()) {
+                        sb.append(lineSeparator);
+                        appendStackTrace(new Throwable().getStackTrace(), lineSeparator, sb);
+                        sb.append(lineSeparator).append(lineSeparator);
+                        LOG.debug(sb.toString());
+                    } else {
+                        sb.append(lineSeparator).append(lineSeparator);
+                        LOG.debug(sb.toString(), new Throwable());
+                    }
                 }
                 final long currentValidity = getCurrentValidity(accountId, session);
                 imapStore.setValidity(currentValidity);

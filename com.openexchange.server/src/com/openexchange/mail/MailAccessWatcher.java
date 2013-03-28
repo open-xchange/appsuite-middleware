@@ -55,8 +55,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import com.openexchange.log.Log;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -75,62 +75,54 @@ public final class MailAccessWatcher {
 
     private static final ConcurrentMap<MailAccess<?, ?>, Long> MAIL_ACCESSES = new NonBlockingHashMap<MailAccess<?, ?>, Long>();
 
-    private static final AtomicBoolean INITIALIZED = new AtomicBoolean();
+    private static boolean initialized = false;
 
     private static volatile ScheduledTimerTask watcherTask;
 
     /**
      * Initializes and starts mail connection watcher if not done, yet
      */
-    static void init() {
-        if (!INITIALIZED.get()) {
-            synchronized (INITIALIZED) {
-                if (INITIALIZED.get()) {
-                    return;
-                }
-                if (MailProperties.getInstance().isWatcherEnabled()) {
-                    /*
-                     * Start task
-                     */
-                    final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
-                    if (null != timer) {
-                        final int frequencyMillis = MailProperties.getInstance().getWatcherFrequency();
-                        watcherTask = timer.scheduleWithFixedDelay(new WatcherTask(MAIL_ACCESSES, LOG), 1000, frequencyMillis);
-                    }
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Mail connection watcher successfully established and ready for tracing");
-                    }
-                }
-                INITIALIZED.set(true);
+    static synchronized void init() {
+        if (initialized) {
+            return;
+        }
+        if (MailProperties.getInstance().isWatcherEnabled()) {
+            /*
+             * Start task
+             */
+            final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
+            if (null != timer) {
+                final int frequencyMillis = MailProperties.getInstance().getWatcherFrequency();
+                watcherTask = timer.scheduleWithFixedDelay(new WatcherTask(MAIL_ACCESSES, LOG), 1000, frequencyMillis);
+            }
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Mail connection watcher successfully established and ready for tracing");
             }
         }
+        initialized = true;
     }
 
     /**
      * Stops mail connection watcher if currently running
      */
-    static void stop() {
-        if (INITIALIZED.get()) {
-            synchronized (INITIALIZED) {
-                if (!INITIALIZED.get()) {
-                    return;
+    static synchronized void stop() {
+        if (!initialized) {
+            return;
+        }
+        if (MailProperties.getInstance().isWatcherEnabled()) {
+            if (null != watcherTask) {
+                watcherTask.cancel(false);
+                final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
+                if (null != timer) {
+                    timer.purge();
                 }
-                if (MailProperties.getInstance().isWatcherEnabled()) {
-                    if (null != watcherTask) {
-                        watcherTask.cancel(false);
-                        final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
-                        if (null != timer) {
-                            timer.purge();
-                        }
-                    }
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Mail connection watcher successfully stopped");
-                    }
-                }
-                MAIL_ACCESSES.clear();
-                INITIALIZED.set(false);
+            }
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Mail connection watcher successfully stopped");
             }
         }
+        MAIL_ACCESSES.clear();
+        initialized = false;
     }
 
     /**
@@ -187,12 +179,6 @@ public final class MailAccessWatcher {
         return count;
     }
 
-    private static final String INFO_PREFIX = "UNCLOSED MAIL CONNECTION AFTER #N#msec:\n";
-
-    private static final String INFO_PREFIX2 = "CLOSING MAIL CONNECTION BY WATCHER:\n";
-
-    private static final String INFO_PREFIX3 = "\n\tDONE";
-
     /**
      * Helper class.
      */
@@ -201,12 +187,14 @@ public final class MailAccessWatcher {
         private final ConcurrentMap<MailAccess<?, ?>, Long> map;
         private final org.apache.commons.logging.Log logger;
         private final boolean traceEnabled;
+        private final String lineSeparator;
 
         public WatcherTask(final ConcurrentMap<MailAccess<?, ?>, Long> mailAccesses, final org.apache.commons.logging.Log logger) {
             super();
             map = mailAccesses;
             this.logger = logger;
             traceEnabled = logger.isTraceEnabled();
+            lineSeparator = System.getProperty("line.separator");
         }
 
         @Override
@@ -228,7 +216,7 @@ public final class MailAccessWatcher {
                     if (mailAccess.isConnected()) {
                         if (mailAccess.isWaiting()) {
                             if (traceEnabled) {
-                                logger.trace(new com.openexchange.java.StringAllocator("Idling/waiting mail connection:\n").append(mailAccess.getTrace()).toString());
+                                logger.trace(new com.openexchange.java.StringAllocator("Idling/waiting mail connection:").append(lineSeparator).append(mailAccess.getTrace()).toString());
                             }
                         } else {
                             final Long val = e.getValue();
@@ -236,11 +224,17 @@ public final class MailAccessWatcher {
                                 final long duration = (now - l(val));
                                 if (duration > watcherTime) {
                                     sb.setLength(0);
-                                    logger.info(sb.append(INFO_PREFIX.replaceFirst("#N#", Long.toString(duration))).append(
-                                        mailAccess.getTrace()).toString());
+                                    sb.append("UNCLOSED MAIL CONNECTION AFTER ");
+                                    sb.append(duration).append("msec:");
+                                    if (Log.appendTraceToMessage()) {
+                                        sb.append(lineSeparator);
+                                        sb.append(mailAccess.getTrace());
+                                        logger.info(sb.toString());
+                                    } else {
+                                        mailAccess.logTrace(sb, logger);
+                                    }
                                     exceededAcesses.add(mailAccess);
                                 }
-
                             }
                         }
                     } else {
@@ -258,9 +252,9 @@ public final class MailAccessWatcher {
                         for (final MailAccess<?, ?> mailAccess : exceededAcesses) {
                             try {
                                 sb.setLength(0);
-                                sb.append(INFO_PREFIX2).append(mailAccess.toString());
+                                sb.append("CLOSING MAIL CONNECTION BY WATCHER:").append(lineSeparator).append(mailAccess.toString());
                                 mailAccess.close(false);
-                                sb.append(INFO_PREFIX3);
+                                sb.append(lineSeparator).append("    DONE");
                                 logger.info(sb.toString());
                             } finally {
                                 map.remove(mailAccess);

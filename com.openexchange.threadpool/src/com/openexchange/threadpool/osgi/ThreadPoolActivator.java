@@ -121,7 +121,10 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             if (init.isPrestartAllCoreThreads()) {
                 threadPool.prestartAllCoreThreads();
             }
+            // Log configuration
             final int queueCapacity = confService.getIntProperty("com.openexchange.log.queueCapacity", -1);
+            final boolean appendTraceToMessage = confService.getBoolProperty("com.openexchange.log.appendTraceToMessage", false);
+            Log.setAppendTraceToMessage(appendTraceToMessage);
             final LogServiceImpl logService = new LogServiceImpl(threadPool, queueCapacity);
             this.logService = logService;
             Log.set(logService);

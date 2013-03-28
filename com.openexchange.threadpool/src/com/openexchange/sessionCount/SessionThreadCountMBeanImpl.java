@@ -86,34 +86,33 @@ public final class SessionThreadCountMBeanImpl extends StandardMBean implements 
         final StringBuilder info = new StringBuilder(8192);
         final SessiondService service = sessiondServiceTracker.getService();
         final Map<String, Set<Thread>> threads = counter.getThreads(threshold);
+        final String lineSeparator = System.getProperty("line.separator");
         for (final Entry<String, Set<Thread>> entry : threads.entrySet()) {
             final Set<Thread> set = entry.getValue();
-            info.append("\n\n").append(set.size()).append(" threads belonging to session \"").append(entry.getKey());
+            info.append(lineSeparator).append(lineSeparator).append(set.size()).append(" threads belonging to session \"").append(entry.getKey());
             if (null == service) {
-                info.append("\":\n");
+                info.append("\":").append(lineSeparator);
             } else {
                 final Session session = service.getSession(entry.getKey());
                 if (null == session) {
-                    info.append("\":\n");
+                    info.append("\":").append(lineSeparator);
                 } else {
-                    info.append("\" (user=").append(session.getUserId()).append(", context=").append(session.getContextId()).append("):\n");
+                    info.append("\" (user=").append(session.getUserId()).append(", context=").append(session.getContextId()).append("):").append(lineSeparator);
                 }
             }
-
             for (final Thread thread : set) {
-                info.append("\n--------------------------------------------------------------------------\n");
-                appendStackTrace(thread.getStackTrace(), info);
+                info.append(lineSeparator).append("--------------------------------------------------------------------------").append(lineSeparator);
+                appendStackTrace(thread.getStackTrace(), info, lineSeparator);
             }
         }
         return info.toString();
     }
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb, final String lineSeparator) {
         if (null == trace) {
-            sb.append("<missing stack trace>\n");
+            sb.append("<missing stack trace>").append(lineSeparator);
             return;
         }
-        final String lineSeparator = System.getProperty("line.separator");
         for (final StackTraceElement ste : trace) {
             final String className = ste.getClassName();
             if (null != className) {
