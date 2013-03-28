@@ -241,7 +241,7 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
      */
     @Override
     public String toString(final String enc) throws UnsupportedEncodingException {
-        return toString(null == enc ? null : Charsets.forName(enc));
+        return new String(buf, 0, count, enc == null ? "ISO-8859-1" : enc);
     }
 
     /**
