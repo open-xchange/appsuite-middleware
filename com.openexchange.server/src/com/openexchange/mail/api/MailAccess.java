@@ -62,6 +62,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailAccessWatcher;
@@ -746,11 +747,70 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     }
 
     /**
+     * Logs the trace of the thread that lastly obtained this access.
+     * 
+     */
+    public void logTrace(final StringBuilder sBuilder, final org.apache.commons.logging.Log log) {
+        {
+            final Props taskProps = LogProperties.optLogProperties(usingThread);
+            if (null != taskProps) {
+                final Map<String, String> sorted = new TreeMap<String, String>();
+                for (final Entry<String, Object> entry : taskProps.asMap().entrySet()) {
+                    final String propertyName = entry.getKey();
+                    final Object value = entry.getValue();
+                    if (null != value) {
+                        sorted.put(propertyName, value.toString());
+                    }
+                }
+                for (final Map.Entry<String, String> entry : sorted.entrySet()) {
+                    sBuilder.append(entry.getKey()).append('=').append(entry.getValue()).append(lineSeparator);
+                }
+                sBuilder.append(lineSeparator);
+            }
+        }
+        sBuilder.append(toString());
+        sBuilder.append(lineSeparator).append("Mail connection established (or fetched from cache) at: ").append(lineSeparator);
+        /*
+         * Start at index 3
+         */
+        if (Log.appendTraceToMessage()) {
+            for (int i = 3; i < trace.length; i++) {
+                sBuilder.append("    at ").append(trace[i]).append(lineSeparator);
+            }
+        } else {
+            final StackTraceElement[] tmp = new StackTraceElement[trace.length - 3];
+            System.arraycopy(trace, 3, tmp, 0, tmp.length);
+            final Throwable thr = new Throwable();
+            thr.setStackTrace(tmp);
+            log.info(sBuilder.toString(), thr);
+            sBuilder.setLength(0);
+        }
+        if ((null != usingThread) && usingThread.isAlive()) {
+            sBuilder.append("Current Using Thread: ").append(usingThread.getName()).append(lineSeparator);
+            /*
+             * Only possibility to get the current working position of a thread. This is only called if a thread is caught by
+             * MailAccessWatcher.
+             */
+            final StackTraceElement[] trace = usingThread.getStackTrace();
+            if (Log.appendTraceToMessage()) {
+                sBuilder.append("    at ").append(trace[0]);
+                for (int i = 1; i < trace.length; i++) {
+                    sBuilder.append(lineSeparator).append("    at ").append(trace[i]);
+                }
+            } else {
+                final Throwable thr = new Throwable();
+                thr.setStackTrace(trace);
+                log.info(sBuilder.toString(), thr);
+            }            
+        }
+    }
+
+    /**
      * Gets the trace of the thread that lastly obtained this access.
      * <p>
      * This is useful to detect certain threads which uses an access for a long time
      *
-     * @return the trace of the thread that lastly obtained this access
+     * @return The trace of the thread that lastly obtained this access
      */
     public final String getTrace() {
         final StringBuilder sBuilder = new StringBuilder(2048);

@@ -171,6 +171,11 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
         defaultIdleSeconds = 0;
     }
 
+    @Override
+    public int numberOfMailAccesses(final Session session, final int accountId) throws OXException {
+        return null == timeoutMap.get(getUserKey(session.getUserId(), accountId, session.getContextId())) ? 0 : 1;
+    }
+
     /**
      * Removes and returns a mail access from cache.
      *

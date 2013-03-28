@@ -109,6 +109,11 @@ public final class SmalMailAccessCache implements IMailAccessCache {
     }
 
     @Override
+    public int numberOfMailAccesses(Session session, int accountId) throws OXException {
+        return delegate.numberOfMailAccesses(session, accountId);
+    }
+
+    @Override
     public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> removeMailAccess(final Session session, final int accountId) {
         return delegate.removeMailAccess(session, accountId);
     }

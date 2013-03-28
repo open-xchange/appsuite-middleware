@@ -57,6 +57,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogPropertyName;
 import com.openexchange.log.Loggable;
@@ -153,98 +154,104 @@ final class LoggerTask extends AbstractTask<Object> {
     }
 
     @Override
-    public Object call() throws Exception {
-        try {
-            final List<Loggable> loggables = new ArrayList<Loggable>(16);
-            while (keepgoing.get()) {
-                try {
-                    if (queue.isEmpty()) {
-                        /*
-                         * Blocking wait for at least 1 Loggable to arrive.
-                         */
-                        final Loggable loggable = queue.take();
-                        if (POISON == loggable) {
-                            return null;
-                        }
-                        loggables.add(loggable);
-                    }
-                    queue.drainTo(loggables);
-                    final boolean quit = loggables.remove(POISON);
-                    for (final Loggable loggable : loggables) {
-                        final Throwable t = loggable.getThrowable();
-                        final Log log = loggable.getLog();
-                        final String message = null == loggable.getMessage() ? "" : loggable.getMessage();
-                        switch (loggable.getLevel()) {
-                        case FATAL:
-                            if (log.isFatalEnabled()) {
-                                if (null == t) {
-                                    log.fatal(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.FATAL));
-                                } else {
-                                    log.fatal(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.FATAL), t);
-                                }
-                            }
-                            break;
-                        case ERROR:
-                            if (log.isErrorEnabled()) {
-                                if (null == t) {
-                                    log.error(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.ERROR));
-                                } else {
-                                    log.error(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.ERROR), t);
-                                }
-                            }
-                            break;
-                        case WARNING:
-                            if (log.isWarnEnabled()) {
-                                if (null == t) {
-                                    log.warn(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.WARNING));
-                                } else {
-                                    log.warn(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.WARNING), t);
-                                }
-                            }
-                            break;
-                        case INFO:
-                            if (log.isInfoEnabled()) {
-                                if (null == t) {
-                                    log.info(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.INFO));
-                                } else {
-                                    log.info(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.INFO), t);
-                                }
-                            }
-                            break;
-                        case DEBUG:
-                            if (log.isDebugEnabled()) {
-                                if (null == t) {
-                                    log.debug(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.DEBUG));
-                                } else {
-                                    log.debug(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.DEBUG), t);
-                                }
-                            }
-                            break;
-                        case TRACE:
-                            if (log.isTraceEnabled()) {
-                                if (null == t) {
-                                    log.trace(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.TRACE));
-                                } else {
-                                    log.trace(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.TRACE), t);
-                                }
-                            }
-                            break;
-                        default:
-                            // No-op
-                        }
-                    }
-                    loggables.clear();
-                    if (quit) {
+    public Object call() {
+        final List<Loggable> loggables = new ArrayList<Loggable>(16);
+        while (keepgoing.get()) {
+            try {
+                loggables.clear();
+                if (queue.isEmpty()) {
+                    /*
+                     * Blocking wait for at least 1 Loggable to arrive.
+                     */
+                    final Loggable loggable = queue.take();
+                    if (POISON == loggable) {
                         return null;
                     }
-                } catch (final RuntimeException e) {
-                    // Log task run failed...
+                    loggables.add(loggable);
+                }
+                queue.drainTo(loggables);
+                final boolean quit = loggables.remove(POISON);
+                for (final Loggable loggable : loggables) {
+                    logIt(loggable);
+                }
+                if (quit) {
+                    return null;
+                }
+            } catch (final Exception e) {
+                // Log task run failed...
+                try {
+                    final org.apache.commons.logging.Log logger = LogFactory.getLog(LoggerTask.class);
+                    logger.error("LoggerTask run failed", e);
+                } catch (final Exception x) {
+                    // Ignore
                 }
             }
-        } catch (final Exception e) {
-            // Log task failed...
         }
         return null;
+    }
+
+    private void logIt(final Loggable loggable) {
+        final Throwable t = loggable.getThrowable();
+        final Log log = loggable.getLog();
+        final String message = null == loggable.getMessage() ? "" : loggable.getMessage();
+        switch (loggable.getLevel()) {
+        case FATAL:
+            if (log.isFatalEnabled()) {
+                if (null == t) {
+                    log.fatal(prependLocation(message, loggable, LogPropertyName.LogLevel.FATAL));
+                } else {
+                    log.fatal(prependLocation(message, loggable, LogPropertyName.LogLevel.FATAL), t);
+                }
+            }
+            break;
+        case ERROR:
+            if (log.isErrorEnabled()) {
+                if (null == t) {
+                    log.error(prependLocation(message, loggable, LogPropertyName.LogLevel.ERROR));
+                } else {
+                    log.error(prependLocation(message, loggable, LogPropertyName.LogLevel.ERROR), t);
+                }
+            }
+            break;
+        case WARNING:
+            if (log.isWarnEnabled()) {
+                if (null == t) {
+                    log.warn(prependLocation(message, loggable, LogPropertyName.LogLevel.WARNING));
+                } else {
+                    log.warn(prependLocation(message, loggable, LogPropertyName.LogLevel.WARNING), t);
+                }
+            }
+            break;
+        case INFO:
+            if (log.isInfoEnabled()) {
+                if (null == t) {
+                    log.info(prependLocation(message, loggable, LogPropertyName.LogLevel.INFO));
+                } else {
+                    log.info(prependLocation(message, loggable, LogPropertyName.LogLevel.INFO), t);
+                }
+            }
+            break;
+        case DEBUG:
+            if (log.isDebugEnabled()) {
+                if (null == t) {
+                    log.debug(prependLocation(message, loggable, LogPropertyName.LogLevel.DEBUG));
+                } else {
+                    log.debug(prependLocation(message, loggable, LogPropertyName.LogLevel.DEBUG), t);
+                }
+            }
+            break;
+        case TRACE:
+            if (log.isTraceEnabled()) {
+                if (null == t) {
+                    log.trace(prependLocation(message, loggable, LogPropertyName.LogLevel.TRACE));
+                } else {
+                    log.trace(prependLocation(message, loggable, LogPropertyName.LogLevel.TRACE), t);
+                }
+            }
+            break;
+        default:
+            // No-op
+        }
     }
 
     private static final Pattern CRLF = Pattern.compile("\r?\n");
