@@ -188,11 +188,20 @@ public class RequestTools {
                 }
                 // Read subsequent chunks
                 while ((read = fis.read(buf, 0, buflen)) > 0) {
+                    if (com.openexchange.java.HTMLDetector.containsHTMLTags(buf, 0, read)) {
+                        throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), mimeType);
+                    }
                     outputStream.write(buf, 0, read);
                 }
             }
-            // Final check for image's width & height
-            isValidImage(Streams.asInputStream(outputStream));
+            // TODO: Final check for image's width & height using javax.imageio.*
+            /*-
+             * 
+            if (!isValidImage(Streams.asInputStream(outputStream))) {
+                throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), mimeType);
+            }
+             * 
+             */
             contact.setImage1(outputStream.toByteArray());
             contact.setImageContentType(null == mimeType ? checkedMimeType : mimeType);
         } catch (final FileNotFoundException e) {
