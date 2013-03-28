@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Atmosphere Realtime Channel Implementation
 Bundle-SymbolicName: com.openexchange.realtime.atmosphere
-Bundle-Version: 6.22.0.0
+Bundle-Version: 7.2.0
 Bundle-Activator: com.openexchange.realtime.atmosphere.osgi.AtmosphereRTActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
