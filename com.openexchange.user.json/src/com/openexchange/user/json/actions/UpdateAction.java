@@ -113,14 +113,17 @@ public final class UpdateAction extends AbstractUserAction {
         super();
     }
 
-    private static ContactField[] CONTACT_FIELDS = {
-        ContactField.DISTRIBUTIONLIST, ContactField.LINKS, ContactField.CATEGORIES, ContactField.COLOR_LABEL, ContactField.PRIVATE_FLAG,
-        ContactField.NUMBER_OF_ATTACHMENTS, ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID,
-        ContactField.CREATED_BY, ContactField.CREATION_DATE, ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED, ContactField.STATE_HOME,
-        ContactField.COMPANY, ContactField.CELLULAR_TELEPHONE1, ContactField.STREET_HOME, ContactField.STREET_BUSINESS, ContactField.TELEPHONE_HOME1,
-        ContactField.STATE_BUSINESS, ContactField.DISPLAY_NAME, ContactField.SUR_NAME, ContactField.CITY_HOME, ContactField.MIDDLE_NAME,
-        ContactField.BIRTHDAY, ContactField.FAX_BUSINESS, ContactField.GIVEN_NAME, ContactField.POSTAL_CODE_HOME, ContactField.POSTAL_CODE_BUSINESS,
-        ContactField.TELEPHONE_BUSINESS1, ContactField.CITY_BUSINESS, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE };
+    private static ContactField[] CONTACT_FIELDS = ContactField.values();
+
+    //    {
+    //        ContactField.DISTRIBUTIONLIST, ContactField.LINKS, ContactField.CATEGORIES, ContactField.COLOR_LABEL, ContactField.PRIVATE_FLAG,
+    //        ContactField.NUMBER_OF_ATTACHMENTS, ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID,
+    //        ContactField.CREATED_BY, ContactField.CREATION_DATE, ContactField.MODIFIED_BY, ContactField.LAST_MODIFIED, ContactField.STATE_HOME,
+    //        ContactField.COMPANY, ContactField.CELLULAR_TELEPHONE1, ContactField.STREET_HOME, ContactField.STREET_BUSINESS, ContactField.TELEPHONE_HOME1,
+    //        ContactField.STATE_BUSINESS, ContactField.DISPLAY_NAME, ContactField.SUR_NAME, ContactField.CITY_HOME, ContactField.MIDDLE_NAME,
+    //        ContactField.BIRTHDAY, ContactField.FAX_BUSINESS, ContactField.GIVEN_NAME, ContactField.POSTAL_CODE_HOME, ContactField.POSTAL_CODE_BUSINESS,
+    //        ContactField.TELEPHONE_BUSINESS1, ContactField.CITY_BUSINESS, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE
+    //    }
 
     private static UserField[] USER_FIELDS = { UserField.ID, UserField.LOCALE, UserField.TIME_ZONE };
 
