@@ -133,5 +133,9 @@ public class JobInfoWrapper implements Serializable {
     public void updateLastRun() {
         lastRun = System.currentTimeMillis();
     }
+    
+    public void updateLastRun(long time) {
+        lastRun = time;
+    }
 
 }
