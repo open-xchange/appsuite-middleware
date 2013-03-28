@@ -1,6 +1,7 @@
 * 2013-03-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 25596: Reduced capacity of the queue used by log service
+ - Fix for bug 25560: Handle possible connect error to Sieve server more gracefully
 
 * 2013-03-27 - thorben.betten@open-xchange.com
 
