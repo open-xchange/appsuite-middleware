@@ -92,6 +92,16 @@ public final class TmpFileFileHolder implements IFileHolder {
         tmpFile.delete();
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        try {
+            close();
+        } catch (final Exception ignore) {
+            // Ignore
+        }
+    }
+
     /**
      * Gets the newly created file.
      *
@@ -168,6 +178,21 @@ public final class TmpFileFileHolder implements IFileHolder {
         this.disposition = disposition;
     }
 
+    private static volatile File uploadDirectory;
+    private static File uploadDirectory() {
+        File tmp = uploadDirectory;
+        if (null == tmp) {
+            synchronized (TmpFileFileHolder.class) {
+                tmp = uploadDirectory;
+                if (null == tmp) {
+                    tmp = new File(ServerConfig.getProperty(ServerConfig.Property.UploadDirectory));
+                    uploadDirectory = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
     /**
      * Creates a new empty file. If this method returns successfully then it is guaranteed that:
      * <ol>
@@ -181,8 +206,7 @@ public final class TmpFileFileHolder implements IFileHolder {
      */
     public static File newTempFile() throws OXException {
         try {
-            final File tmpFile =
-                File.createTempFile("open-xchange-", ".tmp", new File(ServerConfig.getProperty(ServerConfig.Property.UploadDirectory)));
+            final File tmpFile = File.createTempFile("open-xchange-", ".tmp", uploadDirectory());
             tmpFile.deleteOnExit();
             return tmpFile;
         } catch (final IOException e) {
