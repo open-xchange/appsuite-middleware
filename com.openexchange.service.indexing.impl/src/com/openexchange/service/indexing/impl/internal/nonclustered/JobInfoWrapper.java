@@ -70,6 +70,8 @@ public class JobInfoWrapper implements Serializable {
     private final long initialInterval;
 
     private long interval;
+    
+    private long lastRun = 0L;
 
     private final int progressionRate;
 
@@ -119,6 +121,10 @@ public class JobInfoWrapper implements Serializable {
         return progressionRate;
     }
     
+    public long getLastRun() {
+        return lastRun;
+    }
+    
     public void touch() {
         lastUpdate = System.currentTimeMillis();
         interval = initialInterval;
@@ -127,6 +133,10 @@ public class JobInfoWrapper implements Serializable {
     public long increaseInterval() {
         interval = interval + (interval * progressionRate / 100);
         return interval;
+    }
+    
+    public void updateLastRun() {
+        lastRun = System.currentTimeMillis();
     }
 
 }

@@ -112,36 +112,76 @@ public class IndexingServiceImpl implements IndexingService {
 
         JobInfoWrapper infoWrapper = new JobInfoWrapper(info, timeout, initialInterval, progressionRate);
         JobKey jobKey = Tools.generateJobKey(info, null);
-        boolean added = RecurringJobsManager.addOrUpdateJob(jobKey.toString(), infoWrapper);
-        if (!onlyResetProgression || added) {
-            JobDetail jobDetail = JobBuilder.newJob(ProgressiveRecurringJob.class)
-                .withIdentity(jobKey)
-                .build();
-
-            String triggerName = info.toUniqueId() + "/withProgressiveInterval";
-            SimpleTrigger trigger = TriggerBuilder.newTrigger()
-                .forJob(jobDetail.getKey())
-                .withIdentity(triggerName, Tools.generateTriggerGroup(info.contextId, info.userId))
-                .startAt(startDate)
-                .withPriority(priority)
-                .withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow())
-                .build();
-
-            QuartzService quartzService = Services.getService(QuartzService.class);
-            Scheduler scheduler = quartzService.getScheduler(
-                SchedulerConfig.getSchedulerName(),
-                SchedulerConfig.start(),
-                SchedulerConfig.getThreadCount());
-            try {
-                scheduler.addJob(jobDetail, true);
-                if (scheduler.checkExists(trigger.getKey())) {
-                    scheduler.rescheduleJob(trigger.getKey(), trigger);
-                } else {
-                    scheduler.scheduleJob(trigger);
-                }
-            } catch (SchedulerException e) {
-                throw new OXException(e);
+        JobInfoWrapper old = RecurringJobsManager.addOrUpdateJob(jobKey.toString(), infoWrapper);
+        
+        boolean scheduleJob = false;
+        if (old == null) {
+            scheduleJob = true;
+        } else {
+            if (onlyResetProgression) {
+                /*
+                 * If a node dies, all locally scheduled triggers are lost. 
+                 * Despite the jobInfo stays in the distributed collection.
+                 * In those cases the next scheduled run of a job doesn't get fired.
+                 * We can detect such a "misfire" and restore the according trigger.
+                 */
+                scheduleJob = wasMisfired(old);
+            } else {
+                scheduleJob = true;
             }
+        }
+
+        if (scheduleJob) {
+            scheduleProgressiveJob(jobKey, info, startDate, priority);
+        }
+    }
+    
+    private boolean wasMisfired(JobInfoWrapper old) {
+        long lastRun = old.getLastRun();
+        long interval = old.getInterval();
+        long now = System.currentTimeMillis();
+        long safetyGap = 60 * 60000L;
+        long diff = now - (lastRun + interval);
+        if (diff > safetyGap) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Job " + old.getJobInfo().toString() + " was misfired for " + diff + 
+                    "ms. Re-adding trigger and job on session reactivation.");
+            }
+            return true;
+        }
+        
+        return false;
+    }
+    
+    private void scheduleProgressiveJob(JobKey jobKey, JobInfo info, Date startDate, int priority) throws OXException {
+        QuartzService quartzService = Services.getService(QuartzService.class);
+        Scheduler scheduler = quartzService.getScheduler(
+            SchedulerConfig.getSchedulerName(),
+            SchedulerConfig.start(),
+            SchedulerConfig.getThreadCount());
+        
+        JobDetail jobDetail = JobBuilder.newJob(ProgressiveRecurringJob.class)
+            .withIdentity(jobKey)
+            .build();
+
+        String triggerName = info.toUniqueId() + "/withProgressiveInterval";
+        SimpleTrigger trigger = TriggerBuilder.newTrigger()
+            .forJob(jobDetail.getKey())
+            .withIdentity(triggerName, Tools.generateTriggerGroup(info.contextId, info.userId))
+            .startAt(startDate)
+            .withPriority(priority)
+            .withSchedule(SimpleScheduleBuilder.simpleSchedule().withMisfireHandlingInstructionFireNow())
+            .build();
+        
+        try {
+            scheduler.addJob(jobDetail, true);
+            if (scheduler.checkExists(trigger.getKey())) {
+                scheduler.rescheduleJob(trigger.getKey(), trigger);
+            } else {
+                scheduler.scheduleJob(trigger);
+            }
+        } catch (SchedulerException e) {
+            throw new OXException(e);
         }
     }
 

@@ -54,9 +54,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import junit.framework.Assert;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobBuilder;
@@ -159,7 +157,7 @@ public class ProgressiveRecurrenceTest {
                 }
             }, true);
             
-            Assert.assertTrue("Job already existed", RecurringJobsManager.addOrUpdateJob(jobDetail.getKey().toString(), infoWrapper));
+            Assert.assertTrue("Job already existed", RecurringJobsManager.addOrUpdateJob(jobDetail.getKey().toString(), infoWrapper) == null);
             Assert.assertTrue("Wrong job count in RecurringJobsManager", RecurringJobsManager.getJobCount() == 1);
             scheduler.scheduleJob(jobDetail, trigger);
 
@@ -244,7 +242,7 @@ public class ProgressiveRecurrenceTest {
                 }
             }, true);
             
-            Assert.assertTrue("Job already existed", RecurringJobsManager.addOrUpdateJob(jobDetail.getKey().toString(), infoWrapper));
+            Assert.assertTrue("Job already existed", RecurringJobsManager.addOrUpdateJob(jobDetail.getKey().toString(), infoWrapper) == null);
             Assert.assertTrue("Wrong job count in RecurringJobsManager", RecurringJobsManager.getJobCount() == 1);
             scheduler.scheduleJob(jobDetail, trigger);
 

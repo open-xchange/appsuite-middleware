@@ -138,24 +138,23 @@ public class ProgressiveRecurringJob implements Job {
              * and was not updated since X, then remove it...".
              */
             try {
-                if (perform(context, infoWrapper)) {
-                    if (isProgressive(infoWrapper)) {
-                        long newInterval = infoWrapper.increaseInterval();
-                        long nextStartTime = System.currentTimeMillis() + newInterval;
-                        Trigger trigger = context.getTrigger();
-                        TriggerBuilder<? extends Trigger> triggerBuilder = trigger.getTriggerBuilder();
-                        triggerBuilder.startAt(new Date(nextStartTime));
-                        try {
-                            Scheduler scheduler = context.getScheduler();
-                            scheduler.rescheduleJob(trigger.getKey(), triggerBuilder.build());
-                            RecurringJobsManager.addOrUpdateJob(jobId, infoWrapper);
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Job was re-scheduled: " + infoWrapper.getJobInfo().toString() + ", nextStartTime: " +
-                                    nextStartTime + ", newInterval: " + newInterval);
-                            }
-                        } catch (SchedulerException e) {
-                            LOG.error("Could not re-schedule job: " + infoWrapper.getJobInfo().toString(), e);
+                if (perform(context, infoWrapper) && isProgressive(infoWrapper)) {
+                    long newInterval = infoWrapper.increaseInterval();
+                    infoWrapper.updateLastRun();
+                    long nextStartTime = infoWrapper.getLastRun() + newInterval;
+                    Trigger trigger = context.getTrigger();
+                    TriggerBuilder<? extends Trigger> triggerBuilder = trigger.getTriggerBuilder();
+                    triggerBuilder.startAt(new Date(nextStartTime));
+                    try {
+                        Scheduler scheduler = context.getScheduler();
+                        scheduler.rescheduleJob(trigger.getKey(), triggerBuilder.build());
+                        RecurringJobsManager.addOrUpdateJob(jobId, infoWrapper);
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Job was re-scheduled: " + infoWrapper.getJobInfo().toString() + ", nextStartTime: " +
+                                nextStartTime + ", newInterval: " + newInterval);
                         }
+                    } catch (SchedulerException e) {
+                        LOG.error("Could not re-schedule job: " + infoWrapper.getJobInfo().toString(), e);
                     }
                 }
             } catch (OXException e) {
