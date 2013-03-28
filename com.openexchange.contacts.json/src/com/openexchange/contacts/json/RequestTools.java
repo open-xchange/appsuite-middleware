@@ -195,9 +195,13 @@ public class RequestTools {
                 }
             }
             // Final check for image's width & height
+            /*
+             * 
             if (!isValidImage(Streams.asInputStream(outputStream))) {
                 throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), mimeType);
             }
+             * 
+             */
             contact.setImage1(outputStream.toByteArray());
             contact.setImageContentType(null == mimeType ? checkedMimeType : mimeType);
         } catch (final FileNotFoundException e) {
