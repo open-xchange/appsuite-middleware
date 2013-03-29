@@ -26,14 +26,13 @@ define("ui/ui", function () {
     var url = proto+"//"+host+"/realtime/atmosphere/rt";
     
     var request = {
-        url: url,
+        url: url+'?session='+session,
         contentType : "application/json",
         logLevel : 'debug',
         transport : 'long-polling' ,
         fallbackTransport: 'long-polling',
         timeout: 50000,
-        maxRequests : 3,
-        headers : {session: session}
+        maxRequests : 3
         };
 
 
