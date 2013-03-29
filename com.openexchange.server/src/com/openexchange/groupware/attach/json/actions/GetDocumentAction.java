@@ -49,10 +49,9 @@
 
 package com.openexchange.groupware.attach.json.actions;
 
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
@@ -68,7 +67,6 @@ import com.openexchange.log.Log;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link GetDocumentAction}
@@ -128,26 +126,18 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
             ATTACHMENT_BASE.startTransaction();
             final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
             /*
-             * Get bytes
+             * Get input stream
              */
-            final ByteArrayOutputStream os;
             final InputStream documentData = ATTACHMENT_BASE.getAttachedFile(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
+            final ThresholdFileHolder fileHolder = new ThresholdFileHolder();
             try {
-                os = new UnsynchronizedByteArrayOutputStream();
-                final byte[] buffer = new byte[0xFFFF];
-                int bytesRead = 0;
-                while ((bytesRead = documentData.read(buffer)) > 0) {
-                    os.write(buffer, 0, bytesRead);
-                }
-                os.flush();
-
+                fileHolder.write(documentData);
             } finally {
                 Streams.close(documentData);
             }
             /*
              * File holder
              */
-            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(os.toByteArray());
             fileHolder.setContentType(contentType);
             fileHolder.setName(attachment.getFilename());
             ATTACHMENT_BASE.commit();

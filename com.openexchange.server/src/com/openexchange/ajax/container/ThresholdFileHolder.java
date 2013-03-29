@@ -193,12 +193,17 @@ public final class ThresholdFileHolder implements IFileHolder {
 
     /**
      * Writes the specified content to this file holder.
+     * <p>
+     * Orderly closes specified {@link InputStream} instance.
      * 
      * @param in The content to be written.
      * @return This file holder with content written
      * @throws OXException If write attempt fails
      */
     public ThresholdFileHolder write(final InputStream in) throws OXException {
+        if (null == in) {
+            return this;
+        }
         OutputStream out = null;
         try {
             File tempFile = this.tempFile;
