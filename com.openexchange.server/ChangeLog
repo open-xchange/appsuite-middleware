@@ -1,3 +1,7 @@
+* 2013-03-29 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 25626: Added admin id to admin user after creation in database
+
 * 2013-03-28 - marcus.klein@open-xchange.com
 
  - Fix for bug 25099: Used strings from the XML schema elements needs to be interned when using IBM Java.
