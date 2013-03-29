@@ -49,80 +49,118 @@
 
 package com.openexchange.realtime.atmosphere.impl;
 
+import java.util.Map;
+import java.util.Set;
+import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereResourceEventListener;
-import org.atmosphere.cpr.Broadcaster;
+import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
-
+import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
+import com.openexchange.realtime.directory.ResourceDirectory;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.util.IDMap;
 
 /**
  * {@link AtmosphereResourceCleanupListener} - Properly disposes Broadcasters after the last resource was disconnected.
- *
+ * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class AtmosphereResourceCleanupListener implements AtmosphereResourceEventListener {
+
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(RTAtmosphereHandler.class));
-    private final Broadcaster[] associatedBroadcasters;
-    private final RTAtmosphereState atmosphereState;
-    private final RTAtmosphereHandler handler;
+
+    private final AtmosphereResource atmosphereResource;
+
+    private final ID fullID;
+
+    /*
+     * Map general ids (user@context) to full ids (ox://user@context/resource.browserx.taby) This is used for lookups via isConnected
+     */
+    private final IDMap<Set<ID>> generalToFullIDMap;
+
+    /*
+     * Map full client IDs to the AtmosphereResource that represents their connection to the server
+     */
+    private final IDMap<AtmosphereResource> fullIDToResourceMap;
+
     /**
      * Initializes a new {@link AtmosphereResourceCleanupListener}.
-     * @param associatedBroadcasters the associated Broadcasters
+     * 
+     * @param atmosphereResource The AtmosphereResource this AtmosphereResourceEventListener was added to
+     * @param fullID The full ID of the client connected via atmosphereResource
+     * @param generalToFullIDMap Reference to the map of the RTAtmosphereHandler that tracks full client IDs to the AtmosphereResource that
+     *            represents their connection to the server
+     * @param fullIDToResourceMap Reference to the map of the RTAtmosphereHandler that tracks general ids to full ids.
      */
-    public AtmosphereResourceCleanupListener(RTAtmosphereHandler handler, RTAtmosphereState atmosphereState, Broadcaster... associatedBroadcasters) {
-        this.handler = handler;
-        this.associatedBroadcasters = associatedBroadcasters;
-        this.atmosphereState = atmosphereState;
+    public AtmosphereResourceCleanupListener(AtmosphereResource atmosphereResource, ID fullID, IDMap<Set<ID>> generalToFullIDMap, IDMap<AtmosphereResource> fullIDToResourceMap) {
+        this.atmosphereResource = atmosphereResource;
+        this.fullID = fullID;
+        this.generalToFullIDMap = generalToFullIDMap;
+        this.fullIDToResourceMap = fullIDToResourceMap;
     }
 
     @Override
     public void onSuspend(AtmosphereResourceEvent event) {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Suspending: "+event.broadcaster().getID());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Suspending: " + fullID + " and AtmosphereResource " + atmosphereResource.uuid());
         }
     }
 
     @Override
     public void onResume(AtmosphereResourceEvent event) {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Resuming: "+event.broadcaster().getID());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Resuming: " + fullID + " and AtmosphereResource " + atmosphereResource.uuid());
         }
     }
 
     @Override
     public void onDisconnect(AtmosphereResourceEvent event) {
-        for (Broadcaster broadcaster : associatedBroadcasters) {
-            int size = broadcaster.getAtmosphereResources().size();
-            if(size==1) {
-                if(LOG.isDebugEnabled()) {
-                    LOG.debug("Destroying broadcaster: " + broadcaster.getID());
-                }
-              broadcaster.destroy();
-            }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Disconnecting: " + fullID + " and AtmosphereResource " + atmosphereResource.uuid());
         }
         
-        handler.onDisconnect(atmosphereState);
+        // remove single full id from resourceDirectory
+        ResourceDirectory resourceDirectory = AtmosphereServiceRegistry.getInstance().getService(ResourceDirectory.class);
+        try {
+            resourceDirectory.remove(fullID);
+        } catch (OXException e) {
+            LOG.error("Could not unregister resource with ID: " + fullID, e);
+        }
+        
+        // remove fullID from general -> fullID mapping
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Removing from generalID -> conreteID map: " + fullID);
+        }
+        Set<ID> fullIDs = generalToFullIDMap.get(fullID.toGeneralForm());
+        fullIDs.remove(fullID);
+        
+        // remove fullID -> Resource mapping
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Removing from generalID -> conreteID map: " + fullID);
+        }
+        fullIDToResourceMap.remove(fullID);
     }
 
     @Override
     public void onBroadcast(AtmosphereResourceEvent event) {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Broadcasting: "+event.broadcaster().getID());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Broadcasting: " + fullID + " and AtmosphereResource " + atmosphereResource.uuid());
         }
     }
 
     @Override
     public void onThrowable(AtmosphereResourceEvent event) {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Throwing: "+event.broadcaster().getID());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Throwing: " + fullID + " and AtmosphereResource " + atmosphereResource.uuid(), event.throwable());
         }
     }
 
     @Override
     public void onPreSuspend(AtmosphereResourceEvent event) {
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Pre Suspending: "+event.broadcaster().getID());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Pre Suspending: " + fullID + " and AtmosphereResource " + atmosphereResource.uuid());
         }
     }
 
