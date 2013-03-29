@@ -78,6 +78,7 @@ public class HazelcastStanzaStorage implements StanzaStorage {
     public void pushStanza(ID forID, TimedStanza stanza) throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
         MultiMap<ID, TimedStanza> stanzaMap = hazelcast.getMultiMap(STANZA_MAP);
+        stanza.makeSerializable();
         stanzaMap.put(forID, stanza);
     }
 
@@ -106,7 +107,9 @@ public class HazelcastStanzaStorage implements StanzaStorage {
                 return 1;
             }
         });
-        
+        for (TimedStanza timedStanza : sortedStanzas) {
+            timedStanza.makeInternal();
+        }
         return sortedStanzas;
     }
 
