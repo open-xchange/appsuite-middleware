@@ -171,7 +171,7 @@ public final class ThresholdFileHolder implements IFileHolder {
         if (bytes == null) {
             return this;
         }
-        if (0 == count && bytes.length > threshold) {
+        if (null == tempFile && null == buf && bytes.length > threshold) {
             // Nothing written & content does exceed threshold
             final File tempFile = TmpFileFileHolder.newTempFile();
             this.tempFile = tempFile;
