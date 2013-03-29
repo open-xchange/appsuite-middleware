@@ -59,7 +59,6 @@ import java.io.OutputStream;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link ThresholdFileHolder} - A {@link IFileHolder} that backs data in a <code>byte</code> array as long as specified threshold is not
@@ -69,8 +68,11 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  */
 public final class ThresholdFileHolder implements IFileHolder {
 
+    /** The default in-memory threshold of 500KB. */
+    public static final int DEFAULT_IN_MEMORY_THRESHOLD = 500 * 1024; // 500KB
+
     /** The in-memory buffer where data is stored */
-    private byte buf[];
+    private ByteArrayOutputStream buf;
 
     /** The number of valid bytes that were already written */
     private int count;
@@ -97,7 +99,16 @@ public final class ThresholdFileHolder implements IFileHolder {
     private final int initalCapacity;
 
     /**
-     * Initializes a new {@link ThresholdFileHolder}.
+     * Initializes a new {@link ThresholdFileHolder} with default threshold and default initial capacity.
+     */
+    public ThresholdFileHolder() {
+        this(-1, -1);
+    }
+
+    /**
+     * Initializes a new {@link ThresholdFileHolder} with default initial capacity.
+     * 
+     * @param threshold The threshold
      */
     public ThresholdFileHolder(final int threshold) {
         this(threshold, -1);
@@ -105,22 +116,61 @@ public final class ThresholdFileHolder implements IFileHolder {
 
     /**
      * Initializes a new {@link ThresholdFileHolder}.
+     * 
+     * @param threshold The threshold
+     * @param initalCapacity The initial capacity
      */
     public ThresholdFileHolder(final int threshold, final int initalCapacity) {
         super();
         count = 0;
-        this.threshold = threshold;
+        this.threshold = threshold > 0 ? threshold : DEFAULT_IN_MEMORY_THRESHOLD;
         contentType = "application/octet-stream";
         this.initalCapacity = initalCapacity > 0 ? initalCapacity : 2048;
+    }
+
+    /**
+     * Gets the {@link OutputStream} view on this file holder.
+     * 
+     * @return An {@link OutputStream} that writes data into this file holder
+     */
+    public OutputStream asOutputStream() {
+        return new TransferringOutStream(this);
     }
 
     /**
      * Writes the specified content to this file holder.
      * 
      * @param bytes The content to be written.
+     * @param off the start offset in the data.
+     * @param len the number of bytes to write.
+     * @return This file holder with content written
+     * @throws OXException If write attempt fails
+     * @throws IndexOutOfBoundsException If illegal arguments are specified
+     */
+    public ThresholdFileHolder write(final byte[] bytes, final int off, final int len) throws OXException {
+        if (bytes == null) {
+            return this;
+        }
+        if ((off < 0) || (off > bytes.length) || (len < 0) || ((off + len) > bytes.length) || ((off + len) < 0)) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (len == 0) {
+            return this;
+        }
+        return write(new com.openexchange.java.UnsynchronizedByteArrayInputStream(bytes, off, len));
+    }
+
+    /**
+     * Writes the specified content to this file holder.
+     * 
+     * @param bytes The content to be written.
+     * @return This file holder with content written
      * @throws OXException If write attempt fails
      */
-    public void write(final byte[] bytes) throws OXException {
+    public ThresholdFileHolder write(final byte[] bytes) throws OXException {
+        if (bytes == null) {
+            return this;
+        }
         if (0 == count && bytes.length > threshold) {
             // Nothing written & content does exceed threshold
             final File tempFile = TmpFileFileHolder.newTempFile();
@@ -135,44 +185,62 @@ public final class ThresholdFileHolder implements IFileHolder {
             } finally {
                 Streams.close(out);
             }
-            return;
+            return this;
         }
         // Deal with possible available content
-        write(Streams.newByteArrayInputStream(bytes));
+        return write(Streams.newByteArrayInputStream(bytes));
     }
 
     /**
      * Writes the specified content to this file holder.
      * 
      * @param in The content to be written.
+     * @return This file holder with content written
      * @throws OXException If write attempt fails
      */
-    public void write(final InputStream in) throws OXException {
-        ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(initalCapacity);
-        OutputStream out = baos;
+    public ThresholdFileHolder write(final InputStream in) throws OXException {
+        OutputStream out = null;
         try {
-            int count = this.count;
             File tempFile = this.tempFile;
-            final int inMemoryThreshold = threshold;
-            final int buflen = 0xFFFF; // 64KB
-            final byte[] buffer = new byte[buflen];
-            for (int len; (len = in.read(buffer, 0, buflen)) > 0;) {
-                if (null == tempFile) {
-                    // Count bytes to stream to file if threshold is exceeded
-                    count += len;
-                    if (count > inMemoryThreshold) {
-                        tempFile = TmpFileFileHolder.newTempFile();
-                        this.tempFile = tempFile;
-                        out = new FileOutputStream(tempFile);
-                        out.write(baos.toByteArray());
-                        baos = null;
-                    }
-                }
-                out.write(buffer, 0, len);
-            }
-            out.flush();
             if (null == tempFile) {
-                this.count = count;
+                // Threshold not yet exceeded
+                ByteArrayOutputStream baos = buf;
+                if (null == baos) {
+                    baos = Streams.newByteArrayOutputStream(initalCapacity);
+                    this.buf = baos;
+                }
+                out = baos;
+                int count = this.count;
+                final int inMemoryThreshold = threshold;
+                final int buflen = 0xFFFF; // 64KB
+                final byte[] buffer = new byte[buflen];
+                for (int len; (len = in.read(buffer, 0, buflen)) > 0;) {
+                    if (null == tempFile) {
+                        // Count bytes to stream to file if threshold is exceeded
+                        count += len;
+                        if (count > inMemoryThreshold) {
+                            tempFile = TmpFileFileHolder.newTempFile();
+                            this.tempFile = tempFile;
+                            out = new FileOutputStream(tempFile);
+                            out.write(baos.toByteArray());
+                            baos = null;
+                        }
+                    }
+                    out.write(buffer, 0, len);
+                }
+                out.flush();
+                if (null == tempFile) {
+                    this.count = count;
+                }
+            } else {
+                // Threshold already exceeded. Stream to file.
+                out = new FileOutputStream(tempFile);
+                final int buflen = 0xFFFF; // 64KB
+                final byte[] buffer = new byte[buflen];
+                for (int len; (len = in.read(buffer, 0, buflen)) > 0;) {
+                    out.write(buffer, 0, len);
+                }
+                out.flush();
             }
         } catch (final IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
@@ -180,6 +248,7 @@ public final class ThresholdFileHolder implements IFileHolder {
             Streams.close(in);
             Streams.close(out);
         }
+        return this;
     }
 
     @Override
@@ -209,9 +278,9 @@ public final class ThresholdFileHolder implements IFileHolder {
 
     @Override
     public InputStream getStream() throws OXException {
-        final byte[] buf = this.buf;
+        final ByteArrayOutputStream buf = this.buf;
         if (null != buf) {
-            return new UnsynchronizedByteArrayInputStream(buf);
+            return Streams.asInputStream(buf);
         }
         final File tempFile = this.tempFile;
         if (null == tempFile) {
@@ -227,9 +296,9 @@ public final class ThresholdFileHolder implements IFileHolder {
 
     @Override
     public long getLength() {
-        final byte[] buf = this.buf;
+        final ByteArrayOutputStream buf = this.buf;
         if (null != buf) {
-            return buf.length;
+            return buf.size();
         }
         final File tempFile = this.tempFile;
         if (null == tempFile) {
@@ -293,5 +362,39 @@ public final class ThresholdFileHolder implements IFileHolder {
     public void setDelivery(final String delivery) {
         this.delivery = delivery;
     }
+
+    private static final class TransferringOutStream extends OutputStream {
+
+        private final ThresholdFileHolder fileHolder;
+
+        TransferringOutStream(final ThresholdFileHolder fileHolder) {
+            super();
+            this.fileHolder = fileHolder;
+        }
+
+        @Override
+        public void write(final int b) throws IOException {
+            try {
+                fileHolder.write(new byte[] { (byte) b });
+            } catch (final OXException e) {
+                if (e.getCause() instanceof IOException) {
+                    throw (IOException) e.getCause();
+                }
+                throw new IOException(e);
+            }
+        }
+
+        @Override
+        public void write(final byte[] b, final int off, final int len) throws IOException {
+            try {
+                fileHolder.write(b, off, len);
+            } catch (final OXException e) {
+                if (e.getCause() instanceof IOException) {
+                    throw (IOException) e.getCause();
+                }
+                throw new IOException(e);
+            }
+        }
+    } // End of class TransferringOutStream
 
 }

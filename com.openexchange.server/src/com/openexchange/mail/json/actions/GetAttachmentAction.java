@@ -111,9 +111,6 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 @DispatcherNotes(allowPublicSession = true)
 public final class GetAttachmentAction extends AbstractMailAction implements ETagAwareAJAXActionService {
 
-    /** The in-memory threshold */
-    private static final int IN_MEMORY_THRESHOLD = 500 * 1024; // 500KB
-
     /**
      * Initializes a new {@link GetAttachmentAction}.
      *
@@ -251,7 +248,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
              * 
              * Read from stream
              */
-            final ThresholdFileHolder fileHolder = new ThresholdFileHolder(IN_MEMORY_THRESHOLD);
+            final ThresholdFileHolder fileHolder = new ThresholdFileHolder();
             fileHolder.write(attachmentInputStream);
             fileHolder.setName(mailPart.getFileName());
             fileHolder.setContentType(saveToDisk ? "application/octet-stream" : mailPart.getContentType().toString());
