@@ -251,6 +251,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
 
     protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session, final HttpServletResponse resp) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData().setHttpServletResponse(resp);
+        retval.setUserAgent(req.getHeader("user-agent"));
         retval.setMultipart(isFileUpload);
         /*
          * Set HTTP Servlet request instance

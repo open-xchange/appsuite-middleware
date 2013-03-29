@@ -1,6 +1,24 @@
+* 2013-03-29 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 25626: Added admin id to admin user after creation in database
+
+* 2013-03-28 - marcus.klein@open-xchange.com
+
+ - Fix for bug 25099: Used strings from the XML schema elements needs to be interned when using IBM Java.
+
+* 2013-03-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25596: Reduced capacity of the queue used by log service
+ - Fix for bug 25560: Handle possible connect error to Sieve server more gracefully
+ - Fix for bug 25346: Support for all contact fields by user JSON interface
+ - Fix for bug 25571: Handle absent contact
+ - Fix for bug 24724: Pass stack trace as separate argument to log routine, rather than appending it into log message
+ - Fix for bug 25581: Allow passed "content_type" parameter if its primary type matches the one of the validated MIME type
+ - Fix for bug 25566: Maintain commas in processed CSS selectors
+
 * 2013-03-27 - thorben.betten@open-xchange.com
 
- - Fix for bug 25561: Check possibly URL-encodings in Content-Type value
+ - Fix for bug 25561: Check possible URL-encodings in Content-Type value
  - Fix for bug 24889: Register preference items regardless of enabled/disabled status
  - Fix for bug 25589: Added streaming support when exporting vCards
  - Fix fir bug 25587: Denied output of GMX crawler

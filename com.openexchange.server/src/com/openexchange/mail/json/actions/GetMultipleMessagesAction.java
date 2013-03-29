@@ -49,14 +49,13 @@
 
 package com.openexchange.mail.json.actions;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -68,7 +67,6 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link GetMultipleMessagesAction}
@@ -133,25 +131,22 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
                 /*
                  * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.
                  */
-                final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
+                final ThresholdFileHolder fileHolder = new ThresholdFileHolder();
                 /*
                  * Write from content's input stream to response output stream
                  */
-                final InputStream zipInputStream = mf.getInputStream();
-                try {
-                    final byte[] buffer = new byte[0xFFFF];
-                    for (int len; (len = zipInputStream.read(buffer, 0, buffer.length)) > 0;) {
-                        out.write(buffer, 0, len);
+                {
+                    final InputStream zipInputStream = mf.getInputStream();
+                    try {
+                        fileHolder.write(zipInputStream);
+                    } finally {
+                        Streams.close(zipInputStream);
                     }
-                    out.flush();
-                } finally {
-                    Streams.close(zipInputStream);
                 }
                 /*
-                 * Create file holder
+                 * Parameterize file holder
                  */
                 req.getRequest().setFormat("file");
-                final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(out.toByteArray());
                 fileHolder.setName(fileName);
                 fileHolder.setContentType("application/octet-stream");
                 return new AJAXRequestResult(fileHolder, "file");
@@ -161,11 +156,14 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
                     mf = null;
                 }
             }
-        } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+        } catch (final OXException e) {
+            if (e.getCause() instanceof IOException) {
+                final IOException ioe = (IOException) e.getCause();
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(ioe.getClass().getName())) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(ioe);
+                }
             }
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            throw e;
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

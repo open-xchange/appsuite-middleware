@@ -1225,10 +1225,10 @@ public final class SessionHandler {
             final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             dic.put(SessiondEventConstants.PROP_SESSION, session);
             dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
-            final Event event = new Event(SessiondEventConstants.TOPIC_ADD_SESSION, dic);
+            final Event event = new Event(SessiondEventConstants.TOPIC_REACTIVATE_SESSION, dic);
             eventAdmin.postEvent(event);
             if (DEBUG) {
-                LOG.debug("Posted event for added session");
+                LOG.debug("Posted event for reactivated session");
             }
         }
     }

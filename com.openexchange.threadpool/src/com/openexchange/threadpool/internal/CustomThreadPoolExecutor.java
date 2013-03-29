@@ -85,6 +85,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
@@ -1259,17 +1260,23 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                                         }
                                     }
                                     for (final Map.Entry<String, String> entry : sorted.entrySet()) {
-                                        logBuilder.append(entry.getKey()).append('=').append(entry.getValue()).append('\n');
+                                        logBuilder.append(entry.getKey()).append('=').append(entry.getValue()).append(lineSeparator);
                                     }
-                                    logBuilder.append('\n');
+                                    logBuilder.append(lineSeparator);
                                 }
                                 logBuilder.append("Worker \"").append(thread.getName());
                                 logBuilder.append("\" exceeds max. running time of ").append(maxRunningTime);
                                 logBuilder.append("msec -> Processing time: ").append(System.currentTimeMillis() - taskInfo.stamp);
                                 logBuilder.append("msec");
-                                logBuilder.append('\n');
-                                appendStackTrace(thread.getStackTrace(), logBuilder);
-                                LOG.info(logBuilder);
+                                if (Log.appendTraceToMessage()) {
+                                    logBuilder.append(lineSeparator);
+                                    appendStackTrace(thread.getStackTrace(), logBuilder);
+                                    LOG.info(logBuilder);
+                                } else {
+                                    final Throwable t = new Throwable();
+                                    t.setStackTrace(thread.getStackTrace());
+                                    LOG.info(logBuilder, t);
+                                }
                             }
                         }
                         if (poisoned) {

@@ -50,6 +50,7 @@
 package com.openexchange.realtime.handle;
 
 import java.io.Serializable;
+import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.Stanza;
 
 /**
@@ -83,6 +84,14 @@ public class TimedStanza implements Serializable {
 
     public Stanza getStanza() {
         return stanza;
+    }
+
+    public void makeSerializable() throws OXException {
+        stanza.transformPayloads("native");
+    }
+    
+    public void makeInternal() throws OXException {
+        stanza.transformPayloadsToInternal();
     }
 
 }

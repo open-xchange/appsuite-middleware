@@ -49,19 +49,19 @@
 
 package com.openexchange.mail.json.actions;
 
-import java.io.ByteArrayOutputStream;
+import static com.openexchange.ajax.helper.DownloadUtility.appendFilenameParameter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
-import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
@@ -78,19 +78,21 @@ import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.HashUtility;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link GetAttachmentAction}
@@ -200,36 +202,67 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 attachmentInputStream = mailPart.getInputStream();
             }
             /*
+             * Check for image data
+             */
+            boolean isImage = false;
+            {
+                final ContentType contentType = mailPart.getContentType();
+                if (contentType.startsWith("image/")) {
+                    isImage = true;
+                } else if (contentType.startsWith("application/octet-stream")) {
+                    final String fileName = mailPart.getFileName();
+                    if (null != fileName && MimeType2ExtMap.getContentType(fileName).startsWith("image/")) {
+                        isImage = true;
+                    }
+                }
+            }
+            /*-
+             * Try direct output if non-image data
+             * 
+             * Ignore in case of image data since subsequent transformation might be supposed to be applied
+             */
+            final AJAXRequestData requestData = req.getRequest();
+            if (!isImage) {
+                final OutputStream directOutputStream = requestData.optOutputStream();
+                if (null != directOutputStream) {
+                    requestData.setResponseHeader("Content-Type", saveToDisk ? "application/octet-stream" : mailPart.getContentType().toString());                    
+                    final StringAllocator sb = new StringAllocator(saveToDisk ? "attachment" : "inline");
+                    appendFilenameParameter(mailPart.getFileName(), null, requestData.getUserAgent(), sb);
+                    requestData.setResponseHeader("Content-Disposition", sb.toString());
+                    requestData.setResponseETag(getHash(folderPath, uid, imageContentId == null ? sequenceId : imageContentId), AJAXRequestResult.YEAR_IN_MILLIS * 50);
+                    try {
+                        final int buflen = 0xFFFF; // 64KB
+                        final byte[] buffer = new byte[buflen];
+                        for (int len; (len = attachmentInputStream.read(buffer, 0, buflen)) > 0;) {
+                            directOutputStream.write(buffer, 0, len);
+                        }
+                        directOutputStream.flush();
+                    } finally {
+                        Streams.close(attachmentInputStream);
+                    }
+                    return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
+                }
+            }
+            /*-
+             * The regular way...
+             * 
              * Read from stream
              */
-            @SuppressWarnings("resource")
-            ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
-            /*
-             * Write from content's input stream to byte array output stream
-             */
-            try {
-                final int buflen = 0xFFFF;
-                final byte[] buffer = new byte[buflen];
-                for (int len; (len = attachmentInputStream.read(buffer, 0, buflen)) > 0;) {
-                    out.write(buffer, 0, len);
-                }
-                out.flush();
-            } finally {
-                Streams.close(attachmentInputStream);
-            }
-            /*
-             * Create file holder
-             */
-            req.getRequest().setFormat("file");
-            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(out.toByteArray());
-            out = null;
+            final ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+            fileHolder.write(attachmentInputStream);
             fileHolder.setName(mailPart.getFileName());
             fileHolder.setContentType(saveToDisk ? "application/octet-stream" : mailPart.getContentType().toString());
             final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             /*
+             * Set format
+             */
+            if (!"preview_image".equals(requestData.getFormat())) {
+                requestData.setFormat("file");
+            }
+            /*
              * Set ETag
              */
-            setETag(UUID.randomUUID().toString(), AJAXRequestResult.YEAR_IN_MILLIS * 50, result);
+            setETag(getHash(folderPath, uid, imageContentId == null ? sequenceId : imageContentId), AJAXRequestResult.YEAR_IN_MILLIS * 50, result);
             /*
              * Return result
              */
@@ -327,6 +360,10 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
 
     private static String sanitizeHtml(final String htmlContent, final HtmlService htmlService) {
         return htmlService.sanitize(htmlContent, null, false, null, null);
+    }
+
+    private String getHash(final String folderPath, final String uid, final String sequenceId) {
+        return HashUtility.getHash(new com.openexchange.java.StringAllocator(32).append(folderPath).append('/').append(uid).append('/').append(sequenceId).toString(), "md5", "hex");
     }
 
 }

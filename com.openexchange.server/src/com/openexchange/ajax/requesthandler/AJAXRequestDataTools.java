@@ -137,6 +137,7 @@ public class AJAXRequestDataTools {
      */
     public AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session, final String prefix, final HttpServletResponse optResp) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData().setHttpServletResponse(optResp);
+        retval.setUserAgent(req.getHeader("user-agent"));
         parseHostName(retval, req, session);
         retval.setMultipart(isFileUpload);
         /*

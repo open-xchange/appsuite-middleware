@@ -47,27 +47,50 @@
  *
  */
 
-package com.openexchange.service.indexing.impl.internal.nonclustered;
+package com.openexchange.threadpool;
 
-import java.util.List;
-import java.util.Map;
-import javax.management.MBeanException;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
+import org.apache.commons.logging.Log;
+import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
+
 
 /**
- * {@link MonitoringMBean}
+ * {@link RunLoop}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface MonitoringMBean {
+public abstract class RunLoop<E> implements Runnable {
+    
+    private static final Log LOG = LogFactory.getLog(RunLoop.class);
+    
+    private BlockingQueue<E> queue = new LinkedBlockingDeque<E>();
 
-    public int getStoredJobs() throws MBeanException;
+    private String name;
+    
+    public RunLoop(String name) {
+        this.name = name;
+    }
+    
+    @Override
+    public void run() {
+        Thread.currentThread().setName(name);
+        while(true) {
+            try {
+                handle(queue.take());
+            } catch (OXException e) {
+                LOG.error(e.getMessage(), e);
+            } catch (InterruptedException e) {
+                return;
+            }
+        }
+    }
+    
+    public void offer(E element) {
+        queue.offer(element);
+    }
 
-    public int getLocalTriggers() throws MBeanException;
-
-    public int getRunningJobs() throws MBeanException;
-
-    public Map<String, String> getRunningJobDetails() throws MBeanException;
-
-    public List<String> getLocalTriggerDetails() throws MBeanException;
-
+    protected abstract void handle(E element) throws OXException;
+    
 }

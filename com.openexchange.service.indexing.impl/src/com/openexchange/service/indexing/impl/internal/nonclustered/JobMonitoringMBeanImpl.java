@@ -62,24 +62,25 @@ import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.TriggerKey;
 import org.quartz.impl.matchers.GroupMatcher;
+import com.openexchange.service.indexing.JobMonitoringMBean;
 
 
 /**
- * {@link MonitoringMBeanImpl}
+ * {@link JobMonitoringMBeanImpl}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class MonitoringMBeanImpl extends StandardMBean implements MonitoringMBean {
+public class JobMonitoringMBeanImpl extends StandardMBean implements JobMonitoringMBean {
     
     private final Scheduler scheduler;
 
     /**
-     * Initializes a new {@link MonitoringMBeanImpl}.
+     * Initializes a new {@link JobMonitoringMBeanImpl}.
      * @param mbeanInterface
      * @throws NotCompliantMBeanException
      */
-    public MonitoringMBeanImpl(Scheduler scheduler) throws NotCompliantMBeanException {
-        super(MonitoringMBean.class);
+    public JobMonitoringMBeanImpl(Scheduler scheduler) throws NotCompliantMBeanException {
+        super(JobMonitoringMBean.class);
         this.scheduler = scheduler;
     }
     
@@ -89,7 +90,12 @@ public class MonitoringMBeanImpl extends StandardMBean implements MonitoringMBea
     }
     
     @Override
-    public int getLocalTriggers() throws MBeanException {
+    public List<String> getStoredJobDetails() throws MBeanException {
+        return RecurringJobsManager.getJobIds();
+    }
+    
+    @Override
+    public int getLocalJobs() throws MBeanException {
         try {
             int count = 0;
             List<String> groups = scheduler.getTriggerGroupNames();
@@ -98,6 +104,23 @@ public class MonitoringMBeanImpl extends StandardMBean implements MonitoringMBea
                 count += triggerKeys.size();
             }
             return count;
+        } catch (Exception e) {
+            throw new MBeanException(e);
+        }
+    }
+    
+    @Override
+    public List<String> getLocalJobDetails() throws MBeanException {
+        try {
+            List<String> names = new ArrayList<String>();
+            List<String> groups = scheduler.getTriggerGroupNames();
+            for (String group : groups) {
+                Set<TriggerKey> triggerKeys = scheduler.getTriggerKeys(GroupMatcher.triggerGroupEquals(group));
+                for (TriggerKey k : triggerKeys) {
+                    names.add(k.toString());
+                }
+            }
+            return names;
         } catch (Exception e) {
             throw new MBeanException(e);
         }
@@ -129,22 +152,4 @@ public class MonitoringMBeanImpl extends StandardMBean implements MonitoringMBea
             throw new MBeanException(e);
         }
     }
-    
-    @Override
-    public List<String> getLocalTriggerDetails() throws MBeanException {
-        try {
-            List<String> names = new ArrayList<String>();
-            List<String> groups = scheduler.getTriggerGroupNames();
-            for (String group : groups) {
-                Set<TriggerKey> triggerKeys = scheduler.getTriggerKeys(GroupMatcher.triggerGroupEquals(group));
-                for (TriggerKey k : triggerKeys) {
-                    names.add(k.toString());
-                }
-            }
-            return names;
-        } catch (Exception e) {
-            throw new MBeanException(e);
-        }
-    }
-
 }

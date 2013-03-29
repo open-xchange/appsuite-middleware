@@ -174,7 +174,7 @@ public final class HtmlProcessing {
                 if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                     final boolean externalImagesAllowed = usm.isAllowHTMLImages();
                     retval = htmlService.checkBaseTag(retval, externalImagesAllowed);
-                    final String cssPrefix = null == mailPath ? null : (embedded ? "ox-" + getHash(mailPath.toString()) : null);
+                    final String cssPrefix = null == mailPath ? null : (embedded ? "ox-" + getHash(mailPath.toString(), 10) : null);
                     if (useSanitize()) {
                         // No need to generate well-formed HTML
                         if (externalImagesAllowed) {
@@ -255,13 +255,41 @@ public final class HtmlProcessing {
      * Calculates the MD5 for given string.
      *
      * @param str The string
+     * @param maxLen The max. length or <code>-1</code>
      * @return The MD5 hash
      */
-    public static String getHash(final String str) {
+    public static String getHash(final String str, final int maxLen) {
         if (isEmpty(str)) {
             return str;
         }
-        return HashUtility.getHash(str, "md5", "hex");
+        if (maxLen <= 0) {
+            return HashUtility.getHash(str, "md5", "hex");
+        }
+        return abbreviate(HashUtility.getHash(str, "md5", "hex"), 0, maxLen);
+    }
+
+    private static String abbreviate(final String str, int offset, final int maxWidth) {
+        if (str == null) {
+            return null;
+        }
+        final int length = str.length();
+        if (length <= maxWidth) {
+            return str;
+        }
+        int off = offset;
+        if (off > length) {
+            off = length;
+        }
+        if ((length - off) < (maxWidth)) {
+            off = length - (maxWidth);
+        }
+        if (off < 1) {
+            return str.substring(0, maxWidth);
+        }
+        if ((off + (maxWidth)) < length) {
+            return abbreviate(str.substring(off), 0, maxWidth);
+        }
+        return str.substring(length - (maxWidth));
     }
 
     private static final Pattern PATTERN_HTML = Pattern.compile("<html.*?>(.*?)</html>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);

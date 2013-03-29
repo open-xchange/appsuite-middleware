@@ -123,12 +123,12 @@ public class ReplacingXMLStreamReader extends StreamReaderDelegate {
 
     @Override
     public String getLocalName() {
-        return null == current ? super.getLocalName() : current.getExpected().getLocalPart();
+        return null == current ? super.getLocalName() : current.getExpected().getLocalPart().intern();
     }
 
     @Override
     public String getNamespaceURI() {
-        return null == current ? super.getNamespaceURI() : current.getExpected().getNamespaceURI();
+        return null == current ? super.getNamespaceURI() : current.getExpected().getNamespaceURI().intern();
     }
 
     private static XmlSchemaElement getChildSchema(ReplacingElement parent, String name, boolean isTypeName) {

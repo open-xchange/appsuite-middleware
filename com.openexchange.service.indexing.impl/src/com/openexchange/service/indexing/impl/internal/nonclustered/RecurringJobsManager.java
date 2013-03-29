@@ -49,6 +49,8 @@
 
 package com.openexchange.service.indexing.impl.internal.nonclustered;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
@@ -62,24 +64,23 @@ import com.openexchange.service.indexing.impl.internal.Services;
  */
 public class RecurringJobsManager {
     
-    static final String JOB_MAP = "recurringJobs-0";
+    static final String JOB_MAP = "recurringJobs-2";
     
-    /**
-     * Returns true, if job was added and false if it was just updated.
-     */
-    public static boolean addOrUpdateJob(String jobId, JobInfoWrapper infoWrapper) {
+    public static JobInfoWrapper addOrUpdateJob(String jobId, JobInfoWrapper infoWrapper) {
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         IMap<String, JobInfoWrapper> recurringJobs = hazelcast.getMap(JOB_MAP);
         long ttl = infoWrapper.getJobTimeout();
         if (ttl <= 0) {
             ttl = 0;
         }
-        JobInfoWrapper old = recurringJobs.put(jobId, infoWrapper, ttl, TimeUnit.MILLISECONDS);
-        if (old == null) {
-            return true;
+        
+        JobInfoWrapper old = recurringJobs.get(jobId);
+        if (old != null) {
+            infoWrapper.updateLastRun(old.getLastRun());
         }
         
-        return false;
+        recurringJobs.set(jobId, infoWrapper, ttl, TimeUnit.MILLISECONDS);
+        return old;
     }
     
     public static boolean touchJob(String jobId) {
@@ -109,6 +110,12 @@ public class RecurringJobsManager {
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
         IMap<String, JobInfoWrapper> recurringJobs = hazelcast.getMap(JOB_MAP);
         return recurringJobs.size();
+    }
+    
+    public static List<String> getJobIds() {
+        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
+        IMap<String, JobInfoWrapper> recurringJobs = hazelcast.getMap(JOB_MAP);
+        return new ArrayList<String>(recurringJobs.keySet());
     }
 
 }

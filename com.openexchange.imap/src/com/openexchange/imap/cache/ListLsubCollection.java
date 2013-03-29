@@ -74,6 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.log.Log;
 import com.openexchange.mail.mime.MimeMailException;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.ProtocolException;
@@ -219,9 +220,15 @@ final class ListLsubCollection {
         deprecated.set(true);
         stamp = 0;
         if (DEBUG) {
-            final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator("Cleared LIST/LSUB cache.\n");
-            appendStackTrace(new Throwable().getStackTrace(), builder);
-            LOG.debug(builder.toString());
+            if (Log.appendTraceToMessage()) {
+                final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator("Cleared LIST/LSUB cache.");
+                final String lineSeparator = System.getProperty("line.separator");
+                builder.append(lineSeparator);
+                appendStackTrace(new Throwable().getStackTrace(), builder, lineSeparator);
+                LOG.debug(builder.toString());
+            } else {
+                LOG.debug("Cleared LIST/LSUB cache.", new Throwable());
+            }
         }
     }
 
@@ -2095,12 +2102,11 @@ final class ListLsubCollection {
 
     } // End of class ListLsubEntryImpl
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb) {
+    private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb, final String lineSeparator) {
         if (null == trace) {
             sb.append("<missing stack trace>\n");
             return;
         }
-        final String lineSeparator = System.getProperty("line.separator");
         for (final StackTraceElement ste : trace) {
             final String className = ste.getClassName();
             if (null != className) {

@@ -49,14 +49,13 @@
 
 package com.openexchange.snippet.json.action;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import com.openexchange.ajax.Mail;
-import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
@@ -171,26 +170,15 @@ public final class GetAttachmentAction extends SnippetAction implements ETagAwar
             /*
              * Read from stream
              */
-            ByteArrayOutputStream out = Streams.newByteArrayOutputStream(8192);
+            final ThresholdFileHolder fileHolder = new ThresholdFileHolder();
             /*
              * Write from content's input stream to byte array output stream
              */
-            try {
-                final int buflen = 0xFFFF;
-                final byte[] buffer = new byte[buflen];
-                for (int len; (len = attachmentInputStream.read(buffer, 0, buflen)) > 0;) {
-                    out.write(buffer, 0, len);
-                }
-                out.flush();
-            } finally {
-                Streams.close(attachmentInputStream);
-            }
+            fileHolder.write(attachmentInputStream);
             /*
-             * Create file holder
+             * Parameterize file holder
              */
             snippetRequest.getRequestData().setFormat("file");
-            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(out.toByteArray());
-            out = null;
             fileHolder.setName(extractFilename(attachment));
             fileHolder.setContentType(saveToDisk ? "application/octet-stream" : attachment.getContentType());
             final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");

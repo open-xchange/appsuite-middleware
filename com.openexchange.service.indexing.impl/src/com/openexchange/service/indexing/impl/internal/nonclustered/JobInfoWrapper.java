@@ -70,6 +70,8 @@ public class JobInfoWrapper implements Serializable {
     private final long initialInterval;
 
     private long interval;
+    
+    private long lastRun;
 
     private final int progressionRate;
 
@@ -82,12 +84,6 @@ public class JobInfoWrapper implements Serializable {
 
     /**
      * Initializes a new {@link JobInfoWrapper}.
-     * 
-     * @param jobInfo
-     * @param lastUpdate
-     * @param jobTimeout
-     * @param interval
-     * @param progressionRate
      */
     public JobInfoWrapper(JobInfo jobInfo, long lastUpdate, long jobTimeout, long interval, int progressionRate) {
         super();
@@ -97,6 +93,7 @@ public class JobInfoWrapper implements Serializable {
         this.initialInterval = interval;
         this.interval = interval;
         this.progressionRate = progressionRate;
+        this.lastRun = System.currentTimeMillis();
     }
 
     public JobInfo getJobInfo() {
@@ -119,6 +116,10 @@ public class JobInfoWrapper implements Serializable {
         return progressionRate;
     }
     
+    public long getLastRun() {
+        return lastRun;
+    }
+    
     public void touch() {
         lastUpdate = System.currentTimeMillis();
         interval = initialInterval;
@@ -127,6 +128,14 @@ public class JobInfoWrapper implements Serializable {
     public long increaseInterval() {
         interval = interval + (interval * progressionRate / 100);
         return interval;
+    }
+    
+    public void updateLastRun() {
+        lastRun = System.currentTimeMillis();
+    }
+    
+    public void updateLastRun(long time) {
+        lastRun = time;
     }
 
 }

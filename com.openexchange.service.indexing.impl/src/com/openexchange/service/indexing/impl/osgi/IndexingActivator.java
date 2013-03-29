@@ -49,17 +49,13 @@
 
 package com.openexchange.service.indexing.impl.osgi;
 
-import java.util.Map;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
-import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.quartz.Scheduler;
 import org.quartz.service.QuartzService;
-import com.hazelcast.config.Config;
-import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -75,13 +71,12 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.service.indexing.IndexingService;
-import com.openexchange.service.indexing.IndexingServiceMBean;
+import com.openexchange.service.indexing.JobMonitoringMBean;
 import com.openexchange.service.indexing.impl.internal.IndexingProperties;
 import com.openexchange.service.indexing.impl.internal.SchedulerConfig;
 import com.openexchange.service.indexing.impl.internal.Services;
-import com.openexchange.service.indexing.impl.internal.nonclustered.AnotherIndexingService;
-import com.openexchange.service.indexing.impl.internal.nonclustered.AnotherIndexingServiceMBeanImpl;
-import com.openexchange.service.indexing.impl.internal.nonclustered.MonitoringMBeanImpl;
+import com.openexchange.service.indexing.impl.internal.nonclustered.IndexingServiceImpl;
+import com.openexchange.service.indexing.impl.internal.nonclustered.JobMonitoringMBeanImpl;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
@@ -96,15 +91,11 @@ public class IndexingActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingActivator.class));
 
-    private ObjectName indexingMBeanName;
+    private IndexingServiceImpl serviceImpl;
 
-    private AnotherIndexingServiceMBeanImpl indexingMBean;
+    private JobMonitoringMBeanImpl monitoringMBean;
 
-    private AnotherIndexingService serviceImpl;
-
-    private MonitoringMBeanImpl secondMBean;
-
-    private ObjectName secondMBeanName;
+    private ObjectName monitoringMBeanName;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -139,7 +130,7 @@ public class IndexingActivator extends HousekeepingActivator {
         QuartzService quartzService = getService(QuartzService.class);
         Scheduler scheduler = quartzService.getScheduler(SchedulerConfig.getSchedulerName(), SchedulerConfig.start(), SchedulerConfig.getThreadCount());
         
-        serviceImpl = new AnotherIndexingService();
+        serviceImpl = new IndexingServiceImpl();
         addService(IndexingService.class, serviceImpl);
         registerService(IndexingService.class, serviceImpl);
 
@@ -156,31 +147,23 @@ public class IndexingActivator extends HousekeepingActivator {
         super.stopBundle();
 
         ManagementService managementService = Services.optService(ManagementService.class);
-        if (managementService != null && indexingMBeanName != null) {
-            managementService.unregisterMBean(indexingMBeanName);
-            indexingMBean = null;
+        if (managementService != null && monitoringMBeanName != null) {
+            managementService.unregisterMBean(monitoringMBeanName);
+            monitoringMBean = null;
+            monitoringMBeanName = null;
         }
-
-//        if (serviceImpl != null) {
-//            serviceImpl.shutdown();
-//        }
     }
 
     private void registerMBean(Scheduler scheduler) throws NotCompliantMBeanException {
         try {
-            HazelcastInstance hazelcast = getService(HazelcastInstance.class);
-            String mapName = discoverMonitoringMapName(hazelcast.getConfig());
-            indexingMBeanName = new ObjectName(IndexingServiceMBean.DOMAIN, IndexingServiceMBean.KEY, IndexingServiceMBean.VALUE);
-            indexingMBean = new AnotherIndexingServiceMBeanImpl(mapName);
-            secondMBeanName = new ObjectName(IndexingServiceMBean.DOMAIN, IndexingServiceMBean.KEY, "AdditionalMonitoring");
-            secondMBean = new MonitoringMBeanImpl(scheduler);
+            monitoringMBeanName = new ObjectName(JobMonitoringMBean.DOMAIN, JobMonitoringMBean.KEY, JobMonitoringMBean.VALUE);
+            monitoringMBean = new JobMonitoringMBeanImpl(scheduler);
             track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
 
                 @Override
                 public void added(ServiceReference<ManagementService> ref, ManagementService service) {
                     try {
-                        service.registerMBean(indexingMBeanName, indexingMBean);
-                        service.registerMBean(secondMBeanName, secondMBean);
+                        service.registerMBean(monitoringMBeanName, monitoringMBean);
                     } catch (OXException e) {
                         LOG.error(e.getMessage(), e);
                     }
@@ -189,8 +172,7 @@ public class IndexingActivator extends HousekeepingActivator {
                 @Override
                 public void removed(ServiceReference<ManagementService> ref, ManagementService service) {
                     try {
-                        service.unregisterMBean(indexingMBeanName);
-                        service.unregisterMBean(secondMBeanName);
+                        service.unregisterMBean(monitoringMBeanName);
                     } catch (OXException e) {
                         LOG.warn(e.getMessage(), e);
                     }
@@ -200,19 +182,4 @@ public class IndexingActivator extends HousekeepingActivator {
             LOG.error(e.getMessage(), e);
         }
     }
-    
-    private static String discoverMonitoringMapName(Config config) throws IllegalStateException {
-        Map<String, MapConfig> mapConfigs = config.getMapConfigs();
-        if (null != mapConfigs && 0 < mapConfigs.size()) {
-            for (String mapName : mapConfigs.keySet()) {
-                if (mapName.startsWith("indexingServiceMonitoring-")) {
-                    LOG.info("Using distributed map '" + mapName + "'.");
-                    return mapName;
-                }
-            }
-        }
-        String msg = "No distributed indexingServiceMonitoring map found in hazelcast configuration";
-        throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR));
-    }
-
 }

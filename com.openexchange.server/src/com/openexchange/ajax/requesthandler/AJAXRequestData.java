@@ -57,6 +57,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -79,6 +80,7 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.strings.StringParser;
 
@@ -160,6 +162,9 @@ public class AJAXRequestData {
 
     /** The eTag */
     private String eTag;
+
+    /** The <code>User-Agent</code> value */
+    private String userAgent;
 
     /** The expires millis */
     private long expires;
@@ -248,6 +253,7 @@ public class AJAXRequestData {
         copy.remoteAddress = remoteAddress;
         copy.route = route;
         copy.servletRequestUri = servletRequestUri;
+        copy.userAgent = userAgent;
         /*
          * Not sure about following members, therefore leave to null
          */
@@ -255,6 +261,24 @@ public class AJAXRequestData {
         copy.uploadEvent = null;
         copy.uploadStreamProvider = null;
         return copy;
+    }
+    
+    /**
+     * Sets the <code>User-Agent</code> value
+     * 
+     * @param userAgent The <code>User-Agent</code> value
+     */
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+    
+    /**
+     * Gets the <code>User-Agent</code> value
+     * 
+     * @return The <code>User-Agent</code> value
+     */
+    public String getUserAgent() {
+        return userAgent;
     }
 
     /**
@@ -386,6 +410,35 @@ public class AJAXRequestData {
         final HttpServletResponse resp = this.resp;
         if (null != resp) {
             resp.setHeader(name, value);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>,
+     * <i>Cache-Control</i>, and <i>Pragma</i>)
+     *
+     * @param eTag The ETag value
+     * @param expires The optional expires time, pass <code>-1</code> to set default expiry (+ 1 year)
+     * @return <code>true</code> if set; otherwise <code>false</code>
+     */
+    public boolean setResponseETag(final String eTag, final long expires) {
+        return setResponseETag(eTag, expires > 0 ? new Date(expires) : null);
+    }
+
+    /**
+     * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>,
+     * <i>Cache-Control</i>, and <i>Pragma</i>)
+     *
+     * @param eTag The ETag value
+     * @param expires The optional expires date, pass <code>null</code> to set default expiry (+ 1 year)
+     * @return <code>true</code> if set; otherwise <code>false</code>
+     */
+    public boolean setResponseETag(final String eTag, final Date expires) {
+        final HttpServletResponse resp = this.resp;
+        if (null != resp) {
+            Tools.setETag(eTag, expires, resp);
             return true;
         }
         return false;

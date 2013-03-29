@@ -53,8 +53,8 @@ import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import junit.framework.Assert;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobBuilder;
@@ -87,13 +87,13 @@ public class ProgressiveRecurrenceTest {
 
     private static final String SYNCHRONIZER = "synchronizer";
 
-    @BeforeClass
-    public static void beforeClass() {
+    @Before
+    public void before() {
         Services.setServiceLookup(new MockServiceLookup());
     }
 
-    @AfterClass
-    public static void afterClass() {
+    @After
+    public void after() {
         Services.setServiceLookup(null);
     }
 
@@ -157,7 +157,7 @@ public class ProgressiveRecurrenceTest {
                 }
             }, true);
             
-            Assert.assertTrue("Job already existed", RecurringJobsManager.addOrUpdateJob(jobDetail.getKey().toString(), infoWrapper));
+            Assert.assertTrue("Job already existed", RecurringJobsManager.addOrUpdateJob(jobDetail.getKey().toString(), infoWrapper) == null);
             Assert.assertTrue("Wrong job count in RecurringJobsManager", RecurringJobsManager.getJobCount() == 1);
             scheduler.scheduleJob(jobDetail, trigger);
 
@@ -242,7 +242,7 @@ public class ProgressiveRecurrenceTest {
                 }
             }, true);
             
-            Assert.assertTrue("Job already existed", RecurringJobsManager.addOrUpdateJob(jobDetail.getKey().toString(), infoWrapper));
+            Assert.assertTrue("Job already existed", RecurringJobsManager.addOrUpdateJob(jobDetail.getKey().toString(), infoWrapper) == null);
             Assert.assertTrue("Wrong job count in RecurringJobsManager", RecurringJobsManager.getJobCount() == 1);
             scheduler.scheduleJob(jobDetail, trigger);
 

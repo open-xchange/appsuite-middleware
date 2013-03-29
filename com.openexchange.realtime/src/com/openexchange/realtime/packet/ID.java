@@ -431,7 +431,7 @@ public class ID implements Serializable {
             listeners.put(this, events);
         }
 
-        List<IDEventHandler> list = events.get(events);
+        List<IDEventHandler> list = events.get(event);
 
         if (list == null) {
             list = new CopyOnWriteArrayList<IDEventHandler>();

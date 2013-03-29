@@ -56,7 +56,7 @@ import java.util.Comparator;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link MailPath} - Represents a message's unique path inside a mailbox, that is the account ID followed by the folder fullname followed
+ * {@link MailPath} - Represents a message's unique path inside a mailbox, that is the account ID followed by the folder full name followed
  * by the value of {@link #SEPERATOR} followed by mail's unique ID:<br>
  * Example: <i>default1/INBOX.Subfolder/1234</i>
  *
@@ -88,15 +88,15 @@ public final class MailPath implements Cloneable, Serializable {
     public static final MailPath NULL = null;
 
     /**
-     * The <code>'/'</code> character which separates folder's fullname from mail's ID in a mail path
+     * The <code>'/'</code> character which separates folder's full name from mail's ID in a mail path
      */
     public static final char SEPERATOR = '/';
 
     /**
-     * Gets the mail path corresponding to given folder fullname and message UID
+     * Gets the mail path corresponding to given folder full name and message UID
      *
      * @param accountId The account ID
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param mailId The mail ID
      * @return The mail path as {@link String}
      */

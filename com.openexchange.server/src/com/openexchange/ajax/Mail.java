@@ -133,6 +133,7 @@ import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.log.Log;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
@@ -236,21 +237,26 @@ public class Mail extends PermissionServlet implements UploadListener {
         final String message = cause.getMessage();
         if (LOG.isWarnEnabled()) {
             final StringBuilder warnBuilder = new StringBuilder(140);
-            warnBuilder.append("An unexpected exception occurred, which is going to be wrapped for proper display.\n");
-            warnBuilder.append("For safety reason its original content is displayed here.\n");
-            warnBuilder.append(null == message ? "[Not available]" : message).append('\n');
-            appendStackTrace(cause.getStackTrace(), warnBuilder);
-            LOG.warn(warnBuilder.toString());
+            final String lineSeparator = System.getProperty("line.separator");
+            warnBuilder.append("An unexpected exception occurred, which is going to be wrapped for proper display.").append(lineSeparator);
+            warnBuilder.append("For safety reason its original content is displayed here.").append(lineSeparator);
+            warnBuilder.append(null == message ? "[Not available]" : message);
+            if (Log.appendTraceToMessage()) {
+                warnBuilder.append(lineSeparator);
+                appendStackTrace(cause.getStackTrace(), warnBuilder, lineSeparator);
+                LOG.warn(warnBuilder.toString());
+            } else {
+                LOG.warn(warnBuilder.toString(), cause);
+            }
         }
         return MailExceptionCode.UNEXPECTED_ERROR.create(cause, null == message ? "[Not available]" : message);
     }
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb, final String lineSeparator) {
         if (null == trace) {
-            sb.append("<missing stack trace>\n");
+            sb.append("<missing stack trace>").append(lineSeparator);
             return;
         }
-        final String lineSeparator = System.getProperty("line.separator");
         for (final StackTraceElement ste : trace) {
             final String className = ste.getClassName();
             if (null != className) {

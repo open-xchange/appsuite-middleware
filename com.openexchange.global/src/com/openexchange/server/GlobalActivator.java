@@ -80,10 +80,10 @@ public final class GlobalActivator implements BundleActivator {
 
     private static final Log LOG = LogFactory.getLog(GlobalActivator.class);
 
-    private Initialization initialization;
-    protected ServiceTracker<StringParser,StringParser> parserTracker = null;
-    private ServiceRegistration<StringParser> parserRegistration;
-    private List<ServiceTracker<?,?>> trackers;
+    private volatile Initialization initialization;
+    private volatile ServiceTracker<StringParser,StringParser> parserTracker;
+    private volatile ServiceRegistration<StringParser> parserRegistration;
+    private volatile List<ServiceTracker<?,?>> trackers;
     private volatile DynamicClassLoaderActivator dynamicClassLoaderActivator;
 
     /**
@@ -93,18 +93,17 @@ public final class GlobalActivator implements BundleActivator {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void start(final BundleContext context) throws Exception {
         try {
-            initialization = new com.openexchange.server.ServerInitialization();
+            final Initialization initialization = new com.openexchange.server.ServerInitialization();
+            this.initialization = initialization;
             initialization.start();
             ServiceHolderInit.getInstance().start();
             initStringParsers(context);
 
-            trackers = new ArrayList<ServiceTracker<?,?>>(2);
+            final List<ServiceTracker<?,?>> trackers = new ArrayList<ServiceTracker<?,?>>(4);
+            this.trackers = trackers;
             trackers.add(new ServiceTracker<I18nService, I18nService>(context, I18nService.class, new I18nCustomizer(context)));
 
             final ServiceTracker<LogWrapperFactory, LogWrapperFactory> logWrapperTracker = new ServiceTracker<LogWrapperFactory, LogWrapperFactory>(context, LogWrapperFactory.class, null);
@@ -131,14 +130,15 @@ public final class GlobalActivator implements BundleActivator {
             this.dynamicClassLoaderActivator = dynamicClassLoaderActivator;
 
             LOG.info("Global bundle successfully started");
-        } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
         }
     }
 
     private void initStringParsers(final BundleContext context) {
-        parserTracker = new ServiceTracker<StringParser,StringParser>(context, StringParser.class, null);
+        final ServiceTracker<StringParser,StringParser> parserTracker = new ServiceTracker<StringParser,StringParser>(context, StringParser.class, null);
+        this.parserTracker = parserTracker;
         final List<StringParser> standardParsers = new ArrayList<StringParser>(3);
         final StringParser standardParsersComposite = new CompositeParser() {
 
@@ -191,25 +191,37 @@ public final class GlobalActivator implements BundleActivator {
                 dynamicClassLoaderActivator.stop(context);
                 this.dynamicClassLoaderActivator = null;
             }
+            final List<ServiceTracker<?, ?>> trackers = this.trackers;
             if (null != trackers) {
                 while (!trackers.isEmpty()) {
                     trackers.remove(0).close();
                 }
-                trackers = null;
+                this.trackers = null;
             }
             ServiceHolderInit.getInstance().stop();
-            initialization.stop();
-            initialization = null;
+            final Initialization initialization = this.initialization;
+            if (null != initialization) {
+                initialization.stop();
+                this.initialization = null;
+            }
             shutdownStringParsers();
             LOG.debug("Global bundle successfully stopped");
-        } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t.getMessage(), t);
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
         }
     }
 
     private void shutdownStringParsers() {
-        parserRegistration.unregister();
-        parserTracker.close();
+        final ServiceRegistration<StringParser> parserRegistration = this.parserRegistration;
+        if (null != parserRegistration) {
+            parserRegistration.unregister();
+            this.parserRegistration = null;
+        }
+        final ServiceTracker<StringParser,StringParser> parserTracker = this.parserTracker;
+        if (null != parserTracker) {
+            parserTracker.close();
+            this.parserTracker = null;
+        }
     }
 }

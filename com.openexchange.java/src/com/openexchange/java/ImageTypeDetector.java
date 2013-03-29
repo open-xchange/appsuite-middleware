@@ -51,6 +51,8 @@ package com.openexchange.java;
 
 /**
  * {@link ImageTypeDetector} - Detects MIME type of passed image bytes.
+ * <p>
+ * See <a href="http://www.garykessler.net/library/file_sigs.html">http://www.garykessler.net/library/file_sigs.html</a>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -90,6 +92,13 @@ public final class ImageTypeDetector {
      * ff d8 ff e0
      */
     private static final byte[] PREFIX_JPEG = { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0 };
+
+    /**
+     * ff d8 ff e1
+     * 
+     * Exif data available.
+     */
+    private static final byte[] PREFIX_JPEG2 = { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE1 };
 
     /**
      * 49 49 4e 31
@@ -436,7 +445,7 @@ public final class ImageTypeDetector {
             throw new IndexOutOfBoundsException();
         }
         // Check image MIME type
-        if (startsWith(PREFIX_JPEG, bytes, off, len)) {
+        if (startsWith(PREFIX_JPEG, bytes, off, len) || startsWith(PREFIX_JPEG2, bytes, off, len)) {
             return "image/jpeg";
         }
         if (startsWith(PREFIX_BITMAP, bytes, off, len)) {
