@@ -180,18 +180,18 @@ public class GrizzlyActivator extends HousekeepingActivator {
                     LOG.info("Enabling WebSockets for Grizzly server.");
                 }
                 networkListener.registerAddOn(new WebSocketAddOn());
-                WebSocketEngine.getEngine().register(new WebSocketApplication() {
-
-                    @Override
-                    public boolean isApplicationRequest(HttpRequestPacket request) {
-                        return "/echo".equals(request.getRequestURI());
-                    }
-
-                    @Override
-                    public void onMessage(WebSocket socket, String data) {
-                        socket.send(data);
-                    }
-                });
+//                WebSocketEngine.getEngine().register(new WebSocketApplication() {
+//
+//                    @Override
+//                    public boolean isApplicationRequest(HttpRequestPacket request) {
+//                        return "/echo".equals(request.getRequestURI());
+//                    }
+//
+//                    @Override
+//                    public void onMessage(WebSocket socket, String data) {
+//                        socket.send(data);
+//                    }
+//                });
             }
 
             if (grizzlyConfig.isCometEnabled()) {
