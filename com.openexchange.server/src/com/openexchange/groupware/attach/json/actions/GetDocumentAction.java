@@ -49,7 +49,9 @@
 
 package com.openexchange.groupware.attach.json.actions;
 
+import static com.openexchange.ajax.helper.DownloadUtility.appendFilenameParameter;
 import java.io.InputStream;
+import java.io.OutputStream;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -63,7 +65,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.Log;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -118,10 +122,11 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
             contentType,
             session.getContext(),
             session.getUser(),
-            session.getUserConfiguration());
+            session.getUserConfiguration(),
+            requestData);
     }
 
-    private AJAXRequestResult document(Session session, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) throws OXException {
+    private AJAXRequestResult document(Session session, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig, final AJAXRequestData requestData) throws OXException {
         try {
             ATTACHMENT_BASE.startTransaction();
             final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
@@ -129,6 +134,52 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
              * Get input stream
              */
             final InputStream documentData = ATTACHMENT_BASE.getAttachedFile(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
+            /*
+             * Check for image data
+             */
+            boolean isImage = false;
+            {
+                final String lc = toLowerCase(contentType);
+                if (lc.startsWith("image/")) {
+                    isImage = true;
+                } else if (lc.startsWith("application/octet-stream")) {
+                    final String fileName = attachment.getFilename();
+                    if (null != fileName && MimeType2ExtMap.getContentType(fileName).startsWith("image/")) {
+                        isImage = true;
+                    }
+                }
+            }
+            /*-
+             * Try direct output if non-image data
+             * 
+             * Ignore in case of image data since subsequent transformation might be supposed to be applied
+             */
+            if (!isImage) {
+                final OutputStream directOutputStream = requestData.optOutputStream();
+                if (null != directOutputStream) {
+                    requestData.setResponseHeader("Content-Type", contentType);                    
+                    final StringAllocator sb = new StringAllocator(toLowerCase(contentType).startsWith("application/octet-stream") ? "attachment" : "inline");
+                    appendFilenameParameter(attachment.getFilename(), null, requestData.getUserAgent(), sb);
+                    requestData.setResponseHeader("Content-Disposition", sb.toString());
+                    // requestData.setResponseETag(getHash(folderPath, uid, imageContentId == null ? sequenceId : imageContentId), AJAXRequestResult.YEAR_IN_MILLIS * 50);
+                    try {
+                        final int buflen = 0xFFFF; // 64KB
+                        final byte[] buffer = new byte[buflen];
+                        for (int len; (len = documentData.read(buffer, 0, buflen)) > 0;) {
+                            directOutputStream.write(buffer, 0, len);
+                        }
+                        directOutputStream.flush();
+                    } finally {
+                        Streams.close(documentData);
+                    }
+                    return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
+                }
+            }
+            /*-
+             * The regular way...
+             * 
+             * Read from stream
+             */
             final ThresholdFileHolder fileHolder = new ThresholdFileHolder();
             try {
                 fileHolder.write(documentData);
@@ -160,6 +211,19 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
                 LOG.debug("", e);
             }
         }
+    }
+
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }
