@@ -50,7 +50,9 @@
 package com.openexchange.realtime.synthetic;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -67,6 +69,8 @@ import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.ElementPath;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.threadpool.ThreadPoolService;
 
 
 /**
@@ -76,13 +80,27 @@ import com.openexchange.realtime.util.ElementPath;
  */
 public class SyntheticChannel implements Channel, Runnable {
     
+    private static final int NUMBER_OF_RUNLOOPS = 16;
+    
     private static final Log LOG = LogFactory.getLog(SyntheticChannel.class);
     
     private final ConcurrentHashMap<String, Component> components = new ConcurrentHashMap<String, Component>();
     private final ConcurrentHashMap<ID, ComponentHandle> handles = new ConcurrentHashMap<ID, ComponentHandle>();
-
+    private final ConcurrentHashMap<ID, SyntheticChannelRunLoop> runLoopsPerID = new ConcurrentHashMap<ID, SyntheticChannelRunLoop>();
+    private final List<SyntheticChannelRunLoop> runLoops = new ArrayList<SyntheticChannelRunLoop>(NUMBER_OF_RUNLOOPS);
+    
     private final ConcurrentHashMap<ID, Long> lastAccess = new ConcurrentHashMap<ID, Long>();
     private final CopyOnWriteArrayList<TimeoutEviction> timeouts = new CopyOnWriteArrayList<TimeoutEviction>();
+    
+    private Random loadBalancer = new Random();
+    
+    public SyntheticChannel(ServiceLookup services) {
+        for (int i = 0; i < NUMBER_OF_RUNLOOPS; i++) {
+            SyntheticChannelRunLoop rl = new SyntheticChannelRunLoop("message-handler-" + i);
+            runLoops.add(rl);
+            services.getService(ThreadPoolService.class).getExecutor().execute(rl);
+        }
+    }
     
     @Override
     public String getProtocol() {
@@ -122,6 +140,7 @@ public class SyntheticChannel implements Channel, Runnable {
         }
         
         handles.put(id, handle);
+        runLoopsPerID.put(id, runLoops.get(loadBalancer.nextInt(NUMBER_OF_RUNLOOPS)));
         
         setUpEviction(component.getEvictionPolicy(), handle, id);
         
@@ -130,6 +149,7 @@ public class SyntheticChannel implements Channel, Runnable {
             @Override
             public void handle(String event, ID id, Object source, Map<String, Object> properties) {
                 handles.remove(id);
+                runLoopsPerID.remove(id);
                 lastAccess.remove(id);
                 timeouts.remove(this);
 
@@ -147,13 +167,18 @@ public class SyntheticChannel implements Channel, Runnable {
     }
 
     @Override
-    public void send(Stanza stanza, ID recipient) throws OXException {
-        ComponentHandle handle = handles.get(recipient);
+    public void send(final Stanza stanza, ID recipient) throws OXException {
+        final ComponentHandle handle = handles.get(recipient);
         if (handle == null) {
             throw RealtimeExceptionCodes.INVALID_ID.create(stanza.getTo());
         }
         lastAccess.put(stanza.getTo(), System.currentTimeMillis());
-        handle.process(stanza);
+
+        SyntheticChannelRunLoop runLoop = runLoopsPerID.get(recipient);
+        if (runLoop == null) {
+            throw RealtimeExceptionCodes.INVALID_ID.create(stanza.getTo());
+        }
+        runLoop.offer(new MessageDispatch(handle, stanza));
     }
     
     public void addComponent(Component component) {
