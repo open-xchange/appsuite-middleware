@@ -128,8 +128,8 @@ public class WrappingFilter implements Filter {
             String remoteIP = IPTools.getRemoteIP(forHeaderValue, knownProxies);
 
             if (remoteIP.isEmpty()) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Could not detect a valid remote ip in [" + forHeaderValue + "], falling back to default");
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Could not detect a valid remote ip in [" + forHeaderValue + "], falling back to default");
                 }
                 httpServletRequestWrapper = new HttpServletRequestWrapper(httpServletRequest.getRemoteAddr(), httpServletRequest);
             } else {
