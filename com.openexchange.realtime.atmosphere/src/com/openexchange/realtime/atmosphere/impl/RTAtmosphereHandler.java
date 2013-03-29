@@ -91,6 +91,8 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(RTAtmosphereHandler.class));
 
     private final AtmosphereServiceRegistry atmosphereServiceRegistry;
+    
+    
 
     /*
      * Map general ids (user@context) to full ids (ox://user@context/resource.browserx.taby, this is used for lookups via isConnected
@@ -113,7 +115,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     }
 
     @Override
-    public void onRequest(AtmosphereResource resource) throws IOException {
+    public synchronized void onRequest(AtmosphereResource resource) throws IOException {
         // Log all events on the console, including WebSocket events for debugging
         if (LOG.isDebugEnabled()) {
             resource.addEventListener(new WebSocketEventListenerAdapter());
@@ -282,7 +284,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         stanza.transformPayloadsToInternal();
         stanza.initializeDefaults();
 
-        StanzaQueueService stanzaQueueService = AtmosphereServiceRegistry.getInstance().getService(StanzaQueueService.class);
+        StanzaQueueService stanzaQueueService = atmosphereServiceRegistry.getService(StanzaQueueService.class);
         if (!stanzaQueueService.enqueueStanza(stanza)) {
             // TODO: exception?
             LOG.error("Couldn't enqueue Stanza: "+stanza);
@@ -367,7 +369,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     @Override
     public void onStateChange(AtmosphereResourceEvent event) throws IOException {
-        // Hndled via send() or ResourceCleanupListener
+        // Handled via send() or ResourceCleanupListener
     }
 
     @Override
