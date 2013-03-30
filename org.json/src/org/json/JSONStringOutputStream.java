@@ -71,12 +71,10 @@ public final class JSONStringOutputStream extends OutputStream {
      */
     private final static int[] sOutputEscapes = CharTypes.get7BitOutputEscapes();
 
-    final static byte[] HEX_CHARS = CharTypes.copyHexBytes();
+    private final static byte[] HEX_CHARS = CharTypes.copyHexBytes();
 
     private final static byte BYTE_u = (byte) 'u';
-
     private final static byte BYTE_0 = (byte) '0';
-
     private final static byte BYTE_BACKSLASH = (byte) '\\';
 
     private final static int SURR1_FIRST = 0xD800;
