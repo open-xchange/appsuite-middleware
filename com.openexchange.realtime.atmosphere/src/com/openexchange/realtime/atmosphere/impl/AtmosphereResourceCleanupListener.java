@@ -120,7 +120,13 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
         if (LOG.isDebugEnabled()) {
             LOG.debug("Disconnecting: " + fullID + " and AtmosphereResource " + atmosphereResource.uuid());
         }
+        atmosphereResource.removeEventListener(this);
         
+        AtmosphereResource activeResource = fullIDToResourceMap.get(fullID);
+        if (!activeResource.equals(atmosphereResource)) {
+            return; // Other resource is active here. No need to clean up just yet.
+        }
+    
         // remove single full id from resourceDirectory
         ResourceDirectory resourceDirectory = AtmosphereServiceRegistry.getInstance().getService(ResourceDirectory.class);
         try {
@@ -141,6 +147,7 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
             LOG.debug("Removing from generalID -> conreteID map: " + fullID);
         }
         fullIDToResourceMap.remove(fullID);
+        
     }
 
     @Override
