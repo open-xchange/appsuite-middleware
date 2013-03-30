@@ -253,9 +253,9 @@ public final class GetAction extends AbstractMailAction {
                                 return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
                             }
                             // As JSON response: {"data":"..."}
-                            directOutputStream.write(CHUNK1); // ``{"data":"...
+                            directOutputStream.write(CHUNK1); // {"data":"...
                             mail.writeTo(new JSONStringOutputStream(directOutputStream));
-                            directOutputStream.write(CHUNK2); // ..."}лл
+                            directOutputStream.write(CHUNK2); // ..."}
                             directOutputStream.flush();
                             return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
                         } catch (final Exception e) {
