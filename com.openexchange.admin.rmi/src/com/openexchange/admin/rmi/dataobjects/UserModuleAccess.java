@@ -590,12 +590,24 @@ public class UserModuleAccess implements Serializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + (ActiveSync ? 1231 : 1237);
+        result = prime * result + (CollectEmailAddresses ? 1231 : 1237);
+        result = prime * result + (EditGroup ? 1231 : 1237);
+        result = prime * result + (EditPassword ? 1231 : 1237);
+        result = prime * result + (EditResource ? 1231 : 1237);
+        result = prime * result + (GlobalAddressBookDisabled ? 1231 : 1237);
+        result = prime * result + (MultipleMailAccounts ? 1231 : 1237);
+        result = prime * result + (OLOX20 ? 1231 : 1237);
         result = prime * result + (PinboardWrite ? 1231 : 1237);
         result = prime * result + (Projects ? 1231 : 1237);
+        result = prime * result + (PublicFolderEditable ? 1231 : 1237);
+        result = prime * result + (Publication ? 1231 : 1237);
         result = prime * result + (RssBookmarks ? 1231 : 1237);
         result = prime * result + (RssPortal ? 1231 : 1237);
+        result = prime * result + (Subscription ? 1231 : 1237);
         result = prime * result + (Syncml ? 1231 : 1237);
         result = prime * result + (Tasks ? 1231 : 1237);
+        result = prime * result + (USM ? 1231 : 1237);
         result = prime * result + (Vcard ? 1231 : 1237);
         result = prime * result + (Webdav ? 1231 : 1237);
         result = prime * result + (WebdavXml ? 1231 : 1237);
@@ -603,33 +615,61 @@ public class UserModuleAccess implements Serializable {
         result = prime * result + (calendar ? 1231 : 1237);
         result = prime * result + (contacts ? 1231 : 1237);
         result = prime * result + (delegateTask ? 1231 : 1237);
+        result = prime * result + (deniedPortal ? 1231 : 1237);
         result = prime * result + (editPublicFolders ? 1231 : 1237);
         result = prime * result + (forum ? 1231 : 1237);
         result = prime * result + (ical ? 1231 : 1237);
         result = prime * result + (infostore ? 1231 : 1237);
         result = prime * result + (readCreateSharedFolders ? 1231 : 1237);
-        result = prime * result + (EditGroup ? 1231 : 1237);
-        result = prime * result + (EditPassword ? 1231 : 1237);
-        result = prime * result + (EditResource ? 1231 : 1237);
         return result;
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
         if (obj == null) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
+        if (!(obj instanceof UserModuleAccess)) {
             return false;
         }
-        final UserModuleAccess other = (UserModuleAccess) obj;
+        UserModuleAccess other = (UserModuleAccess) obj;
+        if (ActiveSync != other.ActiveSync) {
+            return false;
+        }
+        if (CollectEmailAddresses != other.CollectEmailAddresses) {
+            return false;
+        }
+        if (EditGroup != other.EditGroup) {
+            return false;
+        }
+        if (EditPassword != other.EditPassword) {
+            return false;
+        }
+        if (EditResource != other.EditResource) {
+            return false;
+        }
+        if (GlobalAddressBookDisabled != other.GlobalAddressBookDisabled) {
+            return false;
+        }
+        if (MultipleMailAccounts != other.MultipleMailAccounts) {
+            return false;
+        }
+        if (OLOX20 != other.OLOX20) {
+            return false;
+        }
         if (PinboardWrite != other.PinboardWrite) {
             return false;
         }
         if (Projects != other.Projects) {
+            return false;
+        }
+        if (PublicFolderEditable != other.PublicFolderEditable) {
+            return false;
+        }
+        if (Publication != other.Publication) {
             return false;
         }
         if (RssBookmarks != other.RssBookmarks) {
@@ -638,10 +678,16 @@ public class UserModuleAccess implements Serializable {
         if (RssPortal != other.RssPortal) {
             return false;
         }
+        if (Subscription != other.Subscription) {
+            return false;
+        }
         if (Syncml != other.Syncml) {
             return false;
         }
         if (Tasks != other.Tasks) {
+            return false;
+        }
+        if (USM != other.USM) {
             return false;
         }
         if (Vcard != other.Vcard) {
@@ -665,6 +711,9 @@ public class UserModuleAccess implements Serializable {
         if (delegateTask != other.delegateTask) {
             return false;
         }
+        if (deniedPortal != other.deniedPortal) {
+            return false;
+        }
         if (editPublicFolders != other.editPublicFolders) {
             return false;
         }
@@ -678,15 +727,6 @@ public class UserModuleAccess implements Serializable {
             return false;
         }
         if (readCreateSharedFolders != other.readCreateSharedFolders) {
-            return false;
-        }
-        if (EditGroup != other.EditGroup) {
-            return false;
-        }
-        if (EditPassword != other.EditPassword) {
-            return false;
-        }
-        if (EditResource != other.EditResource) {
             return false;
         }
         return true;

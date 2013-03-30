@@ -82,7 +82,6 @@ import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceException;
 import com.openexchange.admin.daemons.AdminDaemon;
-import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -895,12 +894,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // fire up
             con.commit();
 
-            // JCS
+            /*-
+             * 
             try {
                 ClientAdminThread.cache.reinitAccessCombinations();
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
+             * 
+             */
+            // JCS
             final BundleContext context = AdminCache.getBundleContext();
             if (null != context) {
                 final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
@@ -2231,12 +2234,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     Contacts.deleteContact(getContactIdByUserId(ctx.getId(), user_id, write_ox_con), ctx.getId(), write_ox_con, false);
                 }
 
-                // JCS
+                /*-
+                 * 
                 try {
                     ClientAdminThread.cache.reinitAccessCombinations();
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }
+                 * 
+                 */
+                // JCS
                 final BundleContext context = AdminCache.getBundleContext();
                 if (null != context) {
                     final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
@@ -2385,12 +2392,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             con.commit();
 
-            // JCS
+            /*-
+             * 
             try {
                 ClientAdminThread.cache.reinitAccessCombinations();
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
+             * 
+             */
+            // JCS
             final BundleContext context = AdminCache.getBundleContext();
             if (null != context) {
                 final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context,
