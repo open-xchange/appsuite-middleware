@@ -1,3 +1,7 @@
+* 2013-03-30 - thorben.betten@open-xchange.com
+
+ - Fix bug 25024: Consider all UserModuleAccess options when performing hashcode() & equals() methods
+
 * 2012-08-14 - marcus.klein@open-xchange.com
 
  - Fix for bug 22580: Do not get into a NullPointerException if starting of the administration hosting plugin fails.
