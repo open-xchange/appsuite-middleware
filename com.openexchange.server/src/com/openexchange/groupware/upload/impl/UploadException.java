@@ -203,6 +203,7 @@ public class UploadException extends OXException {
             final UploadException ret;
             if (category.getLogLevel().implies(LogLevel.DEBUG)) {
                 ret = new UploadException(getNumber(), getMessage(), cause, args);
+                ret.setLogMessage(message, args);
             } else {
                 if (OXExceptionFactory.DISPLAYABLE.contains(category.getType())) {
                     // Displayed message is equal to logged one
