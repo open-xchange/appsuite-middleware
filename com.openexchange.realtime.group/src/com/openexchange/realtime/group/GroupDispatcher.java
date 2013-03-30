@@ -269,7 +269,7 @@ public class GroupDispatcher implements ComponentHandle {
         ids.remove(id);
         stamps.remove(id);
         if (ids.isEmpty()) {
-            onDispose();
+            onDispose(id);
             this.id.trigger("dispose", this);
         }
         onLeave(id);
@@ -383,8 +383,10 @@ public class GroupDispatcher implements ComponentHandle {
     /**
      * Called when the group is closed. This happens when the last member left the group, or the {@link EvictionPolicy} of the 
      * {@link Component} that created this group decides it is time to close the group
+     * @param id
+     * @throws OXException 
      */
-    protected void onDispose() {
+    protected void onDispose(ID id) throws OXException {
         
     }
     
