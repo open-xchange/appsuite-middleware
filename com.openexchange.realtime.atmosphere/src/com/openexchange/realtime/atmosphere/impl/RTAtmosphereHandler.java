@@ -115,7 +115,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     }
 
     @Override
-    public synchronized void onRequest(AtmosphereResource resource) throws IOException {
+    public void onRequest(AtmosphereResource resource) throws IOException {
         // Log all events on the console, including WebSocket events for debugging
         if (LOG.isDebugEnabled()) {
             resource.addEventListener(new WebSocketEventListenerAdapter());

@@ -91,15 +91,15 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
         filterRegistration.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), "/*");
 
         AtmosphereServlet atmosphereServlet = new AtmosphereServlet(false, false);
+        SynchronizedHttpServletWrapper synchronizedAtmosphereServlet = new SynchronizedHttpServletWrapper(atmosphereServlet);
         atmosphereFramework = atmosphereServlet.framework();
         ServletConfig config = FrameworkConfig.with("Atmosphere Servlet", realtimeContext)
             .and("org.atmosphere.cpr.broadcasterLifeCyclePolicy","NEVER")
             .build();
         atmosphereFramework.init(config);
-//        atmosphereFramework.setAsyncSupport(new Grizzly2CometSupport(atmosphereFramework.getAtmosphereConfig()));
         atmosphereFramework.setAsyncSupport(new Grizzly2WebSocketSupport(atmosphereFramework.getAtmosphereConfig()));
 
-        ServletRegistration atmosphereRegistration = realtimeContext.addServlet("AtmosphereServlet", atmosphereServlet);
+        ServletRegistration atmosphereRegistration = realtimeContext.addServlet("AtmosphereServlet", synchronizedAtmosphereServlet);
         atmosphereRegistration.addMapping(atmosphereServletMapping);
         atmosphereRegistration.setLoadOnStartup(0);
 
