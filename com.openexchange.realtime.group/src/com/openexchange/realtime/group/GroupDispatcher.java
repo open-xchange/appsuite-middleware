@@ -146,6 +146,10 @@ public class GroupDispatcher implements ComponentHandle {
             return true;
         }
         
+        if (payload.getElementName().equals("ping") && payload.getNamespace().equals("group")) {
+            return true; // Discard, this was just to reset the timeout
+        }
+        
         Object data = payload.getData();
         if (GroupCommand.class.isInstance(data)) {
             ((GroupCommand) data).perform(stanza, this);
@@ -175,7 +179,6 @@ public class GroupDispatcher implements ComponentHandle {
      * Relay this message to all except the original sender ("from") of the stanza.
      */
     public void relayToAllExceptSender(Stanza stanza) throws OXException {
-        stamp(stanza);
         relayToAll(stanza, stanza.getFrom());
     }
     

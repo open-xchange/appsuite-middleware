@@ -159,6 +159,10 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 String postData = request.getReader().readLine();
                 if (postData != null) {
                     JSONObject json = new JSONObject(postData);
+                    if (json.has("type") && "ping".equalsIgnoreCase(json.optString("type"))) {
+                        // ignore
+                        return;
+                    }
                     StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(
                         constructedId,
                         sessionValidator.getServerSession(),
