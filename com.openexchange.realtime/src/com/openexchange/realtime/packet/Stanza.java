@@ -377,5 +377,11 @@ public abstract class Stanza implements Serializable {
             return false;
         return true;
     }
+    
+    @Override
+    public String toString() {
+
+        return "From: " + from.toString() + "\nTo: " + to.toString() + "Payloads:\n" + payloads;
+    }
 
 }

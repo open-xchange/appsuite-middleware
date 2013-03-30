@@ -73,7 +73,7 @@ public class StanzaQueueServiceImpl implements StanzaQueueService {
     private final BlockingQueue<IQ> iqQueue = new LinkedBlockingQueue<IQ>(Integer.MAX_VALUE);
 
     @Override
-    public boolean enqueueStanza(Stanza stanza) {
+    public synchronized boolean enqueueStanza(Stanza stanza) {
         if (stanza == null) {
             throw new IllegalArgumentException("Parameter 'stanza' must not be null!");
         }
