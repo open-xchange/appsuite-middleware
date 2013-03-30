@@ -113,8 +113,8 @@ public final class GetAction extends AbstractMailAction {
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(com.openexchange.log.LogFactory.getLog(GetAction.class));
 
-    private static final byte[] BYTES1 = "{\"data\":\"".getBytes();
-    private static final byte[] BYTES2 = "\"}".getBytes();
+    private static final byte[] CHUNK1 = "{\"data\":\"".getBytes();
+    private static final byte[] CHUNK2 = "\"}".getBytes();
 
     /**
      * Initializes a new {@link GetAction}.
@@ -253,9 +253,9 @@ public final class GetAction extends AbstractMailAction {
                                 return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
                             }
                             // As JSON response: {"data":"..."}
-                            directOutputStream.write(BYTES1); // ``{"data":"...
+                            directOutputStream.write(CHUNK1); // ``{"data":"...
                             mail.writeTo(new JSONStringOutputStream(directOutputStream));
-                            directOutputStream.write(BYTES2); // ..."}лл
+                            directOutputStream.write(CHUNK2); // ..."}лл
                             directOutputStream.flush();
                             return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
                         } catch (final Exception e) {
