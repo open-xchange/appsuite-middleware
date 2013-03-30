@@ -75,7 +75,7 @@ public final class ThresholdFileHolder implements IFileHolder {
     private ByteArrayOutputStream buf;
 
     /** The number of valid bytes that were already written */
-    private int count;
+    private long count;
 
     /** The temporary file to stream to if threshold exceeded */
     private File tempFile;
@@ -207,6 +207,7 @@ public final class ThresholdFileHolder implements IFileHolder {
         OutputStream out = null;
         try {
             File tempFile = this.tempFile;
+            long count = this.count;
             if (null == tempFile) {
                 // Threshold not yet exceeded
                 ByteArrayOutputStream baos = buf;
@@ -215,38 +216,36 @@ public final class ThresholdFileHolder implements IFileHolder {
                     this.buf = baos;
                 }
                 out = baos;
-                int count = this.count;
                 final int inMemoryThreshold = threshold;
                 final int buflen = 0xFFFF; // 64KB
                 final byte[] buffer = new byte[buflen];
                 for (int len; (len = in.read(buffer, 0, buflen)) > 0;) {
-                    if (null == tempFile) {
-                        // Count bytes to stream to file if threshold is exceeded
-                        count += len;
-                        if (count > inMemoryThreshold) {
-                            tempFile = TmpFileFileHolder.newTempFile();
-                            this.tempFile = tempFile;
-                            out = new FileOutputStream(tempFile);
-                            out.write(baos.toByteArray());
-                            baos = null;
-                        }
+                    // Count bytes
+                    count += len;
+                    if ((null == tempFile) && (count > inMemoryThreshold)) {
+                        // Stream to file because threshold is exceeded
+                        tempFile = TmpFileFileHolder.newTempFile();
+                        this.tempFile = tempFile;
+                        out = new FileOutputStream(tempFile);
+                        out.write(baos.toByteArray());
+                        baos = null;
                     }
                     out.write(buffer, 0, len);
                 }
                 out.flush();
-                if (null == tempFile) {
-                    this.count = count;
-                }
             } else {
                 // Threshold already exceeded. Stream to file.
                 out = new FileOutputStream(tempFile);
                 final int buflen = 0xFFFF; // 64KB
                 final byte[] buffer = new byte[buflen];
                 for (int len; (len = in.read(buffer, 0, buflen)) > 0;) {
+                    // Count bytes
+                    count += len;
                     out.write(buffer, 0, len);
                 }
                 out.flush();
             }
+            this.count = count;
         } catch (final IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
@@ -254,6 +253,15 @@ public final class ThresholdFileHolder implements IFileHolder {
             Streams.close(out);
         }
         return this;
+    }
+    
+    /**
+     * Gets the number of valid bytes written to this file holder.
+     * 
+     * @return The number of bytes
+     */
+    public long getCount() {
+        return count;
     }
 
     @Override
