@@ -62,6 +62,7 @@ import org.atmosphere.websocket.WebSocketEventListenerAdapter;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.RealtimeExceptionCodes;
@@ -123,6 +124,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
         AtmosphereRequest request = resource.getRequest();
         AtmosphereResponse response = resource.getResponse();
+        response.setCharacterEncoding("UTF-8");
         String method = request.getMethod();
         SessionValidator sessionValidator = new SessionValidator(resource);
         try {
@@ -305,6 +307,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         }
         PrintWriter writer;
         try {
+            AtmosphereResponse response = atmosphereResource.getResponse();
             writer = atmosphereResource.getResponse().getWriter();
             writer.print(stanzaAsJSON);
             if (writer.checkError()) {
