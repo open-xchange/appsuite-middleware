@@ -91,7 +91,6 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
         filterRegistration.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), "/*");
 
         AtmosphereServlet atmosphereServlet = new AtmosphereServlet(false, false);
-        SynchronizedHttpServletWrapper synchronizedAtmosphereServlet = new SynchronizedHttpServletWrapper(atmosphereServlet);
         atmosphereFramework = atmosphereServlet.framework();
         ServletConfig config = FrameworkConfig.with("Atmosphere Servlet", realtimeContext)
             .and("org.atmosphere.cpr.broadcasterLifeCyclePolicy","NEVER")
@@ -99,7 +98,7 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
         atmosphereFramework.init(config);
         atmosphereFramework.setAsyncSupport(new Grizzly2WebSocketSupport(atmosphereFramework.getAtmosphereConfig()));
 
-        ServletRegistration atmosphereRegistration = realtimeContext.addServlet("AtmosphereServlet", synchronizedAtmosphereServlet);
+        ServletRegistration atmosphereRegistration = realtimeContext.addServlet("AtmosphereServlet", atmosphereServlet);
         atmosphereRegistration.addMapping(atmosphereServletMapping);
         atmosphereRegistration.setLoadOnStartup(0);
 
