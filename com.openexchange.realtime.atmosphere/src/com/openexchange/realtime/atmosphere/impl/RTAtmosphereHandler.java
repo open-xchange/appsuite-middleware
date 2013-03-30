@@ -51,14 +51,23 @@ package com.openexchange.realtime.atmosphere.impl;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.atmosphere.cpr.AtmosphereHandler;
 import org.atmosphere.cpr.AtmosphereRequest;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereResponse;
 import org.atmosphere.websocket.WebSocketEventListenerAdapter;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
@@ -103,6 +112,13 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * Map full client IDs to the AtmosphereResource that represents their connection to the server, this is used for sending
      */
     private final IDMap<AtmosphereResource> concreteIDToResourceMap;
+    
+    /*
+     * Map for holding outboxes
+     */
+    private final ConcurrentHashMap<ID, List<Stanza>> outboxes;
+    
+    
 
     /**
      * Initializes a new {@link RTAtmosphereHandler}.
@@ -111,6 +127,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         super();
         generalToConcreteIDMap = new IDMap<Set<ID>>();
         concreteIDToResourceMap = new IDMap<AtmosphereResource>();
+        outboxes = new ConcurrentHashMap<ID, List<Stanza>>();
         this.atmosphereServiceRegistry = AtmosphereServiceRegistry.getInstance();
     }
 
@@ -145,9 +162,10 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         resource,
                         constructedId,
                         generalToConcreteIDMap,
-                        concreteIDToResourceMap));
+                        concreteIDToResourceMap,
+                        outboxes));
                     // finally suspend the resource until data is available for the clients and resource gets resumed after send
-                    resource.suspend();
+                    drainOutbox(constructedId);
                 } else {
                     response.getWriter().write("OK");
                 }
@@ -158,16 +176,26 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                  */
                 String postData = request.getReader().readLine();
                 if (postData != null) {
-                    JSONObject json = new JSONObject(postData);
-                    if (json.has("type") && "ping".equalsIgnoreCase(json.optString("type"))) {
-                        // ignore
-                        return;
+                    List<JSONObject> stanzas = new LinkedList<JSONObject>();
+                    if (postData.startsWith("[")) {
+                        JSONArray arr = new JSONArray(postData);
+                        for (int i = 0, size = arr.length(); i < size; i++) {
+                            stanzas.add(arr.getJSONObject(i));
+                        }
+                    } else {
+                        stanzas.add(new JSONObject(postData));
                     }
-                    StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(
-                        constructedId,
-                        sessionValidator.getServerSession(),
-                        json);
-                    handleIncoming(stanzaBuilder.build());
+                    for(JSONObject json: stanzas) {
+                        if (json.has("type") && "ping".equalsIgnoreCase(json.optString("type"))) {
+                            // ignore
+                            return;
+                        }
+                        StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(
+                            constructedId,
+                            sessionValidator.getServerSession(),
+                            json);
+                        handleIncoming(stanzaBuilder.build());
+                    }
                 }
             }
         } catch (Exception e) {
@@ -297,33 +325,95 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     @Override
     public void send(Stanza stanza, ID recipient) throws OXException {
-        StanzaWriter stanzaWriter = new StanzaWriter();
-        String stanzaAsJSON = stanzaWriter.write(stanza).toString();
-        AtmosphereResource atmosphereResource = concreteIDToResourceMap.get(recipient);
-        if (atmosphereResource == null || atmosphereResource.isCancelled() || atmosphereResource.getResponse().isCommitted()) {
-            handleResourceNotAvailable();
-        }
-        PrintWriter writer;
-        try {
-            writer = atmosphereResource.getResponse().getWriter();
-            writer.print(stanzaAsJSON);
-            if (writer.checkError()) {
-                handleResourceNotAvailable();
-            }
-            switch (atmosphereResource.transport()) {
-            case JSONP:
-            case AJAX:
-            case LONG_POLLING:
-                atmosphereResource.resume();
-                break;
-            default:
-                break;
-            }
-        } catch (IOException e) {
-            handleResourceNotAvailable();
-        }
+        outboxFor(recipient).add(stanza);
+        drainOutbox(recipient);
+        
     }
 
+    private List<Stanza> outboxFor(ID id) {
+        List<Stanza> outbox = outboxes.get(id);
+        if (outbox == null) {
+            outbox = Collections.synchronizedList(new LinkedList<Stanza>());
+            List<Stanza> activeOutbox = outboxes.putIfAbsent(id, outbox);
+            return (activeOutbox != null) ? activeOutbox : outbox;
+        }
+        return outbox;
+    }
+    
+    private void drainOutbox(ID id) throws OXException {
+        drainOutbox(id, 0);
+    }
+    
+    private void drainOutbox(ID id, int count) throws OXException {
+        AtmosphereResource atmosphereResource = concreteIDToResourceMap.get(id);
+        boolean failed = false;
+        boolean sent = false;
+
+        synchronized(atmosphereResource) {
+            List<Stanza> outbox = outboxes.put(id, Collections.synchronizedList(new LinkedList<Stanza>()));
+            if (outbox != null && ! outbox.isEmpty()) {
+                JSONArray array = new JSONArray();
+                StanzaWriter stanzaWriter = new StanzaWriter();
+                for(Stanza stanza: outbox) {
+                    array.put(stanzaWriter.write(stanza));
+                }
+
+
+                if (atmosphereResource == null || atmosphereResource.isCancelled() || atmosphereResource.getResponse().isCommitted()) {
+                    // Enqueue again and try later
+                    outboxFor(id).addAll(outbox);
+                    failed = true;
+                }
+                
+                if (!failed) {
+                    PrintWriter writer;
+                    try {
+                        writer = atmosphereResource.getResponse().getWriter();
+                        writer.print(array);
+                        if (writer.checkError()) {
+                            handleResourceNotAvailable();
+                        } else {
+                            sent = true;
+                        }
+                        
+                    } catch (IOException e) {
+                        // Enqueue again and try later
+                        outboxFor(id).addAll(outbox);
+                        failed = true;
+                    }
+                }
+            }
+
+            if (sent) {
+                switch (atmosphereResource.transport()) {
+                case JSONP:
+                case AJAX:
+                case LONG_POLLING:
+                    atmosphereResource.resume();
+                    break;
+                default:
+                    break;
+                }
+            } else {
+                switch (atmosphereResource.transport()) {
+                case JSONP:
+                case AJAX:
+                case LONG_POLLING:
+                    atmosphereResource.suspend();
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+
+
+        if (failed && count < 3) {
+            drainOutbox(id, count + 1);
+        }
+        
+    }
+    
     private void handleResourceNotAvailable() throws OXException {
         throw RealtimeExceptionCodes.RESOURCE_NOT_AVAILABLE.create();
     }

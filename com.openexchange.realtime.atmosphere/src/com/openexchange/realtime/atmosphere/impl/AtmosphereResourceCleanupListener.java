@@ -49,8 +49,10 @@
 
 package com.openexchange.realtime.atmosphere.impl;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
 import org.atmosphere.cpr.AtmosphereResourceEventListener;
@@ -60,6 +62,7 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.IDMap;
 
 /**
@@ -85,6 +88,8 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
      */
     private final IDMap<AtmosphereResource> fullIDToResourceMap;
 
+    private ConcurrentHashMap<ID, List<Stanza>> outboxes;
+
     /**
      * Initializes a new {@link AtmosphereResourceCleanupListener}.
      * 
@@ -93,12 +98,14 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
      * @param generalToFullIDMap Reference to the map of the RTAtmosphereHandler that tracks full client IDs to the AtmosphereResource that
      *            represents their connection to the server
      * @param fullIDToResourceMap Reference to the map of the RTAtmosphereHandler that tracks general ids to full ids.
+     * @param outboxes 
      */
-    public AtmosphereResourceCleanupListener(AtmosphereResource atmosphereResource, ID fullID, IDMap<Set<ID>> generalToFullIDMap, IDMap<AtmosphereResource> fullIDToResourceMap) {
+    public AtmosphereResourceCleanupListener(AtmosphereResource atmosphereResource, ID fullID, IDMap<Set<ID>> generalToFullIDMap, IDMap<AtmosphereResource> fullIDToResourceMap, ConcurrentHashMap<ID,List<Stanza>> outboxes) {
         this.atmosphereResource = atmosphereResource;
         this.fullID = fullID;
         this.generalToFullIDMap = generalToFullIDMap;
         this.fullIDToResourceMap = fullIDToResourceMap;
+        this.outboxes = outboxes;
     }
 
     @Override
@@ -147,7 +154,7 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
             LOG.debug("Removing from generalID -> conreteID map: " + fullID);
         }
         fullIDToResourceMap.remove(fullID);
-        
+        outboxes.remove(fullID);
     }
 
     @Override

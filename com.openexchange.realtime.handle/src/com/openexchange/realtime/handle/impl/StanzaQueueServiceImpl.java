@@ -77,7 +77,6 @@ public class StanzaQueueServiceImpl implements StanzaQueueService {
         if (stanza == null) {
             throw new IllegalArgumentException("Parameter 'stanza' must not be null!");
         }
-
         if (stanza instanceof Presence) {
             return presenceQueue.offer((Presence) stanza);
         } else if (stanza instanceof Message) {
