@@ -1,6 +1,7 @@
 * 2013-03-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 25630: Added proper "main" method to CLI classes
+ - Fix for bug 25132: Set proper arguments for UploadSizeExceededException
 
 * 2013-03-29 - dennis.sieben@open-xchange.com
 

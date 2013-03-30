@@ -180,7 +180,7 @@ public class ChineseRoom extends GroupDispatcher implements ComponentHandle {
     }
     
     @Override
-    protected void onDispose() {
+    protected void onDispose(ID id) {
         // Seems we're being closed down, this would be the place to persist our shared state
         System.out.println("Persist data");
     }

@@ -49,8 +49,9 @@
 
 package com.openexchange.mail.json.actions;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -61,9 +62,11 @@ import javax.mail.internet.MimeMessage;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONStringOutputStream;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
-import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
@@ -72,6 +75,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
@@ -87,7 +91,6 @@ import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link GetAction}
@@ -109,6 +112,9 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 public final class GetAction extends AbstractMailAction {
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(com.openexchange.log.LogFactory.getLog(GetAction.class));
+
+    private static final byte[] BYTES1 = "{\"data\":\"".getBytes();
+    private static final byte[] BYTES2 = "\"}".getBytes();
 
     /**
      * Initializes a new {@link GetAction}.
@@ -228,22 +234,61 @@ public final class GetAction extends AbstractMailAction {
                 if (mail == null) {
                     throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
                 }
-                final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
+                /*
+                 * Direct response if possible
+                 */
+                if (null == mimeFilter) {
+                    final AJAXRequestData requestData = req.getRequest();
+                    final OutputStream directOutputStream = requestData.optOutputStream();
+                    if (null != directOutputStream) {
+                        try {
+                            if (saveToDisk) {
+                                requestData.setResponseHeader("Content-Type", "application/octet-stream");
+                                final String subject = mail.getSubject();
+                                final StringAllocator sb = new StringAllocator(64).append("attachment");
+                                DownloadUtility.appendFilenameParameter(isEmpty(subject) ? "mail.eml" : saneForFileName(subject)+".eml", requestData.getUserAgent(), sb);
+                                requestData.setResponseHeader("Content-Disposition",  sb.toString());
+                                mail.writeTo(directOutputStream);
+                                directOutputStream.flush();
+                                return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
+                            }
+                            // As JSON response: {"data":"..."}
+                            directOutputStream.write(BYTES1); // ``{"data":"...
+                            mail.writeTo(new JSONStringOutputStream(directOutputStream));
+                            directOutputStream.write(BYTES2); // ..."}лл
+                            directOutputStream.flush();
+                            return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
+                        } catch (final Exception e) {
+                            LOG.debug(e.getMessage(), e);
+                        }
+                    }
+                }
+                /*-
+                 * The regular way...
+                 */
+                @SuppressWarnings("resource")
+                ThresholdFileHolder fileHolder = new ThresholdFileHolder();
                 try {
-                    mail.writeTo(baos);
+                    mail.writeTo(fileHolder.asOutputStream());
                 } catch (final OXException e) {
                     if (!MailExceptionCode.NO_CONTENT.equals(e)) {
                         throw e;
                     }
                     LOG.debug(e.getMessage(), e);
-                    baos.reset();
+                    fileHolder = new ThresholdFileHolder();
+                    fileHolder.write(new byte[0]);
                 }
                 // Filter
                 if (null != mimeFilter) {
-                    MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), Streams.newByteArrayInputStream(baos.toByteArray()));
-                    mimeMessage = mimeFilter.filter(mimeMessage);
-                    baos.reset();
-                    mimeMessage.writeTo(baos);
+                    final InputStream is = fileHolder.getStream();
+                    try {
+                        MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), is);
+                        mimeMessage = mimeFilter.filter(mimeMessage);
+                        fileHolder = new ThresholdFileHolder();
+                        mimeMessage.writeTo(fileHolder.asOutputStream());
+                    } finally {
+                        Streams.close(is);
+                    }
                 }
                 // Proceed
                 final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
@@ -280,7 +325,6 @@ public final class GetAction extends AbstractMailAction {
                      * Create appropriate file holder
                      */
                     req.getRequest().setFormat("file");
-                    final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(baos.toByteArray());
                     fileHolder.setContentType("application/octet-stream");
                     // Set file name
                     final String subject = mail.getSubject();
@@ -289,9 +333,9 @@ public final class GetAction extends AbstractMailAction {
                 }
                 final ContentType ct = mail.getContentType();
                 if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
-                    data = new AJAXRequestResult(new String(baos.toByteArray(), ct.getCharsetParameter()), "string");
+                    data = new AJAXRequestResult(new String(fileHolder.toByteArray(), ct.getCharsetParameter()), "string");
                 } else {
-                    data = new AJAXRequestResult(new String(baos.toByteArray(), "UTF-8"), "string");
+                    data = new AJAXRequestResult(new String(fileHolder.toByteArray(), "UTF-8"), "string");
                 }
                 // final ContentType rct = new ContentType("text/plain");
                 // if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
