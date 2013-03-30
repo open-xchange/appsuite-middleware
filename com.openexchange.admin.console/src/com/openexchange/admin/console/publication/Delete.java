@@ -67,8 +67,14 @@ public final class Delete extends DeleteCore {
     /**
      * Initializes a new {@link Delete}.
      */
-    public Delete() {
+    public Delete(final String[] args) {
         super();
+        final AdminParser parser = new AdminParser("deletepublication");
+        commonfunctions(parser, args);
+    }
+
+    public static void main(String[] args) {
+        new Delete(args);
     }
 
     @Override

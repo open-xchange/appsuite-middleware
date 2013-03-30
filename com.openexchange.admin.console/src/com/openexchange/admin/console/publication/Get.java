@@ -67,8 +67,14 @@ public final class Get extends GetCore {
     /**
      * Initializes a new {@link Get}.
      */
-    public Get() {
+    public Get(final String[] args) {
         super();
+        final AdminParser parser = new AdminParser("getpublication");
+        commonfunctions(parser, args);
+    }
+
+    public static void main(final String[] args) {
+        new Get(args);
     }
 
     @Override
