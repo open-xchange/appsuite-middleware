@@ -371,7 +371,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     PrintWriter writer;
                     try {
                         writer = atmosphereResource.getResponse().getWriter();
+                        System.out.println("> " + array);
                         writer.print(array);
+                        
                         if (writer.checkError()) {
                             handleResourceNotAvailable();
                         } else {

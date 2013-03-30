@@ -381,7 +381,7 @@ public abstract class Stanza implements Serializable {
     @Override
     public String toString() {
 
-        return "From: " + from.toString() + "\nTo: " + to.toString() + "Payloads:\n" + payloads;
+        return "From: " + from + "\nTo: " + to + "\nPayloads:\n" + payloads;
     }
 
 }
