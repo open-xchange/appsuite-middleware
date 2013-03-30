@@ -1,3 +1,7 @@
+* 2013-03-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25630: Added proper "main" method to CLI classes
+
 * 2013-03-29 - dennis.sieben@open-xchange.com
 
  - Fix for bug 25626: Added admin id to admin user after creation in database
