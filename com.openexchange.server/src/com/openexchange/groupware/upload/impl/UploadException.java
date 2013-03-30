@@ -204,12 +204,19 @@ public class UploadException extends OXException {
             if (category.getLogLevel().implies(LogLevel.DEBUG)) {
                 ret = new UploadException(getNumber(), getMessage(), cause, args);
             } else {
-                ret = new UploadException(
-                    getNumber(),
-                    Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
-                    cause,
-                    new Object[0]);
-                ret.setLogMessage(getMessage(), args);
+                if (OXExceptionFactory.DISPLAYABLE.contains(category.getType())) {
+                    // Displayed message is equal to logged one
+                    final String message = getMessage();
+                    ret = new UploadException(getNumber(), message, cause, args);
+                    ret.setLogMessage(message, args);
+                } else {
+                    ret = new UploadException(
+                        getNumber(),
+                        Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
+                        cause,
+                        new Object[0]);
+                    ret.setLogMessage(getMessage(), args);
+                }
             }
             ret.addCategory(category);
             ret.setPrefix(getPrefix());
