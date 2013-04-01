@@ -250,9 +250,9 @@ final class LoggerTask extends AbstractTask<Object> {
     private static final Pattern CRLF = Pattern.compile("\r?\n");
 
     private String prependLocation(final String message, final Loggable loggable, final LogPropertyName.LogLevel logLevel) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator((null == message ? 0 : message.length()) + 64);
         final StackTraceElement[] trace = loggable.getCallerTrace();
-        String logClass = null;
+        // String logClass = null;
         if (null != trace) {
             for (final StackTraceElement ste : trace) {
                 final String className = ste.getClassName();
@@ -274,7 +274,7 @@ final class LoggerTask extends AbstractTask<Object> {
                         }
                     }
                     sb.append(lineSeparator).append(' ');
-                    logClass = className;
+                    // logClass = className;
                     break;
                 }
             }

@@ -197,36 +197,14 @@ public class PropertiesAppendingLogWrapper implements Log {
         /*
          * Properties available
          */
+        final Set<LogProperties.Name> propertiesToLog = getPropertiesFor(logLevel);
         final Map<String, String> sorted = new TreeMap<String, String>();
         boolean isEmpty = true;
-        {
-            final List<LogPropertyName> names = LogProperties.getPropertyNames();
-            final Set<LogProperties.Name> alreadyLogged;
-            if (names.isEmpty()) {
-                alreadyLogged = Collections.emptySet();
-            } else {
-                alreadyLogged = EnumSet.noneOf(LogProperties.Name.class);
-                for (final LogPropertyName name : names) {
-                    if (name.implies(logLevel)) {
-                        final LogProperties.Name propertyName = name.getPropertyName();
-                        alreadyLogged.add(propertyName);
-                        final Object value = properties.get(propertyName);
-                        if (null != value) {
-                            sorted.put(propertyName.getName(), value.toString());
-                            isEmpty = false;
-                        }
-                    }
-                }
-            }
-            for (final Entry<LogProperties.Name, Object> entry : properties.entrySet()) {
-                final LogProperties.Name propertyName = entry.getKey();
-                if (!alreadyLogged.contains(propertyName)) {
-                    final Object value = entry.getValue();
-                    if (value instanceof ForceLog) {
-                        sorted.put(propertyName.getName(), value.toString());
-                        isEmpty = false;
-                    }
-                }
+        for (final LogProperties.Name propertyName : propertiesToLog) {
+            final Object value = properties.get(propertyName);
+            if (null != value) {
+                sorted.put(propertyName.getName(), value.toString());
+                isEmpty = false;
             }
         }
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256);
@@ -239,6 +217,49 @@ public class PropertiesAppendingLogWrapper implements Log {
         }
         sb.append(message);
         return sb.toString();
+    }
+
+    /**
+     * Gets the properties to log for given log level.
+     * 
+     * @param logLevel The log level
+     * @return The properties to log
+     */
+    public Set<LogProperties.Name> getPropertiesFor(final LogLevel logLevel) {
+        if (!LogProperties.isEnabled()) {
+            return Collections.emptySet();
+        }
+        final Props logProps = LogProperties.optLogProperties();
+        if (logProps == null) {
+            return Collections.emptySet();
+        }
+        final Map<LogProperties.Name, Object> properties = logProps.getMap();
+        if (properties == null) {
+            return Collections.emptySet();
+        }
+        final Set<LogProperties.Name> propertiesToLog;
+        // First add the configured ones
+        {
+            final List<LogPropertyName> names = LogProperties.getPropertyNames();
+            if (names.isEmpty()) {
+                propertiesToLog = Collections.emptySet();
+            } else {
+                propertiesToLog = EnumSet.noneOf(LogProperties.Name.class);
+                for (final LogPropertyName name : names) {
+                    if (name.implies(logLevel)) {
+                        propertiesToLog.add(name.getPropertyName());
+                    }
+                }
+            }
+        }
+        // Now add properties of type "com.openexchange.log.ForceLog"
+        for (final Entry<LogProperties.Name, Object> entry : properties.entrySet()) {
+            final LogProperties.Name propertyName = entry.getKey();
+            if (!propertiesToLog.contains(propertyName) && (entry.getValue() instanceof ForceLog)) {
+                propertiesToLog.add(propertyName);
+            }
+        }
+        return propertiesToLog;
     }
 
 }

@@ -77,6 +77,7 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogProperties.Name;
+import com.openexchange.log.PropertiesAppendingLogWrapper;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -154,11 +155,17 @@ public class DispatcherServlet extends SessionServlet {
     protected final AJAXRequestDataTools defaultRequestDataTools;
 
     /**
+     * The line separator.
+     */
+    protected final String lineSeparator;
+
+    /**
      * Initializes a new {@link DispatcherServlet}.
      */
     public DispatcherServlet() {
         super();
         defaultRequestDataTools = AJAXRequestDataTools.getInstance();
+        lineSeparator = System.getProperty("line.separator");
     }
 
     /**
@@ -352,22 +359,30 @@ public class DispatcherServlet extends SessionServlet {
                 LOG.error(new StringAllocator("Unexpected error: '").append(e.getMessage()).append('\'').toString(), e);
             } else if (e.isLoggable(LogLevel.ERROR)) {
                 if (LogProperties.isEnabled()) {
-                    final StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:\n");
-                    logBuilder.append(LogProperties.getAndPrettyPrint(PROPS_TO_IGNORE));
+                    final StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:").append(lineSeparator);
+                    if (LOG instanceof PropertiesAppendingLogWrapper) {
+                        logBuilder.append(LogProperties.getAndPrettyPrint(((PropertiesAppendingLogWrapper) LOG).getPropertiesFor(com.openexchange.log.LogPropertyName.LogLevel.ERROR)));
+                    } else {
+                        logBuilder.append(LogProperties.getAndPrettyPrint(PROPS_TO_IGNORE));
+                    }
                     LOG.error(logBuilder.toString(), e);
                 } else {
-                    LOG.error(e.getMessage(), e);
+                    LOG.error("Error processing request.", e);
                 }
             }
             final String action = httpRequest.getParameter(PARAMETER_ACTION);
             APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? toUpperCase(httpRequest.getMethod()) : action, httpRequest, httpResponse);
         } catch (final RuntimeException e) {
             if(LogProperties.isEnabled()) {
-                final StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:\n");
-                logBuilder.append(LogProperties.getAndPrettyPrint(PROPS_TO_IGNORE));
-                LOG.error(logBuilder.toString(),e);
+                final StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:").append(lineSeparator);
+                if (LOG instanceof PropertiesAppendingLogWrapper) {
+                    logBuilder.append(LogProperties.getAndPrettyPrint(((PropertiesAppendingLogWrapper) LOG).getPropertiesFor(com.openexchange.log.LogPropertyName.LogLevel.ERROR)));
+                } else {
+                    logBuilder.append(LogProperties.getAndPrettyPrint(PROPS_TO_IGNORE));
+                }
+                LOG.error(logBuilder.toString(), e);
             } else {
-                LOG.error(e.getMessage(), e);
+                LOG.error("Error processing request.", e);
             }
             final OXException exception = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             final String action = httpRequest.getParameter(PARAMETER_ACTION);
