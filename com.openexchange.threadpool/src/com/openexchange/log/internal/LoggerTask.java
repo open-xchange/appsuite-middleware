@@ -279,6 +279,7 @@ final class LoggerTask extends AbstractTask<Object> {
                 }
             }
         }
+        // TODO: Check for PropertiesAppender
         if (null != message) {
             sb.append(CRLF.matcher(message).replaceAll(lineSeparator + " "));
         }

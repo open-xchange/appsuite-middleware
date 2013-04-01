@@ -57,6 +57,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import org.apache.commons.logging.Log;
+import com.openexchange.log.LogProperties.Name;
 import com.openexchange.log.LogPropertyName.LogLevel;
 
 /**
@@ -65,7 +66,7 @@ import com.openexchange.log.LogPropertyName.LogLevel;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class PropertiesAppendingLogWrapper implements Log {
+public class PropertiesAppendingLogWrapper implements Log, PropertiesAppender {
 
     /**
      * Line separator string.  This is the value of the line.separator
@@ -73,6 +74,8 @@ public class PropertiesAppendingLogWrapper implements Log {
      */
     private final String lineSeparator;
     private final org.apache.commons.logging.Log delegate;
+    private final boolean enabled;
+    private final boolean delegateAppending;
 
     /**
      * Initializes a new {@link PropertiesAppendingLogWrapper}.
@@ -81,68 +84,70 @@ public class PropertiesAppendingLogWrapper implements Log {
      */
     protected PropertiesAppendingLogWrapper(final org.apache.commons.logging.Log delegate) {
         super();
+        enabled = LogProperties.isEnabled();
         lineSeparator = System.getProperty("line.separator");
         this.delegate = delegate;
+        delegateAppending = false; // ((delegate instanceof com.openexchange.exception.Log) || (delegate instanceof com.openexchange.log.Log));
     }
 
     @Override
     public void debug(final Object message, final Throwable t) {
-        delegate.debug(appendProperties(message == null ? null : message.toString(), LogLevel.DEBUG), t);
+        delegate.debug(appendProperties(message, LogLevel.DEBUG), t);
     }
 
     @Override
     public void debug(final Object message) {
-        delegate.debug(appendProperties(message == null ? null : message.toString(), LogLevel.DEBUG));
+        delegate.debug(appendProperties(message, LogLevel.DEBUG));
     }
 
     @Override
     public void error(final Object message, final Throwable t) {
-        delegate.error(appendProperties(message == null ? null : message.toString(), LogLevel.ERROR), t);
+        delegate.error(appendProperties(message, LogLevel.ERROR), t);
     }
 
     @Override
     public void error(final Object message) {
-        delegate.error(appendProperties(message == null ? null : message.toString(), LogLevel.ERROR));
+        delegate.error(appendProperties(message, LogLevel.ERROR));
     }
 
     @Override
     public void fatal(final Object message, final Throwable t) {
-        delegate.fatal(appendProperties(message == null ? null : message.toString(), LogLevel.FATAL), t);
+        delegate.fatal(appendProperties(message, LogLevel.FATAL), t);
     }
 
     @Override
     public void fatal(final Object message) {
-        delegate.fatal(appendProperties(message == null ? null : message.toString(), LogLevel.FATAL));
+        delegate.fatal(appendProperties(message, LogLevel.FATAL));
     }
 
     @Override
     public void info(final Object message, final Throwable t) {
-        delegate.info(appendProperties(message == null ? null : message.toString(), LogLevel.INFO), t);
+        delegate.info(appendProperties(message, LogLevel.INFO), t);
     }
 
     @Override
     public void info(final Object message) {
-        delegate.info(appendProperties(message == null ? null : message.toString(), LogLevel.INFO));
+        delegate.info(appendProperties(message, LogLevel.INFO));
     }
 
     @Override
     public void trace(final Object message, final Throwable t) {
-        delegate.trace(appendProperties(message == null ? null : message.toString(), LogLevel.TRACE), t);
+        delegate.trace(appendProperties(message, LogLevel.TRACE), t);
     }
 
     @Override
     public void trace(final Object message) {
-        delegate.trace(appendProperties(message == null ? null : message.toString(), LogLevel.TRACE));
+        delegate.trace(appendProperties(message, LogLevel.TRACE));
     }
 
     @Override
     public void warn(final Object message, final Throwable t) {
-        delegate.warn(appendProperties(message == null ? null : message.toString(), LogLevel.WARNING), t);
+        delegate.warn(appendProperties(message, LogLevel.WARNING), t);
     }
 
     @Override
     public void warn(final Object message) {
-        delegate.warn(appendProperties(message == null ? null : message.toString(), LogLevel.WARNING));
+        delegate.warn(appendProperties(message, LogLevel.WARNING));
     }
 
     @Override
@@ -175,29 +180,54 @@ public class PropertiesAppendingLogWrapper implements Log {
         return delegate.isWarnEnabled();
     }
 
+    // --------------------------------- PropertiesAppender ---------------------------------------- //
+
+    @Override
+    public Object appendProperties(final Object message, final LogLevel logLevel) {
+        if (!enabled) {
+            return message;
+        }
+        if (delegateAppending) {
+            return new PropertiesAppendingMessage(message, logLevel, this);
+        }
+        return innerAppendProperties(message, logLevel);
+    }
+
     /**
-     * Append properties to specified message (if available).
-     *
-     * @param message The message to append to
+     * Appends the log properties
+     * 
+     * @param message The message
      * @param logLevel The log level
      * @return The message with properties appended
      */
-    public String appendProperties(final String message, final LogLevel logLevel) {
-        if (!LogProperties.isEnabled()) {
-            return message;
-        }
-        final Props logProps = LogProperties.optLogProperties();
-        if (logProps == null) {
-            return message;
-        }
-        final Map<LogProperties.Name, Object> properties = logProps.getMap();
-        if (properties == null) {
+    protected Object innerAppendProperties(final Object message, final LogLevel logLevel) {
+        if (!enabled) {
             return message;
         }
         /*
-         * Properties available
+         * Prepend properties
          */
         final Set<LogProperties.Name> propertiesToLog = getPropertiesFor(logLevel);
+        if (propertiesToLog.isEmpty()) {
+            return message;
+        }
+        /*
+         * Check available properties
+         */
+        final Map<LogProperties.Name, Object> properties;
+        {
+            final Props logProps = LogProperties.optLogProperties();
+            if (logProps == null) {
+                return message;
+            }
+            properties = logProps.getMap();
+            if (properties == null) {
+                return message;
+            }
+        }
+        /*
+         * Sorted output
+         */
         final Map<String, String> sorted = new TreeMap<String, String>();
         boolean isEmpty = true;
         for (final LogProperties.Name propertyName : propertiesToLog) {
@@ -219,25 +249,21 @@ public class PropertiesAppendingLogWrapper implements Log {
         return sb.toString();
     }
 
-    /**
-     * Gets the properties to log for given log level.
-     * <p>
-     * The returned set includes the {@link LogProperties#optLogProperties() configured property names} and the ones marked with {@link com.openexchange.log.ForceLog} as well.
-     * 
-     * @param logLevel The log level
-     * @return The properties to log
-     */
+    @Override
     public Set<LogProperties.Name> getPropertiesFor(final LogLevel logLevel) {
-        if (!LogProperties.isEnabled()) {
+        if (!enabled) {
             return Collections.emptySet();
         }
-        final Props logProps = LogProperties.optLogProperties();
-        if (logProps == null) {
-            return Collections.emptySet();
-        }
-        final Map<LogProperties.Name, Object> properties = logProps.getMap();
-        if (properties == null) {
-            return Collections.emptySet();
+        final Map<LogProperties.Name, Object> properties;
+        {
+            final Props logProps = LogProperties.optLogProperties();
+            if (logProps == null) {
+                return Collections.emptySet();
+            }
+            properties = logProps.getMap();
+            if (properties == null) {
+                return Collections.emptySet();
+            }
         }
         final Set<LogProperties.Name> propertiesToLog;
         // First add the configured ones
@@ -263,5 +289,34 @@ public class PropertiesAppendingLogWrapper implements Log {
         }
         return propertiesToLog;
     }
+
+    private static final class PropertiesAppendingMessage implements PropertiesAppender {
+
+        final Object message;
+        final PropertiesAppender appender;
+        final LogLevel logLevel;
+
+        PropertiesAppendingMessage(Object message, final LogLevel logLevel, PropertiesAppender appender) {
+            super();
+            this.message = message;
+            this.appender = appender;
+            this.logLevel = logLevel;
+        }
+
+        @Override
+        public String toString() {
+            return appendProperties(message, logLevel).toString();
+        }
+
+        @Override
+        public Object appendProperties(Object message, LogLevel logLevel) {
+            return appender.appendProperties(message, logLevel);
+        }
+
+        @Override
+        public Set<Name> getPropertiesFor(LogLevel logLevel) {
+            return appender.getPropertiesFor(logLevel);
+        }
+    } // End of PropertiesAppendingMessage
 
 }
