@@ -1,3 +1,7 @@
+* 2013-04-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25636: Limited changeable contact fields to reasonable ones
+
 * 2013-03-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 25630: Added proper "main" method to CLI classes
