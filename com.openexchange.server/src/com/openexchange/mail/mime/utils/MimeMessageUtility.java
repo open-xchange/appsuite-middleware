@@ -376,7 +376,7 @@ public final class MimeMessageUtility {
      */
     public static boolean containsContentId(final String contentId, final Collection<String> contentIds) {
         boolean contains = false;
-        for (Iterator<String> iterator = contentIds.iterator(); !contains && iterator.hasNext();) {
+        for (final Iterator<String> iterator = contentIds.iterator(); !contains && iterator.hasNext();) {
             contains = equalsCID(contentId, iterator.next());
         }
         return contains;
@@ -1369,81 +1369,81 @@ public final class MimeMessageUtility {
         if (null == headerLine) {
             return null;
         }
-        com.openexchange.java.StringAllocator sb = null;
         int i;
-        if ((i = headerLine.indexOf('\r')) >= 0 || (i = headerLine.indexOf('\n')) >= 0) {
-            /*-
-             * Check folded encoded-words as per RFC 2047:
-             *
-             * An 'encoded-word' may not be more than 75 characters long, including
-             * 'charset', 'encoding', 'encoded-text', and delimiters.  If it is
-             * desirable to encode more text than will fit in an 'encoded-word' of
-             * 75 characters, multiple 'encoded-word's (separated by CRLF SPACE) may
-             * be used.
-             *
-             * In this case the SPACE character is not part of the header and should
-             * be discarded.
-             */
-            String s;
-            if (headerLine.indexOf("=?") < 0) {
-                s = headerLine;
-            } else {
-                s = unfoldEncodedWords(headerLine);
-                if ((i = s.indexOf('\r')) < 0 && (i = s.indexOf('\n')) < 0) {
-                    return s;
-                }
+        if ((i = headerLine.indexOf('\r')) < 0 && (i = headerLine.indexOf('\n')) < 0) {
+            return headerLine;
+        }
+        /*-
+         * Check folded encoded-words as per RFC 2047:
+         *
+         * An 'encoded-word' may not be more than 75 characters long, including
+         * 'charset', 'encoding', 'encoded-text', and delimiters.  If it is
+         * desirable to encode more text than will fit in an 'encoded-word' of
+         * 75 characters, multiple 'encoded-word's (separated by CRLF SPACE) may
+         * be used.
+         *
+         * In this case the SPACE character is not part of the header and should
+         * be discarded.
+         */
+        String s;
+        if (headerLine.indexOf("=?") < 0) {
+            s = headerLine;
+        } else {
+            s = unfoldEncodedWords(headerLine);
+            if ((i = s.indexOf('\r')) < 0 && (i = s.indexOf('\n')) < 0) {
+                return s;
             }
-            do {
-                final int start = i;
-                final int len = s.length();
-                i++; // skip CR or NL
-                if ((i < len) && (s.charAt(i - 1) == '\r') && (s.charAt(i) == '\n')) {
-                    i++; // skip LF
-                }
-                if (start == 0 || s.charAt(start - 1) != '\\') {
-                    char c;
-                    /*
-                     * If next line starts with whitespace, skip all of it
-                     */
-                    if ((i < len) && (((c = s.charAt(i)) == ' ') || (c == '\t'))) {
-                        i++; // skip whitespace
-                        while ((i < len) && (((c = s.charAt(i)) == ' ') || (c == '\t'))) {
-                            i++;
-                        }
-                        if (sb == null) {
-                            sb = new com.openexchange.java.StringAllocator(s.length());
-                        }
-                        if (start != 0) {
-                            sb.append(s.substring(0, start));
-                            sb.append(' ');
-                        }
-                        s = s.substring(i);
-                    } else {
-                        /*
-                         * It's not a continuation line, just leave it in
-                         */
-                        if (sb == null) {
-                            sb = new com.openexchange.java.StringAllocator(s.length());
-                        }
-                        sb.append(s.substring(0, i));
-                        s = s.substring(i);
+        }
+        com.openexchange.java.StringAllocator sb = null;
+        do {
+            final int start = i;
+            final int len = s.length();
+            i++; // skip CR or NL
+            if ((i < len) && (s.charAt(i - 1) == '\r') && (s.charAt(i) == '\n')) {
+                i++; // skip LF
+            }
+            if (start == 0 || s.charAt(start - 1) != '\\') {
+                char c;
+                /*
+                 * If next line starts with whitespace, skip all of it
+                 */
+                if ((i < len) && (((c = s.charAt(i)) == ' ') || (c == '\t'))) {
+                    i++; // skip whitespace
+                    while ((i < len) && (((c = s.charAt(i)) == ' ') || (c == '\t'))) {
+                        i++;
                     }
+                    if (sb == null) {
+                        sb = new com.openexchange.java.StringAllocator(s.length());
+                    }
+                    if (start != 0) {
+                        sb.append(s.substring(0, start));
+                        sb.append(' ');
+                    }
+                    s = s.substring(i);
                 } else {
                     /*
-                     * There's a backslash at "start - 1", strip it out, but leave in the line break
+                     * It's not a continuation line, just leave it in
                      */
                     if (sb == null) {
                         sb = new com.openexchange.java.StringAllocator(s.length());
                     }
-                    sb.append(s.substring(0, start - 1));
-                    sb.append(s.substring(start, i));
+                    sb.append(s.substring(0, i));
                     s = s.substring(i);
                 }
-            } while ((i = s.indexOf('\r')) >= 0 || (i = s.indexOf('\n')) >= 0);
-            sb.append(s);
-            return sb.toString();
-        }
-        return headerLine;
+            } else {
+                /*
+                 * There's a backslash at "start - 1", strip it out, but leave in the line break
+                 */
+                if (sb == null) {
+                    sb = new com.openexchange.java.StringAllocator(s.length());
+                }
+                sb.append(s.substring(0, start - 1));
+                sb.append(s.substring(start, i));
+                s = s.substring(i);
+            }
+        } while ((i = s.indexOf('\r')) >= 0 || (i = s.indexOf('\n')) >= 0);
+        sb.append(s);
+        return sb.toString();
     }
 
     private static final Pattern PAT_ENC_WORDS;
