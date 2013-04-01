@@ -1174,7 +1174,7 @@ public final class MimeMessageUtility {
             return s;
         }
         final int length = s.length();
-        final StringBuilder sb = new StringBuilder(length << 1);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(length << 1);
         for (int i = 0; i < length; i++) {
             final char c = s.charAt(i);
             if (c == '\\') {
@@ -1222,6 +1222,9 @@ public final class MimeMessageUtility {
         return quotePhrase(personal, true);
     }
 
+    private static final Pattern P_REPL1 = Pattern.compile("\\\\");
+    private static final Pattern P_REPL2 = Pattern.compile("\"");
+
     /**
      * Quotes given phrase if needed.
      *
@@ -1252,8 +1255,9 @@ public final class MimeMessageUtility {
             if (!needQuoting) {
                 return encode ? MimeUtility.encodeWord(phrase) : phrase;
             }
-            final String replaced = phrase.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\\\"");
-            return new StringBuilder(len + 2).append('"').append(
+            final String replaced = P_REPL2.matcher(P_REPL1.matcher(phrase).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"");
+            // final String replaced = phrase.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\\\"");
+            return new com.openexchange.java.StringAllocator(len + 2).append('"').append(
                 encode ? MimeUtility.encodeWord(replaced) : replaced).append('"').toString();
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
