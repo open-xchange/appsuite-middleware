@@ -284,6 +284,19 @@ public final class ResponseWriter {
      * @param json The JSON object
      * @param warnings The warnings
      * @param locale The locale
+     * @throws JSONException If writing JSON fails
+     * @see OXExceptionConstants#PROPERTY_LOCALE
+     */
+    public static void addWarnings(final JSONObject json, final List<OXException> warnings, final Locale locale) throws JSONException {
+        addWarnings(json, warnings, locale, false);
+    }
+
+    /**
+     * Writes specified warnings to given JSON object using passed locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
+     *
+     * @param json The JSON object
+     * @param warnings The warnings
+     * @param locale The locale
      * @param includeStackTraceOnError <code>true</code> to append stack trace elements to JSON object; otherwise <code>false</code>
      * @throws JSONException If writing JSON fails
      * @see OXExceptionConstants#PROPERTY_LOCALE
