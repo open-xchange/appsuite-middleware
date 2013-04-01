@@ -874,6 +874,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 umm.setMailId(helper.setUID(accountId, fn, accountMail.getMailId()).toString());
                                 umm.setFolder(fullName);
                                 umm.setAccountId(accountId);
+                                umm.setAccountName(mailAccount.getName());
                                 messages.add(umm);
                             }
                             return messages;
