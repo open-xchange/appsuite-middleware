@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
+import static com.openexchange.ajax.requesthandler.AJAXRequestDataTools.parseBoolParameter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
@@ -88,6 +89,8 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     private static final String PLAIN_JSON = "plainJson";
 
+    private static final String INCLUDE_STACK_TRACE_ON_ERROR = "includeStackTraceOnError";
+
     /**
      * Initializes a new {@link APIResponseRenderer}.
      */
@@ -108,12 +111,11 @@ public class APIResponseRenderer implements ResponseRenderer {
     @Override
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
         final Boolean plainJson = (Boolean) result.getParameter(PLAIN_JSON);
-        writeResponse(
-            (Response) result.getResultObject(),
-            request.getAction(),
-            req,
-            resp,
-            null == plainJson ? false : plainJson.booleanValue());
+        final Response response = (Response) result.getResultObject();
+        if (parseBoolParameter(INCLUDE_STACK_TRACE_ON_ERROR, request) ) {
+            response.setIncludeStackTraceOnError(true);
+        }
+        writeResponse(response, request.getAction(), req, resp, null == plainJson ? false : plainJson.booleanValue());
     }
 
     private static final String SESSION_KEY = SessionServlet.SESSION_KEY;

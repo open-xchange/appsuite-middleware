@@ -209,15 +209,15 @@ public final class ResponseWriter {
              * Any warning available? Set first warning as "exception" for compatibility reasons
              */
             if (null != warnings && !warnings.isEmpty()) {
-                addException(json, warnings.get(0), locale);
+                addException(json, warnings.get(0), locale, response.includeStackTraceOnError());
             }
         } else {
-            addException(json, exception, locale);
+            addException(json, exception, locale, response.includeStackTraceOnError());
         }
         /*
          * Add warnings
          */
-        addWarnings(json, warnings, locale);
+        addWarnings(json, warnings, locale, response.includeStackTraceOnError());
         /*
          * Add properties
          */
@@ -275,7 +275,7 @@ public final class ResponseWriter {
      * @see OXExceptionConstants#PROPERTY_LOCALE
      */
     public static void addWarnings(final JSONObject json, final List<OXException> warnings) throws JSONException {
-        addWarnings(json, warnings, defaultLocale());
+        addWarnings(json, warnings, defaultLocale(), false);
     }
 
     /**
@@ -284,10 +284,11 @@ public final class ResponseWriter {
      * @param json The JSON object
      * @param warnings The warnings
      * @param locale The locale
+     * @param includeStackTraceOnError <code>true</code> to append stack trace elements to JSON object; otherwise <code>false</code>
      * @throws JSONException If writing JSON fails
      * @see OXExceptionConstants#PROPERTY_LOCALE
      */
-    public static void addWarnings(final JSONObject json, final List<OXException> warnings, final Locale locale) throws JSONException {
+    public static void addWarnings(final JSONObject json, final List<OXException> warnings, final Locale locale, final boolean includeStackTraceOnError) throws JSONException {
         if (null == warnings || warnings.isEmpty()) {
             return;
         }
@@ -298,7 +299,7 @@ public final class ResponseWriter {
             json.put(WARNINGS, jsonWarning);
             // Check if error has already been set
             if (!json.hasAndNotNull(ERROR)) {
-                addException(json, warning, locale);
+                addException(json, warning, locale, includeStackTraceOnError);
             }
         } else {
             final JSONArray jsonArray = new JSONArray(warnings.size());
@@ -309,7 +310,7 @@ public final class ResponseWriter {
             }
             json.put(WARNINGS, jsonArray);
             if (!warnings.isEmpty() && !json.hasAndNotNull(ERROR)) {
-                addException(json, warnings.get(0).setCategory(Category.CATEGORY_WARNING), locale);
+                addException(json, warnings.get(0).setCategory(Category.CATEGORY_WARNING), locale, includeStackTraceOnError);
             }
         }
     }
@@ -337,7 +338,7 @@ public final class ResponseWriter {
      * @see OXExceptionConstants#PROPERTY_LOCALE
      */
     public static void addException(final JSONObject json, final OXException exception, final Locale locale) throws JSONException {
-        addException(json, ERROR, exception, locale);
+        addException(json, ERROR, exception, locale, false);
     }
 
     /**
@@ -347,10 +348,26 @@ public final class ResponseWriter {
      * @param errorKey The key value for the error value inside the JSON object
      * @param exception The exception to write
      * @param locale The locale
+     * @param includeStackTraceOnError <code>true</code> to append stack trace elements to JSON object; otherwise <code>false</code>
      * @throws JSONException If writing JSON fails
      * @see OXExceptionConstants#PROPERTY_LOCALE
      */
-    public static void addException(final JSONObject json, String errorKey, final OXException exception, final Locale locale) throws JSONException {
+    public static void addException(final JSONObject json, final OXException exception, final Locale locale, final boolean includeStackTraceOnError) throws JSONException {
+        addException(json, ERROR, exception, locale, includeStackTraceOnError);
+    }
+
+    /**
+     * Writes specified exception to given JSON object using passed locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
+     *
+     * @param json The JSON object
+     * @param errorKey The key value for the error value inside the JSON object
+     * @param exception The exception to write
+     * @param locale The locale
+     * @param includeStackTraceOnError <code>true</code> to append stack trace elements to JSON object; otherwise <code>false</code>
+     * @throws JSONException If writing JSON fails
+     * @see OXExceptionConstants#PROPERTY_LOCALE
+     */
+    public static void addException(final JSONObject json, String errorKey, final OXException exception, final Locale locale, final boolean includeStackTraceOnError) throws JSONException {
         final Locale l;
         {
             final String property = exception.getProperty(OXExceptionConstants.PROPERTY_LOCALE);
@@ -409,7 +426,7 @@ public final class ResponseWriter {
         if (Category.CATEGORY_TRUNCATED.equals(exception.getCategory())) {
             addTruncated(json, exception.getProblematics());
         }
-        if (includeStackTraceOnError()) {
+        if (includeStackTraceOnError || includeStackTraceOnError()) {
             // Write exception
             StackTraceElement[] traceElements = exception.getStackTrace();
             final JSONArray jsonStack = new JSONArray(traceElements.length << 1);

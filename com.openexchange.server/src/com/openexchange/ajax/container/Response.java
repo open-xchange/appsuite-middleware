@@ -118,6 +118,11 @@ public final class Response {
     private final List<OXException> warnings;
 
     /**
+     * The flag whether to include stack trace or not.
+     */
+    private boolean includeStackTraceOnError;
+
+    /**
      * This constructor parses a server response into an object.
      *
      * @param response the response JSON object.
@@ -125,6 +130,7 @@ public final class Response {
     public Response(final JSONObject response) {
         this(DEFAULT_LOCALE);
         this.json = response;
+        includeStackTraceOnError = false;
     }
 
     /**
@@ -164,6 +170,7 @@ public final class Response {
         properties = new HashMap<String, Object>(8);
         this.json = null;
         this.locale = locale;
+        includeStackTraceOnError = false;
     }
 
     /**
@@ -456,11 +463,29 @@ public final class Response {
 
     /**
      * Gets this response object's warnings
-     *
+     * 
      * @return The warnings as an unmodifiable list
      */
     public List<OXException> getWarnings() {
         return Collections.unmodifiableList(warnings);
+    }
+
+    /**
+     * Sets whether to include stack trace.
+     * 
+     * @param includeStackTraceOnError <code>true</code> to include stack trace; otherwise <code>false</code>
+     */
+    public void setIncludeStackTraceOnError(final boolean includeStackTraceOnError) {
+        this.includeStackTraceOnError = includeStackTraceOnError;
+    }
+
+    /**
+     * Checks whether to include stack trace.
+     * 
+     * @return <code>true</code> to include stack trace; otherwise <code>false</code>
+     */
+    public boolean includeStackTraceOnError() {
+        return includeStackTraceOnError;
     }
 
     private static ServerSession getServerSessionFrom(final Session session) throws OXException {
