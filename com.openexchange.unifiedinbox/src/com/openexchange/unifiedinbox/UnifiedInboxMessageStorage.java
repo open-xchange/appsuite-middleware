@@ -307,7 +307,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                     insertMessage(mailIds, messages, result.accountId, result.folder, result.mails, fullName, undelegatedAccountId);
                 }
                 if (DEBUG) {
-                    LOG.debug(new StringBuilder(64).append("Retrieving ").append(mailIds.length).append(" messages from folder \"").append(
+                    LOG.debug(new StringBuilder(64).append("Retrieval of ").append(mailIds.length).append(" messages from folder \"").append(
                         fullName).append("\" took ").append(completionService.getDuration()).append("msec."));
                 }
             } catch (final InterruptedException e) {
