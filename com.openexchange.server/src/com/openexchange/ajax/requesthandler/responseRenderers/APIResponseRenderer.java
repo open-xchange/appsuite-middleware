@@ -89,7 +89,7 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     private static final String PLAIN_JSON = "plainJson";
 
-    private static final String INCLUDE_STACK_TRACE_ON_ERROR = "includeStackTraceOnError";
+    private static final String INCLUDE_STACK_TRACE_ON_ERROR = com.openexchange.ajax.AJAXServlet.PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR;
 
     /**
      * Initializes a new {@link APIResponseRenderer}.
