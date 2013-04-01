@@ -50,6 +50,7 @@
 package com.openexchange.unifiedinbox;
 
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
+import static com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry.getServiceRegistry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -89,7 +90,6 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.unifiedinbox.copy.UnifiedInboxMessageCopier;
 import com.openexchange.unifiedinbox.dataobjects.UnifiedMailMessage;
-import com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
 import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxCompletionService;
@@ -131,7 +131,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         this.session = session;
         cid = session.getContextId();
         {
-            final ContextService contextService = UnifiedInboxServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
+            final ContextService contextService = getServiceRegistry().getService(ContextService.class, true);
             ctx = contextService.getContext(cid);
         }
         user = session.getUserId();
@@ -152,7 +152,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
      */
     private Locale getLocale() throws OXException {
         if (null == locale) {
-            final UserService userService = UnifiedInboxServiceRegistry.getServiceRegistry().getService(UserService.class, true);
+            final UserService userService = getServiceRegistry().getService(UserService.class, true);
             locale = userService.getUser(session.getUserId(), ctx).getLocale();
         }
         return locale;
@@ -166,7 +166,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     }
 
     private List<MailAccount> getAccounts() throws OXException {
-        final MailAccountStorageService srv = UnifiedInboxServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+        final MailAccountStorageService srv = getServiceRegistry().getService(MailAccountStorageService.class, true);
         final MailAccount[] tmp = srv.getUserMailAccounts(user, cid);
         final List<MailAccount> accounts = new ArrayList<MailAccount>(tmp.length);
         final int thisAccountId = access.getAccountId();
