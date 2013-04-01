@@ -411,7 +411,7 @@ public final class UpdateAction extends AbstractUserAction {
                 return;
             }
         }
-        String readableType = null != contentType ? contentType : null != mimeType ? mimeType : "application/unknown";
+        String readableType = (null == contentType ? (null == mimeType ? "application/unknown" : mimeType) : contentType);
 //        int idx = readableType.indexOf('/');
 //        if (-1 < idx && idx < readableType.length()) {
 //            readableType = readableType.substring(idx + 1);
