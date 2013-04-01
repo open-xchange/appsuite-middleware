@@ -221,6 +221,8 @@ public class PropertiesAppendingLogWrapper implements Log {
 
     /**
      * Gets the properties to log for given log level.
+     * <p>
+     * The returned set includes the {@link LogProperties#optLogProperties() configured property names} and the ones marked with {@link com.openexchange.log.ForceLog} as well.
      * 
      * @param logLevel The log level
      * @return The properties to log
