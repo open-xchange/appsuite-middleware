@@ -83,6 +83,8 @@ public abstract class Stanza implements Serializable {
     private String id = "";
 
     private String selector = "default";
+    
+    private long sequenceNumber = -1;
 
     // Payloads carried by this Stanza as n-ary trees
     Map<ElementPath, List<PayloadTree>> payloads;
@@ -146,6 +148,26 @@ public abstract class Stanza implements Serializable {
      */
     public void setFrom(final ID from) {
         this.from = from;
+    }
+    
+    
+    /**
+     * Sets the sequenceNumber
+     *
+     * @param sequenceNumber The sequenceNumber to set
+     */
+    public void setSequenceNumber(long sequenceNumber) {
+        this.sequenceNumber = sequenceNumber;
+    }
+    
+    
+    /**
+     * Gets the sequenceNumber
+     *
+     * @return The sequenceNumber
+     */
+    public long getSequenceNumber() {
+        return sequenceNumber;
     }
 
     /**
