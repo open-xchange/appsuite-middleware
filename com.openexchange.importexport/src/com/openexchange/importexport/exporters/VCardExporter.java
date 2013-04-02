@@ -52,11 +52,14 @@ package com.openexchange.importexport.exporters;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.Contact;
@@ -259,6 +262,8 @@ public class VCardExporter implements Exporter {
         }
     }
 
+    private static final ContactField[] FIELDS_ID = new ContactField[] { ContactField.OBJECT_ID };
+
     private void export2out(final ServerSession session, final String folderId, final String objectId, final int[] fieldsToBeExported, final OutputStream out) throws IOException, ConverterException, OXException {
         final VersitDefinition contactDef = Versit.getDefinition("text/vcard");
         final VersitDefinition.Writer versitWriter = contactDef.getWriter(out, "UTF-8");
@@ -271,21 +276,46 @@ public class VCardExporter implements Exporter {
         ContactField[] fields = ContactMapper.getInstance().getFields(null == fieldsToBeExported ? _contactFields : fieldsToBeExported, null, (ContactField[])null);
         
         if (null == objectId) {
-            final SearchIterator<Contact> searchIterator = ImportExportServices.getContactService().getAllContacts(session, folderId, fields);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Going to export " + searchIterator.size() + " contacts (user=" + session.getUserId() + ", context=" + session.getContextId()+")");
-            }
-            try {
-                while (searchIterator.hasNext()) {
-                    exportContact(oxContainerConverter, contactDef, versitWriter, searchIterator.next());
-                }
-                // versitWriter.flush();
-            } finally {
-                closeVersitResources(oxContainerConverter, versitWriter);
+            if (EnumSet.copyOf(Arrays.asList(fields)).contains(ContactField.IMAGE1)) {
+                // Contact by contact
+                final SearchIterator<Contact> searchIterator = ImportExportServices.getContactService().getAllContacts(session, folderId, FIELDS_ID);
                 try {
-                    searchIterator.close();
-                } catch (final SearchIteratorException e) {
-                    LOG.error(e.getMessage(), e);
+                    while (searchIterator.hasNext()) {
+                        final Contact contact = searchIterator.next();
+                        try {
+                            exportContact(oxContainerConverter, contactDef, versitWriter, ImportExportServices.getContactService().getContact(session, folderId, Integer.toString(contact.getObjectID()), fields));
+                        } catch (final OXException e) {
+                            if (!ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e)) {
+                                throw e;
+                            }
+                        }
+                    }
+                    // versitWriter.flush();
+                } finally {
+                    closeVersitResources(oxContainerConverter, versitWriter);
+                    try {
+                        searchIterator.close();
+                    } catch (final SearchIteratorException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+            } else {
+                final SearchIterator<Contact> searchIterator = ImportExportServices.getContactService().getAllContacts(session, folderId, fields);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Going to export " + searchIterator.size() + " contacts (user=" + session.getUserId() + ", context=" + session.getContextId()+")");
+                }
+                try {
+                    while (searchIterator.hasNext()) {
+                        exportContact(oxContainerConverter, contactDef, versitWriter, searchIterator.next());
+                    }
+                    // versitWriter.flush();
+                } finally {
+                    closeVersitResources(oxContainerConverter, versitWriter);
+                    try {
+                        searchIterator.close();
+                    } catch (final SearchIteratorException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
                 }
             }
         } else {
