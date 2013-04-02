@@ -203,8 +203,12 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             /*
              * Check for image data
              */
+            final AJAXRequestData requestData = req.getRequest();
+            final boolean isPreviewImage = "preview_image".equals(requestData.getFormat());
             boolean isImage = false;
-            {
+            if (isPreviewImage) {
+                isImage = true;
+            } else {
                 final ContentType contentType = mailPart.getContentType();
                 if (contentType.startsWith("image/")) {
                     isImage = true;
@@ -220,7 +224,6 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
              * 
              * Ignore in case of image data since subsequent transformation might be supposed to be applied
              */
-            final AJAXRequestData requestData = req.getRequest();
             if (!isImage) {
                 final OutputStream directOutputStream = requestData.optOutputStream();
                 if (null != directOutputStream) {
@@ -255,7 +258,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             /*
              * Set format
              */
-            if (!"preview_image".equals(requestData.getFormat())) {
+            if (!isPreviewImage) {
                 requestData.setFormat("file");
             }
             /*
