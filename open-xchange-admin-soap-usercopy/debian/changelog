@@ -1,3 +1,9 @@
+open-xchange-admin-soap-usercopy (7.2.0-2) UNRELEASED; urgency=low
+
+  * Second candidate for 7.2.0 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 02 Apr 2013 15:06:33 +0200
+
 open-xchange-admin-soap-usercopy (7.2.0-1) UNRELEASED; urgency=low
 
   * First release candidate for 7.2.0
