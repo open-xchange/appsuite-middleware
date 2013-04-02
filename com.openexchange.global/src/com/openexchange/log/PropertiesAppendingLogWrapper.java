@@ -237,10 +237,16 @@ public class PropertiesAppendingLogWrapper implements Log, PropertiesAppender {
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256);
         if (!isEmpty) {
             final String lineSeparator = this.lineSeparator;
+            boolean first = true;
             for (final Entry<String, String> entry : sorted.entrySet()) {
-                sb.append(lineSeparator).append(entry.getKey()).append('=').append(entry.getValue());
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(lineSeparator);
+                }
+                sb.append(entry.getKey()).append('=').append(entry.getValue());
             }
-            sb.deleteCharAt(0).append(lineSeparator).append(lineSeparator);
+            sb.append(lineSeparator).append(lineSeparator);
         }
         sb.append(message);
         return sb.toString();
