@@ -92,7 +92,6 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.HashUtility;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link GetAttachmentAction}
@@ -190,7 +189,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                         contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
                     final String htmlContent = MessageUtility.readMailPart(mailPart, cs);
                     final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                    attachmentInputStream = new UnsynchronizedByteArrayInputStream(sanitizeHtml(htmlContent, htmlService).getBytes(Charsets.forName(cs)));
+                    attachmentInputStream = Streams.newByteArrayInputStream(sanitizeHtml(htmlContent, htmlService).getBytes(Charsets.forName(cs)));
                 } else {
                     attachmentInputStream = mailPart.getInputStream();
                 }
