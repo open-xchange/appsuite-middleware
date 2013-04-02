@@ -248,6 +248,8 @@ public final class ThresholdFileHolder implements IFileHolder {
             this.count = count;
         } catch (final IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(in);
             Streams.close(out);
