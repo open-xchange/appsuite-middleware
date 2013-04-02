@@ -261,34 +261,34 @@ final class LoggerTask extends AbstractTask<Object> {
             }
             msg = CRLF.matcher(msg).replaceAll(lineSeparator + " ");
         }
-        // Get stack trace
+        // Check stack trace
         final StackTraceElement[] trace = loggable.getCallerTrace();
+        if (null == trace) {
+            return msg;
+        }
+        // Stack trace available: <stack-trace> + <LF> + <message>
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
-        // String logClass = null;
-        if (null != trace) {
-            for (final StackTraceElement ste : trace) {
-                final String className = ste.getClassName();
-                if (null != className && !className.startsWith("com.openexchange.log") && !className.startsWith("com.openexchange.exception.Log") && className.indexOf("LoggingLogic", 16) < 0) {
-                    sb.append(PREFIX).append(className).append('.').append(ste.getMethodName());
-                    if (ste.isNativeMethod()) {
-                        sb.append("(Native Method)");
+        for (final StackTraceElement ste : trace) {
+            final String className = ste.getClassName();
+            if (null != className && !className.startsWith("com.openexchange.log") && !className.startsWith("com.openexchange.exception.Log") && className.indexOf("LoggingLogic", 16) < 0) {
+                sb.append(PREFIX).append(className).append('.').append(ste.getMethodName());
+                if (ste.isNativeMethod()) {
+                    sb.append("(Native Method)");
+                } else {
+                    final String fileName = ste.getFileName();
+                    if (null == fileName) {
+                        sb.append("(Unknown Source)");
                     } else {
-                        final String fileName = ste.getFileName();
-                        if (null == fileName) {
-                            sb.append("(Unknown Source)");
-                        } else {
-                            final int lineNumber = ste.getLineNumber();
-                            sb.append('(').append(fileName);
-                            if (lineNumber >= 0) {
-                                sb.append(':').append(lineNumber);
-                            }
-                            sb.append(')');
+                        final int lineNumber = ste.getLineNumber();
+                        sb.append('(').append(fileName);
+                        if (lineNumber >= 0) {
+                            sb.append(':').append(lineNumber);
                         }
+                        sb.append(')');
                     }
-                    sb.append(lineSeparator).append(' ');
-                    // logClass = className;
-                    break;
                 }
+                sb.append(lineSeparator).append(' ');
+                break;
             }
         }
         sb.append(msg);
