@@ -102,7 +102,7 @@ public abstract class AbstractConfigSource implements ConfigSource {
             autoconfig.setMailPort(currentIncomingServer.getPort());
             autoconfig.setMailProtocol(currentIncomingServer.getType().getKeyword());
             SocketType incomingSocket = currentIncomingServer.getSocketType();
-            autoconfig.setMailSecure(incomingSocket == SocketType.SSL || incomingSocket == SocketType.STARTTLS);
+            autoconfig.setMailSecure(incomingSocket == SocketType.SSL /*|| incomingSocket == SocketType.STARTTLS*/);
             autoconfig.setMailServer(currentIncomingServer.getHostname());
 
             OutgoingServer currentOutgoingServer = null;
@@ -128,7 +128,7 @@ public abstract class AbstractConfigSource implements ConfigSource {
             autoconfig.setTransportPort(currentOutgoingServer.getPort());
             autoconfig.setTransportProtocol(currentOutgoingServer.getType().getKeyword());
             SocketType outgoingSocket = currentOutgoingServer.getSocketType();
-            autoconfig.setTransportSecure(outgoingSocket == SocketType.SSL || outgoingSocket == SocketType.STARTTLS);
+            autoconfig.setTransportSecure(outgoingSocket == SocketType.SSL /*|| outgoingSocket == SocketType.STARTTLS*/);
             autoconfig.setTransportServer(currentOutgoingServer.getHostname());
 
             autoconfig.setUsername(currentIncomingServer.getUsername());
