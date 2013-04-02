@@ -63,6 +63,7 @@ public class MailAccountProperties implements IMailProperties {
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccountProperties.class));
 
     protected final Map<String, String> properties;
+    protected final String url;
 
     /**
      * Initializes a new {@link MailAccountProperties}.
@@ -76,6 +77,13 @@ public class MailAccountProperties implements IMailProperties {
             throw new IllegalArgumentException("mail account is null.");
         }
         properties = mailAccount.getProperties();
+        String tmp;
+        try {
+            tmp = mailAccount.generateMailServerURL();
+        } catch (final Exception e) {
+            tmp = null;
+        }
+        url = tmp;
     }
 
     @Override
