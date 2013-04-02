@@ -83,7 +83,7 @@ final class LoggerTask extends AbstractTask<Object> {
         }
 
         @Override
-        public String getMessage() {
+        public Object getMessage() {
             return null;
         }
 
@@ -173,59 +173,59 @@ final class LoggerTask extends AbstractTask<Object> {
                     for (final Loggable loggable : loggables) {
                         final Throwable t = loggable.getThrowable();
                         final Log log = loggable.getLog();
-                        final String message = null == loggable.getMessage() ? "" : loggable.getMessage();
+                        final Object message = null == loggable.getMessage() ? "" : loggable.getMessage();
                         switch (loggable.getLevel()) {
                         case FATAL:
                             if (log.isFatalEnabled()) {
                                 if (null == t) {
-                                    log.fatal(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.FATAL));
+                                    log.fatal(prependLocation(message, loggable, LogPropertyName.LogLevel.FATAL));
                                 } else {
-                                    log.fatal(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.FATAL), t);
+                                    log.fatal(prependLocation(message, loggable, LogPropertyName.LogLevel.FATAL), t);
                                 }
                             }
                             break;
                         case ERROR:
                             if (log.isErrorEnabled()) {
                                 if (null == t) {
-                                    log.error(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.ERROR));
+                                    log.error(prependLocation(message, loggable, LogPropertyName.LogLevel.ERROR));
                                 } else {
-                                    log.error(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.ERROR), t);
+                                    log.error(prependLocation(message, loggable, LogPropertyName.LogLevel.ERROR), t);
                                 }
                             }
                             break;
                         case WARNING:
                             if (log.isWarnEnabled()) {
                                 if (null == t) {
-                                    log.warn(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.WARNING));
+                                    log.warn(prependLocation(message, loggable, LogPropertyName.LogLevel.WARNING));
                                 } else {
-                                    log.warn(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.WARNING), t);
+                                    log.warn(prependLocation(message, loggable, LogPropertyName.LogLevel.WARNING), t);
                                 }
                             }
                             break;
                         case INFO:
                             if (log.isInfoEnabled()) {
                                 if (null == t) {
-                                    log.info(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.INFO));
+                                    log.info(prependLocation(message, loggable, LogPropertyName.LogLevel.INFO));
                                 } else {
-                                    log.info(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.INFO), t);
+                                    log.info(prependLocation(message, loggable, LogPropertyName.LogLevel.INFO), t);
                                 }
                             }
                             break;
                         case DEBUG:
                             if (log.isDebugEnabled()) {
                                 if (null == t) {
-                                    log.debug(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.DEBUG));
+                                    log.debug(prependLocation(message, loggable, LogPropertyName.LogLevel.DEBUG));
                                 } else {
-                                    log.debug(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.DEBUG), t);
+                                    log.debug(prependLocation(message, loggable, LogPropertyName.LogLevel.DEBUG), t);
                                 }
                             }
                             break;
                         case TRACE:
                             if (log.isTraceEnabled()) {
                                 if (null == t) {
-                                    log.trace(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.TRACE));
+                                    log.trace(prependLocation(message, loggable, LogPropertyName.LogLevel.TRACE));
                                 } else {
-                                    log.trace(message.startsWith(PREFIX) ? message : prependLocation(message, loggable, LogPropertyName.LogLevel.TRACE), t);
+                                    log.trace(prependLocation(message, loggable, LogPropertyName.LogLevel.TRACE), t);
                                 }
                             }
                             break;
@@ -249,9 +249,21 @@ final class LoggerTask extends AbstractTask<Object> {
 
     private static final Pattern CRLF = Pattern.compile("\r?\n");
 
-    private String prependLocation(final String message, final Loggable loggable, final LogPropertyName.LogLevel logLevel) {
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator((null == message ? 0 : message.length()) + 64);
+    private String prependLocation(final Object message, final Loggable loggable, final LogPropertyName.LogLevel logLevel) {
+        // Append message's string
+        String msg;
+        if (null == message) {
+            msg = "null";
+        } else {
+            msg = message.toString();
+            if (msg.startsWith(PREFIX)) {
+                return msg;
+            }
+            msg = CRLF.matcher(msg).replaceAll(lineSeparator + " ");
+        }
+        // Get stack trace
         final StackTraceElement[] trace = loggable.getCallerTrace();
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
         // String logClass = null;
         if (null != trace) {
             for (final StackTraceElement ste : trace) {
@@ -279,10 +291,7 @@ final class LoggerTask extends AbstractTask<Object> {
                 }
             }
         }
-        // TODO: Check for PropertiesAppender
-        if (null != message) {
-            sb.append(CRLF.matcher(message).replaceAll(lineSeparator + " "));
-        }
+        sb.append(msg);
         return sb.toString();
     }
 

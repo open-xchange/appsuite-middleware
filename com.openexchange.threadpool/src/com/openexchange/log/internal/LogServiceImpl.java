@@ -133,7 +133,7 @@ public final class LogServiceImpl implements LogService {
     }
 
     @Override
-    public Loggable loggableFor(final Level level, final Log log, final String message, final Throwable throwable) {
+    public Loggable loggableFor(final Level level, final Log log, final Object message, final Throwable throwable) {
         final LoggableImpl loggable = new LoggableImpl(level, log, message, throwable, new Throwable());
         if (LogProperties.isEnabled()) {
             final Props props = LogProperties.optLogProperties();
@@ -143,7 +143,7 @@ public final class LogServiceImpl implements LogService {
     }
 
     @Override
-    public Loggable loggableFor(final Level level, final Log log, final String message) {
+    public Loggable loggableFor(final Level level, final Log log, final Object message) {
         final LoggableImpl loggable = new LoggableImpl(level, log, message, null, new Throwable());
         if (LogProperties.isEnabled()) {
             final Props props = LogProperties.optLogProperties();

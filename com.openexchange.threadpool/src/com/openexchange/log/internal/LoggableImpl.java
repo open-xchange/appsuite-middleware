@@ -63,15 +63,10 @@ import com.openexchange.log.Loggable;
 public final class LoggableImpl implements Loggable {
 
     private final Level level;
-
     private final Log log;
-
-    private final String message;
-
+    private final Object message;
     private final Throwable throwable;
-
     private final Throwable callerTrace;
-
     private final Map<LogProperties.Name, Object> properties;
 
     /**
@@ -82,7 +77,7 @@ public final class LoggableImpl implements Loggable {
      * @param message
      * @param throwable
      */
-    public LoggableImpl(final Level level, final Log log, final String message, final Throwable throwable, final Throwable callerTrace) {
+    public LoggableImpl(final Level level, final Log log, final Object message, final Throwable throwable, final Throwable callerTrace) {
         super();
         this.level = level;
         this.log = log;
@@ -121,7 +116,7 @@ public final class LoggableImpl implements Loggable {
     }
 
     @Override
-    public String getMessage() {
+    public Object getMessage() {
         return message;
     }
 
