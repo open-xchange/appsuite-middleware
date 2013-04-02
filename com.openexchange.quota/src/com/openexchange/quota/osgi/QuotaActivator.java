@@ -49,6 +49,11 @@
 
 package com.openexchange.quota.osgi;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -58,10 +63,13 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.quota.AmountOnlyQuota;
 import com.openexchange.quota.Quota;
+import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaRestriction;
 import com.openexchange.quota.QuotaService;
 import com.openexchange.quota.Resource;
@@ -79,6 +87,9 @@ import com.openexchange.session.Session;
 public final class QuotaActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(QuotaActivator.class);
+
+    /** The {@link DatabaseService} reference. */
+    static final AtomicReference<DatabaseService> DATABASE_SERVICE_REFERENCE = new AtomicReference<DatabaseService>();
 
     /**
      * Initializes a new {@link QuotaActivator}.
@@ -119,6 +130,26 @@ public final class QuotaActivator extends HousekeepingActivator {
                 context.ungetService(reference);
             }
         });
+        track(DatabaseService.class, new ServiceTrackerCustomizer<DatabaseService, DatabaseService>() {
+
+            @Override
+            public DatabaseService addingService(final ServiceReference<DatabaseService> reference) {
+                final DatabaseService service = context.getService(reference);
+                DATABASE_SERVICE_REFERENCE.set(service);
+                return service;
+            }
+
+            @Override
+            public void modifiedService(final ServiceReference<DatabaseService> reference, final DatabaseService service) {
+                // Ignore
+            }
+
+            @Override
+            public void removedService(final ServiceReference<DatabaseService> reference, final DatabaseService service) {
+                DATABASE_SERVICE_REFERENCE.set(null);
+                context.ungetService(reference);
+            }
+        });
         openTrackers();
         // Register pre-defined quota restrictions
         final Log log = LOG;
@@ -131,8 +162,11 @@ public final class QuotaActivator extends HousekeepingActivator {
 
             @Override
             public Quota getQuota(final Resource resource, final ResourceDescription desc, final Session session, final ServiceProvider serviceProvider) throws OXException {
-                final ConfigView configView =
-                    serviceProvider.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
+                final Long quotaFromDB = getQuotaFromDB(resource, session.getContextId());
+                if (null != quotaFromDB) {
+                    return new AmountOnlyQuota(quotaFromDB.longValue());
+                }
+                final ConfigView configView = serviceProvider.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
                 // Get property; first with "context" scope...
                 ConfigProperty<String> property = configView.property("context", "com.openexchange.quota.calendar", String.class);
                 if (!property.isDefined()) {
@@ -166,8 +200,11 @@ public final class QuotaActivator extends HousekeepingActivator {
 
             @Override
             public Quota getQuota(final Resource resource, final ResourceDescription desc, final Session session, final ServiceProvider serviceProvider) throws OXException {
-                final ConfigView configView =
-                    serviceProvider.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
+                final Long quotaFromDB = getQuotaFromDB(resource, session.getContextId());
+                if (null != quotaFromDB) {
+                    return new AmountOnlyQuota(quotaFromDB.longValue());
+                }
+                final ConfigView configView = serviceProvider.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
                 // Get property; first with "context" scope...
                 ConfigProperty<String> property = configView.property("context", "com.openexchange.quota.task", String.class);
                 if (!property.isDefined()) {
@@ -201,8 +238,11 @@ public final class QuotaActivator extends HousekeepingActivator {
 
             @Override
             public Quota getQuota(final Resource resource, final ResourceDescription desc, final Session session, final ServiceProvider serviceProvider) throws OXException {
-                final ConfigView configView =
-                    serviceProvider.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
+                final Long quotaFromDB = getQuotaFromDB(resource, session.getContextId());
+                if (null != quotaFromDB) {
+                    return new AmountOnlyQuota(quotaFromDB.longValue());
+                }
+                final ConfigView configView = serviceProvider.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
                 // Get property; first with "context" scope...
                 ConfigProperty<String> property = configView.property("context", "com.openexchange.quota.contact", String.class);
                 if (!property.isDefined()) {
@@ -236,8 +276,11 @@ public final class QuotaActivator extends HousekeepingActivator {
 
             @Override
             public Quota getQuota(final Resource resource, final ResourceDescription desc, final Session session, final ServiceProvider serviceProvider) throws OXException {
-                final ConfigView configView =
-                    serviceProvider.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
+                final Long quotaFromDB = getQuotaFromDB(resource, session.getContextId());
+                if (null != quotaFromDB) {
+                    return new AmountOnlyQuota(quotaFromDB.longValue());
+                }
+                final ConfigView configView = serviceProvider.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId());
                 // Get property; first with "context" scope...
                 ConfigProperty<String> property = configView.property("context", "com.openexchange.quota.infostore", String.class);
                 if (!property.isDefined()) {
@@ -262,6 +305,45 @@ public final class QuotaActivator extends HousekeepingActivator {
                 return new Class<?>[] { ConfigurationService.class, ConfigViewFactory.class };
             }
         });
+    }
+
+    /**
+     * Reads the quota value from database.
+     *
+     * @param resource The resource
+     * @param contextId The context identifier
+     * @return The quota value or <code>null</code>
+     * @throws OXException If reading from database fails
+     */
+    static Long getQuotaFromDB(final Resource resource, final int contextId) throws OXException {
+        final DatabaseService databaseService = DATABASE_SERVICE_REFERENCE.get();
+        if (null == databaseService) {
+            return null;
+        }
+        final Connection con = databaseService.getReadOnly(contextId);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT value FROM quota_context WHERE cid=? AND module=?");
+            stmt.setLong(1, contextId);
+            stmt.setString(2, resource.getIdentifier());
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return null;
+            }
+            final long retval = rs.getLong(1);
+            if (rs.wasNull()) {
+                return null;
+            }
+            return Long.valueOf(retval <= 0 ? Quota.UNLIMITED : retval);
+        } catch (final SQLException e) {
+            throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(contextId, con);
+        }
     }
 
     @Override

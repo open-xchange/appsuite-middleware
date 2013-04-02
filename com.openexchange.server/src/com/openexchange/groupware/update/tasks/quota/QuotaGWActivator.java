@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,29 +47,42 @@
  *
  */
 
-package com.openexchange.groupware.results;
+package com.openexchange.groupware.update.tasks.quota;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.database.CreateTableService;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.osgi.HousekeepingActivator;
+
 
 /**
- * A pair of {@link SearchIterator} and the most recent last-changed time stamp of involved items.
+ * {@link QuotaGWActivator}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface TimedResult<T> {
+public final class QuotaGWActivator extends HousekeepingActivator {
 
     /**
-     * Gets the results as an {@link SearchIterator iterator}.
-     * 
-     * @return The results
-     * @throws OXException If returning results fails
+     * Initializes a new {@link QuotaGWActivator}.
      */
-    SearchIterator<T> results() throws OXException;
+    public QuotaGWActivator() {
+        super();
+    }
 
-    /**
-     * Gets the most recent last-changed time stamp of involved items.
-     * 
-     * @return The time stamp
-     * @throws OXException If time stamp cannot be returned
-     */
-    long sequenceNumber() throws OXException;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return null;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        /*
+         * Register update task, create table job and delete listener
+         */
+        registerService(CreateTableService.class, new QuotaCreateTableService());
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new QuotaCreateTableTask()));
+        registerService(DeleteListener.class, new QuotaDeleteListener());
+    }
+
 }

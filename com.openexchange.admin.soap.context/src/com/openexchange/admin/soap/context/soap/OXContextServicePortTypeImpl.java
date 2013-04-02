@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.jws.WebParam;
 import javax.xml.datatype.XMLGregorianCalendar;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
@@ -63,6 +64,30 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
             throw new RemoteException_Exception("Missing "+OXContextInterface.class.getName() + " instance.");
         }
         return contextInterface;
+    }
+
+    @Override
+    public void changeQuota(@WebParam(partName = "parameters", name = "changeQuota", targetNamespace = "http://soap.admin.openexchange.com") ChangeQuota parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception {
+        final OXContextInterface contextInterface = getContextInterface();
+        try {
+            final String sQuotaValue = parameters.quotaValue;
+            if (isEmpty(sQuotaValue)) {
+                throw new InvalidDataException("Missing quota value.");
+            }
+            contextInterface.changeQuota(soap2Context(parameters.ctx), parameters.module, Long.parseLong(sQuotaValue.trim()), soap2Credentials(parameters.auth));
+        } catch (final RemoteException e) {
+            throw new RemoteException_Exception(e.getMessage(), e);
+        } catch (final InvalidCredentialsException e) {
+            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+        } catch (final NoSuchContextException e) {
+            throw new NoSuchContextException_Exception(e.getMessage(), e);
+        } catch (final StorageException e) {
+            throw new StorageException_Exception(e.getMessage(), e);
+        } catch (final InvalidDataException e) {
+            throw new InvalidDataException_Exception(e.getMessage(), e);
+        } catch (final NumberFormatException e) {
+            throw new InvalidDataException_Exception("Invalid quota value.", e);
+        }
     }
 
     @Override
