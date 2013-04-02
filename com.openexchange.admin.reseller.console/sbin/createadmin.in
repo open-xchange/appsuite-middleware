@@ -53,8 +53,8 @@ OXFUNCTIONS=@oxfunctions@
 OXCONFIG=@oxscriptconf@
 
 test -f $OXFUNCTIONS || {
-	echo "missing common shell functions file"
-	exit 1
+    echo "missing common shell functions file"
+    exit 1
 }
 
 . $OXFUNCTIONS
@@ -99,7 +99,9 @@ case "$BNAME" in
 esac
 
 JAVAMAIN="com.openexchange.admin.reseller.console.${ACTION}"
+
 ADMINCP=$(for jar in $LIBPATH/*.jar; do
     echo -n "${jar}:"
     done)
-$JAVA_BIN $JAVA_OXCMD_OPTS $JAVA_XTRAOPTS -classpath ${ADMINCP} $JAVAMAIN "$@"
+
+$JAVA_BIN $JAVA_OXCMD_OPTS -classpath ${ADMINCP} $JAVAMAIN "$@"
