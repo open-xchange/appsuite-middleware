@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 6
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -91,6 +91,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
 
 %changelog
+* Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-04-04
 * Mon Mar 04 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-03-07
 * Tue Feb 19 2013 Marcus Klein <marcus.klein@open-xchange.com>
