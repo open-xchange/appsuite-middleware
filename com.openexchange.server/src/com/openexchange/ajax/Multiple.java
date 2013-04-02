@@ -181,7 +181,7 @@ public class Multiple extends SessionServlet {
     }
 
     /** The concurrency level for processing multiple requests */
-    private static final int CONCURRENCY_LEVEL = -1;
+    private static final int CONCURRENCY_LEVEL = 5;
 
     public static JSONArray perform(JSONArray dataArray, HttpServletRequest req, ServerSession session) throws OXException, JSONException {
     	final int length = dataArray.length();
