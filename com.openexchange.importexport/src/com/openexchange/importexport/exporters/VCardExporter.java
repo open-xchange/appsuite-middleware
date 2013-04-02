@@ -272,6 +272,9 @@ public class VCardExporter implements Exporter {
         
         if (null == objectId) {
             final SearchIterator<Contact> searchIterator = ImportExportServices.getContactService().getAllContacts(session, folderId, fields);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Going to export " + searchIterator.size() + " contacts (user=" + session.getUserId() + ", context=" + session.getContextId()+")");
+            }
             try {
                 while (searchIterator.hasNext()) {
                     exportContact(oxContainerConverter, contactDef, versitWriter, searchIterator.next());
