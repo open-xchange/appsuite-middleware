@@ -54,8 +54,8 @@ OXPREFIX=@prefix@
 CONSOLELOG=@consolelogfile@
 
 test -f $OXFUNCTIONS || {
-	echo "missing common shell functions file"
-	exit 1
+    echo "missing common shell functions file"
+    exit 1
 }
 
 . $OXFUNCTIONS
@@ -66,7 +66,7 @@ ox_set_JAVA_BIN
 
 ox_update_config_init @configini@ @configini@.template @bundle.d@
 
-test -z "$JAVA_XTRAOPTS" && JAVA_XTRAOPTS="-Xms50M -Xmx50M"
+test -z "$JAVA_XTRAOPTS" && JAVA_XTRAOPTS="-Xmx512M"
 
 JAVA_OPTS="${JAVA_XTRAOPTS} \
 -Djava.awt.headless=true \
@@ -76,15 +76,15 @@ JAVA_OPTS="${JAVA_XTRAOPTS} \
 CLASSPATH=""
 
 if [ -n "$CLASSPATH" ]; then
-	CLASSPATH="-classpath $CLASSPATH"
+    CLASSPATH="-classpath $CLASSPATH"
 fi
 
 ox_save_backup $CONSOLELOG
 
 if [ -n "$UMASK" ]; then
-	umask $UMASK
+    umask $UMASK
 else
-	umask 066
+    umask 066
 fi
 
 exec $JAVA_BIN $JAVA_OPTS $CLASSPATH -jar /opt/open-xchange/bundles/org.eclipse.osgi_3.8.1.v20120830-144521.jar -configuration file:$OSGIPATH >> $CONSOLELOG 2>&1

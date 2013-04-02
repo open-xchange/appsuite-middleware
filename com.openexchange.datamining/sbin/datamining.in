@@ -56,8 +56,8 @@ BUNDLELIBPATH=@libDir@
 
 
 test -f $OXFUNCTIONS || {
-	echo "missing common shell functions file"
-	exit 1
+    echo "missing common shell functions file"
+    exit 1
 }
 
 . $OXFUNCTIONS
@@ -66,9 +66,9 @@ test -f $OXCONFIG && . $OXCONFIG
 
 ox_set_JAVA_BIN
 
-test -z "$JAVA_XTRAOPTS" && JAVA_XTRAOPTS="-Xms20M -Xmx280M"
+test -z "$JAVA_OXCMD_OPTS" && JAVA_OXCMD_OPTS="-Xmx280M"
 
-JAVA_OPTS="${JAVA_XTRAOPTS} \
+JAVA_OPTS="${JAVA_OXCMD_OPTS} \
 -Djava.awt.headless=true \
 -Dopenexchange.propdir=$PROPERTIESDIR \
 -Dopenexchange.propdir2=$COMMONPROPERTIESDIR"
@@ -77,4 +77,3 @@ CLASSPATH="-classpath @classpath@"
 
 umask 066
 exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.datamining.Datamining $@
-
