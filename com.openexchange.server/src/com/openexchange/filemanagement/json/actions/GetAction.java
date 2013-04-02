@@ -131,20 +131,20 @@ public final class GetAction implements ETagAwareAJAXActionService {
             final String fileName = file.getFileName();
             final String disposition = file.getContentDisposition();
             final ContentType contentType = new ContentType(file.getContentType());
-            if (contentType.getBaseType().equalsIgnoreCase("application/octet-stream")) {
-                /*
-                 * Try to determine MIME type
-                 */
-                final String ct = MimeType2ExtMap.getContentType(fileName);
-                final int pos = ct.indexOf('/');
-                contentType.setPrimaryType(ct.substring(0, pos));
-                contentType.setSubType(ct.substring(pos + 1));
-            }
-
-            if (fileName != null) {
+            if (null != fileName) {
+                // Resolve Content-Type by file name if set to default
+                if (contentType.startsWith("application/octet-stream")) {
+                    /*
+                     * Try to determine MIME type
+                     */
+                    final String ct = MimeType2ExtMap.getContentType(fileName);
+                    final int pos = ct.indexOf('/');
+                    contentType.setPrimaryType(ct.substring(0, pos));
+                    contentType.setSubType(ct.substring(pos + 1));
+                }
+                // Set as "name" parameter
                 contentType.setParameter("name", fileName);
             }
-
             /*
              * Write from content's input stream to response output stream
              */
