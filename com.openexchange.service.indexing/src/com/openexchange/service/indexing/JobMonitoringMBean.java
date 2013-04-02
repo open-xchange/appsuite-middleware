@@ -71,34 +71,34 @@ public interface JobMonitoringMBean {
     static final String VALUE = "indexingServiceMonitoring";
 
     /**
-     * @return The number of jobs stored in the cluster.
+     * @return The number of job infos stored in the cluster.
      * @throws MBeanException
      */
-    int getStoredJobs() throws MBeanException;
+    int countStoredJobInfos() throws MBeanException;
     
     /**
-     * @return A list of names of all jobs stored in the cluster.
+     * @return A list of ids of all job infos stored in the cluster.
      * @throws MBeanException
      */
-    List<String> getStoredJobDetails() throws MBeanException;
+    List<String> getStoredJobInfos() throws MBeanException;
 
     /**
-     * @return The number of jobs that are stored locally on this node.
+     * @return The number of job triggers that are stored locally on this node.
      * @throws MBeanException
      */
-    int getLocalJobs() throws MBeanException;
+    int countLocalTriggers() throws MBeanException;
     
     /**
-     * @return A list of names of the jobs that are stored locally on this node.
+     * @return A list of trigger names that are stored locally on this node.
      * @throws MBeanException
      */
-    List<String> getLocalJobDetails() throws MBeanException;
+    List<String> getLocalTriggers() throws MBeanException;
 
     /**
      * @return The number of currently running jobs on this node.
      * @throws MBeanException
      */
-    int getRunningJobs() throws MBeanException;
+    int countRunningJobs() throws MBeanException;
 
     /**
      * Returns the names of all currently running jobs on this node.
@@ -107,6 +107,27 @@ public interface JobMonitoringMBean {
      * @return The job names.
      * @throws MBeanException
      */
-    Map<String, String> getRunningJobDetails() throws MBeanException;
+    Map<String, String> getRunningJobs() throws MBeanException;
+    
+    /**
+     * Returns a human-readable String that contains detailed information about the
+     * locally stored trigger with the given name. If no trigger exists for the given name,
+     * <code>null</code> is returned.
+     * 
+     * @param triggerName The triggers name (as returned by {@link #getLocalTriggers()}).
+     * @return
+     * @throws MBeanException
+     */
+    String getTriggerDetails(String triggerName) throws MBeanException;
+    
+    /**
+     * Returns a given jobs recurrence details as a human-readable String. 
+     * If no job exists for the given key, <code>null</code> is returned.
+     * 
+     * @param jobKey The jobs key (as returned by {@link #getStoredJobInfos()}).
+     * @return
+     * @throws MBeanException
+     */
+    String getRecurrenceDetails(String jobKey) throws MBeanException;
 
 }

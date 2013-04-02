@@ -50,6 +50,7 @@
 package com.openexchange.service.indexing.impl.internal.nonclustered;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,7 @@ import javax.management.StandardMBean;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
+import org.quartz.Trigger;
 import org.quartz.TriggerKey;
 import org.quartz.impl.matchers.GroupMatcher;
 import com.openexchange.service.indexing.JobMonitoringMBean;
@@ -85,17 +87,17 @@ public class JobMonitoringMBeanImpl extends StandardMBean implements JobMonitori
     }
     
     @Override
-    public int getStoredJobs() throws MBeanException {
+    public int countStoredJobInfos() throws MBeanException {
         return RecurringJobsManager.getJobCount();
     }
     
     @Override
-    public List<String> getStoredJobDetails() throws MBeanException {
+    public List<String> getStoredJobInfos() throws MBeanException {
         return RecurringJobsManager.getJobIds();
     }
     
     @Override
-    public int getLocalJobs() throws MBeanException {
+    public int countLocalTriggers() throws MBeanException {
         try {
             int count = 0;
             List<String> groups = scheduler.getTriggerGroupNames();
@@ -110,7 +112,7 @@ public class JobMonitoringMBeanImpl extends StandardMBean implements JobMonitori
     }
     
     @Override
-    public List<String> getLocalJobDetails() throws MBeanException {
+    public List<String> getLocalTriggers() throws MBeanException {
         try {
             List<String> names = new ArrayList<String>();
             List<String> groups = scheduler.getTriggerGroupNames();
@@ -127,7 +129,7 @@ public class JobMonitoringMBeanImpl extends StandardMBean implements JobMonitori
     }
     
     @Override
-    public int getRunningJobs() throws MBeanException {
+    public int countRunningJobs() throws MBeanException {
         try {
             int count = scheduler.getCurrentlyExecutingJobs().size();
             return count;
@@ -137,7 +139,7 @@ public class JobMonitoringMBeanImpl extends StandardMBean implements JobMonitori
     }
     
     @Override
-    public Map<String, String> getRunningJobDetails() throws MBeanException {
+    public Map<String, String> getRunningJobs() throws MBeanException {
         try {
             Map<String, String> names = new HashMap<String, String>();
             List<JobExecutionContext> executingJobs = scheduler.getCurrentlyExecutingJobs();
@@ -148,6 +150,55 @@ public class JobMonitoringMBeanImpl extends StandardMBean implements JobMonitori
             }
             
             return names;
+        } catch (Exception e) {
+            throw new MBeanException(e);
+        }
+    }
+    
+    @Override
+    public String getRecurrenceDetails(String jobKey) throws MBeanException {
+        JobInfoWrapper job = RecurringJobsManager.getJob(jobKey);
+        if (job == null) {
+            return null;
+        }
+        
+        long lastUpdate = job.getLastUpdate();
+        long lastRun = job.getLastRun();
+        long interval = job.getInterval();
+        StringBuilder sb = new StringBuilder(job.getJobInfo().toString())
+            .append("\n    Last Update:      ")
+            .append(new Date(lastUpdate))
+            .append("\n    Timeout:          ")
+            .append(new Date(lastUpdate + job.getJobTimeout()))
+            .append("\n    Last Run:         ")
+            .append(new Date(lastRun))
+            .append("\n    Next Run:         ")
+            .append(new Date(lastRun + interval))
+            .append("\n    Interval:         ")
+            .append(interval)
+            .append("\n    Progression Rate: ")
+            .append(job.getProgressionRate());
+        
+        return sb.toString();
+    }
+
+    @Override
+    public String getTriggerDetails(String triggerName) throws MBeanException {
+        try {
+            int index = triggerName.indexOf('.');
+            Trigger trigger = scheduler.getTrigger(new TriggerKey(triggerName.substring(index + 1, triggerName.length()), triggerName.substring(0, index)));
+            if (trigger == null) {
+                return null;
+            }
+            
+            StringBuilder sb = new StringBuilder("Trigger: ")
+                .append(triggerName)
+                .append("\n    For Job:        ")
+                .append(trigger.getJobKey().toString())
+                .append("\n    Next Fire Time: ")
+                .append(trigger.getNextFireTime());
+            
+            return sb.toString();
         } catch (Exception e) {
             throw new MBeanException(e);
         }

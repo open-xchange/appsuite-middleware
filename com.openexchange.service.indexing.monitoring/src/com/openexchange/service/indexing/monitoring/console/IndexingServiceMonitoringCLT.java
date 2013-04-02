@@ -108,12 +108,12 @@ public class IndexingServiceMonitoringCLT {
                 List<String> storedJobs = null;
                 Map<String, String> runningJobs = null;
                 if (cmd.hasOption('s')) {
-                    storedJobs = proxy.getStoredJobDetails();
+                    storedJobs = proxy.getStoredJobInfos();
                 } else if (cmd.hasOption('r')) {
-                    runningJobs = proxy.getRunningJobDetails();
+                    runningJobs = proxy.getRunningJobs();
                 } else {
-                    storedJobs = proxy.getStoredJobDetails();
-                    runningJobs = proxy.getRunningJobDetails();
+                    storedJobs = proxy.getStoredJobInfos();
+                    runningJobs = proxy.getRunningJobs();
                 }
                 
                 if (storedJobs != null) {
@@ -134,12 +134,12 @@ public class IndexingServiceMonitoringCLT {
                 int storedJobs = -1;
                 int runningJobs = -1;
                 if (cmd.hasOption('s')) {
-                    storedJobs = proxy.getStoredJobs();
+                    storedJobs = proxy.countStoredJobInfos();
                 } else if (cmd.hasOption('r')) {
-                    runningJobs = proxy.getRunningJobs();
+                    runningJobs = proxy.countRunningJobs();
                 } else {
-                    storedJobs = proxy.getStoredJobs();
-                    runningJobs = proxy.getRunningJobs();
+                    storedJobs = proxy.countStoredJobInfos();
+                    runningJobs = proxy.countRunningJobs();
                 }
                 
                 if (storedJobs >= 0) {
