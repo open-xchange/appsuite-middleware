@@ -752,19 +752,15 @@ public final class SMTPTransport extends MailTransport {
         final String server = IDNA.toASCII(smtpConfig.getServer());
         final int port = smtpConfig.getPort();
         if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
+            final String encodedPassword = encodePassword(smtpConfig.getPassword());
             if (isKerberosAuth()) {
                 try {
-                    Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(
-                        transport,
-                        server,
-                        port,
-                        smtpConfig.getLogin(),
-                        encodePassword(smtpConfig.getPassword())));
+                    Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(transport, server, port, smtpConfig.getLogin(), encodedPassword));
                 } catch (final PrivilegedActionException e) {
                     handlePrivilegedActionException(e);
                 }
             } else {
-                transport.connect(server, port, smtpConfig.getLogin(), encodePassword(smtpConfig.getPassword()));
+                transport.connect(server, port, smtpConfig.getLogin(), encodedPassword);
             }
         } else {
             transport.connect(server, port, null, null);
