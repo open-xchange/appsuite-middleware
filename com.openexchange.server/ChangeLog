@@ -1,3 +1,7 @@
+* 2013-04-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25193: More lenient handling when creating mail accounts by auto-config settings
+
 * 2013-04-02 - marcus.klein@open-xchange.com
 
  - Fix for bug 24581: Using only special Java options for CLTs in all scripts starting some CLT.
