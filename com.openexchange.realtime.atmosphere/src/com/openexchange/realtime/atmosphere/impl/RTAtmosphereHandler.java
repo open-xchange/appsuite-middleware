@@ -56,11 +56,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.atmosphere.cpr.AtmosphereHandler;
 import org.atmosphere.cpr.AtmosphereRequest;
 import org.atmosphere.cpr.AtmosphereResource;
@@ -71,7 +67,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.RealtimeExceptionCodes;
@@ -102,8 +97,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     private final AtmosphereServiceRegistry atmosphereServiceRegistry;
     
-    
-
     /*
      * Map general ids (user@context) to full ids (ox://user@context/resource.browserx.taby, this is used for lookups via isConnected
      */
@@ -118,7 +111,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * Map for holding outboxes
      */
     private final ConcurrentHashMap<ID, List<Stanza>> outboxes;
-    
     
 
     /**
@@ -327,8 +319,13 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     @Override
     public void send(Stanza stanza, ID recipient) throws OXException {
-        outboxFor(recipient).add(stanza);
-        drainOutbox(recipient);
+        try {
+            recipient.lock("rt-atmosphere-outbox");
+            outboxFor(recipient).add(stanza);
+            drainOutbox(recipient);
+        } finally {
+            recipient.unlock("rt-atmosphere-outbox");
+        }
         
     }
 
@@ -347,12 +344,14 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     }
     
     private void drainOutbox(ID id, int count) throws OXException {
-        AtmosphereResource atmosphereResource = concreteIDToResourceMap.get(id);
-        boolean failed = false;
-        boolean sent = false;
+        List<Stanza> outbox = null;
+        try {
+            id.lock("rt-atmosphere-outbox");
+            AtmosphereResource atmosphereResource = concreteIDToResourceMap.get(id);
+            boolean failed = false;
+            boolean sent = false;
 
-        synchronized(atmosphereResource) {
-            List<Stanza> outbox = outboxes.put(id, Collections.synchronizedList(new LinkedList<Stanza>()));
+            outbox = outboxes.remove(id);
             if (outbox != null && ! outbox.isEmpty()) {
                 JSONArray array = new JSONArray();
                 StanzaWriter stanzaWriter = new StanzaWriter();
@@ -364,6 +363,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 if (atmosphereResource == null || atmosphereResource.isCancelled() || atmosphereResource.getResponse().isCommitted()) {
                     // Enqueue again and try later
                     outboxFor(id).addAll(outbox);
+                    outbox = null;
                     failed = true;
                 }
                 
@@ -372,9 +372,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     try {
                         writer = atmosphereResource.getResponse().getWriter();
                         writer.print(array);
-                        
                         if (writer.checkError()) {
-                            handleResourceNotAvailable();
+                            outboxFor(id).addAll(outbox);
+                            failed = true;
                         } else {
                             sent = true;
                         }
@@ -384,6 +384,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         outboxFor(id).addAll(outbox);
                         failed = true;
                     }
+                    outbox = null;
                 }
             }
 
@@ -402,18 +403,24 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 case JSONP:
                 case AJAX:
                 case LONG_POLLING:
-                    atmosphereResource.suspend();
+                    if (!atmosphereResource.getResponse().isCommitted()) {
+                        atmosphereResource.suspend();
+                    }
                     break;
                 default:
                     break;
                 }
             }
+        } catch (OXException x) {
+            throw x;
+        } catch (Throwable t) {
+            if (outbox != null) {
+                outboxFor(id).addAll(outbox);
+            }
+        } finally {
+            id.unlock("rt-atmosphere-outbox");
         }
 
-
-        if (failed && count < 3) {
-            drainOutbox(id, count + 1);
-        }
         
     }
     
