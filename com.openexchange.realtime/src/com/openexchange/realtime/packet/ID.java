@@ -186,7 +186,9 @@ public class ID implements Serializable {
             if (isEmpty(component)) {
                 component = null;
             } else {
-                component = component.substring(1);
+                if (component.startsWith(".")) {
+                    component = component.substring(1);
+                }
             }
         }
 
