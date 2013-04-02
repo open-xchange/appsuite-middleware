@@ -444,8 +444,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
          */
         if (resource == null) {
             resource = serverSession.getSessionID();
-        } else {
-            resource = resource + serverSession.getSessionID();
         }
         return new ID(RTAtmosphereChannel.PROTOCOL, null, userLogin, contextName, resource);
     }
@@ -459,7 +457,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     private String getContextName(String login) {
         int index = login.indexOf('@');
         if (index < 0) {
-            return "";
+            return "defaultcontext";
         }
         return login.substring(index + 1);
     }
