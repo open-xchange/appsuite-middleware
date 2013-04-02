@@ -61,6 +61,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -267,7 +268,7 @@ public class Executor {
         PreparedStatement stmt = null;
         int parameterIndex = 1;
         ResultSet resultSet = null;
-        List<Contact> contacts = new ArrayList<Contact>();
+        List<Contact> contacts = new LinkedList<Contact>();
         try {
             stmt = connection.prepareStatement(stringAllocator.toString());
             stmt.setInt(parameterIndex++, contextID);

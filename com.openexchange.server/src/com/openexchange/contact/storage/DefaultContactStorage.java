@@ -334,11 +334,9 @@ public abstract class DefaultContactStorage implements ContactStorage {
      */
     protected static SearchIterator<Contact> getSearchIterator(Collection<Contact> contacts) {
         if (null == contacts) {
-            List<Contact> emptyList = Collections.emptyList();
-            return new SearchIteratorAdapter<Contact>(emptyList.iterator(), 0);
-        } else {
-            return new SearchIteratorAdapter<Contact>(contacts.iterator(), contacts.size());
+            return new SearchIteratorAdapter<Contact>(Collections.<Contact>emptyList().iterator(), 0);
         }
+        return new SearchIteratorAdapter<Contact>(contacts.iterator(), contacts.size());
     }
 
     /**
