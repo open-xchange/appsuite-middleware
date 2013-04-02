@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 17
+%define        ox_release 16
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -401,8 +401,6 @@ ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
 %doc com.openexchange.server/ChangeLog
 
 %changelog
-* Wed Mar 27 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-04-04
 * Mon Mar 18 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-03-18
 * Fri Mar 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
