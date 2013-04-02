@@ -119,7 +119,7 @@ public class Partitioner {
         cal.setTime(displayStart);
         Date tmp = cal.getTime();
         while (!tmp.after(displayEnd)) {
-            dayMap.put(tmp, new Day(tmp, cal, tmp.before(firstDay) || tmp.after(new Date(lastDay.getTime() - 1))));
+            dayMap.put(tmp, new Day(tmp, cal, tmp.before(firstDay) || tmp.after(new Date(lastDay.getTime()))));
             cal.add(Calendar.DATE, 1);
             tmp = cal.getTime();
         }
