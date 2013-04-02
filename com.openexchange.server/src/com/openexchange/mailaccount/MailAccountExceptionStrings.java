@@ -119,6 +119,12 @@ public final class MailAccountExceptionStrings implements LocalizableStrings {
     // Invalid host name: %1$s
     public static final String INVALID_HOST_NAME_MSG = "Invalid host name: %1$s";
 
+    // Could not connect to mail server "%1$s" for login %2$s
+    public static final String VALIDATE_FAILED_MAIL_MSG = "Could not connect to mail server \"%1$s\" for login %2$s";
+
+    // Could not connect to transport server "%1$s" for login %2$s
+    public static final String VALIDATE_FAILED_TRANSPORT_MSG = "Could not connect to transport server \"%1$s\" for login %2$s";
+
     /**
      * Initializes a new {@link MailAccountExceptionStrings}.
      */

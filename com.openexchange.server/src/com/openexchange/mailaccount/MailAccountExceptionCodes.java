@@ -141,6 +141,14 @@ public enum MailAccountExceptionCodes implements OXExceptionCode {
      * Invalid host name: %1$s
      */
     INVALID_HOST_NAME(MailAccountExceptionStrings.INVALID_HOST_NAME_MSG, CATEGORY_USER_INPUT, 19),
+    /**
+     * Could not connect to mail server "%1$s" for login %2$s
+     */
+    VALIDATE_FAILED_MAIL(MailAccountExceptionStrings.VALIDATE_FAILED_MAIL_MSG, CATEGORY_WARNING, 20),
+    /**
+     * Could not connect to transport server "%1$s" for login %2$s
+     */
+    VALIDATE_FAILED_TRANSPORT(MailAccountExceptionStrings.VALIDATE_FAILED_TRANSPORT_MSG, CATEGORY_WARNING, 21),
 
     ;
 

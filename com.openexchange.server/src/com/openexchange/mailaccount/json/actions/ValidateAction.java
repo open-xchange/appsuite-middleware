@@ -156,13 +156,16 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         return new AJAXRequestResult(actionValidateBoolean(accountDescription, session, warnings)).addWarnings(warnings);
     }
 
-    private static JSONObject actionValidateTree(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws JSONException, OXException {
+    private static Object actionValidateTree(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws JSONException, OXException {
         if (!actionValidateBoolean(accountDescription, session, warnings).booleanValue()) {
             // TODO: How to indicate error if folder tree requested?
             return null;
         }
         // Create a mail access instance
-        final MailAccess<?, ?> mailAccess = getMailAccess(accountDescription, session);
+        final MailAccess<?, ?> mailAccess = getMailAccess(accountDescription, session, warnings);
+        if (null == mailAccess) {
+            return JSONObject.NULL;
+        }
         return actionValidateTree0(mailAccess, session);
     }
 
@@ -207,7 +210,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             }
         }
         // Proceed
-        final MailAccess<?, ?> mailAccess = getMailAccess(accountDescription, session);
+        final MailAccess<?, ?> mailAccess = getMailAccess(accountDescription, session, warnings);
         if (null == mailAccess) {
             return false;
         }
@@ -267,8 +270,16 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             if (DEBUG) {
                 LOG.debug("Validating transport account failed.", e);
             }
-            e.setCategory(Category.CATEGORY_WARNING);
-            warnings.add(e);
+            Throwable cause = e.getCause();
+            while ((null != cause) && (cause instanceof OXException)) {
+                cause = cause.getCause();
+            }
+            if (null != cause) {
+                warnings.add(MailAccountExceptionCodes.VALIDATE_FAILED_TRANSPORT.create(cause, transportConfig.getServer(), transportConfig.getLogin()));
+            } else {
+                e.setCategory(Category.CATEGORY_WARNING);
+                warnings.add(e);
+            }
             validated = false;
         } finally {
             if (close) {
