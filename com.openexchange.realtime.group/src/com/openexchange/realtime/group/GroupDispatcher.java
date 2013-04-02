@@ -91,6 +91,8 @@ public class GroupDispatcher implements ComponentHandle {
     
     private final ID id;
     
+    private long sequenceNumber = 0;
+    
     private ActionHandler handler = null;
     
     /**
@@ -287,6 +289,9 @@ public class GroupDispatcher implements ComponentHandle {
      */
     public void stamp(Stanza s) {
         s.setSelector(getStamp(s.getTo()));
+        s.setSequencePrincipal(id);
+        s.setSequenceNumber(sequenceNumber);
+        sequenceNumber++;
     }
     
     

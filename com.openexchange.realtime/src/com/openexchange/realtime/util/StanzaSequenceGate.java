@@ -74,58 +74,66 @@ public abstract class StanzaSequenceGate {
     private ConcurrentHashMap<ID, AtomicLong> sequenceNumbers = new ConcurrentHashMap<ID, AtomicLong>();
     private ConcurrentHashMap<ID, List<Stanza>> inboxes = new ConcurrentHashMap<ID, List<Stanza>>();
     
-    public void handle(Stanza stanza) throws OXException {
+    public void handle(Stanza stanza, ID recipient) throws OXException {
         if (stanza.getSequenceNumber() == -1) {
-            handleInternal(stanza);
+            handleInternal(stanza, recipient);
         }
-        
-        AtomicLong threshhold = sequenceNumbers.get(stanza.getFrom());
-        if (threshhold == null) {
-            threshhold = new AtomicLong(0);
-            AtomicLong meantime = sequenceNumbers.putIfAbsent(stanza.getFrom(), threshhold);
-            if (meantime == null) {
-                stanza.getFrom().on("dispose", new IDEventHandler() {
-                    
-                    @Override
-                    public void handle(String event, ID id, Object source, Map<String, Object> properties) {
-                        sequenceNumbers.remove(id);
-                        inboxes.remove(id);
-                    }
-                });
-            } else {
-                threshhold = meantime;
+        try {
+            stanza.getSequencePrincipal().lock("gate");
+            AtomicLong threshhold = sequenceNumbers.get(stanza.getSequencePrincipal());
+            if (threshhold == null) {
+                threshhold = new AtomicLong(stanza.getSequenceNumber());
+                AtomicLong meantime = sequenceNumbers.putIfAbsent(stanza.getSequencePrincipal(), threshhold);
+                if (meantime == null) {
+                    stanza.getSequencePrincipal().on("dispose", new IDEventHandler() {
+                        
+                        @Override
+                        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
+                            sequenceNumbers.remove(id);
+                            inboxes.remove(id);
+                        }
+                    });
+                } else {
+                    threshhold = meantime;
+                }
             }
-        }
-        
-        if (threshhold.compareAndSet(stanza.getSequenceNumber(), stanza.getSequenceNumber() + 1)) {
-            handleInternal(stanza);
-            // Drain
-            List<Stanza> stanzas = inboxes.put(stanza.getFrom(), Collections.synchronizedList(new ArrayList<Stanza>()));
-            if (stanzas == null) {
-                return;
-            }
-            Collections.sort(stanzas, new Comparator<Stanza>() {
+            
+            if (threshhold.compareAndSet(stanza.getSequenceNumber(), stanza.getSequenceNumber() + 1)) {
+                handleInternal(stanza, recipient);
+                // Drain
+                List<Stanza> stanzas = inboxes.remove(stanza.getSequencePrincipal());
+                
+                if (stanzas == null || stanzas.isEmpty()) {
+                    return;
+                }
+                Collections.sort(stanzas, new Comparator<Stanza>() {
 
-                public int compare(Stanza arg0, Stanza arg1) {
-                    return (int) (arg0.getSequenceNumber() - arg1.getSequenceNumber());
+                    public int compare(Stanza arg0, Stanza arg1) {
+                        return (int) (arg0.getSequenceNumber() - arg1.getSequenceNumber());
+                    }
+                    
+                });
+                for(Stanza s: stanzas) {
+                    handle(s, s.getTo());
                 }
                 
-            });
-            for(Stanza s: stanzas) {
-                handle(s);
+
+            } else {
+                // Enqueue
+                List<Stanza> inbox = inboxes.get(stanza.getSequencePrincipal());
+                if (inbox == null) {
+                    inbox = Collections.synchronizedList(new ArrayList<Stanza>());
+                    List<Stanza> oldList = inboxes.putIfAbsent(stanza.getSequencePrincipal(), inbox);
+                    inbox = (oldList != null) ? oldList : inbox;
+                }
+                inbox.add(stanza);
             }
-        } else {
-            // Enqueue
-            List<Stanza> inbox = inboxes.get(stanza.getFrom());
-            if (inbox == null) {
-                inbox = Collections.synchronizedList(new ArrayList<Stanza>());
-                List<Stanza> oldList = inboxes.putIfAbsent(stanza.getFrom(), inbox);
-                inbox = (oldList != null) ? oldList : inbox;
-            }
-            inbox.add(stanza);
+        } finally {
+            stanza.getSequencePrincipal().unlock("gate");
         }
+
     }
     
-    public abstract void handleInternal(Stanza stanza) throws OXException;
+    public abstract void handleInternal(Stanza stanza, ID recipient) throws OXException;
     
 }
