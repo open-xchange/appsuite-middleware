@@ -162,9 +162,10 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         } catch (final InvalidDataException e) {
             log.error(e.getMessage(), e);
             throw e;
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             log.error(e.getMessage(), e);
-            throw e;
+            // Eliminate nested root cause exceptions. These are mostly unknown to clients.
+            throw new StorageException(e.getMessage());
         }
     }
 

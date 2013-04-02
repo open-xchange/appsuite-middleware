@@ -1,6 +1,7 @@
 * 2013-04-02 - marcus.klein@open-xchange.com
 
  - Fix for bug 24581: Using only special Java options for CLTs in all scripts starting some CLT.
+ - Fix for bug 25083: Not throwing nested exceptions to RMI clients because they do not know about internal exception classes.
 
 * 2013-04-01 - thorben.betten@open-xchange.com
 
