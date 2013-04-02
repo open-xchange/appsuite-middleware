@@ -609,26 +609,7 @@ public final class SMTPTransport extends MailTransport {
             final long start = System.currentTimeMillis();
             final Transport transport = getSMTPSession().getTransport(SMTP);
             try {
-                final String server = IDNA.toASCII(smtpConfig.getServer());
-                final int port = smtpConfig.getPort();
-                if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
-                    if (isKerberosAuth()) {
-                        try {
-                            Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(
-                                transport,
-                                server,
-                                port,
-                                smtpConfig.getLogin(),
-                                encodePassword(smtpConfig.getPassword())));
-                        } catch (final PrivilegedActionException e) {
-                            handlePrivilegedActionException(e);
-                        }
-                    } else {
-                        transport.connect(server, port, smtpConfig.getLogin(), encodePassword(smtpConfig.getPassword()));
-                    }
-                } else {
-                    transport.connect(server, port, null, null);
-                }
+                connectTransport(transport, smtpConfig);
                 saveChangesSafe(smtpMessage);
                 transport(smtpMessage, smtpMessage.getAllRecipients(), transport, smtpConfig);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
@@ -668,26 +649,7 @@ public final class SMTPTransport extends MailTransport {
                 final long start = System.currentTimeMillis();
                 final Transport transport = getSMTPSession().getTransport(SMTP);
                 try {
-                    final String server = IDNA.toASCII(smtpConfig.getServer());
-                    final int port = smtpConfig.getPort();
-                    if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
-                        if (isKerberosAuth()) {
-                            try {
-                                Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(
-                                    transport,
-                                    server,
-                                    port,
-                                    smtpConfig.getLogin(),
-                                    encodePassword(smtpConfig.getPassword())));
-                            } catch (final PrivilegedActionException e) {
-                                handlePrivilegedActionException(e);
-                            }
-                        } else {
-                            transport.connect(server, port, smtpConfig.getLogin(), encodePassword(smtpConfig.getPassword()));
-                        }
-                    } else {
-                        transport.connect(server, port, null, null);
-                    }
+                    connectTransport(transport, smtpConfig);
                     saveChangesSafe(smtpMessage);
                     transport(smtpMessage, recipients, transport, smtpConfig);
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
@@ -757,26 +719,7 @@ public final class SMTPTransport extends MailTransport {
                 final long start = System.currentTimeMillis();
                 final Transport transport = getSMTPSession().getTransport(SMTP);
                 try {
-                    final String server = IDNA.toASCII(smtpConfig.getServer());
-                    final int port = smtpConfig.getPort();
-                    if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
-                        if (isKerberosAuth()) {
-                            try {
-                                Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(
-                                    transport,
-                                    server,
-                                    port,
-                                    smtpConfig.getLogin(),
-                                    encodePassword(smtpConfig.getPassword())));
-                            } catch (final PrivilegedActionException e) {
-                                handlePrivilegedActionException(e);
-                            }
-                        } else {
-                            transport.connect(server, port, smtpConfig.getLogin(), encodePassword(smtpConfig.getPassword()));
-                        }
-                    } else {
-                        transport.connect(server, port, null, null);
-                    }
+                    connectTransport(transport, smtpConfig);
                     /*
                      * Save changes
                      */
@@ -805,6 +748,29 @@ public final class SMTPTransport extends MailTransport {
         }
     }
 
+    private void connectTransport(final Transport transport, final SMTPConfig smtpConfig) throws OXException, MessagingException {
+        final String server = IDNA.toASCII(smtpConfig.getServer());
+        final int port = smtpConfig.getPort();
+        if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
+            if (isKerberosAuth()) {
+                try {
+                    Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(
+                        transport,
+                        server,
+                        port,
+                        smtpConfig.getLogin(),
+                        encodePassword(smtpConfig.getPassword())));
+                } catch (final PrivilegedActionException e) {
+                    handlePrivilegedActionException(e);
+                }
+            } else {
+                transport.connect(server, port, smtpConfig.getLogin(), encodePassword(smtpConfig.getPassword()));
+            }
+        } else {
+            transport.connect(server, port, null, null);
+        }
+    }
+
     private void transport(final SMTPMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
         try {
             transport.sendMessage(smtpMessage, recipients);
@@ -828,6 +794,9 @@ public final class SMTPTransport extends MailTransport {
         try {
             final MimeMessageDataSource dataSource = new MimeMessageDataSource(smtpMessage, smtpConfig, session);
             smtpMessage.setDataHandler(new DataHandler(dataSource));
+            if (!transport.isConnected()) {
+                connectTransport(transport, smtpConfig);
+            }
             transport.sendMessage(smtpMessage, recipients);
             invokeLater(new Runnable() {
                 
@@ -916,26 +885,7 @@ public final class SMTPTransport extends MailTransport {
         final SMTPConfig config = getTransportConfig0();
         try {
             try {
-                final String server = IDNA.toASCII(config.getServer());
-                final int port = config.getPort();
-                if (config.getSMTPProperties().isSmtpAuth()) {
-                    if (isKerberosAuth()) {
-                        try {
-                            Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(
-                                transport,
-                                server,
-                                port,
-                                config.getLogin(),
-                                encodePassword(config.getPassword())));
-                        } catch (final PrivilegedActionException e) {
-                            handlePrivilegedActionException(e);
-                        }
-                    } else {
-                        transport.connect(server, port, config.getLogin(), encodePassword(config.getPassword()));
-                    }
-                } else {
-                    transport.connect(server, port, null, null);
-                }
+                connectTransport(transport, config);
                 close = true;
             } catch (final javax.mail.AuthenticationFailedException e) {
                 throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, config.getServer(), e.getMessage());
