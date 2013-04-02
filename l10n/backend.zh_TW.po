@@ -5,14 +5,14 @@ msgstr ""
 "Project-Id-Version: errors.zh_TW\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: DATE\n"
-"PO-Revision-Date: 2013-02-12 00:43+0800\n"
+"PO-Revision-Date: 2013-03-19 19:31+0800\n"
 "Last-Translator: \n"
 "Language-Team: Traditional Chinese <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.5.5\n"
+"X-Generator: Poedit 1.5.4\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
@@ -177,6 +177,7 @@ msgstr "在位置 %1$s 缺少緩存配置檔"
 #.
 #. An I/O error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.capabilities/src/com/openexchange/capabilities/CapabilityExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion/src/com/openexchange/conversion/DataExceptionMessages.java:80
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.document.converter/src/com/openexchange/document/converter/DocumentConverterExceptionMessages.java:81
@@ -184,6 +185,7 @@ msgstr "在位置 %1$s 缺少緩存配置檔"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:65
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.langdetect/src/com/openexchange/langdetect/LanguageDetectionExceptionMessages.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.loxandra/src/com/openexchange/loxandra/LoxandraExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:92
@@ -197,6 +199,7 @@ msgstr "在位置 %1$s 缺少緩存配置檔"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rdiff/src/com/openexchange/rdiff/RdiffExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/configuration/ConfigurationExceptionMessage.java:94
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:117
@@ -283,12 +286,34 @@ msgid "Location"
 msgstr "地點"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:67
 msgid "Participants"
 msgstr "參與者"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:73
 msgid "Comments"
 msgstr "注釋"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:62
+msgid "Accepted"
+msgstr "已接受"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:63
+msgid "Declined"
+msgstr "已拒絕"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:64
+msgid "Tentatively accepted"
+msgstr "已暫時接受"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:65
+msgid "Undecided"
+msgstr "未決定"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:273
+msgid "Resources"
+msgstr "資源"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -935,10 +960,6 @@ msgstr "約會時間已重新調整。原始日期: %1$s。新日期: %2$s"
 msgid "Reschedule the event. Original date: %1$s. New date: %2$s"
 msgstr "重新安排事件時間。原始日期: %1$s。新日期: %2$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:273
-msgid "Resources"
-msgstr "資源"
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:275
 msgid "The entire day"
 msgstr "全日"
@@ -1010,6 +1031,7 @@ msgstr "因為此約會的需要使用您所管理的資源 %1$s 所以收到這
 #. * An error occurred: %1$s
 #.
 #. An error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.capabilities/src/com/openexchange/capabilities/CapabilityExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.config.cascade/src/com/openexchange/config/cascade/ConfigCascadeExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.config.objects/src/com/openexchange/config/objects/ConfigObjectsExceptionMessages.java:63
@@ -1024,6 +1046,7 @@ msgstr "因為此約會的需要使用您所管理的資源 %1$s 所以收到這
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.groupware.dataRetrieval/src/com/openexchange/groupware/dataRetrieval/DataRetrievalExceptionMessages.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.loxandra/src/com/openexchange/loxandra/LoxandraExceptionMessages.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mdns/src/com/openexchange/mdns/MDNSExceptionMessages.java:63
@@ -1040,6 +1063,7 @@ msgstr "因為此約會的需要使用您所管理的資源 %1$s 所以收到這
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.proxy/src/com/openexchange/proxy/ProxyExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push/src/com/openexchange/push/PushExceptionMessages.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rdiff/src/com/openexchange/rdiff/RdiffExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:124
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/delete/DeleteFailedExceptionMessage.java:76
@@ -1050,7 +1074,7 @@ msgstr "因為此約會的需要使用您所管理的資源 %1$s 所以收到這
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:116
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:14
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.textxtraction/src/com/openexchange/textxtraction/TextXtractExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:63
@@ -1058,8 +1082,57 @@ msgstr "因為此約會的需要使用您所管理的資源 %1$s 所以收到這
 msgid "An error occurred: %1$s"
 msgstr "出現一個錯誤: %1$s"
 
+#. A JSON error occurred: %1$s
+#. *
+#. * A JSON error occurred: %1$s
+#.
+#. A JSON error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.capabilities/src/com/openexchange/capabilities/CapabilityExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion.servlet/src/com/openexchange/conversion/servlet/ConversionServletExceptionMessage.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:65
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:65
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mdns/src/com/openexchange/mdns/MDNSExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.servlet/src/com/openexchange/passwordchange/servlet/PasswordChangeServletExceptionMessage.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:391
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:72
+msgid "A JSON error occurred: %1$s"
+msgstr "出現一個 JSON 錯誤: 1$%s"
+
+#. A SQL error occurred: %1$s
+#. *
+#. * A SQL error occurred: %1$s
+#.
+#. A SQL error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.capabilities/src/com/openexchange/capabilities/CapabilityExceptionMessages.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.datatypes.genericonf.storage/src/com/openexchange/datatypes/genericonf/storage/GenericConfigurationStorageExceptionMessage.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:87
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:120
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/delete/DeleteFailedExceptionMessage.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/downgrade/DowngradeFailedExceptionMessage.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/userconfiguration/UserConfigurationExceptionMessage.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:324
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:78
+msgid "A SQL error occurred: %1$s"
+msgstr "出現一個 SQL 錯誤: %1$s"
+
 #. Method is not supported.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:69
 msgid "Method is not supported."
 msgstr "方法不受支援。"
 
@@ -1135,19 +1208,19 @@ msgstr "%1$s 已加入聊天"
 
 #. Could not coerce value %1$s into class %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.config.cascade/src/com/openexchange/config/cascade/ConfigCascadeExceptionMessages.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:17
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:66
 msgid "Could not coerce value %1$s into class %2$s"
 msgstr "不能將值 %1$s強制轉換為類%2$s"
 
 #. Can not define metadata %1$s in scope %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.config.cascade/src/com/openexchange/config/cascade/ConfigCascadeExceptionMessages.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:20
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:69
 msgid "Can not define metadata %1$s in scope %2$s"
 msgstr "不能在範圍%2$s內定義元數據%1$s"
 
 #. Can not set property %1$s in scope %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.config.cascade/src/com/openexchange/config/cascade/ConfigCascadeExceptionMessages.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:23
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:72
 msgid "Can not set property %1$s in scope %2$s"
 msgstr "不能在範圍 %2$s內設置屬性%1$s"
 
@@ -1541,29 +1614,6 @@ msgstr "輸入的 storagePriority 值「%s」在檔案「%s」當中不是整數
 msgid "Unable to map contact property \"%s\""
 msgstr "無法對應聯絡人屬性「%d」。"
 
-#. A JSON error occurred: %1$s
-#. *
-#. * A JSON error occurred: %1$s
-#.
-#. A JSON error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion.servlet/src/com/openexchange/conversion/servlet/ConversionServletExceptionMessage.java:70
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:71
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mdns/src/com/openexchange/mdns/MDNSExceptionMessages.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.servlet/src/com/openexchange/passwordchange/servlet/PasswordChangeServletExceptionMessage.java:71
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:92
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:391
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:72
-msgid "A JSON error occurred: %1$s"
-msgstr "出現一個 JSON 錯誤: 1$%s"
-
 #. Missing parameter %1$s
 #. *
 #. * Missing parameter %1$s
@@ -1676,6 +1726,125 @@ msgstr "請提供隨機的亂碼字元以產生安全的金鑰。"
 msgid "Arbitrary byte sequence is missing to generate a secure key."
 msgstr "區少隨機字元順序，無法產生安全金鑰。"
 
+#. The server is unable to connect to the configuration database.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:63
+msgid "Cannot get connection to config DB."
+msgstr "無法建立到配置資料庫的連接。"
+
+#. It was not possible to determine the database server for a specific OX server and a context.
+#. %1$d is replaced with the context identifier.
+#. %2$d is replaced with the server identifier.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:68
+msgid "Database for context %1$d and server %2$d can not be resolved"
+msgstr "無法為環境 %1$d 和伺服器 %2$d 解析資料庫！"
+
+#. The connection to the database could not be established.
+#. %1$d is replaced with the database pool identifier.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:72
+msgid "No connection to database %1$d"
+msgstr "無法建立到資料庫 %1$d 的連接。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:74
+msgid "Schema can not be set on database connection"
+msgstr "無法設置關於資料庫連接的架構。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:76
+msgid "Null is returned to connection pool."
+msgstr "向連接池返回 Null。"
+
+#. %1$s is replaced with some SQL command.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:79
+msgid "Problem with executing SQL: %1$s"
+msgstr "執行 SQL 時出現問題: %1$s"
+
+#. %1$d is replaced with the database pool identifier.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:82
+msgid "Cannot get information for pool %1$d."
+msgstr "無法獲得關於池 %1$d 的資訊。"
+
+#. %1$s is replace with some java class name representing the JDBC driver.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:85
+msgid "Driver class %1$s missing."
+msgstr "缺少驅動程式類 %1$s。"
+
+#. The pool throws this exception if it believes the connection does not belong to it.
+#. "Return" in terms of giving a previously obtained pooled connection back into connection pool.
+#. %1$s is replaced with the object identifier of the database connection object.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:90
+msgid ""
+"Object %1$s does not belong to this pool. The object will be removed. If "
+"there was a previous message about this object not having been returned to "
+"the pool, the object was just in use too long."
+msgstr ""
+"物件 %1$s 不屬於此 pool，這個物件將會被移除。如果先前有關於此物件未回到此 "
+"pool 的訊息，該物件被使用太久了。"
+
+#. A property defining the server name was not found in the configuration properties files.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:93
+msgid "Server name is not defined."
+msgstr "未定義伺服器名稱。"
+
+#. %1$s is replaced with some class name where that class has not been initialized before calling its methods.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:96
+msgid "%1$s is not initialized."
+msgstr "%1$s 未初始化。"
+
+#. %1$d is replaced with the time in milliseconds the connection has been used.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:99
+msgid "Connection used for %1$d milliseconds."
+msgstr "連接已使用 %1$d 毫秒。"
+
+#. %1$d is replaced with the number of statements that have not been closed before returning the connection.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:102
+msgid "%1$d statements are not closed."
+msgstr "%1$d 條語句未關閉。"
+
+#. %1$s is replaced with the URL parameter string that is not parseable.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:105
+msgid "Parsing problem in URL parameter \"%1$s\"."
+msgstr "URL 參數 \"%1$s\" 中有解析問題。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:107
+msgid "Configuration file for database configuration is missing."
+msgstr "缺少用於資料庫配置的配置檔。"
+
+#. %1$s is replaced with the name of the required property that is not found.
+#. Property "%1$s" is not defined.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/configuration/ConfigurationExceptionMessage.java:82
+msgid "Property \"%1$s\" is not defined."
+msgstr "未定義屬性 \"%1$s\"。"
+
+#. %1$s is replaced with the name of the java class that should be initialized a second time.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:113
+msgid "%1$s is already initialized."
+msgstr "%1$s 已經初始化。"
+
+#. %1$s is replaced with the defined server name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:116
+msgid "Cannot resolve server id for server %1$s."
+msgstr "無法解析伺服器 %1$s 的伺服器 ID。"
+
+#. This error message is only for administrators to show that some coding problem exists.
+#. %1$d is replaced with a unique identifier of a database connection pool.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:120
+msgid "Nothing known about pool %1$d."
+msgstr "沒有連接池 %1$d 的任何資訊。"
+
+#. This is a technical exception message for administrators. For monitoring the replication a replicationMonitor table with a
+#. transaction counter is used. If this transaction counter is missing this exception gets thrown.
+#. %1$d is replaced with the context identifier that is stored in the schema.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:125
+msgid "Transaction counter is missing for context %1$d."
+msgstr "缺少環境 %1$ 的事務計數。"
+
+#. This error message may happen when provisioning contexts. Writing the database assigment failed in database.
+#. %1$d is replaced with the context identifier.
+#. %2$d is replaced with the server identifier.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:130
+msgid "Inserting database assignment for context %1$d and server %2$d failed!"
+msgstr "環境 %1$d 和伺服器 %2$d 的資料庫內容插入失敗！"
+
 #. Data retention failed: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dataretention/src/com/openexchange/dataretention/DataRetentionExceptionStrings.java:62
 msgid "Data retention failed: %1$s."
@@ -1685,28 +1854,6 @@ msgstr "資料保持失敗: %1$s。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dataretention/src/com/openexchange/dataretention/DataRetentionExceptionStrings.java:65
 msgid "An I/O error occurred: %1$s."
 msgstr "出現一個 I/O 錯誤: %1$s。"
-
-#. A SQL error occurred: %1$s
-#. *
-#. * A SQL error occurred: %1$s
-#.
-#. A SQL error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.datatypes.genericonf.storage/src/com/openexchange/datatypes/genericonf/storage/GenericConfigurationStorageExceptionMessage.java:68
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:67
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:68
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:61
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:67
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:67
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:87
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:120
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/delete/DeleteFailedExceptionMessage.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/downgrade/DowngradeFailedExceptionMessage.java:70
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/userconfiguration/UserConfigurationExceptionMessage.java:71
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:324
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:78
-msgid "A SQL error occurred: %1$s"
-msgstr "出現一個 SQL 錯誤: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.datatypes.genericonf.storage/src/com/openexchange/datatypes/genericonf/storage/GenericConfigurationStorageExceptionMessage.java:70
 msgid "Object type is not supported: %1$s"
@@ -2686,125 +2833,6 @@ msgstr "URL \"%s\" 不正確。"
 msgid "Extras link is not implemented."
 msgstr "未實施其他鏈結。"
 
-#. The server is unable to connect to the configuration database.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:63
-msgid "Cannot get connection to config DB."
-msgstr "無法建立到配置資料庫的連接。"
-
-#. It was not possible to determine the database server for a specific OX server and a context.
-#. %1$d is replaced with the context identifier.
-#. %2$d is replaced with the server identifier.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:68
-msgid "Database for context %1$d and server %2$d can not be resolved"
-msgstr "無法為環境 %1$d 和伺服器 %2$d 解析資料庫！"
-
-#. The connection to the database could not be established.
-#. %1$d is replaced with the database pool identifier.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:72
-msgid "No connection to database %1$d"
-msgstr "無法建立到資料庫 %1$d 的連接。"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:74
-msgid "Schema can not be set on database connection"
-msgstr "無法設置關於資料庫連接的架構。"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:76
-msgid "Null is returned to connection pool."
-msgstr "向連接池返回 Null。"
-
-#. %1$s is replaced with some SQL command.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:79
-msgid "Problem with executing SQL: %1$s"
-msgstr "執行 SQL 時出現問題: %1$s"
-
-#. %1$d is replaced with the database pool identifier.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:82
-msgid "Cannot get information for pool %1$d."
-msgstr "無法獲得關於池 %1$d 的資訊。"
-
-#. %1$s is replace with some java class name representing the JDBC driver.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:85
-msgid "Driver class %1$s missing."
-msgstr "缺少驅動程式類 %1$s。"
-
-#. The pool throws this exception if it believes the connection does not belong to it.
-#. "Return" in terms of giving a previously obtained pooled connection back into connection pool.
-#. %1$s is replaced with the object identifier of the database connection object.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:90
-msgid ""
-"Object %1$s does not belong to this pool. The object will be removed. If "
-"there was a previous message about this object not having been returned to "
-"the pool, the object was just in use too long."
-msgstr ""
-"物件 %1$s 不屬於此 pool，這個物件將會被移除。如果先前有關於此物件未回到此 "
-"pool 的訊息，該物件被使用太久了。"
-
-#. A property defining the server name was not found in the configuration properties files.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:93
-msgid "Server name is not defined."
-msgstr "未定義伺服器名稱。"
-
-#. %1$s is replaced with some class name where that class has not been initialized before calling its methods.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:96
-msgid "%1$s is not initialized."
-msgstr "%1$s 未初始化。"
-
-#. %1$d is replaced with the time in milliseconds the connection has been used.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:99
-msgid "Connection used for %1$d milliseconds."
-msgstr "連接已使用 %1$d 毫秒。"
-
-#. %1$d is replaced with the number of statements that have not been closed before returning the connection.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:102
-msgid "%1$d statements are not closed."
-msgstr "%1$d 條語句未關閉。"
-
-#. %1$s is replaced with the URL parameter string that is not parseable.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:105
-msgid "Parsing problem in URL parameter \"%1$s\"."
-msgstr "URL 參數 \"%1$s\" 中有解析問題。"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:107
-msgid "Configuration file for database configuration is missing."
-msgstr "缺少用於資料庫配置的配置檔。"
-
-#. %1$s is replaced with the name of the required property that is not found.
-#. Property "%1$s" is not defined.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:110
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/configuration/ConfigurationExceptionMessage.java:82
-msgid "Property \"%1$s\" is not defined."
-msgstr "未定義屬性 \"%1$s\"。"
-
-#. %1$s is replaced with the name of the java class that should be initialized a second time.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:113
-msgid "%1$s is already initialized."
-msgstr "%1$s 已經初始化。"
-
-#. %1$s is replaced with the defined server name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:116
-msgid "Cannot resolve server id for server %1$s."
-msgstr "無法解析伺服器 %1$s 的伺服器 ID。"
-
-#. This error message is only for administrators to show that some coding problem exists.
-#. %1$d is replaced with a unique identifier of a database connection pool.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:120
-msgid "Nothing known about pool %1$d."
-msgstr "沒有連接池 %1$d 的任何資訊。"
-
-#. This is a technical exception message for administrators. For monitoring the replication a replicationMonitor table with a
-#. transaction counter is used. If this transaction counter is missing this exception gets thrown.
-#. %1$d is replaced with the context identifier that is stored in the schema.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:125
-msgid "Transaction counter is missing for context %1$d."
-msgstr "缺少環境 %1$ 的事務計數。"
-
-#. This error message may happen when provisioning contexts. Writing the database assigment failed in database.
-#. %1$d is replaced with the context identifier.
-#. %2$d is replaced with the server identifier.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:130
-msgid "Inserting database assignment for context %1$d and server %2$d failed!"
-msgstr "環境 %1$d 和伺服器 %2$d 的資料庫內容插入失敗！"
-
 #. Text displayed to user if there is no message.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:63
 msgid "[Not available]"
@@ -3059,23 +3087,23 @@ msgstr "找不到 ID %1$s 的資料提供程式"
 msgid "Missing parameter: %1$s"
 msgstr "缺少參數: %1$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:6
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:55
 msgid "The embedded Apache client threw an error: %1$s"
 msgstr "嵌入的 Apache 客戶端丟出錯誤: %1$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:7
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:56
 msgid "Parsing this JSON did not work: %1$s"
 msgstr "無法剖析此 JSON: %1$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:8
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:57
 msgid "Parsing this XML with SAX did not work: %1$s"
 msgstr "無法剖析此含有 SAX 的 XML: %1$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:9
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:58
 msgid "Some generic exception was thrown: %1$s"
 msgstr "遇到某些一般例外情況：%1$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:10
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:59
 msgid "An IO error occurred: %1$s"
 msgstr "發生一個 I/O 錯誤: %1$s"
 
@@ -3086,7 +3114,7 @@ msgstr "無法啟動 grizzly 伺服器"
 
 #. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:66
 msgid "The following needed service is missing: \"%1$s\""
 msgstr "缺少下列必須服務:「%1$s」"
 
@@ -3429,6 +3457,21 @@ msgstr "使用者 %2$d 在環境 %3$d 的模組 %1$d 的索引已被鎖定。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:68
 msgid "Index-based search is not supported for module: %1$s"
 msgstr "模組 %1$s 不支援以索引為基礎的搜尋"
+
+#. There is no search handler for field %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:71
+msgid "There is no search handler for field %1$s."
+msgstr "沒有 %1$s 欄位的搜尋控制器。"
+
+#. The Internet proxy is not enabled.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:75
+msgid "The Internet proxy is not enabled."
+msgstr "未啟用網際網路代理伺服器。"
+
+#. There is no such Internet proxy for id %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:78
+msgid "There is no such Internet proxy for id %1$s."
+msgstr "沒有 id %1$s 的網際網路代理伺服器。"
 
 #. No JSlob storage found for identifier: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:68
@@ -4739,6 +4782,18 @@ msgid ""
 "restrictions by provider. Otherwise subsequent login attempt might not work."
 msgstr "因為帳號提供者的限制，POP3 驗證已被停用，否則後續將無法登入。"
 
+#. POP3 messages cannot be imported because of existing quota constraints on primary mail account. Please free some space.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:332
+msgid ""
+"POP3 messages cannot be imported because of existing quota constraints on "
+"primary mail account. Please free some space."
+msgstr "無法匯入 POP3 訊息，因為以達目前的配額限制額度。請清出一些空間再匯入。"
+
+#. Thumbnail image not available.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:72
+msgid "Thumbnail image not available."
+msgstr "縮圖無法使用。"
+
 #. Duplicate proxy registration: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.proxy/src/com/openexchange/proxy/ProxyExceptionMessages.java:66
 msgid "Duplicate proxy registration: %1$s"
@@ -5012,20 +5067,10 @@ msgstr "數據報封裝包中缺乏有效載荷。"
 msgid "No UDP channel is configured."
 msgstr "未設定 UDP 通道。"
 
-#. * The following obligatory element is missing: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere.presence/src/com/openexchange/realtime/atmosphere/presence/AtmospherePresenceExceptionMessage.java:62
-msgid "The following obligatory element is missing: \"%1$s\""
-msgstr "缺少以下必須的元素:「%1$s」"
-
-#. * Malformed Presence Data
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere.presence/src/com/openexchange/realtime/atmosphere/presence/AtmospherePresenceExceptionMessage.java:64
-msgid "Malformed Presence Data"
-msgstr "變形的存在資料"
-
-#. * Malformed Presence Element: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere.presence/src/com/openexchange/realtime/atmosphere/presence/AtmospherePresenceExceptionMessage.java:66
-msgid "Malformed Presence Element: \"%1$s\""
-msgstr "變形的存在元素:「%1$s」"
+#. Quota exceeded. Please delete some items in order to create new ones.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:69
+msgid "Quota exceeded. Please delete some items in order to create new ones."
+msgstr "已達配額。請刪除某些項目以建立新項目。"
 
 #. * The mandatory session information is missing.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:62
@@ -5052,37 +5097,56 @@ msgstr "建立 Stanza 時出錯:「%1$s」。"
 msgid "Could not find a transformer for the PayloadElement: \"%1$s\""
 msgstr "找不到 PayloadElement 的 transformer :「%1$s」"
 
-#. * Could not find a handler for the specified stanza
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:72
-msgid "Could not find a handler for the given stanza: . \"%1$s\""
-msgstr "找不到這種 stanza 的 handler:「%1$s」"
-
 #. * Could not find an initializer for the specified stanza
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:72
 msgid "Could not find an initializer for the given stanza: . \"%1$s\""
 msgstr "找不到這種 stanza 的 initializer:「%1$s」"
 
 #. * Error while transforming a PayloadElement: \"%1$s. %2$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:74
 msgid "Error while transforming a PayloadElement: \"%1$s, %2$s\""
 msgstr "變形 PayloadElement 時發生錯誤：「%1$s, %2$s」"
 
 #. * Error while converting a PayloadElement: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:76
 msgid "Error while converting PayloadElement data: \"%1$s\""
 msgstr "轉換 PayloadElement 時出錯:「%1$s」。"
 
-#. * Unknown channel %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:63
+#. * The following obligatory element is missing: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:78
+msgid "The following obligatory element is missing: \"%1$s\""
+msgstr "缺少以下必須的元素:「%1$s」"
+
+#. * Malformed Presence Data
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:80
+msgid "Malformed Presence Data"
+msgstr "變形的存在資料"
+
+#. * Malformed Presence Element: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:82
+msgid "Malformed Presence Element: \"%1$s\""
+msgstr "變形的存在元素:「%1$s」"
+
+#. * Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:84
+msgid "Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\""
+msgstr "「%3$s」中有 「%2$s」的值「%2$s」無效。"
+
+#. Could not find a handler for the specified stanza
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:63
+msgid "Could not find a handler for the given stanza: . \"%1$s\""
+msgstr "找不到這種 stanza 的 handler:「%1$s」"
+
+#. Could not send stanza to resource. Resource was offline: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:66
+msgid "Could not send stanza to resource. Resource was offline: %1$s"
+msgstr "無法傳送 stanza 給資源。資源已離線: %1$s"
+
+#. Unknown channel %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:69
 msgid "Unknown channel %1$s"
 msgstr "未知頻道 %1$s"
 
-#. * No appropriate channel found for recipient %1$s with payload namespace %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:66
-msgid ""
-"No appropriate channel found for recipient %1$s with payload namespace %2$s"
-msgstr "沒有適合收件者「%1$s」使用負載命名空間「%2$s」的頻道。"
-
 #. Unexpected error: %1$s
 #. *
 #. * Unexpected error: %1$s
@@ -5091,7 +5155,8 @@ msgstr "沒有適合收件者「%1$s」使用負載命名空間「%2$s」的頻�
 #. *
 #. * Unexpected error: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:151
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:120
@@ -5100,6 +5165,32 @@ msgstr "沒有適合收件者「%1$s」使用負載命名空間「%2$s」的頻�
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/webdav/WebdavExceptionMessage.java:126
 msgid "Unexpected error: %1$s"
 msgstr "意外錯誤: %1$s"
+
+#. * Could not send directed Presence to resource: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.handle/src/com/openexchange/realtime/handle/HandleExceptionMessage.java:63
+msgid "Could not send directed Presence to resource: %1$s"
+msgstr "無法傳送 directed Presence 給資源: %1$s"
+
+#. * Invalid context ID. Couldn't find context for: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.presence.subscribe/src/com/openexchange/realtime/presence/subscribe/PresenceSubscribeExceptionMessages.java:63
+msgid "Invalid context ID. Couldn't find context for: %1$s"
+msgstr "無效內容 ID。找不到 %1$s 的內容"
+
+#. * No appropriate channel found for recipient %1$s with payload namespace %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:63
+msgid ""
+"No appropriate channel found for recipient %1$s with payload namespace %2$s"
+msgstr "沒有適合收件者「%1$s」使用負載命名空間「%2$s」的頻道。"
+
+#. * Invalid ID. Resource identifier is missing.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:72
+msgid "Invalid ID. Resource identifier is missing."
+msgstr "無效 ID。缺少資源 ID。"
+
+#. * Resource not available.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:75
+msgid "Resource not available."
+msgstr "資源不可用。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rmi/src/com/openexchange/rmi/exceptions/OXRMIExceptionMessage.java:62
 msgid "Start of RMI service failed."
@@ -11928,6 +12019,17 @@ msgstr "因為作業系統的權限，檔案存取已被拒絕。"
 msgid "File access denied."
 msgstr "檔案存取被拒絕。"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:88
+msgid ""
+"This template was not whitelisted in 'com.openexchange.templating."
+"templateWhitelist'."
+msgstr ""
+"此範本不在「com.openexchange.templating.templateWhitelist」的白名單當中。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:90
+msgid "This template was not whitelisted,"
+msgstr "此範本不在白名單中。"
+
 #. The consumer key/consumer secret pair is missing in configuration.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:72
 msgid "The consumer key/consumer secret pair is missing in configuration."
@@ -12101,6 +12203,31 @@ msgstr "無法儲存使用者的郵件設定。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.user.copy/src/com/openexchange/user/copy/UserCopyExceptionMessages.java:81
 msgid "A user named %1$s already exists in destination context %2$s."
 msgstr "在目標環境 %2$s 當中已經有一個名為 %1$s 的使用者存在。"
+
+#. No configuration service found
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
+msgid "No configuration service found."
+msgstr "找不到配置服務。"
+
+#. The value given in the property %1$s is no integer value
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:66
+msgid "The value given in the property %1$s is no integer value."
+msgstr "%1$s 屬性中的值不是整數。"
+
+#. Property %1$s not set but required.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:69
+msgid "Property %1$s not set but required."
+msgstr "未設定必要屬性「%1$s」。"
+
+#. Property %1$s claims to have condition but condition not set.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:72
+msgid "Property %1$s claims to have condition but condition not set."
+msgstr "屬性 %1$s 宣稱有條件，但未設定條件。"
+
+#. Property %1$s must be set if %2$s is set to %3$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:75
+msgid "Property %1$s must be set if %2$s is set to %3$s"
+msgstr "若 %2$s 設為 %3$s 則必須設定屬性 %1$s。"
 
 #. Missing main extension attribute for user %1$s in context %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.voipnow.json/src/com/openexchange/voipnow/json/VoipNowExceptionMessages.java:71
