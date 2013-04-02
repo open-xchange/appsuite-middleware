@@ -742,10 +742,11 @@ public final class SMTPTransport extends MailTransport {
             throw MimeMailException.handleMessagingException(e, smtpConfig, session);
         } catch (final IOException e) {
             throw SMTPExceptionCode.IO_ERROR.create(e, e.getMessage());
-        }  finally {
+        }
+        //finally {
             // Restore the ClassLoader
             // Thread.currentThread().setContextClassLoader(tcl);
-        }
+        //}
     }
 
     private void connectTransport(final Transport transport, final SMTPConfig smtpConfig) throws OXException, MessagingException {
