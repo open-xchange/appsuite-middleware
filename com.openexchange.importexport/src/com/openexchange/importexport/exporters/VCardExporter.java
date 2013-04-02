@@ -57,6 +57,7 @@ import java.util.EnumSet;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -278,12 +279,13 @@ public class VCardExporter implements Exporter {
         if (null == objectId) {
             if (EnumSet.copyOf(Arrays.asList(fields)).contains(ContactField.IMAGE1)) {
                 // Contact by contact
-                final SearchIterator<Contact> searchIterator = ImportExportServices.getContactService().getAllContacts(session, folderId, FIELDS_ID);
+                final ContactService contactService = ImportExportServices.getContactService();
+                final SearchIterator<Contact> searchIterator = contactService.getAllContacts(session, folderId, FIELDS_ID);
                 try {
                     while (searchIterator.hasNext()) {
                         final Contact contact = searchIterator.next();
                         try {
-                            exportContact(oxContainerConverter, contactDef, versitWriter, ImportExportServices.getContactService().getContact(session, folderId, Integer.toString(contact.getObjectID()), fields));
+                            exportContact(oxContainerConverter, contactDef, versitWriter, contactService.getContact(session, folderId, Integer.toString(contact.getObjectID()), fields));
                         } catch (final OXException e) {
                             if (!ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e)) {
                                 throw e;
