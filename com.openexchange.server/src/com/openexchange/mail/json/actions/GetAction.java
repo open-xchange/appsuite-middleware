@@ -242,6 +242,8 @@ public final class GetAction extends AbstractMailAction {
                     final OutputStream directOutputStream = requestData.optOutputStream();
                     if (null != directOutputStream) {
                         try {
+                            final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
+                            final boolean doUnseen = (unseen && wasUnseen);
                             if (saveToDisk) {
                                 requestData.setResponseHeader("Content-Type", "application/octet-stream");
                                 final String subject = mail.getSubject();
@@ -250,14 +252,22 @@ public final class GetAction extends AbstractMailAction {
                                 requestData.setResponseHeader("Content-Disposition",  sb.toString());
                                 mail.writeTo(directOutputStream);
                                 directOutputStream.flush();
-                                return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
+                                final AJAXRequestResult requestResult = new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
+                                if (doUnseen) {
+                                    mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
+                                }
+                                return requestResult;
                             }
                             // As JSON response: {"data":"..."}
                             directOutputStream.write(CHUNK1); // {"data":"...
                             mail.writeTo(new JSONStringOutputStream(directOutputStream));
                             directOutputStream.write(CHUNK2); // ..."}
                             directOutputStream.flush();
-                            return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
+                            final AJAXRequestResult requestResult = new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
+                            if (doUnseen) {
+                                mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
+                            }
+                            return requestResult;
                         } catch (final Exception e) {
                             LOG.debug(e.getMessage(), e);
                         }
