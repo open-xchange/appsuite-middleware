@@ -131,8 +131,8 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
             ATTACHMENT_BASE.startTransaction();
             final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
             String sContentType;
-            if (null == contentType || "application/octet-stream".equals(toLowerCase(contentType))) {
-                sContentType = attachment.getFileMIMEType();
+            if ((null == contentType) || ("application/octet-stream".equals(toLowerCase(contentType)))) {
+                sContentType = "application/octet-stream";
             } else {
                 sContentType = contentType;
                 final String fileMIMEType = attachment.getFileMIMEType();
