@@ -114,15 +114,17 @@ public class LineWrap implements PreferencesItemService {
                 final UserSettingMail settings = storage.getUserSettingMail(user.getId(), ctx);
                 if (null != settings) {
                     final String s = setting.getSingleValue().toString();
-                    try {
+                    if (!isEmpty(s)) {
                         try {
-                            settings.setAutoLinebreak(Integer.parseInt(s));
-                        } catch (NumberFormatException e) {
-                            settings.setAutoLinebreak(new BigInteger(s).intValue());
+                            try {
+                                settings.setAutoLinebreak(Integer.parseInt(s));
+                            } catch (NumberFormatException e) {
+                                settings.setAutoLinebreak(new BigInteger(s).intValue());
+                            }
+                            storage.saveUserSettingMail(settings, user.getId(), ctx);
+                        } catch (final NumberFormatException e) {
+                            throw SettingExceptionCodes.JSON_READ_ERROR.create(e);
                         }
-                        storage.saveUserSettingMail(settings, user.getId(), ctx);
-                    } catch (final NumberFormatException e) {
-                        throw SettingExceptionCodes.JSON_READ_ERROR.create(e);
                     }
                 }
             }
@@ -130,6 +132,19 @@ public class LineWrap implements PreferencesItemService {
             @Override
             public int getId() {
                 return -1;
+            }
+
+            /** Check for an empty string */
+            private boolean isEmpty(final String string) {
+                if (null == string) {
+                    return true;
+                }
+                final int len = string.length();
+                boolean isWhitespace = true;
+                for (int i = 0; isWhitespace && i < len; i++) {
+                    isWhitespace = Character.isWhitespace(string.charAt(i));
+                }
+                return isWhitespace;
             }
         };
     }
