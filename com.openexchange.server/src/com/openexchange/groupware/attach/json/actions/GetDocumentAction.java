@@ -130,6 +130,24 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
         try {
             ATTACHMENT_BASE.startTransaction();
             final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
+            String sContentType;
+            if (null == contentType || "application/octet-stream".equals(toLowerCase(contentType))) {
+                sContentType = attachment.getFileMIMEType();
+            } else {
+                sContentType = contentType;
+                final String fileMIMEType = attachment.getFileMIMEType();
+                final String primaryType1 = getPrimaryType(fileMIMEType);
+                final String primaryType2 = getPrimaryType(contentType);
+                if (!toLowerCase(primaryType1).startsWith(toLowerCase(primaryType2))) {
+                    // Specified Content-Type does NOT match file's real MIME type
+                    // Therefore ignore it due to security reasons (see bug #25343)
+                    final StringAllocator sb = new StringAllocator(128);
+                    sb.append("Denied parameter \"").append(AJAXServlet.PARAMETER_CONTENT_TYPE).append("\" due to security constraints (");
+                    sb.append(contentType).append(" vs. ").append(fileMIMEType).append(").");
+                    LOG.warn(sb.toString());
+                    sContentType = fileMIMEType;
+                }
+            }
             /*
              * Get input stream
              */
@@ -139,7 +157,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
              */
             boolean isImage = false;
             {
-                final String lc = toLowerCase(contentType);
+                final String lc = toLowerCase(sContentType);
                 if (lc.startsWith("image/")) {
                     isImage = true;
                 } else if (lc.startsWith("application/octet-stream")) {
@@ -157,8 +175,8 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
             if (!isImage) {
                 final OutputStream directOutputStream = requestData.optOutputStream();
                 if (null != directOutputStream) {
-                    requestData.setResponseHeader("Content-Type", contentType);                    
-                    final StringAllocator sb = new StringAllocator(toLowerCase(contentType).startsWith("application/octet-stream") ? "attachment" : "inline");
+                    requestData.setResponseHeader("Content-Type", sContentType);                    
+                    final StringAllocator sb = new StringAllocator(toLowerCase(sContentType).startsWith("application/octet-stream") ? "attachment" : "inline");
                     appendFilenameParameter(attachment.getFilename(), null, requestData.getUserAgent(), sb);
                     requestData.setResponseHeader("Content-Disposition", sb.toString());
                     // requestData.setResponseETag(getHash(folderPath, uid, imageContentId == null ? sequenceId : imageContentId), AJAXRequestResult.YEAR_IN_MILLIS * 50);
@@ -189,7 +207,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
             /*
              * File holder
              */
-            fileHolder.setContentType(contentType);
+            fileHolder.setContentType(sContentType);
             fileHolder.setName(attachment.getFilename());
             ATTACHMENT_BASE.commit();
             return new AJAXRequestResult(fileHolder, "file");
@@ -213,7 +231,20 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
         }
     }
 
-    private static String toLowerCase(final CharSequence chars) {
+    /** Check for an empty string */
+    private boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    private String toLowerCase(final CharSequence chars) {
         if (null == chars) {
             return null;
         }
@@ -224,6 +255,14 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
         }
         return builder.toString();
+    }
+
+    private String getPrimaryType(final String contentType) {
+        if (isEmpty(contentType)) {
+            return contentType;
+        }
+        final int pos = contentType.indexOf('/');
+        return pos > 0 ? contentType.substring(0, pos) : contentType;
     }
 
 }
