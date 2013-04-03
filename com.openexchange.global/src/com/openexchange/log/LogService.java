@@ -84,7 +84,7 @@ public interface LogService {
      * @param throwable The optional throwable
      * @return The newly created {@link Loggable}
      */
-    public Loggable loggableFor(Level level, Log log, String message, Throwable throwable);
+    public Loggable loggableFor(Level level, Log log, Object message, Throwable throwable);
 
     /**
      * Creates a new {@link Loggable} with specified arguments.
@@ -94,6 +94,6 @@ public interface LogService {
      * @param message The message
      * @return The newly created {@link Loggable}
      */
-    public Loggable loggableFor(Level level, Log log, String message);
+    public Loggable loggableFor(Level level, Log log, Object message);
 
 }

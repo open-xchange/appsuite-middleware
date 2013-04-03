@@ -32,6 +32,7 @@ modules/mail/colorquoted > io.ox/mail//isColorQuoted
 mail/folder > io.ox/mail//folder
 mail/vcard > io.ox/mail//vcard
 ui/mail/replyTo > io.ox/mail//showReplyTo
+modules/mail/linewrap > io.ox/mail//lineWrapAfter
 
 # CalDAV
 modules/caldav/active > io.ox/caldav//active

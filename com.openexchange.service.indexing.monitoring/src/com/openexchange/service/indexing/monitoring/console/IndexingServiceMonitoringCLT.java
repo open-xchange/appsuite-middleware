@@ -88,8 +88,9 @@ public class IndexingServiceMonitoringCLT {
         Options options = new Options();
         options.addOption(createOption("h", "help", false, "Prints a help text.", false));
         options.addOption(createOption("r", "running", false, "Lists only jobs that are currently running on this node.", false));
-        options.addOption(createOption("s", "scheduled", false, "Lists only all cluster-wide scheduled jobs.", false));
-        options.addOption(createOption("d", "details", false, "Does not only list the numbers of jobs but also the job names.", false));
+        options.addOption(createOption("w", "waiting", false, "Lists all locally stored jobs that are waiting to get fired.", false));
+        options.addOption(createOption("s", "stored", false, "Lists only all cluster-wide stored jobs.", false));
+        options.addOption(createOption("d", "details", false, "Does not only print the numbers of jobs but also the job names.", false));
         CommandLineParser parser = new PosixParser();
         JMXConnector jmxConnector = null;
         try {
@@ -99,24 +100,24 @@ public class IndexingServiceMonitoringCLT {
                 return 0;
             }
 
+            boolean showDetails = cmd.hasOption('d');
+            boolean listRunning = cmd.hasOption('r');
+            boolean listWaiting = cmd.hasOption('w');
+            boolean listStored = cmd.hasOption('s');
+            if (!listRunning && !listWaiting && !listStored) {
+                listRunning = true;
+                listWaiting = true;
+                listStored = true;
+            }
+            
             JMXServiceURL url = new JMXServiceURL(JMX_URL);
             jmxConnector = JMXConnectorFactory.connect(url, null);
             MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
             JobMonitoringMBean proxy = indexingServiceMBeanProxy(mbsc);
             StringBuilder sb = new StringBuilder();
-            if (cmd.hasOption('d')) {
-                List<String> storedJobs = null;
-                Map<String, String> runningJobs = null;
-                if (cmd.hasOption('s')) {
-                    storedJobs = proxy.getStoredJobInfos();
-                } else if (cmd.hasOption('r')) {
-                    runningJobs = proxy.getRunningJobs();
-                } else {
-                    storedJobs = proxy.getStoredJobInfos();
-                    runningJobs = proxy.getRunningJobs();
-                }
-                
-                if (storedJobs != null) {
+            if (showDetails) {
+                if (listStored) {
+                    List<String> storedJobs = proxy.getStoredJobInfos();
                     sb.append("All scheduled jobs: ").append(storedJobs.size()).append('\n');
                     for (String job : storedJobs) {
                         sb.append("    ").append(job).append('\n');
@@ -124,30 +125,33 @@ public class IndexingServiceMonitoringCLT {
                     sb.append('\n');
                 }
                 
-                if (runningJobs != null) {
+                if (listRunning) {
+                    Map<String, String> runningJobs = proxy.getRunningJobs();
                     sb.append("Currently running jobs on this node: ").append(runningJobs.size()).append('\n');
                     for (String job : runningJobs.keySet()) {
                         sb.append("    ").append(job).append('\n');
                     }
+                    sb.append('\n');
+                }
+                
+                if (listWaiting) {
+                    List<String> triggers = proxy.getLocalTriggers();
+                    sb.append("Locally waiting jobs: ").append(triggers.size()).append('\n');
+                    for (String trigger : triggers) {
+                        sb.append("    ").append(trigger).append('\n');
+                    }
                 }
             } else {
-                int storedJobs = -1;
-                int runningJobs = -1;
-                if (cmd.hasOption('s')) {
-                    storedJobs = proxy.countStoredJobInfos();
-                } else if (cmd.hasOption('r')) {
-                    runningJobs = proxy.countRunningJobs();
-                } else {
-                    storedJobs = proxy.countStoredJobInfos();
-                    runningJobs = proxy.countRunningJobs();
+                if (listStored) {
+                    sb.append("All scheduled jobs: ").append(proxy.countStoredJobInfos()).append('\n');
+                } 
+                
+                if (listRunning) {
+                    sb.append("Currently running jobs on this node: ").append(proxy.countRunningJobs()).append('\n');
                 }
                 
-                if (storedJobs >= 0) {
-                    sb.append("All scheduled jobs: ").append(storedJobs).append('\n');
-                }
-                
-                if (runningJobs >= 0) {
-                    sb.append("Currently running jobs on this node: ").append(runningJobs).append('\n');
+                if (listWaiting) {
+                    sb.append("Locally waiting jobs: ").append(proxy.countLocalTriggers()).append('\n');
                 }
             }
             
@@ -190,7 +194,7 @@ public class IndexingServiceMonitoringCLT {
 
     private static void printHelp(Options options) {
         HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp("listindexingjobs", "Lists all scheduled indexing jobs and the ones that are currently running on this node.", options, null, false);
+        formatter.printHelp("listindexingjobs", "Lists all scheduled indexing jobs and the ones that are stored and currently running on this node.", options, null, false);
     }
 
     private static Option createOption(String shortArg, String longArg, boolean hasArg, String description, boolean required) {

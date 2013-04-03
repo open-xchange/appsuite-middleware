@@ -9656,6 +9656,16 @@ msgstr ""
 msgid "Invalid host name: %1$s"
 msgstr ""
 
+#. Could not connect to mail server "%1$s" for login %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:123
+msgid "Could not connect to mail server \"%1$s\" for login %2$s"
+msgstr ""
+
+#. Could not connect to transport server "%1$s" for login %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:126
+msgid "Could not connect to transport server \"%1$s\" for login %2$s"
+msgstr ""
+
 #. *
 #. * SQL Problem: "%1$s".
 #.

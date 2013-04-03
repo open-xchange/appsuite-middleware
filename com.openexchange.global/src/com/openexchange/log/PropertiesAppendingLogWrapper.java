@@ -87,7 +87,7 @@ public class PropertiesAppendingLogWrapper implements Log, PropertiesAppender {
         enabled = LogProperties.isEnabled();
         lineSeparator = System.getProperty("line.separator");
         this.delegate = delegate;
-        delegateAppending = false; // ((delegate instanceof com.openexchange.exception.Log) || (delegate instanceof com.openexchange.log.Log));
+        delegateAppending = ((delegate instanceof com.openexchange.exception.Log) || (delegate instanceof com.openexchange.log.Log));
     }
 
     @Override
@@ -201,9 +201,6 @@ public class PropertiesAppendingLogWrapper implements Log, PropertiesAppender {
      * @return The message with properties appended
      */
     protected Object innerAppendProperties(final Object message, final LogLevel logLevel) {
-        if (!enabled) {
-            return message;
-        }
         /*
          * Prepend properties
          */
@@ -240,10 +237,16 @@ public class PropertiesAppendingLogWrapper implements Log, PropertiesAppender {
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256);
         if (!isEmpty) {
             final String lineSeparator = this.lineSeparator;
+            boolean first = true;
             for (final Entry<String, String> entry : sorted.entrySet()) {
-                sb.append(lineSeparator).append(entry.getKey()).append('=').append(entry.getValue());
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(lineSeparator);
+                }
+                sb.append(entry.getKey()).append('=').append(entry.getValue());
             }
-            sb.deleteCharAt(0).append(lineSeparator).append(lineSeparator);
+            sb.append(lineSeparator).append(lineSeparator);
         }
         sb.append(message);
         return sb.toString();
@@ -293,10 +296,10 @@ public class PropertiesAppendingLogWrapper implements Log, PropertiesAppender {
     private static final class PropertiesAppendingMessage implements PropertiesAppender {
 
         final Object message;
-        final PropertiesAppender appender;
+        final PropertiesAppendingLogWrapper appender;
         final LogLevel logLevel;
 
-        PropertiesAppendingMessage(Object message, final LogLevel logLevel, PropertiesAppender appender) {
+        PropertiesAppendingMessage(final Object message, final LogLevel logLevel, final PropertiesAppendingLogWrapper appender) {
             super();
             this.message = message;
             this.appender = appender;
@@ -309,12 +312,12 @@ public class PropertiesAppendingLogWrapper implements Log, PropertiesAppender {
         }
 
         @Override
-        public Object appendProperties(Object message, LogLevel logLevel) {
-            return appender.appendProperties(message, logLevel);
+        public Object appendProperties(final Object message, final LogLevel logLevel) {
+            return appender.innerAppendProperties(message, logLevel);
         }
 
         @Override
-        public Set<Name> getPropertiesFor(LogLevel logLevel) {
+        public Set<Name> getPropertiesFor(final LogLevel logLevel) {
             return appender.getPropertiesFor(logLevel);
         }
     } // End of PropertiesAppendingMessage

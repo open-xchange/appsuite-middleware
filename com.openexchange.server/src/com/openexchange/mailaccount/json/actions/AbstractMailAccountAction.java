@@ -64,6 +64,7 @@ import org.json.JSONValue;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderStorage;
@@ -80,6 +81,7 @@ import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
@@ -325,10 +327,11 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * 
      * @param accountDescription The mail account description
      * @param session The session providing needed user information
+     * @param warnings 
      * @return The appropriate {@link MailAccess} instance
      * @throws OXException If appropriate {@link MailAccess} instance cannot be determined
      */
-    protected static MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(final MailAccountDescription accountDescription, final ServerSession session) throws OXException {
+    protected static MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws OXException {
         final String mailServerURL = accountDescription.generateMailServerURL();
         // Get the appropriate mail provider by mail server URL
         final MailProvider mailProvider = MailProviderRegistry.getMailProviderByURL(mailServerURL);
@@ -340,10 +343,11 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         }
         // Set marker
         session.setParameter("mail-account.request", "validate");
+        MailConfig mailConfig = null;
         try {
             // Create a mail access instance
             final MailAccess<?, ?> mailAccess = mailProvider.createNewMailAccess(session);
-            final MailConfig mailConfig = mailAccess.getMailConfig();
+            mailConfig = mailAccess.getMailConfig();
             // Set login and password
             mailConfig.setLogin(accountDescription.getLogin());
             mailConfig.setPassword(accountDescription.getPassword());
@@ -361,10 +365,24 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
             mailConfig.setSecure(accountDescription.isMailSecure());
             mailAccess.setCacheable(false);
             return mailAccess;
+        } catch (final OXException e) {
+            if (null != mailConfig) {
+                Throwable cause = e.getCause();
+                while ((null != cause) && (cause instanceof OXException)) {
+                    cause = cause.getCause();
+                }
+                if (null != cause) {
+                    warnings.add(MailAccountExceptionCodes.VALIDATE_FAILED_TRANSPORT.create(cause, mailConfig.getServer(), mailConfig.getLogin()));
+                }
+            } else {
+                e.setCategory(Category.CATEGORY_WARNING);
+                warnings.add(e);
+            }
         } finally {
             // Unset marker
             session.setParameter("mail-account.request", null);
         }
+        return null;
     }
 
     /**
