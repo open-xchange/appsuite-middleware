@@ -232,13 +232,17 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         "application/x-pdf")));
 
     private String getContentType(final IFileHolder fileHolder, final ContentTypeChecker checker) {
-        String contentType = getLowerCaseBaseType(fileHolder.getContentType());
+        String contentType = sanitizeContentType(getLowerCaseBaseType(fileHolder.getContentType()));
         if (isEmpty(contentType) || INVALIDS.contains(contentType) || (null != checker && !checker.isValid(contentType))) {
             // Determine Content-Type by file name
             contentType = MimeType2ExtMap.getContentType(fileHolder.getName());
         }
-        if (contentType == null) {
-            return "application/octet-stream";
+        return contentType == null ? "application/octet-stream" : contentType;
+    }
+
+    private String sanitizeContentType(final String contentType) {
+        if (null == contentType) {
+            return null;
         }
         try {
             return new ContentType(contentType).toString();
