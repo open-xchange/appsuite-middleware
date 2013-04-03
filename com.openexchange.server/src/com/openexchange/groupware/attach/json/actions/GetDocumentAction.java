@@ -232,7 +232,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
     }
 
     /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
+    private boolean isEmpty(final String string) {
         if (null == string) {
             return true;
         }
@@ -244,7 +244,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
         return isWhitespace;
     }
 
-    private static String toLowerCase(final CharSequence chars) {
+    private String toLowerCase(final CharSequence chars) {
         if (null == chars) {
             return null;
         }
