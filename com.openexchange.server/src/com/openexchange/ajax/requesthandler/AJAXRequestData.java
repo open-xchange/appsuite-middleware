@@ -864,6 +864,8 @@ public class AJAXRequestData {
 
     /**
      * Whether this request has a secure connection.
+     * <p>
+     * <b>Note</b>: This flag should already consider setting of <tt>'com.openexchange.forceHTTPS'</tt> property
      * 
      * @return <code>true</code> if this request has a secure connection; otherwise <code>false</code>
      */

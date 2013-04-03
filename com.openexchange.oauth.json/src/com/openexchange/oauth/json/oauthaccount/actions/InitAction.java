@@ -54,7 +54,6 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -200,14 +199,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
          * Compose call-back URL
          */
         final StringBuilder callbackUrlBuilder = new StringBuilder(256);
-        {
-            final HttpServletRequest servletRequest = request.optHttpServletRequest();
-            if (null == servletRequest) {
-                callbackUrlBuilder.append(request.isSecure() ? "https://" : "http://");
-            } else {
-                callbackUrlBuilder.append(com.openexchange.tools.servlet.http.Tools.getProtocol(servletRequest));
-            }
-        }
+        callbackUrlBuilder.append(request.isSecure() ? "https://" : "http://");
         callbackUrlBuilder.append(request.getHostname());
         callbackUrlBuilder.append(PREFIX.get().getPrefix()).append("oauth/accounts");
         callbackUrlBuilder.append("?action=reauthorize");
