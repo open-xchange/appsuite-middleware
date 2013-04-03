@@ -89,6 +89,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.ContactService;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.dataretention.RetentionData;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -2533,6 +2534,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          */
         initConnection(accountId);
         final MailTransport transport = MailTransport.getInstance(session, accountId);
+        boolean mailSent = false;
         try {
             /*
              * Send mail
@@ -2549,6 +2551,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             } else {
                 sentMail = transport.sendMailMessage(composedMail, type);
             }
+            mailSent = true;
             /*
              * Email successfully sent, trigger data retention
              */
@@ -2610,6 +2613,21 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 return new MailPath(accountId, sentMail.getFolder(), sentMail.getMailId()).toString();
             }
             return append2SentFolder(sentMail).toString();
+        } catch (final OXException e) {
+            if (!mailSent) {
+                throw e;
+            }
+            e.setCategory(Category.CATEGORY_WARNING);
+            warnings.add(e);
+            return null;
+        } catch (final RuntimeException e) {
+            final OXException oxe = MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+            if (!mailSent) {
+                throw oxe;
+            }
+            oxe.setCategory(Category.CATEGORY_WARNING);
+            warnings.add(oxe);
+            return null;
         } finally {
             transport.close();
         }

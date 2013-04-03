@@ -4867,7 +4867,17 @@ public class Mail extends PermissionServlet implements UploadListener {
                         }
                     }
                     if (msgIdentifier == null) {
-                        throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();
+                        warnings.addAll(mailServletInterface.getWarnings());
+                        if (warnings.isEmpty()) {
+                            throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();                            
+                        }
+                        final Response response = new Response(session);
+                        response.setData(JSONObject.NULL);
+                        response.addWarnings(warnings);
+                        final String jsResponse = substituteJS(ResponseWriter.getJSON(response).toString(), actionStr);
+                        writer.write(jsResponse);
+                        writer.flush();
+                        return true;
                     }
                     /*
                      * Create JSON response object

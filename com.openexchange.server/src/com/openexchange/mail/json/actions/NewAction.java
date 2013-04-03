@@ -192,6 +192,7 @@ public final class NewAction extends AbstractMailAction {
                 if (msgIdentifier == null) {
                     throw MailExceptionCode.DRAFT_FAILED_UNKNOWN.create();
                 }
+                warnings.addAll(mailInterface.getWarnings());
             } else {
                 /*
                  * ... and send message
@@ -209,6 +210,7 @@ public final class NewAction extends AbstractMailAction {
                 for (int i = 1; i < composedMails.length; i++) {
                     mailInterface.sendMessage(composedMails[i], sendType, accountId);
                 }
+                warnings.addAll(mailInterface.getWarnings());
                 /*
                  * Trigger contact collector
                  */
@@ -227,7 +229,12 @@ public final class NewAction extends AbstractMailAction {
             }
         }
         if (msgIdentifier == null) {
-            throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();
+            if (warnings.isEmpty()) {
+                throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();                            
+            }
+            final AJAXRequestResult result = new AJAXRequestResult(JSONObject.NULL, "json");
+            result.addWarnings(warnings);
+            return result;
         }
         /*
          * Create JSON response object
