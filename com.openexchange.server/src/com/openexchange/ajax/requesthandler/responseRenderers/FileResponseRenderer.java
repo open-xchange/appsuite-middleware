@@ -254,7 +254,8 @@ public class FileResponseRenderer implements ResponseRenderer {
         /*
          * check input
          */
-        if (null == this.scaler || false == isImage(file)) {
+        final ImageTransformationService scaler = this.scaler;
+        if (null == scaler || false == isImage(file)) {
             return file;
         }
         /*
