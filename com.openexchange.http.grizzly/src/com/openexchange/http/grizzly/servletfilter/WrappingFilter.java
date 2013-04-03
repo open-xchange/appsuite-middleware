@@ -70,7 +70,7 @@ import com.openexchange.log.Props;
 
 /**
  * {@link WrappingFilter} - Wrap the Request in {@link HttpServletResponseWrapper} and the Response in {@link HttpServletResponseWrapper}
- * and creates a new HttpSession and do various tasks to achieve feature parity with the ajp based implementation. 
+ * and creates a new HttpSession and do various tasks to achieve feature parity with the ajp based implementation.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -93,7 +93,7 @@ public class WrappingFilter implements Filter {
     private int httpsPort;
 
     private boolean isConsiderXForwards = false;
-    
+
     private String echoHeader;
 
     @Override
@@ -115,10 +115,10 @@ public class WrappingFilter implements Filter {
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
         HttpServletRequestWrapper httpServletRequestWrapper = null;
         HttpServletResponseWrapper httpServletResponseWrapper = null;
-        
+
         // Inspect echoHeader and when present copy it to Response
         String echoHeaderValue = httpServletRequest.getHeader(echoHeader);
-        if(echoHeaderValue != null) {
+        if (echoHeaderValue != null) {
             httpServletResponse.setHeader(echoHeader, echoHeaderValue);
         }
 
@@ -128,8 +128,9 @@ public class WrappingFilter implements Filter {
             String remoteIP = IPTools.getRemoteIP(forHeaderValue, knownProxies);
 
             if (remoteIP.isEmpty()) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Could not detect a valid remote ip in [" + forHeaderValue + "], falling back to default");
+                if (LOG.isDebugEnabled()) {
+                    forHeaderValue = forHeaderValue == null ? "" : forHeaderValue;
+                    LOG.debug("Could not detect a valid remote ip in " + forHeader + ": [" + forHeaderValue + "], falling back to default");
                 }
                 httpServletRequestWrapper = new HttpServletRequestWrapper(httpServletRequest.getRemoteAddr(), httpServletRequest);
             } else {
@@ -160,7 +161,7 @@ public class WrappingFilter implements Filter {
             logProperties.put(LogProperties.Name.GRIZZLY_THREAD_NAME, Thread.currentThread().getName());
             logProperties.put(LogProperties.Name.GRIZZLY_SERVER_NAME, httpServletRequest.getServerName());
         }
-        
+
         chain.doFilter(httpServletRequestWrapper, httpServletResponseWrapper);
     }
 
