@@ -232,8 +232,14 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         "application/x-pdf")));
 
     private String getContentType(final IFileHolder fileHolder, final ContentTypeChecker checker) {
-        String contentType = sanitizeContentType(getLowerCaseBaseType(fileHolder.getContentType()));
-        if (isEmpty(contentType) || INVALIDS.contains(contentType) || (null != checker && !checker.isValid(contentType))) {
+        String contentType = fileHolder.getContentType();
+        if (isEmpty(contentType)) {
+            // Determine Content-Type by file name
+            return MimeType2ExtMap.getContentType(fileHolder.getName());
+        }
+        // Cut to base type & sanitize
+        contentType = sanitizeContentType(getLowerCaseBaseType(contentType));
+        if (INVALIDS.contains(contentType) || (null != checker && !checker.isValid(contentType))) {
             // Determine Content-Type by file name
             contentType = MimeType2ExtMap.getContentType(fileHolder.getName());
         }
