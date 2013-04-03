@@ -66,6 +66,7 @@ import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.preview.ContentTypeChecker;
 import com.openexchange.preview.PreviewDocument;
@@ -232,11 +233,18 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
 
     private String getContentType(final IFileHolder fileHolder, final ContentTypeChecker checker) {
         String contentType = getLowerCaseBaseType(fileHolder.getContentType());
-        if (isEmpty(contentType) || INVALIDS.contains(contentType) || (null != checker && checker.isValid(contentType))) {
+        if (isEmpty(contentType) || INVALIDS.contains(contentType) || (null != checker && !checker.isValid(contentType))) {
             // Determine Content-Type by file name
             contentType = MimeType2ExtMap.getContentType(fileHolder.getName());
         }
-        return contentType == null ? "application/octet-stream" : contentType;
+        if (contentType == null) {
+            return "application/octet-stream";
+        }
+        try {
+            return new ContentType(contentType).toString();
+        } catch (final OXException e) {
+            return contentType;
+        }
     }
 
     private String getLowerCaseBaseType(final String contentType) {
