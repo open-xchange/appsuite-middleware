@@ -62,11 +62,13 @@ public final class RedirectRequest implements AJAXRequest<RedirectResponse> {
 
     private final String referer;
     private final String location;
+    private final boolean failOnNonRedirect;
 
-    public RedirectRequest(String referer, String location) {
+    public RedirectRequest(String referer, String location, boolean failOnNonRedirect) {
         super();
         this.referer = referer;
         this.location = location;
+        this.failOnNonRedirect = failOnNonRedirect;
     }
 
     @Override
@@ -88,7 +90,7 @@ public final class RedirectRequest implements AJAXRequest<RedirectResponse> {
 
     @Override
     public RedirectParser getParser() {
-        return new RedirectParser();
+        return new RedirectParser(failOnNonRedirect);
     }
 
     @Override

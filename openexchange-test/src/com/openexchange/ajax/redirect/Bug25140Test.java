@@ -83,7 +83,7 @@ public final class Bug25140Test {
 
     @Test
     public void testForArbitraryURLRedirect() throws OXException, IOException, JSONException {
-        RedirectRequest request = new RedirectRequest("%0d/", "www.google.de");
+        RedirectRequest request = new RedirectRequest("%0d/", "www.google.de", false);
         RedirectResponse response = client.execute(request);
         Assert.assertThat("", "//www.google.de", not(equalTo(response.getLocation())));
     }
