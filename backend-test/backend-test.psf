@@ -20,7 +20,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,com.openexchange.global"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,com.openexchange.http.deferrer"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,com.openexchange.i18n"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,com.openexchange.index.solr"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,com.openexchange.mail.filter"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,com.openexchange.messaging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,com.openexchange.messaging.generic"/>
@@ -33,7 +32,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,com.openexchange.publish.online.infostore"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,com.openexchange.quartz"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,com.openexchange.server"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,com.openexchange.service.indexing.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,com.openexchange.sessiond"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,com.openexchange.subscribe"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.0,com.openexchange.subscribe.crawler"/>
