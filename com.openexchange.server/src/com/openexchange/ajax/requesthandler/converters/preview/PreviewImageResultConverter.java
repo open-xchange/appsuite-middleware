@@ -143,9 +143,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             // No cached preview available
             final Object resultObject = result.getResultObject();
             if (!(resultObject instanceof IFileHolder)) {
-                throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(
-                    IFileHolder.class.getSimpleName(),
-                    null == resultObject ? "null" : resultObject.getClass().getSimpleName());
+                throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
             }
             final IFileHolder fileHolder = (IFileHolder) resultObject;
 

@@ -185,7 +185,7 @@ public class AJAXRequestData {
     private String prefix;
 
     /** The optional <code>HttpServletResponse</code> instance */
-    private HttpServletResponse resp;
+    private HttpServletResponse httpServletResponse;
 
     /**
      * Initializes a new {@link AJAXRequestData}.
@@ -294,7 +294,7 @@ public class AJAXRequestData {
      * @return This request data with <code>HttpServletResponse</code> instance applied
      */
     public AJAXRequestData setHttpServletResponse(final HttpServletResponse resp) {
-        this.resp = resp;
+        this.httpServletResponse = resp;
         return this;
     }
 
@@ -348,8 +348,8 @@ public class AJAXRequestData {
      * @see #optWriter()
      */
     public OutputStream optOutputStream() throws IOException {
-        if (null != resp) {
-            return resp.getOutputStream();
+        if (null != httpServletResponse) {
+            return httpServletResponse.getOutputStream();
         }
         return null;
     }
@@ -372,8 +372,8 @@ public class AJAXRequestData {
      * @see #setCharacterEncoding
      */
     public PrintWriter optWriter() throws IOException {
-        if (null != resp) {
-            return resp.getWriter();
+        if (null != httpServletResponse) {
+            return httpServletResponse.getWriter();
         }
         return null;
     }
@@ -389,7 +389,7 @@ public class AJAXRequestData {
      * @return <code>true</code> if set; otherwise <code>false</code>
      */
     public boolean setResponseCharacterEncoding(final String charset) {
-        final HttpServletResponse resp = this.resp;
+        final HttpServletResponse resp = this.httpServletResponse;
         if (null != resp) {
             resp.setCharacterEncoding(charset);
             return true;
@@ -407,7 +407,7 @@ public class AJAXRequestData {
      * @return <code>true</code> if set; otherwise <code>false</code>
      */
     public boolean setResponseHeader(final String name, final String value) {
-        final HttpServletResponse resp = this.resp;
+        final HttpServletResponse resp = this.httpServletResponse;
         if (null != resp) {
             resp.setHeader(name, value);
             return true;
@@ -436,7 +436,7 @@ public class AJAXRequestData {
      * @return <code>true</code> if set; otherwise <code>false</code>
      */
     public boolean setResponseETag(final String eTag, final Date expires) {
-        final HttpServletResponse resp = this.resp;
+        final HttpServletResponse resp = this.httpServletResponse;
         if (null != resp) {
             Tools.setETag(eTag, expires, resp);
             return true;
@@ -476,7 +476,7 @@ public class AJAXRequestData {
      * 
      * @return The HTTP Servlet request or <code>null</code> if absent
      */
-    public HttpServletRequest getHttpServletRequest() {
+    public HttpServletRequest optHttpServletRequest() {
         return httpServletRequest;
     }
 
