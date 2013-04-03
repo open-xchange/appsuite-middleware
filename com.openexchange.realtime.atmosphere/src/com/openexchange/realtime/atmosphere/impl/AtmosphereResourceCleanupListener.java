@@ -79,16 +79,24 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
     private final ID fullID;
 
     /*
-     * Map general ids (user@context) to full ids (ox://user@context/resource.browserx.taby) This is used for lookups via isConnected
+     * Map general ids (user@context) to concrete ids (ox://user@context/resource.browserx.taby) This is used for lookups via isConnected
      */
-    private final IDMap<Set<ID>> generalToFullIDMap;
+    private final IDMap<Set<ID>> generalToConcreteIDMap;
 
     /*
-     * Map full client IDs to the AtmosphereResource that represents their connection to the server
+     * Map concrete client IDs to the AtmosphereResource that represents their connection to the server
      */
     private final IDMap<AtmosphereResource> fullIDToResourceMap;
 
+    /*
+     * Stored Stanzas for a concreteID
+     */
     private ConcurrentHashMap<ID, List<Stanza>> outboxes;
+
+    /*
+     * Resource Reaper
+     */
+    private AtmosphereResourceReaper atmosphereResourceReaper;
 
     /**
      * Initializes a new {@link AtmosphereResourceCleanupListener}.
@@ -98,14 +106,15 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
      * @param generalToFullIDMap Reference to the map of the RTAtmosphereHandler that tracks full client IDs to the AtmosphereResource that
      *            represents their connection to the server
      * @param fullIDToResourceMap Reference to the map of the RTAtmosphereHandler that tracks general ids to full ids.
-     * @param outboxes 
+     * @param outboxes
      */
-    public AtmosphereResourceCleanupListener(AtmosphereResource atmosphereResource, ID fullID, IDMap<Set<ID>> generalToFullIDMap, IDMap<AtmosphereResource> fullIDToResourceMap, ConcurrentHashMap<ID,List<Stanza>> outboxes) {
+    public AtmosphereResourceCleanupListener(AtmosphereResource atmosphereResource, ID fullID, IDMap<Set<ID>> generalToFullIDMap, IDMap<AtmosphereResource> fullIDToResourceMap, ConcurrentHashMap<ID, List<Stanza>> outboxes, AtmosphereResourceReaper atmosphereResourceReaper) {
         this.atmosphereResource = atmosphereResource;
         this.fullID = fullID;
-        this.generalToFullIDMap = generalToFullIDMap;
+        this.generalToConcreteIDMap = generalToFullIDMap;
         this.fullIDToResourceMap = fullIDToResourceMap;
         this.outboxes = outboxes;
+        this.atmosphereResourceReaper = atmosphereResourceReaper;
     }
 
     @Override
@@ -117,65 +126,41 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
 
     @Override
     public void onResume(AtmosphereResourceEvent event) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Resuming: " + fullID + " and AtmosphereResource " + atmosphereResource.uuid());
-        }
+        // if (LOG.isDebugEnabled()) {
+        // LOG.debug("Resuming: " + fullID + " and AtmosphereResource " + atmosphereResource.uuid());
+        // }
     }
 
     @Override
     public void onDisconnect(AtmosphereResourceEvent event) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Disconnecting: " + fullID + " and AtmosphereResource " + atmosphereResource.uuid());
-        }
         atmosphereResource.removeEventListener(this);
-        
         AtmosphereResource activeResource = fullIDToResourceMap.get(fullID);
         if (!activeResource.equals(atmosphereResource)) {
             return; // Other resource is active here. No need to clean up just yet.
+        } else {
+            atmosphereResourceReaper.add(new Moribund(fullID, atmosphereResource, generalToConcreteIDMap, fullIDToResourceMap, outboxes));
         }
-    
-        // remove single full id from resourceDirectory
-        ResourceDirectory resourceDirectory = AtmosphereServiceRegistry.getInstance().getService(ResourceDirectory.class);
-        try {
-            resourceDirectory.remove(fullID);
-        } catch (OXException e) {
-            LOG.error("Could not unregister resource with ID: " + fullID, e);
-        }
-        
-        // remove fullID from general -> fullID mapping
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Removing from generalID -> conreteID map: " + fullID);
-        }
-        Set<ID> fullIDs = generalToFullIDMap.get(fullID.toGeneralForm());
-        fullIDs.remove(fullID);
-        
-        // remove fullID -> Resource mapping
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Removing from generalID -> conreteID map: " + fullID);
-        }
-        fullIDToResourceMap.remove(fullID);
-        outboxes.remove(fullID);
     }
 
     @Override
     public void onBroadcast(AtmosphereResourceEvent event) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Broadcasting: " + fullID + " and AtmosphereResource " + atmosphereResource.uuid());
-        }
+        // if (LOG.isDebugEnabled()) {
+        // LOG.debug("Broadcasting: " + fullID + " and AtmosphereResource " + atmosphereResource.uuid());
+        // }
     }
 
     @Override
     public void onThrowable(AtmosphereResourceEvent event) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Throwing: " + fullID + " and AtmosphereResource " + atmosphereResource.uuid(), event.throwable());
-        }
+        // if (LOG.isDebugEnabled()) {
+        // LOG.debug("Throwing: " + fullID + " and AtmosphereResource " + atmosphereResource.uuid(), event.throwable());
+        // }
     }
 
     @Override
     public void onPreSuspend(AtmosphereResourceEvent event) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Pre Suspending: " + fullID + " and AtmosphereResource " + atmosphereResource.uuid());
-        }
+        // if (LOG.isDebugEnabled()) {
+        // LOG.debug("Pre Suspending: " + fullID + " and AtmosphereResource " + atmosphereResource.uuid());
+        // }
     }
 
 }

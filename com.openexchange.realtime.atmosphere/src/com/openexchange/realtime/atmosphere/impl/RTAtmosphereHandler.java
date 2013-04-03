@@ -112,6 +112,11 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      */
     private final ConcurrentHashMap<ID, List<Stanza>> outboxes;
     
+    /*
+     * Give resources time to linger before finally cleaning up
+     */
+    AtmosphereResourceReaper atmosphereResourceReaper = new AtmosphereResourceReaper();
+    
 
     /**
      * Initializes a new {@link RTAtmosphereHandler}.
@@ -157,7 +162,8 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         constructedId,
                         generalToConcreteIDMap,
                         concreteIDToResourceMap,
-                        outboxes));
+                        outboxes,
+                        atmosphereResourceReaper));
                     // finally suspend the resource until data is available for the clients and resource gets resumed after send
                     drainOutbox(constructedId);
                 } else {
@@ -212,6 +218,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @throws OXException
      */
     private void trackConnectedUser(ID concreteID, AtmosphereResource atmosphereResource) throws OXException {
+        /* if the id was marked for removal via the reaper try to remove it from the reaper */
+        atmosphereResourceReaper.remove(concreteID);
+        
         // Adds the concreteID to the generalID -> concreteID map
         ID generalID = concreteID.toGeneralForm();
         if (generalToConcreteIDMap.containsKey(generalID)) {
