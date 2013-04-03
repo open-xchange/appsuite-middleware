@@ -59,8 +59,6 @@ import java.security.SecureRandom;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * This ssl socket factory creates a ssl context that trusts all certificates and uses then this context to create a ssl socket factory that
@@ -69,8 +67,6 @@ import org.apache.commons.logging.LogFactory;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class TrustAllSSLSocketFactory extends SSLSocketFactory {
-
-    private static final Log LOG = LogFactory.getLog(TrustAllSSLSocketFactory.class);
 
     /**
      * This factory will trust all certificates.
@@ -87,10 +83,8 @@ public final class TrustAllSSLSocketFactory extends SSLSocketFactory {
             context.init(null, new TrustManager[] { new TrustAllManager() }, new SecureRandom());
             factory = context.getSocketFactory();
         } catch (final NoSuchAlgorithmException e) {
-            LOG.error(e.getMessage(), e);
             throw new IllegalStateException(e.getMessage(), e);
         } catch (final KeyManagementException e) {
-            LOG.error(e.getMessage(), e);
             throw new IllegalStateException(e.getMessage(), e);
         }
     }

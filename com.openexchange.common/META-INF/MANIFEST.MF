@@ -6,7 +6,8 @@ Bundle-Version: 7.0.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: javax.activation
-Import-Package: javax.activation,
+Import-Package: com.openexchange.tools.ssl,
+ javax.activation,
  javax.crypto,
  javax.crypto.interfaces,
  javax.crypto.spec,
@@ -101,7 +102,6 @@ Export-Package: com.googlecode.concurrentlinkedhashmap,
  com.mysql.jdbc;version="5.1.23",
  com.openexchange.httpclient.ssl,
  com.openexchange.l10n,
- com.openexchange.tools.ssl,
  com.planetj.math.rabinhash,
  com.steadystate.css.dom,
  com.steadystate.css.parser,
