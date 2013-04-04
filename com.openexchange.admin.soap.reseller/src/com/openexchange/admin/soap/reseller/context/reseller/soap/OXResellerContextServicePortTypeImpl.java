@@ -15,9 +15,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.xml.datatype.XMLGregorianCalendar;
+import com.openexchange.admin.reseller.rmi.extensions.OXContextExtensionImpl;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -26,12 +28,13 @@ import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.soap.reseller.context.reseller.rmi.dataobjects.ResellerAdmin;
+import com.openexchange.admin.soap.reseller.context.reseller.rmi.dataobjects.Restriction;
+import com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext;
 import com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials;
 import com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Filestore;
-import com.openexchange.admin.soap.reseller.context.soap.dataobjects.Context;
 import com.openexchange.admin.soap.reseller.context.soap.dataobjects.Database;
 import com.openexchange.admin.soap.reseller.context.soap.dataobjects.Entry;
-import com.openexchange.admin.soap.reseller.context.soap.dataobjects.Group;
 import com.openexchange.admin.soap.reseller.context.soap.dataobjects.SOAPMapEntry;
 import com.openexchange.admin.soap.reseller.context.soap.dataobjects.SOAPStringMap;
 import com.openexchange.admin.soap.reseller.context.soap.dataobjects.SOAPStringMapMap;
@@ -79,6 +82,8 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             throw new StorageException_Exception(e.getMessage(), e);
         } catch (final InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
+        } catch (DuplicateExtensionException e) {
+            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
         }
     }
 
@@ -99,6 +104,8 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             throw new InvalidDataException_Exception(e.getMessage(), e);
         } catch (final DatabaseUpdateException e) {
             throw new DatabaseUpdateException_Exception(e.getMessage(), e);
+        } catch (DuplicateExtensionException e) {
+            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
         }
     }
 
@@ -121,6 +128,8 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             throw new NoSuchReasonException_Exception(e.getMessage(), e);
         } catch (final OXContextException e) {
             throw new OXContextException_Exception(e.getMessage(), e);
+        } catch (DuplicateExtensionException e) {
+            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
         }
     }
 
@@ -163,6 +172,8 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             throw new StorageException_Exception(e.getMessage(), e);
         } catch (final InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
+        } catch (DuplicateExtensionException e) {
+            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
         }
     }
 
@@ -181,6 +192,8 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             throw new StorageException_Exception(e.getMessage(), e);
         } catch (final InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
+        } catch (DuplicateExtensionException e) {
+            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
         }
     }
 
@@ -199,6 +212,8 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             throw new StorageException_Exception(e.getMessage(), e);
         } catch (final InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
+        } catch (DuplicateExtensionException e) {
+            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
         }
     }
 
@@ -219,6 +234,8 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             throw new InvalidDataException_Exception(e.getMessage(), e);
         } catch (final DatabaseUpdateException e) {
             throw new DatabaseUpdateException_Exception(e.getMessage(), e);
+        } catch (DuplicateExtensionException e) {
+            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
         }
     }
 
@@ -237,6 +254,8 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             throw new StorageException_Exception(e.getMessage(), e);
         } catch (final InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
+        } catch (DuplicateExtensionException e) {
+            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
         }
     }
 
@@ -332,6 +351,8 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             throw new InvalidDataException_Exception(e.getMessage(), e);
         } catch (final ContextExistsException e) {
             throw new ContextExistsException_Exception(e.getMessage(), e);
+        } catch (DuplicateExtensionException e) {
+            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
         }
     }
 
@@ -350,6 +371,8 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             throw new InvalidDataException_Exception(e.getMessage(), e);
         } catch (final ContextExistsException e) {
             throw new ContextExistsException_Exception(e.getMessage(), e);
+        } catch (DuplicateExtensionException e) {
+            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
         }
     }
 
@@ -368,6 +391,8 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             throw new StorageException_Exception(e.getMessage(), e);
         } catch (final InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
+        } catch (DuplicateExtensionException e) {
+            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
         }
     }
 
@@ -386,6 +411,8 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             throw new InvalidDataException_Exception(e.getMessage(), e);
         } catch (final ContextExistsException e) {
             throw new ContextExistsException_Exception(e.getMessage(), e);
+        } catch (DuplicateExtensionException e) {
+            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
         }
     }
 
@@ -402,6 +429,8 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             throw new StorageException_Exception(e.getMessage(), e);
         } catch (final InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
+        } catch (DuplicateExtensionException e) {
+            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
         }
     }
 
@@ -452,6 +481,8 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             throw new StorageException_Exception(e.getMessage(), e);
         } catch (final InvalidDataException e) {
             throw new InvalidDataException_Exception(e.getMessage(), e);
+        } catch (DuplicateExtensionException e) {
+            throw new DuplicateExtensionException_Exception(e.getMessage(), e);
         }
     }
 
@@ -1094,59 +1125,29 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         return user;
     }
 
-    private static com.openexchange.admin.rmi.dataobjects.Group soap2Group(final Group soapGroup) {
-        if (null == soapGroup) {
-            return null;
-        }
-        final com.openexchange.admin.rmi.dataobjects.Group group = new com.openexchange.admin.rmi.dataobjects.Group();
-        final String displayname = soapGroup.getDisplayname();
-        if (null != displayname) {
-            group.setDisplayname(displayname);
-        }
-        final Integer id = soapGroup.getId();
-        if (null != id) {
-            group.setId(id);
-        }
-        final List<Integer> members = soapGroup.getMembers();
-        if (null != members) {
-            group.setMembers(members.toArray(new Integer[0]));
-        }
-        final String name = soapGroup.getName();
-        if (null != name) {
-            group.setName(name);
-        }
-        return group;
-    }
-
-    private static com.openexchange.admin.rmi.dataobjects.Context soap2Context(final Context soapContext) {
+    private static com.openexchange.admin.rmi.dataobjects.Context soap2Context(ResellerContext soapContext) throws DuplicateExtensionException {
         if (null == soapContext) {
             return null;
         }
-        final com.openexchange.admin.rmi.dataobjects.Context ret = new com.openexchange.admin.rmi.dataobjects.Context();
-
+        com.openexchange.admin.rmi.dataobjects.Context ret = new com.openexchange.admin.rmi.dataobjects.Context();
         Long lng = soapContext.getAverageSize();
         if (null != lng) {
             ret.setAverage_size(lng);
         }
-
-        final Boolean enabled = soapContext.isEnabled();
+        Boolean enabled = soapContext.isEnabled();
         if (null != enabled) {
             ret.setEnabled(enabled);
         }
-
-        final String s = soapContext.getFilestoreName();
+        String s = soapContext.getFilestoreName();
         if (null != s) {
             ret.setFilestore_name(s);
         }
-
         Integer itg = soapContext.getFilestoreId();
         if (null != itg) {
             ret.setFilestoreId(itg);
         }
-
         itg = soapContext.getId();
         ret.setId(itg);
-
         if (null != soapContext.getLoginMappings()) {
             for (String loginMapping : soapContext.getLoginMappings()) {
                 if (null != loginMapping) {
@@ -1154,36 +1155,48 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
                 }
             }
         }
-
         lng = soapContext.getMaxQuota();
         if (null != lng) {
             ret.setMaxQuota(lng);
         }
-
-        final String name = soapContext.getName();
+        String name = soapContext.getName();
         if (null != name) {
             ret.setName(name);
         }
-
-        final Long usedQuota = soapContext.getUsedQuota();
+        Long usedQuota = soapContext.getUsedQuota();
         if (null != usedQuota) {
             ret.setUsedQuota(usedQuota);
         }
-
-        final Database readDatabase = soapContext.getReadDatabase();
+        Database readDatabase = soapContext.getReadDatabase();
         if (null != readDatabase) {
             ret.setReadDatabase(soap2Database(readDatabase));
         }
-
-        final Database writeDatabase = soapContext.getWriteDatabase();
+        Database writeDatabase = soapContext.getWriteDatabase();
         if (null != writeDatabase) {
             ret.setWriteDatabase(soap2Database(writeDatabase));
         }
-
-        final SOAPStringMapMap userAttributes = soapContext.getUserAttributes();
+        SOAPStringMapMap userAttributes = soapContext.getUserAttributes();
         if (null != userAttributes) {
             ret.setUserAttributes(soap2MapMap(userAttributes));
         }
+        OXContextExtensionImpl ctxext = new OXContextExtensionImpl();
+        String customId = soapContext.getCustomid();
+        if (null != customId) {
+            ctxext.setCustomid(customId);
+        }
+        ResellerAdmin owner = soapContext.getOwner();
+        if (null != owner) {
+            ctxext.setOwner(soap2ResellerAdmin(owner));
+        }
+        List<Restriction> list = soapContext.getRestriction();
+        if (null != list) {
+            ctxext.setRestriction(soap2Restrictions(list));
+        }
+        Integer sid = soapContext.getSid();
+        if (null != sid) {
+            ctxext.setSid(sid.intValue());
+        }
+        ret.addExtension(ctxext);
         return ret;
     }
 
@@ -1524,6 +1537,14 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         soapContext.setUsedQuota(context.getUsedQuota());
         soapContext.setUserAttributes(mapmap2Soap(context.getUserAttributes()));
         soapContext.setWriteDatabase(database2Soap(context.getWriteDatabase()));
+
+        OXContextExtensionImpl oxext  = (OXContextExtensionImpl) context.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
+        soapContext.setExtensionError(oxext.getExtensionError());
+        soapContext.setCustomid(oxext.getCustomid());
+        soapContext.setOwner(resellerAdmin2Soap(oxext.getOwner()));
+        soapContext.setSid(Integer.valueOf(oxext.getSid()));
+        soapContext.setRestriction(restrictions2Soap(oxext.getRestriction()));
+
         return soapContext;
     }
 
@@ -1581,6 +1602,43 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         }
         soapMap.setEntries(entries);
         return soapMap;
+    }
+
+    private static ResellerAdmin resellerAdmin2Soap(final com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin resellerAdmin) {
+        if (null == resellerAdmin) {
+            return null;
+        }
+        final ResellerAdmin soapResellerAdmin = new ResellerAdmin();
+        soapResellerAdmin.setDisplayName(resellerAdmin.getDisplayname());
+        soapResellerAdmin.setId(resellerAdmin.getId());
+        soapResellerAdmin.setName(resellerAdmin.getName());
+        soapResellerAdmin.setParentId(resellerAdmin.getParentId());
+        soapResellerAdmin.setPassword(resellerAdmin.getPassword());
+        soapResellerAdmin.setPasswordMech(resellerAdmin.getPasswordMech());
+        soapResellerAdmin.setRestrictions(restrictions2Soap(resellerAdmin.getRestrictions()));
+        return soapResellerAdmin;
+    }
+
+    private static List<Restriction> restrictions2Soap(final com.openexchange.admin.reseller.rmi.dataobjects.Restriction[] restrictions) {
+        if (null == restrictions) {
+            return null;
+        }
+        final List<Restriction> soapRestrictions = new ArrayList<Restriction>(restrictions.length);
+        for (int i = 0; i < restrictions.length; i++) {
+            soapRestrictions.add(restriction2Soap(restrictions[i]));
+        }
+        return soapRestrictions;
+    }
+
+    private static Restriction restriction2Soap(final com.openexchange.admin.reseller.rmi.dataobjects.Restriction restriction) {
+        if (null == restriction) {
+            return null;
+        }
+        final Restriction soapRestriction = new Restriction();
+        soapRestriction.setId(restriction.getId());
+        soapRestriction.setName(restriction.getName());
+        soapRestriction.setValue(restriction.getValue());
+        return soapRestriction;
     }
 
     private static com.openexchange.admin.rmi.dataobjects.Database soap2Database(com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Database db) {
@@ -1669,6 +1727,73 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             ret.setUrl(tmp);
         }
         return ret;
+    }
+
+    private static com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin soap2ResellerAdmin(ResellerAdmin soapResellerAdmin) {
+        if (null == soapResellerAdmin) {
+            return null;
+        }
+        com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin resellerAdmin = new com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin();
+        String tmp = soapResellerAdmin.getDisplayName();
+        if (tmp != null) {
+            resellerAdmin.setDisplayname(tmp);
+        }
+        Integer i = soapResellerAdmin.getId();
+        if (i != null) {
+            resellerAdmin.setId(i);
+        }
+        tmp = soapResellerAdmin.getName();
+        if (tmp != null) {
+            resellerAdmin.setName(tmp);
+        }
+        i = soapResellerAdmin.getParentId();
+        if (i != null) {
+            resellerAdmin.setParentId(i);
+        }
+        tmp = soapResellerAdmin.getPassword();
+        if (tmp != null) {
+            resellerAdmin.setPassword(tmp);
+        }
+        tmp = soapResellerAdmin.getPasswordMech();
+        if (tmp != null) {
+            resellerAdmin.setPasswordMech(tmp);
+        }
+        List<Restriction> restrictions = soapResellerAdmin.getRestrictions();
+        if (null != restrictions) {
+            resellerAdmin.setRestrictions(soap2Restrictions(restrictions));
+        }
+        return resellerAdmin;
+    }
+
+    private static com.openexchange.admin.reseller.rmi.dataobjects.Restriction soap2Restriction(Restriction soapRestriction) {
+        if (null == soapRestriction) {
+            return null;
+        }
+        com.openexchange.admin.reseller.rmi.dataobjects.Restriction restriction = new com.openexchange.admin.reseller.rmi.dataobjects.Restriction();
+        Integer id = soapRestriction.getId();
+        if (id != null) {
+            restriction.setId(id);
+        }
+        String name = soapRestriction.getName();
+        if (name != null) {
+            restriction.setName(name);
+        }
+        String value = soapRestriction.getValue();
+        if (value != null) {
+            restriction.setValue(value);
+        }
+        return restriction;
+    }
+
+    private static com.openexchange.admin.reseller.rmi.dataobjects.Restriction[] soap2Restrictions(List<Restriction> soapRestrictions) {
+        if (null == soapRestrictions) {
+            return null;
+        }
+        com.openexchange.admin.reseller.rmi.dataobjects.Restriction[] restrictions = new com.openexchange.admin.reseller.rmi.dataobjects.Restriction[soapRestrictions.size()];
+        for (int i = 0; i < restrictions.length; i++) {
+            restrictions[i] = soap2Restriction(soapRestrictions.get(i));
+        }
+        return restrictions;
     }
 
     private static boolean isEmpty(final String string) {
