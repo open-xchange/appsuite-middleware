@@ -91,4 +91,19 @@ public enum Resource {
         return identifier;
     }
 
+    /**
+     * Gets currently known identifiers.
+     * 
+     * @return The currently known identifiers
+     */
+    public static String[] allIdentifiers() {
+        final Resource[] values = Resource.values();
+        final int length = values.length;
+        final String[] ret = new String[length];
+        for (int i = 0; i < length; i++) {
+            ret[i] = values[i].getIdentifier();
+        }
+        return ret;
+    }
+
 }
