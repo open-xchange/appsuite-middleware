@@ -800,6 +800,8 @@ public final class MessageUtility {
         setText(text, charset, null, part);
     }
 
+    private static final String HDR_CONTENT_TYPE = MessageHeaders.HDR_CONTENT_TYPE;
+
     /**
      * Convenience method that sets the given String as this part's content, with a primary MIME type of "text" and the specified MIME
      * subtype.
@@ -832,7 +834,7 @@ public final class MessageUtility {
         } else {
             part.setDataHandler(dhFor(new DataContentHandlerDataSource(text, objectMimeType, dch)));
         }
-        part.setHeader(MessageHeaders.HDR_CONTENT_TYPE, objectMimeType);
+        part.setHeader(HDR_CONTENT_TYPE, objectMimeType);
     }
 
     /** ASCII-wise to lower-case */
