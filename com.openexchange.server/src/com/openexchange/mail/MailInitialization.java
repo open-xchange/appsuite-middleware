@@ -49,12 +49,8 @@
 
 package com.openexchange.mail;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.activation.CommandMap;
-import javax.activation.MailcapCommandMap;
 import org.apache.commons.logging.Log;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
@@ -79,76 +75,6 @@ import com.openexchange.server.Initialization;
 public final class MailInitialization implements Initialization, CacheAvailabilityListener {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(MailInitialization.class);
-
-    /**
-     * Initializes the {@link MailcapCommandMap mailcap}.
-     */
-    public static final class MailcapInitialization implements Initialization {
-
-        private static final MailcapInitialization CAP_INSTANCE = new MailcapInitialization();
-
-        /**
-         * Gets the instance
-         *
-         * @return The instance
-         */
-        public static MailcapInitialization getInstance() {
-            return CAP_INSTANCE;
-        }
-
-        /**
-         * Initializes a new {@link MailInitialization.MailcapInitialization}.
-         */
-        private MailcapInitialization() {
-            super();
-        }
-
-        @Override
-        public void stop() {
-            // Nothing to do
-        }
-
-        @Override
-        public void start() {
-            /*-
-             * Add handlers for main MIME types
-             *
-                #
-                #
-                # Default mailcap file for the JavaMail System.
-                #
-                # JavaMail content-handlers:
-                #
-                text/plain;;            x-java-content-handler=com.sun.mail.handlers.text_plain
-                text/html;;             x-java-content-handler=com.sun.mail.handlers.text_html
-                text/xml;;              x-java-content-handler=com.sun.mail.handlers.text_xml
-                multipart/*;;           x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true
-                message/rfc822;;        x-java-content-handler=com.sun.mail.handlers.message_rfc822
-                #
-                # can't support image types because java.awt.Toolkit doesn't work on servers
-                #
-                #image/gif;;            x-java-content-handler=com.sun.mail.handlers.image_gif
-                #image/jpeg;;           x-java-content-handler=com.sun.mail.handlers.image_jpeg
-             */
-            final MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
-            final Set<String> types = new HashSet<String>(java.util.Arrays.asList(mc.getMimeTypes()));
-            if (!types.contains("text/html")) {
-                mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
-            }
-            if (!types.contains("text/xml")) {
-                mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
-            }
-            if (!types.contains("text/plain")) {
-                mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
-            }
-            if (!types.contains("multipart/*")) {
-                mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true");
-            }
-            if (!types.contains("message/rfc822")) {
-                mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
-            }
-        }
-    }
 
     private static final MailInitialization INSTANCE = new MailInitialization();
 
@@ -215,7 +141,18 @@ public final class MailInitialization implements Initialization, CacheAvailabili
                     EventPool.releaseInstance();
                 }
             }, startedStack);
-            startUp(MailcapInitialization.getInstance(), startedStack);
+            startUp(new Initialization() {
+
+                @Override
+                public void start() {
+                    MailcapInitialization.getInstance().init();
+                }
+
+                @Override
+                public void stop() {
+                    // Nope
+                }
+            }, startedStack);
             /*
              * Add to cache availability registry
              */

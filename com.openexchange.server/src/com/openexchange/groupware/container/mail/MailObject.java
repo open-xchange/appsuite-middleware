@@ -58,12 +58,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.regex.Matcher;
-import javax.activation.CommandMap;
 import javax.activation.DataHandler;
-import javax.activation.MailcapCommandMap;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -97,6 +93,7 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.datasource.MimeMessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.version.Version;
@@ -117,43 +114,6 @@ public class MailObject {
     private static volatile UnknownHostException warnSpam;
 
     static {
-        /*-
-         * Add handlers for main MIME types
-         *
-            #
-            #
-            # Default mailcap file for the JavaMail System.
-            #
-            # JavaMail content-handlers:
-            #
-            text/plain;;            x-java-content-handler=com.sun.mail.handlers.text_plain
-            text/html;;             x-java-content-handler=com.sun.mail.handlers.text_html
-            text/xml;;              x-java-content-handler=com.sun.mail.handlers.text_xml
-            multipart/*;;           x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true
-            message/rfc822;;        x-java-content-handler=com.sun.mail.handlers.message_rfc822
-            #
-            # can't support image types because java.awt.Toolkit doesn't work on servers
-            #
-            #image/gif;;            x-java-content-handler=com.sun.mail.handlers.image_gif
-            #image/jpeg;;           x-java-content-handler=com.sun.mail.handlers.image_jpeg
-         */
-        final MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
-        final Set<String> types = new HashSet<String>(java.util.Arrays.asList(mc.getMimeTypes()));
-        if (!types.contains("text/html")) {
-            mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
-        }
-        if (!types.contains("text/xml")) {
-            mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
-        }
-        if (!types.contains("text/plain")) {
-            mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
-        }
-        if (!types.contains("multipart/*")) {
-            mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true");
-        }
-        if (!types.contains("message/rfc822")) {
-            mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
-        }
         // Host name initialization
         try {
             staticHostName = InetAddress.getLocalHost().getCanonicalHostName();
@@ -489,37 +449,46 @@ public class MailObject {
             final String subType = ct.getSubType();
             if (multipart == null) {
                 if ("html".equalsIgnoreCase(subType) || "htm".equalsIgnoreCase(subType)) {
-                    msg.setContent(text, ct.toString());
+                    msg.setDataHandler(new DataHandler(new MessageDataSource(text.toString(), ct)));
+                    // msg.setContent(text, ct.toString());
                 } else if ("plain".equalsIgnoreCase(subType) || "enriched".equalsIgnoreCase(subType)) {
                     if (!ct.containsCharsetParameter()) {
-                        msg.setText((String) text);
+                        MessageUtility.setText((String) text, msg);
+                        // msg.setText((String) text);
                     } else {
-                        msg.setText((String) text, ct.getCharsetParameter());
+                        MessageUtility.setText((String) text, ct.getCharsetParameter(), msg);
+                        // msg.setText((String) text, ct.getCharsetParameter());
                     }
                 } else if (ct.startsWith("multipart/")) {
-                    msg.setContent((Multipart) text);
+                    MessageUtility.setContent((Multipart) text, msg);
+                    // msg.setContent((Multipart) text);
                 } else {
                     throw MailExceptionCode.UNSUPPORTED_MIME_TYPE.create(ct.toString());
                 }
             } else {
                 final MimeBodyPart textPart = new MimeBodyPart();
                 if ("html".equalsIgnoreCase(subType) || "htm".equalsIgnoreCase(subType)) {
-                    textPart.setContent(text, ct.toString());
+                    textPart.setDataHandler(new DataHandler(new MessageDataSource(text.toString(), ct)));
+                    // textPart.setContent(text, ct.toString());
                 } else if ("plain".equalsIgnoreCase(subType) || "enriched".equalsIgnoreCase(subType)) {
                     if (!ct.containsCharsetParameter()) {
-                        textPart.setText((String) text);
+                        MessageUtility.setText((String) text, textPart);
+                        // textPart.setText((String) text);
                     } else {
-                        textPart.setText((String) text, ct.getCharsetParameter());
+                        MessageUtility.setText((String) text, ct.getCharsetParameter(), textPart);
+                        // textPart.setText((String) text, ct.getCharsetParameter());
                     }
                 } else if (ct.startsWith("multipart/")) {
-                    textPart.setContent((Multipart) text);
+                    MessageUtility.setContent((Multipart) text, textPart);
+                    // textPart.setContent((Multipart) text);
                 } else {
                     throw MailExceptionCode.UNSUPPORTED_MIME_TYPE.create(ct.toString());
                 }
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
                 multipart.addBodyPart(textPart, 0);
-                msg.setContent(multipart);
+                MessageUtility.setContent(multipart, msg);
+                // msg.setContent(multipart);
             }
             /*
              * Disposition notification

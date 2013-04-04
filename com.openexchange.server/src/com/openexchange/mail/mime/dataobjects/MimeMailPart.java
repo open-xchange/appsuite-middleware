@@ -56,11 +56,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.HashSet;
-import java.util.Set;
-import javax.activation.CommandMap;
 import javax.activation.DataHandler;
-import javax.activation.MailcapCommandMap;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -81,6 +77,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -95,46 +92,6 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
     private static final long serialVersionUID = -1142595512657302179L;
 
     private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMailPart.class));
-
-    static {
-        /*-
-         * Add handlers for main MIME types
-         *
-            #
-            #
-            # Default mailcap file for the JavaMail System.
-            #
-            # JavaMail content-handlers:
-            #
-            text/plain;;            x-java-content-handler=com.sun.mail.handlers.text_plain
-            text/html;;             x-java-content-handler=com.sun.mail.handlers.text_html
-            text/xml;;              x-java-content-handler=com.sun.mail.handlers.text_xml
-            multipart/*;;           x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true
-            message/rfc822;;        x-java-content-handler=com.sun.mail.handlers.message_rfc822
-            #
-            # can't support image types because java.awt.Toolkit doesn't work on servers
-            #
-            #image/gif;;            x-java-content-handler=com.sun.mail.handlers.image_gif
-            #image/jpeg;;           x-java-content-handler=com.sun.mail.handlers.image_jpeg
-         */
-        final MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
-        final Set<String> types = new HashSet<String>(java.util.Arrays.asList(mc.getMimeTypes()));
-        if (!types.contains("text/html")) {
-            mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
-        }
-        if (!types.contains("text/xml")) {
-            mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
-        }
-        if (!types.contains("text/plain")) {
-            mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
-        }
-        if (!types.contains("multipart/*")) {
-            mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true");
-        }
-        if (!types.contains("message/rfc822")) {
-            mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
-        }
-    }
 
     /**
      * The max. in-memory size in bytes.
@@ -255,7 +212,8 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         }
         try {
             final MimeBodyPart part = new MimeBodyPart();
-            part.setContent(multipart);
+            MessageUtility.setContent(multipart, part);
+            // part.setContent(multipart);
             this.part = part;
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
@@ -749,9 +707,10 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      */
     private static MimeBodyPart createBodyMessage(final byte[] data) throws MessagingException {
         final MimeBodyPart mimeBodyPart = new MimeBodyPart();
-        mimeBodyPart.setContent(
-            new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(data)),
-            MimeTypes.MIME_MESSAGE_RFC822);
+        MessageUtility.setContent(new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(data)), mimeBodyPart);
+        //mimeBodyPart.setContent(
+        //    new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(data)),
+        //    MimeTypes.MIME_MESSAGE_RFC822);
         return mimeBodyPart;
     }
 
@@ -765,7 +724,8 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      */
     private static MimeBodyPart createBodyMultipart(final byte[] data, final String contentType) throws MessagingException {
         final MimeBodyPart mimeBodyPart = new MimeBodyPart();
-        mimeBodyPart.setContent(new MimeMultipart(new MessageDataSource(data, contentType)));
+        MessageUtility.setContent(new MimeMultipart(new MessageDataSource(data, contentType)), mimeBodyPart);
+        // mimeBodyPart.setContent(new MimeMultipart(new MessageDataSource(data, contentType)));
         return mimeBodyPart;
     }
 

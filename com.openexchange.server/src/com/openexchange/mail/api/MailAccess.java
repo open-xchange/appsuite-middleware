@@ -53,16 +53,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Queue;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import javax.activation.CommandMap;
-import javax.activation.MailcapCommandMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -103,46 +99,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     private static final long serialVersionUID = -2580495494392812083L;
 
     private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MailAccess.class));
-
-    static {
-        /*-
-         * Add handlers for main MIME types
-         *
-            #
-            #
-            # Default mailcap file for the JavaMail System.
-            #
-            # JavaMail content-handlers:
-            #
-            text/plain;;            x-java-content-handler=com.sun.mail.handlers.text_plain
-            text/html;;             x-java-content-handler=com.sun.mail.handlers.text_html
-            text/xml;;              x-java-content-handler=com.sun.mail.handlers.text_xml
-            multipart/*;;           x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true
-            message/rfc822;;        x-java-content-handler=com.sun.mail.handlers.message_rfc822
-            #
-            # can't support image types because java.awt.Toolkit doesn't work on servers
-            #
-            #image/gif;;            x-java-content-handler=com.sun.mail.handlers.image_gif
-            #image/jpeg;;           x-java-content-handler=com.sun.mail.handlers.image_jpeg
-         */
-        final MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
-        final Set<String> types = new HashSet<String>(java.util.Arrays.asList(mc.getMimeTypes()));
-        if (!types.contains("text/html")) {
-            mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
-        }
-        if (!types.contains("text/xml")) {
-            mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
-        }
-        if (!types.contains("text/plain")) {
-            mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
-        }
-        if (!types.contains("multipart/*")) {
-            mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true");
-        }
-        if (!types.contains("message/rfc822")) {
-            mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
-        }
-    }
 
     /*-
      * ############### MEMBERS ###############

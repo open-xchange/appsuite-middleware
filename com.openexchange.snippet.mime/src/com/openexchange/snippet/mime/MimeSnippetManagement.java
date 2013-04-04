@@ -422,7 +422,8 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 // Content part
                 {
                     final MimeBodyPart textPart = new MimeBodyPart();
-                    textPart.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain");
+                    MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain", textPart);
+                    // textPart.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain");
                     multipart.addBodyPart(textPart);
                 }
                 // Misc
@@ -446,9 +447,11 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     }
                 }
                 // Apply multipart
-                mimeMessage.setContent(multipart);
+                MessageUtility.setContent(multipart, mimeMessage);
+                // mimeMessage.setContent(multipart);
             } else {
-                mimeMessage.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain");
+                MessageUtility.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain", mimeMessage);
+                // mimeMessage.setText(sanitizeContent(snippet.getContent()), "UTF-8", "plain");
             }
             // Save
             mimeMessage.saveChanges();
@@ -678,7 +681,8 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 final Multipart primaryMultipart = new MimeMultipart();
                 // Add text part
                 final MimeBodyPart textPart = new MimeBodyPart();
-                textPart.setText(sanitizeContent(content), "UTF-8", "plain");
+                MessageUtility.setText(sanitizeContent(content), "UTF-8", "plain", textPart);
+                // textPart.setText(sanitizeContent(content), "UTF-8", "plain");
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 primaryMultipart.addBodyPart(textPart);
                 // Add attachment parts
@@ -692,9 +696,11 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     primaryMultipart.addBodyPart((BodyPart) miscPart);
                 }
                 // Apply to message
-                updateMessage.setContent(primaryMultipart);
+                MessageUtility.setContent(primaryMultipart, updateMessage);
+                // updateMessage.setContent(primaryMultipart);
             } else {
-                updateMessage.setText(sanitizeContent(content), "UTF-8", "plain");
+                MessageUtility.setText(sanitizeContent(content), "UTF-8", "plain", updateMessage);
+                // updateMessage.setText(sanitizeContent(content), "UTF-8", "plain");
                 updateMessage.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             }
             // Save to MIME structure...
