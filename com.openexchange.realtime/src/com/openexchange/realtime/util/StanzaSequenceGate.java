@@ -97,7 +97,9 @@ public abstract class StanzaSequenceGate {
                     threshhold = meantime;
                 }
             }
-            
+            if (stanza.getSequenceNumber() == 0) {
+                threshhold.set(0);
+            }
             if (threshhold.compareAndSet(stanza.getSequenceNumber(), stanza.getSequenceNumber() + 1)) {
                 handleInternal(stanza, recipient);
                 // Drain
