@@ -416,7 +416,8 @@ public final class MimeReply {
                 /*
                  * Add empty text content as message's body
                  */
-                replyMsg.setText("", MailProperties.getInstance().getDefaultMimeCharset(), "plain");
+                MessageUtility.setText("", MailProperties.getInstance().getDefaultMimeCharset(), replyMsg);
+                // replyMsg.setText("", MailProperties.getInstance().getDefaultMimeCharset(), "plain");
                 replyMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 replyMsg.setHeader(
                     MessageHeaders.HDR_CONTENT_TYPE,
@@ -494,7 +495,8 @@ public final class MimeReply {
                 retvalContentType.setCharsetParameter("UTF-8");
                 replyText = replaceMetaEquiv(replyText, retvalContentType);
             }
-            replyMsg.setText(replyText, retvalContentType.getCharsetParameter(), retvalContentType.getSubType());
+            MessageUtility.setText(replyText, retvalContentType.getCharsetParameter(), retvalContentType.getSubType(), replyMsg);
+            // replyMsg.setText(replyText, retvalContentType.getCharsetParameter(), retvalContentType.getSubType());
             replyMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             replyMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(retvalContentType.toString()));
             replyMsg.saveChanges();

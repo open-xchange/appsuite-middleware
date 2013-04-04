@@ -87,6 +87,7 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -170,7 +171,8 @@ public final class VCardAttachMailDataHandler implements DataHandler {
              */
             {
                 final MimeBodyPart textPart = new MimeBodyPart();
-                textPart.setText("", "text/html; charset=UTF-8", "html");
+                MessageUtility.setText("", "text/html; charset=UTF-8", "html", textPart);
+                // textPart.setText("", "text/html; charset=UTF-8", "html");
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "text/html; charset=UTF-8");
                 mimeMultipart.addBodyPart(textPart);
@@ -196,7 +198,8 @@ public final class VCardAttachMailDataHandler implements DataHandler {
                 vcardPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
                 mimeMultipart.addBodyPart(vcardPart);
             }
-            mimeMessage.setContent(mimeMultipart);
+            MessageUtility.setContent(mimeMultipart, mimeMessage);
+            // mimeMessage.setContent(mimeMultipart);
             mimeMessage.saveChanges();
             // Remove generated Message-Id for template message
             mimeMessage.removeHeader(MessageHeaders.HDR_MESSAGE_ID);

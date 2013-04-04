@@ -52,6 +52,7 @@ package com.openexchange.messaging.generic.internet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -69,7 +70,9 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.HeaderName;
+import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.ManagedFileContent;
@@ -657,7 +660,8 @@ public class MimeMessagingPart implements MessagingPart {
      */
     public void setContent(final MimeMultipartContent mp) throws OXException {
         try {
-            part.setContent(mp.mimeMultipart);
+            MessageUtility.setContent(mp.mimeMultipart, part);
+            // part.setContent(mp.mimeMultipart);
             part.setHeader(H_CONTENT_TYPE.toString(), mp.mimeMultipart.getContentType());
             headers = null;
             cachedContent = null;
@@ -680,10 +684,12 @@ public class MimeMessagingPart implements MessagingPart {
     public void setContent(final MessagingContent content, final String type) throws OXException {
         try {
             if (content instanceof MimeMessagingMessage) {
-                part.setContent(((MimeMessagingMessage) content).mimeMessage, type);
+                MessageUtility.setContent(((MimeMessagingMessage) content).mimeMessage, part);
+                // part.setContent(((MimeMessagingMessage) content).mimeMessage, type);
                 part.setHeader(H_CONTENT_TYPE.toString(), type);
             } else if (content instanceof MimeMultipartContent) {
-                part.setContent(((MimeMultipartContent) content).mimeMultipart);
+                MessageUtility.setContent(((MimeMultipartContent) content).mimeMultipart, part);
+                // part.setContent(((MimeMultipartContent) content).mimeMultipart);
                 part.setHeader(H_CONTENT_TYPE.toString(), type);
             } else if (content instanceof SimpleContent<?>) {
                 if (content instanceof BinaryContent) {
@@ -692,9 +698,19 @@ public class MimeMessagingPart implements MessagingPart {
                     part.setDataHandler(new DataHandler(new StreamDataSource(new ManagedFileContentISP((ManagedFileContent) content), type)));
                 } else if (content instanceof StringContent) {
                     final MimeContentType mct = new MimeContentType(type);
-                    part.setText(((StringContent) content).getData().toString(), mct.getCharsetParameter(), mct.getSubType());
+                    MessageUtility.setText(((StringContent) content).getData().toString(), mct.getCharsetParameter(), mct.getSubType(), part);
+                    // part.setText(((StringContent) content).getData().toString(), mct.getCharsetParameter(), mct.getSubType());
                 } else if (content instanceof SimpleContent) {
-                    part.setContent(((SimpleContent<?>) content).getData(), type);
+                    final Object data = ((SimpleContent<?>) content).getData();
+                    if (data instanceof String) {
+                        try {
+                            part.setDataHandler(new DataHandler(new MessageDataSource(data.toString(), type)));
+                        } catch (final UnsupportedEncodingException e) {
+                            throw new javax.mail.MessagingException("Unsupported encosing.", e);
+                        }
+                    } else {
+                        part.setContent(data, type);
+                    }
                 } else {
                     throw MessagingExceptionCodes.UNKNOWN_MESSAGING_CONTENT.create(content.getClass().getName());
                 }
@@ -860,7 +876,8 @@ public class MimeMessagingPart implements MessagingPart {
      */
     public void setText(final String text, final String charset, final String subtype) throws OXException {
         try {
-            part.setText(text, charset, subtype);
+            MessageUtility.setText(text, charset, subtype, part);
+            // part.setText(text, charset, subtype);
             headers = null;
             cachedContent = null;
             b_cachedContentType = false;

@@ -61,17 +61,13 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Matcher;
-import javax.activation.CommandMap;
 import javax.activation.DataHandler;
-import javax.activation.MailcapCommandMap;
 import javax.mail.Address;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
@@ -117,6 +113,7 @@ import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
@@ -137,46 +134,6 @@ import com.sun.mail.smtp.SMTPMessage;
 public final class SMTPTransport extends MailTransport {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(SMTPTransport.class));
-
-    static {
-        /*-
-         * Add handlers for main MIME types
-         *
-            #
-            #
-            # Default mailcap file for the JavaMail System.
-            #
-            # JavaMail content-handlers:
-            #
-            text/plain;;            x-java-content-handler=com.sun.mail.handlers.text_plain
-            text/html;;             x-java-content-handler=com.sun.mail.handlers.text_html
-            text/xml;;              x-java-content-handler=com.sun.mail.handlers.text_xml
-            multipart/*;;           x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true
-            message/rfc822;;        x-java-content-handler=com.sun.mail.handlers.message_rfc822
-            #
-            # can't support image types because java.awt.Toolkit doesn't work on servers
-            #
-            #image/gif;;            x-java-content-handler=com.sun.mail.handlers.image_gif
-            #image/jpeg;;           x-java-content-handler=com.sun.mail.handlers.image_jpeg
-         */
-        final MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap();
-        final Set<String> types = new HashSet<String>(java.util.Arrays.asList(mc.getMimeTypes()));
-        if (!types.contains("text/html")) {
-            mc.addMailcap("text/html;; x-java-content-handler=com.sun.mail.handlers.text_html");
-        }
-        if (!types.contains("text/xml")) {
-            mc.addMailcap("text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml");
-        }
-        if (!types.contains("text/plain")) {
-            mc.addMailcap("text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain");
-        }
-        if (!types.contains("multipart/*")) {
-            mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true");
-        }
-        if (!types.contains("message/rfc822")) {
-            mc.addMailcap("message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822");
-        }
-    }
 
     /**
      * The SMTP protocol name.
@@ -569,15 +526,15 @@ public final class SMTPTransport extends MailTransport {
             final Date sentDate = srcMail.getSentDate();
             {
                 final MimeBodyPart text = new MimeBodyPart();
-                text.setText(
-                    performLineFolding(
-                        strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT).replaceFirst(
-                            "#DATE#",
-                            sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG, locale).format(sentDate))).replaceFirst(
-                            "#RECIPIENT#",
-                            quoteReplacement(from)).replaceFirst("#SUBJECT#", quoteReplacement(srcMail.getSubject())),
-                        usm.getAutoLinebreak()),
-                    defaultMimeCS);
+                final String txt = performLineFolding(
+                    strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT).replaceFirst(
+                        "#DATE#",
+                        sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG, locale).format(sentDate))).replaceFirst(
+                        "#RECIPIENT#",
+                        quoteReplacement(from)).replaceFirst("#SUBJECT#", quoteReplacement(srcMail.getSubject())),
+                    usm.getAutoLinebreak());
+                MessageUtility.setText(txt, defaultMimeCS, text);
+                // text.setText(txt,defaultMimeCS);
                 text.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
                 mixedMultipart.addBodyPart(text);
@@ -589,11 +546,11 @@ public final class SMTPTransport extends MailTransport {
             {
                 final MimeBodyPart ack = new MimeBodyPart();
                 final String msgId = srcMail.getFirstHeader(MessageHeaders.HDR_MESSAGE_ID);
-                ack.setText(
-                    strHelper.getString(ACK_TEXT).replaceFirst("#FROM#", quoteReplacement(from)).replaceFirst(
-                        "#MSG ID#",
-                        quoteReplacement(msgId)),
-                    defaultMimeCS);
+                final String txt = strHelper.getString(ACK_TEXT).replaceFirst("#FROM#", quoteReplacement(from)).replaceFirst(
+                    "#MSG ID#",
+                    quoteReplacement(msgId));
+                MessageUtility.setText(txt, defaultMimeCS, ack);
+                // ack.setText(txt,defaultMimeCS);
                 ack.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 ack.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
                 ack.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, CD_READ_ACK);
@@ -602,7 +559,8 @@ public final class SMTPTransport extends MailTransport {
             /*
              * Set message content
              */
-            smtpMessage.setContent(mixedMultipart);
+            MessageUtility.setContent(mixedMultipart, smtpMessage);
+            // smtpMessage.setContent(mixedMultipart);
             /*
              * Transport message
              */

@@ -28,7 +28,7 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastInstance.class, HazelcastConfigurationService.class, ConfigurationService.class, DispatcherPrefixService.class };
+        return new Class<?>[] { HazelcastConfigurationService.class, ConfigurationService.class, DispatcherPrefixService.class };
     }
 
     @Override
@@ -46,7 +46,7 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
                     String address = service.getCluster().getLocalMember().getInetSocketAddress().getHostName();
                     String mapName = discoverMapName(service.getConfig());
                     address += prefix;
-                    context.registerService(DistributedFileManagement.class, new DistributedFileManagementImpl(DistributedFileManagementActivator.this, address, mapName), null);
+                    registerService(DistributedFileManagement.class, new DistributedFileManagementImpl(DistributedFileManagementActivator.this, address, mapName));
                 }
 
                 @Override
@@ -54,6 +54,16 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
                     DistributedFileManagementImpl.setHazelcastInstance(null);
                 }
             });
+
+            HazelcastInstance service = getOptionalService(HazelcastInstance.class);
+            if (service != null) {
+                DistributedFileManagementImpl.setHazelcastInstance(service);
+                String address = service.getCluster().getLocalMember().getInetSocketAddress().getHostName();
+                String mapName = discoverMapName(service.getConfig());
+                address += prefix;
+                registerService(DistributedFileManagement.class, new DistributedFileManagementImpl(DistributedFileManagementActivator.this, address, mapName));
+            }
+            
         }
 
         openTrackers();

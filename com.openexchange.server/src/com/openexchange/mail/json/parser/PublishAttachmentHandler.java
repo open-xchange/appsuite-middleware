@@ -95,6 +95,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.config.TransportProperties;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.PublicationTarget;
@@ -527,7 +528,8 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
     private MailPart createLinksAttachment(final String text) throws OXException, OXException {
         try {
             final MimeBodyPart bodyPart = new MimeBodyPart();
-            bodyPart.setText(getConformHTML(text, "UTF-8"), "UTF-8", "html");
+            MessageUtility.setText(getConformHTML(text, "UTF-8"), "UTF-8", "html", bodyPart);
+            // bodyPart.setText(getConformHTML(text, "UTF-8"), "UTF-8", "html");
             bodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             bodyPart.setHeader(
                 MessageHeaders.HDR_CONTENT_TYPE,

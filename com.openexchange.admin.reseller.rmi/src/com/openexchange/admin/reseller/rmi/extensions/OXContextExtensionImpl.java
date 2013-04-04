@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.reseller.rmi.extensions;
 
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;

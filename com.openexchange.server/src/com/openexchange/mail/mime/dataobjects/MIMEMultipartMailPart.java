@@ -73,6 +73,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -396,7 +397,8 @@ public final class MIMEMultipartMailPart extends MailPart {
     private static MailPart createTextPart() throws OXException {
         try {
             final MimeBodyPart mbp = new MimeBodyPart();
-            mbp.setText("", "US-ASCII");
+            MessageUtility.setText("", "us-ascii", mbp);
+            // mbp.setText("", "US-ASCII");
             mbp.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             mbp.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "text/plain; charset=\"US-ASCII\"");
             return MimeMessageConverter.convertPart(mbp);
@@ -408,7 +410,8 @@ public final class MIMEMultipartMailPart extends MailPart {
     private static MailPart createTextPart(final byte[] subArr, final String charset) throws UnsupportedCharsetException, OXException {
         try {
             final MimeBodyPart mbp = new MimeBodyPart();
-            mbp.setText(new String(subArr, Charsets.forName(charset)), charset);
+            MessageUtility.setText(new String(subArr, Charsets.forName(charset)), charset, mbp);
+            // mbp.setText(new String(subArr, Charsets.forName(charset)), charset);
             mbp.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             mbp.setHeader(
                 MessageHeaders.HDR_CONTENT_TYPE,

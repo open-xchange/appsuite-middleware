@@ -107,8 +107,10 @@ public abstract class StanzaSequenceGate {
                     threshhold = meantime;
                 }
             }
-
             // Best case, we found the follow up Stanza
+            if (stanza.getSequenceNumber() == 0) {
+                threshhold.set(0);
+            }
             if (threshhold.compareAndSet(stanza.getSequenceNumber(), stanza.getSequenceNumber() + 1)) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Best case, Threshold: " + threshhold.get());

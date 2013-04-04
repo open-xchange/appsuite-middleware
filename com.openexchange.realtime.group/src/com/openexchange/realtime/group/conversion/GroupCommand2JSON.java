@@ -85,17 +85,13 @@ public class GroupCommand2JSON implements SimplePayloadConverter {
 
     @Override
     public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
-        try {
-            if (JoinCommand.class.isInstance(data)) {
-                return new JSONObject("{command: 'join'}");
-            }
-            if (LeaveCommand.class.isInstance(data)) {
-                return new JSONObject("{command: 'leave'}");
-            }
-            return new JSONObject("{command: 'unknown '" + data.getClass().getSimpleName()+ "'");
-        } catch (JSONException x) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage(), x);
+        if (JoinCommand.class.isInstance(data)) {
+            return "join";
         }
+        if (LeaveCommand.class.isInstance(data)) {
+            return "leave";
+        }
+        return "unknown: " + data.getClass().getSimpleName();
     }
 
 }

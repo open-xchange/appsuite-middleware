@@ -84,6 +84,7 @@ import com.openexchange.mail.mime.ParameterizedHeader;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -365,7 +366,8 @@ public final class MIMEStructureParser {
         try {
             final MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
             parseMessage(jsonMessage, mimeMessage);
-            mimePart.setContent(mimeMessage, "message/rfc822");
+            MessageUtility.setContent(mimeMessage, mimePart);
+            // mimePart.setContent(mimeMessage, "message/rfc822");
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
@@ -380,7 +382,8 @@ public final class MIMEStructureParser {
                 parsePart(jsonMultiparts.getJSONObject(i), bodyPart);
                 multipart.addBodyPart(bodyPart);
             }
-            mimePart.setContent(multipart);
+            MessageUtility.setContent(multipart, mimePart);
+            // mimePart.setContent(multipart);
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
@@ -391,7 +394,8 @@ public final class MIMEStructureParser {
     private static void parseSimpleBodyText(final JSONObject jsonBody, final MimePart mimePart, final ContentType contentType) throws OXException {
         try {
             if (isText(contentType.getBaseType())) {
-                mimePart.setText(jsonBody.getString("data"), "UTF-8", contentType.getSubType());
+                MessageUtility.setText(jsonBody.getString("data"), "UTF-8", contentType.getSubType(), mimePart);
+                // mimePart.setText(jsonBody.getString("data"), "UTF-8", contentType.getSubType());
                 mimePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType.toString(true));
             } else {
                 final byte[] bytes = jsonBody.getString("data").toString().getBytes(com.openexchange.java.Charsets.UTF_8);

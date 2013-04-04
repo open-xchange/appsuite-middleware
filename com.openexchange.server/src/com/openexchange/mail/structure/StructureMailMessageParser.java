@@ -76,6 +76,7 @@ import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
@@ -95,7 +96,6 @@ import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageHandler;
-import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -568,7 +568,8 @@ public final class StructureMailMessageParser {
                 if (attrBody != null) {
                     final TNEFBodyPart bodyPart = new TNEFBodyPart();
                     final String value = (String) attrBody.getValue();
-                    bodyPart.setText(value);
+                    MessageUtility.setText(value, bodyPart);
+                    // bodyPart.setText(value);
                     bodyPart.setSize(value.length());
                     parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                 }

@@ -1,3 +1,13 @@
+* 2013-04-04 - marcus.klein@open-xchange.com
+
+ - Fix for bug 25330: Implemented conversion of reseller administrator, custom identifier and restrictions in reseller context SOAP
+   interface.
+
+* 2013-04-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25684: Trying to avoid fragile JAF data-content-handler look-up where possible
+ - Fix for bug 25126: Consider config-cascade setting when propagating capability
+
 * 2013-04-04 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 25673: Be aware of possibly removed MBeans during iteration in showruntimestats

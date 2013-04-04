@@ -50,9 +50,12 @@
 package com.openexchange.oauth.linkedin.osgi;
 
 import org.apache.commons.logging.Log;
-
+import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -60,6 +63,7 @@ import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.oauth.linkedin.LinkedInServiceImpl;
 import com.openexchange.oauth.linkedin.OAuthServiceMetaDataLinkedInImpl;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.tools.session.ServerSession;
 
 public class Activator extends HousekeepingActivator {
 
@@ -70,7 +74,7 @@ public class Activator extends HousekeepingActivator {
     private ConfigurationService configurationService;
 
     public Activator() {
-
+        super();
     }
 
     public void registerServices() {
@@ -112,7 +116,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[]{CapabilityService.class};
+        return new Class<?>[]{CapabilityService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -120,6 +124,19 @@ public class Activator extends HousekeepingActivator {
         track(ConfigurationService.class, new ConfigurationServiceRegisterer(context, this));
         track(OAuthService.class, new OAuthServiceRegisterer(context, this));
         openTrackers();
+        registerService(CapabilityChecker.class, new CapabilityChecker() {
+
+            @Override
+            public boolean isEnabled(String capability, ServerSession session) throws OXException {
+                if ("linkedin".equals(capability)) {
+                    final ConfigViewFactory factory = getService(ConfigViewFactory.class);
+                    final ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+                    return view.opt("com.openexchange.oauth.linkedin", boolean.class, Boolean.TRUE).booleanValue();
+                }
+                return true;
+                
+            }
+        });
         getService(CapabilityService.class).declareCapability("linkedin");
     }
 

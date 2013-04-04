@@ -345,18 +345,19 @@ public final class MimeForward {
                  * Add appropriate text part prefixed with forward text
                  */
                 final MimeBodyPart textPart = new MimeBodyPart();
-                textPart.setText(
+                final String txt =
                     usm.isDropReplyForwardPrefix() ? firstSeenText : generateForwardText(
                         firstSeenText,
                         new LocaleAndTimeZone(getUser(session, ctx)),
                         originalMsg,
-                        isHtml),
-                    contentType.getCharsetParameter(),
-                    contentType.getSubType());
+                        isHtml);
+                MessageUtility.setText(txt, contentType.getCharsetParameter(), contentType.getSubType(), textPart);
+                // textPart.setText(txt, contentType.getCharsetParameter(), contentType.getSubType());
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
                 multipart.addBodyPart(textPart);
-                forwardMsg.setContent(multipart);
+                MessageUtility.setContent(multipart, forwardMsg);
+                //forwardMsg.setContent(multipart);
                 forwardMsg.saveChanges();
                 // Remove generated Message-Id header
                 forwardMsg.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
@@ -391,14 +392,13 @@ public final class MimeForward {
                 originalContentType.setCharsetParameter("UTF-8");
                 content = replaceMetaEquiv(content, originalContentType);
             }
-            forwardMsg.setText(
-                usm.isDropReplyForwardPrefix() ? (content == null ? "" : content) : generateForwardText(
-                    content == null ? "" : content,
-                    new LocaleAndTimeZone(getUser(session, ctx)),
-                    originalMsg,
-                    originalContentType.startsWith(TEXT_HTM)),
-                originalContentType.getCharsetParameter(),
-                originalContentType.getSubType());
+            final String txt = usm.isDropReplyForwardPrefix() ? (content == null ? "" : content) : generateForwardText(
+                content == null ? "" : content,
+                new LocaleAndTimeZone(getUser(session, ctx)),
+                originalMsg,
+                originalContentType.startsWith(TEXT_HTM));
+            MessageUtility.setText(txt, originalContentType.getCharsetParameter(), originalContentType.getSubType(), forwardMsg);
+            // forwardMsg.setText(txt,originalContentType.getCharsetParameter(),originalContentType.getSubType());
             forwardMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             forwardMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(originalContentType.toString()));
             forwardMsg.saveChanges();
@@ -418,14 +418,14 @@ public final class MimeForward {
                 final ContentType contentType = new ContentType(MimeTypes.MIME_TEXT_PLAIN);
                 contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
                 final MimeBodyPart textPart = new MimeBodyPart();
-                textPart.setText(
-                    usm.isDropReplyForwardPrefix() ? "" : generateForwardText("", new LocaleAndTimeZone(getUser(session, ctx)), originalMsg, false),
-                    MailProperties.getInstance().getDefaultMimeCharset(),
-                    "plain");
+                String txt = usm.isDropReplyForwardPrefix() ? "" : generateForwardText("", new LocaleAndTimeZone(getUser(session, ctx)), originalMsg, false);
+                MessageUtility.setText(txt,MailProperties.getInstance().getDefaultMimeCharset(),"plain", textPart);
+                // textPart.setText(txt,MailProperties.getInstance().getDefaultMimeCharset(),"plain");
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
                 multipart.addBodyPart(textPart);
-                forwardMsg.setContent(multipart);
+                MessageUtility.setContent(multipart, forwardMsg);
+                // forwardMsg.setContent(multipart);
                 forwardMsg.saveChanges();
                 // Remove generated Message-Id header
                 forwardMsg.removeHeader(MessageHeaders.HDR_MESSAGE_ID);
@@ -493,13 +493,15 @@ public final class MimeForward {
              * Add empty text content as message's body
              */
             final MimeBodyPart textPart = new MimeBodyPart();
-            textPart.setText("", MailProperties.getInstance().getDefaultMimeCharset(), "plain");
+            MessageUtility.setText("", MailProperties.getInstance().getDefaultMimeCharset(), "plain", textPart);
+            // textPart.setText("", MailProperties.getInstance().getDefaultMimeCharset(), "plain");
             textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             textPart.setHeader(
                 MessageHeaders.HDR_CONTENT_TYPE,
                 MimeTypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst("#CS#", MailProperties.getInstance().getDefaultMimeCharset()));
             multipart.addBodyPart(textPart);
-            forwardMsg.setContent(multipart);
+            MessageUtility.setContent(multipart, forwardMsg);
+            // forwardMsg.setContent(multipart);
             forwardMsg.saveChanges();
             // Remove generated Message-Id header
             forwardMsg.removeHeader(MessageHeaders.HDR_MESSAGE_ID);

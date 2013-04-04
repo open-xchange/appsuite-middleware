@@ -47,63 +47,82 @@
  *
  */
 
-package com.openexchange.quota;
+package com.openexchange.mail.mime.datasource;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import javax.activation.DataContentHandler;
+import javax.activation.DataSource;
+import com.openexchange.conversion.DataHandler;
 
 /**
- * {@link Resource} - Denotes an Open-Xchange resource that might have a quota restriction.
- *
+ * {@link DataContentHandlerDataSource} - A {@link DataSource} backed by a {@link DataContentHandler}.
+ * <p>
+ * This bypasses the need for {@link DataHandler} to look-up an appropriate {@link DataContentHandler}.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum Resource {
+public final class DataContentHandlerDataSource implements DataSource {
+
+    private final DataContentHandler dch;
+    private final Object object;
+    private final String objectMimeType;
 
     /**
-     * The quota resource for tasks.
+     * Initializes a new {@link DataContentHandlerDataSource}.
      */
-    TASK("task"),
-    /**
-     * The quota resource for appointments.
-     */
-    CALENDAR("calendar"),
-    /**
-     * The quota resource for contact.
-     */
-    CONTACT("contact"),
-    /**
-     * The quota resource for infostore files.
-     */
-    INFOSTORE_FILES("infostore"),
-
-    ;
-
-    private final String identifier;
-
-    private Resource(final String identifier) {
-        this.identifier = identifier;
+    public DataContentHandlerDataSource(final Object object, final String objectMimeType, final DataContentHandler dch) {
+        super();
+        this.object = object;
+        this.objectMimeType = objectMimeType;
+        this.dch = dch;
     }
 
-    /**
-     * Gets the identifier
-     *
-     * @return The identifier
-     */
-    public String getIdentifier() {
-        return identifier;
+    @Override
+    public InputStream getInputStream() throws IOException {
+        final PipedOutputStream pos = new PipedOutputStream();
+        final PipedInputStream pin = new PipedInputStream(pos);
+        
+        final DataContentHandler dch = this.dch;
+        final Object object = this.object;
+        final String objectMimeType = this.objectMimeType;
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    dch.writeTo(object, objectMimeType, pos);
+                } catch (final IOException e) {
+                    // Ignore
+                } finally {
+                    try {
+                        pos.close();
+                    } catch (final IOException ie) {
+                        // Ignore
+                    }
+                }
+            }
+        }, "DataHandler.getInputStream").start();
+        return pin;
+
     }
 
-    /**
-     * Gets currently known identifiers.
-     * 
-     * @return The currently known identifiers
-     */
-    public static String[] allIdentifiers() {
-        final Resource[] values = Resource.values();
-        final int length = values.length;
-        final String[] ret = new String[length];
-        for (int i = 0; i < length; i++) {
-            ret[i] = values[i].getIdentifier();
-        }
-        return ret;
+    @Override
+    public OutputStream getOutputStream() throws IOException {
+        return null;
+    }
+
+    @Override
+    public String getContentType() {
+        return objectMimeType;
+    }
+
+    @Override
+    public String getName() {
+        return null;
     }
 
 }

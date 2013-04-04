@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlElementRefs;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.namespace.QName;
 import com.openexchange.admin.soap.reseller.context.rmi.dataobjects.EnforceableDataObject;
 
 
@@ -56,6 +57,56 @@ public class Restriction
         @XmlElementRef(name = "name", namespace = "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", type = JAXBElement.class)
     })
     protected List<JAXBElement<? extends Serializable>> rest;
+
+    public Integer getId() {
+        return get("id");
+    }
+
+    public void setId(final Integer value) {
+        set("id", "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", value);
+    }
+
+    public String getName() {
+        return get("name");
+    }
+
+    public void setName(final String value) {
+        set("name", "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", value);
+    }
+
+    public String getValue() {
+        return get("value");
+    }
+
+    public void setValue(final String value) {
+        set("value", "http://dataobjects.rmi.reseller.admin.openexchange.com/xsd", String.class, value);
+    }
+
+    private <V extends Serializable> void set(final String name, final String namespace, final V value) {
+        if (rest == null) {
+            rest = new ArrayList<JAXBElement<? extends Serializable>>();
+        }
+        rest.add(new JAXBElement<V>(new QName(namespace, name), (Class<V>) value.getClass(), value));
+    }
+
+    private <V extends Serializable> void set(String name, String namespace, Class<V> clazz, V value) {
+        if (rest == null) {
+            rest = new ArrayList<JAXBElement<? extends Serializable>>();
+        }
+        rest.add(new JAXBElement<V>(new QName(namespace, name), clazz, value));
+    }
+
+    private <V> V get(final String name) {
+        if (rest == null) {
+            return null;
+        }
+        for (final JAXBElement<?> element : rest) {
+            if (name.equals(element.getName().getLocalPart())) {
+                return (V) element.getValue();
+            }
+        }
+        return null;
+    }
 
     /**
      * Ruft das restliche Contentmodell ab.

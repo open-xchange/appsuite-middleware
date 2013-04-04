@@ -65,11 +65,12 @@ import javax.mail.internet.MimeMultipart;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.ContentDisposition;
+import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mail.utils.MessageUtility;
 
 /**
  * {@link CompositeMailMessage} - Extends the common {@link MailMessage} class by the possibility to add extra parts to an existing
@@ -442,7 +443,8 @@ public final class CompositeMailMessage extends MailMessage {
                 bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition(contentDisposition.toString()));
                 mimeMultipart.addBodyPart(bodyPart);
             }
-            mimeMessage.setContent(mimeMultipart);
+            MessageUtility.setContent(mimeMultipart, mimeMessage);
+            // mimeMessage.setContent(mimeMultipart);
             mimeMessage.writeTo(out);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
