@@ -1088,7 +1088,7 @@ public class MimeMessageFiller {
                 mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
             } else {
                 final MimeBodyPart msgBodyPart = new MimeBodyPart();
-                mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(mail.getContent().toString(), content)));
+                mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(mail.getContent().toString(), contentType)));
                 // msgBodyPart.setContent(mail.getContent(), contentType.toString());
                 msgBodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
                 msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
