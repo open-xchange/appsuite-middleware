@@ -175,6 +175,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                  * requests
                  */
                 String postData = request.getReader().readLine();
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Incoming: " + postData);
+                }
                 if (postData != null) {
                     List<JSONObject> stanzas = new LinkedList<JSONObject>();
                     if (postData.startsWith("[")) {
@@ -381,6 +384,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     try {
                         writer = atmosphereResource.getResponse().getWriter();
                         writer.print(array);
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace("Outgoing: " + array);
+                        }
                         if (writer.checkError()) {
                             outboxFor(id).addAll(outbox);
                             failed = true;

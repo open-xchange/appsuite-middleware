@@ -1,3 +1,7 @@
+* 2013-04-04 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25673: Be aware of possibly removed MBeans during iteration in showruntimestats
+
 * 2013-04-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 24989: Added mapping to config-tree <-> JSlob
