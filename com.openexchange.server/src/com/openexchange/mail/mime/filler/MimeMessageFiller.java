@@ -1082,7 +1082,7 @@ public class MimeMessageFiller {
                 } else {
                     mailText = htmlService.getConformHTML(content, contentType.getCharsetParameter());
                 }
-                mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(mailText, content)));
+                mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(mailText, contentType)));
                 // mimeMessage.setContent(mailText, contentType.toString());
                 mimeMessage.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
                 mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
