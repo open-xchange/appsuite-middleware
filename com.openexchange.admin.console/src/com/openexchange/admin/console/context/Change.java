@@ -115,8 +115,8 @@ public class Change extends ChangeCore {
         }
 
         final String module = parseAndSetQuotaModule(parser);
-        final Long quotaValue = parseAndSetQuotaValue(parser);
-        if (null != module && null != quotaValue) {
+        if (null != module) {
+            final Long quotaValue = parseAndSetQuotaValue(parser);
             oxctx.changeQuota(ctx, module, quotaValue.longValue(), auth);
         }
     }

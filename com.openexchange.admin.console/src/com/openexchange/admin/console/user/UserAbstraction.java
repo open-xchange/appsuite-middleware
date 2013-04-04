@@ -1965,7 +1965,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         return isEmpty(tmp) ? null : tmp;
     }
 
-    public Long parseAndSetQuotaValue(final AdminParser parser) {
+    public Long parseAndSetQuotaValue(final AdminParser parser) throws InvalidDataException {
         if (null == quotaValue) {
             setQuotaValue(parser);
         }
@@ -1976,7 +1976,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         try {
             return Long.valueOf(object.toString().trim());
         } catch (NumberFormatException e) {
-            return null;
+            throw new InvalidDataException("Quota value must be a number.");
         }
     }
 
