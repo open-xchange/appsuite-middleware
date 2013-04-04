@@ -53,11 +53,13 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Locale;
 import java.util.regex.Pattern;
 import javax.activation.DataContentHandler;
 import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -76,6 +78,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.DataContentHandlerDataSource;
+import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.datasource.StreamDataSource.InputStreamProvider;
 
 /**
@@ -728,6 +731,10 @@ public final class MessageUtility {
         return null;
     }
 
+    private static DataHandler dhFor(final DataSource dataSource) {
+        return new DataHandler(dataSource);
+    }
+
     /**
      * Sets the message content
      * 
@@ -739,7 +746,7 @@ public final class MessageUtility {
         if (null == message || null == part) {
             return;
         }
-        part.setDataHandler(new DataHandler(new DataContentHandlerDataSource(message, "message/rfc822", DCH_MESSAGE)));
+        part.setDataHandler(dhFor(new DataContentHandlerDataSource(message, "message/rfc822", DCH_MESSAGE)));
     }
 
     /**
@@ -750,10 +757,7 @@ public final class MessageUtility {
      * @throws MessagingException If setting content fails
      */
     public static void setContent(final Multipart multipart, final Part part) throws MessagingException {
-        if (null == multipart || null == part) {
-            return;
-        }
-        part.setDataHandler(new DataHandler(new DataContentHandlerDataSource(multipart, multipart.getContentType(), DCH_MULTIPART)));
+        setContent(multipart, null, part);
     }
 
     /**
@@ -768,7 +772,7 @@ public final class MessageUtility {
         if (null == multipart || null == part) {
             return;
         }
-        part.setDataHandler(new DataHandler(new DataContentHandlerDataSource(multipart, contentType, DCH_MULTIPART)));
+        part.setDataHandler(dhFor(new DataContentHandlerDataSource(multipart, null == contentType ? multipart.getContentType() : contentType, DCH_MULTIPART)));
     }
 
     /**
@@ -813,11 +817,21 @@ public final class MessageUtility {
             return;
         }
         final String st = null == subtype ? "plain" : subtype;
-        final String objectMimeType =
-            new StringAllocator(32).append("text/").append(st).append("; charset=").append(
-                MimeUtility.quote(null == charset ? "us-ascii" : charset, HeaderTokenizer.MIME)).toString();
-        final DataContentHandlerDataSource ds = new DataContentHandlerDataSource(text, objectMimeType, dchFor(toLowerCase(st)));
-        part.setDataHandler(new DataHandler(ds));
+        final String objectMimeType = new StringAllocator(32).append("text/").append(st).append("; charset=").append(
+            MimeUtility.quote(null == charset ? "us-ascii" : charset, HeaderTokenizer.MIME)).toString();
+        final DataContentHandler dch = dchFor(toLowerCase(st));
+        if (null == dch) {
+            // No object DCH for MIME type
+            try {
+                part.setDataHandler(dhFor(new MessageDataSource(text, objectMimeType)));
+            } catch (final UnsupportedEncodingException e) {
+                throw new MessagingException("Unsupported encoding", e);
+            } catch (final OXException e) {
+                throw new MessagingException("Invalid MIME type", e);
+            }
+        } else {
+            part.setDataHandler(dhFor(new DataContentHandlerDataSource(text, objectMimeType, dch)));
+        }
         part.setHeader(MessageHeaders.HDR_CONTENT_TYPE, objectMimeType);
     }
 
