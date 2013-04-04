@@ -49,10 +49,13 @@
 
 package com.openexchange.common.osgi;
 
+import javax.activation.MailcapCommandMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.mailcap.OXMailcapCommandMap;
 
 
 /**
@@ -61,6 +64,8 @@ import org.osgi.framework.BundleContext;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CommonActivator implements BundleActivator {
+
+    private volatile ServiceRegistration<MailcapCommandMap> mailcapRegistration;
 
     /**
      * Initializes a new {@link CommonActivator}.
@@ -75,6 +80,27 @@ public final class CommonActivator implements BundleActivator {
         logger.info("Starting bundle: com.openexchange.common");
         try {
             // Add any start-up operations here
+            {
+                final String mailcap = "" +
+                		"#\n" + 
+                		"#\n" + 
+                		"# Default mailcap file for the JavaMail System.\n" + 
+                		"#\n" + 
+                		"# JavaMail content-handlers:\n" + 
+                		"#\n" + 
+                		"text/plain;;        x-java-content-handler=com.sun.mail.handlers.text_plain\n" + 
+                		"text/html;;     x-java-content-handler=com.sun.mail.handlers.text_html\n" + 
+                		"text/xml;;      x-java-content-handler=com.sun.mail.handlers.text_xml\n" + 
+                		"multipart/*;;       x-java-content-handler=com.sun.mail.handlers.multipart_mixed; x-java-fallback-entry=true\n" + 
+                		"message/rfc822;;    x-java-content-handler=com.sun.mail.handlers.message_rfc822\n" + 
+                		"#\n" + 
+                		"# can't support image types because java.awt.Toolkit doesn't work on servers\n" + 
+                		"#\n" + 
+                		"#image/gif;;        x-java-content-handler=com.sun.mail.handlers.image_gif\n" + 
+                		"#image/jpeg;;       x-java-content-handler=com.sun.mail.handlers.image_jpeg\n" + 
+                		"";
+                mailcapRegistration = context.registerService(MailcapCommandMap.class, new OXMailcapCommandMap(mailcap), null);
+            }
         } catch (final Exception e) {
             logger.info("Starting bundle 'com.openexchange.common' failed: " + e.getMessage(), e);
             throw e;
@@ -87,6 +113,11 @@ public final class CommonActivator implements BundleActivator {
         logger.info("Stopping bundle: com.openexchange.common");
         try {
             // Add any shut-down operations here
+            final ServiceRegistration<MailcapCommandMap> mailcapRegistration = this.mailcapRegistration;
+            if (null != mailcapRegistration) {
+                mailcapRegistration.unregister();
+                this.mailcapRegistration = null;
+            }
         } catch (final Exception e) {
             logger.info("Stopping bundle 'com.openexchange.common' failed: " + e.getMessage(), e);
             throw e;

@@ -52,6 +52,7 @@ package com.openexchange.smtp.osgi;
 import static com.openexchange.smtp.services.SMTPServiceRegistry.getServiceRegistry;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import javax.activation.MailcapCommandMap;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -120,6 +121,7 @@ public final class SMTPActivator extends HousekeepingActivator {
                 }
             }
             track(HostnameService.class, new RegistryCustomizer<HostnameService>(context, HostnameService.class, getServiceRegistry()));
+            track(MailcapCommandMap.class, new MailcapServiceTracker(context));
             openTrackers();
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
             dictionary.put("protocol", SMTPProvider.PROTOCOL_SMTP.toString());

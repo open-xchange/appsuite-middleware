@@ -711,11 +711,11 @@ public final class MessageUtility {
         return isWhitespace;
     }
 
-    private static final com.sun.mail.handlers.multipart_mixed DCH_MULTIPART = new com.sun.mail.handlers.multipart_mixed();
-    private static final com.sun.mail.handlers.message_rfc822 DCH_MESSAGE = new com.sun.mail.handlers.message_rfc822();
-    private static final com.sun.mail.handlers.text_plain DCH_TEXT_PLAIN = new com.sun.mail.handlers.text_plain();
-    private static final com.sun.mail.handlers.text_html DCH_TEXT_HTML = new com.sun.mail.handlers.text_html();
-    private static final com.sun.mail.handlers.text_xml DCH_TEXT_XML = new com.sun.mail.handlers.text_xml();
+    private static final com.sun.mail.handlers.multipart_mixed  DCH_MULTIPART   = new com.sun.mail.handlers.multipart_mixed();
+    private static final com.sun.mail.handlers.message_rfc822   DCH_MESSAGE     = new com.sun.mail.handlers.message_rfc822();
+    private static final com.sun.mail.handlers.text_plain       DCH_TEXT_PLAIN  = new com.sun.mail.handlers.text_plain();
+    private static final com.sun.mail.handlers.text_html        DCH_TEXT_HTML   = new com.sun.mail.handlers.text_html();
+    private static final com.sun.mail.handlers.text_xml         DCH_TEXT_XML    = new com.sun.mail.handlers.text_xml();
 
     private static DataContentHandler dchFor(final String subtype) {
         if (subtype.startsWith("plain")) {

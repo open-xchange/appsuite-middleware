@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+import javax.activation.MailcapCommandMap;
 import javax.servlet.ServletException;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
@@ -156,6 +157,7 @@ import com.openexchange.mail.loginhandler.MailLoginHandler;
 import com.openexchange.mail.loginhandler.TransportLoginHandler;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.osgi.MailProviderServiceTracker;
+import com.openexchange.mail.osgi.MailcapServiceTracker;
 import com.openexchange.mail.osgi.TransportProviderServiceTracker;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.service.impl.MailServiceImpl;
@@ -355,6 +357,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        final BundleContext context = this.context;
         CONTEXT = context;
         {
             // Set logger
@@ -417,6 +420,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Mail provider service tracker
         track(MailProvider.class, new MailProviderServiceTracker(context));
+        track(MailcapCommandMap.class, new MailcapServiceTracker(context));
 
         // Transport provider service tracker
         track(TransportProvider.class, new TransportProviderServiceTracker(context));

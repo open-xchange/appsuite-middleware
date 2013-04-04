@@ -53,6 +53,7 @@ import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegis
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
+import javax.activation.MailcapCommandMap;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
 import org.osgi.framework.BundleActivator;
@@ -170,6 +171,11 @@ public final class IMAPActivator extends HousekeepingActivator {
                     registerService(IMAPNotifierRegistryService.class, IMAPNotifierRegistry.getInstance());
                 }
             }
+            /*
+             * Trackers
+             */
+            track(MailcapCommandMap.class, new MailcapServiceTracker(context));
+            openTrackers();
             /*
              * Register login handler
              */
