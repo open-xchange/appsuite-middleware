@@ -106,6 +106,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.log.LogFactory;
+import com.openexchange.quota.Resource;
 import com.openexchange.tools.pipesnfilters.Filter;
 
 public class OXContext extends OXContextCommonImpl implements OXContextInterface {
@@ -131,6 +132,16 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     public void changeQuota(final Context ctx, final String module, final long quotaValue, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
         if (isEmpty(module)) {
             throw new InvalidDataException("No valid module specified.");
+        }
+        {
+            final Resource[] resources = Resource.values();
+            boolean found = false;
+            for (int i = 0; !found && i < resources.length; i++) {
+                found = resources[i].getIdentifier().equalsIgnoreCase(module);
+            }
+            if (!found) {
+                throw new InvalidDataException("Unknown module: " + module);
+            }
         }
 
         final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
