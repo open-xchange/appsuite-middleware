@@ -151,7 +151,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
             Set<ID> ids = targets.get(receiver);
             LOG.debug("Sending to '" + stanza.getTo() + "' @ " + receiver);
 
-            FutureTask<Map<ID, OXException>> task = new DistributedTask<Map<ID, OXException>>(new StanzaDispatcher(stanza, ids), receiver);
+            FutureTask<Map<ID, OXException>> task = new DistributedTask<Map<ID, OXException>>(new StanzaDispatcher(stanza, ids) , receiver);
             executorService.execute(task);
             futures.add(task);
         }
