@@ -58,9 +58,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.logging.Log;
 import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
@@ -75,6 +77,7 @@ import com.openexchange.realtime.hazelcast.Services;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.channel.StanzaDispatcher;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.IDMap;
 import com.openexchange.threadpool.ThreadPools;
@@ -150,7 +153,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
         for (Member receiver : targets.keySet()) {
             Set<ID> ids = targets.get(receiver);
             LOG.debug("Sending to '" + stanza.getTo() + "' @ " + receiver);
-
+            ensureSequence(stanza, receiver);
             FutureTask<Map<ID, OXException>> task = new DistributedTask<Map<ID, OXException>>(new StanzaDispatcher(stanza, ids) , receiver);
             executorService.execute(task);
             futures.add(task);
@@ -170,5 +173,35 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
 
         return exceptions;
     }
+    
+    private ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>> peerMapPerID = new ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>>();
 
+    private void ensureSequence(Stanza stanza, Member receiver) {
+        if (stanza.getSequenceNumber() != -1) {
+            ConcurrentHashMap<String, AtomicLong> peerMap = peerMapPerID.get(stanza.getFrom());
+            if (peerMap == null) {
+                peerMap = new ConcurrentHashMap<String, AtomicLong>();
+                ConcurrentHashMap<String, AtomicLong> otherPeerMap = peerMapPerID.putIfAbsent(stanza.getFrom(), peerMap);
+                if (otherPeerMap == null) {
+                    stanza.getFrom().on("dispose", new IDEventHandler() {
+
+                        @Override
+                        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
+                            peerMapPerID.remove(id);
+                        }
+                        
+                    });
+                } else {
+                    peerMap = otherPeerMap;
+                }
+            }
+            AtomicLong nextNumber = peerMap.get(receiver.getUuid());
+            if (nextNumber == null) {
+                nextNumber = new AtomicLong(0);
+                AtomicLong otherNextNumber = peerMap.putIfAbsent(receiver.getUuid(), nextNumber);
+                nextNumber = (otherNextNumber != null) ? otherNextNumber : nextNumber;
+            }
+            stanza.setSequenceNumber(nextNumber.incrementAndGet() - 1);
+        }
+    }
 }
