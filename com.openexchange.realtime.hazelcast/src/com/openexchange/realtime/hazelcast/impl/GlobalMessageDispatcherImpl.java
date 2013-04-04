@@ -137,8 +137,8 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
     private Map<ID, OXException> deliver(Stanza stanza, Map<Member, Set<ID>> targets) throws OXException {
         final HazelcastInstance hazelcastInstance = HazelcastAccess.getHazelcastInstance();
         Member localMember = hazelcastInstance.getCluster().getLocalMember();
-        Set<ID> localIds = targets.remove(localMember);
         Map<ID, OXException> exceptions = new HashMap<ID, OXException>();
+        Set<ID> localIds = targets.remove(localMember);
         if (localIds != null) {
             // Send via local message dispatcher to locally reachable receivers
             Map<ID, OXException> sent = Services.getService(LocalMessageDispatcher.class).send(stanza, localIds);
