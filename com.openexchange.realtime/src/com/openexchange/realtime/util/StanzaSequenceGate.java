@@ -57,23 +57,28 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.Log;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Stanza;
 
-
 /**
- * A {@link StanzaSequenceGate} ensures that stanzas are handled in a well defined order. Sequence numbers are expected to always rise by one (1, 2, 3, 4....). If a sequence number
- * is skipped the stanza sequence gate will hold back handling the stanza until the missing stanza arrives, and then handle all held back stanzas in turn. If a stanza contains no sequence number (-1)
- * then it will be handled immediately
- *
+ * A {@link StanzaSequenceGate} ensures that stanzas are handled in a well defined order. Sequence numbers are expected to always rise by
+ * one (1, 2, 3, 4....). If a sequence number is skipped the stanza sequence gate will hold back handling the stanza until the missing
+ * stanza arrives, and then handle all held back stanzas in turn. If a stanza contains no sequence number (-1) then it will be handled
+ * immediately
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class StanzaSequenceGate {
-    
+
+    private static org.apache.commons.logging.Log LOG = Log.loggerFor(StanzaSequenceGate.class);
+
+    /* Keep track of SequencePrincalpal(ID) to thresholds(sequence number of last seen stanza) */
     private ConcurrentHashMap<ID, AtomicLong> sequenceNumbers = new ConcurrentHashMap<ID, AtomicLong>();
+
     private ConcurrentHashMap<ID, List<Stanza>> inboxes = new ConcurrentHashMap<ID, List<Stanza>>();
-    
+
     public void handle(Stanza stanza, ID recipient) throws OXException {
         if (stanza.getSequenceNumber() == -1) {
             handleInternal(stanza, recipient);
@@ -81,12 +86,17 @@ public abstract class StanzaSequenceGate {
         try {
             stanza.getSequencePrincipal().lock("gate");
             AtomicLong threshhold = sequenceNumbers.get(stanza.getSequencePrincipal());
+            // we haven't recorded a threshold for this principal, yet
             if (threshhold == null) {
                 threshhold = new AtomicLong(stanza.getSequenceNumber());
                 AtomicLong meantime = sequenceNumbers.putIfAbsent(stanza.getSequencePrincipal(), threshhold);
+                /*
+                 * Add eventhandler to clean up the traces we left in the gate when the the principal receives the dispose event, e.g when
+                 * all members left the GroupDispatcher(SequencePrincipal)
+                 */
                 if (meantime == null) {
                     stanza.getSequencePrincipal().on("dispose", new IDEventHandler() {
-                        
+
                         @Override
                         public void handle(String event, ID id, Object source, Map<String, Object> properties) {
                             sequenceNumbers.remove(id);
@@ -97,12 +107,16 @@ public abstract class StanzaSequenceGate {
                     threshhold = meantime;
                 }
             }
-            
+
+            // Best case, we found the follow up Stanza
             if (threshhold.compareAndSet(stanza.getSequenceNumber(), stanza.getSequenceNumber() + 1)) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Best case, Threshold: " + threshhold.get());
+                }
                 handleInternal(stanza, recipient);
-                // Drain
+                // Drain Stanzas accumulated while waiting for the missing SequenceNumber
                 List<Stanza> stanzas = inboxes.remove(stanza.getSequencePrincipal());
-                
+
                 if (stanzas == null || stanzas.isEmpty()) {
                     return;
                 }
@@ -111,15 +125,17 @@ public abstract class StanzaSequenceGate {
                     public int compare(Stanza arg0, Stanza arg1) {
                         return (int) (arg0.getSequenceNumber() - arg1.getSequenceNumber());
                     }
-                    
+
                 });
-                for(Stanza s: stanzas) {
+                for (Stanza s : stanzas) {
                     handle(s, s.getTo());
                 }
-                
 
+                // Stanzas got out of sync, enqueue until we receive the Stanza matching threshold
             } else {
-                // Enqueue
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Stanzas not in sequence, Threshold: " + threshhold.get() + " SequenceNumber: " + stanza.getSequenceNumber());
+                }
                 List<Stanza> inbox = inboxes.get(stanza.getSequencePrincipal());
                 if (inbox == null) {
                     inbox = Collections.synchronizedList(new ArrayList<Stanza>());
@@ -133,7 +149,7 @@ public abstract class StanzaSequenceGate {
         }
 
     }
-    
+
     public abstract void handleInternal(Stanza stanza, ID recipient) throws OXException;
-    
+
 }

@@ -186,7 +186,7 @@ public abstract class Stanza implements Serializable {
     /**
      * Gets the sequencePrincipal
      *
-     * @return The sequencePrincipal
+     * @return The SequencePrincipal (ID) set via setSequencePrincipal or the SequencePrincipal of the sender ID
      */
     public ID getSequencePrincipal() {
         return (sequencePrincipal != null) ? sequencePrincipal : from;

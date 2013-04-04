@@ -88,6 +88,7 @@ public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
             } else {
                 if (channel.isConnected(recipient)) {
                     try {
+                        LOG.info("Sending Stanza: " + stanza + " to " + recipient.toString());
                         channel.send(stanza, recipient);
                     } catch (OXException e) {
                         if (RealtimeExceptionCodes.RESOURCE_NOT_AVAILABLE.equals(e)) {
@@ -99,6 +100,7 @@ public class LocalMessageDispatcherImpl implements LocalMessageDispatcher {
                         throw DispatchExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
                     }
                 } else {
+                    LOG.error(DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString()));
                    throw DispatchExceptionCode.RESOURCE_OFFLINE.create(recipient.toString());
                 }
             }

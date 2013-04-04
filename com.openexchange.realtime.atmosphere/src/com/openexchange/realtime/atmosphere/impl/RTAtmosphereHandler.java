@@ -96,7 +96,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(RTAtmosphereHandler.class));
 
     private final AtmosphereServiceRegistry atmosphereServiceRegistry;
-    
+
     /*
      * Map general ids (user@context) to full ids (ox://user@context/resource.browserx.taby, this is used for lookups via isConnected
      */
@@ -106,17 +106,16 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * Map full client IDs to the AtmosphereResource that represents their connection to the server, this is used for sending
      */
     private final IDMap<AtmosphereResource> concreteIDToResourceMap;
-    
+
     /*
      * Map for holding outboxes
      */
     private final ConcurrentHashMap<ID, List<Stanza>> outboxes;
-    
+
     /*
      * Give resources time to linger before finally cleaning up
      */
     AtmosphereResourceReaper atmosphereResourceReaper = new AtmosphereResourceReaper();
-    
 
     /**
      * Initializes a new {@link RTAtmosphereHandler}.
@@ -185,7 +184,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     } else {
                         stanzas.add(new JSONObject(postData));
                     }
-                    for(JSONObject json: stanzas) {
+                    for (JSONObject json : stanzas) {
                         if (json.has("type") && "ping".equalsIgnoreCase(json.optString("type"))) {
                             // ignore
                             return;
@@ -220,7 +219,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     private void trackConnectedUser(ID concreteID, AtmosphereResource atmosphereResource) throws OXException {
         /* if the id was marked for removal via the reaper try to remove it from the reaper */
         atmosphereResourceReaper.remove(concreteID);
-        
+
         // Adds the concreteID to the generalID -> concreteID map
         ID generalID = concreteID.toGeneralForm();
         if (generalToConcreteIDMap.containsKey(generalID)) {
@@ -230,22 +229,22 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 generalToConcreteIDMap.put(generalID, fullIDSet);
             }
             fullIDSet.add(concreteID);
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Added to generalID -> concreteIDMap: "+generalID + " -> " + concreteID);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Added to generalID -> concreteIDMap: " + generalID + " -> " + concreteID);
             }
         } else {
             Set<ID> concreteIDSet = new HashSet<ID>();
             concreteIDSet.add(concreteID);
             generalToConcreteIDMap.put(generalID, concreteIDSet);
-            if(LOG.isDebugEnabled()) {
-                LOG.debug("Added to generalID -> concreteIDMap: "+generalID + " -> " + concreteID);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Added to generalID -> concreteIDMap: " + generalID + " -> " + concreteID);
             }
         }
 
         // Adds an entry to the concreteID -> AtmosphereResource map
         concreteIDToResourceMap.put(concreteID, atmosphereResource);
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Added to concreteIDMap -> atmosphereResourceMap: "+concreteID + " -> " + atmosphereResource.uuid());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Added to concreteIDMap -> atmosphereResourceMap: " + concreteID + " -> " + atmosphereResource.uuid());
         }
 
         // Register the concreteID in the ResourceDirectory
@@ -322,7 +321,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         StanzaQueueService stanzaQueueService = atmosphereServiceRegistry.getService(StanzaQueueService.class);
         if (!stanzaQueueService.enqueueStanza(stanza)) {
             // TODO: exception?
-            LOG.error("Couldn't enqueue Stanza: "+stanza);
+            LOG.error("Couldn't enqueue Stanza: " + stanza);
         }
     }
 
@@ -335,7 +334,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         } finally {
             recipient.unlock("rt-atmosphere-outbox");
         }
-        
+
     }
 
     private List<Stanza> outboxFor(ID id) {
@@ -347,11 +346,11 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         }
         return outbox;
     }
-    
+
     private void drainOutbox(ID id) throws OXException {
         drainOutbox(id, 0);
     }
-    
+
     private void drainOutbox(ID id, int count) throws OXException {
         List<Stanza> outbox = null;
         try {
@@ -361,13 +360,15 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             boolean sent = false;
 
             outbox = outboxes.remove(id);
-            if (outbox != null && ! outbox.isEmpty()) {
+            if (outbox != null && !outbox.isEmpty()) {
                 JSONArray array = new JSONArray();
                 StanzaWriter stanzaWriter = new StanzaWriter();
-                for(Stanza stanza: outbox) {
+                for (Stanza stanza : outbox) {
                     array.put(stanzaWriter.write(stanza));
                 }
-
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Trying to send: " + array.length() + " stanzas: " + array);
+                }
 
                 if (atmosphereResource == null || atmosphereResource.isCancelled() || atmosphereResource.getResponse().isCommitted()) {
                     // Enqueue again and try later
@@ -375,7 +376,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     outbox = null;
                     failed = true;
                 }
-                
+
                 if (!failed) {
                     PrintWriter writer;
                     try {
@@ -387,7 +388,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         } else {
                             sent = true;
                         }
-                        
+
                     } catch (IOException e) {
                         // Enqueue again and try later
                         outboxFor(id).addAll(outbox);
@@ -430,9 +431,8 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             id.unlock("rt-atmosphere-outbox");
         }
 
-        
     }
-    
+
     private void handleResourceNotAvailable() throws OXException {
         throw RealtimeExceptionCodes.RESOURCE_NOT_AVAILABLE.create();
     }
