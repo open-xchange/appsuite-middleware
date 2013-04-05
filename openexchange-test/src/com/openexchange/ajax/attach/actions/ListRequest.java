@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,15 +47,67 @@
  *
  */
 
-package com.openexchange.ajax.framework;
+package com.openexchange.ajax.attach.actions;
+
+import static com.openexchange.ajax.framework.AJAXRequest.Method.PUT;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TimeZone;
+import org.json.JSONArray;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.attach.AttachmentTools;
+import com.openexchange.groupware.container.CommonObject;
 
 /**
- * Super class for list parsers.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link ListRequest}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public abstract class AbstractListParser<T extends AbstractColumnsResponse> extends AbstractColumnsParser<T> {
+public final class ListRequest extends AbstractAttachmentRequest<ListResponse> {
 
-    public AbstractListParser(final boolean failOnError, final int[] columns) {
-        super(failOnError, columns);
+    private CommonObject object;
+    private int[] attachmentIds;
+    private int[] columns;
+    private TimeZone timezone;
+
+    public ListRequest(CommonObject object, int[] attachmentIds, int[] columns, TimeZone timezone) {
+        super();
+        this.object = object;
+        this.attachmentIds = attachmentIds;
+        this.columns = columns;
+        this.timezone = timezone;
+    }
+
+    @Override
+    public Method getMethod() {
+        return PUT;
+    }
+
+    @Override
+    public Parameter[] getParameters() {
+        List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST));
+        params.add(new URLParameter(AJAXServlet.PARAMETER_ATTACHEDID, object.getObjectID()));
+        params.add(new URLParameter(AJAXServlet.PARAMETER_FOLDERID, object.getParentFolderID()));
+        params.add(new URLParameter(AJAXServlet.PARAMETER_MODULE, AttachmentTools.determineModule(object)));
+        params.add(new URLParameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        if (null != timezone) {
+            params.add(new Parameter(AJAXServlet.PARAMETER_TIMEZONE, timezone.getID()));
+        }
+        return params.toArray(new Parameter[params.size()]);
+    }
+
+    @Override
+    public ListParser getParser() {
+        return new ListParser(columns);
+    }
+
+    @Override
+    public Object getBody() {
+        JSONArray array = new JSONArray();
+        for (int attachmentId : attachmentIds) {
+            array.put(attachmentId);
+        }
+        return array.toString();
     }
 }

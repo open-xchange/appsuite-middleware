@@ -57,6 +57,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -364,8 +365,9 @@ public class AttachmentRequest extends CommonRequest {
                 if (AJAXServlet.ACTION_DETACH.equals(action)) {
                     detach(folderId, attachedId, moduleId, ids);
                 } else {
+                    String timeZoneId = null; //req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
                     final AttachmentField[] columns = PARSER.getColumns(req.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
-                    list(folderId, attachedId, moduleId, ids, columns);
+                    list(folderId, attachedId, moduleId, ids, columns, timeZoneId);
                 }
                 return true;
             }
@@ -579,10 +581,15 @@ public class AttachmentRequest extends CommonRequest {
         }
     }
 
-    private void list(final int folderId, final int attachedId, final int moduleId, final int[] ids, final AttachmentField[] fields) {
+    private void list(final int folderId, final int attachedId, final int moduleId, final int[] ids, final AttachmentField[] fields, String timeZoneId) {
 
         SearchIterator<AttachmentMetadata> iter = null;
-
+        final TimeZone tz;
+        if (null == timeZoneId) {
+            tz = TimeZoneUtils.getTimeZone(user.getTimeZone());
+        } else {
+            tz = TimeZoneUtils.getTimeZone(timeZoneId);
+        }
         try {
             ATTACHMENT_BASE.startTransaction();
 
@@ -592,7 +599,7 @@ public class AttachmentRequest extends CommonRequest {
 
             final AttachmentWriter aWriter = new AttachmentWriter(w);
             aWriter.timedResult(result.sequenceNumber());
-            aWriter.writeAttachments(iter, fields, TimeZoneUtils.getTimeZone(user.getTimeZone()));
+            aWriter.writeAttachments(iter, fields, tz);
             aWriter.endTimedResult();
             // w.flush();
 
