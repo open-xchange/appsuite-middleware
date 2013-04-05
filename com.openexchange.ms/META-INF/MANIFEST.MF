@@ -1,5 +1,6 @@
 Manifest-Version: 1.0
 Eclipse-RegisterBuddy: com.hazelcast
+Eclipse-BuddyPolicy: dependent
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Messaging System Bundle
 Bundle-SymbolicName: com.openexchange.ms

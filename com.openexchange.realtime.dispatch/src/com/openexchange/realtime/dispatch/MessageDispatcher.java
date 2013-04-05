@@ -50,6 +50,7 @@
 package com.openexchange.realtime.dispatch;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.directory.Resource;
@@ -77,4 +78,10 @@ public interface MessageDispatcher {
      * Delivers a stanza using the resource directory to resolve the recipients
      */
     public Map<ID, OXException> send(Stanza stanza) throws OXException;
+
+    /**
+     * Send a message and synchronously waits for a response. The recipient is supposed to send exactly one Stanza
+     * back to the 'from' ID. The 'from' ID is generated in this method. 
+     */
+    public Stanza sendSynchronously(Stanza stanza, long timeout, TimeUnit unit) throws OXException;
 }

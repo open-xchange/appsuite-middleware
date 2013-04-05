@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,36 +47,36 @@
  *
  */
 
-package com.openexchange.config.cascade.hostname;
+package com.openexchange.realtime.example.chineseroom.json;
 
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import java.util.Arrays;
+import java.util.Collection;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.server.ServiceLookup;
+
 
 /**
- * {@link ConfigurableHostnameService}
+ * {@link ChineseActions}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ConfigurableHostnameService implements HostnameService {
+public class ChineseActions implements AJAXActionServiceFactory {
 
-    private final ConfigViewFactory configViews;
-
-    private static final String HOSTNAME_KEY = "com.openexchange.hostname";
-
-    public ConfigurableHostnameService(final ConfigViewFactory configViews) {
-        super();
-        this.configViews = configViews;
+    private AJAXActionService HISTORY_ACTION = null;
+    
+    public ChineseActions(ServiceLookup services) {
+        HISTORY_ACTION = new HistoryAction(services);
     }
 
     @Override
-    public String getHostname(final int userId, final int contextId) {
-        try {
-            final ConfigView view = configViews.getView(userId, contextId);
-            return view.get(HOSTNAME_KEY, String.class);
-        } catch (OXException e) {
-            return null;
-        }
+    public Collection<?> getSupportedServices() {
+        return Arrays.asList("history");
     }
+    @Override
+    public AJAXActionService createActionService(String action) throws OXException {
+        return HISTORY_ACTION;
+    }
+
 }
