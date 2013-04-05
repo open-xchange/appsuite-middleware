@@ -61,7 +61,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
  */
 public class ConfigurableHostnameService implements HostnameService {
 
-    private ConfigViewFactory configViews = null;
+    private final ConfigViewFactory configViews;
 
     private static final String HOSTNAME_KEY = "com.openexchange.hostname";
 
