@@ -49,12 +49,6 @@
 
 package com.openexchange.soap.cxf.osgi;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.cxf.Bus;
@@ -66,11 +60,9 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.soap.cxf.interceptor.TransformGenericElementsInterceptor;
 import com.openexchange.soap.cxf.logger.CommonsLoggingLogger;
-import com.openexchange.soap.cxf.servlet.BoundedCXFNonSpringServlet;
 
 /**
  * {@link CXFActivator} - The activator for CXF bundle.
@@ -79,33 +71,6 @@ import com.openexchange.soap.cxf.servlet.BoundedCXFNonSpringServlet;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CXFActivator extends HousekeepingActivator {
-
-    /** The host name service */
-    final AtomicReference<HostnameService> hostnameServiceRef;
-
-    /** The HTTP service */
-    final AtomicReference<HttpService> httpServiceRef;
-
-    /** The WebserviceCollector */
-    final AtomicReference<WebserviceCollector> collectorRef;
-
-    /** The mutex */
-    final Object mutex;
-
-    /** The registered aliases */
-    final Map<String, Object> registeredAliases;
-
-    /**
-     * Initializes a new {@link CXFActivator}.
-     */
-    public CXFActivator() {
-        super();
-        hostnameServiceRef = new AtomicReference<HostnameService>();
-        httpServiceRef = new AtomicReference<HttpService>();
-        collectorRef = new AtomicReference<WebserviceCollector>();
-        registeredAliases = new HashMap<String, Object>(4);
-        mutex = new Object();
-    }
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -119,24 +84,37 @@ public class CXFActivator extends HousekeepingActivator {
             log.info("Starting Bundle: com.openexchange.soap.cxf");
             LogUtils.setLoggerClass(CommonsLoggingLogger.class);
             final BundleContext context = this.context;
-            final Set<String> aliases = new HashSet<String>(4);
-            aliases.add("/webservices");
-            aliases.add("/servlet/axis2/services");
-            aliases.add("/axis2");
+            final String alias = "/webservices";
+            final String alias2 = "/servlet/axis2/services";
             /*
              * Initialize ServiceTrackerCustomizer
              */
             final ServiceTrackerCustomizer<HttpService, HttpService> trackerCustomizer =
                 new ServiceTrackerCustomizer<HttpService, HttpService>() {
 
+                    private volatile WebserviceCollector collector;
+
                     @Override
                     public void removedService(final ServiceReference<HttpService> reference, final HttpService service) {
                         final HttpService httpService = getService(HttpService.class);
-                        synchronized (mutex) {
-                            unregister(httpService, aliases, log);
+                        if (httpService != null) {
+                            try {
+                                httpService.unregister(alias);
+                                httpService.unregister(alias2);
+                            } catch (final Exception e) {
+                                // Ignore
+                            }
+                        }
+                        final WebserviceCollector collector = this.collector;
+                        if (null != collector) {
+                            try {
+                                collector.close();
+                            } catch (final Exception e) {
+                                // Ignore
+                            }
+                            this.collector = null;
                         }
                         context.ungetService(reference);
-                        httpServiceRef.set(null);
                     }
 
                     @Override
@@ -147,167 +125,84 @@ public class CXFActivator extends HousekeepingActivator {
                     @Override
                     public HttpService addingService(final ServiceReference<HttpService> reference) {
                         final HttpService httpService = context.getService(reference);
-                        synchronized (mutex) {
-                            if (register(httpService, aliases, log)) {
-                                httpServiceRef.set(httpService);
-                                return httpService;
+                        boolean servletRegistered = false;
+                        boolean collectorOpened = false;
+                        try {
+                            System.setProperty("org.apache.cxf.Logger", "com.openexchange.soap.cxf.logger.CommonsLoggingLogger");
+                            final CXFNonSpringServlet cxfServlet = new CXFNonSpringServlet();
+                            /*
+                             * Register CXF Servlet
+                             */
+                            httpService.registerServlet(alias, cxfServlet, null, null);
+                            log.info("Registered CXF Servlet under: " + alias);
+                            httpService.registerServlet(alias2, cxfServlet, null, null);
+                            log.info("Registered CXF Servlet under: " + alias2);
+                            servletRegistered = true;
+                            /*
+                             * Get CXF bus
+                             */
+                            Bus bus = cxfServlet.getBus();
+                            if (null == bus) {
+                                bus = BusFactory.newInstance().createBus();
+                                cxfServlet.setBus(bus);
                             }
+                            /*
+                             * Add interceptors here
+                             */
+                            bus.getInInterceptors().add(new TransformGenericElementsInterceptor());
+                            /*
+                             * Apply as default bus
+                             */
+                            BusFactory.setDefaultBus(bus);
+                            /*
+                             * Initialize Webservice collector
+                             */
+                            final WebserviceCollector collector = new WebserviceCollector(context);
+                            context.addServiceListener(collector);
+                            collector.open();
+                            this.collector = collector;
+                            collectorOpened = true;
+                            log.info("CXF SOAP service is up and running");
+                            /*
+                             * Return tracked HTTP service
+                             */
+                            return httpService;
+                        } catch (final ServletException e) {
+                            log.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
+                        } catch (final NamespaceException e) {
+                            log.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
+                        } catch (final RuntimeException e) {
+                            if (servletRegistered) {
+                                try {
+                                    httpService.unregister(alias);
+                                    httpService.unregister(alias2);
+                                } catch (final Exception e1) {
+                                    // Ignore
+                                }
+                            }
+                            if (collectorOpened) {
+                                final WebserviceCollector collector = this.collector;
+                                if (null != collector) {
+                                    try {
+                                        collector.close();
+                                    } catch (final Exception e1) {
+                                        // Ignore
+                                    }
+                                    this.collector = null;
+                                }
+                            }
+                            log.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
                         }
                         context.ungetService(reference);
-                        httpServiceRef.set(null);
                         return null;
                     }
                 };
                 track(HttpService.class, trackerCustomizer);
-                track(HostnameService.class, new ServiceTrackerCustomizer<HostnameService, HostnameService>() {
-
-                    @Override
-                    public HostnameService addingService(ServiceReference<HostnameService> reference) {
-                        final HostnameService service = context.getService(reference);
-                        if (hostnameServiceRef.compareAndSet(null, service)) {
-                            final HttpService httpService = httpServiceRef.get();
-                            if (null != httpService) {
-                                synchronized (mutex) {
-                                    unregister(httpService, aliases, log);
-                                    register(httpService, aliases, log);
-                                }
-                            }
-                        }
-                        return service;
-                    }
-
-                    @Override
-                    public void modifiedService(ServiceReference<HostnameService> reference, HostnameService service) {
-                        // Ignore
-                    }
-
-                    @Override
-                    public void removedService(ServiceReference<HostnameService> reference, HostnameService service) {
-                        if (hostnameServiceRef.compareAndSet(service, null)) {
-                            final HttpService httpService = httpServiceRef.get();
-                            if (null != httpService) {
-                                synchronized (mutex) {
-                                    unregister(httpService, aliases, log);
-                                    register(httpService, aliases, log);
-                                }
-                            }
-                        }
-                        context.ungetService(reference);
-                    }
-                });
                 openTrackers();
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
             throw e;
         }
-    }
-
-    boolean register(final HttpService httpService, final Collection<String> aliases, final Log log) {
-        boolean servletRegistered = false;
-        boolean collectorOpened = false;
-        try {
-            // Set logger
-            System.setProperty("org.apache.cxf.Logger", "com.openexchange.soap.cxf.logger.CommonsLoggingLogger");
-            // Create Servlet instance
-            final CXFNonSpringServlet cxfServlet;
-            {
-                final HostnameService hostnameService = hostnameServiceRef.get();
-                if (null == hostnameService) {
-                    cxfServlet = new CXFNonSpringServlet();
-                } else {
-                    cxfServlet = new BoundedCXFNonSpringServlet(hostnameService);
-                }
-            }
-            /*
-             * Register CXF Servlet
-             */
-            for (final String alias : aliases) {
-                if (!registeredAliases.containsKey(alias)) {
-                    httpService.registerServlet(alias, cxfServlet, null, null);
-                    registeredAliases.put(alias, mutex);
-                    log.info("Registered CXF Servlet under: " + alias);
-                }
-            }
-            servletRegistered = true;
-            /*
-             * Get CXF bus
-             */
-            Bus bus = cxfServlet.getBus();
-            if (null == bus) {
-                bus = BusFactory.newInstance().createBus();
-                cxfServlet.setBus(bus);
-            }
-            /*
-             * Add interceptors here
-             */
-            bus.getInInterceptors().add(new TransformGenericElementsInterceptor());
-            /*
-             * Apply as default bus
-             */
-            BusFactory.setDefaultBus(bus);
-            /*
-             * Initialize Webservice collector
-             */
-            final WebserviceCollector collector = new WebserviceCollector(context);
-            context.addServiceListener(collector);
-            collector.open();
-            collectorRef.set(collector);
-            collectorOpened = true;
-            log.info("CXF SOAP service is up and running");
-            return true;
-        } catch (final ServletException e) {
-            log.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
-        } catch (final NamespaceException e) {
-            log.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
-        } catch (final RuntimeException e) {
-            if (servletRegistered) {
-                for (final String alias : aliases) {
-                    try {
-                        httpService.unregister(alias);
-                    } catch (final Exception e1) {
-                        // Ignore
-                    }
-                }
-            }
-            if (collectorOpened) {
-                final WebserviceCollector collector = collectorRef.get();
-                if (null != collector) {
-                    try {
-                        collector.close();
-                    } catch (final Exception e1) {
-                        // Ignore
-                    }
-                    collectorRef.set(null);
-                }
-            }
-            log.error("Couldn't register CXF Servlet: " + e.getMessage(), e);
-        }
-        return false;
-    }
-
-    void unregister(final HttpService httpService, final Collection<String> aliases, final Log log) {
-        if (httpService != null) {
-            for (final String alias : aliases) {
-                if (registeredAliases.containsKey(alias)) {
-                    try {
-                        httpService.unregister(alias);
-                    } catch (final Exception e) {
-                        // Ignore
-                    }
-                    registeredAliases.remove(alias);
-                }
-            }
-        }
-        final WebserviceCollector collector = collectorRef.get();
-        if (null != collector) {
-            try {
-                collector.close();
-            } catch (final Exception e) {
-                // Ignore
-            }
-            collectorRef.set(null);
-        }
-        log.info("CXF SOAP service stopped");
     }
 
 }
