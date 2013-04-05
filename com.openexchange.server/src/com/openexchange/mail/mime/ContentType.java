@@ -402,6 +402,10 @@ public class ContentType extends ParameterizedHeader {
                 // Primary type
                 {
                     String pt = 0 == slashPos ? DEFAULT_PRIMTYPE : type.substring(0, slashPos).trim();
+                    if (pt.indexOf('%') >= 0) {
+                        // Possibly mail-safe encoded
+                        pt = decodeUrl(pt);
+                    }
                     char fc;
                     if ((fc = pt.charAt(0)) == '"' || fc == '\'') {
                         pt = pt.substring(1);
@@ -420,6 +424,10 @@ public class ContentType extends ParameterizedHeader {
                 // Subtype
                 {
                     String st = slashPos < type.length() ? type.substring(slashPos + 1).trim() : DEFAULT_SUBTYPE;
+                    if (st.indexOf('%') >= 0) {
+                        // Possibly mail-safe encoded
+                        st = decodeUrl(st);
+                    }
                     final int mlen = st.length() - 1;
                     char lc;
                     if (mlen > 0 && ((lc = st.charAt(mlen)) == '"' || lc == '\'')) {

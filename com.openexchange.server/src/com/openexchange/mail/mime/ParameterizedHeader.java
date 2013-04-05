@@ -205,10 +205,6 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
             // Possibly mail-safe encoded
             paramHdr = decodeEnvelopeHeader(paramHdr).trim();
         }
-        if (paramHdr.indexOf('%') >= 0) {
-            // Possibly mail-safe encoded
-            paramHdr = decodeUrl(paramHdr);
-        }
         int length = paramHdr.length();
         if (length > 0) {
             int lastPos = length - 1;
@@ -232,7 +228,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      * <p>
      * Using <code>org.apache.commons.codec.net.URLCodec</code>.
      */
-    private static String decodeUrl(final String s) {
+    protected static String decodeUrl(final String s) {
         try {
             return isEmpty(s) ? s : (URL_CODEC.decode(s));
         } catch (final DecoderException e) {
