@@ -125,7 +125,7 @@ public class ChineseRoom extends GroupDispatcher implements ComponentHandle {
     //    }
     public void handleGetLog(Stanza stanza) throws OXException {
         // Again, only members may retrieve the history
-        if (!isMember(stanza.getFrom())) {
+        if (!isMember(stanza.getFrom()) && !stanza.getFrom().getProtocol().equals("call")) {
             return; // Discard
         }
         // As an answer, we create a new message
@@ -155,7 +155,7 @@ public class ChineseRoom extends GroupDispatcher implements ComponentHandle {
     private String chineseVersionOf(String string) {
         return string.replaceAll("[aeiouŠŸš]", "o");
     }
-    
+        
     // Build a message out of a string
     private void sendToAll(Stanza stanza, String chineseVersion) throws OXException {
         Message message = new Message();

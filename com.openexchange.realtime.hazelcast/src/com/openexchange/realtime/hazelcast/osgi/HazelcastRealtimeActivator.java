@@ -126,6 +126,9 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         registerService(ResourceDirectory.class, directory, null);
         registerService(MessageDispatcher.class, globalDispatcher);
         registerService(StanzaStorage.class, new HazelcastStanzaStorage());
+        registerService(Channel.class, globalDispatcher.getChannel());
+        
+        directory.addChannel(globalDispatcher.getChannel());
     }
 
     @Override

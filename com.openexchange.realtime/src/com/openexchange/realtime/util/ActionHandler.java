@@ -57,7 +57,9 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.payload.PayloadElement;
 import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
 
 
 /**
@@ -166,6 +168,15 @@ public class ActionHandler {
         }
         
         return false;
+    }
+    
+    public static PayloadTree getMethodCall(String methodName) {
+        return new PayloadTree(
+            PayloadTreeNode.builder()
+            .withPayload(
+                new PayloadElement(methodName, "json", null, "action") 
+            ).build()
+        );
     }
 
 }

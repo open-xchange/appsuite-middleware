@@ -47,41 +47,58 @@
  *
  */
 
-package com.openexchange.realtime.dispatch;
+package com.openexchange.realtime.example.chineseroom.json;
 
-import java.util.Map;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import org.json.JSONArray;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.directory.Resource;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.util.IDMap;
+import com.openexchange.realtime.packet.Message;
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.util.ActionHandler;
+import com.openexchange.realtime.util.ElementPath;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * The Message dispatcher chooses an appropriate {@link Channel} to push data (aka. a Stanza) to listening clients
+ * {@link HistoryAction}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface MessageDispatcher {
-    
-    /**
-     * Delivers a {@link Stanza} to a list of given recipients.
-     *
-     * @param stanza The stanza to send
-     * @return A map of IDs that could not be reached because of an occurred exception.
-     * @throws OXException If send operation fails for any reason
-     */
-    public Map<ID, OXException> send(Stanza stanza, IDMap<Resource> recipients) throws OXException;
-    
-    /**
-     * Delivers a stanza using the resource directory to resolve the recipients
-     */
-    public Map<ID, OXException> send(Stanza stanza) throws OXException;
+public class HistoryAction implements AJAXActionService {
 
-    /**
-     * Send a message and synchronously waits for a response. The recipient is supposed to send exactly one Stanza
-     * back to the 'from' ID. The 'from' ID is generated in this method. 
-     */
-    public Stanza sendSynchronously(Stanza stanza, long timeout, TimeUnit unit) throws OXException;
+    private ServiceLookup services;
+
+    public HistoryAction(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
+
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        String room = requestData.getParameter("room");
+        ID id = new ID("synthetic", "china", room, "" + session.getContextId(), "");
+        
+        Message message = new Message();
+        message.setTo(id);
+        message.addPayload(ActionHandler.getMethodCall("getLog"));
+        
+        Message history = (Message) services.getService(MessageDispatcher.class).sendSynchronously(message, 10, TimeUnit.SECONDS);
+        history.transformPayloads("json");
+        
+        JSONArray array = new JSONArray();
+        Collection<PayloadTree> payloads = history.getPayloads(new ElementPath("china", "replay"));
+        for (PayloadTree payloadTree : payloads) {
+            array.put(payloadTree.getRoot().getData());
+        }
+        
+        return new AJAXRequestResult(array, "json");
+    }
+
 }
