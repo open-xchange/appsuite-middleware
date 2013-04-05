@@ -62,7 +62,7 @@ Description: The Open-Xchange Meta package for OX managed via database only
 
 Package: open-xchange-meta-mobility
 Architecture: all
-Depends: open-xchange-eas, open-xchange-usm, open-xchange-help-usm-eas, open-xchange-eas-provisioning-mail, open-xchange-eas-provisioning-gui
+Depends: open-xchange-eas, open-xchange-usm, open-xchange-help-usm-eas | open-xchange-meta-ui-appsuite, open-xchange-eas-provisioning-mail, open-xchange-eas-provisioning-gui | open-xchange-meta-ui-appsuite
 Description: The Open-Xchange Meta package for Business Mobility
 
 Package: open-xchange-meta-outlook
@@ -96,4 +96,3 @@ Architecture: all
 Provides: open-xchange-meta-backend
 Depends: ${oxcommon}
 Description: The Open-Xchange Meta package for OX App Suite backend packages
-
