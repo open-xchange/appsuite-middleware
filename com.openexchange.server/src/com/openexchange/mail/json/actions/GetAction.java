@@ -246,9 +246,12 @@ public final class GetAction extends AbstractMailAction {
                             final boolean doUnseen = (unseen && wasUnseen);
                             if (saveToDisk) {
                                 requestData.setResponseHeader("Content-Type", "application/octet-stream");
-                                final String subject = mail.getSubject();
                                 final StringAllocator sb = new StringAllocator(64).append("attachment");
-                                DownloadUtility.appendFilenameParameter(isEmpty(subject) ? "mail.eml" : saneForFileName(subject)+".eml", requestData.getUserAgent(), sb);
+                                {
+                                    final String subject = mail.getSubject();
+                                    final String fileName = isEmpty(subject) ? "mail.eml" : saneForFileName(subject) + ".eml";
+                                    DownloadUtility.appendFilenameParameter(fileName, requestData.getUserAgent(), sb);
+                                }
                                 requestData.setResponseHeader("Content-Disposition",  sb.toString());
                                 mail.writeTo(directOutputStream);
                                 directOutputStream.flush();
