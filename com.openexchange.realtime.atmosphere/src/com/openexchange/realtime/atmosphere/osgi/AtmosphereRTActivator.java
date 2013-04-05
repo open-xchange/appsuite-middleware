@@ -121,7 +121,10 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        getService(AtmosphereService.class).unregister("rt");
+        AtmosphereService atmosphereService = getService(AtmosphereService.class);
+        if (atmosphereService != null) {
+            atmosphereService.unregister("rt");
+        }
         AtmosphereServiceRegistry.SERVICES.set(null);
         super.stop(context);
     }
