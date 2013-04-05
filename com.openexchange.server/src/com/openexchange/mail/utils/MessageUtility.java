@@ -54,6 +54,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -714,6 +715,126 @@ public final class MessageUtility {
         return isWhitespace;
     }
 
+    // ---------------------------------- JAF DataHandler stuff ---------------------------------------- //
+
+    private static volatile Field dataContentHandlerField;
+    private static Field dataContentHandlerField() {
+        Field f = dataContentHandlerField;
+        if (null == f) {
+            synchronized (MessageUtility.class) {
+                f = dataContentHandlerField;
+                if (null == f) {
+                    try {
+                        f = DataHandler.class.getDeclaredField("dataContentHandler");
+                        f.setAccessible(true);
+                    } catch (final Exception e) {
+                        f = null;
+                    }
+                    dataContentHandlerField = f;
+                }
+            }
+        }
+        return f;
+    }
+
+    private static volatile Field objectField;
+    private static Field objectField() {
+        Field f = objectField;
+        if (null == f) {
+            synchronized (MessageUtility.class) {
+                f = objectField;
+                if (null == f) {
+                    try {
+                        f = DataHandler.class.getDeclaredField("object");
+                        f.setAccessible(true);
+                    } catch (final Exception e) {
+                        f = null;
+                    }
+                    objectField = f;
+                }
+            }
+        }
+        return f;
+    }
+
+    private static volatile Field objectMimeTypeField;
+    private static Field objectMimeTypeField() {
+        Field f = objectMimeTypeField;
+        if (null == f) {
+            synchronized (MessageUtility.class) {
+                f = objectMimeTypeField;
+                if (null == f) {
+                    try {
+                        f = DataHandler.class.getDeclaredField("objectMimeType");
+                        f.setAccessible(true);
+                    } catch (final Exception e) {
+                        f = null;
+                    }
+                    objectMimeTypeField = f;
+                }
+            }
+        }
+        return f;
+    }
+
+    private static DataHandler setFields(final DataHandler dataHandler, final DataContentHandler dch, final Object object, final String objectMimeType) throws MessagingException {
+        if (null == dataHandler) {
+            return dataHandler;
+        }
+        if (null != dch) {
+            try {
+                final Field field = dataContentHandlerField();
+                if (null == field) {
+                    throw new NoSuchFieldException("dataContentHandler");
+                }
+                field.set(dataHandler, dch);
+            } catch (final SecurityException e) {
+                throw new MessagingException(e.getMessage(), e);
+            } catch (final IllegalArgumentException e) {
+                throw new MessagingException(e.getMessage(), e);
+            } catch (final NoSuchFieldException e) {
+                throw new MessagingException(e.getMessage(), e);
+            } catch (final IllegalAccessException e) {
+                throw new MessagingException(e.getMessage(), e);
+            }
+        }
+        if (null != object) {
+            try {
+                final Field field = objectField();
+                if (null == field) {
+                    throw new NoSuchFieldException("object");
+                }
+                field.set(dataHandler, object);
+            } catch (final SecurityException e) {
+                throw new MessagingException(e.getMessage(), e);
+            } catch (final IllegalArgumentException e) {
+                throw new MessagingException(e.getMessage(), e);
+            } catch (final NoSuchFieldException e) {
+                throw new MessagingException(e.getMessage(), e);
+            } catch (final IllegalAccessException e) {
+                throw new MessagingException(e.getMessage(), e);
+            }
+        }
+        if (null != objectMimeType) {
+            try {
+                final Field field = objectMimeTypeField();
+                if (null == field) {
+                    throw new NoSuchFieldException("objectMimeType");
+                }
+                field.set(dataHandler, objectMimeType);
+            } catch (final SecurityException e) {
+                throw new MessagingException(e.getMessage(), e);
+            } catch (final IllegalArgumentException e) {
+                throw new MessagingException(e.getMessage(), e);
+            } catch (final NoSuchFieldException e) {
+                throw new MessagingException(e.getMessage(), e);
+            } catch (final IllegalAccessException e) {
+                throw new MessagingException(e.getMessage(), e);
+            }
+        }
+        return dataHandler;
+    }
+
     private static final com.sun.mail.handlers.multipart_mixed  DCH_MULTIPART   = new com.sun.mail.handlers.multipart_mixed();
     private static final com.sun.mail.handlers.message_rfc822   DCH_MESSAGE     = new com.sun.mail.handlers.message_rfc822();
     private static final com.sun.mail.handlers.text_plain       DCH_TEXT_PLAIN  = new com.sun.mail.handlers.text_plain();
@@ -731,8 +852,18 @@ public final class MessageUtility {
         return null;
     }
 
-    private static DataHandler dhFor(final DataSource dataSource) {
-        return new DataHandler(dataSource);
+    /**
+     * Creates a new {@code DataHandler} with specified {@code DataSource}, {@code DataContentHandler}, object and MIME type set.
+     * 
+     * @param dataSource The data source
+     * @param dch The data content handler (<i>optional</i>; <code>null</code> is accepted)
+     * @param object The object (<i>optional</i>; <code>null</code> is accepted)
+     * @param objectMimeType The MIME type (<i>optional</i>; <code>null</code> is accepted)
+     * @return The resulting data handler
+     * @throws MessagingException If creating such a data handler fail
+     */
+    public static DataHandler dhFor(final DataSource dataSource, final DataContentHandler dch, final Object object, final String objectMimeType) throws MessagingException {
+        return setFields(new DataHandler(dataSource), dch, object, objectMimeType);
     }
 
     /**
@@ -746,7 +877,7 @@ public final class MessageUtility {
         if (null == message || null == part) {
             return;
         }
-        part.setDataHandler(dhFor(new DataContentHandlerDataSource(message, "message/rfc822", DCH_MESSAGE)));
+        part.setDataHandler(dhFor(new DataContentHandlerDataSource(message, "message/rfc822", DCH_MESSAGE), DCH_MESSAGE, message, "message/rfc822"));
     }
 
     /**
@@ -772,7 +903,8 @@ public final class MessageUtility {
         if (null == multipart || null == part) {
             return;
         }
-        part.setDataHandler(dhFor(new DataContentHandlerDataSource(multipart, null == contentType ? multipart.getContentType() : contentType, DCH_MULTIPART)));
+        final String objectMimeType = null == contentType ? multipart.getContentType() : contentType;
+        part.setDataHandler(dhFor(new DataContentHandlerDataSource(multipart, objectMimeType, DCH_MULTIPART), DCH_MULTIPART, multipart, objectMimeType));
     }
 
     /**
@@ -825,14 +957,14 @@ public final class MessageUtility {
         if (null == dch) {
             // No object DCH for MIME type
             try {
-                part.setDataHandler(dhFor(new MessageDataSource(text, objectMimeType)));
+                part.setDataHandler(new DataHandler(new MessageDataSource(text, objectMimeType)));
             } catch (final UnsupportedEncodingException e) {
                 throw new MessagingException("Unsupported encoding", e);
             } catch (final OXException e) {
                 throw new MessagingException("Invalid MIME type", e);
             }
         } else {
-            part.setDataHandler(dhFor(new DataContentHandlerDataSource(text, objectMimeType, dch)));
+            part.setDataHandler(dhFor(new DataContentHandlerDataSource(text, objectMimeType, dch), dch, text, objectMimeType));
         }
         part.setHeader(HDR_CONTENT_TYPE, objectMimeType);
     }

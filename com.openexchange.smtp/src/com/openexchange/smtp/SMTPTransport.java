@@ -650,7 +650,6 @@ public final class SMTPTransport extends MailTransport {
             composedMail.setFiller(smtpFiller);
             try {
                 smtpFiller.fillMail(composedMail, smtpMessage, sendType);
-
                 /*
                  * Check recipients
                  */

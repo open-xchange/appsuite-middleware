@@ -37,6 +37,10 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
+%post
+. /opt/open-xchange/lib/oxfunctions.sh
+ox_update_permissions "/opt/open-xchange/etc/upsell.properties" root:open-xchange 640
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -49,6 +53,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %dir /opt/open-xchange/etc
 %dir /opt/open-xchange/etc/settings
 %config(noreplace) /opt/open-xchange/etc/*
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/upsell.properties
 %config(noreplace) /opt/open-xchange/etc/settings/*
 %doc com.openexchange.upsell.multiple/ChangeLog
 

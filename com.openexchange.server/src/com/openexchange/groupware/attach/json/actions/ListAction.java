@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.attach.json.actions;
 
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONValue;
@@ -123,7 +124,8 @@ public final class ListAction extends AbstractAttachmentAction {
                 }
             }
             final AttachmentField[] columns = PARSER.getColumns(requestData.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
-            final JSONValue jsonValue = list(session, folderId, attachedId, moduleId, ids, columns);
+            String timeZoneId = requestData.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+            final JSONValue jsonValue = list(session, folderId, attachedId, moduleId, ids, columns, timeZoneId);
             return new AJAXRequestResult(jsonValue, "apiResponse");
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
@@ -134,15 +136,20 @@ public final class ListAction extends AbstractAttachmentAction {
         }
     }
 
-    private JSONValue list(final ServerSession session, final int folderId, final int attachedId, final int moduleId, final int[] ids, final AttachmentField[] fields) throws OXException {
+    private JSONValue list(final ServerSession session, final int folderId, final int attachedId, final int moduleId, final int[] ids, final AttachmentField[] fields, String timeZoneId) throws OXException {
 
         SearchIterator<AttachmentMetadata> iter = null;
-
+        final User user = session.getUser();
+        final TimeZone tz;
+        if (null == timeZoneId) {
+            tz = TimeZoneUtils.getTimeZone(user.getTimeZone());
+        } else {
+            tz = TimeZoneUtils.getTimeZone(timeZoneId);
+        }
         try {
             ATTACHMENT_BASE.startTransaction();
 
             final Context ctx = session.getContext();
-            final User user = session.getUser();
             final UserConfiguration userConfig = session.getUserConfiguration();
             final TimedResult<AttachmentMetadata> result =
                 ATTACHMENT_BASE.getAttachments(session, folderId, attachedId, moduleId, ids, fields, ctx, user, userConfig);
@@ -152,7 +159,7 @@ public final class ListAction extends AbstractAttachmentAction {
             final OXJSONWriter w = new OXJSONWriter();
             final AttachmentWriter aWriter = new AttachmentWriter(w);
             aWriter.timedResult(result.sequenceNumber());
-            aWriter.writeAttachments(iter, fields, TimeZoneUtils.getTimeZone(user.getTimeZone()));
+            aWriter.writeAttachments(iter, fields, tz);
             aWriter.endTimedResult();
             // w.flush();
 
