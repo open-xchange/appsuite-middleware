@@ -1,3 +1,7 @@
+* 2013-04-05 - francisco.laguna@open-xchange.com
+
+ - Fix for bug 25706: Fixed login
+
 * 2013-04-04 - marcus.klein@open-xchange.com
 
  - Fix for bug 25330: Implemented conversion of reseller administrator, custom identifier and restrictions in reseller context SOAP
