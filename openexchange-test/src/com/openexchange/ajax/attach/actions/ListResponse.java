@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,15 +47,20 @@
  *
  */
 
-package com.openexchange.ajax.framework;
+package com.openexchange.ajax.attach.actions;
+
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractColumnsResponse;
 
 /**
- * Super class for list parsers.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link ListResponse}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public abstract class AbstractListParser<T extends AbstractColumnsResponse> extends AbstractColumnsParser<T> {
+public final class ListResponse extends AbstractColumnsResponse {
 
-    public AbstractListParser(final boolean failOnError, final int[] columns) {
-        super(failOnError, columns);
+    public ListResponse(Response response) {
+        super(response);
     }
+
 }

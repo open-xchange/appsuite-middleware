@@ -16,9 +16,11 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+. /opt/open-xchange/lib/oxfunctions.sh
 
 case "$1" in
     configure)
+        ox_update_permissions "/opt/open-xchange/etc/upsell.properties" root:open-xchange 640
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
