@@ -123,7 +123,7 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
     protected StringBuffer getStats(final MBeanServerConnection mbc, final String class_name) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException {
         final StringBuffer retval = new StringBuffer();
 
-        final Iterator<ObjectInstance> itr = mbc.queryMBeans(null, Query.isInstanceOf(Query.value(class_name))).iterator();
+        final Iterator<ObjectInstance> itr = mbc.queryMBeans(null, null).iterator();
         while (itr.hasNext()) {
             final ObjectInstance oin = itr.next();
             final ObjectName obj = oin.getObjectName();
