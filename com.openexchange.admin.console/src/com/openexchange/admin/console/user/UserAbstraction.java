@@ -77,7 +77,6 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.quota.Resource;
 
 public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
@@ -1859,7 +1858,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected void setQuotaModule(final AdminParser parser) {
-        this.quotaModule = setLongOpt(parser,OPT_QUOTA_MODULE,"The identifier of the module to which to apply the quota value; currently supported values: " + Arrays.toString(Resource.allIdentifiers()), true, false,false);
+        this.quotaModule = setLongOpt(parser,OPT_QUOTA_MODULE,"The identifier of the module to which to apply the quota value; currently supported values: [task, calendar, contact, infostore]", true, false,false);
     }
 
     protected void setQuotaValue(final AdminParser parser) {
