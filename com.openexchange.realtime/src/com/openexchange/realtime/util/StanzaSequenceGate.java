@@ -82,6 +82,7 @@ public abstract class StanzaSequenceGate {
     public void handle(Stanza stanza, ID recipient) throws OXException {
         if (stanza.getSequenceNumber() == -1) {
             handleInternal(stanza, recipient);
+            return;
         }
         try {
             stanza.getSequencePrincipal().lock("gate");
