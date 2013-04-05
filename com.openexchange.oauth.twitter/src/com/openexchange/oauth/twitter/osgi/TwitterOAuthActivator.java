@@ -97,6 +97,9 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
                 @Override
                 public boolean isEnabled(String capability, ServerSession session) throws OXException {
                     if ("twitter".equals(capability)) {
+                        if (session.isAnonymous()) {
+                            return false;
+                        }
                         final ConfigViewFactory factory = getService(ConfigViewFactory.class);
                         final ConfigView view = factory.getView(session.getUserId(), session.getContextId());
                         return view.opt("com.openexchange.oauth.twitter", boolean.class, Boolean.TRUE).booleanValue();

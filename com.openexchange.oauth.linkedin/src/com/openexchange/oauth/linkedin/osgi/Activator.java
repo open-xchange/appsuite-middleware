@@ -129,6 +129,9 @@ public class Activator extends HousekeepingActivator {
             @Override
             public boolean isEnabled(String capability, ServerSession session) throws OXException {
                 if ("linkedin".equals(capability)) {
+                    if (session.isAnonymous()) {
+                        return false;
+                    }
                     final ConfigViewFactory factory = getService(ConfigViewFactory.class);
                     final ConfigView view = factory.getView(session.getUserId(), session.getContextId());
                     return view.opt("com.openexchange.oauth.linkedin", boolean.class, Boolean.TRUE).booleanValue();

@@ -90,6 +90,9 @@ public final class Activator extends HousekeepingActivator {
             @Override
             public boolean isEnabled(String capability, ServerSession session) throws OXException {
                 if ("facebook".equals(capability)) {
+                    if (session.isAnonymous()) {
+                        return false;
+                    }
                     final ConfigViewFactory factory = getService(ConfigViewFactory.class);
                     final ConfigView view = factory.getView(session.getUserId(), session.getContextId());
                     return view.opt("com.openexchange.oauth.facebook", boolean.class, Boolean.TRUE).booleanValue();
