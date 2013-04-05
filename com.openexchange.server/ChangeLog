@@ -6,7 +6,6 @@
 * 2013-04-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 25704: Dropped dependency
- - Fix for bug 25710: Added missing Servlet path and bounded SOAP interface to localhost only
 
 * 2013-04-05 - francisco.laguna@open-xchange.com
 
