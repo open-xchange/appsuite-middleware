@@ -1,7 +1,7 @@
 * 2013-04-05 - marcus.klein@open-xchange.com
 
  - Fix for bug 24876: Attachment list requests respect now the optional time zone parameter.
- - Fix for bug 2570%: Removing read permissions for all users on upsell.properties configuration file.
+ - Fix for bug 25705: Removing read permissions for all users on upsell.properties configuration file.
 
 * 2013-04-05 - thorben.betten@open-xchange.com
 
