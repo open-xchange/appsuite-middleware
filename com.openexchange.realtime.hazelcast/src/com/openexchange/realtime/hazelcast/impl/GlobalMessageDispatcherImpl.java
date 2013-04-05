@@ -56,18 +56,21 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.logging.Log;
 import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.realtime.RealtimeExceptionCodes;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.ResourceDirectory;
@@ -92,15 +95,30 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(GlobalMessageDispatcherImpl.class);
 
     private final ResourceDirectory directory;
-
+    
+    private ResponseChannel channel = null;
+    
     public GlobalMessageDispatcherImpl(ResourceDirectory directory) {
         super();
         this.directory = directory;
+        this.channel = new ResponseChannel(directory);
     }
-
+    
+    @Override
+    public Stanza sendSynchronously(Stanza stanza, long timeout, TimeUnit unit) throws OXException {
+        String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
+        channel.setUp(uuid, stanza);
+        send(stanza);
+        return channel.waitFor(uuid, timeout, unit);
+    }
+    
     @Override
     public Map<ID, OXException> send(Stanza stanza) throws OXException {
         return send(stanza, directory.get(stanza.getTo()));
+    }
+    
+    public ResponseChannel getChannel() {
+        return channel;
     }
 
     @Override

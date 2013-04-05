@@ -47,41 +47,36 @@
  *
  */
 
-package com.openexchange.realtime.dispatch;
+package com.openexchange.realtime.example.chineseroom.json;
 
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.Arrays;
+import java.util.Collection;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.Channel;
-import com.openexchange.realtime.directory.Resource;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.util.IDMap;
+import com.openexchange.server.ServiceLookup;
+
 
 /**
- * The Message dispatcher chooses an appropriate {@link Channel} to push data (aka. a Stanza) to listening clients
+ * {@link ChineseActions}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface MessageDispatcher {
-    
-    /**
-     * Delivers a {@link Stanza} to a list of given recipients.
-     *
-     * @param stanza The stanza to send
-     * @return A map of IDs that could not be reached because of an occurred exception.
-     * @throws OXException If send operation fails for any reason
-     */
-    public Map<ID, OXException> send(Stanza stanza, IDMap<Resource> recipients) throws OXException;
-    
-    /**
-     * Delivers a stanza using the resource directory to resolve the recipients
-     */
-    public Map<ID, OXException> send(Stanza stanza) throws OXException;
+public class ChineseActions implements AJAXActionServiceFactory {
 
-    /**
-     * Send a message and synchronously waits for a response. The recipient is supposed to send exactly one Stanza
-     * back to the 'from' ID. The 'from' ID is generated in this method. 
-     */
-    public Stanza sendSynchronously(Stanza stanza, long timeout, TimeUnit unit) throws OXException;
+    private AJAXActionService HISTORY_ACTION = null;
+    
+    public ChineseActions(ServiceLookup services) {
+        HISTORY_ACTION = new HistoryAction(services);
+    }
+
+    @Override
+    public Collection<?> getSupportedServices() {
+        return Arrays.asList("history");
+    }
+    @Override
+    public AJAXActionService createActionService(String action) throws OXException {
+        return HISTORY_ACTION;
+    }
+
 }
