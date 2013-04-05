@@ -78,7 +78,10 @@ public class BoundedCXFNonSpringServlet extends CXFNonSpringServlet {
         } else {
             final HashSet<String> newSet = new HashSet<String>(4);
             try {
-                newSet.add(toLowerCase(hostnameService.getHostname(-1, -1)));
+                final String hostname = hostnameService.getHostname(-1, -1);
+                if (!isEmpty(hostname)) {
+                    newSet.add(toLowerCase(hostname));
+                }
             } catch (final Exception e) {
                 final Log log = com.openexchange.log.Log.loggerFor(BoundedCXFNonSpringServlet.class);
                 log.warn("Couldn't get server host name.", e);
