@@ -452,7 +452,6 @@ public final class SessionHandler {
      * @param session The session to store
      * @param sessionStorageService The storage service
      * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly replacing put
-     * @param async Whether to perform task asynchronously or not
      */
     public static void storeSessionSync(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
         storeSession(session, sessionStorageService, addIfAbsent, false, null);
