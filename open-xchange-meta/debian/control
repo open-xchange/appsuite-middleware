@@ -15,7 +15,7 @@ Description: The Open-Xchange Meta package for OX into UCS integration
 
 Package: open-xchange-meta-parallels
 Architecture: all
-Depends: ${all-lang-backend}, open-xchange-meta-backend, open-xchange-parallels, open-xchange-parallels-gui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-manage-group-resource
+Depends: ${all-lang-backend}, open-xchange-meta-backend, open-xchange-parallels, open-xchange-parallels-gui | open-xchange-meta-ui-appsuite, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-meta-gui, open-xchange-manage-group-resource
 Conflicts: open-xchange-admin-autocontextid, open-xchange-admin-reseller
 Description: The Open-Xchange Meta package for OX into Parallels integration
 
@@ -62,7 +62,7 @@ Description: The Open-Xchange Meta package for OX managed via database only
 
 Package: open-xchange-meta-mobility
 Architecture: all
-Depends: open-xchange-eas, open-xchange-usm, open-xchange-help-usm-eas, open-xchange-eas-provisioning-mail, open-xchange-eas-provisioning-gui
+Depends: open-xchange-eas, open-xchange-usm, open-xchange-help-usm-eas | open-xchange-meta-ui-appsuite, open-xchange-eas-provisioning-mail, open-xchange-eas-provisioning-gui | open-xchange-meta-ui-appsuite
 Description: The Open-Xchange Meta package for Business Mobility
 
 Package: open-xchange-meta-outlook
@@ -96,4 +96,3 @@ Architecture: all
 Provides: open-xchange-meta-backend
 Depends: ${oxcommon}
 Description: The Open-Xchange Meta package for OX App Suite backend packages
-

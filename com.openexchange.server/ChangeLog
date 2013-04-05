@@ -3,6 +3,8 @@
  - Fix for bug 24876: Attachment list requests respect now the optional time zone parameter.
  - Fix for bug 25705: Removing read permissions for all users on upsell.properties configuration file.
  - Fix for bug 25710: Corrected access limitations for SOAP interface in apache proxy example configuration files.
+ - Fix for bug 25091: Added dependency on open-xchange-parallels-gui or open-xchange-meta-ui-appsuite.
+ - Fix for bug 25092: Added dependency on open-xchange-help-usm-eas and open-xchange-eas-provisioning-gui or open-xchange-meta-ui-appsuite.
 
 * 2013-04-05 - thorben.betten@open-xchange.com
 
