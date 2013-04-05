@@ -14,7 +14,7 @@ define("simpleox/bootstrap", ["simpleox/login"], function (login) {
         
         $form.append($name = $('<input type="text">'), '<br/>', $password = $('<input type="password">'), '<br/>', '<button>Login</button>');
         $form.find("button").on("click", function () {
-	    ox.userName=$name.val();
+	        ox.userName=$name.val();
             login.login($name.val(), $password.val()).done(function (resp) {
                 if (resp.session) {
                      ox.session = resp.session;
@@ -26,6 +26,21 @@ define("simpleox/bootstrap", ["simpleox/login"], function (login) {
                 }
             });
         });
+        $form.keypress(function(event) {
+        	if (event.which == 13) {
+        		ox.userName=$name.val();
+                login.login($name.val(), $password.val()).done(function (resp) {
+                    if (resp.session) {
+                         ox.session = resp.session;
+                         login.store(resp.session);
+                         def.resolve(resp.session);
+                        $form.remove();
+                    } else {
+                        alert("Wrong login name or password");
+                    }
+                });
+            }
+        }) 
     }
     
     hash = window.location.hash;
