@@ -449,7 +449,7 @@ public class ContentType extends ParameterizedHeader {
                     }
                 }
                 baseType = new com.openexchange.java.StringAllocator(16).append(primaryType).append(DELIMITER).append(subType).toString();
-                lcBaseType = null;
+                lcBaseType = toLowerCase(baseType);
                 if (paramList) {
                     if (pos < 0) {
                         parameterList = new ParameterList();
