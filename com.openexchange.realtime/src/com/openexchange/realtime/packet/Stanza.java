@@ -166,7 +166,7 @@ public abstract class Stanza implements Serializable {
     /**
      * Gets the sequenceNumber
      *
-     * @return The sequenceNumber
+     * @return The sequenceNumber, -1 if the sequenceNumber is invalid/not set
      */
     public long getSequenceNumber() {
         return sequenceNumber;

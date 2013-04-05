@@ -80,6 +80,7 @@ public abstract class StanzaSequenceGate {
     private ConcurrentHashMap<ID, List<Stanza>> inboxes = new ConcurrentHashMap<ID, List<Stanza>>();
 
     public void handle(Stanza stanza, ID recipient) throws OXException {
+        /* Stanza didn't carry a valid Sequencenumber, just handle it without pestering the gate and return */ 
         if (stanza.getSequenceNumber() == -1) {
             handleInternal(stanza, recipient);
             return;
@@ -87,7 +88,7 @@ public abstract class StanzaSequenceGate {
         try {
             stanza.getSequencePrincipal().lock("gate");
             AtomicLong threshhold = sequenceNumbers.get(stanza.getSequencePrincipal());
-            // we haven't recorded a threshold for this principal, yet
+            /* We haven't recorded a threshold for this principal, yet */
             if (threshhold == null) {
                 threshhold = new AtomicLong(stanza.getSequenceNumber());
                 AtomicLong meantime = sequenceNumbers.putIfAbsent(stanza.getSequencePrincipal(), threshhold);
@@ -108,7 +109,7 @@ public abstract class StanzaSequenceGate {
                     threshhold = meantime;
                 }
             }
-            // Best case, we found the follow up Stanza
+            /* Best case, we found the follow up Stanza */
             if (stanza.getSequenceNumber() == 0) {
                 threshhold.set(0);
             }
@@ -117,7 +118,7 @@ public abstract class StanzaSequenceGate {
                     LOG.debug("Best case, Threshold: " + threshhold.get());
                 }
                 handleInternal(stanza, recipient);
-                // Drain Stanzas accumulated while waiting for the missing SequenceNumber
+                /* Drain Stanzas accumulated while waiting for the missing SequenceNumber */
                 List<Stanza> stanzas = inboxes.remove(stanza.getSequencePrincipal());
 
                 if (stanzas == null || stanzas.isEmpty()) {
@@ -134,7 +135,7 @@ public abstract class StanzaSequenceGate {
                     handle(s, s.getTo());
                 }
 
-                // Stanzas got out of sync, enqueue until we receive the Stanza matching threshold
+                /* Stanzas got out of sync, enqueue until we receive the Stanza matching threshold */
             } else {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Stanzas not in sequence, Threshold: " + threshhold.get() + " SequenceNumber: " + stanza.getSequenceNumber());
