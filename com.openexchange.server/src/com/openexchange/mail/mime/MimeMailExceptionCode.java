@@ -89,11 +89,11 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
     /**
      * Mail folder "%1$s" could not be found.
      */
-    FOLDER_NOT_FOUND(MimeMailExceptionMessage.FOLDER_NOT_FOUND_MSG, CATEGORY_ERROR, 1002),
+    FOLDER_NOT_FOUND(MimeMailExceptionMessage.FOLDER_NOT_FOUND_MSG, CATEGORY_USER_INPUT, 1002),
     /**
      * Mail folder "%1$s" could not be found on mail server %2$s with login %3$s (user=%4$s, context=%5$s).
      */
-    FOLDER_NOT_FOUND_EXT(MimeMailExceptionMessage.FOLDER_NOT_FOUND_EXT_MSG, CATEGORY_ERROR, FOLDER_NOT_FOUND.detailNumber),
+    FOLDER_NOT_FOUND_EXT(MimeMailExceptionMessage.FOLDER_NOT_FOUND_EXT_MSG, CATEGORY_USER_INPUT, FOLDER_NOT_FOUND.detailNumber),
     /**
      * Folder "%1$s" has been closed due to some reason.<br>
      * Probably your request took too long.
@@ -102,12 +102,12 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      * reason. Following the exception, the Folder is reset to the "closed" state.
      * </p>
      */
-    FOLDER_CLOSED(MimeMailExceptionMessage.FOLDER_CLOSED_MSG, CATEGORY_ERROR, 1003),
+    FOLDER_CLOSED(MimeMailExceptionMessage.FOLDER_CLOSED_MSG, CATEGORY_USER_INPUT, 1003),
     /**
      * Folder "%1$s" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.<br>
      * Probably your request took too long.
      */
-    FOLDER_CLOSED_EXT(MimeMailExceptionMessage.FOLDER_CLOSED_EXT_MSG, CATEGORY_ERROR, FOLDER_CLOSED.detailNumber),
+    FOLDER_CLOSED_EXT(MimeMailExceptionMessage.FOLDER_CLOSED_EXT_MSG, CATEGORY_USER_INPUT, FOLDER_CLOSED.detailNumber),
     /**
      * Illegal write attempt: %1$s
      * <p>
@@ -285,11 +285,11 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
     /**
      * Error processing mail server response. The administrator has been informed.
      */
-    PROCESSING_ERROR(MimeMailExceptionMessage.PROCESSING_ERROR_MSG, CATEGORY_ERROR, 1031),
+    PROCESSING_ERROR(MimeMailExceptionMessage.PROCESSING_ERROR_MSG, CATEGORY_USER_INPUT, 1031),
     /**
      * Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed.
      */
-    PROCESSING_ERROR_EXT(MimeMailExceptionMessage.PROCESSING_ERROR_EXT_MSG, CATEGORY_ERROR, PROCESSING_ERROR.detailNumber),
+    PROCESSING_ERROR_EXT(MimeMailExceptionMessage.PROCESSING_ERROR_EXT_MSG, CATEGORY_USER_INPUT, PROCESSING_ERROR.detailNumber),
     /**
      * An I/O error occurred: %1$s
      */
