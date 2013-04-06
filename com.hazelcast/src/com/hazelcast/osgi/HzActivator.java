@@ -53,37 +53,33 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 
-
 /**
- * {@link HzActivator}
- *
+ * {@link HzActivator} - The activator for Hazelcast bundle.
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class HzActivator implements BundleActivator {
-    
+
     public HzActivator() {
         super();
     }
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void start(final BundleContext context) throws Exception {
+        // Check if log4j is enabled
         boolean hasLog4J = false;
-        Bundle[] bundles = context.getBundles();
-        for (Bundle bundle : bundles) {
-            if (bundle.getSymbolicName().equals("org.apache.commons.logging.log4j")) {
-                hasLog4J = true;
-                break;
-            }
+        final Bundle[] bundles = context.getBundles();
+        for (int i = 0; !hasLog4J && i < bundles.length; i++) {
+            hasLog4J = ("org.apache.commons.logging.log4j".equals(bundles[i].getSymbolicName()));
         }
-        
         if (hasLog4J) {
             System.setProperty("hazelcast.logging.type", "log4j");
         }
     }
 
     @Override
-    public void stop(BundleContext arg0) throws Exception {
-        
+    public void stop(final BundleContext context) throws Exception {
+        // Ignore
     }
 
 }
