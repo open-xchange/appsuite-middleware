@@ -17,6 +17,7 @@ import com.openexchange.admin.soap.user.dataobjects.Credentials;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
+    "contextid",
     "url",
     "auth"
 })
@@ -24,9 +25,19 @@ import com.openexchange.admin.soap.user.dataobjects.Credentials;
 public class GetPublication {
 
     @XmlElement(nillable = true)
+    protected String contextid;
+    @XmlElement(nillable = true)
     protected String url;
     @XmlElement(nillable = true)
     protected Credentials auth;
+
+    public String getContextid() {
+        return contextid;
+    }
+
+    public void setContextid(String contextid) {
+        this.contextid = contextid;
+    }
 
     /**
      * Ruft den Wert der url-Eigenschaft ab.

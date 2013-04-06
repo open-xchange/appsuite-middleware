@@ -58,7 +58,7 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
     public Publication getPublication(final GetPublication parameters) throws RemoteException_Exception, MissingServiceException_Exception, NoSuchPublicationException_Exception {
         final OXPublicationInterface publicationInterface = getPublicationInterface();
         try {
-            final com.openexchange.admin.rmi.dataobjects.Publication pub = publicationInterface.getPublication(parameters.getUrl(), soap2Credentials(parameters.getAuth()));
+            final com.openexchange.admin.rmi.dataobjects.Publication pub = publicationInterface.getPublication(new com.openexchange.admin.rmi.dataobjects.Context(Integer.valueOf(parameters.getContextid())), parameters.getUrl(), soap2Credentials(parameters.getAuth()));
             if (null == pub) {
                 throw new NoSuchPublicationException("No such publication with URL \"" + parameters.getUrl() + "\" found");
             }
@@ -76,7 +76,7 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
     public void deletePublication(final DeletePublication parameters) throws RemoteException_Exception, MissingServiceException_Exception, NoSuchPublicationException_Exception {
         final OXPublicationInterface publicationInterface = getPublicationInterface();
         try {
-            final boolean success = publicationInterface.deletePublication(parameters.getUrl(), soap2Credentials(parameters.getAuth()));
+            final boolean success = publicationInterface.deletePublication(new com.openexchange.admin.rmi.dataobjects.Context(Integer.valueOf(parameters.getContextid())), parameters.getUrl(), soap2Credentials(parameters.getAuth()));
             if (!success) {
                 throw new RemoteException("Failed deleting publication with URL \""+parameters.getUrl()+"\" for any reason.");
             }

@@ -52,6 +52,7 @@ package com.openexchange.admin.console.publication;
 import java.rmi.RemoteException;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.OXPublicationInterface;
+import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Publication;
 import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
@@ -79,6 +80,8 @@ public final class Delete extends DeleteCore {
 
     @Override
     protected void maincall(AdminParser parser, OXPublicationInterface oxpub, Publication pub, Credentials auth) throws RemoteException, DuplicateExtensionException {
+        Context context = contextparsing(parser);
+        pub.setContext(context);
         String url = parseAndSetPublicationUrl(parser);
         pub.setUrl(url);
     }

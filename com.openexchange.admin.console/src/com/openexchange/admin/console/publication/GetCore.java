@@ -72,7 +72,7 @@ public abstract class GetCore extends PublicationAbstraction {
 
             maincall(parser, oxpub, publication, auth);
 
-            publication = oxpub.getPublication(publication.getUrl(), auth);
+            publication = oxpub.getPublication(publication.getContext(), publication.getUrl(), auth);
             
             createMessageForStdout(publication.toString(), null, null, parser);
             sysexit(0);

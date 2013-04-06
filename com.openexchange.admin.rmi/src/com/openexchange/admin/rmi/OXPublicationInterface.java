@@ -50,6 +50,7 @@ package com.openexchange.admin.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Publication;
 import com.openexchange.admin.rmi.exceptions.MissingServiceException;
@@ -84,7 +85,7 @@ public interface OXPublicationInterface extends Remote {
      * @throws NoSuchPublicationException 
      * @throws MissingServiceException 
      */
-    public Publication getPublication(final String url, final Credentials auth) throws RemoteException, NoSuchPublicationException, MissingServiceException;
+    public Publication getPublication(Context ctx, String url, Credentials auth) throws RemoteException, NoSuchPublicationException, MissingServiceException;
     
     /**
      * This method will delete a Publication
@@ -94,6 +95,6 @@ public interface OXPublicationInterface extends Remote {
      * @throws NoSuchPublicationException 
      * @throws MissingServiceException 
      */
-    public boolean deletePublication(final String url, final Credentials auth) throws RemoteException, NoSuchPublicationException, MissingServiceException;
+    public boolean deletePublication(Context ctx, String url, Credentials auth) throws RemoteException, NoSuchPublicationException, MissingServiceException;
     
 }

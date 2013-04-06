@@ -72,7 +72,7 @@ public abstract class DeleteCore extends PublicationAbstraction {
 
             maincall(parser, oxpub, publication, auth);
 
-            boolean success = oxpub.deletePublication(publication.getUrl(), auth);
+            boolean success = oxpub.deletePublication(publication.getContext(), publication.getUrl(), auth);
             if (success) {
                 successtext = "Publication successfully deleted";
             } else {

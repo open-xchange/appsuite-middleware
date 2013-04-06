@@ -49,13 +49,17 @@
 
 package com.openexchange.admin.rmi.impl;
 
+import java.rmi.RemoteException;
 import org.apache.commons.logging.Log;
 import com.openexchange.admin.rmi.OXPublicationInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Publication;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.MissingServiceException;
 import com.openexchange.admin.rmi.exceptions.NoSuchPublicationException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -71,15 +75,18 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
 
     private final static Log log = LogFactory.getLog(OXPublication.class);
 
-    public OXPublication() {
+    private final BasicAuthenticator basicauth;
+
+    public OXPublication() throws StorageException {
         super();
+        basicauth = new BasicAuthenticator();
         if (log.isInfoEnabled()) {
             log.info("Class loaded: " + this.getClass().getName());
         }
     }
     
     @Override
-    public Publication getPublication(String url, Credentials auth) throws NoSuchPublicationException, MissingServiceException {
+    public Publication getPublication(Context ctx, String url, Credentials credentials) throws RemoteException, NoSuchPublicationException, MissingServiceException {
         PublicationTargetDiscoveryService discovery = AdminServiceRegistry.getInstance().getService(PublicationTargetDiscoveryService.class);
         if (null == discovery){
             throw new MissingServiceException(PublicationTargetDiscoveryService.class.getSimpleName()+" is missing or not started yet");
@@ -88,7 +95,9 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
         if (null == contexts){
             throw new MissingServiceException(ContextService.class.getSimpleName()+" is missing or not started yet");
         }
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
+            basicauth.doAuthentication(auth, ctx);
             for (PublicationTarget pubTar : discovery.listTargets()) {
                 final PublicationService publicationService = pubTar.getPublicationService();
                 if (null != publicationService) {
@@ -101,12 +110,18 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
             }
         } catch (OXException e) {
             log.error(e.getMessage(), e);
+        } catch (InvalidCredentialsException e) {
+            throw new RemoteException(e.getMessage());
+        } catch (StorageException e) {
+            throw new RemoteException(e.getMessage());
+        } catch (InvalidDataException e) {
+            throw new RemoteException(e.getMessage());
         }
         throw new NoSuchPublicationException("No such publication with URL \"" + url + "\" found");
     }
 
     @Override
-    public boolean deletePublication(String url, Credentials auth) throws NoSuchPublicationException, MissingServiceException {
+    public boolean deletePublication(Context ctx, String url, Credentials credentials) throws RemoteException, NoSuchPublicationException, MissingServiceException {
         PublicationTargetDiscoveryService discovery = AdminServiceRegistry.getInstance().getService(PublicationTargetDiscoveryService.class);
         if (null == discovery){
             throw new MissingServiceException(PublicationTargetDiscoveryService.class.getSimpleName()+" is missing or not started yet");
@@ -115,7 +130,9 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
         if (null == contexts){
             throw new MissingServiceException(ContextService.class.getSimpleName()+" is missing or not started yet");
         }
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
         try {
+            basicauth.doAuthentication(auth, ctx);
             for (PublicationTarget pubTar : discovery.listTargets()) {
                 final PublicationService publicationService = pubTar.getPublicationService();
                 if (null != publicationService) {
@@ -128,6 +145,12 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
             }
         } catch (OXException e) {
             log.error(e.getMessage(), e);
+        } catch (InvalidCredentialsException e) {
+            throw new RemoteException(e.getMessage());
+        } catch (StorageException e) {
+            throw new RemoteException(e.getMessage());
+        } catch (InvalidDataException e) {
+            throw new RemoteException(e.getMessage());
         }
         throw new NoSuchPublicationException("no Publication with URL " + url + " found");
     }
