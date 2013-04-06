@@ -241,40 +241,36 @@ public final class GetAction extends AbstractMailAction {
                     final AJAXRequestData requestData = req.getRequest();
                     final OutputStream directOutputStream = requestData.optOutputStream();
                     if (null != directOutputStream) {
-                        try {
-                            final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
-                            final boolean doUnseen = (unseen && wasUnseen);
-                            if (saveToDisk) {
-                                requestData.setResponseHeader("Content-Type", "application/octet-stream");
-                                final StringAllocator sb = new StringAllocator(64).append("attachment");
-                                {
-                                    final String subject = mail.getSubject();
-                                    final String fileName = isEmpty(subject) ? "mail.eml" : saneForFileName(subject) + ".eml";
-                                    DownloadUtility.appendFilenameParameter(fileName, requestData.getUserAgent(), sb);
-                                }
-                                requestData.setResponseHeader("Content-Disposition",  sb.toString());
-                                requestData.removeCachingHeader();
-                                mail.writeTo(directOutputStream);
-                                directOutputStream.flush();
-                            } else {
-                                // As JSON response: {"data":"..."}
-                                directOutputStream.write(CHUNK1); // {"data":"...
-                                {
-                                    final JSONStringOutputStream jsonStringOutputStream = new JSONStringOutputStream(directOutputStream);
-                                    mail.writeTo(jsonStringOutputStream);
-                                    jsonStringOutputStream.flush();
-                                }
-                                directOutputStream.write(CHUNK2); // ..."}
-                                directOutputStream.flush();
+                        final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
+                        final boolean doUnseen = (unseen && wasUnseen);
+                        if (saveToDisk) {
+                            requestData.setResponseHeader("Content-Type", "application/octet-stream");
+                            final StringAllocator sb = new StringAllocator(64).append("attachment");
+                            {
+                                final String subject = mail.getSubject();
+                                final String fileName = isEmpty(subject) ? "mail.eml" : saneForFileName(subject) + ".eml";
+                                DownloadUtility.appendFilenameParameter(fileName, requestData.getUserAgent(), sb);
                             }
-                            final AJAXRequestResult requestResult = new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
-                            if (doUnseen) {
-                                mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
+                            requestData.setResponseHeader("Content-Disposition",  sb.toString());
+                            requestData.removeCachingHeader();
+                            mail.writeTo(directOutputStream);
+                            directOutputStream.flush();
+                        } else {
+                            // As JSON response: {"data":"..."}
+                            directOutputStream.write(CHUNK1); // {"data":"...
+                            {
+                                final JSONStringOutputStream jsonStringOutputStream = new JSONStringOutputStream(directOutputStream);
+                                mail.writeTo(jsonStringOutputStream);
+                                jsonStringOutputStream.flush();
                             }
-                            return requestResult;
-                        } catch (final Exception e) {
-                            LOG.debug(e.getMessage(), e);
+                            directOutputStream.write(CHUNK2); // ..."}
+                            directOutputStream.flush();
                         }
+                        final AJAXRequestResult requestResult = new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
+                        if (doUnseen) {
+                            mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
+                        }
+                        return requestResult;
                     }
                 }
                 /*-
