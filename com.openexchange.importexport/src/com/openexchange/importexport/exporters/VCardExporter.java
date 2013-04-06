@@ -236,7 +236,7 @@ public class VCardExporter implements Exporter {
     @Override
     public SizedInputStream exportData(final ServerSession session, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
         try {
-            final AJAXRequestData requestData = (AJAXRequestData) optionalParams.get("__requestData");
+            final AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
             if (null != requestData) {
                 // Try to stream
                 final OutputStream out = requestData.optOutputStream();
@@ -334,7 +334,7 @@ public class VCardExporter implements Exporter {
     @Override
     public SizedInputStream exportData(final ServerSession session, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
         try {
-            final AJAXRequestData requestData = (AJAXRequestData) optionalParams.get("__requestData");
+            final AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
             if (null != requestData) {
                 // Try to stream
                 final OutputStream out = requestData.optOutputStream();
