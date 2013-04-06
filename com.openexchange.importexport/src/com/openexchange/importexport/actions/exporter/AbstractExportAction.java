@@ -77,6 +77,11 @@ public abstract class AbstractExportAction implements AJAXActionService {
 
     public abstract Exporter getExporter();
 
+    private static final String PARAMETER_CONTENT_TYPE = "content_type";
+    private static final String DELIVERY = "delivery";
+    private static final String SAVE_AS_TYPE = "application/octet-stream";
+    private static final String DOWNLOAD = "download";
+
     private AJAXRequestResult perform(ExportRequest req) throws OXException {
         List<Integer> cols = req.getColumns();
 
@@ -92,8 +97,13 @@ public abstract class AbstractExportAction implements AJAXActionService {
             if (null == out) {
                 optionalParams = null;
             } else {
-                optionalParams = new HashMap<String, Object>(1);
+                optionalParams = new HashMap<String, Object>(4);
                 optionalParams.put("__requestData", request);
+                String contentType = request.getParameter(PARAMETER_CONTENT_TYPE);
+                String delivery = request.getParameter(DELIVERY);
+                if (SAVE_AS_TYPE.equals(contentType) || DOWNLOAD.equalsIgnoreCase(delivery)) {
+                    optionalParams.put("__saveToDisk", Boolean.TRUE);                    
+                }
             }
         }
 

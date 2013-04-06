@@ -241,7 +241,7 @@ public class VCardExporter implements Exporter {
                 // Try to stream
                 final OutputStream out = requestData.optOutputStream();
                 if (null != out) {
-                    requestData.setResponseHeader("Content-Type", Format.VCARD.getMimeType() + "; charset=UTF-8");
+                    requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.VCARD.getMimeType() + "; charset=UTF-8");
                     requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + Format.VCARD.getFullName() + "." + Format.VCARD.getExtension());
                     requestData.removeCachingHeader();
                     export2out(session, folder, null, fieldsToBeExported, out);
@@ -258,6 +258,9 @@ public class VCardExporter implements Exporter {
         } catch (final NumberFormatException e) {
             throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
         } catch (final ConverterException e) {
+            throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
+        } catch (final java.net.SocketException e) {
+            // Download aborted ?
             throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
         } catch (final IOException e) {
             throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
@@ -339,7 +342,7 @@ public class VCardExporter implements Exporter {
                 // Try to stream
                 final OutputStream out = requestData.optOutputStream();
                 if (null != out) {
-                    requestData.setResponseHeader("Content-Type", Format.VCARD.getMimeType() + "; charset=UTF-8");
+                    requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.VCARD.getMimeType() + "; charset=UTF-8");
                     requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + Format.VCARD.getFullName() + "." + Format.VCARD.getExtension());
                     requestData.removeCachingHeader();
                     export2out(session, folder, Integer.toString(objectId), fieldsToBeExported, out);
@@ -379,5 +382,16 @@ public class VCardExporter implements Exporter {
                 LOG.error(e.getMessage(), e);
             }
         }
+    }
+
+    private boolean isSaveToDisk(final Map<String, Object> optionalParams) {
+        if (null == optionalParams) {
+            return false;
+        }
+        final Object object = optionalParams.get("__saveToDisk");
+        if (null == object) {
+            return false;
+        }
+        return (object instanceof Boolean ? ((Boolean) object).booleanValue() : Boolean.parseBoolean(object.toString().trim()));
     }
 }
