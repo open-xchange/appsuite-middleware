@@ -3,6 +3,7 @@
  - Fix for bug 25727: Added authentication to publication tools
  - Fix for bug 25723: Added null guard
  - Fix for bug 25724: Added validation check to quota arguments
+ - Fix for bug 25224: Changed category accordingly
 
 * 2013-04-05 - marcus.klein@open-xchange.com
 
