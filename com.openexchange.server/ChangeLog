@@ -1,3 +1,7 @@
+* 2013-04-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25727: Added authentication to publication tools
+
 * 2013-04-05 - marcus.klein@open-xchange.com
 
  - Fix for bug 24876: Attachment list requests respect now the optional time zone parameter.
