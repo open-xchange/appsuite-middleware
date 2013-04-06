@@ -777,60 +777,37 @@ public final class MessageUtility {
         return f;
     }
 
+    private static void setField(final Field field, final Object obj, final Object value, final String name) throws MessagingException {
+        try {
+            if (null == field) {
+                throw new NoSuchFieldException(name);
+            }
+            field.set(obj, value);
+        } catch (final SecurityException e) {
+            throw new MessagingException(e.getMessage(), e);
+        } catch (final IllegalArgumentException e) {
+            throw new MessagingException(e.getMessage(), e);
+        } catch (final NoSuchFieldException e) {
+            throw new MessagingException(e.getMessage(), e);
+        } catch (final IllegalAccessException e) {
+            throw new MessagingException(e.getMessage(), e);
+        } catch (final RuntimeException e) {
+            throw new MessagingException(e.getMessage(), e);
+        }
+    }
+
     private static DataHandler setFields(final DataHandler dataHandler, final DataContentHandler dch, final Object object, final String objectMimeType) throws MessagingException {
         if (null == dataHandler) {
             return dataHandler;
         }
         if (null != dch) {
-            try {
-                final Field field = dataContentHandlerField();
-                if (null == field) {
-                    throw new NoSuchFieldException("dataContentHandler");
-                }
-                field.set(dataHandler, dch);
-            } catch (final SecurityException e) {
-                throw new MessagingException(e.getMessage(), e);
-            } catch (final IllegalArgumentException e) {
-                throw new MessagingException(e.getMessage(), e);
-            } catch (final NoSuchFieldException e) {
-                throw new MessagingException(e.getMessage(), e);
-            } catch (final IllegalAccessException e) {
-                throw new MessagingException(e.getMessage(), e);
-            }
+            setField(dataContentHandlerField(), dataHandler, dch, "dataContentHandler");
         }
         if (null != object) {
-            try {
-                final Field field = objectField();
-                if (null == field) {
-                    throw new NoSuchFieldException("object");
-                }
-                field.set(dataHandler, object);
-            } catch (final SecurityException e) {
-                throw new MessagingException(e.getMessage(), e);
-            } catch (final IllegalArgumentException e) {
-                throw new MessagingException(e.getMessage(), e);
-            } catch (final NoSuchFieldException e) {
-                throw new MessagingException(e.getMessage(), e);
-            } catch (final IllegalAccessException e) {
-                throw new MessagingException(e.getMessage(), e);
-            }
+            setField(objectField(), dataHandler, object, "object");
         }
         if (null != objectMimeType) {
-            try {
-                final Field field = objectMimeTypeField();
-                if (null == field) {
-                    throw new NoSuchFieldException("objectMimeType");
-                }
-                field.set(dataHandler, objectMimeType);
-            } catch (final SecurityException e) {
-                throw new MessagingException(e.getMessage(), e);
-            } catch (final IllegalArgumentException e) {
-                throw new MessagingException(e.getMessage(), e);
-            } catch (final NoSuchFieldException e) {
-                throw new MessagingException(e.getMessage(), e);
-            } catch (final IllegalAccessException e) {
-                throw new MessagingException(e.getMessage(), e);
-            }
+            setField(objectMimeTypeField(), dataHandler, objectMimeType, "objectMimeType");
         }
         return dataHandler;
     }
