@@ -231,6 +231,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     final StringAllocator sb = new StringAllocator(saveToDisk ? "attachment" : "inline");
                     appendFilenameParameter(mailPart.getFileName(), null, requestData.getUserAgent(), sb);
                     requestData.setResponseHeader("Content-Disposition", sb.toString());
+                    requestData.removeCachingHeader();
                     requestData.setResponseETag(getHash(folderPath, uid, imageContentId == null ? sequenceId : imageContentId), AJAXRequestResult.YEAR_IN_MILLIS * 50);
                     try {
                         final int buflen = 0xFFFF; // 64KB

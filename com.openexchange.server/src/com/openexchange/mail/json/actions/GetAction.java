@@ -253,6 +253,7 @@ public final class GetAction extends AbstractMailAction {
                                     DownloadUtility.appendFilenameParameter(fileName, requestData.getUserAgent(), sb);
                                 }
                                 requestData.setResponseHeader("Content-Disposition",  sb.toString());
+                                requestData.removeCachingHeader();
                                 mail.writeTo(directOutputStream);
                                 directOutputStream.flush();
                             } else {

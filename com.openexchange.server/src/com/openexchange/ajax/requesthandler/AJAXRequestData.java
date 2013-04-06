@@ -416,6 +416,21 @@ public class AJAXRequestData {
     }
 
     /**
+     * Remove <tt>Pragma</tt> response header value if we are going to write directly into servlet's output stream cause then some browsers
+     * do not allow this header.
+     * 
+     * @return <code>true</code> if applied; otherwise <code>false</code>
+     */
+    public boolean removeCachingHeader() {
+        final HttpServletResponse resp = this.httpServletResponse;
+        if (null != resp) {
+            Tools.removeCachingHeader(resp);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>,
      * <i>Cache-Control</i>, and <i>Pragma</i>)
      *

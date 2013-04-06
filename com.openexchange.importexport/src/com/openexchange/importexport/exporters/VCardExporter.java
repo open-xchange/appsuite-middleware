@@ -243,6 +243,7 @@ public class VCardExporter implements Exporter {
                 if (null != out) {
                     requestData.setResponseHeader("Content-Type", Format.VCARD.getMimeType() + "; charset=UTF-8");
                     requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + Format.VCARD.getFullName() + "." + Format.VCARD.getExtension());
+                    requestData.removeCachingHeader();
                     export2out(session, folder, null, fieldsToBeExported, out);
                     return null;
                 }
@@ -340,6 +341,7 @@ public class VCardExporter implements Exporter {
                 if (null != out) {
                     requestData.setResponseHeader("Content-Type", Format.VCARD.getMimeType() + "; charset=UTF-8");
                     requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + Format.VCARD.getFullName() + "." + Format.VCARD.getExtension());
+                    requestData.removeCachingHeader();
                     export2out(session, folder, Integer.toString(objectId), fieldsToBeExported, out);
                     return null;
                 }
