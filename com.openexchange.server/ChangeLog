@@ -1,6 +1,7 @@
 * 2013-04-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 25727: Added authentication to publication tools
+ - Fix for bug 25723: Added null guard
 
 * 2013-04-05 - marcus.klein@open-xchange.com
 
