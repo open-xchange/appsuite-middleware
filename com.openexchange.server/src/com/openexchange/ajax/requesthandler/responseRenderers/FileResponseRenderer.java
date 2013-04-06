@@ -127,10 +127,10 @@ public class FileResponseRenderer implements ResponseRenderer {
     @Override
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
         IFileHolder file = (IFileHolder) result.getResultObject();
+        final String fileName = file.getName();
         InputStream documentData = null;
         try {
             final String fileContentType = file.getContentType();
-            final String fileName = file.getName();
             // Check certain parameters
             String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
             if (null == contentType) {
@@ -243,7 +243,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             outputStream.flush();
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("Exception while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
         } finally {
             close(file);
             close(documentData);
