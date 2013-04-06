@@ -74,7 +74,11 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
             if (isEmpty(sQuotaValue)) {
                 throw new InvalidDataException("Missing quota value.");
             }
-            contextInterface.changeQuota(soap2Context(parameters.ctx), parameters.module, Long.parseLong(sQuotaValue.trim()), soap2Credentials(parameters.auth));
+            final String module = parameters.module;
+            if (null == module) {
+                throw new InvalidDataException("Missing quota module.");
+            }
+            contextInterface.changeQuota(soap2Context(parameters.ctx), module, Long.parseLong(sQuotaValue.trim()), soap2Credentials(parameters.auth));
         } catch (final RemoteException e) {
             throw new RemoteException_Exception(e.getMessage(), e);
         } catch (final InvalidCredentialsException e) {
