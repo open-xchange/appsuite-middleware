@@ -115,11 +115,17 @@ public class Change extends ChangeCore {
         }
 
         final String module = parseAndSetQuotaModule(parser);
-        if (null != module) {
+        if (null == module) {
             final Long quotaValue = parseAndSetQuotaValue(parser);
             if (null != quotaValue) {
-                oxctx.changeQuota(ctx, module, quotaValue.longValue(), auth);
+                throw new InvalidDataException("Missing --quota-module argument.");
             }
+        } else {
+            final Long quotaValue = parseAndSetQuotaValue(parser);
+            if (null == quotaValue) {
+                throw new InvalidDataException("Missing --quota-value argument.");
+            }
+            oxctx.changeQuota(ctx, module, quotaValue.longValue(), auth);
         }
     }
 
