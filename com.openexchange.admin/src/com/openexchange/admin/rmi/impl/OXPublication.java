@@ -80,9 +80,6 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
     public OXPublication() throws StorageException {
         super();
         basicauth = new BasicAuthenticator();
-        if (log.isInfoEnabled()) {
-            log.info("Class loaded: " + this.getClass().getName());
-        }
     }
     
     @Override
