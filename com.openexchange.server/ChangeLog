@@ -1,6 +1,7 @@
 * 2013-04-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 25715: Check if specified quota is in allowed range for INT(10) UNSIGNED
+ - Fix for bug 19150: Check existence of appropriate property on bundle start-up
 
 * 2013-04-06 - thorben.betten@open-xchange.com
 
