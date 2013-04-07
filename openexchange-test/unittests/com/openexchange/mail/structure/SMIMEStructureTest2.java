@@ -99,7 +99,7 @@ public class SMIMEStructureTest2 extends AbstractMailTest {
             final JSONObject jsonMailObject = handler.getJSONMailObject();
             assertNotNull("Structured JSON mail object is null.", jsonMailObject);
 
-            System.out.println(jsonMailObject.toString(2));
+            // System.out.println(jsonMailObject.toString(2));
 
             assertTrue("Detected a body object, but shouldn't be there.", !jsonMailObject.hasAndNotNull("body"));
 

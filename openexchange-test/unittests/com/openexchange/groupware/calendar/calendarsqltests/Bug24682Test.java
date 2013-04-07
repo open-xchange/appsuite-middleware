@@ -96,8 +96,8 @@ public class Bug24682Test extends CalendarSqlTest {
         appointments.switchUser(thirdUser);
         int[] columns = new int[] { CalendarDataObject.OBJECT_ID, CalendarDataObject.FOLDER_ID };
         CalendarDataObject[] changeExceptionsByRecurrence = calendarCollectionService.getChangeExceptionsByRecurrence(appointment.getObjectID(), columns, appointments.getSession());
-        assertEquals("Wrong folder id", sharedFolderId1, changeExceptionsByRecurrence[0].getParentFolderID());
-        System.out.println(changeExceptionsByRecurrence.toString());
+        assertEquals("Wrong folder id"+System.getProperty("line.separator")+changeExceptionsByRecurrence.toString(), sharedFolderId1, changeExceptionsByRecurrence[0].getParentFolderID());
+        // System.out.println(changeExceptionsByRecurrence.toString());
     }
 
     @Override

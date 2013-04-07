@@ -223,7 +223,7 @@ public final class MailJSONHandlerTest extends AbstractMailTest {
             new MailMessageParser().parseMailMessage(mail, handler);
             final JSONObject jo = handler.getJSONObject();
 
-            System.out.println(jo);
+            // System.out.println(jo);
 
         } catch (final Exception e) {
             e.printStackTrace();
