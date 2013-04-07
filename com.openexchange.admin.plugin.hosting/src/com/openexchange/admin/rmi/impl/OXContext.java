@@ -154,7 +154,16 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw new NoSuchContextException(e);
         }
 
-        final long quota = quotaValue <= 0 ? -1L : quotaValue;
+        final long quota;
+        if (quotaValue <= 0) {
+            quota = -1L;
+        } else {
+            // MySQL int(10) unsigned: the allowable range is from 0 to 4294967295
+            if (quotaValue > 4294967295L) {
+                throw new InvalidDataException("Quota value is out of range (allowable range is from 0 to 4294967295): " + quotaValue);
+            }
+            quota = quotaValue;
+        }
 
         log.debug(ctx+" - "+module + " - " + quota);
 
