@@ -140,7 +140,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 found = resources[i].getIdentifier().equalsIgnoreCase(module);
             }
             if (!found) {
-                throw new InvalidDataException("Unknown module: " + module);
+                throw new InvalidDataException("Unknown module: \"" + module + "\" (known modules: " + Arrays.toString(Resource.allIdentifiers()) + ")");
             }
         }
 
