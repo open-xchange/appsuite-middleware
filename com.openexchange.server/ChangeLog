@@ -2,6 +2,7 @@
 
  - Fix for bug 25715: Check if specified quota is in allowed range for INT(10) UNSIGNED
  - Fix for bug 19150: Check existence of appropriate property on bundle start-up
+ - Fix for bug 25732: Lowered log level for commonly raised "Folder not found" error code
 
 * 2013-04-06 - thorben.betten@open-xchange.com
 
