@@ -83,6 +83,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessionObject;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -358,38 +359,64 @@ public class DispatcherServlet extends SessionServlet {
             if (AjaxExceptionCodes.UNEXPECTED_ERROR.equals(e)) {
                 LOG.error(new StringAllocator("Unexpected error: '").append(e.getMessage()).append('\'').toString(), e);
             } else if (e.isLoggable(LogLevel.ERROR)) {
-                if (LogProperties.isEnabled()) {
-                    final StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:").append(lineSeparator);
-                    if (LOG instanceof PropertiesAppendingLogWrapper) {
-                        logBuilder.append(LogProperties.getAndPrettyPrint(((PropertiesAppendingLogWrapper) LOG).getPropertiesFor(com.openexchange.log.LogPropertyName.LogLevel.ERROR)));
-                    } else {
-                        logBuilder.append(LogProperties.getAndPrettyPrint(PROPS_TO_IGNORE));
-                    }
-                    LOG.error(logBuilder.toString(), e);
+                // Ignore special "folder not found" error
+                if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
+                    logException(e, LogLevel.DEBUG);
                 } else {
-                    LOG.error("Error processing request.", e);
+                    logException(e);
                 }
             }
             final String action = httpRequest.getParameter(PARAMETER_ACTION);
             APIResponseRenderer.writeResponse(new Response().setException(e), null == action ? toUpperCase(httpRequest.getMethod()) : action, httpRequest, httpResponse);
         } catch (final RuntimeException e) {
-            if(LogProperties.isEnabled()) {
-                final StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:").append(lineSeparator);
-                if (LOG instanceof PropertiesAppendingLogWrapper) {
-                    logBuilder.append(LogProperties.getAndPrettyPrint(((PropertiesAppendingLogWrapper) LOG).getPropertiesFor(com.openexchange.log.LogPropertyName.LogLevel.ERROR)));
-                } else {
-                    logBuilder.append(LogProperties.getAndPrettyPrint(PROPS_TO_IGNORE));
-                }
-                LOG.error(logBuilder.toString(), e);
-            } else {
-                LOG.error("Error processing request.", e);
-            }
+            logException(e);
             final OXException exception = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             final String action = httpRequest.getParameter(PARAMETER_ACTION);
             APIResponseRenderer.writeResponse(new Response().setException(exception), null == action ? toUpperCase(httpRequest.getMethod()) : action, httpRequest, httpResponse);
         } finally {
             if (null != state) {
                 dispatcher.end(state);
+            }
+        }
+    }
+
+    private void logException(final Exception e) {
+        logException(e, null);
+    }
+
+    private void logException(final Exception e, final LogLevel logLevel) {
+        final String msg;
+        if (LogProperties.isEnabled()) {
+            final StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:").append(lineSeparator);
+            if (LOG instanceof PropertiesAppendingLogWrapper) {
+                logBuilder.append(LogProperties.getAndPrettyPrint(((PropertiesAppendingLogWrapper) LOG).getPropertiesFor(com.openexchange.log.LogPropertyName.LogLevel.ERROR)));
+            } else {
+                logBuilder.append(LogProperties.getAndPrettyPrint(PROPS_TO_IGNORE));
+            }
+            msg = logBuilder.toString();
+        } else {
+            msg = "Error processing request.";
+        }
+        if (null == logLevel) {
+            LOG.error(msg, e);
+        } else {
+            switch (logLevel) {
+            case TRACE:
+                LOG.trace(msg, e);
+                break;
+            case DEBUG:
+                LOG.debug(msg, e);
+                break;
+            case INFO:
+                LOG.info(msg, e);
+                break;
+            case WARNING:
+                LOG.warn(msg, e);
+                break;
+            case ERROR:
+                // fall-through
+            default:
+                LOG.error(msg, e);
             }
         }
     }
