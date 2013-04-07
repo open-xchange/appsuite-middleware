@@ -117,7 +117,7 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
         } catch (InvalidDataException e) {
             throw new RemoteException(e.getMessage());
         }
-        throw new NoSuchPublicationException("No such publication with URL \"" + url + "\" found");
+        throw new NoSuchPublicationException("No such publication with URL \"" + url + "\"");
     }
 
     @Override
@@ -152,7 +152,7 @@ public class OXPublication extends OXCommonImpl implements OXPublicationInterfac
         } catch (InvalidDataException e) {
             throw new RemoteException(e.getMessage());
         }
-        throw new NoSuchPublicationException("no Publication with URL " + url + " found");
+        throw new NoSuchPublicationException("No such publication with URL \"" + url + "\"");
     }
 
     private Publication parsePublication(com.openexchange.publish.Publication input, String description) {
