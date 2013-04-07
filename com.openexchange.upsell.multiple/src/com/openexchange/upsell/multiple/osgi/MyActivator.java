@@ -117,7 +117,30 @@ public class MyActivator extends HousekeepingActivator {
         }
 
         // register the http info/sso servlet
-        rememberTracker(new HTTPServletRegistration(context, getFromConfig("com.openexchange.upsell.multiple.servlet"), new MyServlet()));
+        final String alias = getFromConfig("com.openexchange.upsell.multiple.servlet");
+        {
+            // In-place checker
+            class EmptyCecker {
+                boolean isEmpty(final String string) {
+                    if (null == string) {
+                        return true;
+                    }
+                    final int len = string.length();
+                    boolean isWhitespace = true;
+                    for (int i = 0; isWhitespace && i < len; i++) {
+                        isWhitespace = Character.isWhitespace(string.charAt(i));
+                    }
+                    return isWhitespace;
+                }
+            }
+            if (new EmptyCecker().isEmpty(alias)) {
+                registry.clearRegistry();
+                final IllegalStateException e = new IllegalStateException("Missing property in \"com.openexchange.upsell.multiple.servlet\" configuration or missing file \"upsell.properties\".");
+                LOG.error(e.getMessage(), e);
+                return;
+            }
+        }
+        rememberTracker(new HTTPServletRegistration(context, alias, new MyServlet()));
         rememberTracker(new ServiceTracker<UpsellURLService,UpsellURLService>(context, UpsellURLService.class, new UrlServiceInstallationServiceListener(context)));
 
         // track Remote instances
