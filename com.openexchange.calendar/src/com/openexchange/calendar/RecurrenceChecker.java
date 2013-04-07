@@ -257,14 +257,15 @@ public class RecurrenceChecker {
 
         boolean skipType = false;
 
+        final int recurrenceType = CalendarObject.RECURRENCE_TYPE;
         for (final int exception : exceptions) {
             recurrenceFields.remove(Integer.valueOf(exception));
-            if (exception == CalendarObject.RECURRENCE_TYPE) {
+            if (exception == recurrenceType) {
                 skipType = true;
             }
         }
 
-        if (!skipType && cdao.contains(CalendarObject.RECURRENCE_TYPE) && ((Integer) cdao.get(CalendarObject.RECURRENCE_TYPE)).intValue() != CalendarObject.NO_RECURRENCE) {
+        if (!skipType && cdao.contains(recurrenceType) && ((Integer) cdao.get(recurrenceType)).intValue() != CalendarObject.NO_RECURRENCE) {
             return true;
         }
 
