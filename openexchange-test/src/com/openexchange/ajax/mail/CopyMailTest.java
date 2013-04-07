@@ -130,7 +130,7 @@ public class CopyMailTest extends AbstractMailTest {
 
         TestMail copiedMail = manager.copy(myMail, destination);
         String newID = copiedMail.getId();
-        System.out.println("***** newID : "+newID);
+        // System.out.println("***** newID : "+newID);
 
         manager.get(destination, newID);
         assertTrue("Should produce no errors when getting copied e-mail", !manager.getLastResponse().hasError() );

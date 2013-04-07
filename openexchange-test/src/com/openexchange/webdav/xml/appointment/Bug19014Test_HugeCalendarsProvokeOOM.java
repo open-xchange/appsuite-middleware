@@ -145,7 +145,7 @@ public class Bug19014Test_HugeCalendarsProvokeOOM extends ManagedAppointmentTest
 		int numTzDefs = 0;
 		Set<Integer> number = new HashSet<Integer>();
 		while((line = ical.readLine()) != null){
-			System.out.println(line);
+			// System.out.println(line);
 			Matcher matcher = pattern.matcher(line);
 			if(line.contains("TZID:Europe/Berlin")) {
                 numTzDefs++;
@@ -154,7 +154,7 @@ public class Bug19014Test_HugeCalendarsProvokeOOM extends ManagedAppointmentTest
                 continue;
             }
 			String group = matcher.group(1);
-			number.add(Integer.parseInt(group));
+			number.add(Integer.valueOf(group));
 		}
 		ical.close();
 		
@@ -196,8 +196,8 @@ public class Bug19014Test_HugeCalendarsProvokeOOM extends ManagedAppointmentTest
 		
 		HttpResponse response = makeTheCall(folder.getObjectID());
 		String ical = IOUtils.toString(response.getEntity().getContent());
-		System.out.println(ical);
-		assertTrue("The series should be exported", ical.contains("A daily series"));
+		// System.out.println(ical);
+		assertTrue("The series should be exported:"+System.getProperty("line.separator")+ical, ical.contains("A daily series"));
 		for(int i = 1; i < numChanges+1; i++){
 			assertTrue("The exception should be exported", ical.contains("Element # "+i+" of series that has different name"));
 			if(i < 10) {

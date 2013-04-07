@@ -75,7 +75,7 @@ public class ListTest extends AbstractContactTest {
         final long end = System.currentTimeMillis();
         final long diff = end -start;
 
-	    System.out.println("Duration: " + diff);
+	    // System.out.println("Duration: " + diff);
 	}
 
 	public void testListWithAllFields() throws Exception {

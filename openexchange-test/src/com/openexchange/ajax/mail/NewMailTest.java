@@ -96,7 +96,7 @@ public class NewMailTest extends AbstractMailTest {
     }
 
     public void testTransportNewRFC822MailWithoutFrom() throws OXException, IOException, SAXException, JSONException{
-        System.out.println(values.getDraftsFolder());
+        // System.out.println(values.getDraftsFolder());
 
         final NewMailRequest newMailRequest = new NewMailRequest(null, EML_WITHOUT_FROM.replaceFirst("#TOADDR#", values.getSendAddress()), -1, true);
         final NewMailResponse newMailResponse = getClient().execute(newMailRequest);
@@ -106,7 +106,7 @@ public class NewMailTest extends AbstractMailTest {
     }
 
     public void testAppendNewRFC822MailWithoutFrom() throws OXException, IOException, SAXException, JSONException{
-        System.out.println(values.getDraftsFolder());
+        // System.out.println(values.getDraftsFolder());
 
         final NewMailRequest newMailRequest = new NewMailRequest(values.getDraftsFolder(), EML_WITHOUT_FROM.replaceFirst("#TOADDR#", values.getSendAddress()), -1, true);
         final NewMailResponse newMailResponse = getClient().execute(newMailRequest);

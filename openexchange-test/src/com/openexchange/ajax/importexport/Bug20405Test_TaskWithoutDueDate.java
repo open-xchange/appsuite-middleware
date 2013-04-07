@@ -32,8 +32,8 @@ public class Bug20405Test_TaskWithoutDueDate extends ManagedTaskTest {
 	public void testWhateverIsBroken() throws Exception{
 		ICalImportRequest importRequest = new ICalImportRequest(folderID, ical);
 		ICalImportResponse importResponse = getClient().execute(importRequest);
-		System.out.println(importResponse.getResponse());
-		assertEquals(1,importResponse.getImports().length);
+		//System.out.println(importResponse.getResponse());
+		assertEquals(System.getProperty("line.separator")+importResponse.getResponse(), 1,importResponse.getImports().length);
 
 		int id = Integer.parseInt(importResponse.getImports()[0].getObjectId());
 

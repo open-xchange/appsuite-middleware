@@ -88,8 +88,8 @@ public class Bug19089Test extends ManagedAppointmentTest {
         ICalExportRequest request = new ICalExportRequest(folder.getObjectID());
         ICalExportResponse response = getClient().execute(request);
         String ical = (String) response.getData();
-        System.out.println(ical);
-        assertTrue("Export should contain a VTIMEZONE Object", ical.contains("BEGIN:VTIMEZONE"));
+        // System.out.println(ical);
+        assertTrue("Export should contain a VTIMEZONE Object"+System.getProperty("line.separator")+ical, ical.contains("BEGIN:VTIMEZONE"));
     }
 
 }

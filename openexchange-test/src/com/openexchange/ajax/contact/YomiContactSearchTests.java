@@ -34,7 +34,6 @@ public class YomiContactSearchTests extends AbstractManagedContactTest {
         contact.setYomiLastName(YOMI_LAST_NAME);
         contact.setParentFolderID(folderID);
 		manager.newAction(contact);
-		System.out.println();
 	}
 
 	@Override

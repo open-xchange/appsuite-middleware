@@ -106,7 +106,7 @@ public class TestServletTest {
         }
         WebResponse response = conversation.getResponse(request);
         int responseCode = response.getResponseCode();
-        System.out.println(responseCode);
+        // System.out.println(responseCode);
     }
 
 }
