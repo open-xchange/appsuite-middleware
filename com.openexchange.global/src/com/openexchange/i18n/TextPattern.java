@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,13 +50,16 @@
 package com.openexchange.i18n;
 
 /**
- * Marker interface to tell the string extractor that this class contains strings that have to be translated on the back-end.
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * This class contains text pattern that can be used in classes implementing {@link LocalizableStrings}.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface LocalizableStrings {
+public final class TextPattern {
 
-    // Empty interface for classes containing string to translate.
+    private TextPattern() {
+        super();
+    }
+
+    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
 }

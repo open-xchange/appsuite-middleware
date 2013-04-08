@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import static com.openexchange.i18n.TextPattern.LINE_SEPARATOR;
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
