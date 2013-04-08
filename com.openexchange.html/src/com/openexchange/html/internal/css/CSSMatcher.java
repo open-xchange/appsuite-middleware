@@ -425,7 +425,7 @@ public final class CSSMatcher {
                     if (fst) {
                         fst = false;
                     } else {
-                        builder.append(',');
+                        builder.append(", ");
                     }
                     handleWords(sWords, cssPrefix, builder, helper);
                 }
@@ -444,12 +444,16 @@ public final class CSSMatcher {
                 if (isEmpty(word)) {
                     builder.append(word);
                 } else {
-                    handleSelector(cssPrefix, builder, helper, word, first);
                     if (first) {
+                        handleSelector(cssPrefix, builder, helper, word, true);
                         first = false;
+                    } else {
+                        builder.append(' ');
+                        handleSelector(cssPrefix, builder, helper, word, false);
                     }
                 }
             }
+            builder.append(' ');
         }
     }
 
@@ -461,20 +465,20 @@ public final class CSSMatcher {
                 builder.append('#').append(cssPrefix).append(' ');
             }
             builder.append('.').append(cssPrefix).append('-');
-            builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper)).append(' ');
+            builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper));
         } else if ('#' == firstChar) {
             // #id -> #prefix #prefix-id
             if (first) {
                 builder.append('#').append(cssPrefix).append(' ');
             }
             builder.append('#').append(cssPrefix).append('-');
-            builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper)).append(' ');
+            builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper));
         } else {
             // element -> #prefix element
             if (first) {
                 builder.append('#').append(cssPrefix).append(' ');
             }
-            builder.append(replaceDotsAndHashes(selector, cssPrefix, helper)).append(' ');
+            builder.append(replaceDotsAndHashes(selector, cssPrefix, helper));
         }
     }
 

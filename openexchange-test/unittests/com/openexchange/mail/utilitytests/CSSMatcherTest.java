@@ -76,7 +76,7 @@ public class CSSMatcherTest extends TestCase {
         super(name);
     }
 
-    public void testCss() {
+    public void notestCss() {
         final StringBuilder cssBuffer = new StringBuilder(256);
         final String css = " .content {\n" + 
         		" white-space: normal;\n" + 
@@ -267,6 +267,55 @@ public class CSSMatcherTest extends TestCase {
         CSSMatcher.checkCSS(cssBuffer.append(css), FilterJerichoHandler.getStaticStyleMap(), "test");
 
         System.out.println(cssBuffer.toString());
+    }
+
+    public void testCss1() {
+        final StringBuilder cssBuffer = new StringBuilder(256);
+        final String css = " .content {\n" + 
+                " white-space: normal;\n" + 
+                " color: black;\n" + 
+                " font-family: Arial, Helvetica, sans-serif;\n" + 
+                " font-size: 12px;\n" + 
+                " cursor: default;\n" + 
+                "}";
+
+        CSSMatcher.checkCSS(cssBuffer.append(css), FilterJerichoHandler.getStaticStyleMap(), "test");
+
+        // System.out.println(cssBuffer.toString());
+
+        assertTrue("Unexpected CSS: "+cssBuffer.toString(), cssBuffer.toString().trim().startsWith("#test .test-content {"));
+    }
+
+    public void testCss2() {
+        final StringBuilder cssBuffer = new StringBuilder(256);
+        final String css = ".calendar-action  .status.accepted { color: #8EB360; } /* green */\n";
+
+        CSSMatcher.checkCSS(cssBuffer.append(css), FilterJerichoHandler.getStaticStyleMap(), "test");
+
+        // System.out.println(cssBuffer.toString());
+
+        assertTrue("Unexpected CSS: "+cssBuffer.toString(), cssBuffer.toString().trim().startsWith("#test .test-calendar-action .test-status.test-accepted {"));
+    }
+
+    public void testCss3() {
+        final StringBuilder cssBuffer = new StringBuilder(256);
+        final String css = ".justification, .attachmentNote {\n" + 
+            " margin-top: 2em;\n" + 
+            " margin-bottom: 2em;\n" + 
+            "}\n";
+
+        CSSMatcher.checkCSS(cssBuffer.append(css), FilterJerichoHandler.getStaticStyleMap(), "test");
+        final String saneCss = cssBuffer.toString().trim();
+
+        // System.out.println(saneCss);
+
+        assertTrue("Unexpected CSS: "+saneCss, saneCss.indexOf(',') > 0);
+
+        final String[] splits = saneCss.split(" *, *");
+        assertTrue("Unexpected CSS: "+saneCss, splits.length == 2);
+
+        assertTrue("Unexpected CSS: "+saneCss, splits[0].trim().startsWith("#test .test-justification"));
+        assertTrue("Unexpected CSS: "+saneCss, splits[1].trim().startsWith("#test .test-attachmentNote {"));
     }
 
 }
