@@ -260,9 +260,9 @@ public final class CSSMatcher {
     }
 
     /** Matches a starting CSS block */
-    private static final Pattern PATTERN_STYLE_STARTING_BLOCK = Pattern.compile("(?:#|\\.|@|[a-zA-Z])[^{]*?\\{");
+    private static final Pattern PATTERN_STYLE_STARTING_BLOCK = Pattern.compile("(?:#|\\.|@|[a-zA-Z])[^{/]*?\\{");
     /** Matches a complete CSS block, but not appropriate for possible nested blocks */
-    private static final Pattern PATTERN_STYLE_BLOCK = Pattern.compile("((?:#|\\.|[a-zA-Z])[^{]*?\\{)([^}]+)\\}");
+    private static final Pattern PATTERN_STYLE_BLOCK = Pattern.compile("((?:#|\\.|[a-zA-Z])[^{]*?\\{)([^}/]+)\\}");
     /** Matches a CR?LF plus indention */
     private static final Pattern CRLF = Pattern.compile("\r?\n( {2,})?");
 
