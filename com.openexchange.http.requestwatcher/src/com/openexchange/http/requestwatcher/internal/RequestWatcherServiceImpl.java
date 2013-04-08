@@ -132,12 +132,8 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
                         if (requestRegistryEntry.getAge() > requestMaxAge) {
                             sb.reinitTo(0);
                             logRequestRegistryEntry(requestRegistryEntry, sb);
-                            try {
-                                requestRegistry.remove(requestRegistryEntry);
-                                requestRegistryEntry.sendError();
-                            } catch (final IOException e) {
-                                LOG.error(RequestWatcherExceptionMessage.ERROR_WHILE_SENDING_SERVLET_STATUS_CODE_MSG, e.getCause());
-                            }
+                            requestRegistry.remove(requestRegistryEntry);
+                            
                         } else {
                             stillOldRequestsLeft = false;
                         }

@@ -211,19 +211,4 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
         }
     }
 
-    /**
-     * Interrupt processing of this thread and send an error to the client if the response wasn't already committed.
-     *
-     * @throws IOException
-     */
-    public void sendError() throws IOException {
-        /*
-         * We have to make the backend completely interrupt aware before we can enable this
-         * thread.interrupt();
-         */
-        if (!response.isCommitted()) {
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
-    }
-
 }
