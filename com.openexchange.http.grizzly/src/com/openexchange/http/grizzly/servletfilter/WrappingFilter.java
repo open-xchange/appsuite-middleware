@@ -67,6 +67,8 @@ import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
+import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTP_SCHEME;
+import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTPS_SCHEME;
 
 /**
  * {@link WrappingFilter} - Wrap the Request in {@link HttpServletResponseWrapper} and the Response in {@link HttpServletResponseWrapper}
@@ -126,16 +128,25 @@ public class WrappingFilter implements Filter {
         if (isConsiderXForwards) {
             String forHeaderValue = httpServletRequest.getHeader(forHeader);
             String remoteIP = IPTools.getRemoteIP(forHeaderValue, knownProxies);
+            String protocol = httpServletRequest.getHeader(protocolHeader);
 
+            if(!isValidProtocol(protocol)) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Could not detect a valid protocol header value in " + protocol + ", falling back to default");
+                }
+                 protocol = httpServletRequest.getScheme();
+            }
+            
             if (remoteIP.isEmpty()) {
                 if (LOG.isDebugEnabled()) {
                     forHeaderValue = forHeaderValue == null ? "" : forHeaderValue;
                     LOG.debug("Could not detect a valid remote ip in " + forHeader + ": [" + forHeaderValue + "], falling back to default");
                 }
-                httpServletRequestWrapper = new HttpServletRequestWrapper(httpServletRequest.getRemoteAddr(), httpServletRequest);
-            } else {
-                httpServletRequestWrapper = new HttpServletRequestWrapper(remoteIP, httpServletRequest);
+                remoteIP = httpServletRequest.getRemoteAddr();
             }
+            
+            httpServletRequestWrapper = new HttpServletRequestWrapper(protocol, remoteIP, httpServletRequest.getServerPort(), httpServletRequest);
+            
         } else {
             httpServletRequestWrapper = new HttpServletRequestWrapper(httpServletRequest);
         }
@@ -163,6 +174,10 @@ public class WrappingFilter implements Filter {
         }
 
         chain.doFilter(httpServletRequestWrapper, httpServletResponseWrapper);
+    }
+    
+    private boolean isValidProtocol(String protocolHeaderValue) {
+        return HTTP_SCHEME.equals(protocolHeaderValue) || HTTPS_SCHEME.equals(protocolHeaderValue);
     }
 
     @Override
