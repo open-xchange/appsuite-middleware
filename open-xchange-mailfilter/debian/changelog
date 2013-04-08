@@ -148,6 +148,12 @@ open-xchange-mailfilter (6.23.0-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 03 Sep 2012 13:46:14 +0200
 
+open-xchange-mailfilter (6.22.1-14) unstable; urgency=low
+
+  * Build for patch 2013-04-04
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 02 Apr 2013 09:10:03 +0200
+
 open-xchange-mailfilter (6.22.1-13) unstable; urgency=low
 
   * Build for patch 2013-03-07
