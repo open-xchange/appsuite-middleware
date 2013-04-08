@@ -55,10 +55,12 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.Collections;
 
 /**
@@ -69,6 +71,22 @@ import com.openexchange.tools.Collections;
 public class ContentType extends ParameterizedHeader {
 
     private static final long serialVersionUID = -9197784872892324694L;
+
+    private static Boolean contentTypeRegexFallback;
+    private static boolean contentTypeRegexFallback() {
+        Boolean b = contentTypeRegexFallback;
+        if (null == b) {
+            synchronized (ContentType.class) {
+                b = contentTypeRegexFallback;
+                if (null == b) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    b = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.mail.mime.contentTypeRegexFallback", true));
+                    contentTypeRegexFallback = b;
+                }
+            }
+        }
+        return b.booleanValue();
+    }
 
     /**
      * {@link UnmodifiableContentType} - An unmodifiable content type.
@@ -393,8 +411,9 @@ public class ContentType extends ParameterizedHeader {
             return;
         }
         final String cts = prepareParameterizedHeader(contentType);
-        int pos = cts.indexOf(';');
-        final String type = pos < 0 ? cts : cts.substring(0, pos);
+        int semicolonPos = cts.indexOf(';');
+        int commaPos = -1;
+        final String type = semicolonPos < 0 ? cts : cts.substring(0, semicolonPos);
         // Check for '/' character
         final int slashPos = type.indexOf(DELIMITER);
         if (slashPos >= 0) {
@@ -403,11 +422,11 @@ public class ContentType extends ParameterizedHeader {
                 {
                     String pt = 0 == slashPos ? DEFAULT_PRIMTYPE : type.substring(0, slashPos).trim();
                     if (pt.indexOf('%') >= 0) {
-                        // Possibly mail-safe encoded
+                        // Possibly encoded
                         pt = decodeUrl(pt);
                     }
                     char fc;
-                    if ((fc = pt.charAt(0)) == '"' || fc == '\'') {
+                    while ((fc = pt.charAt(0)) == '"' || fc == '\'') {
                         pt = pt.substring(1);
                     }
                     if (pt.toLowerCase(Locale.US).startsWith("content-type:")) {
@@ -424,13 +443,17 @@ public class ContentType extends ParameterizedHeader {
                 // Subtype
                 {
                     String st = slashPos < type.length() ? type.substring(slashPos + 1).trim() : DEFAULT_SUBTYPE;
+                    {
+                        commaPos = st.indexOf(',');
+                        st = commaPos > 0 ? st.substring(0, commaPos) : st;
+                    }
                     if (st.indexOf('%') >= 0) {
-                        // Possibly mail-safe encoded
+                        // Possibly encoded
                         st = decodeUrl(st);
                     }
-                    final int mlen = st.length() - 1;
+                    int mlen;
                     char lc;
-                    if (mlen > 0 && ((lc = st.charAt(mlen)) == '"' || lc == '\'')) {
+                    while ((mlen = st.length() - 1) > 0 && ((lc = st.charAt(mlen)) == '"' || lc == '\'')) {
                         st = st.substring(0, mlen);
                     }
                     if (isInvalidToken(st)) {
@@ -451,11 +474,21 @@ public class ContentType extends ParameterizedHeader {
                 baseType = new com.openexchange.java.StringAllocator(16).append(primaryType).append(DELIMITER).append(subType).toString();
                 lcBaseType = toLowerCase(baseType);
                 if (paramList) {
-                    if (pos < 0) {
-                        parameterList = new ParameterList();
+                    if (semicolonPos < 0) {
+                        if (commaPos < 0) {
+                            parameterList = new ParameterList();
+                        } else {
+                            // Encountered a comma during sub-type parsing
+                            try {
+                                commaPos = cts.indexOf(','); // Detect comma's real position
+                                parameterList = commaPos < cts.length() ? new ParameterList(cts.substring(commaPos + 1)) : new ParameterList();
+                            } catch (final RuntimeException e) {
+                                throw MailExceptionCode.INVALID_CONTENT_TYPE.create(e, contentType);
+                            }
+                        }
                     } else {
                         try {
-                            parameterList = pos < cts.length() ? new ParameterList(cts.substring(pos + 1)) : new ParameterList();
+                            parameterList = semicolonPos < cts.length() ? new ParameterList(cts.substring(semicolonPos + 1)) : new ParameterList();
                         } catch (final RuntimeException e) {
                             throw MailExceptionCode.INVALID_CONTENT_TYPE.create(e, contentType);
                         }
@@ -463,6 +496,9 @@ public class ContentType extends ParameterizedHeader {
                 }
                 return;
             } catch (final OXException e) {
+                if (!contentTypeRegexFallback()) {
+                    throw e;
+                }
                 // Content-Type could not be parsed the simple way
                 final Log logger = com.openexchange.log.Log.loggerFor(ContentType.class);
                 logger.debug(e.getMessage(), e);
@@ -491,10 +527,10 @@ public class ContentType extends ParameterizedHeader {
                         primaryType = DEFAULT_PRIMTYPE;
                     }
                 }
-                pos = primaryType.indexOf(DELIMITER);
-                if (pos >= 0) {
-                    subType = primaryType.substring(pos + 1);
-                    primaryType = primaryType.substring(0, pos);
+                semicolonPos = primaryType.indexOf(DELIMITER);
+                if (semicolonPos >= 0) {
+                    subType = primaryType.substring(semicolonPos + 1);
+                    primaryType = primaryType.substring(0, semicolonPos);
                 } else {
                     {
                         final String st = ctMatcher.group(2);
@@ -520,7 +556,7 @@ public class ContentType extends ParameterizedHeader {
             baseType = new com.openexchange.java.StringAllocator(16).append(primaryType).append(DELIMITER).append(subType).toString();
             lcBaseType = null;
             if (paramList) {
-                parameterList = new ParameterList(pos < 0 ? cts : cts.substring(pos));
+                parameterList = new ParameterList(semicolonPos < 0 ? cts : cts.substring(semicolonPos));
                 final String name = parameterList.getParameter("name");
                 if (null != name) {
                     final String byName = MimeType2ExtMap.getContentType(name);

@@ -1,3 +1,7 @@
+* 2013-04-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25753: Sane Content-Type value
+
 * 2013-04-08 - marc.arens@open-xchange.com
 
  - Fix for bug: 25039 - Files: Uploading a new file version of 10MB times out without user notification
