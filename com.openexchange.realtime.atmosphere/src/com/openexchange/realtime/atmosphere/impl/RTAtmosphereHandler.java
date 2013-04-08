@@ -430,6 +430,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         } catch (OXException x) {
             throw x;
         } catch (Throwable t) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(t.getMessage(), t);
+            }
             if (outbox != null) {
                 outboxFor(id).addAll(outbox);
             }
