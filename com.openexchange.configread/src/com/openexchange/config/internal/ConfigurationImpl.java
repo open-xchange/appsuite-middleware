@@ -170,9 +170,46 @@ public final class ConfigurationImpl implements ConfigurationService {
         propertiesFiles = new HashMap<String, String>(2048);
         yamlFiles = new HashMap<String, Object>(64);
         yamlPaths = new HashMap<String, String>(64);
-
+        // First filter+processor pair
         final FileFilter fileFilter = new PropertyFileFilter();
-        dirs = new File[directories.length];
+        final FileProcessor processor = new FileProcessor() {
+
+            @Override
+            public void processFile(final File file) {
+                processPropertiesFile(file);
+            }
+
+        };
+        // Second filter+processor pair
+        final FileFilter fileFilter2 = new FileFilter() {
+
+            @Override
+            public boolean accept(final File pathname) {
+                return pathname.isDirectory() || pathname.getName().endsWith(".yml") || pathname.getName().endsWith(".yaml");
+            }
+
+        };
+        final Log log = LOG;
+        final FileProcessor processor2 = new FileProcessor() {
+
+            @Override
+            public void processFile(final File file) {
+                Object o = null;
+                try {
+                    o = Yaml.load(file);
+                } catch (final FileNotFoundException e) {
+                    // IGNORE
+                    return;
+                } catch (RuntimeException x) {
+                    log.error(file, x);
+                    throw x;
+                }
+                yamlPaths.put(file.getName(), file.getPath());
+                yamlFiles.put(file.getPath(), o);
+            }
+
+        };
+        final File[] dirs = new File[directories.length];
         for (int i = 0; i < directories.length; i++) {
             if (null == directories[i]) {
                 throw new IllegalArgumentException("Given configuration directory path is null.");
@@ -184,44 +221,12 @@ public final class ConfigurationImpl implements ConfigurationService {
             } else if (!dir.isDirectory()) {
                 throw new IllegalArgumentException(MessageFormat.format("Not a directory: {0}", directories[i]));
             }
-            processDirectory(dir, fileFilter, new FileProcessor() {
-
-                @Override
-                public void processFile(final File file) {
-                    processPropertiesFile(file);
-                }
-
-            });
-
-            processDirectory(dir, new FileFilter() {
-
-                @Override
-                public boolean accept(final File pathname) {
-                    return pathname.isDirectory() || pathname.getName().endsWith(".yml") || pathname.getName().endsWith(".yaml");
-                }
-
-            },
-
-            new FileProcessor() {
-
-                @Override
-                public void processFile(final File file) {
-                    Object o = null;
-                    try {
-                        o = Yaml.load(file);
-                    } catch (final FileNotFoundException e) {
-                        // IGNORE
-                        return;
-                    } catch (RuntimeException x) {
-                    	LOG.error(file, x);
-                    	throw x;
-                    }
-                    yamlPaths.put(file.getName(), file.getPath());
-                    yamlFiles.put(file.getPath(), o);
-                }
-
-            });
+            // Process: First round
+            processDirectory(dir, fileFilter, processor);
+            // Process: Second round
+            processDirectory(dir, fileFilter2, processor2);
         }
+        this.dirs = dirs;
     }
 
     private static interface FileProcessor {
