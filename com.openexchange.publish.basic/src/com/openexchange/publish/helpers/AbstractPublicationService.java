@@ -120,7 +120,9 @@ public abstract class AbstractPublicationService implements PublicationService {
                 returnPublications.add(publication);
             } catch (OXException e) {
                 if (InfostoreExceptionCodes.NOT_EXIST.equals(e)){
-                    LOG.info(e.getLogMessage());
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(e.getLogMessage());
+                    }
                 } else {
                     throw e;
                 }
@@ -141,7 +143,9 @@ public abstract class AbstractPublicationService implements PublicationService {
                 returnPublications.add(publication);
             } catch (OXException e) {
                 if (InfostoreExceptionCodes.NOT_EXIST.equals(e)){
-                    LOG.info(e.getLogMessage());
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(e.getLogMessage());
+                    }
                 } else {
                     throw e;
                 }
@@ -168,7 +172,9 @@ public abstract class AbstractPublicationService implements PublicationService {
                 returnPublications.add(publication);
             } catch (OXException e) {
                 if (InfostoreExceptionCodes.NOT_EXIST.equals(e)){
-                    LOG.info(e.getLogMessage());
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(e.getLogMessage());
+                    }
                 } else {
                     throw e;
                 }
