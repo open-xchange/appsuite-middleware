@@ -50,6 +50,7 @@
 package com.openexchange.http.deferrer.servlet;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.util.BitSet;
 import java.util.Enumeration;
@@ -241,5 +242,19 @@ public class DeferrerServlet extends HttpServlet {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    /**
+     * Gets the ASCII string from specified bytes.
+     *
+     * @param bytes The bytes
+     * @return The ASCII string
+     */
+    public static String toAsciiString(final byte[] bytes) {
+        final StringBuilder sb = new StringBuilder(bytes.length);
+        for (int i = 0; i < bytes.length; i++) {
+            sb.append((char) (bytes[i] & 0x00FF));
+        }
+        return sb.toString();
     }
 }
