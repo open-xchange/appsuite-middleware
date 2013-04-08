@@ -164,12 +164,12 @@ public final class ConfigurationImpl implements ConfigurationService {
         if (null == directories || directories.length == 0) {
             throw new IllegalArgumentException("Missing configuration directory path.");
         }
-        propertiesByFile = new HashMap<String, Properties>();
-        texts = new ConcurrentHashMap<String, String>();
-        properties = new HashMap<String, String>();
-        propertiesFiles = new HashMap<String, String>();
-        yamlFiles = new HashMap<String, Object>();
-        yamlPaths = new HashMap<String, String>();
+        propertiesByFile = new HashMap<String, Properties>(256);
+        texts = new ConcurrentHashMap<String, String>(1024);
+        properties = new HashMap<String, String>(2048);
+        propertiesFiles = new HashMap<String, String>(2048);
+        yamlFiles = new HashMap<String, Object>(64);
+        yamlPaths = new HashMap<String, String>(64);
 
         final FileFilter fileFilter = new PropertyFileFilter();
         dirs = new File[directories.length];
