@@ -87,18 +87,24 @@ public abstract class JDBC4ConnectionReturner implements Connection {
 
     private final boolean write;
 
-    private final boolean usedAsRead;
+    private boolean usedAsRead;
 
-    public JDBC4ConnectionReturner(final Pools pools, final AssignmentImpl assign, final Connection delegate, final boolean noTimeout, final boolean write, final boolean usedAsRead) {
+	private final ReplicationMonitor monitor;
+
+    public JDBC4ConnectionReturner(final Pools pools, final ReplicationMonitor monitor, final AssignmentImpl assign, final Connection delegate, final boolean noTimeout, final boolean write, final boolean usedAsRead) {
         super();
         this.pools = pools;
         this.assign = assign;
         this.delegate = delegate;
         this.noTimeout = noTimeout;
         this.write = write;
+        this.monitor = monitor;
         this.usedAsRead = usedAsRead;
     }
-
+    
+    public void setUsedAsRead(boolean b) {
+    	this.usedAsRead = b;
+    }
     @Override
     public String toString() {
         return delegate.toString();
@@ -117,7 +123,7 @@ public abstract class JDBC4ConnectionReturner implements Connection {
         }
         final Connection toReturn = delegate;
         delegate = null;
-        ReplicationMonitor.backAndIncrementTransaction(pools, assign, toReturn, noTimeout, write, usedAsRead);
+        monitor.backAndIncrementTransaction(pools, assign, toReturn, noTimeout, write, usedAsRead);
     }
 
     @Override
