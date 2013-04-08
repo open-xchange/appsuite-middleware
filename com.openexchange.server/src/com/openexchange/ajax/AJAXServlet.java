@@ -1123,7 +1123,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             final Throwable cause = e.getCause();
             if (cause instanceof IOException) {
                 final String message = cause.getMessage();
-                if (message.startsWith("Max. byte count of ")) {
+                if (null != message && message.startsWith("Max. byte count of ")) {
                     // E.g. Max. byte count of 10240 exceeded.
                     final int pos = message.indexOf(" exceeded", 19 + 1);
                     final String limit = message.substring(19, pos);
