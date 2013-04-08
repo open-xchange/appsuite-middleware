@@ -1,3 +1,9 @@
+* 2013-04-08 - marc.arens@open-xchange.com
+
+ - Fix for bug: 25039 - Files: Uploading a new file version of 10MB times out without user notification
+ - Fix for bug: 25474 - Unexpected error: null when sending mail
+ - Fix for bug: 25285 - publication api always returns http as protocol
+
 * 2013-04-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 25715: Check if specified quota is in allowed range for INT(10) UNSIGNED
