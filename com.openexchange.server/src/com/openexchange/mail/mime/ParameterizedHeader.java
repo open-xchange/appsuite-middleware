@@ -53,6 +53,7 @@ import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeEnvelope
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import java.io.Serializable;
 import java.util.Iterator;
+import java.util.regex.Pattern;
 import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.codec.DecoderException;
 
@@ -222,6 +223,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
     }
 
     private static final org.apache.commons.codec.net.URLCodec URL_CODEC = new org.apache.commons.codec.net.URLCodec(CharEncoding.ISO_8859_1);
+    private static final Pattern P_ENC = Pattern.compile("%\\s([0-9a-fA-F]{2})");
 
     /**
      * URL decodes given string.
@@ -230,7 +232,7 @@ public abstract class ParameterizedHeader implements Serializable, Comparable<Pa
      */
     protected static String decodeUrl(final String s) {
         try {
-            return isEmpty(s) ? s : (URL_CODEC.decode(s));
+            return isEmpty(s) ? s : (URL_CODEC.decode(P_ENC.matcher(s).replaceAll("%$1")));
         } catch (final DecoderException e) {
             return s;
         }
