@@ -99,11 +99,13 @@ public class TranslatedTest {
         com.openexchange.unifiedinbox.NameStrings.class
     };
 
+    private final String className;
     private final Locale locale;
     private final String key;
 
-    public TranslatedTest(final Locale locale, final String key) {
+    public TranslatedTest(String className, Locale locale, String key) {
         super();
+        this.className = className;
         this.locale = locale;
         this.key = key;
     }
@@ -117,7 +119,7 @@ public class TranslatedTest {
                 for (final Field field : clazz.getFields()) {
                     if (String.class.isAssignableFrom(field.getType())) {
                         final String key = (String) field.get(instance);
-                        retval.add(new Object[] { locale, key });
+                        retval.add(new Object[] { clazz.getName(), locale, key });
                     }
                 }
             }
@@ -127,7 +129,7 @@ public class TranslatedTest {
             }
             removeUnwantedZones(timeZoneIDs);
             for (final String timeZoneID : timeZoneIDs) {
-                retval.add(new Object[] { locale, timeZoneID.replace('_', ' ') });
+                retval.add(new Object[] { TimeZone.class.getName(), locale, timeZoneID.replace('_', ' ') });
             }
         }
         return retval;
@@ -152,9 +154,9 @@ public class TranslatedTest {
         final I18nService i18nService = I18nServices.getInstance().getService(locale);
         assertNotNull("Can't get i18n service for " + locale.toString(), i18nService);
         final boolean isTranslated = i18nService.hasKey(key);
-        assertTrue("No translation for key " + key + " into language " + locale + ".", isTranslated);
+        assertTrue("No translation for key \"" + key + "\" of class " + className + " into language " + locale + ".", isTranslated);
         final String translation = i18nService.getLocalized(key);
-        assertNotNull("Translation for key " + key + " is null.", translation);
+        assertNotNull("Translation for key \"" + key + "\" of class " + className + " is null.", translation);
     }
 
     private static void removeUnwantedZones(List<String> timeZoneIDs) {
