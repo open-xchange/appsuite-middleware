@@ -50,10 +50,13 @@
 package com.openexchange.http.deferrer.servlet;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
 import java.util.BitSet;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -62,7 +65,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.logging.Log;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
-import com.openexchange.java.Charsets;
 
 /**
  * {@link DeferrerServlet}
@@ -137,16 +139,8 @@ public class DeferrerServlet extends HttpServlet {
         }
     }
 
-    /**
-     * URL encodes given string.
-     * <p>
-     * Using <code>org.apache.commons.codec.net.URLCodec</code>.
-     */
-    private String encodeUrl(final String s) {
-        return encodeUrl(s, false);
-    }
-
     private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n|(?:%0[aA])?%0[dD]");
+    private static final Pattern PATTERN_DSLASH = Pattern.compile("(?:/|%2[fF]){2}");
 
     /**
      * URL encodes given string.
@@ -158,16 +152,38 @@ public class DeferrerServlet extends HttpServlet {
             return s;
         }
         try {
-            if (!forAnchor) {
-                return Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL, s.getBytes(Charsets.ISO_8859_1)));
+            final String ascii;
+            if (forAnchor) {
+                // Prepare for being used as anchor/link
+                ascii = toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL_ANCHOR, s.getBytes("ISO-8859-1")));
+            } else {
+                ascii = toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL, s.getBytes("ISO-8859-1")));
             }
-            // Prepare for being used as anchor/link
-            final String ascii = Charsets.toAsciiString(URLCodec.encodeUrl(WWW_FORM_URL_ANCHOR, s.getBytes(Charsets.ISO_8859_1)));
             // Strip possible "\r?\n" and/or "%0A?%0D"
-            if (ascii.indexOf('\n') < 0 && ascii.indexOf("%0") < 0) {
-                return ascii;
+            String retval = PATTERN_CRLF.matcher(ascii).replaceAll("");
+            // Check for a relative URI
+            try {
+                final java.net.URI uri = new java.net.URI(retval);
+                if (uri.isAbsolute() || null != uri.getScheme() || null != uri.getHost()) {
+                    throw new IllegalArgumentException("Illegal Location value: " + s);
+                }
+            } catch (final URISyntaxException e) {
+                throw new IllegalArgumentException("Illegal Location value: " + s, e);
             }
-            return PATTERN_CRLF.matcher(ascii).replaceAll("");
+            // Replace double slashes with single one
+            {
+                Matcher matcher = PATTERN_DSLASH.matcher(retval);
+                while (matcher.find()) {
+                    retval = matcher.replaceAll("/");
+                    matcher = PATTERN_DSLASH.matcher(retval);
+                }
+            }
+            return retval;
+        } catch (final IllegalArgumentException e) {
+            throw e;
+        } catch (final UnsupportedEncodingException e) {
+            LOG.error("An encoding error occurred.", e);
+            return s;
         } catch (final RuntimeException e) {
             LOG.error("A runtime error occurred.", e);
             return s;
@@ -202,7 +218,7 @@ public class DeferrerServlet extends HttpServlet {
             String parameter = req.getParameter(name);
             builder.append(concat);
             concat = '&';
-            builder.append(name).append('=').append(encodeUrl(parameter));
+            builder.append(name).append('=').append(encodeUrl(parameter, true));
         }
         resp.sendRedirect(builder.toString());
 
@@ -228,5 +244,19 @@ public class DeferrerServlet extends HttpServlet {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    /**
+     * Gets the ASCII string from specified bytes.
+     *
+     * @param bytes The bytes
+     * @return The ASCII string
+     */
+    public static String toAsciiString(final byte[] bytes) {
+        final StringBuilder sb = new StringBuilder(bytes.length);
+        for (int i = 0; i < bytes.length; i++) {
+            sb.append((char) (bytes[i] & 0x00FF));
+        }
+        return sb.toString();
     }
 }

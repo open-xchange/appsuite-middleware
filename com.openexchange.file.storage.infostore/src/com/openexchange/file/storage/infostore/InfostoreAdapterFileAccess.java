@@ -49,8 +49,10 @@
 
 package com.openexchange.file.storage.infostore;
 
+import static com.openexchange.file.storage.FileStorageUtility.checkUrl;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -83,15 +85,15 @@ import com.openexchange.tools.session.ServerSession;
 public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
 
     private static final InfostoreFacade VIRTUAL_INFOSTORE = new VirtualFolderInfostoreFacade();
-    private static final Set<Long> VIRTUAL_FOLDERS = new HashSet<Long>() {
-
-        {
-            add(Long.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
-            add(Long.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
-            add(Long.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID));
-            add(Long.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID));
-        }
-    };
+    private static final Set<Long> VIRTUAL_FOLDERS;
+    static {
+        final Set<Long> set = new HashSet<Long>(4);
+        set.add(Long.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
+        set.add(Long.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
+        set.add(Long.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID));
+        set.add(Long.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID));
+        VIRTUAL_FOLDERS = Collections.unmodifiableSet(set);
+    }
 
     private final InfostoreFacade infostore;
     private final InfostoreSearchEngine search;
@@ -107,6 +109,7 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
      * @param infostore2
      */
     public InfostoreAdapterFileAccess(final ServerSession session, final InfostoreFacade infostore, final InfostoreSearchEngine search, final FileStorageAccountAccess accountAccess) {
+        super();
         this.sessionObj = session;
 
         this.ctx = sessionObj.getContext();
@@ -117,7 +120,6 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
         this.search = search;
         this.accountAccess = accountAccess;
     }
-
 
     @Override
     public boolean exists(final String folderId, final String id, final String version) throws OXException {
@@ -218,24 +220,32 @@ public class InfostoreAdapterFileAccess implements FileStorageFileAccess {
 
     @Override
     public void saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
+        checkUrl(file);
         getInfostore(file.getFolderId()).saveDocument(new FileMetadata(file), data, sequenceNumber, sessionObj);
     }
 
 
     @Override
     public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+        if (modifiedFields.contains(Field.URL)) {
+            checkUrl(file);
+        }
         getInfostore(file.getFolderId()).saveDocument(new FileMetadata(file), data, sequenceNumber, FieldMapping.getMatching(modifiedFields), sessionObj );
     }
 
 
     @Override
     public void saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
+        checkUrl(file);
         getInfostore(file.getFolderId()).saveDocumentMetadata(new FileMetadata(file), sequenceNumber, sessionObj);
     }
 
 
     @Override
     public void saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+        if (modifiedFields.contains(Field.URL)) {
+            checkUrl(file);
+        }
         getInfostore(file.getFolderId()).saveDocumentMetadata(new FileMetadata(file), sequenceNumber, FieldMapping.getMatching(modifiedFields), sessionObj);
     }
 
