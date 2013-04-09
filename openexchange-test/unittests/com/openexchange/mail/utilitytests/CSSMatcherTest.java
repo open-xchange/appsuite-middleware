@@ -49,9 +49,9 @@
 
 package com.openexchange.mail.utilitytests;
 
+import junit.framework.TestCase;
 import com.openexchange.html.internal.css.CSSMatcher;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler;
-import junit.framework.TestCase;
 
 
 /**
@@ -316,6 +316,29 @@ public class CSSMatcherTest extends TestCase {
 
         assertTrue("Unexpected CSS: "+saneCss, splits[0].trim().startsWith("#test .test-justification"));
         assertTrue("Unexpected CSS: "+saneCss, splits[1].trim().startsWith("#test .test-attachmentNote {"));
+    }
+
+    public void testCss4() {
+        final StringBuilder cssBuffer = new StringBuilder(256);
+        final String css = CSSSnippets.getCssSnippet1();
+
+        CSSMatcher.checkCSS(cssBuffer.append(css), FilterJerichoHandler.getStaticStyleMap(), "test");
+        final String saneCss = cssBuffer.toString().trim();
+
+        //System.out.println(saneCss);
+
+        final String[] lines = saneCss.split("\r?\n");
+
+        {
+            final String line = lines[0];
+            assertTrue("Unexpected CSS: "+saneCss, line.trim().startsWith("/* common --------------------------------------------------*/  #test {"));
+        }
+
+        {
+            final String line = lines[1];
+            assertTrue("Unexpected CSS: "+saneCss, line.trim().startsWith("#test {"));
+        }
+
     }
 
 }
