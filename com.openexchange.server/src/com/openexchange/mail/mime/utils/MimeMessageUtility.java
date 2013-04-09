@@ -406,19 +406,54 @@ public final class MimeMessageUtility {
     /**
      * Compares (case insensitive) the given values of message header "Content-ID". The leading/trailing characters '<code>&lt;</code>' and
      * ' <code>&gt;</code>' are ignored during comparison
-     *
+     * 
      * @param contentId1 The first content ID
      * @param contentId2 The second content ID
      * @return <code>true</code> if both are equal; otherwise <code>false</code>
      */
     public static boolean equalsCID(final String contentId1, final String contentId2) {
-        if (null != contentId1 && null != contentId2) {
-            final int length1 = contentId1.length();
-            final int length2 = contentId2.length();
-            final String cid1 = length1 > 0 && contentId1.charAt(0) == '<' ? contentId1.substring(1, length1 - 1) : contentId1;
-            return cid1.equalsIgnoreCase(length2 > 0 && contentId2.charAt(0) == '<' ? contentId2.substring(1, length2 - 1) : contentId2);
+        return equalsCID(contentId1, contentId2, null);
+    }
+
+    /**
+     * Compares (case insensitive) the given values of message header "Content-ID". The leading/trailing characters '<code>&lt;</code>' and
+     * ' <code>&gt;</code>' are ignored during comparison
+     *
+     * @param contentId1 The first content ID
+     * @param contentId2 The second content ID
+     * @param ignorableSuffix The optional ignorable suffix; e.g. <code>"@Open-Xchange"</code>
+     * @return <code>true</code> if both are equal; otherwise <code>false</code>
+     */
+    public static boolean equalsCID(final String contentId1, final String contentId2, final String ignorableSuffix) {
+        final String cid1 = trimContentId(contentId1, ignorableSuffix);
+        final String cid2 = trimContentId(contentId2, ignorableSuffix);
+        if (null == cid1) {
+            if (null != cid2) {
+                return false;
+            }
+        } else {
+            if ((null == cid2) || !cid1.equalsIgnoreCase(cid2)) {
+                return false;
+            }
         }
-        return false;
+        return true;
+    }
+
+    private static String trimContentId(final String contentId, final String ignorableSuffix) {
+        if (null == contentId) {
+            return null;
+        }
+        String ret = contentId.trim();
+        if (ret.startsWith("<")) {
+            ret = ret.substring(1);
+            if (ret.endsWith(">")) {
+                ret = ret.substring(0, ret.length() - 1);
+            }
+        }
+        if (null != ignorableSuffix && ret.endsWith(ignorableSuffix)) {
+            ret = ret.substring(0, ret.lastIndexOf(ignorableSuffix));
+        }
+        return ret;
     }
 
     private static final String IMAGE_ALIAS_APPENDIX = ImageActionFactory.ALIAS_APPENDIX;

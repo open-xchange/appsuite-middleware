@@ -70,6 +70,7 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.uuencode.UUEncodedPart;
+import com.openexchange.version.Version;
 
 /**
  * {@link ImageMessageHandler}
@@ -108,29 +109,31 @@ public final class ImageMessageHandler implements MailMessageHandler {
     }
 
     private static final String IMAGE = "image/";
+    private static final String MIME_APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
+    private static final String SUFFIX = "@" + Version.NAME;
 
     @Override
     public boolean handleAttachment(final MailPart part, final boolean isInline, final String baseContentType, final String fileName, final String id) throws OXException {
-        if (part.getContentType().startsWith(IMAGE) || part.getContentType().startsWith(MimeTypes.MIME_APPL_OCTET)) {
+        if (part.getContentType().startsWith(IMAGE) || part.getContentType().startsWith(MIME_APPL_OCTET)) {
             String cid = part.getContentId();
-            if (cid == null || cid.length() == 0) {
+            if (isEmpty(cid)) {
                 /*
                  * Try to read from headers
                  */
                 cid = part.getFirstHeader(MessageHeaders.HDR_CONTENT_ID);
-                if (cid == null || cid.length() == 0) {
+                if (isEmpty(cid)) {
                     /*
                      * Compare with filename
                      */
                     final String realFilename = MimeMessageUtility.getRealFilename(part);
-                    if (MimeMessageUtility.equalsCID(this.cid, realFilename)) {
+                    if (MimeMessageUtility.equalsCID(this.cid, realFilename, SUFFIX)) {
                         imagePart = part;
                         return false;
                     }
                     return true;
                 }
             }
-            if (MimeMessageUtility.equalsCID(this.cid, cid)) {
+            if (MimeMessageUtility.equalsCID(this.cid, cid, SUFFIX)) {
                 imagePart = part;
                 return false;
             }
@@ -409,6 +412,19 @@ public final class ImageMessageHandler implements MailMessageHandler {
     @Override
     public boolean handleUserFlags(final String[] userFlags) throws OXException {
         return true;
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

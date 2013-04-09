@@ -186,6 +186,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.tools.collections.PropertizedList;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
+import com.openexchange.version.Version;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
@@ -870,6 +871,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
+    private static final String SUFFIX = "@" + Version.NAME;
+
     private Part examinePart(final Part part, final String contentId) throws OXException {
         try {
             final String ct = toLowerCase(getFirstHeaderFrom(MessageHeaders.HDR_CONTENT_TYPE, part));
@@ -887,7 +890,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Compare with Content-Id
                  */
-                if (MimeMessageUtility.equalsCID(contentId, partContentId)) {
+                if (MimeMessageUtility.equalsCID(contentId, partContentId, SUFFIX)) {
                     return part;
                 }
                 /*
