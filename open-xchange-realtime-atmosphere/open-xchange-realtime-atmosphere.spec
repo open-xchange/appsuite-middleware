@@ -8,7 +8,7 @@ BuildRequires: open-xchange-realtime-core
 BuildRequires: open-xchange-grizzly
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -46,6 +46,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Apr 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.2.0 release
 * Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.2.0 release
 * Thu Mar 28 2013 Marcus Klein <marcus.klein@open-xchange.com>
