@@ -142,7 +142,10 @@ public final class JSONStringOutputStream extends OutputStream {
         int offset = off;
         final int end = offset + len;
         while (offset < end) {
-            final int ch = b[offset++];
+            int ch = b[offset++];
+            if (ch < 0) {
+                ch = ch & 0xff;
+            }
             if (ch <= 0x7F) {
                 if (escCodes[ch] == 0) {
                     out.write(ch);
@@ -162,7 +165,8 @@ public final class JSONStringOutputStream extends OutputStream {
                 _writeGenericEscape(ch);
                 continue;
             }
-            if (ch <= 0x7FF) { // fine, just needs 2 byte output
+            if (ch <= 0x7FF) {
+                // fine, just needs 2 byte output
                 out.write((byte) (0xc0 | (ch >> 6)));
                 out.write((byte) (0x80 | (ch & 0x3f)));
             } else {
