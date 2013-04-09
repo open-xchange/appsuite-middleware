@@ -53,6 +53,7 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import com.fasterxml.jackson.core.io.CharTypes;
 
 /**
@@ -72,6 +73,8 @@ public final class JSONStringOutputStream extends OutputStream {
     private final static int[] sOutputEscapes = CharTypes.get7BitOutputEscapes();
 
     private final static byte[] HEX_CHARS = CharTypes.copyHexBytes();
+
+    private final static Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
     private final static byte BYTE_u = (byte) 'u';
     private final static byte BYTE_0 = (byte) '0';
@@ -99,9 +102,50 @@ public final class JSONStringOutputStream extends OutputStream {
 
     @Override
     public void write(final int ch) throws IOException {
+        writeChar(ch, 127, sOutputEscapes);
+    }
+
+    @Override
+    public void write(final byte[] b) throws IOException {
+        write(b, 0, b.length);
+    }
+
+    @Override
+    public void write(final byte[] b, final int off, final int len) throws IOException {
         final int[] escCodes = sOutputEscapes;
         final int maxUnescaped = 127;
 
+        int offset = off;
+        final int end = offset + len;
+        int prev = 0;
+        while (offset < end) {
+            int ch = b[offset++];
+            if (ch < 0) {
+                if (prev == 0) {
+                    prev = ch;
+                    continue;
+                }
+                ch = new String(new byte[] { (byte) prev, (byte) ch }, UTF8_CHARSET).charAt(0);
+                prev = 0;
+            } else {
+                if (prev != 0) {
+                    writeChar(prev, maxUnescaped, escCodes);
+                    prev = 0;
+                }
+            }
+            writeChar(ch, maxUnescaped, escCodes);
+        }
+        if (prev != 0) {
+            writeChar(prev, maxUnescaped, escCodes);
+            prev = 0;
+        }
+    }
+
+    private void writeChar(int c, final int maxUnescaped, final int[] escCodes) throws IOException {
+        int ch = c;
+        if (ch < 0) {
+            ch = ch & 0xff;
+        }
         if (ch <= 0x7F) {
             if (escCodes[ch] == 0) {
                 out.write(ch);
@@ -121,57 +165,12 @@ public final class JSONStringOutputStream extends OutputStream {
             _writeGenericEscape(ch);
             return;
         }
-        if (ch <= 0x7FF) { // fine, just needs 2 byte output
+        if (ch <= 0x7FF) {
+            // fine, just needs 2 byte output
             out.write((byte) (0xc0 | (ch >> 6)));
             out.write((byte) (0x80 | (ch & 0x3f)));
         } else {
             _outputMultiByteChar(ch);
-        }
-    }
-
-    @Override
-    public void write(final byte[] b) throws IOException {
-        write(b, 0, b.length);
-    }
-
-    @Override
-    public void write(final byte[] b, final int off, final int len) throws IOException {
-        final int[] escCodes = sOutputEscapes;
-        final int maxUnescaped = 127;
-
-        int offset = off;
-        final int end = offset + len;
-        while (offset < end) {
-            int ch = b[offset++];
-            if (ch < 0) {
-                ch = ch & 0xff;
-            }
-            if (ch <= 0x7F) {
-                if (escCodes[ch] == 0) {
-                    out.write(ch);
-                    continue;
-                }
-                final int escape = escCodes[ch];
-                if (escape > 0) { // 2-char escape, fine
-                    out.write(BYTE_BACKSLASH);
-                    out.write((byte) escape);
-                } else {
-                    // ctrl-char, 6-byte escape...
-                    _writeGenericEscape(ch);
-                }
-                continue;
-            }
-            if (ch > maxUnescaped) { // Allow forced escaping if non-ASCII (etc) chars:
-                _writeGenericEscape(ch);
-                continue;
-            }
-            if (ch <= 0x7FF) {
-                // fine, just needs 2 byte output
-                out.write((byte) (0xc0 | (ch >> 6)));
-                out.write((byte) (0x80 | (ch & 0x3f)));
-            } else {
-                _outputMultiByteChar(ch);
-            }
         }
     }
 
