@@ -244,6 +244,12 @@ open-xchange-messaging (6.22.1-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 26 Oct 2012 10:03:40 +0200
 
+open-xchange-messaging (6.22.0-12) unstable; urgency=low
+
+  * Build for patch 2013-04-04
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 02 Apr 2013 11:07:14 +0200
+
 open-xchange-messaging (6.22.0-11) unstable; urgency=low
 
   * Build for patch 2013-03-08

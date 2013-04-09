@@ -50,7 +50,6 @@
 package com.openexchange.http.deferrer.servlet;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.util.BitSet;
 import java.util.Enumeration;

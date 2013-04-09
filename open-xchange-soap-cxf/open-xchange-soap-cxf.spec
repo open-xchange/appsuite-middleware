@@ -58,7 +58,7 @@ Fourth release candidate for 6.22.2/7.0.2
 Third release candidate for 6.22.2/7.0.2
 * Thu Mar 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 6.22.2/7.0.2
-* Mon Mar 04 2013 Marcus Klein <marcus.kleni@open-xchange.com>
+* Mon Mar 04 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-03-08
 * Mon Mar 04 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-03-07
@@ -68,7 +68,7 @@ Build for patch 2013-03-07
 Build for patch 2013-03-07
 * Wed Feb 27 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.2/7.0.2
-* Tue Feb 26 2013 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Feb 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-02-22
 * Mon Feb 25 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-02-22

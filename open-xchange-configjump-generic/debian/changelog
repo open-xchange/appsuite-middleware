@@ -44,7 +44,7 @@ open-xchange-configjump-generic (7.0.1-6) unstable; urgency=low
 
   * Build for patch 2013-04-04
 
- -- Carsten Hoeger <choegeropen-xchange.com>  Tue, 02 Apr 2013 09:53:14 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 02 Apr 2013 09:53:14 +0200
 
 open-xchange-configjump-generic (7.0.1-5) unstable; urgency=low
 
@@ -158,7 +158,7 @@ open-xchange-configjump-generic (6.22.1-14) unstable; urgency=low
 
   * Build for patch 2013-04-04
 
- -- Carsten Hoeger <choegeropen-xchange.com>  Tue, 02 Apr 2013 09:10:36 +0200
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 02 Apr 2013 09:10:36 +0200
 
 open-xchange-configjump-generic (6.22.1-13) unstable; urgency=low
 
@@ -243,6 +243,12 @@ open-xchange-configjump-generic (6.22.1-0) unstable; urgency=low
   * prepare for 6.22.1
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 26 Oct 2012 10:04:23 +0200
+
+open-xchange-configjump-generic (6.22.0-10) unstable; urgency=low
+
+  * Build for patch 2013-04-04
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 02 Apr 2013 11:07:47 +0200
 
 open-xchange-configjump-generic (6.22.0-9) unstable; urgency=low
 
