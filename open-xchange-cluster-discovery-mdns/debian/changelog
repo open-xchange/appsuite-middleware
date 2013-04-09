@@ -1,3 +1,9 @@
+open-xchange-cluster-discovery-mdns (6.22.1-13) unstable; urgency=low
+
+  * Build for patch 2013-04-04
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 02 Apr 2013 09:09:52 +0200
+
 open-xchange-cluster-discovery-mdns (6.22.1-12) unstable; urgency=low
 
   * Build for patch 2013-03-07

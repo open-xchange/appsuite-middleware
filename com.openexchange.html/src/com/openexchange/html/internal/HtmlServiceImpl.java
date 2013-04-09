@@ -51,6 +51,8 @@ package com.openexchange.html.internal;
 
 import gnu.inet.encoding.IDNAException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -68,6 +70,10 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.io.IOUtils;
+import org.apache.tika.Tika;
+import org.apache.tika.exception.TikaException;
+import org.apache.tika.metadata.Metadata;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.Serializer;
@@ -85,14 +91,13 @@ import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
-import com.openexchange.java.Charsets;
 import com.openexchange.proxy.ImageContentTypeRestriction;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
 
 /**
  * {@link HtmlServiceImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HtmlServiceImpl implements HtmlService {
@@ -114,12 +119,12 @@ public final class HtmlServiceImpl implements HtmlService {
      */
 
     private final Map<Character, String> htmlCharMap;
-
     private final Map<String, Character> htmlEntityMap;
+    private final Tika tika;
 
     /**
      * Initializes a new {@link HtmlServiceImpl}.
-     * 
+     *
      * @param tidyConfiguration The jTidy configuration
      * @param htmlCharMap The HTML entity to string map
      * @param htmlEntityMap The string to HTML entity map
@@ -128,6 +133,7 @@ public final class HtmlServiceImpl implements HtmlService {
         super();
         this.htmlCharMap = htmlCharMap;
         this.htmlEntityMap = htmlEntityMap;
+        tika = new Tika();
     }
 
     private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -363,7 +369,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
     /**
      * Checks if specified URL needs to be converted to its ASCII form.
-     * 
+     *
      * @param url The URL to check
      * @return The checked URL
      * @throws MalformedURLException If URL is malformed
@@ -383,13 +389,12 @@ public final class HtmlServiceImpl implements HtmlService {
         /*
          * Still contains any non-ascii character?
          */
-        final char[] chars = urlStr.toCharArray();
-        final int len = chars.length;
+        final int len = urlStr.length();
         StringBuilder tmp = null;
         int lastpos = 0;
         int i;
         for (i = 0; i < len; i++) {
-            final char c = chars[i];
+            final char c = urlStr.charAt(i);
             if (c >= 128) {
                 if (null == tmp) {
                     tmp = new StringBuilder(len + 16);
@@ -409,15 +414,15 @@ public final class HtmlServiceImpl implements HtmlService {
 
     /**
      * Checks whether the specified string's characters are ASCII 7 bit
-     * 
+     *
      * @param s The string to check
      * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
      */
     private static boolean isAscii(final String s) {
-        final char[] chars = s.toCharArray();
+        final int length = s.length();
         boolean isAscci = true;
-        for (int i = 0; isAscci && (i < chars.length); i++) {
-            isAscci = (chars[i] < 128);
+        for (int i = 0; isAscci && (i < length); i++) {
+            isAscci = (s.charAt(i) < 128);
         }
         return isAscci;
     }
@@ -461,33 +466,42 @@ public final class HtmlServiceImpl implements HtmlService {
     public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified, final String cssPrefix) {
         try {
             final long st = DEBUG ? System.currentTimeMillis() : 0L;
-            String confName = optConfigName;
-            if (null != confName && !confName.endsWith(".properties")) {
-                confName += ".properties";
-            }
-            String html = replaceHexEntities(htmlContent);
+            String html = htmlContent;
+            // Perform one-shot sanitizing
+            html = replaceHexEntities(html);
             html = processDownlevelRevealedConditionalComments(html);
             html = dropDoubleAccents(html);
-            // html = replaceHexNbsp(html);
-            final FilterJerichoHandler handler;
+            // CSS- and tag-wise sanitizing
             {
-                final String definition = null == confName ? null : getConfiguration().getText(confName);
-                if (null == definition) {
-                    handler = new FilterJerichoHandler(html.length());
-                } else {
-                    handler = new FilterJerichoHandler(html.length(), definition);
+                // Determine the definition to use
+                final String definition;
+                {
+                    String confName = optConfigName;
+                    if (null != confName && !confName.endsWith(".properties")) {
+                        confName += ".properties";
+                    }
+                    definition = null == confName ? null : getConfiguration().getText(confName);
                 }
+                // Handle HTML content
+                final FilterJerichoHandler handler = null == definition ? new FilterJerichoHandler(html.length()) : new FilterJerichoHandler(html.length(), definition);
+                JerichoParser.parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix));
+                if (dropExternalImages && null != modified) {
+                    modified[0] |= handler.isImageURLFound();
+                }
+                html = handler.getHTML();
             }
-            JerichoParser.parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix));
-            if (dropExternalImages && null != modified) {
-                modified[0] |= handler.isImageURLFound();
+            // Repetitive sanitizing until no further replacement/changes performed
+            final boolean[] sanitized = new boolean[] { true };
+            while (sanitized[0]) {
+                sanitized[0] = false;
+                // Start sanitizing round
+                html = SaneScriptTags.saneScriptTags(html, sanitized);
             }
-            final String retval = handler.getHTML();
             if (DEBUG) {
                 final long dur = System.currentTimeMillis() - st;
                 LOG.debug("\tHTMLServiceImpl.sanitize() took " + dur + "msec.");
             }
-            return retval;
+            return html;
         } catch (final ParsingDeniedException e) {
             LOG.warn("HTML content will be returned un-sanitized. Reason: "+e.getMessage(), e);
             return htmlContent;
@@ -495,11 +509,8 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     private static final Pattern PATTERN_TAG = Pattern.compile("<\\w+?[^>]*>");
-
     private static final Pattern PATTERN_DOUBLE_ACCENTS = Pattern.compile(Pattern.quote("\u0060\u0060")+"|"+Pattern.quote("\u00b4\u00b4"));
-
     private static final Pattern PATTERN_ACCENT1 = Pattern.compile(Pattern.quote("\u0060"));
-
     private static final Pattern PATTERN_ACCENT2 = Pattern.compile(Pattern.quote("\u00b4"));
 
     private static String dropDoubleAccents(final String html) {
@@ -541,16 +552,43 @@ public final class HtmlServiceImpl implements HtmlService {
 //        HTMLParser.parse(htmlContent, handler);
 //        return handler.getText();
 
-        String prepared = prepareSignatureStart(htmlContent);
-        prepared = prepareHrTag(prepared);
-        prepared = insertBlockquoteMarker(prepared);
-        prepared = insertSpaceMarker(prepared);
-        String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref).toString());
-        // Drop heading whitespaces
-        text = PATTERN_HEADING_WS.matcher(text).replaceAll("$1");
-        // ... but keep enforced ones
-        text = whitespaceText(text);
-        return text;
+        try {
+            String prepared = prepareSignatureStart(htmlContent);
+            prepared = prepareHrTag(prepared);
+            prepared = insertBlockquoteMarker(prepared);
+            prepared = insertSpaceMarker(prepared);
+            String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref).toString());
+            // Drop heading whitespaces
+            text = PATTERN_HEADING_WS.matcher(text).replaceAll("$1");
+            // ... but keep enforced ones
+            text = whitespaceText(text);
+            return text;
+        } catch (final StackOverflowError soe) {
+            // Unfortunately it may happen...
+            LOG.warn("Stack-overflow during processing HTML content.", soe);
+            // Retry with Tika framework
+            try {
+                return extractFrom(new java.io.ByteArrayInputStream(htmlContent.getBytes("ISO-8859-1")));
+            } catch (final Exception e) {
+                LOG.error("Error during processing HTML content.", e);
+                return "";
+            }
+        }
+    }
+
+    private String extractFrom(final InputStream inputStream) throws OXException {
+        try {
+            final Metadata metadata = new Metadata();
+            metadata.set(Metadata.CONTENT_ENCODING, "ISO-8859-1");
+            metadata.set(Metadata.CONTENT_TYPE, "text/html");
+            return tika.parseToString(inputStream, metadata);
+        } catch (final IOException e) {
+            throw new OXException(e);
+        } catch (final TikaException e) {
+            throw new OXException(e);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
     }
 
     private static final Pattern PATTERN_HR = Pattern.compile("<hr[^>]*>(.*?</hr>)?", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -705,7 +743,7 @@ public final class HtmlServiceImpl implements HtmlService {
          * Specify pattern & matcher
          */
         final Pattern p = Pattern.compile(
-            sb.append(Pattern.quote("<!--" + commentId + " ")).append("(.+?)").append(Pattern.quote("-->")).toString(),
+            sb.append(Pattern.quote("<!--" + commentId + ' ')).append("(.+?)").append(Pattern.quote("-->")).toString(),
             Pattern.DOTALL);
         sb.setLength(0);
         final Matcher m = p.matcher(s);
@@ -724,11 +762,11 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     private void escapePlain(final String s, final boolean withQuote, final StringBuilder sb) {
-        final char[] chars = s.toCharArray();
+        final int length = s.length();
         final Map<Character, String> htmlChar2EntityMap = htmlCharMap;
         if (withQuote) {
-            for (int i = 0; i < chars.length; i++) {
-                final char c = chars[i];
+            for (int i = 0; i < length; i++) {
+                final char c = s.charAt(i);
                 final String entity = htmlChar2EntityMap.get(Character.valueOf(c));
                 if (entity == null) {
                     sb.append(c);
@@ -737,8 +775,8 @@ public final class HtmlServiceImpl implements HtmlService {
                 }
             }
         } else {
-            for (int i = 0; i < chars.length; i++) {
-                final char c = chars[i];
+            for (int i = 0; i < length; i++) {
+                final char c = s.charAt(i);
                 if ('"' == c) {
                     sb.append(c);
                 } else {
@@ -759,7 +797,7 @@ public final class HtmlServiceImpl implements HtmlService {
      * <p>
      * This is just a convenience method which invokes <code>{@link #htmlFormat(String, boolean)}</code> with latter parameter set to
      * <code>true</code>.
-     * 
+     *
      * @param plainText The plain text
      * @return The properly escaped HTML content
      * @see #htmlFormat(String, boolean)
@@ -786,7 +824,7 @@ public final class HtmlServiceImpl implements HtmlService {
      * <code>\(?\b(?:https?://|ftp://|mailto:|news\\.|www\.)[-\p{L}\p{Sc}0-9+&@#/%?=~_()|!:,.;]*[-\p{L}\p{Sc}0-9+&@#/%=~_()|]</code>
      * <p>
      * Parentheses, if present, are allowed in the URL -- The leading one is absorbed, too.
-     * 
+     *
      * <pre>
      * String s = matcher.group();
      * int mlen = s.length() - 1;
@@ -817,7 +855,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
     /**
      * Maps specified HTML entity - e.g. <code>&amp;uuml;</code> - to corresponding unicode character.
-     * 
+     *
      * @param entity The HTML entity
      * @return The corresponding unicode character or <code>null</code>
      */
@@ -905,7 +943,7 @@ public final class HtmlServiceImpl implements HtmlService {
             /*
              * Serialize
              */
-            final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());
+            final StringWriter writer = new StringWriter(htmlContent.length());
             SERIALIZER.write(htmlNode, writer, "UTF-8");
             return writer.toString();
         } catch (final UnsupportedEncodingException e) {
@@ -976,7 +1014,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 final int epos;
                 if (pos >= 0) {
                     String href;
-                    char c = imgTag.charAt(pos+4);
+                    final char c = imgTag.charAt(pos+4);
                     if ('"' == c) {
                         epos = imgTag.indexOf('"', pos+5);
                         href = imgTag.substring(pos+5, epos);
@@ -1089,9 +1127,9 @@ public final class HtmlServiceImpl implements HtmlService {
                     final byte[] responseBody = get.getResponseBody();
                     try {
                         final String charSet = get.getResponseCharSet();
-                        css.append(new String(responseBody, null == charSet ? Charsets.ISO_8859_1 : Charsets.forName(charSet)));
+                        css.append(new String(responseBody, null == charSet ? "ISO-8859-1" : charSet));
                     } catch (final UnsupportedCharsetException e) {
-                        css.append(new String(responseBody, Charsets.ISO_8859_1));
+                        css.append(new String(responseBody, "ISO-8859-1"));
                     }
                 }
             } catch (final HttpException e) {
@@ -1218,7 +1256,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
     /**
      * Removes unnecessary CDATA from CSS or JavaScript <code>style</code> elements:
-     * 
+     *
      * <pre>
      * &lt;style type=&quot;text/css&quot;&gt;
      * /*&lt;![CDATA[&#42;/
@@ -1228,9 +1266,9 @@ public final class HtmlServiceImpl implements HtmlService {
      * /*]]&gt;&#42;/
      * &lt;/style&gt;
      * </pre>
-     * 
+     *
      * is turned to
-     * 
+     *
      * <pre>
      * &lt;style type=&quot;text/css&quot;&gt;
      * &lt;!--
@@ -1238,7 +1276,7 @@ public final class HtmlServiceImpl implements HtmlService {
      * --&gt;
      * &lt;/style&gt;
      * </pre>
-     * 
+     *
      * @param htmlContent The (X)HTML content possibly containing CDATA in CSS or JavaScript <code>style</code> elements
      * @return The (X)HTML content with CDATA removed
      */
@@ -1313,7 +1351,7 @@ public final class HtmlServiceImpl implements HtmlService {
         final String ret = processDownlevelRevealedConditionalComments0(htmlContent, PATTERN_CC2);
         return processDownlevelRevealedConditionalComments0(ret, PATTERN_CC);
     }
-    
+
     private static String processDownlevelRevealedConditionalComments0(final String htmlContent, final Pattern p) {
         final Matcher m = p.matcher(htmlContent);
         if (!m.find()) {
@@ -1358,7 +1396,7 @@ public final class HtmlServiceImpl implements HtmlService {
     /**
      * Validates specified HTML content with <a href="http://tidy.sourceforge.net/">tidy html</a> library and falls back using <a
      * href="http://htmlcleaner.sourceforge.net/">HtmlCleaner</a> if any error occurs.
-     * 
+     *
      * @param htmlContent The HTML content
      * @return The validated HTML content
      */
@@ -1406,7 +1444,7 @@ public final class HtmlServiceImpl implements HtmlService {
 
     /**
      * Pre-process specified HTML content with <a href="http://jsoup.org/">jsoup</a> library.
-     * 
+     *
      * @param htmlContent The HTML content
      * @return The safe HTML content according to JSoup processing
      */
@@ -1461,16 +1499,16 @@ public final class HtmlServiceImpl implements HtmlService {
             /*
              * Serialize
              */
-            final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());
+            final StringWriter writer = new StringWriter(htmlContent.length());
             SERIALIZER.write(htmlNode, writer, "UTF-8");
-            final StringBuilder builder = writer.getBuffer();
+            final StringBuffer buffer = writer.getBuffer();
             /*
              * Insert DOCTYPE if absent
              */
-            if (builder.indexOf("<!DOCTYPE") < 0) {
-                builder.insert(0, DOCTYPE_DECL);
+            if (buffer.indexOf("<!DOCTYPE") < 0) {
+                buffer.insert(0, DOCTYPE_DECL);
             }
-            return builder.toString();
+            return buffer.toString();
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
             LOG.error("HtmlCleaner library failed to pretty-print HTML content with an unsupported encoding: " + e.getMessage(), e);
