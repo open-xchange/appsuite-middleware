@@ -53,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
@@ -69,7 +70,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Streams;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
@@ -150,7 +150,7 @@ public class RequestTools {
 		    if (null == file) {
 		        throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
 		    }
-		    RequestTools.setImageData(contact, file);
+		    setImageData(contact, file);
 		} finally {
 		    if (null != uploadEvent) {
 		        uploadEvent.cleanUp();
@@ -166,28 +166,40 @@ public class RequestTools {
      * @throws OXException If applying image data to contact fails
      */
     public static void setImageData(final Contact contact, final UploadFile file) throws OXException {
-        checkIsImageFile(file);
         FileInputStream fis = null;
         try {
+            // First check MIME type
+            final String checkedMimeType = checkIsImageFile(file);
+            // Read image data
             fis = new FileInputStream(file.getTmpFile());
             final ByteArrayOutputStream outputStream = Streams.newByteArrayOutputStream((int) file.getSize());
-            final int buflen = 2048;
-            final byte[] buf = new byte[buflen];
-            int read;
-            // Examine first chunk
-            if ((read = fis.read(buf, 0, buflen)) > 0) {
-                final String mimeType = com.openexchange.java.ImageTypeDetector.getMimeType(buf, 0, read);
-                if (!toLowerCase(mimeType).startsWith("image/") || com.openexchange.java.HTMLDetector.containsHTMLTags(buf, 0, read)) {
-                    throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), mimeType);
+            String mimeType = null;
+            {
+                final int buflen = 2048;
+                final byte[] buf = new byte[buflen];
+                int read;
+                // Examine first chunk
+                if ((read = fis.read(buf, 0, buflen)) > 0) {
+                    mimeType = com.openexchange.java.ImageTypeDetector.getMimeType(buf, 0, read);
+                    if (!toLowerCase(mimeType).startsWith("image/") || com.openexchange.java.HTMLDetector.containsHTMLTags(buf, 0, read)) {
+                        throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), mimeType);
+                    }
+                    outputStream.write(buf, 0, read);
                 }
-                outputStream.write(buf, 0, read);
+                // Read subsequent chunks
+                while ((read = fis.read(buf, 0, buflen)) > 0) {
+                    if (com.openexchange.java.HTMLDetector.containsHTMLTags(buf, 0, read)) {
+                        throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), mimeType);
+                    }
+                    outputStream.write(buf, 0, read);
+                }
             }
-            // Read subsequent chunks
-            while ((read = fis.read(buf, 0, buflen)) > 0) {
-                outputStream.write(buf, 0, read);
+            // Final check for image's width & height using javax.imageio.*
+            if (!isValidImage(Streams.asInputStream(outputStream))) {
+                throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), mimeType);
             }
             contact.setImage1(outputStream.toByteArray());
-            contact.setImageContentType(file.getContentType());
+            contact.setImageContentType(null == mimeType ? checkedMimeType : mimeType);
         } catch (final FileNotFoundException e) {
             throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create(e);
         } catch (final IOException e) {
@@ -197,27 +209,37 @@ public class RequestTools {
         }
     }
 
-    private static void checkIsImageFile(UploadFile file) throws OXException {
+    private static String checkIsImageFile(final UploadFile file) throws OXException {
         if (null == file) {
             throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
         }
         final String contentType = file.getContentType();
         if (isImageContentType(contentType)) {
-            return;
+            return contentType;
         }
         String mimeType = null;
         if (null != file.getPreparedFileName()) {
             mimeType = new MimetypesFileTypeMap().getContentType(file.getPreparedFileName());
             if (isImageContentType(mimeType)) {
-                return;
+                return mimeType;
             }
         }
+        // Throw an exception
         final String readableType = null == contentType ? (null == mimeType ? "application/unknown" : mimeType) : contentType;
         throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), readableType);
     }
 
-    private static boolean isImageContentType(String contentType) {
+    private static boolean isImageContentType(final String contentType) {
         return null != contentType && toLowerCase(contentType).startsWith("image/");
+    }
+
+    private static boolean isValidImage(final InputStream data) {
+        try {
+            final java.awt.image.BufferedImage bimg = javax.imageio.ImageIO.read(data);
+            return (bimg != null && bimg.getHeight() > 0 && bimg.getWidth() > 0);
+        } catch (final Exception e) {
+            return false;
+        }
     }
 
     /**
@@ -232,7 +254,7 @@ public class RequestTools {
         return new Comparator<Contact>() {
 
             @Override
-            public int compare(Contact o1, Contact o2) {
+            public int compare(final Contact o1, final Contact o2) {
                 Date date1, date2;
                 if (ContactField.BIRTHDAY.equals(dateField)) {
                     date1 = o1.getBirthday();
@@ -248,13 +270,13 @@ public class RequestTools {
                 } else if (null == date2) {
                     return -1;
                 } else {
-                    Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                    final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                     calendar.setTime(date1);
-                    int dayOfYear1 = calendar.get(Calendar.DAY_OF_YEAR);
+                    final int dayOfYear1 = calendar.get(Calendar.DAY_OF_YEAR);
                     calendar.setTime(date2);
-                    int dayOfYear2 = calendar.get(Calendar.DAY_OF_YEAR);
+                    final int dayOfYear2 = calendar.get(Calendar.DAY_OF_YEAR);
                     calendar.setTime(reference);
-                    int dayOfYearReference = calendar.get(Calendar.DAY_OF_YEAR);
+                    final int dayOfYearReference = calendar.get(Calendar.DAY_OF_YEAR);
                     if (dayOfYear1 == dayOfYear2) {
                         return 0;
                     } else if (dayOfYear1 >= dayOfYearReference && dayOfYear2 >= dayOfYearReference) {
