@@ -49,6 +49,7 @@
 
 package com.openexchange.java;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -180,6 +181,16 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
     }
 
     /**
+     * Creates a newly allocated <tt>ByteArrayInputStream</tt>. Its size is the current size of this output stream and the valid contents of
+     * the buffer have been copied into it.
+     *
+     * @return The current contents of this output stream, as a <tt>ByteArrayInputStream</tt>.
+     */
+    public ByteArrayInputStream toByteArrayInputStream() {
+        return new UnsynchronizedByteArrayInputStream(buf, 0, count);
+    }
+
+    /**
      * Creates a newly allocated byte array. Its size is the current size of this output stream and the valid contents of the buffer have
      * been copied into it.
      *
@@ -241,7 +252,7 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
      */
     @Override
     public String toString(final String enc) throws UnsupportedEncodingException {
-        return new String(buf, 0, count, enc);
+        return new String(buf, 0, count, enc == null ? "ISO-8859-1" : enc);
     }
 
     /**

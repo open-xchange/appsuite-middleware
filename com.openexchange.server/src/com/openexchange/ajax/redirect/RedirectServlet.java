@@ -96,7 +96,7 @@ public class RedirectServlet extends HttpServlet {
 
         location = assumeRelative(referer, location);
 
-        resp.sendRedirect(encodeUrl(location, true));
+        resp.sendRedirect(encodeUrl(location, true, true));
 
     }
 
