@@ -526,16 +526,23 @@ public class AJAXRequestData {
     }
 
     /**
-     * Gets the ETag
+     * Gets the ETag which is the <code>"If-None-Match"</code> header taken from request.
      * 
-     * @return The ETag
+     * @return The ETag or <code>null</code>
      */
     public String getETag() {
+        String eTag = this.eTag;
+        if (null == eTag) {
+            eTag = getHeader("If-None-Match");
+            if (null != eTag) {
+                this.eTag = eTag;
+            }
+        }
         return eTag;
     }
 
     /**
-     * Sets the ETag
+     * Sets the ETag which is the <code>"If-None-Match"</code> header taken from request.
      * 
      * @param eTag The ETag to set
      */

@@ -115,7 +115,8 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         try {
             // Check cache first
             final PreviewCache previewCache = AbstractPreviewResultConverter.getPreviewCache();
-            final String eTag = requestData.getETag();
+            // Get eTag from result that provides the IFileHolder
+            final String eTag = result.getHeader("ETag");
             final boolean isValidEtag = !isEmpty(eTag);
             if (null != previewCache && isValidEtag) {
                 final String cacheKey = generatePreviewCacheKey(eTag, requestData, new String[0]);
