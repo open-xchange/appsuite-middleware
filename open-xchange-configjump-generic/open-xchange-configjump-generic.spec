@@ -74,6 +74,8 @@ Build for patch 2013-02-22
 Build for patch 2013-02-22
 * Mon Feb 25 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-02-22
+* Mon Feb 25 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-02-22
 * Tue Feb 19 2013 Carsten Hoeger <choeger@open-xchange.com>
 Fourth release candidate for 7.0.1
 * Tue Feb 19 2013 Carsten Hoeger <choeger@open-xchange.com>

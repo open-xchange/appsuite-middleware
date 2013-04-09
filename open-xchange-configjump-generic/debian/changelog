@@ -1,3 +1,9 @@
+open-xchange-configjump-generic (7.0.2-7) unstable; urgency=low
+
+  * Build for patch 2013-04-04
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 02 Apr 2013 10:39:07 +0200
+
 open-xchange-configjump-generic (7.0.2-6) unstable; urgency=low
 
   * Sixth release candidate for 6.22.2/7.0.2
