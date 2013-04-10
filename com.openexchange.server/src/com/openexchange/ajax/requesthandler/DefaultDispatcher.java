@@ -54,6 +54,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -61,6 +63,10 @@ import org.apache.commons.logging.Log;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.log.ForceLog;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -113,124 +119,160 @@ public class DefaultDispatcher implements Dispatcher {
         if (null == session) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_SESSION);
         }
-        List<AJAXActionCustomizer> outgoing = new ArrayList<AJAXActionCustomizer>(customizerFactories.size());
-        final List<AJAXActionCustomizer> todo = new LinkedList<AJAXActionCustomizer>();
-        /*
-         * Create customizers
-         */
-        for (final AJAXActionCustomizerFactory customizerFactory : customizerFactories) {
-            final AJAXActionCustomizer customizer = customizerFactory.createCustomizer(requestData, session);
-            if (customizer != null) {
-                todo.add(customizer);
-            }
-        }
-        /*
-         * Iterate customizers for AJAXRequestData
-         */
-        AJAXRequestData modifiedRequestData = requestData;
-        while (!todo.isEmpty()) {
-            final Iterator<AJAXActionCustomizer> iterator = todo.iterator();
-            while (iterator.hasNext()) {
-                final AJAXActionCustomizer customizer = iterator.next();
-                try {
-                    final AJAXRequestData modified = customizer.incoming(modifiedRequestData, session);
-                    if (modified != null) {
-                        modifiedRequestData = modified;
-                    }
-                    outgoing.add(customizer);
-                    iterator.remove();
-                } catch (final FlowControl.Later l) {
-                    // Remains in list and is therefore retried
-                }
-            }
-        }
-        /*
-         * Look-up appropriate factory for request's module
-         */
-        final AJAXActionServiceFactory factory = lookupFactory(modifiedRequestData.getModule());
-        if (factory == null) {
-            throw AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequestData.getModule());
-        }
-        /*
-         * Get associated action
-         */
-        final AJAXActionService action = factory.createActionService(modifiedRequestData.getAction());
-        if (action == null) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(modifiedRequestData.getAction(), modifiedRequestData.getModule());
-        }
-        /*
-         * Is it possible to serve request by ETag?
-         */
-        {
-            final String eTag = modifiedRequestData.getETag();
-            if (null != eTag && (action instanceof ETagAwareAJAXActionService) && ((ETagAwareAJAXActionService) action).checkETag(eTag, modifiedRequestData, session)) {
-                final AJAXRequestResult etagResult = new AJAXRequestResult();
-                etagResult.setType(AJAXRequestResult.ResultType.ETAG);
-                final long newExpires = modifiedRequestData.getExpires();
-                if (newExpires > 0) {
-                    etagResult.setExpires(newExpires);
-                }
-                return etagResult;
-            }
-        }
-        /*
-         * Check for Action annotation
-         */
-        if (modifiedRequestData.getFormat() == null) {
-            final DispatcherNotes actionMetadata = getActionMetadata(action);
-            modifiedRequestData.setFormat(actionMetadata == null ? "apiResponse" : actionMetadata.defaultFormat());
-        }
-        /*
-         * State already initialized for module?
-         */
-        if (factory instanceof AJAXStateHandler) {
-            final AJAXStateHandler handler = (AJAXStateHandler) factory;
-            if (state.addInitializer(modifiedRequestData.getModule(), handler)) {
-                handler.initialize(state);
-            }
-        }
-        modifiedRequestData.setState(state);
-        /*
-         * Perform request
-         */
-        AJAXRequestResult result;
         try {
-            result = action.perform(modifiedRequestData, session);
+            List<AJAXActionCustomizer> outgoing = new ArrayList<AJAXActionCustomizer>(customizerFactories.size());
+            final List<AJAXActionCustomizer> todo = new LinkedList<AJAXActionCustomizer>();
+            /*
+             * Create customizers
+             */
+            for (final AJAXActionCustomizerFactory customizerFactory : customizerFactories) {
+                final AJAXActionCustomizer customizer = customizerFactory.createCustomizer(requestData, session);
+                if (customizer != null) {
+                    todo.add(customizer);
+                }
+            }
+            /*
+             * Iterate customizers for AJAXRequestData
+             */
+            AJAXRequestData modifiedRequestData = requestData;
+            while (!todo.isEmpty()) {
+                final Iterator<AJAXActionCustomizer> iterator = todo.iterator();
+                while (iterator.hasNext()) {
+                    final AJAXActionCustomizer customizer = iterator.next();
+                    try {
+                        final AJAXRequestData modified = customizer.incoming(modifiedRequestData, session);
+                        if (modified != null) {
+                            modifiedRequestData = modified;
+                        }
+                        outgoing.add(customizer);
+                        iterator.remove();
+                    } catch (final FlowControl.Later l) {
+                        // Remains in list and is therefore retried
+                    }
+                }
+            }
+            /*
+             * Look-up appropriate factory for request's module
+             */
+            final AJAXActionServiceFactory factory = lookupFactory(modifiedRequestData.getModule());
+            if (factory == null) {
+                throw AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequestData.getModule());
+            }
+            /*
+             * Get associated action
+             */
+            final AJAXActionService action = factory.createActionService(modifiedRequestData.getAction());
+            if (action == null) {
+                throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(modifiedRequestData.getAction(), modifiedRequestData.getModule());
+            }
+            /*
+             * Is it possible to serve request by ETag?
+             */
+            {
+                final String eTag = modifiedRequestData.getETag();
+                if (null != eTag && (action instanceof ETagAwareAJAXActionService) && ((ETagAwareAJAXActionService) action).checkETag(eTag, modifiedRequestData, session)) {
+                    final AJAXRequestResult etagResult = new AJAXRequestResult();
+                    etagResult.setType(AJAXRequestResult.ResultType.ETAG);
+                    final long newExpires = modifiedRequestData.getExpires();
+                    if (newExpires > 0) {
+                        etagResult.setExpires(newExpires);
+                    }
+                    return etagResult;
+                }
+            }
+            /*
+             * Check for Action annotation
+             */
+            if (modifiedRequestData.getFormat() == null) {
+                final DispatcherNotes actionMetadata = getActionMetadata(action);
+                modifiedRequestData.setFormat(actionMetadata == null ? "apiResponse" : actionMetadata.defaultFormat());
+            }
+            /*
+             * State already initialized for module?
+             */
+            if (factory instanceof AJAXStateHandler) {
+                final AJAXStateHandler handler = (AJAXStateHandler) factory;
+                if (state.addInitializer(modifiedRequestData.getModule(), handler)) {
+                    handler.initialize(state);
+                }
+            }
+            modifiedRequestData.setState(state);
+            /*
+             * Perform request
+             */
+            AJAXRequestResult result;
+            try {
+                result = action.perform(modifiedRequestData, session);
+                if (null == result) {
+                    // Huh...?!
+                    addLogProperties(modifiedRequestData);
+                    throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(AJAXRequestResult.class.getSimpleName(), "null");
+                }
+            } catch (final IllegalStateException e) {
+                final Throwable cause = e.getCause();
+                if (cause instanceof OXException) {
+                    throw (OXException) cause;
+                }
+                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } finally {
+                modifiedRequestData.cleanUploads();
+            }
+            /*
+             * Check for direct result type
+             */
             if (AJAXRequestResult.ResultType.DIRECT == result.getType()) {
                 // No further processing
                 return result;
             }
-        } catch (final IllegalStateException e) {
-            final Throwable cause = e.getCause();
-            if (cause instanceof OXException) {
-                throw (OXException) cause;
-            }
-            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            modifiedRequestData.cleanUploads();
-        }
-        /*
-         * Iterate customizers in reverse oder for request data and result pair
-         */
-        Collections.reverse(outgoing);
-        outgoing = new LinkedList<AJAXActionCustomizer>(outgoing);
-        while (!outgoing.isEmpty()) {
-            final Iterator<AJAXActionCustomizer> iterator = outgoing.iterator();
+            /*
+             * Iterate customizers in reverse oder for request data and result pair
+             */
+            Collections.reverse(outgoing);
+            outgoing = new LinkedList<AJAXActionCustomizer>(outgoing);
+            while (!outgoing.isEmpty()) {
+                final Iterator<AJAXActionCustomizer> iterator = outgoing.iterator();
 
-            while (iterator.hasNext()) {
-                final AJAXActionCustomizer customizer = iterator.next();
-                try {
-                    final AJAXRequestResult modified = customizer.outgoing(modifiedRequestData, result, session);
-                    if (modified != null) {
-                        result = modified;
+                while (iterator.hasNext()) {
+                    final AJAXActionCustomizer customizer = iterator.next();
+                    try {
+                        final AJAXRequestResult modified = customizer.outgoing(modifiedRequestData, result, session);
+                        if (modified != null) {
+                            result = modified;
+                        }
+                        iterator.remove();
+                    } catch (final FlowControl.Later l) {
+                        // Remains in list and is therefore retried
                     }
-                    iterator.remove();
-                } catch (final FlowControl.Later l) {
-                    // Remains in list and is therefore retried
                 }
             }
+            return result;
+        } catch (final RuntimeException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        return result;
+    }
+
+    private void addLogProperties(AJAXRequestData modifiedRequestData) {
+        if (LogProperties.isEnabled()) {
+            final Props props = LogProperties.getLogProperties();
+            props.put(LogProperties.Name.AJAX_ACTION, ForceLog.valueOf(modifiedRequestData.getAction()));
+            props.put(LogProperties.Name.AJAX_MODULE, ForceLog.valueOf(modifiedRequestData.getModule()));
+    
+            final Map<String, String> parameters = modifiedRequestData.getParameters();
+            if (null != parameters) {
+                final StringAllocator sb = new StringAllocator(256);
+                boolean first = true;
+                for (final Entry<String, String> entry : parameters.entrySet()) {
+                    if (first) {
+                        sb.append('?');
+                        first = false;
+                    } else {
+                        sb.append('&');
+                    }
+                    sb.append(entry.getKey()).append('=').append(entry.getValue());
+                }
+                props.put(LogProperties.Name.SERVLET_QUERY_STRING, ForceLog.valueOf(sb.toString()));
+            }
+        }
     }
 
     // private static final Pattern SPLIT_SLASH = Pattern.compile("/");

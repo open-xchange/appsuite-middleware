@@ -49,6 +49,8 @@
 
 package com.openexchange.http.grizzly.servletfilter;
 
+import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTPS_SCHEME;
+import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTP_SCHEME;
 import java.io.IOException;
 import java.util.List;
 import javax.servlet.Filter;
@@ -67,8 +69,6 @@ import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
-import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTP_SCHEME;
-import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTPS_SCHEME;
 
 /**
  * {@link WrappingFilter} - Wrap the Request in {@link HttpServletResponseWrapper} and the Response in {@link HttpServletResponseWrapper}
@@ -171,6 +171,12 @@ public class WrappingFilter implements Filter {
             // Names, addresses
             logProperties.put(LogProperties.Name.GRIZZLY_THREAD_NAME, Thread.currentThread().getName());
             logProperties.put(LogProperties.Name.GRIZZLY_SERVER_NAME, httpServletRequest.getServerName());
+
+            // AJAX action
+            final String action = request.getParameter("action");
+            if (null != action) {
+                logProperties.put(LogProperties.Name.AJAX_ACTION, action);
+            }
         }
 
         chain.doFilter(httpServletRequestWrapper, httpServletResponseWrapper);
