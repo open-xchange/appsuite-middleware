@@ -260,6 +260,7 @@ public class DefaultDispatcher implements Dispatcher {
             final Map<String, String> parameters = modifiedRequestData.getParameters();
             if (null != parameters) {
                 final StringAllocator sb = new StringAllocator(256);
+                sb.append('"');
                 boolean first = true;
                 for (final Entry<String, String> entry : parameters.entrySet()) {
                     if (first) {
@@ -270,6 +271,7 @@ public class DefaultDispatcher implements Dispatcher {
                     }
                     sb.append(entry.getKey()).append('=').append(entry.getValue());
                 }
+                sb.append('"');
                 props.put(LogProperties.Name.SERVLET_QUERY_STRING, ForceLog.valueOf(sb.toString()));
             }
         }
