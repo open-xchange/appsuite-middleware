@@ -68,6 +68,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
+import com.openexchange.mail.mime.datasource.StreamDataSource.InputStreamProvider;
 import com.openexchange.session.Session;
 
 /**
@@ -84,10 +85,8 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
 
     private static final transient org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(InfostoreDocumentMailPart.class));
 
-    private transient DataSource dataSource;
-
-    private transient final StreamDataSource.InputStreamProvider inputStreamProvider;
-
+    private transient final Session session;
+    private transient final String documentId;
     private transient Object cachedContent;
 
     /**
@@ -95,10 +94,13 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
      *
      * @param documentId The document's unique ID
      * @param session The session providing needed user data
-     * @throws OXException If infostore document cannot be read
+     * @throws OXException If document cannot be loaded
      */
     public InfostoreDocumentMailPart(final String documentId, final Session session) throws OXException {
         super();
+        this.documentId = documentId;
+        this.session = session;
+        // Read document meta data
         IDBasedFileAccess fileAccess = null;
         try {
             final IDBasedFileAccessFactory fileAccessFactory = getInstance().getService(IDBasedFileAccessFactory.class, true);
@@ -117,9 +119,6 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
                     }
                 }
             }
-            final DocumentInputStreamProvider tmp = new DocumentInputStreamProvider(fileAccess, documentId);
-            tmp.setName(getFileName());
-            inputStreamProvider = tmp;
         } finally {
             if (fileAccess != null) {
                 try {
@@ -131,14 +130,12 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
         }
     }
 
+    private InputStreamProvider inputStreamProvider() {
+        return new DocumentInputStreamProvider(documentId, session, getFileName());
+    }
+
     private DataSource getDataSource() {
-        /*
-         * Lazy creation
-         */
-        if (null == dataSource) {
-            dataSource = new StreamDataSource(inputStreamProvider, getContentType().toString());
-        }
-        return dataSource;
+        return new StreamDataSource(inputStreamProvider(), getContentType().toString());
     }
 
     @Override
@@ -153,7 +150,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
             }
             InputStream docInputSream = null;
             try {
-                docInputSream = inputStreamProvider.getInputStream();
+                docInputSream = inputStreamProvider().getInputStream();
                 cachedContent = readStream(docInputSream, charset);
             } catch (final FileNotFoundException e) {
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -195,7 +192,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
     @Override
     public InputStream getInputStream() throws OXException {
         try {
-            return inputStreamProvider.getInputStream();
+            return inputStreamProvider().getInputStream();
         } catch (final IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
@@ -222,29 +219,45 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
 
     private static final class DocumentInputStreamProvider implements StreamDataSource.InputStreamProvider {
 
-        private final IDBasedFileAccess fileAccess;
+        private final Session session;
         private final String documentId;
-        private String name;
+        private final String name;
 
-        public DocumentInputStreamProvider(final IDBasedFileAccess fileAccess, final String documentId) {
+        protected DocumentInputStreamProvider(final String documentId, final Session session, final String name) {
             super();
-            this.fileAccess = fileAccess;
+            this.name = name;
+            this.session = session;
             this.documentId = documentId;
+        }
+
+        private static IDBasedFileAccess fileAccess(final Session session) throws OXException {
+            final IDBasedFileAccessFactory fileAccessFactory = getInstance().getService(IDBasedFileAccessFactory.class, true);
+            return fileAccessFactory.createAccess(session);
         }
 
         @Override
         public InputStream getInputStream() throws IOException {
+            IDBasedFileAccess fileAccess = null;
             try {
+                fileAccess = fileAccess(session);
                 return fileAccess.getDocument(documentId, FileStorageFileAccess.CURRENT_VERSION);
             } catch (final OXException e) {
-                final IOException io = new IOException("Input stream cannot be retrieved");
-                io.initCause(e);
-                throw io;
+                throw new IOException("Input stream cannot be retrieved", e);
+            } finally {
+                if (fileAccess != null) {
+                    try {
+                        fileAccess.finish();
+                    } catch (final Exception e) {
+                        // IGNORE
+                    }
+                }
             }
-        }
-
-        public void setName(final String name) {
-            this.name = name;
+//            try {
+//                final IDBasedFileAccess fileAccess = fileAccess(session);
+//                return new ClosingInputStream(fileAccess.getDocument(documentId, FileStorageFileAccess.CURRENT_VERSION), fileAccess);
+//            } catch (final OXException e) {
+//                throw new IOException("Input stream cannot be retrieved", e);
+//            }
         }
 
         @Override
@@ -263,6 +276,71 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private static final class ClosingInputStream extends InputStream {
+
+        private final InputStream in;
+        private final IDBasedFileAccess fileAccess;
+
+        protected ClosingInputStream(final InputStream in, final IDBasedFileAccess fileAccess) {
+            super();
+            this.in = in;
+            this.fileAccess = fileAccess;
+        }
+
+        @Override
+        public int read() throws IOException {
+            return in.read();
+        }
+
+        @Override
+        public int read(final byte[] b) throws IOException {
+            return in.read(b);
+        }
+
+        @Override
+        public int read(final byte[] b, final int off, final int len) throws IOException {
+            return in.read(b, off, len);
+        }
+
+        @Override
+        public long skip(final long n) throws IOException {
+            return in.skip(n);
+        }
+
+        @Override
+        public int available() throws IOException {
+            return in.available();
+        }
+
+        @Override
+        public void close() throws IOException {
+            try {
+                in.close();
+            } finally {
+                try {
+                    fileAccess.finish();
+                } catch (final Exception e) {
+                    // Ignore
+                }
+            }
+        }
+
+        @Override
+        public void mark(final int readlimit) {
+            in.mark(readlimit);
+        }
+
+        @Override
+        public void reset() throws IOException {
+            in.reset();
+        }
+
+        @Override
+        public boolean markSupported() {
+            return in.markSupported();
+        }
     }
 
 }

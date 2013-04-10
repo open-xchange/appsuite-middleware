@@ -56,6 +56,7 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import javax.activation.DataContentHandler;
 import javax.activation.DataSource;
+import org.apache.commons.logging.Log;
 import com.openexchange.conversion.DataHandler;
 
 /**
@@ -66,6 +67,9 @@ import com.openexchange.conversion.DataHandler;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DataContentHandlerDataSource implements DataSource {
+
+    /** The logger */
+    static final Log LOG = com.openexchange.log.Log.loggerFor(DataContentHandlerDataSource.class);
 
     private final DataContentHandler dch;
     private final Object object;
@@ -85,7 +89,7 @@ public final class DataContentHandlerDataSource implements DataSource {
     public InputStream getInputStream() throws IOException {
         final PipedOutputStream pos = new PipedOutputStream();
         final PipedInputStream pin = new PipedInputStream(pos);
-        
+
         final DataContentHandler dch = this.dch;
         final Object object = this.object;
         final String objectMimeType = this.objectMimeType;
@@ -95,8 +99,9 @@ public final class DataContentHandlerDataSource implements DataSource {
             public void run() {
                 try {
                     dch.writeTo(object, objectMimeType, pos);
-                } catch (final IOException e) {
+                } catch (final Exception e) {
                     // Ignore
+                    LOG.warn("Error while writing object to stream (object=" + (null == object ? "null" : object.getClass().getName()) + ")", e);
                 } finally {
                     try {
                         pos.close();
@@ -107,7 +112,6 @@ public final class DataContentHandlerDataSource implements DataSource {
             }
         }, "DataContentHandlerDataSource.getInputStream").start();
         return pin;
-
     }
 
     @Override

@@ -778,7 +778,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
      * @throws OXException If an error occurs
      */
     protected FileStorageFileAccess getFileAccess(final String serviceId, final String accountId) throws OXException {
-        final FileStorageAccountAccess cached = connectedAccounts.get().get(new StringAllocator(serviceId).append('/').append(accountId).toString());
+        final Map<String, FileStorageAccountAccess> connectedAccounts = this.connectedAccounts.get();
+        final FileStorageAccountAccess cached = connectedAccounts.get(new StringAllocator(serviceId).append('/').append(accountId).toString());
         if (cached != null) {
             return cached.getFileAccess();
         }
