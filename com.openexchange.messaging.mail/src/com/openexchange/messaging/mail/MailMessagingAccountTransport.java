@@ -103,6 +103,7 @@ public class MailMessagingAccountTransport implements MessagingAccountTransport 
                 addr.setAddress(mah.getAddress());
                 addr.setPersonal(mah.getPersonal());
             }
+            // TODO: Use ContentAwareComposeMailMessage instead
             mailTransport.sendRawMessage(out.toByteArray(), addrs.toArray(new Address[0]));
         } catch (final UnsupportedEncodingException e) {
             throw MessagingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());

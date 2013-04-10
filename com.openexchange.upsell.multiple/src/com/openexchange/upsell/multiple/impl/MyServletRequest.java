@@ -87,6 +87,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.dataobjects.compose.ComposeType;
+import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
@@ -484,9 +486,9 @@ public final class MyServletRequest  {
             /*
              * Compose rfc822 message
              */
-            final byte[] rfc822;
+            final MimeMessage mimeMessage;
             {
-                final MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
+                mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
                 mimeMessage.setSubject(subject);
                 mimeMessage.setFrom(new QuotedInternetAddress(from, true));
                 mimeMessage.setRecipient(javax.mail.Message.RecipientType.TO, new QuotedInternetAddress(to));
@@ -501,7 +503,6 @@ public final class MyServletRequest  {
                  */
                 final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream(2048);
                 mimeMessage.writeTo(tmp);
-                rfc822 = tmp.toByteArray();
             }
             /*
              * Perform transport
@@ -509,7 +510,7 @@ public final class MyServletRequest  {
             final MailTransport transport = MailTransport.getInstance(this.sessionObj);
             try {
                 mailConfig = transport.getTransportConfig();
-                transport.sendRawMessage(rfc822);
+                transport.sendMailMessage(new ContentAwareComposedMailMessage(mimeMessage, sessionObj, ctx), ComposeType.NEW);
                 LOG.info("Upsell request from user "+this.sessionObj.getLogin()+" (cid:"+this.ctx.getContextId()+")  was sent to "+to+"");
             } finally {
                 transport.close();

@@ -155,6 +155,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
@@ -4064,9 +4065,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             /*
              * Get message bytes
              */
-            final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream();
-            m.writeTo(tmp);
-            final MailMessage sentMail = transport.sendRawMessage(tmp.toByteArray());
+            final MailMessage sentMail = transport.sendMailMessage(new ContentAwareComposedMailMessage(m, session, null), ComposeType.NEW);
             JSONObject responseData = null;
             /*
              * Set \Answered flag (if appropriate) & append to sent folder
@@ -4160,7 +4159,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             return responseData;
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
+        } catch (final RuntimeException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }

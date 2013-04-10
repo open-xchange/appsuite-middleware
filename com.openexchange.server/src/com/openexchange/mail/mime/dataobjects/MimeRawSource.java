@@ -50,6 +50,7 @@
 package com.openexchange.mail.mime.dataobjects;
 
 import java.io.InputStream;
+import javax.mail.Part;
 import com.openexchange.exception.OXException;
 
 /**
@@ -68,5 +69,12 @@ public interface MimeRawSource {
      * @throws OXException If an error occurs
      */
     InputStream getRawInputStream() throws OXException;
+
+    /**
+     * Gets the {@link Part part}.
+     *
+     * @return The {@link Part part} or <code>null</code>
+     */
+    public Part getPart();
 
 }

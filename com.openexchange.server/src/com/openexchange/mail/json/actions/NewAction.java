@@ -80,6 +80,7 @@ import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -87,6 +88,7 @@ import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -362,7 +364,12 @@ public final class NewAction extends AbstractMailAction {
             /*
              * Send raw message source
              */
-            final MailMessage sentMail = transport.sendRawMessage(m.getSourceBytes());
+            final MailMessage sentMail;
+            if (m instanceof MimeMailMessage) {
+                sentMail = transport.sendMailMessage(new ContentAwareComposedMailMessage(((MimeMailMessage) m).getMimeMessage(), session, null), ComposeType.NEW);
+            } else {
+                sentMail = transport.sendRawMessage(m.getSourceBytes());
+            }
             JSONObject responseData = null;
             if (!session.getUserSettingMail().isNoCopyIntoStandardSentFolder()) {
                 /*

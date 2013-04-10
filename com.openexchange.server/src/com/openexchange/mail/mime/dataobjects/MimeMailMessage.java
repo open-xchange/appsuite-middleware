@@ -96,6 +96,11 @@ public final class MimeMailMessage extends MailMessage implements MimeRawSource,
         mailPart = new MimeMailPart(msg);
     }
 
+    @Override
+    public Part getPart() {
+        return mailPart.getPart();
+    }
+
     /**
      * Gets the separator.
      *
