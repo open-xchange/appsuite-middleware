@@ -247,17 +247,18 @@ public class DefaultDispatcher implements Dispatcher {
             }
             return result;
         } catch (final RuntimeException e) {
+            addLogProperties(requestData);
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void addLogProperties(AJAXRequestData modifiedRequestData) {
-        if (LogProperties.isEnabled()) {
+    private void addLogProperties(final AJAXRequestData requestData) {
+        if (null != requestData && LogProperties.isEnabled()) {
             final Props props = LogProperties.getLogProperties();
-            props.put(LogProperties.Name.AJAX_ACTION, ForceLog.valueOf(modifiedRequestData.getAction()));
-            props.put(LogProperties.Name.AJAX_MODULE, ForceLog.valueOf(modifiedRequestData.getModule()));
+            props.put(LogProperties.Name.AJAX_ACTION, ForceLog.valueOf(requestData.getAction()));
+            props.put(LogProperties.Name.AJAX_MODULE, ForceLog.valueOf(requestData.getModule()));
     
-            final Map<String, String> parameters = modifiedRequestData.getParameters();
+            final Map<String, String> parameters = requestData.getParameters();
             if (null != parameters) {
                 final StringAllocator sb = new StringAllocator(256);
                 sb.append('"');
