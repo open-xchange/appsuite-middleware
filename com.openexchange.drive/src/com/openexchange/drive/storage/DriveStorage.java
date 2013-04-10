@@ -60,6 +60,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.drive.storage.filter.FileFilter;
@@ -110,34 +111,50 @@ public class DriveStorage {
         this.knownFolders = new FolderCache();
     }
 
-    public void copyFile(File sourceFile, String targetFileName, String targetPath) throws OXException {
+    public File copyFile(File sourceFile, String targetFileName, String targetPath) throws OXException {
         File copiedFile = new DefaultFile();
         copiedFile.setFileName(targetFileName);
         copiedFile.setTitle(targetFileName);
-        List<Field> updatedFields = Arrays.asList(new Field[] { Field.FILENAME, Field.TITLE });
+        copiedFile.setFolderId(getFolderID(targetPath, true));
         IDTuple sourceId = new IDTuple(sourceFile.getFolderId(), sourceFile.getId());
-        getFileAccess().copy(sourceId, getFolderID(targetPath, true), copiedFile, null, updatedFields);
+        IDTuple targetId = getFileAccess().copy(sourceId, copiedFile.getFolderId(), copiedFile, null, DriveConstants.FILE_FIELDS);
+        copiedFile.setFolderId(targetId.getFolder());
+        copiedFile.setId(targetId.getId());
+        return copiedFile;
     }
 
-    public void deleteFile(File file, boolean hard) throws OXException {
+    public File copyFile(File sourceFile, File targetFile) throws OXException {
+        getFileAccess().saveDocument(targetFile, getDocument(sourceFile), targetFile.getSequenceNumber());
+        return targetFile;
+    }
+
+    public File deleteFile(File file, boolean hard) throws OXException {
         if (hard) {
             IDTuple id = new IDTuple(file.getFolderId(), file.getId());
-            getFileAccess().removeDocument(Arrays.asList(new IDTuple[] { id }), file.getSequenceNumber());
+            List<IDTuple> notRemoved = getFileAccess().removeDocument(Arrays.asList(new IDTuple[] { id }), file.getSequenceNumber());
+            if (null != notRemoved && 0 < notRemoved.size()) {
+                throw DriveExceptionCodes.FILE_NOT_FOUND.create();//TODO: exception for this
+            }
+            return file;
         } else {
-            moveFile(file, TEMP_PATH);
+            return moveFile(file, TEMP_PATH);
         }
     }
+
+//    public void updateFile(File file, InputStream document) throws OXException {
+//        getFileAccess().saveDocument(file, document, file.getSequenceNumber());
+//    }
 
     public InputStream getDocument(File file) throws OXException {
         return getFileAccess().getDocument(file.getFolderId(), file.getId(), file.getVersion());
     }
 
-    public void renameFile(File file, String targetFileName) throws OXException {
-        updateFile(file, targetFileName, null);
+    public File renameFile(File file, String targetFileName) throws OXException {
+        return updateFile(file, targetFileName, null);
     }
 
-    public void moveFile(File file, String targetPath) throws OXException {
-        updateFile(file, null, targetPath);
+    public File moveFile(File file, String targetPath) throws OXException {
+        return updateFile(file, null, targetPath);
     }
 
     public File updateFile(File file, String targetFileName, String targetPath) throws OXException {
@@ -168,6 +185,11 @@ public class DriveStorage {
         return getFileAccess().getDocuments(getFolderID(path), DriveConstants.FILE_FIELDS, Field.FILENAME, SortDirection.ASC).results();
     }
 
+    private SearchIterator<File> getFilesIterator(String path, String pattern) throws OXException {
+        return getFileAccess().search(pattern, DriveConstants.FILE_FIELDS, getFolderID(path), Field.FILENAME, SortDirection.ASC,
+            FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+    }
+
     public List<File> getFiles(String path, FileFilter filter) throws OXException {
         return Filter.apply(getFilesIterator(path), filter);
     }
@@ -177,11 +199,31 @@ public class DriveStorage {
     }
 
     public File findFileByName(String path, final String name) throws OXException {
-        return Filter.find(getFilesIterator(path), new FileNameFilter() {
+        return Filter.find(getFilesIterator(path, name), new FileNameFilter() {
 
             @Override
             protected boolean accept(String fileName) throws OXException {
                 return name.equals(fileName);
+            }
+        });
+    }
+
+    public File findFileByNameAndChecksum(String path, String name, final String checksum) throws OXException {
+        return Filter.find(getFilesIterator(path, name), new FileFilter() {
+
+            @Override
+            public boolean accept(File file) throws OXException {
+                return null != file && checksum.equals(ChecksumProvider.getMD5(session, file));
+            }
+        });
+    }
+
+    public File findFileByChecksum(String path, final String checksum) throws OXException {
+        return Filter.find(getFilesIterator(path), new FileFilter() {
+
+            @Override
+            public boolean accept(File file) throws OXException {
+                return null != file && checksum.equals(ChecksumProvider.getMD5(session, file));
             }
         });
     }
@@ -386,7 +428,7 @@ public class DriveStorage {
         return names;
     }
 
-    private FileStorageAccountAccess getAccountAccess() throws OXException {
+    public FileStorageAccountAccess getAccountAccess() throws OXException {
         if (null == accountAccess) {
             accountAccess = DriveServiceLookup.getService(FileStorageServiceRegistry.class)
                 .getFileStorageService(rootFolderID.getService()).getAccountAccess(rootFolderID.getAccountId(), session.getServerSession());

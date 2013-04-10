@@ -50,6 +50,9 @@
 package com.openexchange.drive.checksum;
 
 import java.util.Collection;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ChecksumStore}
@@ -59,18 +62,33 @@ import java.util.Collection;
 public interface ChecksumStore {
 
     /**
+     * Adds a checksum for the supplied file.
+     *
+     * @param session The current session
+     * @param file The file
+     * @param checksum The checksum
+     */
+    void addChecksum(ServerSession session, File file, String checksum) throws OXException;
+
+    /**
      * Gets the checksum for the supplied file.
      *
-     * @param fileID The file
+     * @param session The current session
+     * @param file The file
      * @return The checksum, or <code>null</code> if unknown
+     * @throws OXException
      */
-    String getChecksum(FileID fileID);
+    String getChecksum(ServerSession session, File file) throws OXException;
 
-    void addChecksum(FileID fileID, String checksum);
+    /**
+     * Removes stored the checksum for all versions of the supplied file.
+     *
+     * @param session The current session
+     * @param file The file
+     */
+    void removeChecksums(ServerSession session, File file) throws OXException;
 
-    void removeChecksum(FileID fileID);
-
-    Collection<FileID> getFiles(String checksum);
+    Collection<File> getFiles(ServerSession session, String checksum) throws OXException;
 
 }
 

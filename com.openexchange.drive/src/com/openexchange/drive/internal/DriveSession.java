@@ -49,16 +49,10 @@
 
 package com.openexchange.drive.internal;
 
-import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.checksum.ChecksumStore;
 import com.openexchange.drive.sim.checksum.SimChecksumStore;
 import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -70,38 +64,17 @@ public class DriveSession {
 
     private final ServerSession session;
 
-    private IDBasedFileAccess fileAccess;
     private ChecksumStore checksumStore;
-    private ChecksumProvider checksumProvider;
-//    private FolderService folderService;
-//    private FolderHelper folderHelper;
     private final String rootFolderID;
     private DriveStorage storage;
 
     /**
      * Initializes a new {@link DriveSession}.
      */
-    public DriveSession(ServerSession session, String rootFolderID, ChecksumStore checksumStore, ChecksumProvider checksumProvider) {
+    public DriveSession(ServerSession session, String rootFolderID) {
         super();
         this.session = session;
         this.rootFolderID = rootFolderID;
-        this.checksumProvider = checksumProvider;
-        this.checksumStore = checksumStore;
-    }
-
-    public File getFileByName(String folderID, final String fileName) throws OXException {
-        TimedResult<File> documents = getFileAccess().getDocuments(folderID);
-        return find(documents, new Predicate<File>() {
-
-            @Override
-            public boolean matches(File t) {
-                return fileName.equals(t.getFileName());
-            }
-        });
-    }
-
-    public String getMD5(File file) throws OXException {
-        return checksumProvider.getMD5(file, getStorage());
     }
 
     public ServerSession getServerSession() {
@@ -114,85 +87,21 @@ public class DriveSession {
         }
         return storage;
     }
-//
-//    public FolderHelper getFolderHelper() {
-//        if (null == folderHelper) {
-//            folderHelper = new FolderHelper(this, rootFolderID);
-//        }
-//        return folderHelper;
-//    }
-
-    /**
-     * Gets the fileAccess
-     *
-     * @return The fileAccess
-     * @throws OXException
-     */
-    public IDBasedFileAccess getFileAccess() throws OXException {
-        if (null == fileAccess) {
-            fileAccess = DriveServiceLookup.getService(IDBasedFileAccessFactory.class, true).createAccess(session);
-        }
-        return fileAccess;
-    }
-
-    /**
-     * Gets the folder service
-     *
-     * @return The folder service
-     * @throws OXException
-     */
-//    public FolderService getFolderService() throws OXException {
-//        if (null == folderService) {
-//            folderService = DriveServiceLookup.getService(FolderService.class, true);
-//        }
-//        return folderService;
-//    }
 
     /**
      * Gets the checksumStore
      *
      * @return The checksumStore
+     * @throws OXException
+     * @throws NumberFormatException
      */
-    public ChecksumStore getChecksumStore() {
+    public ChecksumStore getChecksumStore() throws OXException {
         if (null == checksumStore) {
             checksumStore = new SimChecksumStore();
+//            checksumStore = new RdbChecksumStore(
+//                getStorage().getAccountAccess().getService().getId(), getStorage().getAccountAccess().getAccountId());
         }
         return checksumStore;
-    }
-
-    /**
-     * Gets the checksumProvider
-     *
-     * @return The checksumProvider
-     */
-    public ChecksumProvider getChecksumProvider() {
-        if (null == checksumProvider) {
-            checksumProvider = new ChecksumProvider(getChecksumStore());
-        }
-        return checksumProvider;
-    }
-
-    private static <T> T find(TimedResult<T> ts, Predicate<T> predicate) throws OXException {
-        SearchIterator<T> searchIterator = null;
-        try {
-            searchIterator = ts.results();
-            while (searchIterator.hasNext()) {
-                T t = searchIterator.next();
-                if (predicate.matches(t)) {
-                    return t;
-                }
-            }
-        } finally {
-            if (null != searchIterator) {
-                searchIterator.close();
-            }
-        }
-        return null;
-    }
-
-    private interface Predicate<T> {
-
-        boolean matches(T t);
     }
 
 }

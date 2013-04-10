@@ -56,11 +56,12 @@ import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.storage.filter.FileFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
-import com.openexchange.file.storage.composition.IDBasedFileAccess;
 
 /**
  * {@link DownloadHelper}
@@ -99,7 +100,7 @@ public class DownloadHelper {
         if (null == file) {
             throw DriveExceptionCodes.FILE_NOT_FOUND.create(fileVersion.getName(), path);
         }
-        IDBasedFileAccess fileAccess = session.getFileAccess();
+        FileStorageFileAccess fileAccess = session.getStorage().getFileAccess();
         InputStream inputStream = null;
         if (0 < offset || 0 < length) {
             /*
@@ -109,7 +110,7 @@ public class DownloadHelper {
                 inputStream = ((FileStorageRandomFileAccess)fileAccess).getDocument(file.getFolderId(), file.getId(), file.getVersion(), offset, length);
             } else {
                 try {
-                    inputStream = new PartialInputStream(fileAccess.getDocument(file.getId(), file.getVersion()), offset, length);
+                    inputStream = new PartialInputStream(fileAccess.getDocument(file.getFolderId(), file.getId(), file.getVersion()), offset, length);
                 } catch (IOException e) {
                     throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
                 }
@@ -118,7 +119,7 @@ public class DownloadHelper {
             /*
              * get complete stream by default
              */
-            inputStream = fileAccess.getDocument(file.getId(), file.getVersion());
+            inputStream = fileAccess.getDocument(file.getFolderId(), file.getId(), file.getVersion());
         }
         /*
          * wrap stream into file holder and return
@@ -178,7 +179,7 @@ public class DownloadHelper {
             @Override
             public boolean accept(File file) throws OXException {
                 if (null != file) {
-                    return fileVersion.getChecksum().equals(session.getMD5(file));
+                    return fileVersion.getChecksum().equals(ChecksumProvider.getMD5(session, file));
                 }
                 return false;
             }

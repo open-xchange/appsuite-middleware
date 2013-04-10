@@ -55,8 +55,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.drive.storage.DriveConstants;
-import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.java.Charsets;
@@ -69,14 +69,7 @@ import com.openexchange.java.Streams;
  */
 public class ChecksumProvider {
 
-    private final ChecksumStore store;
-
-    public ChecksumProvider(ChecksumStore store) {
-        super();
-        this.store = store;
-    }
-
-    public String getMD5(List<File> files, DriveStorage storage) throws OXException {
+    public static String getMD5(DriveSession session, List<File> files) throws OXException {
         if (null == files || 0 == files.size()) {
             return DriveConstants.EMPTY_MD5;
         }
@@ -85,7 +78,7 @@ public class ChecksumProvider {
             for (File file : files) {
                 if (null != file.getFileName()) {
                     md5.update(file.getFileName().getBytes(Charsets.UTF_8));
-                    md5.update(getMD5(file, storage).getBytes(Charsets.UTF_8));
+                    md5.update(getMD5(session, file).getBytes(Charsets.UTF_8));
                 }
             }
             return md5.getFormattedValue();
@@ -94,7 +87,7 @@ public class ChecksumProvider {
         }
     }
 
-    public String getMD5(File file, DriveStorage storage) throws OXException {
+    public static String getMD5(DriveSession session, File file) throws OXException {
         /*
          * try available metadata first
          */
@@ -103,15 +96,14 @@ public class ChecksumProvider {
             /*
              * query checksum store
              */
-            FileID fileID = new FileID(file.getId(), String.valueOf(file.getLastModified().getTime()));
-            md5sum = store.getChecksum(fileID);
+            md5sum = session.getChecksumStore().getChecksum(session.getServerSession(), file);
             if (null == md5sum) {
                 /*
                  * calculate and store checksum
                  */
                 InputStream document = null;
                 try {
-                    document = storage.getDocument(file);
+                    document = session.getStorage().getDocument(file);
                     md5sum = getMD5(document);
                 } catch (IOException e) {
                     throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
@@ -119,14 +111,18 @@ public class ChecksumProvider {
                     Streams.close(document);
                 }
                 if (null != md5sum) {
-                    store.addChecksum(fileID, md5sum);
+                    session.getChecksumStore().addChecksum(session.getServerSession(), file, md5sum);
                 }
             }
         }
         return md5sum;
     }
 
-    private static String getMD5(InputStream inputStream) throws IOException {
+    public static void invalidateChecksums(DriveSession session, File file) throws OXException {
+        session.getChecksumStore().removeChecksums(session.getServerSession(), file);
+    }
+
+    public static String getMD5(InputStream inputStream) throws IOException {
         byte[] buffer = new byte[1024];
         try {
             MD md5 = new MD("MD5");

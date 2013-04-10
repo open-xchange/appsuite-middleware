@@ -62,12 +62,10 @@ import com.openexchange.drive.actions.AcknowledgeFileAction;
 import com.openexchange.drive.actions.DriveAction;
 import com.openexchange.drive.actions.EditFileAction;
 import com.openexchange.drive.checksum.ChecksumProvider;
-import com.openexchange.drive.checksum.ChecksumStore;
 import com.openexchange.drive.comparison.DirectoryVersionMapper;
 import com.openexchange.drive.comparison.FileVersionMapper;
 import com.openexchange.drive.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.comparison.ServerFileVersion;
-import com.openexchange.drive.sim.checksum.SimChecksumStore;
 import com.openexchange.drive.storage.filter.FileFilter;
 import com.openexchange.drive.sync.SyncResult;
 import com.openexchange.drive.sync.Synchronizer;
@@ -88,21 +86,16 @@ public class DriveServiceImpl implements DriveService {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveServiceImpl.class);
 
-    private final ChecksumProvider checksumProvider;
-    private final ChecksumStore checksumStore;
-
     /**
      * Initializes a new {@link DriveServiceImpl}.
      */
     public DriveServiceImpl() {
         super();
         LOG.debug("initialized.");
-        this.checksumStore = new SimChecksumStore();
-        this.checksumProvider = new ChecksumProvider(checksumStore);
     }
 
     private DriveSession createSession(ServerSession session, String rootFolderID) {
-        return new DriveSession(session, rootFolderID, checksumStore, checksumProvider);
+        return new DriveSession(session, rootFolderID);
     }
 
     @Override
@@ -156,18 +149,30 @@ public class DriveServiceImpl implements DriveService {
                 case REMOVE:
                     // delete file
                     ServerFileVersion file = (ServerFileVersion)fileAction.getVersion();
-                    driveSession.getStorage().deleteFile(file.getFile(), false);
+                    File removedFile = driveSession.getStorage().deleteFile(file.getFile(), false);
+                    driveSession.getChecksumStore().removeChecksums(session, file.getFile());
+                    driveSession.getChecksumStore().addChecksum(session, removedFile, file.getChecksum());
                     //TODO check possible edit-delete conflicts
                     break;
                 case DOWNLOAD:
                     // copy file
                     File sourceFile = ((ServerFileVersion)fileAction.getVersion()).getFile();
-                    driveSession.getStorage().copyFile(sourceFile, fileAction.getNewVersion().getName(), path);
+                    File targetFile = null != fileAction.getNewVersion() ? driveSession.getStorage().findFileByNameAndChecksum(
+                        path, fileAction.getNewVersion().getName(), fileAction.getNewVersion().getChecksum()) : null;
+                    File copiedFile;
+                    if (null != targetFile) {
+                        copiedFile = driveSession.getStorage().copyFile(sourceFile, targetFile);
+                    } else {
+                        copiedFile = driveSession.getStorage().copyFile(sourceFile, fileAction.getNewVersion().getName(), path);
+                    }
+                    driveSession.getChecksumStore().addChecksum(session, copiedFile, fileAction.getNewVersion().getChecksum());
                     break;
                 case EDIT:
                     // edit file
                     File originalFile = ((ServerFileVersion)fileAction.getVersion()).getFile();
-                    driveSession.getStorage().renameFile(originalFile, fileAction.getNewVersion().getName());
+                    driveSession.getChecksumStore().removeChecksums(session, originalFile);
+                    File renamedFile = driveSession.getStorage().renameFile(originalFile, fileAction.getNewVersion().getName());
+                    driveSession.getChecksumStore().addChecksum(session, renamedFile, fileAction.getNewVersion().getChecksum());
                     break;
                 default:
                     throw new IllegalStateException("Can't perform action " + fileAction + " on server");
@@ -223,7 +228,7 @@ public class DriveServiceImpl implements DriveService {
     }
 
     private static ServerFileVersion getServerFile(File file, DriveSession session) throws OXException {
-        return new ServerFileVersion(file, session.getMD5(file));
+        return new ServerFileVersion(file, ChecksumProvider.getMD5(session, file));
     }
 
     private static List<ServerDirectoryVersion> getServerDirectories(DriveSession session) throws OXException {
@@ -243,8 +248,7 @@ public class DriveServiceImpl implements DriveService {
                 return null != file && false == Strings.isEmpty(file.getFileName());
             }
         });
-        String checksum = session.getChecksumProvider().getMD5(files, session.getStorage());
-        return new ServerDirectoryVersion(path, checksum);
+        return new ServerDirectoryVersion(path, ChecksumProvider.getMD5(session, files));
     }
 
 }

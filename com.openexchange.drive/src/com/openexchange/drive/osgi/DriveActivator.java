@@ -50,6 +50,7 @@
 package com.openexchange.drive.osgi;
 
 import org.apache.commons.logging.Log;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.internal.DriveServiceImpl;
 import com.openexchange.drive.internal.DriveServiceLookup;
@@ -76,7 +77,7 @@ public class DriveActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { IDBasedFileAccessFactory.class, ManagedFileManagement.class, FileStorageServiceRegistry.class };
+        return new Class<?>[] { IDBasedFileAccessFactory.class, ManagedFileManagement.class, FileStorageServiceRegistry.class, DatabaseService.class };
     }
 
     @Override

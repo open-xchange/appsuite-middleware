@@ -53,27 +53,26 @@ import static com.openexchange.drive.storage.DriveConstants.TEMP_PATH;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.drive.storage.filter.FileFilter;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
-import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Streams;
-import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link UploadHelper}
@@ -108,13 +107,14 @@ public class UploadHelper {
                  * overwrite original file if still valid and unchanged
                  */
                 File currentFile = session.getStorage().findFileByName(path, originalVersion.getName());
-                if (null != currentFile && originalVersion.getChecksum().equals(session.getMD5(currentFile))) {
+                if (null != currentFile && originalVersion.getChecksum().equals(ChecksumProvider.getMD5(session, currentFile))) {
                     //TODO: overwrite directly during update
 //                    session.getStorage().updateFile(uploadFile, newVersion.getName(), path);
                     //workaround:
                     {
-                        session.getStorage().getFileAccess().saveDocument(
-                            currentFile, session.getStorage().getDocument(uploadFile), uploadFile.getSequenceNumber());
+                        //TODO: transactional
+                        saveDocumentAndChecksum(currentFile, session.getStorage().getDocument(uploadFile),
+                            uploadFile.getSequenceNumber(), DriveConstants.FILE_FIELDS, false);
                         session.getStorage().deleteFile(uploadFile, true);
                     }
                     return new ServerFileVersion(currentFile, newVersion.getChecksum());//TODO: validate checksum
@@ -184,12 +184,34 @@ public class UploadHelper {
             } finally {
                 Streams.close(inputStream);
             }
+            List<Field> modifiedFields = Arrays.asList(File.Field.FILE_SIZE);
             uploadFile.setFileSize(managedFile.getSize());
-            session.getStorage().getFileAccess().saveDocument(uploadFile, managedFile.getInputStream(), uploadFile.getSequenceNumber());
+            saveDocumentAndChecksum(uploadFile, managedFile.getInputStream(), uploadFile.getSequenceNumber(), modifiedFields, true);
+//            session.getStorage().getFileAccess().saveDocument(uploadFile, managedFile.getInputStream(), uploadFile.getSequenceNumber());
         } finally {
             if (null != managedFile) {
                 DriveServiceLookup.getService(ManagedFileManagement.class, true).removeByID(managedFile.getID());
             }
+        }
+    }
+
+    private void saveDocumentAndChecksum(File file, InputStream inputStream, long sequenceNumber, List<Field> modifiedFields, boolean ignoreVersion) throws OXException {
+        DigestInputStream digestStream = null;
+        try {
+            digestStream = new DigestInputStream(inputStream, MessageDigest.getInstance("MD5"));
+            FileStorageFileAccess fileAccess = session.getStorage().getFileAccess();
+            if (ignoreVersion && FileStorageIgnorableVersionFileAccess.class.isInstance(fileAccess)) {
+                ((FileStorageIgnorableVersionFileAccess)fileAccess).saveDocument(file, digestStream, sequenceNumber, modifiedFields, true);
+            } else {
+                fileAccess.saveDocument(file, digestStream, sequenceNumber, modifiedFields);
+            }
+            byte[] digest = digestStream.getMessageDigest().digest();
+            String checksum = jonelo.jacksum.util.Service.format(digest);
+            session.getChecksumStore().addChecksum(session.getServerSession(), file, checksum);
+        } catch (NoSuchAlgorithmException e) {
+            throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(digestStream);
         }
     }
 
@@ -251,130 +273,6 @@ public class UploadHelper {
             Streams.close(outputStream);
         }
         return managedFile;
-    }
-
-
-    public static FileVersion perform(DriveSession session, InputStream uploadStream, String folderID, FileVersion originalVersion, FileVersion newVersion,
-        long offset, long totalLength) throws OXException {
-
-        IDBasedFileAccess fileAccess = session.getFileAccess();
-        String uploadFileName = getUploadFileName(newVersion);
-        File uploadFile = session.getFileByName(folderID, uploadFileName);
-
-        //TODO: write through directly to filestore
-        ManagedFileManagement fileManagement = DriveServiceLookup.getService(ManagedFileManagement.class, true);
-        ManagedFile managedFile;
-        if (null == uploadFile) {
-            if (0 < offset) {
-                throw new OXException();
-            }
-            /*
-             * prepare new file if needed
-             */
-            uploadFile = new DefaultFile();
-            uploadFile.setFolderId(folderID);
-            uploadFile.setFileName(uploadFileName);
-            fileAccess.saveFileMetadata(uploadFile, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
-            managedFile = fileManagement.createManagedFile(fileManagement.newTempFile());
-        } else {
-            /*
-             * prepare temp file with current state
-             */
-            managedFile = fileManagement.createManagedFile(fileAccess.getDocument(uploadFile.getId(), uploadFile.getVersion()));
-        }
-        long currentLength = managedFile.getFile().length();
-        if (offset != currentLength) {
-            throw new OXException();
-        }
-        /*
-         * append data to managed file
-         */
-        FileOutputStream outputStream = null;
-        try {
-            outputStream = new FileOutputStream(managedFile.getFile(), true);
-            byte[] buffer = new byte[4096];
-            for (int read; (read = uploadStream.read(buffer)) > 0;) {
-                outputStream.write(buffer, 0, read);
-                currentLength += read;
-            }
-            outputStream.flush();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } finally {
-            Streams.close(uploadStream, outputStream);
-        }
-
-
-
-        List<Field> editedFields = new ArrayList<File.Field>();
-        File editedFile = new DefaultFile();
-        editedFile.setId(uploadFile.getId());
-        editedFile.setFolderId(uploadFile.getFolderId());
-
-        if (-1 == totalLength || currentLength >= totalLength) {
-
-            if (null != originalVersion) {
-                /*
-                 * overwrite original file and remove upload file if original file still valid and unchanged
-                 */
-                File originalFile = filter(fileAccess.getDocuments(folderID), originalVersion.getName());
-                // TODO
-                if (null != originalFile && session.getMD5(originalFile).equals(originalVersion.getChecksum())) {
-                    File overwrittenFile = new DefaultFile();
-                    overwrittenFile.setId(originalFile.getId());
-                    overwrittenFile.setFolderId(originalFile.getFolderId());
-                    fileAccess.saveDocument(overwrittenFile, managedFile.getInputStream(), originalFile.getSequenceNumber());
-                    fileAccess.removeDocument(Arrays.asList(new String[] { uploadFile.getId() }), uploadFile.getSequenceNumber());
-                    return new ServerFileVersion(overwrittenFile, newVersion.getChecksum());//TODO: validate checksum
-                }
-            }
-            /*
-             * file transfer finished, save document & rename file to target file name
-             */
-            editedFile.setFileName(newVersion.getName());
-            editedFields.add(Field.FILENAME);
-            editedFile.setTitle(newVersion.getName());
-            editedFields.add(Field.TITLE);
-            fileAccess.saveDocument(editedFile, managedFile.getInputStream(), editedFile.getSequenceNumber(), editedFields);
-            return new ServerFileVersion(editedFile, newVersion.getChecksum());//TODO: validate checksum
-        } else {
-            /*
-             * save so far uploaded document
-             */
-            editedFile.setFileName(uploadFile.getFileName());
-            editedFields.add(Field.FILENAME);
-            editedFile.setTitle(uploadFile.getFileName());
-            editedFields.add(Field.TITLE);
-            fileAccess.saveDocument(editedFile, managedFile.getInputStream(), uploadFile.getSequenceNumber());
-            return null;
-        }
-    }
-
-    public static String getUploadFileName(FileVersion fileVersion) {
-        return '.' + fileVersion.getChecksum() + ".tmp";
-    }
-
-    public static boolean isUploadFileName(String fileName) {
-        return null != fileName && fileName.matches("(?i)\\A\\.[A-F0-9]{32}\\.tmp\\z");
-    }
-
-    private static File filter(TimedResult<File> files, String name) throws OXException {
-        SearchIterator<File> searchIterator = null;
-        try {
-            searchIterator = files.results();
-            while (searchIterator.hasNext()) {
-                File file = searchIterator.next();
-                if (name.equals(file.getFileName())) {
-                    return file;
-                }
-            }
-        } finally {
-            if (null != searchIterator) {
-                searchIterator.close();
-            }
-        }
-        return null;
     }
 
 }

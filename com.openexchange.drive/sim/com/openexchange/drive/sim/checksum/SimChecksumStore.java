@@ -55,7 +55,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.drive.checksum.ChecksumStore;
-import com.openexchange.drive.checksum.FileID;
+import com.openexchange.file.storage.File;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SimChecksumStore}
@@ -64,48 +65,48 @@ import com.openexchange.drive.checksum.FileID;
  */
 public class SimChecksumStore implements ChecksumStore {
 
-    private final Map<FileID, String> checksums;
-    private final Map<String, Set<FileID>> fileIDs;
+    private final Map<File, String> checksums;
+    private final Map<String, Set<File>> files;
 
     /**
      * Initializes a new {@link SimChecksumStore}.
      */
     public SimChecksumStore() {
         super();
-        this.checksums = new HashMap<FileID, String>();
-        this.fileIDs = new HashMap<String, Set<FileID>>();
+        this.checksums = new HashMap<File, String>();
+        this.files = new HashMap<String, Set<File>>();
     }
 
     @Override
-    public String getChecksum(FileID fileID) {
-        return checksums.get(fileID);
+    public String getChecksum(ServerSession session, File file) {
+        return checksums.get(file);
     }
 
     @Override
-    public Collection<FileID> getFiles(String checksum) {
-        return fileIDs.get(checksum);
+    public Collection<File> getFiles(ServerSession session, String checksum) {
+        return files.get(checksum);
     }
 
     @Override
-    public synchronized void addChecksum(FileID fileID, String checksum) {
-        checksums.put(fileID, checksum);
-        Set<FileID> ids = fileIDs.get(checksum);
+    public synchronized void addChecksum(ServerSession session, File file, String checksum) {
+        checksums.put(file, checksum);
+        Set<File> ids = files.get(checksum);
         if (null == ids) {
-            ids = new HashSet<FileID>();
-            fileIDs.put(checksum, ids);
+            ids = new HashSet<File>();
+            files.put(checksum, ids);
         }
-        ids.add(fileID);
+        ids.add(file);
     }
 
     @Override
-    public synchronized void removeChecksum(FileID fileID) {
-        String checksum = checksums.remove(fileID);
-        Set<FileID> ids = fileIDs.get(checksum);
+    public synchronized void removeChecksums(ServerSession session, File file) {
+        String checksum = checksums.remove(file);
+        Set<File> ids = files.get(checksum);
         if (null != ids) {
             ids.remove(checksum);
         }
         if (0 == ids.size()) {
-            fileIDs.remove(ids);
+            files.remove(ids);
         }
     }
 

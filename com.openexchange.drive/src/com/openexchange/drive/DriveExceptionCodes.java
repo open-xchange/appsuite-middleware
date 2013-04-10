@@ -76,6 +76,9 @@ public enum DriveExceptionCodes implements OXExceptionCode {
     /** The file offset \"%1$d\" is invalid */
     INVALID_FILE_OFFSET(DriveExceptionMessages.INVALID_FILE_OFFSET_MSG, Category.CATEGORY_USER_INPUT, 5),
 
+    /** Unexpected database error: \"%1$s\" */
+    DB_ERROR(DriveExceptionMessages.DB_ERROR_MSG, Category.CATEGORY_ERROR, 6),
+
 
     ;
 
