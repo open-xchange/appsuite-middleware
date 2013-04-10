@@ -214,14 +214,29 @@ public class MimeFilter {
                 contentType = LocaleTools.toLowerCase(contentType.trim());
                 if (contentType.startsWith("multipart/")) {
                     final MimeMultipart newSubMultipart = new MimeMultipart(getSubType(contentType, "mixed"));
-                    handlePart((Multipart) bodyPart.getContent(), newSubMultipart);
+                    {
+                        final Object content = bodyPart.getContent();
+                        if (content instanceof Multipart) {
+                            handlePart((Multipart) content, newSubMultipart);
+                        } else {
+                            handlePart(new MimeMultipart(bodyPart.getDataHandler().getDataSource()), newSubMultipart);
+                        }
+                    }
                     final MimeBodyPart mimeBodyPart = new MimeBodyPart();
                     MessageUtility.setContent(newSubMultipart, mimeBodyPart);
                     // mimeBodyPart.setContent(newSubMultipart);
                     newMultipart.addBodyPart(mimeBodyPart);
                 } else if (contentType.startsWith("message/rfc822")) {
                     final MimeFilter nestedFilter = new MimeFilter(ignorableContentTypes);
-                    final MimeMessage filteredMessage = nestedFilter.filter((MimeMessage) bodyPart.getContent());
+                    final MimeMessage filteredMessage;
+                    {
+                        final Object content = bodyPart.getContent();
+                        if (content instanceof MimeMessage) {
+                            filteredMessage = nestedFilter.filter((MimeMessage) content);
+                        } else {
+                            filteredMessage = nestedFilter.filter(new MimeMessage(MimeDefaultSession.getDefaultSession(), bodyPart.getInputStream()));
+                        }
+                    }
                     final MimeBodyPart mimeBodyPart = new MimeBodyPart();
                     MessageUtility.setContent(filteredMessage, mimeBodyPart);
                     // mimeBodyPart.setContent(filteredMessage, "message/rfc822");

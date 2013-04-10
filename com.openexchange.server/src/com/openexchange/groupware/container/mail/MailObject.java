@@ -75,11 +75,12 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.java.Streams;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.dataobjects.compose.ComposeType;
+import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -561,20 +562,11 @@ public class MailObject {
             /*
              * Finally transport mail
              */
-            MimeMessageDataSource cleanUp = null;
             final MailTransport transport = MailTransport.getInstance(session);
             try {
-                final ByteArrayOutputStream bos = Streams.newByteArrayOutputStream(2048);
-                cleanUp = writeTo(msg, bos);
-                transport.sendRawMessage(bos.toByteArray());
-                if (DEBUG) {
-                    LOG.debug("Sent mail:\n" + new String(bos.toByteArray()));
-                }
+                transport.sendMailMessage(new ContentAwareComposedMailMessage(msg, session, null), ComposeType.NEW);
             } finally {
                 transport.close();
-                if (null != cleanUp) {
-                    cleanUp.cleanUp();
-                }
             }
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);

@@ -100,6 +100,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.ContentAware;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeHeaderNameChecker;
@@ -640,6 +641,51 @@ public final class SMTPTransport extends MailTransport {
             // Set the ClassLoader to the javax.mail bundle loader.
             // Thread.currentThread().setContextClassLoader(ComposedMailMessage.class.getClassLoader());
             // Go ahead...
+            /*
+             * Message content available?
+             */
+            MimeMessage mimeMessage = null;
+            if (composedMail instanceof ContentAware) {
+                try {
+                    Object content = composedMail.getContent();
+                    if (content instanceof MimeMessage) {
+                        mimeMessage = (MimeMessage) content;
+                    }
+                } catch (final Exception e) {
+                    // Ignore
+                }
+            }
+            /*
+             * Proceed
+             */
+            if (null != mimeMessage) {
+                mimeMessage.removeHeader("x-original-headers");
+                /*
+                 * Check recipients
+                 */
+                final Address[] recipients = allRecipients == null ? mimeMessage.getAllRecipients() : allRecipients;
+                checkRecipients(recipients);
+                try {
+                    final long start = System.currentTimeMillis();
+                    final Transport transport = getSMTPSession().getTransport(SMTP);
+                    try {
+                        connectTransport(transport, smtpConfig);
+                        saveChangesSafe(mimeMessage);
+                        transport(mimeMessage, recipients, transport, smtpConfig);
+                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    } catch (final javax.mail.AuthenticationFailedException e) {
+                        throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
+                    } finally {
+                        transport.close();
+                    }
+                } catch (final MessagingException e) {
+                    throw MimeMailException.handleMessagingException(e, smtpConfig, session);
+                }
+                return MimeMessageConverter.convertMessage(mimeMessage);
+            }
+            /*
+             * Fill from scratch
+             */
             final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession());
             /*
              * Fill message dependent on send type
@@ -725,7 +771,7 @@ public final class SMTPTransport extends MailTransport {
         }
     }
 
-    private void transport(final SMTPMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
+    private void transport(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
         try {
             transport.sendMessage(smtpMessage, recipients);
         } catch (final MessagingException e) {
@@ -744,7 +790,7 @@ public final class SMTPTransport extends MailTransport {
         }
     }
 
-    private void transportAlt(final SMTPMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
+    private void transportAlt(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
         try {
             final MimeMessageDataSource dataSource = new MimeMessageDataSource(smtpMessage, smtpConfig, session);
             smtpMessage.setDataHandler(new DataHandler(dataSource));
