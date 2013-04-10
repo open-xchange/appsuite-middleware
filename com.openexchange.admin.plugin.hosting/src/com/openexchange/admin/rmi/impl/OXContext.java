@@ -410,7 +410,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             if (null != cacheService) {
                 try {
                     final Cache cache = cacheService.getCache("MailAccount");
-                    cache.invalidateGroup(Integer.toString(contextID));
+                    cache.clear();
                 } catch (final OXException e) {
                     log.error(e.getMessage(), e);
                 } finally {
