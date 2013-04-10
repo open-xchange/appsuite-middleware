@@ -197,12 +197,12 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
 
     private void ensureSequence(Stanza stanza, Member receiver) {
         if (stanza.getSequenceNumber() != -1) {
-            ConcurrentHashMap<String, AtomicLong> peerMap = peerMapPerID.get(stanza.getFrom());
+            ConcurrentHashMap<String, AtomicLong> peerMap = peerMapPerID.get(stanza.getSequencePrincipal());
             if (peerMap == null) {
                 peerMap = new ConcurrentHashMap<String, AtomicLong>();
-                ConcurrentHashMap<String, AtomicLong> otherPeerMap = peerMapPerID.putIfAbsent(stanza.getFrom(), peerMap);
+                ConcurrentHashMap<String, AtomicLong> otherPeerMap = peerMapPerID.putIfAbsent(stanza.getSequencePrincipal(), peerMap);
                 if (otherPeerMap == null) {
-                    stanza.getFrom().on("dispose", new IDEventHandler() {
+                    stanza.getSequencePrincipal().on("dispose", new IDEventHandler() {
 
                         @Override
                         public void handle(String event, ID id, Object source, Map<String, Object> properties) {
