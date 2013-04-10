@@ -1,6 +1,9 @@
 * 2013-04-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 25808: Fixed sending documents as mail attachments
+ - Fix for bug 25802: Trying to bypass parsing a message from stream
+ - Fix for bug 25792: Deal with possibly non-mail-safe E-Mail addresses
+ - Fix for bug 24519: Ignore "@Open-Xchange" suffix during Content-Id look-up
 
 * 2013-04-08 - thorben.betten@open-xchange.com
 
