@@ -113,7 +113,7 @@ public abstract class StanzaSequenceGate {
             if (stanza.getSequenceNumber() == 0) {
                 threshhold.set(0);
             }
-            System.out.println(stanza.getSequencePrincipal()+":"+stanza.getSequenceNumber() + ":" + threshhold);
+            
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Stanza Gate: " + stanza.getSequencePrincipal()+":"+stanza.getSequenceNumber() + ":" + threshhold);
             }
