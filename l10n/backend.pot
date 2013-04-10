@@ -1939,6 +1939,10 @@ msgstr ""
 msgid "The file offset \"%1$d\" is invalid"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:68
+msgid "Unexpected database error: \"%1$s\""
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.eas.provisioning.json/src/com/openexchange/mobile/configuration/json/exception/MobileProvisioningJsonExceptionMessages.java:63
 msgid "An error occurred for action: %1$s"
 msgstr ""
