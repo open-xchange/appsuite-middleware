@@ -47,14 +47,13 @@
  *
  */
 
-package com.openexchange.drive.sim.checksum;
+package com.openexchange.drive.checksum;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import com.openexchange.drive.checksum.ChecksumStore;
 import com.openexchange.file.storage.File;
 import com.openexchange.tools.session.ServerSession;
 

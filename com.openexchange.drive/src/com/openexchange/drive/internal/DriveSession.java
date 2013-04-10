@@ -50,7 +50,7 @@
 package com.openexchange.drive.internal;
 
 import com.openexchange.drive.checksum.ChecksumStore;
-import com.openexchange.drive.sim.checksum.SimChecksumStore;
+import com.openexchange.drive.checksum.SimChecksumStore;
 import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;

@@ -116,8 +116,9 @@ public class DriveStorage {
         copiedFile.setFileName(targetFileName);
         copiedFile.setTitle(targetFileName);
         copiedFile.setFolderId(getFolderID(targetPath, true));
+        List<Field> fileFields = Arrays.asList(new Field[] { Field.FILENAME, Field.TITLE, Field.FOLDER_ID });
         IDTuple sourceId = new IDTuple(sourceFile.getFolderId(), sourceFile.getId());
-        IDTuple targetId = getFileAccess().copy(sourceId, copiedFile.getFolderId(), copiedFile, null, DriveConstants.FILE_FIELDS);
+        IDTuple targetId = getFileAccess().copy(sourceId, copiedFile.getFolderId(), copiedFile, null, fileFields);
         copiedFile.setFolderId(targetId.getFolder());
         copiedFile.setId(targetId.getId());
         return copiedFile;
