@@ -3,6 +3,7 @@
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-aws"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-chat"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-drive"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-storage-cmis"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-freebusy-ews"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-indexing"/>
