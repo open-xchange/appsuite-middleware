@@ -162,6 +162,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
         Set<ID> localIds = targets.remove(localMember);
         if (localIds != null) {
             // Send via local message dispatcher to locally reachable receivers
+            ensureSequence(stanza, localMember);
             Map<ID, OXException> sent = Services.getService(LocalMessageDispatcher.class).send(stanza, localIds);
             exceptions.putAll(sent);
         }
