@@ -8,6 +8,10 @@
  - Fix for bug 25807: Added null guard
  - Fix for bug 25869: Log severe errors if mail transport failed
 
+* 2013-04-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24662: Added dynamic checksum calculation for X-ABCROP-RECTANGLE parameter 
+
 * 2013-04-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 25808: Fixed sending documents as mail attachments
