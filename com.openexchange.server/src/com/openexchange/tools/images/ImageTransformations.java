@@ -120,4 +120,12 @@ public interface ImageTransformations {
      */
     InputStream getInputStream(String formatName) throws IOException;
 
+    /**
+     * Applies all transformations and writes the result as raw image data in the given format, including some meta information wrapped
+     * into a transformed image reference.
+     *
+     * @return The resulting transformed image
+     */
+    TransformedImage getTransformedImage(String formatName) throws IOException;
+
 }
