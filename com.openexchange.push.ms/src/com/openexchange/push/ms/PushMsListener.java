@@ -53,6 +53,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -69,7 +70,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class PushMsListener implements MessageListener<PushMsObject> {
+public class PushMsListener implements MessageListener<Map<String, Object>> {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMsListener.class));
 
@@ -83,8 +84,8 @@ public class PushMsListener implements MessageListener<PushMsObject> {
     }
 
     @Override
-    public void onMessage(final Message<PushMsObject> message) {
-        final PushMsObject pushObj = message.getMessageObject();
+    public void onMessage(final Message<Map<String, Object>> message) {
+        final PushMsObject pushObj = PushMsObject.valueFor(message.getMessageObject());
         if (!getHostname().equals(pushObj.getHostname())) {
             final ServiceLookup registry = Services.getServiceLookup();
             final EventAdmin eventAdmin = registry.getService(EventAdmin.class);

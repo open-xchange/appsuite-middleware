@@ -60,8 +60,8 @@ public abstract class AbstractPushMsObject implements Serializable {
 
     private static final long serialVersionUID = -5653705789077693945L;
 
-    private final int contextId;
-    private final boolean remote;
+    protected int contextId;
+    protected boolean remote;
 
     /**
      * Initializes a new {@link AbstractPushMsObject}.
