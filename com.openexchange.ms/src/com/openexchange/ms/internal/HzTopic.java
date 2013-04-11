@@ -49,6 +49,7 @@
 
 package com.openexchange.ms.internal;
 
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -69,10 +70,12 @@ public final class HzTopic<E> implements Topic<E> {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HzTopic.class);
 
-    private final ITopic<MessageData<E>> hzTopic;
+    private static final String MESSAGE_DATA_OBJECT = HzDataUtility.MESSAGE_DATA_OBJECT;
+
+    private final ITopic<Map<String, Object>> hzTopic;
     private final String senderId;
     private final String name;
-    private final ConcurrentMap<MessageListener<E>, com.hazelcast.core.MessageListener<MessageData<E>>> registeredListeners;
+    private final ConcurrentMap<MessageListener<E>, com.hazelcast.core.MessageListener<Map<String, Object>>> registeredListeners;
 
     /**
      * Initializes a new {@link HzTopic}.
@@ -82,7 +85,7 @@ public final class HzTopic<E> implements Topic<E> {
         this.name = name;
         senderId = UUIDs.getUnformattedString(UUID.randomUUID());
         this.hzTopic = hz.getTopic(name);
-        registeredListeners = new ConcurrentHashMap<MessageListener<E>, com.hazelcast.core.MessageListener<MessageData<E>>>(8);
+        registeredListeners = new ConcurrentHashMap<MessageListener<E>, com.hazelcast.core.MessageListener<Map<String, Object>>>(8);
     }
 
     @Override
@@ -104,7 +107,7 @@ public final class HzTopic<E> implements Topic<E> {
 
     @Override
     public void removeMessageListener(final MessageListener<E> listener) {
-        final com.hazelcast.core.MessageListener<MessageData<E>> hzListener = registeredListeners.remove(listener);
+        final com.hazelcast.core.MessageListener<Map<String, Object>> hzListener = registeredListeners.remove(listener);
         if (null != hzListener) {
             try {
                 hzTopic.removeMessageListener(hzListener);
@@ -126,12 +129,12 @@ public final class HzTopic<E> implements Topic<E> {
 
     @Override
     public void publish(final E message) {
-        hzTopic.publish(new MessageData<E>(message, senderId));
+        hzTopic.publish(HzDataUtility.generateMapFor(message, senderId));
     }
 
     // ------------------------------------------------------------------------ //
 
-    private static final class HzMessageListener<E> implements com.hazelcast.core.MessageListener<MessageData<E>> {
+    private static final class HzMessageListener<E> implements com.hazelcast.core.MessageListener<Map<String, Object>> {
 
         private final MessageListener<E> listener;
         private final String senderId;
@@ -146,10 +149,10 @@ public final class HzTopic<E> implements Topic<E> {
         }
 
         @Override
-        public void onMessage(final com.hazelcast.core.Message<MessageData<E>> message) {
-            final MessageData<E> messageData = message.getMessageObject();
-            final String messageSender = messageData.getSenderId();
-            listener.onMessage(new Message<E>(message.getSource().toString(), messageSender, messageData.getObject(), !senderId.equals(messageSender)));
+        public void onMessage(final com.hazelcast.core.Message<Map<String, Object>> message) {
+            final Map<String, Object> messageData = message.getMessageObject();
+            final String messageSender = (String) messageData.get(HzDataUtility.MESSAGE_DATA_SENDER_ID);
+            listener.onMessage(new Message<E>(message.getSource().toString(), messageSender, (E) messageData.get(MESSAGE_DATA_OBJECT), !senderId.equals(messageSender)));
         }
     }
 }
