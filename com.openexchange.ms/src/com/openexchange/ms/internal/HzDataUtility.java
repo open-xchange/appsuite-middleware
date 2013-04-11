@@ -49,48 +49,55 @@
 
 package com.openexchange.ms.internal;
 
-import java.io.Serializable;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 
 /**
- * {@link MessageData} - A wrapper for data element keeping track of sender identifier.
+ * {@link HzDataUtility} - A utility class for Hazelcast-based messaging.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessageData<E> implements Serializable {
-
-    private static final long serialVersionUID = 7312460889378705573L;
-
-    private final E object;
-    private final String senderId;
+public final class HzDataUtility {
 
     /**
-     * Initializes a new {@link MessageData}.
-     *
-     * @param object The message's object
-     * @param senderId The identifier of the sender dispatching that message object
+     * Initializes a new {@link HzDataUtility}.
      */
-    public MessageData(final E object, final String senderId) {
+    private HzDataUtility() {
         super();
-        this.object = object;
-        this.senderId = senderId;
     }
 
-    /**
-     * Gets the object
-     *
-     * @return The object
-     */
-    public E getObject() {
-        return object;
-    }
+    // ------------------------------------- MESSAGE DATA ------------------------------------------- //
 
     /**
-     * Gets the sender identifier
-     *
-     * @return The sender identifier
+     * The property name for the identifier of the sender that transmitted message data.
      */
-    public String getSenderId() {
-        return senderId;
+    public static final String MESSAGE_DATA_SENDER_ID = "__senderId".intern();
+
+    /**
+     * The property name for transmitted message data object.
+     */
+    public static final String MESSAGE_DATA_OBJECT = "__object".intern();
+
+    /**
+     * Generates message data for given arguments.
+     *
+     * @param e The message data object; POJOs preferred
+     * @param senderId The sender identifier
+     * @return The message data container
+     */
+    public static <E> Map<String, Object> generateMapFor(final E e, final String senderId) {
+        final Map<String, Object> map = new LinkedHashMap<String, Object>(2);
+        if (null != e) {
+            map.put(MESSAGE_DATA_OBJECT, e);
+        }
+        if (null != senderId) {
+            map.put(MESSAGE_DATA_SENDER_ID, senderId);
+        }
+        return map;
     }
+
+    
+    // ------------------------------------- OTHER STIFF ------------------------------------------- //
 
 }
