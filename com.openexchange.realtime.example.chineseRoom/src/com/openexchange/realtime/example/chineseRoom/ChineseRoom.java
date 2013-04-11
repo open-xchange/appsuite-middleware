@@ -104,6 +104,7 @@ public class ChineseRoom extends GroupDispatcher implements ComponentHandle {
             // Simply append all messages
             message.append(messages.getRoot().getData().toString());
         }
+        System.out.println(stanza.getFrom()+ ": " + message);
         // Turn the message into pseudo chinese
         String chineseMessage = chineseVersionOf (message.toString());
         
@@ -112,6 +113,16 @@ public class ChineseRoom extends GroupDispatcher implements ComponentHandle {
     
         // Send the message to all participants in the chat (including the one who said it originally
         sendToAll( stanza, chineseMessage);
+    }
+    
+    @Override
+    protected void onJoin(ID id) {
+        System.out.println("JOIN: "+id);
+    }
+    
+    @Override
+    protected void onLeave(ID id) {
+        System.out.println("LEAVE: "+id);
     }
     
     // Get a replay of old messages

@@ -57,6 +57,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.servlet.http.HttpServletResponse;
 import org.atmosphere.cpr.AtmosphereHandler;
 import org.atmosphere.cpr.AtmosphereRequest;
 import org.atmosphere.cpr.AtmosphereResource;
@@ -79,7 +80,10 @@ import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.StanzaSender;
 import com.openexchange.realtime.handle.StanzaQueueService;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.payload.PayloadTree;
+import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.IDMap;
 import com.openexchange.tools.session.ServerSession;
 
@@ -325,6 +329,15 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         if (!stanzaQueueService.enqueueStanza(stanza)) {
             // TODO: exception?
             LOG.error("Couldn't enqueue Stanza: " + stanza);
+        } else {
+            if (stanza.getSequenceNumber() != -1) {
+                // Return receipt
+                Message msg = new Message();
+                msg.setTo(stanza.getFrom());
+                msg.setFrom(stanza.getFrom());
+                msg.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(stanza.getSequenceNumber(), "json", "atmosphere", "received").build()));
+                send(msg, msg.getTo());
+            }
         }
     }
 
