@@ -113,7 +113,6 @@ public abstract class StanzaSequenceGate {
             if (stanza.getSequenceNumber() == 0) {
                 threshhold.set(0);
             }
-           
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Stanza Gate: " + stanza.getSequencePrincipal()+":"+stanza.getSequenceNumber() + ":" + threshhold);
             }
@@ -141,6 +140,10 @@ public abstract class StanzaSequenceGate {
 
                 /* Stanzas got out of sync, enqueue until we receive the Stanza matching threshold */
             } else {
+                if (threshhold.get() > stanza.getSequenceNumber()) {
+                    // Discard as this stanza already passed the gate once
+                    return;
+                }
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Stanzas not in sequence, Threshold: " + threshhold.get() + " SequenceNumber: " + stanza.getSequenceNumber());
                 }
