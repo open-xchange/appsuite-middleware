@@ -54,6 +54,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -72,10 +74,31 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
 
     private static final long serialVersionUID = -8490584616201401142L;
 
+    public static PushMsObject valueFor(final Map<String, Object> pojo) {
+        if (null == pojo) {
+            return null;
+        }
+        try {
+            final Integer contextId = (Integer) pojo.get("__contextId");
+            final Boolean remote = (Boolean) pojo.get("__remote");
+            final Integer folderId = (Integer) pojo.get("__folderId");
+            final Integer module = (Integer) pojo.get("__module");
+            final Integer hash = (Integer) pojo.get("__hash");
+            final int[] users = (int[]) pojo.get("__users");
+            final Long creationDate = (Long) pojo.get("__creationDate");
+            final Long timestamp = (Long) pojo.get("__timestamp");
+            final String hostname = (String) pojo.get("__hostname");
+            final String topicName = (String) pojo.get("__topicName");
+            return new PushMsObject(folderId.intValue(), module.intValue(), contextId.intValue(), users, remote.booleanValue(), timestamp.longValue(), topicName, hostname, hash.intValue(), new Date(creationDate.longValue()));
+        } catch (final NullPointerException npe) {
+            return null;
+        }
+    }
+
     private final int folderId;
     private final int module;
     private final int users[];
-    private final Date creationDate = new Date();
+    private final Date creationDate;
     private final int hash;
     private final long timestamp;
     private final String topicName;
@@ -94,6 +117,7 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
      */
     public PushMsObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isRemote, final long timestamp, final String topicName) {
         super(contextId, isRemote);
+        creationDate = new Date();
         this.folderId = folderId;
         this.module = module;
         this.users = users;
@@ -124,6 +148,7 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
      */
     public PushMsObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isRemote, final long timestamp, final String topicName, String hostname) {
         super(contextId, isRemote);
+        creationDate = new Date();
         this.folderId = folderId;
         this.module = module;
         this.users = users;
@@ -133,6 +158,18 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
         this.hostname = hostname;
     }
 
+    private PushMsObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isRemote, final long timestamp, final String topicName, String hostname, final int hash, final Date creationDate) {
+        super(contextId, isRemote);
+        this.folderId = folderId;
+        this.module = module;
+        this.users = users;
+        this.hash = hash;
+        this.timestamp = timestamp;
+        this.topicName = topicName;
+        this.hostname = hostname;
+        this.creationDate = creationDate;
+    }
+
     private int hashCode0() {
         final int prime = 31;
         int result = super.hashCode();
@@ -140,6 +177,38 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
         result = prime * result + module;
         result = prime * result + Arrays.hashCode(users);
         return result;
+    }
+
+    /**
+     * Generates the POJO view for this instance.
+     *
+     * @return The POJO view
+     */
+    public Map<String, Object> writePojo() {
+        final Map<String, Object> m = new LinkedHashMap<String, Object>(8);
+        if (folderId > 0) {
+            m.put("__folderId", Integer.valueOf(folderId));
+        }
+        if (module > 0) {
+            m.put("__module", Integer.valueOf(module));
+        }
+        if (null != users) {
+            m.put("__users", users);
+        }
+        if (null != creationDate) {
+            m.put("__creationDate", Long.valueOf(creationDate.getTime()));
+        }
+        m.put("__hash", Integer.valueOf(hash));
+        if (timestamp > 0) {
+            m.put("__timestamp", Long.valueOf(timestamp));
+        }
+        if (null != hostname) {
+            m.put("__hostname", hostname);
+        }
+        if (null != topicName) {
+            m.put("__topicName", topicName);
+        }
+        return m;
     }
 
     /**
