@@ -28,6 +28,12 @@ open-xchange-munin-scripts (7.2.0-0) UNRELEASED; urgency=low
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 15 Mar 2013 13:34:02 +0100
 
+open-xchange-munin-scripts (7.0.2-7) unstable; urgency=low
+
+  * Build for patch 2013-04-04
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 02 Apr 2013 10:39:58 +0200
+
 open-xchange-munin-scripts (7.0.2-6) unstable; urgency=low
 
   * Sixth release candidate for 6.22.2/7.0.2

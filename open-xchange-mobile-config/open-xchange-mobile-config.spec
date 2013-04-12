@@ -72,6 +72,8 @@ Fourth candidate for 7.2.0 release
 * Tue Apr 09 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Third candidate for 7.2.0 release
 * Tue Apr 02 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+Build for patch 2013-04-04
+* Tue Apr 02 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Second candidate for 7.2.0 release
 * Tue Mar 26 2013 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 First release candidate for 7.2.0
