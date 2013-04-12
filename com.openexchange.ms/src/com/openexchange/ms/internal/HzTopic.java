@@ -60,6 +60,7 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.ms.Message;
 import com.openexchange.ms.MessageListener;
 import com.openexchange.ms.Topic;
+import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -79,6 +80,7 @@ public final class HzTopic<E> implements Topic<E> {
     private final String name;
     private final ConcurrentMap<MessageListener<E>, com.hazelcast.core.MessageListener<Map<String, Object>>> registeredListeners;
     private final HzDelayQueue<HzDelayed<E>> publishQueue;
+    private final ScheduledTimerTask timerTask;
 
     /**
      * Initializes a new {@link HzTopic}.
@@ -104,7 +106,7 @@ public final class HzTopic<E> implements Topic<E> {
                 }
             }
         };
-        timerService.scheduleWithFixedDelay(r, 3000, 3000);
+        timerTask = timerService.scheduleWithFixedDelay(r, 3000, 3000);
     }
 
     @Override
@@ -143,6 +145,7 @@ public final class HzTopic<E> implements Topic<E> {
 
     @Override
     public void destroy() {
+        timerTask.cancel();
         hzTopic.destroy();
     }
 
