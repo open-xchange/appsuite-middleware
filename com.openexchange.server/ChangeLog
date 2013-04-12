@@ -1,6 +1,7 @@
 * 2013-04-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 25814: Added null guard
+ - Fix for bug 25807: Added null gard
 
 * 2013-04-10 - thorben.betten@open-xchange.com
 
