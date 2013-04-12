@@ -1,3 +1,7 @@
+* 2013-04-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25837: Added several enhancements to avoid flooding of the distributed hazelcast topic for cache events
+ 
 * 2013-04-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 25814: Added null guard
