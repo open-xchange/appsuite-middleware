@@ -54,7 +54,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.caching.CacheKeyService;
 import com.openexchange.caching.events.CacheEventService;
+import com.openexchange.caching.events.ms.internal.CacheEventWrapper;
 import com.openexchange.caching.events.ms.internal.MsCacheEventHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.ms.MsService;
@@ -118,6 +120,25 @@ public final class MsCacheEventHandlerActivator extends HousekeepingActivator {
                     this.eventHandler = null;
                 }
                 MsCacheEventHandler.setMsService(null);
+            }
+        });
+        track(CacheKeyService.class, new ServiceTrackerCustomizer<CacheKeyService, CacheKeyService>() {
+
+            @Override
+            public CacheKeyService addingService(ServiceReference<CacheKeyService> reference) {
+                CacheKeyService cacheKeyService = context.getService(reference);
+                CacheEventWrapper.setCacheKeyService(cacheKeyService);
+                return cacheKeyService;
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<CacheKeyService> reference, CacheKeyService service) {
+                // Ignored
+            }
+
+            @Override
+            public void removedService(ServiceReference<CacheKeyService> reference, CacheKeyService service) {
+                CacheEventWrapper.setCacheKeyService(null);
             }
         });
         openTrackers();
