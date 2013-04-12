@@ -318,7 +318,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     if ("GlobalFolderCache".equals(region)) {
                         final int contextId = Tools.getUnsignedInteger((String) event.getProperty("group"));
                         if (null == event.getProperty("key")) {
-                            CacheFolderStorage.getInstance().clearCache(0, contextId);
+                            FolderMapManagement.getInstance().dropFor(contextId);
                         } else {
                             final Serializable[] keys = ((CacheKey) event.getProperty("key")).getKeys();
                             final String id = keys[1].toString();
@@ -334,7 +334,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                 }
 
                 private void removeFromUserCache(final String id, final String treeId, final int contextId) {
-                    CacheFolderStorage.getInstance().removeSingleFromCache(id, treeId, -1, contextId, false, true, null);
+                    FolderMapManagement.getInstance().dropFor(id, treeId, -1, contextId);
                 }
             };
             final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
