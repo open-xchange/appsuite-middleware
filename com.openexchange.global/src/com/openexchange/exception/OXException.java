@@ -238,6 +238,8 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     private Generic generic;
 
+    private LogLevel optLogLevel;
+
     /**
      * Initializes a default {@link OXException}.
      */
@@ -661,7 +663,11 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return <code>true</code> if this {@link OXException} is loggable for specified log level; otherwise <code>false</code>
      */
     public boolean isLoggable(final LogLevel logLevel) {
-        return logLevel.implies(getCategories().get(0));
+        final LogLevel thisLogLevel = this.optLogLevel;
+        if (null == thisLogLevel) {
+            return logLevel.implies(getCategories().get(0));            
+        }
+        return logLevel.implies(thisLogLevel);
     }
 
     /**
@@ -733,7 +739,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Adds specified category.
-     *
+     * 
      * @param category The category to add
      * @return This exception with category added (for chained invocations)
      */
@@ -748,8 +754,21 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
+     * Sets the log level for this exception.
+     * <p>
+     * If <code>null</code> log level is taken from {@link #getCategory() category}.
+     * 
+     * @param logLevel The log level to set
+     * @return This exception with log level applied
+     */
+    public OXException setLogLevel(final LogLevel logLevel) {
+        this.optLogLevel = logLevel;
+        return this;
+    }
+
+    /**
      * Sets specified category and drops all existing categories.
-     *
+     * 
      * @param category The category to set
      * @return This exception with category set (for chained invocations)
      */
