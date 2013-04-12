@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,66 +47,21 @@
  *
  */
 
-package com.openexchange.groupware.settings.impl;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserImpl;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.session.Session;
+package com.openexchange.user.internal.mapping;
 
 /**
- * This class contains the shared functions for all user settings.
+ * {@link UserField}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public abstract class AbstractUserFuncs implements IValueHandler {
+public enum UserField {
 
-    /**
-     * Initializes a new {@link AbstractUserFuncs}.
-     */
-    protected AbstractUserFuncs() {
-        super();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
-        /*
-         * write to user storage
-         */
-        UserImpl newUser = new UserImpl();
-        newUser.setId(user.getId());
-        setValue(newUser, setting.getSingleValue().toString(), user);
-        UserStorage.getInstance().updateUser(newUser, ctx);
-        /*
-         * try and set value in passed reference, too
-         */
-        if (UserImpl.class.isInstance(user)) {
-            setValue((UserImpl)user, setting.getSingleValue().toString(), user);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getId() {
-        return -1;
-    }
-
-    /**
-     * Sets the value in passed <tt>newUser</tt>.
-     *
-     * @param newUser In this user object the value should be set.
-     * @param value The value to set.
-     * @param originalUser The original user fetched from storage
-     * @throws OXException If writing of the value fails.
-     */
-    protected abstract void setValue(UserImpl newUser, String value, User originalUser)
-        throws OXException;
+    TIME_ZONE,
+    PREFERRED_LANGUAGE,
+    IMAP_LOGIN,
+    IMAP_SERVER,
+    SMTP_SERVER,
+    PASSWORD,
+    PASSWORD_MECHANISM
 
 }
