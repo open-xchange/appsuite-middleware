@@ -230,7 +230,7 @@ public final class GetAction extends AbstractMailAction {
                 /*
                  * Get message
                  */
-                final MailMessage mail = mailInterface.getMessage(folderPath, uid);
+                final MailMessage mail = mailInterface.getMessage(folderPath, uid, !unseen);
                 if (mail == null) {
                     throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
                 }
@@ -241,8 +241,6 @@ public final class GetAction extends AbstractMailAction {
                     final AJAXRequestData requestData = req.getRequest();
                     final OutputStream directOutputStream = requestData.optOutputStream();
                     if (null != directOutputStream) {
-                        final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
-                        final boolean doUnseen = (unseen && wasUnseen);
                         if (saveToDisk) {
                             requestData.setResponseHeader("Content-Type", "application/octet-stream");
                             final StringAllocator sb = new StringAllocator(64).append("attachment");
@@ -266,11 +264,7 @@ public final class GetAction extends AbstractMailAction {
                             directOutputStream.write(CHUNK2); // ..."}
                             directOutputStream.flush();
                         }
-                        final AJAXRequestResult requestResult = new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
-                        if (doUnseen) {
-                            mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
-                        }
-                        return requestResult;
+                        return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
                     }
                 }
                 /*-
@@ -362,17 +356,12 @@ public final class GetAction extends AbstractMailAction {
                 /*
                  * Get message
                  */
-                final MailMessage mail = mailInterface.getMessage(folderPath, uid);
+                final MailMessage mail = mailInterface.getMessage(folderPath, uid, !unseen);
                 if (mail == null) {
                     throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
                 }
                 final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
                 final boolean doUnseen = (unseen && wasUnseen);
-                if (doUnseen) {
-                    mail.setFlag(MailMessage.FLAG_SEEN, false);
-                    final int unreadMsgs = mail.getUnreadMessages();
-                    mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
-                }
                 final ContentType rct = new ContentType("text/plain");
                 final ContentType ct = mail.getContentType();
                 if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
@@ -406,24 +395,10 @@ public final class GetAction extends AbstractMailAction {
                     }
                 }
             } else {
-//                tmp = req.getParameter(Mail.PARAMETER_EDIT_DRAFT);
-//                final boolean editDraft = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
-//                tmp = req.getParameter(Mail.PARAMETER_VIEW);
-//                final String view = null == tmp ? null : tmp.toLowerCase(Locale.ENGLISH);
-//                tmp = null;
-//                final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
-//                /*
-//                 * Deny saving for this request-specific settings
-//                 */
-//                usmNoSave.setNoSave(true);
-//                /*
-//                 * Overwrite settings with request's parameters
-//                 */
-//                detectDisplayMode(editDraft, view, usmNoSave);
                 /*
                  * Get message
                  */
-                final MailMessage mail = mailInterface.getMessage(folderPath, uid);
+                final MailMessage mail = mailInterface.getMessage(folderPath, uid, !unseen);
                 if (mail == null) {
                     throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
                 }

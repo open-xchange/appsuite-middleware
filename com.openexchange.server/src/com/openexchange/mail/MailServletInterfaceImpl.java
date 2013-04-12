@@ -1116,7 +1116,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     private static final transient Object[] ARGS_FLAG_SEEN_UNSET = new Object[] { Integer.valueOf(-1 * MailMessage.FLAG_SEEN) };
 
     @Override
-    public MailMessage getMessage(final String folder, final String msgUID) throws OXException {
+    public MailMessage getMessage(final String folder, final String msgUID, final boolean markAsSeen) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -1124,7 +1124,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             throw MailExceptionCode.FOLDER_DOES_NOT_HOLD_MESSAGES.create(MailFolder.DEFAULT_FOLDER_ID);
         }
         final String fullname = argument.getFullname();
-        final MailMessage mail = mailAccess.getMessageStorage().getMessage(fullname, msgUID, true);
+        final MailMessage mail = mailAccess.getMessageStorage().getMessage(fullname, msgUID, markAsSeen);
         if (mail != null) {
             if (!mail.containsAccountId() || mail.getAccountId() < 0) {
                 mail.setAccountId(accountId);
