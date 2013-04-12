@@ -121,7 +121,7 @@ public final class HzDelayQueue<E extends Delayed> extends AbstractQueue<E> impl
      * Inserts the specified element into this delay queue if not already present.
      *
      * @param e the element to add
-     * @return <tt>true</tt> if added; otherwise <code>false</code> if alreeady contained
+     * @return <tt>true</tt> if added; otherwise <code>false</code> if already contained
      * @throws NullPointerException if the specified element is <code>null</code>
      */
     public boolean offerIfAbsent(E e) {
