@@ -89,14 +89,14 @@ public final class HzDelayed<E> implements Delayed {
     }
 
     @Override
-    public int compareTo(Delayed o) {
+    public int compareTo(final Delayed o) {
         final long thisStamp = stamp;
         final long otherStamp = ((HzDelayed<?>) o).stamp;
         return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
     }
 
     @Override
-    public long getDelay(TimeUnit unit) {
+    public long getDelay(final TimeUnit unit) {
         return immediateDelivery ? 0L : unit.convert(MSEC_DELAY - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS);
     }
 
@@ -106,7 +106,7 @@ public final class HzDelayed<E> implements Delayed {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return data.equals(obj);
     }
 
