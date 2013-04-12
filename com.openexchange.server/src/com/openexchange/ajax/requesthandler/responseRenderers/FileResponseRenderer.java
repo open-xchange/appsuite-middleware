@@ -167,7 +167,8 @@ public class FileResponseRenderer implements ResponseRenderer {
                 resp.setHeader("Content-Disposition", sb.toString());
                 resp.setContentType(null == contentType ? SAVE_AS_TYPE : contentType);
             } else {
-                final String cts = null == fileContentType ? MimeType2ExtMap.getContentType(fileName) : fileContentType;
+                final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
+                final String cts = null == fileContentType ? contentTypeByFileName : fileContentType;
                 final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileName, cts, contentDisposition, userAgent);
                 if (delivery == null || !delivery.equalsIgnoreCase(VIEW)) {
                     if (isEmpty(contentDisposition)) {
@@ -186,14 +187,35 @@ public class FileResponseRenderer implements ResponseRenderer {
                         }
                     }
                 }
+                /*-
+                 * Determine preferred Content-Type
+                 *
+                 * 1. Ensure contentTypeByFileName has a valid value
+                 *
+                 * 2. Reset checkedContentType if
+                 *   - it is set to "application/octet-stream"
+                 *   - it's primary type is not equal to contentTypeByFileName's primary type; e.g. both start with "text/"
+                 */
+                String preferredContentType = checkedDownload.getContentType();
+                if (!SAVE_AS_TYPE.equals(contentTypeByFileName)) {
+                    if (SAVE_AS_TYPE.equals(preferredContentType)) {
+                        preferredContentType = contentTypeByFileName;
+                    } else {
+                        final String primaryType1 = getPrimaryType(preferredContentType);
+                        final String primaryType2 = getPrimaryType(contentTypeByFileName);
+                        if (!toLowerCase(primaryType1).startsWith(toLowerCase(primaryType2))) {
+                            preferredContentType = contentTypeByFileName;
+                        }
+                    }
+                }
                 if (contentType == null) {
-                    resp.setContentType(checkedDownload.getContentType());
+                    resp.setContentType(preferredContentType);
                 } else {
-                    final String checkedContentType = checkedDownload.getContentType();
-                    if (SAVE_AS_TYPE.equals(checkedContentType)) {
+                    if (SAVE_AS_TYPE.equals(preferredContentType)) {
+                        // We don't know better...
                         resp.setContentType(contentType);
                     } else {
-                        final String primaryType1 = getPrimaryType(checkedContentType);
+                        final String primaryType1 = getPrimaryType(preferredContentType);
                         final String primaryType2 = getPrimaryType(contentType);
                         if (toLowerCase(primaryType1).startsWith(toLowerCase(primaryType2))) {
                             resp.setContentType(contentType);
@@ -202,9 +224,9 @@ public class FileResponseRenderer implements ResponseRenderer {
                             // Therefore ignore it due to security reasons (see bug #25343)
                             final StringAllocator sb = new StringAllocator(128);
                             sb.append("Denied parameter \"").append(PARAMETER_CONTENT_TYPE).append("\" due to security constraints (");
-                            sb.append(contentType).append(" vs. ").append(checkedContentType).append(").");
+                            sb.append(contentType).append(" vs. ").append(preferredContentType).append(").");
                             LOG.warn(sb.toString());
-                            resp.setContentType(checkedContentType);
+                            resp.setContentType(preferredContentType);
                         }
                     }
                 }

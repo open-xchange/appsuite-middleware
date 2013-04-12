@@ -126,26 +126,42 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
             requestData);
     }
 
+    private static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
+
     private AJAXRequestResult document(Session session, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig, final AJAXRequestData requestData) throws OXException {
         try {
             ATTACHMENT_BASE.startTransaction();
             final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
             String sContentType;
-            if ((null == contentType) || ("application/octet-stream".equals(toLowerCase(contentType)))) {
-                sContentType = "application/octet-stream";
+            if ((null == contentType) || (APPLICATION_OCTET_STREAM.equals(toLowerCase(contentType)))) {
+                sContentType = APPLICATION_OCTET_STREAM;
             } else {
-                sContentType = contentType;
-                final String fileMIMEType = attachment.getFileMIMEType();
-                final String primaryType1 = getPrimaryType(fileMIMEType);
+                final String contentTypeByFileName = MimeType2ExtMap.getContentType(attachment.getFilename());
+                String preferredContentType = attachment.getFileMIMEType();
+                if (!APPLICATION_OCTET_STREAM.equals(contentTypeByFileName)) {
+                    if (APPLICATION_OCTET_STREAM.equals(preferredContentType)) {
+                        preferredContentType = contentTypeByFileName;
+                    } else {
+                        final String primaryType1 = getPrimaryType(preferredContentType);
+                        final String primaryType2 = getPrimaryType(contentTypeByFileName);
+                        if (!toLowerCase(primaryType1).startsWith(toLowerCase(primaryType2))) {
+                            preferredContentType = contentTypeByFileName;
+                        }
+                    }
+                }
+                // Compare...
+                final String primaryType1 = getPrimaryType(preferredContentType);
                 final String primaryType2 = getPrimaryType(contentType);
-                if (!toLowerCase(primaryType1).startsWith(toLowerCase(primaryType2))) {
+                if (toLowerCase(primaryType1).startsWith(toLowerCase(primaryType2))) {
+                    sContentType = contentType;
+                } else {
                     // Specified Content-Type does NOT match file's real MIME type
                     // Therefore ignore it due to security reasons (see bug #25343)
                     final StringAllocator sb = new StringAllocator(128);
                     sb.append("Denied parameter \"").append(AJAXServlet.PARAMETER_CONTENT_TYPE).append("\" due to security constraints (");
-                    sb.append(contentType).append(" vs. ").append(fileMIMEType).append(").");
+                    sb.append(contentType).append(" vs. ").append(preferredContentType).append(").");
                     LOG.warn(sb.toString());
-                    sContentType = fileMIMEType;
+                    sContentType = preferredContentType;
                 }
             }
             /*
@@ -160,7 +176,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
                 final String lc = toLowerCase(sContentType);
                 if (lc.startsWith("image/")) {
                     isImage = true;
-                } else if (lc.startsWith("application/octet-stream")) {
+                } else if (lc.startsWith(APPLICATION_OCTET_STREAM)) {
                     final String fileName = attachment.getFilename();
                     if (null != fileName && MimeType2ExtMap.getContentType(fileName).startsWith("image/")) {
                         isImage = true;
@@ -176,7 +192,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
                 final OutputStream directOutputStream = requestData.optOutputStream();
                 if (null != directOutputStream) {
                     requestData.setResponseHeader("Content-Type", sContentType);                    
-                    final StringAllocator sb = new StringAllocator(toLowerCase(sContentType).startsWith("application/octet-stream") ? "attachment" : "inline");
+                    final StringAllocator sb = new StringAllocator(toLowerCase(sContentType).startsWith(APPLICATION_OCTET_STREAM) ? "attachment" : "inline");
                     appendFilenameParameter(attachment.getFilename(), null, requestData.getUserAgent(), sb);
                     requestData.setResponseHeader("Content-Disposition", sb.toString());
                     requestData.removeCachingHeader();
