@@ -7,6 +7,7 @@
  - Fix for bug 25814: Added null guard
  - Fix for bug 25807: Added null guard
  - Fix for bug 25869: Log severe errors if mail transport failed
+ - Fix for bug 25847: Try to sanitize Content-Type header to an appropriate value (if signaled differently by file name)
 
 * 2013-04-10 - tobias.friedrich@open-xchange.com
 
