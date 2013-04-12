@@ -2048,7 +2048,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     @Override
-    public void changeQuota(final Context ctx, final String module, final long quota, final Credentials auth) throws StorageException {
+    public void changeQuota(final Context ctx, final List<String> modules, final long quota, final Credentials auth) throws StorageException {
         final int contextId = ctx.getId().intValue();
         // SQL resources
         Connection con = null;
@@ -2060,31 +2060,33 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             con.setAutoCommit(false); // BEGIN
             autocommit = true;
             rollback = true;
-            // Determine if already present
-            final boolean exists;
-            {
-                stmt = con.prepareStatement("SELECT 1 FROM quota_context WHERE cid=? AND module=?");
-                stmt.setInt(1, contextId);
-                stmt.setString(2, module);
-                ResultSet rs = stmt.executeQuery();
-                exists = rs.next();
-                Databases.closeSQLStuff(rs, stmt);
-                stmt = null;
-                rs = null;
-            }
-            // Insert/update row
-            if (exists) {
-                stmt = con.prepareStatement("UPDATE quota_context SET value=? WHERE cid=? AND module=?");
-                stmt.setLong(1, quota <= 0 ? 0 : quota);
-                stmt.setInt(2, contextId);
-                stmt.setString(3, module);
-                stmt.executeUpdate();
-            } else {
-                stmt = con.prepareStatement("INSERT INTO quota_context (cid, module, value) VALUES (?, ?, ?)");
-                stmt.setInt(1, contextId);
-                stmt.setString(2, module);
-                stmt.setLong(3, quota <= 0 ? 0 : quota);
-                stmt.executeUpdate();
+            for (final String module : modules) {
+                // Determine if already present
+                final boolean exists;
+                {
+                    stmt = con.prepareStatement("SELECT 1 FROM quota_context WHERE cid=? AND module=?");
+                    stmt.setInt(1, contextId);
+                    stmt.setString(2, module);
+                    ResultSet rs = stmt.executeQuery();
+                    exists = rs.next();
+                    Databases.closeSQLStuff(rs, stmt);
+                    stmt = null;
+                    rs = null;
+                }
+                // Insert/update row
+                if (exists) {
+                    stmt = con.prepareStatement("UPDATE quota_context SET value=? WHERE cid=? AND module=?");
+                    stmt.setLong(1, quota <= 0 ? 0 : quota);
+                    stmt.setInt(2, contextId);
+                    stmt.setString(3, module);
+                    stmt.executeUpdate();
+                } else {
+                    stmt = con.prepareStatement("INSERT INTO quota_context (cid, module, value) VALUES (?, ?, ?)");
+                    stmt.setInt(1, contextId);
+                    stmt.setString(2, module);
+                    stmt.setLong(3, quota <= 0 ? 0 : quota);
+                    stmt.executeUpdate();
+                }
             }
             con.commit(); // COMMIT
             rollback = false;
