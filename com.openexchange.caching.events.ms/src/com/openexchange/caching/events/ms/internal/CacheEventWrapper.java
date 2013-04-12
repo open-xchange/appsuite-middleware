@@ -50,6 +50,8 @@
 package com.openexchange.caching.events.ms.internal;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -126,24 +128,24 @@ public class CacheEventWrapper {
     private static Serializable wrapKey(Serializable serializable) {
         if (null != serializable && CacheKey.class.isInstance(serializable)) {
             CacheKey cacheKey = (CacheKey)serializable;
-            Serializable[] objs = cacheKey.getKeys();
-            Serializable[] cacheKeyArray = new Serializable[1 + objs.length];
-            cacheKeyArray[0] = Integer.valueOf(cacheKey.getContextId());
-            System.arraycopy(objs, 0, cacheKeyArray, 1, objs.length);
-            return cacheKeyArray;
+            final ArrayList<Serializable> ret = new ArrayList<Serializable>(Arrays.asList(cacheKey.getKeys()));
+            ret.add(0, Integer.valueOf(cacheKey.getContextId()));
+            return ret;
         }
         return serializable;
     }
 
     private static Serializable unwrapKey(Serializable serializable) {
-        if (null != serializable && Serializable[].class.isInstance(serializable)) {
-            Serializable[] cacheKeyArray = (Serializable[])serializable;
-            if (1 < cacheKeyArray.length) {
+        if (null != serializable && ArrayList.class.isInstance(serializable)) {
+            ArrayList<Serializable> cacheKeyArray = (ArrayList<Serializable>)serializable;
+            if (1 < cacheKeyArray.size()) {
                 CacheKeyService cacheKeyService = CKS_REFERENCE.get();
                 if (null != cacheKeyService) {
-                    int contextID = ((Integer)cacheKeyArray[0]).intValue();
-                    Serializable[] objs = new Serializable[cacheKeyArray.length - 1];
-                    System.arraycopy(cacheKeyArray, 1, objs, 0, objs.length);
+                    int contextID = ((Integer)cacheKeyArray.get(0)).intValue();
+                    Serializable[] objs = new Serializable[cacheKeyArray.size() - 1];
+                    for (int i = 0; i < objs.length; i++) {
+                        objs[i] = cacheKeyArray.get(i+1);
+                    }
                     return cacheKeyService.newCacheKey(contextID, objs);
                 }
             }

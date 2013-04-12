@@ -68,6 +68,7 @@ public final class HzDelayed<E> implements Delayed {
     private final long stamp;
     private final boolean immediateDelivery;
     private final E data;
+    private final int hash;
 
     /**
      * Initializes a new {@link HzDelayed}.
@@ -77,8 +78,12 @@ public final class HzDelayed<E> implements Delayed {
         stamp = System.currentTimeMillis();
         this.immediateDelivery = immediateDelivery;
         this.data = data;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((data == null) ? 0 : data.hashCode());
+        hash = result;
     }
-    
+
     /**
      * Gets the message data object.
      *
@@ -102,12 +107,29 @@ public final class HzDelayed<E> implements Delayed {
 
     @Override
     public int hashCode() {
-        return data.hashCode();
+        return hash;
     }
 
     @Override
-    public boolean equals(final Object obj) {
-        return data.equals(obj);
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof HzDelayed)) {
+            return false;
+        }
+        HzDelayed<?> other = (HzDelayed<?>) obj;
+        if (data == null) {
+            if (other.data != null) {
+                return false;
+            }
+        } else if (!data.equals(other.data)) {
+            return false;
+        }
+        return true;
     }
 
 }
