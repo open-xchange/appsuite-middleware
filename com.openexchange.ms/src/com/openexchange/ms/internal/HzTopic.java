@@ -60,10 +60,11 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.ms.Message;
 import com.openexchange.ms.MessageListener;
 import com.openexchange.ms.Topic;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link HzTopic}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HzTopic<E> implements Topic<E> {
@@ -71,11 +72,13 @@ public final class HzTopic<E> implements Topic<E> {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HzTopic.class);
 
     private static final String MESSAGE_DATA_OBJECT = HzDataUtility.MESSAGE_DATA_OBJECT;
+    private static final String MESSAGE_DATA_SENDER_ID = HzDataUtility.MESSAGE_DATA_SENDER_ID;
 
     private final ITopic<Map<String, Object>> hzTopic;
     private final String senderId;
     private final String name;
     private final ConcurrentMap<MessageListener<E>, com.hazelcast.core.MessageListener<Map<String, Object>>> registeredListeners;
+    private final HzDelayQueue<HzDelayed<E>> publishQueue;
 
     /**
      * Initializes a new {@link HzTopic}.
@@ -86,6 +89,22 @@ public final class HzTopic<E> implements Topic<E> {
         senderId = UUIDs.getUnformattedString(UUID.randomUUID());
         this.hzTopic = hz.getTopic(name);
         registeredListeners = new ConcurrentHashMap<MessageListener<E>, com.hazelcast.core.MessageListener<Map<String, Object>>>(8);
+        publishQueue = new HzDelayQueue<HzDelayed<E>>();
+        // Timer task
+        final TimerService timerService = Services.getService(TimerService.class);
+        final Log log = LOG;
+        final Runnable r = new Runnable() {
+            
+            @Override
+            public void run() {
+                try {
+                    triggerPublish();
+                } catch (final Exception e) {
+                    log.warn("Failed to trigger publishing messages.", e);
+                }
+            }
+        };
+        timerService.scheduleWithFixedDelay(r, 3000, 3000);
     }
 
     @Override
@@ -129,6 +148,26 @@ public final class HzTopic<E> implements Topic<E> {
 
     @Override
     public void publish(final E message) {
+        publishQueue.offerIfAbsent(new HzDelayed<E>(message, false));
+        triggerPublish();
+    }
+
+    /**
+     * Triggers all due messages.
+     */
+    public void triggerPublish() {
+        HzDelayed<E> polled;
+        while ((polled = publishQueue.poll()) != null) {
+            publishNow(polled.getData());
+        }
+    }
+
+    /**
+     * (Immediately) Publishes specified message to queue.
+     * 
+     * @param message The messahe to publish
+     */
+    public void publishNow(final E message) {
         hzTopic.publish(HzDataUtility.generateMapFor(message, senderId));
     }
 
@@ -151,8 +190,12 @@ public final class HzTopic<E> implements Topic<E> {
         @Override
         public void onMessage(final com.hazelcast.core.Message<Map<String, Object>> message) {
             final Map<String, Object> messageData = message.getMessageObject();
-            final String messageSender = (String) messageData.get(HzDataUtility.MESSAGE_DATA_SENDER_ID);
-            listener.onMessage(new Message<E>(message.getSource().toString(), messageSender, (E) messageData.get(MESSAGE_DATA_OBJECT), !senderId.equals(messageSender)));
+            final String messageSender = (String) messageData.get(MESSAGE_DATA_SENDER_ID);
+            listener.onMessage(new Message<E>(
+                message.getSource().toString(),
+                messageSender,
+                (E) messageData.get(MESSAGE_DATA_OBJECT),
+                !senderId.equals(messageSender)));
         }
     }
 }
