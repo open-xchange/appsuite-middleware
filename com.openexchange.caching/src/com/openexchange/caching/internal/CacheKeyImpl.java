@@ -148,7 +148,14 @@ public class CacheKeyImpl implements CacheKey {
 
     @Override
     public String toString() {
-        return new com.openexchange.java.StringAllocator(32).append("CacheKey: context=").append(contextId).append(", keys=").append(Arrays.toString(keyObjs)).toString();
+        final StringBuilder sb = new StringBuilder(64);
+        sb.append('[');
+        sb.append(contextId);
+        for (final Serializable item : keyObjs) {
+            sb.append(',').append(null == item ? "null" : item.toString());
+        }
+        sb.append(']');
+        return sb.toString();
     }
 
     @Override
