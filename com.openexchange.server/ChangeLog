@@ -2,6 +2,182 @@
 
  - Fix for bug 24662: Added dynamic checksum calculation for X-ABCROP-RECTANGLE parameter 
 
+* 2013-04-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25808: Fixed sending documents as mail attachments
+ - Fix for bug 25802: Trying to bypass parsing a message from stream
+ - Fix for bug 25792: Deal with possibly non-mail-safe E-Mail addresses
+ - Fix for bug 24519: Ignore "@Open-Xchange" suffix during Content-Id look-up
+ - Fix for bug 25806: Proper cache invalidation
+
+* 2013-04-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25753: Sane Content-Type value
+
+* 2013-04-08 - marc.arens@open-xchange.com
+
+ - Fix for bug: 25039 - Files: Uploading a new file version of 10MB times out without user notification
+ - Fix for bug: 25474 - Unexpected error: null when sending mail
+ - Fix for bug: 25285 - publication api always returns http as protocol
+
+* 2013-04-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25715: Check if specified quota is in allowed range for INT(10) UNSIGNED
+ - Fix for bug 19150: Check existence of appropriate property on bundle start-up
+ - Fix for bug 25732: Lowered log level for commonly raised "Folder not found" error code
+
+* 2013-04-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25727: Added authentication to publication tools
+ - Fix for bug 25723: Added null guard
+ - Fix for bug 25724: Added validation check to quota arguments
+ - Fix for bug 25224: Changed category accordingly
+
+* 2013-04-05 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24876: Attachment list requests respect now the optional time zone parameter.
+ - Fix for bug 25705: Removing read permissions for all users on upsell.properties configuration file.
+ - Fix for bug 25710: Corrected access limitations for SOAP interface in apache proxy example configuration files.
+ - Fix for bug 25091: Added dependency on open-xchange-parallels-gui or open-xchange-meta-ui-appsuite.
+ - Fix for bug 25092: Added dependency on open-xchange-help-usm-eas and open-xchange-eas-provisioning-gui or open-xchange-meta-ui-appsuite.
+
+* 2013-04-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25704: Dropped dependency
+
+* 2013-04-05 - francisco.laguna@open-xchange.com
+
+ - Fix for bug 25706: Fixed login
+
+* 2013-04-04 - marcus.klein@open-xchange.com
+
+ - Fix for bug 25330: Implemented conversion of reseller administrator, custom identifier and restrictions in reseller context SOAP
+   interface.
+
+* 2013-04-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25684: Trying to avoid fragile JAF data-content-handler look-up where possible
+ - Fix for bug 25126: Consider config-cascade setting when propagating capability
+
+* 2013-04-04 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25673: Be aware of possibly removed MBeans during iteration in showruntimestats
+
+* 2013-04-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24989: Added mapping to config-tree <-> JSlob
+ - Fix for bug 23383: Fixed response headers
+
+* 2013-04-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25193: More lenient handling when creating mail accounts by auto-config settings
+
+* 2013-04-02 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24581: Using only special Java options for CLTs in all scripts starting some CLT.
+ - Fix for bug 25083: Not throwing nested exceptions to RMI clients because they do not know about internal exception classes.
+
+* 2013-04-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25636: Limited changeable contact fields to reasonable ones
+
+* 2013-03-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25630: Added proper "main" method to CLI classes
+ - Fix for bug 25132: Set proper arguments for UploadSizeExceededException
+
+* 2013-03-29 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 25626: Added admin id to admin user after creation in database
+
+* 2013-03-28 - marcus.klein@open-xchange.com
+
+ - Fix for bug 25099: Used strings from the XML schema elements needs to be interned when using IBM Java.
+
+* 2013-03-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25596: Reduced capacity of the queue used by log service
+ - Fix for bug 25560: Handle possible connect error to Sieve server more gracefully
+ - Fix for bug 25346: Support for all contact fields by user JSON interface
+ - Fix for bug 25571: Handle absent contact
+ - Fix for bug 24724: Pass stack trace as separate argument to log routine, rather than appending it into log message
+ - Fix for bug 25581: Allow passed "content_type" parameter if its primary type matches the one of the validated MIME type
+ - Fix for bug 25566: Maintain commas in processed CSS selectors
+
+* 2013-03-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25561: Check possible URL-encodings in Content-Type value
+ - Fix for bug 24889: Register preference items regardless of enabled/disabled status
+ - Fix for bug 25589: Added streaming support when exporting vCards
+ - Fix fir bug 25587: Denied output of GMX crawler
+
+* 2013-03-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25495: Close currently opened folder immediately
+ - Fix for bug 25552: Declare capability "linkedinPlus" once mail-capable LinkedIn API key is available
+ - Fix for bug 25542: Avoid ArrayIndexOutOfBoundsException when accessing array
+ - Fix for bug 25541: Dropped unresolveable dependency
+ - Fix for bug 25518: Added another content type to ignore on preview generation
+ - Fixes for bug 25528 & bug 25478: Added entries to 'paths.perfMap' mapping file
+ - Fix for bug 25531: Added entry to 'paths.perfMap' mapping file
+
+* 2013-03-26 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24709: Removed duplicate org.apache.log4j bundle.
+
+* 2013-03-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25421: Invoke 'OXFolderAdminHelper.propagateUserModification()' if user's display name was changed
+ - Fix for bug 25487: Fixed condition check
+
+* 2013-03-25 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 25499: Fixed NullPointerException.
+
+* 2013-03-22 - marc.arens@open-xchange.com
+
+ - Fix for bug 25025: open-xchange-grizzly doesn't send echo header
+ 
+* 2013-03-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25437: Proper check if specified full name denotes account's trash folder
+
+* 2013-03-21 - marc.arens@open-xchange.com
+
+ - Fix for bug 25395: German Umlauts typed in OX Text broken on server
+
+* 2013-03-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25374: Disable Halo linkedIn if non-email-capable API key/secret is configured
+ - Fix for bug 15313: Added property to 'spamassassin.properties' to define whether confirmed-spam/confirmed-ham folders shall be unsubscribed or not. Default is true.
+ - Fix for bug 25407: Adjusted category accordingly to let proper error message be displayed to user
+ - Fix for bug 25413: Improved check for possible file-attachments
+ - Fix for bug 25439: Check proper user configuration permissions whether resources/groups are accessible in participants dialog
+ - Fix for bug 25221: Ignore FETCH responses that miss requested items
+ - Fix for bug 23408: Checking insert position when composing line-wise SIEVE script
+
+* 2013-03-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25393: Added null guard
+ - Fix for bug 23815: Restored previous behavior of 'com.openexchange.groupware.userconfiguration.UserConfiguration.hasPermission(int)'
+
+* 2013-03-20 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 25417: Removed useless error message.
+
+* 2013-03-19 - martin.herfurth@open-xchange.com
+
+ - Story 46455255: New calendar action: getChangeExceptions
+
+* 2013-03-18 - marc.arens@open-xchange.com
+
+ - Fix for bug 25016: oxnotifier login doesn't work if grizzly is configured with ajp
+
+* 2013-03-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25286: Proper output for "-j" option
+ - Fix for bug 22867: Drop obsolete subscription source in JSON layer if returned by queried service
+
 * 2013-03-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 25350: Reduced repetitive behavior to necessary sanitizing steps

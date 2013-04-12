@@ -70,7 +70,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.AllocatingStringWriter;
@@ -78,6 +80,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
@@ -171,7 +174,7 @@ public final class HtmlProcessing {
                 if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                     final boolean externalImagesAllowed = usm.isAllowHTMLImages();
                     retval = htmlService.checkBaseTag(retval, externalImagesAllowed);
-                    final String cssPrefix = null == mailPath ? null : (embedded ? "ox-" + getHash(mailPath.toString()) : null);
+                    final String cssPrefix = null == mailPath ? null : (embedded ? "ox-" + getHash(mailPath.toString(), 10) : null);
                     if (useSanitize()) {
                         // No need to generate well-formed HTML
                         if (externalImagesAllowed) {
@@ -252,13 +255,41 @@ public final class HtmlProcessing {
      * Calculates the MD5 for given string.
      *
      * @param str The string
+     * @param maxLen The max. length or <code>-1</code>
      * @return The MD5 hash
      */
-    public static String getHash(final String str) {
+    public static String getHash(final String str, final int maxLen) {
         if (isEmpty(str)) {
             return str;
         }
-        return HashUtility.getHash(str, "md5", "hex");
+        if (maxLen <= 0) {
+            return HashUtility.getHash(str, "md5", "hex");
+        }
+        return abbreviate(HashUtility.getHash(str, "md5", "hex"), 0, maxLen);
+    }
+
+    private static String abbreviate(final String str, int offset, final int maxWidth) {
+        if (str == null) {
+            return null;
+        }
+        final int length = str.length();
+        if (length <= maxWidth) {
+            return str;
+        }
+        int off = offset;
+        if (off > length) {
+            off = length;
+        }
+        if ((length - off) < (maxWidth)) {
+            off = length - (maxWidth);
+        }
+        if (off < 1) {
+            return str.substring(0, maxWidth);
+        }
+        if ((off + (maxWidth)) < length) {
+            return abbreviate(str.substring(off), 0, maxWidth);
+        }
+        return str.substring(length - (maxWidth));
     }
 
     private static final Pattern PATTERN_HTML = Pattern.compile("<html.*?>(.*?)</html>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -878,9 +909,9 @@ public final class HtmlProcessing {
                 /*
                  * Extract Content-ID
                  */
-                String cid = cidMatcher.group(1);
+                String cid = cidMatcher.group(2);
                 if (cid == null) {
-                    cid = cidMatcher.group(2);
+                    cid = cidMatcher.group(1);
                 }
                 /*
                  * Compose corresponding image data
@@ -888,7 +919,21 @@ public final class HtmlProcessing {
                 final String imageURL;
                 {
                     final InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
-                    final ImageLocation imageLocation = new ImageLocation.Builder(cid).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(msgUID.getMailID()).build();
+                    // Check mail identifier
+                    String mailId = msgUID.getMailID();
+                    if (mailId.indexOf('%') >= 0) {
+                        String tmp = AJAXServlet.decodeUrl(mailId, null);
+                        if (tmp.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+                            // Expect mail path; e.g. "default0/INBOX/123"
+                            try {
+                                mailId = new MailPath(tmp).getMailID();
+                            } catch (OXException e) {
+                                // Ignore
+                            }
+                        }
+                    }
+                    // Build image location
+                    final ImageLocation imageLocation = new ImageLocation.Builder(cid).folder(prepareFullname(msgUID.getAccountId(), msgUID.getFolder())).id(mailId).build();
                     imageURL = imgSource.generateUrl(imageLocation, session);
                 }
                 linkBuilder.setLength(0);

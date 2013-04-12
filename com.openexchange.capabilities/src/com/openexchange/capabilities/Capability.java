@@ -139,5 +139,10 @@ public class Capability {
         }
         return true;
     }
+    
+    @Override
+    public String toString() {
+        return id;
+    }
 
 }

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Grizzly Bundle
 Bundle-SymbolicName: com.openexchange.http.grizzly
-Bundle-Version: 7.0.2
+Bundle-Version: 7.2.0
 Bundle-Activator: com.openexchange.http.grizzly.osgi.GrizzlyActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -49,24 +49,24 @@ Bundle-ClassPath: .,
  lib/atmosphere-runtime-1.1.0-SNAPSHOT-sources.jar,
  lib/atmosphere-runtime-1.1.0-SNAPSHOT.jar,
  lib/annotation-detector-3.0.0.jar,
- lib/grizzly-comet-2.2.20-SNAPSHOT-sources.jar,
- lib/grizzly-comet-2.2.20-SNAPSHOT.jar,
- lib/grizzly-framework-2.2.20-SNAPSHOT-sources.jar,
- lib/grizzly-framework-2.2.20-SNAPSHOT.jar,
- lib/grizzly-http-2.2.20-SNAPSHOT-sources.jar,
- lib/grizzly-http-2.2.20-SNAPSHOT.jar,
- lib/grizzly-http-server-2.2.20-SNAPSHOT-sources.jar,
- lib/grizzly-http-server-2.2.20-SNAPSHOT.jar,
- lib/grizzly-http-servlet-2.2.20-SNAPSHOT-sources.jar,
- lib/grizzly-http-servlet-2.2.20-SNAPSHOT.jar,
- lib/grizzly-portunif-2.2.20-SNAPSHOT-sources.jar,
- lib/grizzly-portunif-2.2.20-SNAPSHOT.jar,
- lib/grizzly-rcm-2.2.20-SNAPSHOT-sources.jar,
- lib/grizzly-rcm-2.2.20-SNAPSHOT.jar,
- lib/grizzly-websockets-2.2.20-SNAPSHOT-sources.jar,
- lib/grizzly-websockets-2.2.20-SNAPSHOT.jar,
- lib/grizzly-http-ajp-2.2.20-SNAPSHOT-sources.jar,
- lib/grizzly-http-ajp-2.2.20-SNAPSHOT.jar
+ lib/grizzly-comet-2.2.22-SNAPSHOT-sources.jar,
+ lib/grizzly-comet-2.2.22-SNAPSHOT.jar,
+ lib/grizzly-framework-2.2.22-SNAPSHOT-sources.jar,
+ lib/grizzly-framework-2.2.22-SNAPSHOT.jar,
+ lib/grizzly-http-2.2.22-SNAPSHOT-sources.jar,
+ lib/grizzly-http-2.2.22-SNAPSHOT.jar,
+ lib/grizzly-http-ajp-2.2.22-SNAPSHOT-sources.jar,
+ lib/grizzly-http-ajp-2.2.22-SNAPSHOT.jar,
+ lib/grizzly-http-server-2.2.22-SNAPSHOT-sources.jar,
+ lib/grizzly-http-server-2.2.22-SNAPSHOT.jar,
+ lib/grizzly-http-servlet-2.2.22-SNAPSHOT-sources.jar,
+ lib/grizzly-http-servlet-2.2.22-SNAPSHOT.jar,
+ lib/grizzly-portunif-2.2.22-SNAPSHOT-sources.jar,
+ lib/grizzly-portunif-2.2.22-SNAPSHOT.jar,
+ lib/grizzly-rcm-2.2.22-SNAPSHOT-sources.jar,
+ lib/grizzly-rcm-2.2.22-SNAPSHOT.jar,
+ lib/grizzly-websockets-2.2.22-SNAPSHOT-sources.jar,
+ lib/grizzly-websockets-2.2.22-SNAPSHOT.jar
 Export-Package: com.openexchange.http.grizzly.service.atmosphere,
  org.atmosphere.cache,
  org.atmosphere.client,

@@ -121,6 +121,13 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
             throw MailAccountExceptionCodes.CREATION_FAILED.create();
         }
 
+        {
+            final String name = accountDescription.getName();
+            if (isEmpty(name) || "null".equalsIgnoreCase(name)) {
+                accountDescription.setName(accountDescription.getPrimaryAddress());
+            }
+        }
+
         final MailAccountStorageService storageService =
             ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 

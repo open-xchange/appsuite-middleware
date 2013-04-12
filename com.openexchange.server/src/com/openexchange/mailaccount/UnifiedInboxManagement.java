@@ -50,6 +50,10 @@
 package com.openexchange.mailaccount;
 
 import java.sql.Connection;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 
 /**
@@ -60,14 +64,44 @@ import com.openexchange.exception.OXException;
 public interface UnifiedInboxManagement {
 
     /**
+     * Full name of INBOX.
+     */
+    public static final String INBOX = "INBOX".intern();
+
+    /**
+     * Full name of Trash.
+     */
+    public static final String TRASH = "Trash".intern();
+
+    /**
+     * Full name of Sent.
+     */
+    public static final String SENT = "Sent".intern();
+
+    /**
+     * Full name of Spam.
+     */
+    public static final String SPAM = "Spam".intern();
+
+    /**
+     * Full name of Drafts.
+     */
+    public static final String DRAFTS = "Drafts".intern();
+
+    /**
+     * A set containing all known default folders for an Unified Mail account.
+     */
+    public static final Set<String> KNOWN_FOLDERS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] { INBOX, DRAFTS, SENT, SPAM, TRASH })));
+
+    /**
      * The Unified Mail protocol name.
      */
-    public static final String PROTOCOL_UNIFIED_INBOX = "unifiedinbox";
+    public static final String PROTOCOL_UNIFIED_INBOX = "unifiedinbox".intern();
 
     /**
      * The Unified Mail name.
      */
-    public static final String NAME_UNIFIED_INBOX = "Unified Mail";
+    public static final String NAME_UNIFIED_INBOX = "Unified Mail".intern();
 
     /**
      * Creates the Unified Mail account for given user in specified context.

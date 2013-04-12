@@ -53,8 +53,8 @@ OXCONFIG=@oxscriptconf@
 
 
 test -f $OXFUNCTIONS || {
-	echo "missing common shell functions file"
-	exit 1
+    echo "missing common shell functions file"
+    exit 1
 }
 
 . $OXFUNCTIONS
@@ -63,7 +63,7 @@ test -f $OXCONFIG && . $OXCONFIG
 
 ox_set_JAVA_BIN
 
-test -z "$JAVA_OXCMD_OPTS" && JAVA_OXCMD_OPTS="-Xms20M -Xmx280M"
+test -z "$JAVA_OXCMD_OPTS" && JAVA_OXCMD_OPTS="-Xmx280M"
 
 JAVA_OPTS="${JAVA_OXCMD_OPTS} \
 -Djava.awt.headless=true \

@@ -55,12 +55,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -109,15 +107,13 @@ public class UserContact {
      * @return the serialized user contact
      * @throws OXException
      */
-    private JSONObject serialize(final ContactField[] contactFields, final UserField[] userFields, final String timeZoneID) throws OXException {
+    private JSONObject serialize(Session session, ContactField[] contactFields, UserField[] userFields, String timeZoneID) throws OXException {
     	final JSONObject jsonObject = new JSONObject();
     	try {
-        	ContactMapper.getInstance().serialize(contact, jsonObject, contactFields, timeZoneID);
-        	UserMapper.getInstance().serialize(user, jsonObject, userFields, timeZoneID);
+        	ContactMapper.getInstance().serialize(contact, jsonObject, contactFields, timeZoneID, session);
+        	UserMapper.getInstance().serialize(user, jsonObject, userFields, timeZoneID, session);
     	} catch (final JSONException e) {
     		throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-		} catch (final RuntimeException x) {
-			System.out.print(x.getMessage());
 		}
     	return jsonObject;
     }
@@ -154,12 +150,12 @@ public class UserContact {
      * @return the serialized user contact
      * @throws OXException
      */
-    public JSONArray serialize(final int[] columnIDs, final String timeZoneID, final Map<String, List<String>> attributeParameters)
+    public JSONArray serialize(Session session, int[] columnIDs, String timeZoneID, Map<String, List<String>> attributeParameters)
     		throws OXException {
     	final JSONArray jsonArray = new JSONArray();
 		final UserField[] userFields = UserMapper.getInstance().getFields(columnIDs);
 		final ContactField[] contactFields = ContactMapper.getInstance().getFields(columnIDs);
-		final JSONObject temp = this.serialize(contactFields, userFields, timeZoneID);
+		final JSONObject temp = this.serialize(session, contactFields, userFields, timeZoneID);
 		for (final int columnID : columnIDs) {
 			final UserField userField = UserMapper.getInstance().getMappedField(columnID);
 			if (null != userField) {

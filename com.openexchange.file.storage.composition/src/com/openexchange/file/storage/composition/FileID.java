@@ -129,4 +129,9 @@ public class FileID {
         }
         return IDMangler.mangle(serviceId, accountId, folderId, fileId);
     }
+
+    @Override
+    public String toString() {
+        return toUniqueID();
+    }
 }

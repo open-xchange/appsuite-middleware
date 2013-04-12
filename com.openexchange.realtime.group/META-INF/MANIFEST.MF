@@ -2,11 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Realtime Groupdispatcher
 Bundle-SymbolicName: com.openexchange.realtime.group
-Bundle-Version: 7.1.0.0
+Bundle-Version: 7.2.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.conversion.simple,
  com.openexchange.exception,
+ com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.realtime,
  com.openexchange.realtime.dispatch,
@@ -17,6 +18,7 @@ Import-Package: com.openexchange.conversion.simple,
  com.openexchange.server,
  com.openexchange.tools.servlet,
  com.openexchange.tools.session,
+ org.apache.commons.logging,
  org.json,
  org.osgi.framework
 Export-Package: com.openexchange.realtime.group,

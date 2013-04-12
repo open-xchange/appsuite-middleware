@@ -114,7 +114,7 @@ public class Bug16899Test extends AbstractAJAXSession {
         folders = performListRequest(inbox);
         boolean secondMatch = false;
         for (FolderObject f : folders) {
-        	System.out.println(f.getFullName());
+        	// System.out.println(f.getFullName());
         	if (f.getFullName().equals(folder.getFullName())) {
         		secondMatch = true;
         		break;

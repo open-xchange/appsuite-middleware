@@ -49,9 +49,8 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
-import java.io.ByteArrayOutputStream;
 import org.apache.commons.logging.Log;
-import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -61,7 +60,6 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link AbstractMailPreviewResultConverter}
@@ -103,21 +101,22 @@ abstract class AbstractMailPreviewResultConverter implements ResultConverter {
          * Create file holder from mail
          */
         final MailMessage mail = (MailMessage) result.getResultObject();
-        final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
+        ThresholdFileHolder fileHolder = new ThresholdFileHolder();
         try {
-            mail.writeTo(baos);
+            mail.writeTo(fileHolder.asOutputStream());
         } catch (final OXException e) {
             if (!MailExceptionCode.NO_CONTENT.equals(e)) {
                 throw e;
             }
             LOG.debug(e.getMessage(), e);
-            baos.reset();
+            fileHolder.close();
+            fileHolder = new ThresholdFileHolder();
+            fileHolder.write(new byte[0]);
         }
         mail.prepareForCaching();
         /*
          * Create appropriate file holder
          */
-        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(baos.toByteArray());
         fileHolder.setContentType("application/octet-stream");
         fileHolder.setName(new com.openexchange.java.StringAllocator(mail.getSubject()).append(".eml").toString());
         result.setResultObject(fileHolder, "file");

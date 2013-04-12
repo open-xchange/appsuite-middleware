@@ -46,9 +46,13 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.halo.linkedin.osgi;
 
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.linkedin.LinkedinInboxDataSource;
 import com.openexchange.halo.linkedin.LinkedinProfileDataSource;
@@ -58,23 +62,28 @@ import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
+/**
+ * {@link LinkedinHaloActivator}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class LinkedinHaloActivator extends HousekeepingActivator {
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class[]{
-			LinkedInService.class,
-			OAuthService.class,
-			ContactService.class,
-			UserService.class};
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { LinkedInService.class, OAuthService.class, ContactService.class, UserService.class, ConfigurationService.class, CapabilityService.class };
+    }
 
-	@Override
-	protected void startBundle() throws Exception {
-		registerService(HaloContactDataSource.class, new LinkedinProfileDataSource(this));
-		registerService(HaloContactDataSource.class, new LinkedinInboxDataSource(this));
-		registerService(HaloContactDataSource.class, new LinkedinUpdatesDataSource(this));
-	}
-
+    @Override
+    protected void startBundle() throws Exception {
+        final ConfigurationService cs = getService(ConfigurationService.class);
+        final boolean enabledMailCapableKey = cs.getBoolProperty("com.openexchange.halo.linkedin.enabledMailCapableKey", false);
+        if (enabledMailCapableKey) {
+            getService(CapabilityService.class).declareCapability("linkedinPlus");
+            registerService(HaloContactDataSource.class, new LinkedinProfileDataSource(this));
+            registerService(HaloContactDataSource.class, new LinkedinInboxDataSource(this));
+            registerService(HaloContactDataSource.class, new LinkedinUpdatesDataSource(this));
+        }
+    }
 
 }

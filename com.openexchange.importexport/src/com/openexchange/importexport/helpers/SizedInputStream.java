@@ -75,10 +75,20 @@ public class SizedInputStream extends InputStream{
 		this.format = format;
 	}
 
+	/**
+	 * Gets the size (if known)
+	 * 
+	 * @return The size or <code>-1</code>
+	 */
 	public long getSize() {
 		return this.size;
 	}
 
+	/**
+	 * Gets the associated format
+	 * 
+	 * @return The format
+	 */
 	public Format getFormat(){
 		return this.format;
 	}

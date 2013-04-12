@@ -196,14 +196,14 @@ public final class LoginCounterTool {
             
             
             for (String client : logins.keySet()) {
-                if (client.equals("sum")) {
+                if (client.equals(LoginCounterMBean.SUM)) {
                     continue;
                 }
                 Integer number = logins.get(client);
                 System.out.println(client + ": " + number);
             }
             
-            Integer sum = logins.get("sum");
+            Integer sum = logins.get(LoginCounterMBean.SUM);
             System.out.println("Total: " + sum);
         } catch (Exception e) {
             String errMsg = e.getMessage();

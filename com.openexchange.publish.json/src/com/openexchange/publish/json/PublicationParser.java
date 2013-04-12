@@ -108,10 +108,14 @@ public class PublicationParser {
             }
         }
         if(object.has(TARGET)) {
-            PublicationTarget target = discovery.getTarget(object.getString(TARGET));
-            publication.setTarget(target);
-            if(object.has(target.getId())) {
-                publication.setConfiguration(FormContentParser.parse(object.getJSONObject(target.getId()), target.getFormDescription()));
+            String target = object.getString(TARGET);
+            PublicationTarget pubTarget = discovery.getTarget(target);
+            if (null == pubTarget){
+                throw PublicationJSONErrorMessage.UNKNOWN_TARGET.create(target);
+            }
+            publication.setTarget(pubTarget);
+            if(object.has(pubTarget.getId())) {
+                publication.setConfiguration(FormContentParser.parse(object.getJSONObject(pubTarget.getId()), pubTarget.getFormDescription()));
             }
         }
 

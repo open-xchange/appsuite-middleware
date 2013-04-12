@@ -19,8 +19,9 @@ if ( $ARGV[0] and $ARGV[0] eq "config") {
     print "graph_title Indexing Jobs\n";
     print "graph_category Open Xchange\n";
     print "graph_vlabel number of jobs\n";
-    print "a.label stored jobs\n";
-    print "b.label currently running jobs\n";
+    print "a.label all stored jobs\n";
+    print "b.label locally stored jobs\n";
+    print "c.label currently running jobs\n";
     exit 0
 }
 
@@ -35,10 +36,17 @@ while (<JOBS>)
         next;
     }
     
-    if ( $_ =~ /Currently running jobs on this node/) {
+    if ( $_ =~ /Locally waiting jobs/) {
         s/.*://;
         $val=$_+0;
         print "b.value $val\n";
+        next;
+    }
+    
+    if ( $_ =~ /Currently running jobs on this node/) {
+        s/.*://;
+        $val=$_+0;
+        print "c.value $val\n";
         next;
     }
 }

@@ -673,7 +673,7 @@ public class AppointmentTest extends AbstractWebdavXMLTest {
         WebRequest request = new GetMethodWebRequest(url);
         WebResponse response = webCon.getResponse(request);
         String text = response.getText();
-        System.out.println(text);
+        // System.out.println(text);
         return -1;
     }
 

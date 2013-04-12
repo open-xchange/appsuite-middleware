@@ -49,32 +49,61 @@
 
 package com.openexchange.realtime.atmosphere.impl;
 
+import static com.openexchange.ajax.SessionServlet.checkSecret;
+import static com.openexchange.ajax.SessionServlet.isIpCheckError;
+import static com.openexchange.ajax.SessionServlet.removeJSESSIONID;
+import static com.openexchange.ajax.SessionServlet.removeOXCookies;
+import java.util.List;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.atmosphere.cpr.AtmosphereRequest;
+import org.atmosphere.cpr.AtmosphereResource;
+import org.atmosphere.cpr.AtmosphereResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.Login;
+import com.openexchange.ajax.login.HashCalculator;
+import com.openexchange.configuration.ClientWhitelist;
+import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.Log;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
+import com.openexchange.realtime.RealtimeExceptionCodes;
+import com.openexchange.realtime.atmosphere.AtmosphereConfig;
 import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.impl.IPRange;
+import com.openexchange.sessiond.impl.SubnetMask;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link SessionValidator}
+ * {@link SessionValidator} - Validate session information of incoming realtime requests like done in the
+ * com.openexchange.ajax.SessionServlet
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class SessionValidator {
 
+    private static final org.apache.commons.logging.Log LOG = Log.loggerFor(SessionValidator.class);
+
+    private AtmosphereConfig atmosphereConfig;
+
+    private AtmosphereServiceRegistry atmosphereServiceRegistry;
+
     private final AtmosphereRequest request;
 
-    private final String postData;
+    private final AtmosphereResponse response;
 
-    private AtmosphereServiceRegistry services;
+    private final String postData;
 
     private boolean isAlreadyValidated = false;
 
@@ -87,8 +116,8 @@ public class SessionValidator {
      * 
      * @param request The incoming {@link AtmosphereRequest}
      */
-    public SessionValidator(AtmosphereRequest request) {
-        this(request, null);
+    public SessionValidator(AtmosphereResource resource) {
+        this(resource, null);
     }
 
     /**
@@ -97,10 +126,12 @@ public class SessionValidator {
      * @param request The incoming {@link AtmosphereRequest}
      * @param postData the post data of the request, can be null
      */
-    public SessionValidator(AtmosphereRequest request, String postData) {
-        this.request = request;
+    public SessionValidator(AtmosphereResource resource, String postData) {
+        this.request = resource.getRequest();
+        this.response = resource.getResponse();
         this.postData = postData;
-        this.services = AtmosphereServiceRegistry.getInstance();
+        this.atmosphereServiceRegistry = AtmosphereServiceRegistry.getInstance();
+        this.atmosphereConfig = AtmosphereConfig.getInstance();
     }
 
     /**
@@ -111,7 +142,7 @@ public class SessionValidator {
      */
     public String getSessionId() throws OXException {
         if (this.sessionId == null) {
-            this.sessionId = getSessionId(getSessionFromParameters(request), getSessionFromPostData(postData));
+            this.sessionId = getSessionId(getSessionFromParameters(request));
         }
         return sessionId;
     }
@@ -138,7 +169,7 @@ public class SessionValidator {
     private ServerSession getValidatedServerSession() throws OXException {
         String sessionId = getSessionId();
         ServerSession serverSession = getServerSessionFromSessionId(sessionId);
-        validateServerSession(serverSession);
+        validateServerSession(request, sessionId, serverSession);
         this.isAlreadyValidated = true;
         return serverSession;
     }
@@ -146,19 +177,233 @@ public class SessionValidator {
     /**
      * Checks the session:
      * <ol>
-     * <li>request provides the open-xchange-secret
-     * <li>open-xchange-secret matches the one stored in sessiond for the Session object looked up via the session identifier
-     * <li>requests ip
-     * <li>and secret cookie against information stored in the sessiond
+     * <li>does the provided sessionId match the on in the Session stored in the Sessiond?
+     * <li>is the context of the user who sent the request unlocked
+     * <li>is the current ip the same that created the session initially
+     * <li>does the request provide the open-xchange-secret and does the provided secret matche the one stored in Sessiond for the Session
+     * object looked up via the session identifier
      * 
-     * @return false if the session was invalid, true if the request contains session,
-     * @throws OXException
+     * @param request The incoming HttpServletRequest
+     * @param sessionId The sessionId sent with the incoming request
+     * @param serverSession The ServerSession associated with the sessionId
+     * @throws OXException if the validation of the session fails
      */
-    private void validateServerSession(ServerSession serverSession) throws OXException {
-//        getSecret
-//        validateSecret
-//        getIp
-//        validateIP
+    private void validateServerSession(HttpServletRequest request, String sessionId, ServerSession serverSession) throws OXException {
+        try {
+            matchIDs(sessionId, serverSession);
+            checkContext(serverSession);
+            checkIP(
+                atmosphereConfig.isIPCheckEnabled(),
+                atmosphereConfig.getIpRangeWhitelist(),
+                serverSession,
+                request.getRemoteAddr(),
+                atmosphereConfig.getClientWhitelist());
+            checkSecret(atmosphereConfig.getCookieHashSource(), request, serverSession);
+
+            // set LogProperties after validation
+            final Props properties = LogProperties.getLogProperties();
+            properties.put(LogProperties.Name.SESSION_SESSION_ID, sessionId);
+            properties.put(LogProperties.Name.SESSION_USER_ID, Integer.valueOf(serverSession.getUserId()));
+            properties.put(LogProperties.Name.SESSION_CONTEXT_ID, Integer.valueOf(serverSession.getContextId()));
+            final String client = serverSession.getClient();
+            properties.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : client);
+            properties.put(LogProperties.Name.SESSION_SESSION, serverSession);
+        } catch (OXException oxe) {
+            /*
+             * If we got a SessionException during validation properly handle the server side consequences 
+             */
+            if (SessionExceptionCodes.getErrorPrefix().equals(oxe.getPrefix())) {
+                LOG.debug(oxe.getMessage(), oxe);
+                handleSessiondException(oxe, request, response, serverSession);
+            }
+            /* and rethrow the exception so the ChannelHandler can properly hand the Exception to the client*/
+            throw oxe;
+        }
+    }
+
+    /**
+     * Handle specified SessionD exception by removing the Session related cookies and removing the Session from the Sessiond.
+     * 
+     * @param e The SessionD exception
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     */
+    protected void handleSessiondException(final OXException e, final HttpServletRequest req, final HttpServletResponse resp, ServerSession session) {
+        if (isIpCheckError(e)) {
+            try {
+                removeOXCookies(session.getHash(), req, resp);
+                removeJSESSIONID(req, resp);
+            } catch (final Exception ex) {
+                LOG.error("Cookies could not be removed", ex);
+            }
+            SessiondService sessiondService = atmosphereServiceRegistry.getService(SessiondService.class);
+            if (sessiondService == null) {
+                LOG.error(
+                    "Session could not be removed",
+                    RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(SessiondService.class.getName()));
+            }
+            sessiondService.removeSession(sessionId);
+        }
+    }
+
+    /**
+     * Checks if the client IP address of the current request matches the one through that the session has been created.
+     * 
+     * @param doCheck <code>true</code> to deny request with an exception.
+     * @param ranges The white-list ranges
+     * @param session session object
+     * @param actual IP address of the current request.
+     * @param whitelist The optional IP check whitelist (by client identifier)
+     * @throws OXException if the IP addresses don't match.
+     */
+    public void checkIP(final boolean doCheck, final List<IPRange> ranges, final Session session, final String actual, final ClientWhitelist whitelist) throws OXException {
+        if (null == actual || !actual.equals(session.getLocalIp())) {
+            // IP is missing or changed
+            SubnetMask allowedSubnet = atmosphereConfig.getAllowedSubnet();
+            if (doCheck && !isWhitelistedFromIPCheck(actual, ranges) && !isWhitelistedClient(session, whitelist) && !allowedSubnet.areInSameSubnet(
+                actual,
+                session.getLocalIp())) {
+                // kick client with changed IP address
+                if (LOG.isInfoEnabled()) {
+                    final StringBuilder sb = new StringBuilder(96);
+                    sb.append("Request to server denied (IP check activated) for session: ");
+                    sb.append(session.getSessionID());
+                    sb.append(". Client login IP changed from ");
+                    sb.append(session.getLocalIp());
+                    sb.append(" to ");
+                    sb.append((null == actual ? "<missing>" : actual));
+                    sb.append(" and is not covered by IP white-list or netmask.");
+                    LOG.info(sb.toString());
+                }
+                throw SessionExceptionCodes.WRONG_CLIENT_IP.create();
+            }
+            if (null != actual && (!doCheck || isWhitelistedClient(session, whitelist))) {
+                // change IP in session so the IMAP NOOP command contains the correct client IP address (Bug #21842)
+                session.setLocalIp(actual);
+            }
+            if (LOG.isDebugEnabled() && !isWhitelistedFromIPCheck(actual, ranges) && !isWhitelistedClient(session, whitelist)) {
+                final StringBuilder sb = new StringBuilder(64);
+                sb.append("Session ");
+                sb.append(session.getSessionID());
+                sb.append(" requests now from ");
+                sb.append(actual);
+                sb.append(" but login came from ");
+                sb.append(session.getLocalIp());
+                LOG.debug(sb.toString());
+            }
+        }
+    }
+
+    /**
+     * White listed clients are necessary for the Mobile Web Interface. This clients often change their IP address in mobile data networks.
+     * 
+     * @param session The looked up Session
+     * @param clientWhitelist The ClientWhiteList allowing to whitelist clients based on Strings with optional regular expressions
+     * @return true if the client contained in the Session is part if the clientWhitelist, else false
+     */
+    private boolean isWhitelistedClient(final Session session, final ClientWhitelist clientWhitelist) {
+        return null != clientWhitelist && !clientWhitelist.isEmpty() && clientWhitelist.isAllowed(session.getClient());
+    }
+
+    /**
+     * Clients can be whitelisted based on IP ranges. This way you can whitelist whole subnets.
+     * 
+     * @param actual The actual remote IP of the client
+     * @param ranges The whitelisted IP ranges
+     * @return true if the remote IP of the client is contained in the whitelisted IP ranges, else false
+     */
+    public boolean isWhitelistedFromIPCheck(final String actual, final List<IPRange> ranges) {
+        for (final IPRange range : ranges) {
+            if (range.contains(actual)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if the sent sessionid matches the one saved in the ServerSession.
+     * 
+     * @param sessionId The sent sessionid
+     * @param session the SeverSession
+     * @throws OXException If the sessionids differ
+     */
+    private void matchIDs(String sessionId, ServerSession session) throws OXException {
+        if (!sessionId.equals(session.getSessionID())) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Request's session identifier \"" + sessionId + "\" differs from the one indicated by SessionD service \"" + session.getSessionID() + "\".");
+            }
+            throw SessionExceptionCodes.WRONG_SESSION.create();
+        }
+
+    }
+
+    /**
+     * Check if the context associated with the ServerSession is locked.
+     * 
+     * @param session The ServerSession containing the context
+     * @throws OXException If the Context is locked
+     */
+    private void checkContext(ServerSession session) throws OXException {
+        final Context ctx = session.getContext();
+        if (!ctx.isEnabled()) {
+            SessiondService sessiondService = atmosphereServiceRegistry.getService(SessiondService.class);
+            if (sessiondService != null) {
+                sessiondService.removeSession(sessionId);
+            } else {
+                if (LOG.isWarnEnabled())
+                    LOG.warn(
+                        "Couldn't remove Session " + sessionId + " from SessionD",
+                        RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(SessiondService.class.getName()));
+            }
+            if (LOG.isInfoEnabled()) {
+                LOG.info("The context " + ctx.getContextId() + " associated with session is locked.");
+            }
+            throw SessionExceptionCodes.CONTEXT_LOCKED.create();
+        }
+    }
+
+    /**
+     * Extracts the secret string from specified cookies using given hash string.
+     * 
+     * @param req the HTTP servlet request object.
+     * @param hash remembered hash from session.
+     * @param client the remembered client from the session.
+     * @return The secret string or <code>null</code>
+     */
+    public static String extractSecret(final CookieHashSource cookieHash, final HttpServletRequest req, final String hash, final String client) {
+        final Cookie[] cookies = req.getCookies();
+        if (null != cookies) {
+            final String cookieName = Login.SECRET_PREFIX + getHash(cookieHash, req, hash, client);
+            for (final Cookie cookie : cookies) {
+                if (cookieName.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Didn't found an appropriate Cookie for name \"" + cookieName + "\" (CookieHashSource=" + cookieHash.toString() + ") which provides the session secret.");
+            }
+        } else if (LOG.isInfoEnabled()) {
+            LOG.info("Missing Cookies in HTTP request. No session secret can be looked up.");
+        }
+        return null;
+    }
+
+    /**
+     * Gets the appropriate hash for specified request.
+     * 
+     * @param cookieHash defines how the cookie should be found.
+     * @param req The HTTP request
+     * @param hash The previously remembered hash
+     * @param client The client identifier
+     * @return The appropriate hash
+     */
+    public static String getHash(final CookieHashSource cookieHash, final HttpServletRequest req, final String hash, final String client) {
+        if (CookieHashSource.REMEMBER == cookieHash) {
+            return hash;
+        }
+        // Default is calculate
+        return HashCalculator.getInstance().getHash(req, client);
     }
 
     /**
@@ -252,7 +497,7 @@ public class SessionValidator {
             throw new IllegalArgumentException("Invalid parameter: sessionInfo");
         }
 
-        SessiondService sessiondService = services.getService(SessiondService.class);
+        SessiondService sessiondService = atmosphereServiceRegistry.getService(SessiondService.class);
         if (sessiondService == null) {
             throw OXExceptionFactory.getInstance().create(ServiceExceptionCode.SERVICE_UNAVAILABLE, SessiondService.class);
         }

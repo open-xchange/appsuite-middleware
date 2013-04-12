@@ -24,12 +24,12 @@ ENABLED=0
 
 test -f $DEFAULTS && . $DEFAULTS
 if [ ! -f $OXFUNCTIONS ]; then
-	echo "$DESC: $OXFUNCTIONS missing, exiting"
-	exit 0
+    echo "$DESC: $OXFUNCTIONS missing, exiting"
+    exit 0
 fi
 if [ ! -f $OXCONFIG ]; then
-	echo "$DESC: $OXCONFIG missing, exiting"
-	exit 0
+    echo "$DESC: $OXCONFIG missing, exiting"
+    exit 0
 fi
 
 . $OXFUNCTIONS
@@ -61,51 +61,42 @@ fi
 
 case "$1" in
   start)
-    echo "Cleaning up $DESC environment: killing readerengine processes."
-    ox_kill_readerengine_instances
     echo -n "Starting $DESC: "
-	ox_start_daemon $STARTSCRIPT $NAME open-xchange open-xchange
-	echo "$NAME."
-	;;
+    ox_start_daemon $STARTSCRIPT $NAME open-xchange open-xchange
+    echo "$NAME."
+    ;;
 
   stop)
-	echo -n "Stopping $DESC: "
-	ox_stop_daemon $NAME
-	echo "$NAME."
-    echo "Cleaning up $DESC environment: killing readerengine processes."
-    ox_kill_readerengine_instances
-	;;
+    echo -n "Stopping $DESC: "
+    ox_stop_daemon $NAME
+    echo "$NAME."
+    ;;
 
   restart|force-reload)
-	echo -n "Restarting $DESC: "
+    echo -n "Restarting $DESC: "
         read pid < /var/run/open-xchange.pid
         $0 stop
         while ox_is_running open-xchange "/opt/open-xchange/etc" $pid; do
              sleep 1
         done
         $0 start
-	echo "$NAME."
-	;;
-
-  clean)
-    echo "Cleaning up $DESC environment: killing readerengine processes."
-    ox_kill_readerengine_instances
+    echo "$NAME."
     ;;
 
   status)
-	echo -n "Checking for $DESC: "
-	if ox_daemon_status /var/run/open-xchange.pid ;then
-	    echo "running."
-	else
-	    echo "not running"
-	fi
-	;;
+    echo -n "Checking for $DESC: "
+    if ox_daemon_status /var/run/open-xchange.pid ;then
+        echo "running."
+    else
+        echo "not running"
+    fi
+    ;;
 
   *)
-	N=/etc/init.d/$SNAME
-	echo "Usage: $N {start|stop|restart|force-reload|status}" >&2
-	exit 1
-	;;
+    N=/etc/init.d/$SNAME
+    echo "Usage: $N {start|stop|restart|force-reload|status}" >&2
+    exit 1
+    ;;
 esac
 
 exit 0

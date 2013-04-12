@@ -47,16 +47,17 @@
  *
  */
 
-
 package com.openexchange.realtime.atmosphere.osgi;
 
 import org.osgi.framework.BundleContext;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.http.grizzly.service.atmosphere.AtmosphereService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.Channel;
+import com.openexchange.realtime.atmosphere.AtmosphereConfig;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.ByteToJSONConverter;
@@ -72,25 +73,28 @@ import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.packet.PresenceState;
 import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.timer.TimerService;
 
 public class AtmosphereRTActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SessiondService.class, AtmosphereService.class, MessageDispatcher.class, SimpleConverter.class, ResourceDirectory.class, StanzaQueueService.class,  PayloadTreeConverter.class, CapabilityService.class };
+        return new Class<?>[] {
+            ConfigurationService.class, SessiondService.class, AtmosphereService.class, MessageDispatcher.class, SimpleConverter.class,
+            ResourceDirectory.class, StanzaQueueService.class, PayloadTreeConverter.class, CapabilityService.class, TimerService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         AtmosphereServiceRegistry.SERVICES.set(this);
-
-        openTrackers();
+        AtmosphereConfig atmosphereConfig = AtmosphereConfig.getInstance();
+        atmosphereConfig.start();
 
         AtmosphereService atmosphereService = getService(AtmosphereService.class);
         RTAtmosphereHandler handler = new RTAtmosphereHandler();
         atmosphereService.addAtmosphereHandler("rt", handler);
         registerService(Channel.class, new RTAtmosphereChannel(handler));
-        
+
         /*
          * Register the package specific payload converters. The SimpleConverterActivator listens for registrations of new
          * SimplePayloadConverters. When new SimplePayloadConverters are added they are wrapped in a PayloadConverterAdapter and registered
@@ -104,20 +108,23 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
         registerService(SimplePayloadConverter.class, new JSONToStringConverter());
         registerService(SimplePayloadConverter.class, new JSONToPresenceStateConverter());
         registerService(SimplePayloadConverter.class, new PresenceStateToJSONConverter());
-        
-     // Add Transformers using Converters
+
+        // Add Transformers using Converters
         PayloadTreeConverter converter = getService(PayloadTreeConverter.class);
         converter.declarePreferredFormat(Presence.STATUS_PATH, PresenceState.class.getSimpleName());
         converter.declarePreferredFormat(Presence.MESSAGE_PATH, String.class.getSimpleName());
         converter.declarePreferredFormat(Presence.PRIORITY_PATH, Byte.class.getSimpleName());
-        
+
         getService(CapabilityService.class).declareCapability("rt");
 
     }
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        getService(AtmosphereService.class).unregister("rt");
+        AtmosphereService atmosphereService = getService(AtmosphereService.class);
+        if (atmosphereService != null) {
+            atmosphereService.unregister("rt");
+        }
         AtmosphereServiceRegistry.SERVICES.set(null);
         super.stop(context);
     }

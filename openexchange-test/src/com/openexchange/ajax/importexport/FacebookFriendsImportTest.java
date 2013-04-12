@@ -80,7 +80,8 @@ public class FacebookFriendsImportTest extends AbstractManagedContactTest {
 		assertEquals(296, all.length());
 		
 		for(int i = 0; i < all.length(); i++){
-			System.out.println(all.getJSONArray(i));
+			JSONArray jsonArray = all.getJSONArray(i);
+            //System.out.println(jsonArray);
 		}
 	}
 
@@ -97,7 +98,8 @@ public class FacebookFriendsImportTest extends AbstractManagedContactTest {
 		assertEquals(296, all.length());
 		
 		for(int i = 0; i < all.length(); i++){
-			System.out.println(all.getJSONArray(i));
+			JSONArray jsonArray = all.getJSONArray(i);
+            //System.out.println(jsonArray);
 		}
 	}
 

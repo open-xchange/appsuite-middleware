@@ -64,7 +64,7 @@ test -f $OXCONFIG && . $OXCONFIG
 
 ox_set_JAVA_BIN
 
-test -z "$JAVA_XTRAOPTS" && JAVA_XTRAOPTS="-Xms20M -Xmx280M"
+test -z "$JAVA_OXCMD_OPTS" && JAVA_OXCMD_OPTS="-Xmx280M"
 
 JAVA_OPTS="${JAVA_OXCMD_OPTS} \
 -Djava.awt.headless=true \
@@ -74,4 +74,5 @@ JAVA_OPTS="${JAVA_OXCMD_OPTS} \
 CLASSPATH="-classpath $OXBUNDLES/com.openexchange.global/com.openexchange.global.jar:$OXBUNDLES/com.openexchange.java/com.openexchange.java.jar:$OXBUNDLES/com.openexchange.server/com.openexchange.server.jar:$OXBUNDLES/org.apache.commons.cli_1.2.0.v201105210650.jar:$OXBUNDLES/org.apache.commons.logging_1.1.1.v201101211721.jar:$OXBUNDLES/com.openexchange.osgi.jar:$OXBUNDLES/com.openexchange.aws.autoscaling.jar:$OXBUNDLES/com.openexchange.aws/lib/aws-java-sdk-1.3.18.jar:$OXBUNDLES/com.openexchange.common/lib/httpcore-4.2.1.jar:$OXBUNDLES/com.openexchange.common/lib/httpclient-4.2.1.jar:$OXBUNDLES/com.openexchange.common/lib/commons-codec-1.6.jar"
 
 umask 066
+
 exec $JAVA_BIN $JAVA_OPTS $CLASSPATH com.openexchange.aws.autoscaling.console.AutoScalingCLT $@

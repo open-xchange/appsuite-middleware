@@ -60,6 +60,13 @@ import com.openexchange.mail.cache.PooledMailAccess;
 public interface MailAccessQueue extends Queue<PooledMailAccess> {
 
     /**
+     * Gets the capacity.
+     * 
+     * @return The capacity
+     */
+    int getCapacity();
+
+    /**
      * Marks this queue as deprecated.
      */
     void markDeprecated();

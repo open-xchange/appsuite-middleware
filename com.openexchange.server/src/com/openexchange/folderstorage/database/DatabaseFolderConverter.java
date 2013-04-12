@@ -56,6 +56,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountManager;
@@ -67,13 +68,13 @@ import com.openexchange.folderstorage.database.getfolder.SystemPrivateFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemPublicFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemSharedFolder;
 import com.openexchange.folderstorage.database.getfolder.VirtualListFolder;
-import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.preferences.ServerUserSetting;
@@ -174,9 +175,18 @@ public final class DatabaseFolderConverter {
         super();
     }
 
-    private static int getContactCollectorFolder(final int userId, final int contextId, final Connection con) throws OXException {
-        final Integer folderId = ServerUserSetting.getInstance(con).getContactCollectionFolder(contextId, userId);
-        return null == folderId ? -1 : folderId.intValue();
+    private static int getContactCollectorFolder(final Session session, final Connection con) throws OXException {
+        final int contextId = session.getContextId();
+        final int userId = session.getUserId();
+        final String key = "__ccf#";
+        Integer ret = (Integer) session.getParameter(key);
+        if (null == ret) {
+            Integer folderId = ServerUserSetting.getInstance(con).getContactCollectionFolder(contextId, userId);
+            folderId = null == folderId ? Integer.valueOf(-1) : folderId;
+            session.setParameter(key, folderId);
+            ret = folderId;
+        }
+        return ret.intValue();
     }
 
     private static int getPublishedMailAttachmentsFolder(final Session session) {
@@ -212,6 +222,22 @@ public final class DatabaseFolderConverter {
         return null;
     }
 
+    private static volatile Boolean preferDisplayName;
+    private static boolean preferDisplayName() {
+        Boolean tmp = preferDisplayName;
+        if (null == tmp) {
+            synchronized (DatabaseFolderConverter.class) {
+                tmp = preferDisplayName;
+                if (null == tmp) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = null == service ? Boolean.FALSE : Boolean.valueOf(service.getBoolProperty("com.openexchange.folderstorage.database.preferDisplayName", false));
+                    preferDisplayName = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
     /**
      * Converts specified {@link FolderObject} instance to a {@link DatabaseFolder} instance.
      *
@@ -228,38 +254,45 @@ public final class DatabaseFolderConverter {
     public static DatabaseFolder convert(final FolderObject fo, final User user, final UserConfiguration userConfiguration, final Context ctx, final Session session, final boolean altNames, final Connection con) throws OXException {
         try {
             final int folderId = fo.getObjectID();
-            if (FolderObject.SYSTEM_SHARED_FOLDER_ID == folderId) {
-                /*
-                 * The system shared folder
-                 */
-                return SystemSharedFolder.getSystemSharedFolder(fo, user, userConfiguration, ctx, con);
-            }
-            /*
-             * Look-up a system converter
-             */
-            FolderConverter folderConverter = SYSTEM_CONVERTERS.get(folderId);
-            if (null != folderConverter) {
-                /*
-                 * Return immediately
-                 */
-                final DatabaseFolder databaseFolder = folderConverter.convert(fo, altNames);
-                if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId && !InfostoreFacades.isInfoStoreAvailable()) {
-                    final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
-                    if (null != defaultAccount) {
-                        // Rename to default account name
-                        databaseFolder.setName(defaultAccount.getDisplayName());
-                    }
+            if (folderId < FolderObject.MIN_FOLDER_ID) { // Possibly a system folder
+                if (FolderObject.SYSTEM_SHARED_FOLDER_ID == folderId) {
+                    /*
+                     * The system shared folder
+                     */
+                    return SystemSharedFolder.getSystemSharedFolder(fo, user, userConfiguration, ctx, con);
                 }
-                return databaseFolder;
+                /*
+                 * Look-up a system converter
+                 */
+                FolderConverter folderConverter = SYSTEM_CONVERTERS.get(folderId);
+                if (null != folderConverter) {
+                    /*
+                     * Return immediately
+                     */
+                    final DatabaseFolder databaseFolder = folderConverter.convert(fo, altNames);
+                    if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == folderId && !InfostoreFacades.isInfoStoreAvailable()) {
+                        final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
+                        if (null != defaultAccount) {
+                            // Rename to default account name
+                            databaseFolder.setName(defaultAccount.getDisplayName());
+                        }
+                    }
+                    return databaseFolder;
+                }
+                /*
+                 * Look-up a converter
+                 */
+                folderConverter = CONVERTERS.get(folderId);
+                if (null != folderConverter) {
+                    final DatabaseFolder databaseFolder = folderConverter.convert(fo, altNames);
+                    return handleDatabaseFolder(databaseFolder, folderId, fo, session, user, userConfiguration, ctx, con);
+                }
             }
-            final DatabaseFolder retval;
             /*
-             * Look-up a converter
+             * Converter database folder
              */
-            folderConverter = CONVERTERS.get(folderId);
-            if (null != folderConverter) {
-                retval = folderConverter.convert(fo, altNames);
-            } else if (fo.isDefaultFolder()) {
+            final DatabaseFolder retval;
+            if (fo.isDefaultFolder()) {
                 /*
                  * A default folder: set locale-sensitive name
                  */
@@ -273,10 +306,32 @@ public final class DatabaseFolderConverter {
                 } else if (module == FolderObject.CALENDAR) {
                     retval = new LocalizedDatabaseFolder(fo);
                     retval.setName(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME);
+                } else if (module == FolderObject.INFOSTORE) {
+                    if (preferDisplayName()) {
+                        final int ownerId = fo.getCreatedBy();
+                        if (user.getId() == ownerId) {
+                            // Requestor is owner
+                            retval = new LocalizedDatabaseFolder(fo);
+                            retval.setName(user.getDisplayName());
+                        } else {
+                            DatabaseFolder tmp = null;
+                            try {
+                                final User owner = UserStorage.getInstance().getUser(ownerId, ctx);
+                                tmp = new LocalizedDatabaseFolder(fo);
+                                tmp.setName(owner.getDisplayName());
+                            } catch (final Exception ignore) {
+                                // Ignore
+                                tmp = new DatabaseFolder(fo);
+                            }
+                            retval = tmp;
+                        }
+                    } else {
+                        retval = new DatabaseFolder(fo);
+                    }
                 } else {
                     retval = new DatabaseFolder(fo);
                 }
-            } else if (folderId == getContactCollectorFolder(user.getId(), ctx.getContextId(), con)) {
+            } else if (folderId == getContactCollectorFolder(session, con)) {
                 retval = new LocalizedDatabaseFolder(fo);
                 retval.setName(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
             } else if (folderId == getPublishedMailAttachmentsFolder(session)) {
@@ -309,144 +364,147 @@ public final class DatabaseFolderConverter {
                     }
                 }
             }
-            final int userId = user.getId();
-            final int[] groups = user.getGroups();
-            final int[] modules = userConfiguration.getAccessibleModules();
-            if (PrivateType.getInstance().equals(retval.getType()) && userId != retval.getCreatedBy()) {
-                /*
-                 * A shared folder
-                 */
-                retval.setType(SharedType.getInstance());
-                retval.setGlobal(false); // user-sensitive!
-                retval.setCacheable(OXFolderProperties.isEnableSharedFolderCaching()); // cacheable
-                retval.setDefault(false);
-                /*
-                 * Determine user-visible subfolders
-                 */
-                final TIntList visibleSubfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, groups, modules, ctx, con);
-                if (visibleSubfolders.isEmpty()) {
-                    retval.setSubfolderIDs(new String[0]);
-                    retval.setSubscribedSubfolders(false);
-                } else {
-                    final String[] tmp = new String[visibleSubfolders.size()];
-                    for (int i = 0; i < tmp.length; i++) {
-                        tmp[i] = String.valueOf(visibleSubfolders.get(i));
-                    }
-                    retval.setSubfolderIDs(tmp);
-                    retval.setSubscribedSubfolders(true);
+            // Handle database folder
+            return handleDatabaseFolder(retval, folderId, fo, session, user, userConfiguration, ctx, con);
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static DatabaseFolder handleDatabaseFolder(final DatabaseFolder databaseFolder, final int folderId, final FolderObject fo, final Session session, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException, SQLException {
+        final int userId = user.getId();
+        if (FolderObject.PRIVATE == fo.getType() && userId != databaseFolder.getCreatedBy()) { // Shared
+            /*
+             * A shared folder
+             */
+            databaseFolder.setType(SharedType.getInstance());
+            databaseFolder.setGlobal(false); // user-sensitive!
+            databaseFolder.setCacheable(OXFolderProperties.isEnableSharedFolderCaching()); // cacheable
+            databaseFolder.setDefault(false);
+            /*
+             * Determine user-visible subfolders
+             */
+            final TIntList visibleSubfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, user.getGroups(), userConfiguration.getAccessibleModules(), ctx, con);
+            if (visibleSubfolders.isEmpty()) {
+                databaseFolder.setSubfolderIDs(new String[0]);
+                databaseFolder.setSubscribedSubfolders(false);
+            } else {
+                final String[] tmp = new String[visibleSubfolders.size()];
+                for (int i = 0; i < tmp.length; i++) {
+                    tmp[i] = Integer.toString(visibleSubfolders.get(i), 10);
                 }
+                databaseFolder.setSubfolderIDs(tmp);
+                databaseFolder.setSubscribedSubfolders(true);
+            }
+            /*
+             * Determine parent
+             */
+            final int parent = fo.getParentFolderID();
+            if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == parent || !OXFolderIteratorSQL.isVisibleFolder(parent, userId, user.getGroups(), userConfiguration.getAccessibleModules(), ctx, con)) {
                 /*
-                 * Determine parent
+                 * Either located below private folder or parent not visible
                  */
-                final int parent = fo.getParentFolderID();
-                if (FolderObject.SYSTEM_PRIVATE_FOLDER_ID == parent || !OXFolderIteratorSQL.isVisibleFolder(parent, userId, groups, modules, ctx, con)) {
-                    /*
-                     * Either located below private folder or parent not visible
-                     */
-                    retval.setParentID(new com.openexchange.java.StringAllocator(8).append(FolderObject.SHARED_PREFIX).append(retval.getCreatedBy()).toString());
-                } else {
-                    /*
-                     * Parent is visible
-                     */
-                    retval.setParentID(String.valueOf(parent));
-                }
+                databaseFolder.setParentID(new com.openexchange.java.StringAllocator(8).append(FolderObject.SHARED_PREFIX).append(databaseFolder.getCreatedBy()).toString());
             } else {
                 /*
-                 * Set subfolders for folder.
+                 * Parent is visible
                  */
-                if (FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == folderId) {
-                    boolean setChildren = true;
+                databaseFolder.setParentID(Integer.toString(parent, 10));
+            }
+        } else {
+            /*
+             * Set subfolders for folder.
+             */
+            if (FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == folderId) {
+                boolean setChildren = true;
+                if (!InfostoreFacades.isInfoStoreAvailable()) {
+                    final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
+                    if (null != defaultAccount) {
+                        /*
+                         * Enforce subfolders are retrieved from appropriate file storage
+                         */
+                        databaseFolder.setSubfolderIDs(null);
+                        setChildren = false;
+                    }
+                }
+                if (setChildren) {
+                    /*
+                     * User-sensitive loading of user infostore folder
+                     */
+                    final TIntList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, user.getGroups(), userConfiguration.getAccessibleModules(), ctx, null);
+                    if (subfolders.isEmpty()) {
+                        databaseFolder.setSubfolderIDs(new String[0]);
+                        databaseFolder.setSubscribedSubfolders(false);
+                    } else {
+                        final int len = subfolders.size();
+                        final String[] arr = new String[len];
+                        for (int i = 0; i < len; i++) {
+                            arr[i] = Integer.toString(subfolders.get(i), 10);
+                        }
+                        databaseFolder.setSubfolderIDs(arr);
+                        databaseFolder.setSubscribedSubfolders(true);
+                    }
+                }
+                /*
+                 * Mark for user-sensitive cache
+                 */
+                databaseFolder.setCacheable(true);
+                databaseFolder.setGlobal(false);
+            } else {
+                /*
+                 * Any folder different from private and user-store folder
+                 */
+                boolean setChildren = true;
+                if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
                     if (!InfostoreFacades.isInfoStoreAvailable()) {
                         final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
                         if (null != defaultAccount) {
                             /*
                              * Enforce subfolders are retrieved from appropriate file storage
                              */
-                            retval.setSubfolderIDs(null);
+                            databaseFolder.setSubfolderIDs(null);
+                            /*
+                             * Mark for user-sensitive cache
+                             */
+                            databaseFolder.setCacheable(true);
+                            databaseFolder.setGlobal(false);
                             setChildren = false;
                         }
                     }
-                    if (setChildren) {
-                        /*
-                         * User-sensitive loading of user infostore folder
-                         */
-                        final TIntList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(folderId, userId, groups, modules, ctx, null);
-                        if (subfolders.isEmpty()) {
-                            retval.setSubfolderIDs(new String[0]);
-                            retval.setSubscribedSubfolders(false);
+                }
+                if (setChildren) {
+                    if (fo.containsSubfolderIds()) {
+                        final List<Integer> subfolderIds = fo.getSubfolderIds();
+                        if (subfolderIds.isEmpty()) {
+                            databaseFolder.setSubfolderIDs(new String[0]);
+                            databaseFolder.setSubscribedSubfolders(false);
                         } else {
-                            final int len = subfolders.size();
+                            final List<String> tmp = new ArrayList<String>(subfolderIds.size());
+                            for (final Integer id : subfolderIds) {
+                                tmp.add(Integer.toString(id.intValue(), 10));
+                            }
+                            databaseFolder.setSubfolderIDs(tmp.toArray(new String[tmp.size()]));
+                            databaseFolder.setSubscribedSubfolders(true);
+                        }
+                    } else {
+                        final TIntList subfolderIds = OXFolderLoader.getSubfolderInts(folderId, ctx, con);
+                        if (subfolderIds.isEmpty()) {
+                            databaseFolder.setSubfolderIDs(new String[0]);
+                            databaseFolder.setSubscribedSubfolders(false);
+                        } else {
+                            final int len = subfolderIds.size();
                             final String[] arr = new String[len];
                             for (int i = 0; i < len; i++) {
-                                arr[i] = Integer.toString(subfolders.get(i));
+                                arr[i] = Integer.toString(subfolderIds.get(i), 10);
                             }
-                            retval.setSubfolderIDs(arr);
-                            retval.setSubscribedSubfolders(true);
-                        }
-                    }
-                    /*
-                     * Mark for user-sensitive cache
-                     */
-                    retval.setCacheable(true);
-                    retval.setGlobal(false);
-                } else {
-                    /*
-                     * Any folder different from private and user-store folder
-                     */
-                    boolean setChildren = true;
-                    if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == folderId) {
-                        if (!InfostoreFacades.isInfoStoreAvailable()) {
-                            final FileStorageAccount defaultAccount = getDefaultFileStorageAccess(session);
-                            if (null != defaultAccount) {
-                                /*
-                                 * Enforce subfolders are retrieved from appropriate file storage
-                                 */
-                                retval.setSubfolderIDs(null);
-                                /*
-                                 * Mark for user-sensitive cache
-                                 */
-                                retval.setCacheable(true);
-                                retval.setGlobal(false);
-                                setChildren = false;
-                            }
-                        }
-                    }
-                    if (setChildren) {
-                        if (fo.containsSubfolderIds()) {
-                            final List<Integer> subfolderIds = fo.getSubfolderIds();
-                            if (subfolderIds.isEmpty()) {
-                                retval.setSubfolderIDs(new String[0]);
-                                retval.setSubscribedSubfolders(false);
-                            } else {
-                                final List<String> tmp = new ArrayList<String>(subfolderIds.size());
-                                for (final Integer id : subfolderIds) {
-                                    tmp.add(id.toString());
-                                }
-                                retval.setSubfolderIDs(tmp.toArray(new String[tmp.size()]));
-                                retval.setSubscribedSubfolders(true);
-                            }
-                        } else {
-                            final TIntList subfolderIds = OXFolderLoader.getSubfolderInts(folderId, ctx, con);
-                            if (subfolderIds.isEmpty()) {
-                                retval.setSubfolderIDs(new String[0]);
-                                retval.setSubscribedSubfolders(false);
-                            } else {
-                                final int len = subfolderIds.size();
-                                final String[] arr = new String[len];
-                                for (int i = 0; i < len; i++) {
-                                    arr[i] = Integer.toString(subfolderIds.get(i));
-                                }
-                                retval.setSubfolderIDs(arr);
-                                retval.setSubscribedSubfolders(true);
-                            }
+                            databaseFolder.setSubfolderIDs(arr);
+                            databaseFolder.setSubscribedSubfolders(true);
                         }
                     }
                 }
             }
-            return retval;
-        } catch (final SQLException e) {
-            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         }
+        return databaseFolder;
     }
 
     private static int getPossibleVirtualParent(final FolderObject fo) {

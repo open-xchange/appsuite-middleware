@@ -65,6 +65,7 @@ import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
+import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.mail.MailExceptionCode;
@@ -77,7 +78,6 @@ import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
-import com.openexchange.java.CharsetDetector;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -258,7 +258,8 @@ public final class TextFinder {
             if (attrBody != null) {
                 final TNEFBodyPart bodyPart = new TNEFBodyPart();
                 final String value = (String) attrBody.getValue();
-                bodyPart.setText(value);
+                MessageUtility.setText(value, bodyPart);
+                // bodyPart.setText(value);
                 bodyPart.setSize(value.length());
                 final String s = getTextRecursive(MimeMessageConverter.convertPart(bodyPart));
                 if (null != s) {

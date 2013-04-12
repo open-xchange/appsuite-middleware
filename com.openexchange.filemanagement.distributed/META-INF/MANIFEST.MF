@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Distributed File Management
+Bundle-SymbolicName: com.openexchange.filemanagement.distributed
+Bundle-Version: 7.2.0
+Bundle-Activator: com.openexchange.filemanagement.distributed.osgi.DistributedFileManagementActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.hazelcast.config,
+ com.hazelcast.core,
+ com.openexchange.config,
+ com.openexchange.dispatcher,
+ com.openexchange.exception,
+ com.openexchange.filemanagement,
+ com.openexchange.filemanagement.internal,
+ com.openexchange.hazelcast.configuration,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ javax.servlet,
+ javax.servlet.http,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.service.http,
+ org.osgi.util.tracker
+Bundle-ActivationPolicy: lazy

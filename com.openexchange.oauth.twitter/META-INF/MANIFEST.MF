@@ -2,15 +2,19 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Twitter OAuth Bundle
 Bundle-SymbolicName: com.openexchange.oauth.twitter
-Bundle-Version: 7.0.2
+Bundle-Version: 7.2.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.capabilities,
  com.openexchange.config,
+ com.openexchange.config.cascade,
+ com.openexchange.exception,
  com.openexchange.log,
  com.openexchange.oauth,
  com.openexchange.osgi,
  com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.session,
  org.apache.commons.logging,
  org.osgi.framework
 Bundle-Activator: com.openexchange.oauth.twitter.osgi.TwitterOAuthActivator

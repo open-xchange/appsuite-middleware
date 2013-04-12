@@ -163,7 +163,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 return;
             }
 
-            final AJAXRequestData data = parseRequest(req, preferStream, isFileUpload, session);
+            final AJAXRequestData data = parseRequest(req, preferStream, isFileUpload, session, resp);
             try {
                 if (handleIndividually(action, data, req, resp)) {
                     return;
@@ -249,8 +249,9 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
         return false;
     }
 
-    protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
-        final AJAXRequestData retval = new AJAXRequestData();
+    protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session, final HttpServletResponse resp) throws IOException, OXException {
+        final AJAXRequestData retval = new AJAXRequestData().setHttpServletResponse(resp);
+        retval.setUserAgent(req.getHeader("user-agent"));
         retval.setMultipart(isFileUpload);
         /*
          * Set HTTP Servlet request instance

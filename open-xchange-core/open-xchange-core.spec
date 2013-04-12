@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 6
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -213,6 +213,38 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
            fi
        done
     fi
+fi
+
+# SoftwareChange_Request-1358
+# -----------------------------------------------------------------------
+if [ ${1:-0} -eq 2 ]; then
+   # updating?
+   pfile=/opt/open-xchange/etc/mdns.properties
+   mdnsjar=/opt/open-xchange/bundles/com.openexchange.cluster.discovery.mdns.jar
+   # open-xchange-cluster-discovery-mdns installed? if not, disable
+   if [ ! -e $mdnsjar ]; then
+       ox_set_property com.openexchange.mdns.enabled false $pfile
+   fi
+fi
+
+# SoftwareChange_Request-1365
+pfile=/opt/open-xchange/etc/configdb.properties
+if ! ox_exists_property com.openexchange.database.replicationMonitor $pfile; then
+    ox_set_property com.openexchange.database.replicationMonitor true $pfile
+fi
+
+# SoftwareChange_Request-1389
+# -----------------------------------------------------------------------
+pfile=/opt/open-xchange/etc/foldercache.properties
+if ! ox_exists_property com.openexchange.folderstorage.database.preferDisplayName $pfile; then
+    ox_set_property com.openexchange.folderstorage.database.preferDisplayName false $pfile
+fi
+
+# SoftwareChange_Request-1328
+# -----------------------------------------------------------------------
+pfile=/opt/open-xchange/etc/mdns.properties
+if ! ox_exists_property com.openexchange.mdns.interface $pfile; then
+    ox_set_property com.openexchange.mdns.interface '' $pfile
 fi
 
 # SoftwareChange_Request-1335
@@ -587,10 +619,22 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Wed Apr 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth candidate for 7.2.0 release
+* Tue Apr 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.2.0 release
 * Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-04
+* Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.2.0 release
+* Tue Mar 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.2.0
 * Mon Mar 18 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-03-18
+* Mon Mar 18 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-03-18
+* Fri Mar 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.2.0
 * Tue Mar 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Sixth release candidate for 6.22.2/7.0.2
 * Mon Mar 11 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -602,9 +646,9 @@ Third release candidate for 6.22.2/7.0.2
 * Thu Mar 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 6.22.2/7.0.2
 * Mon Mar 04 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-03-08
-* Fri Mar 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-03-07
+* Mon Mar 04 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-03-08
 * Fri Mar 01 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-03-07
 * Wed Feb 27 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -635,8 +679,6 @@ Build for patch 2013-01-23
 Build for patch 2013-01-10
 * Thu Jan 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.0.1
-* Thu Jan 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-01-10
 * Thu Jan 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for public patch 2013-01-15
 * Fri Dec 28 2012 Marcus Klein <marcus.klein@open-xchange.com>

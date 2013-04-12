@@ -3,7 +3,7 @@ Name:           open-xchange-meta
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
 Version:	@OXVERSION@
-%define		ox_release 6
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -110,11 +110,37 @@ Authors:
 %package -n	open-xchange-meta-mobility
 Group:          Applications/Productivity
 Summary:	The Open-Xchange Meta package for Business Mobility
-Requires:	open-xchange-eas, open-xchange-usm, open-xchange-help-usm-eas, open-xchange-eas-provisioning-mail, open-xchange-eas-provisioning-gui
+Requires:	open-xchange-eas, open-xchange-usm, open-xchange-eas-provisioning-mail
 
 
 %description -n open-xchange-meta-mobility
 The Open-Xchange Meta package for Business Mobility
+
+Authors:
+--------
+    Open-Xchange
+
+%package -n open-xchange-meta-mobility-ui-ox6
+Group:      Applications/Productivity
+Summary:    Helper package for Open-Xchange meta package for business mobility
+Requires:   open-xchange-help-usm-eas, open-xchange-eas-provisioning-gui
+Provides:   open-xchange-meta-mobility-ui
+
+%description -n open-xchange-meta-mobility-ui-ox6
+Helper package for Open-Xchange meta package for business mobility
+
+Authors:
+--------
+    Open-Xchange
+
+%package -n open-xchange-meta-mobility-ui-appsuite
+Group:      Applications/Productivity
+Summary:    Helper package for Open-Xchange meta package for business mobility
+Requires:   open-xchange-meta-ui-appsuite
+Provides:   open-xchange-meta-mobility-ui
+
+%description -n open-xchange-meta-mobility-ui-appsuite
+Helper package for Open-Xchange meta package for business mobility
 
 Authors:
 --------
@@ -138,15 +164,14 @@ Authors:
 #
 
 # ----------------------------------------------------------------------------------------------------
-%package -n	open-xchange-meta-parallels
-Group:          Applications/Productivity
-Summary:	The Open-Xchange Meta package for OX into Parallels integration
-Requires:	open-xchange-meta-backend
-Requires:	open-xchange-meta-gui
-Requires:	%{all_lang_backend}
-Requires:	open-xchange-parallels, open-xchange-custom-parallels-gui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-manage-group-resource
-Conflicts:	open-xchange-admin-plugin-autocontextid, open-xchange-admin-plugin-reseller
-
+%package -n open-xchange-meta-parallels
+Group:      Applications/Productivity
+Summary:    The Open-Xchange Meta package for OX into Parallels integration
+Requires:   open-xchange-meta-backend
+Requires:   open-xchange-meta-gui
+Requires:   %{all_lang_backend}
+Requires:   open-xchange-parallels, open-xchange-meta-parallels-ui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-manage-group-resource
+Conflicts:  open-xchange-admin-plugin-autocontextid, open-xchange-admin-plugin-reseller
 
 %description -n open-xchange-meta-parallels
 The Open-Xchange Meta package for OX into Parallels integration
@@ -155,6 +180,31 @@ Authors:
 --------
     Open-Xchange
 
+%package -n open-xchange-meta-parallels-ui-ox6
+Group:      Applications/Productivity
+Summary:    Helper package for Open-Xchange Meta package for Parallels integration
+Requires:   open-xchange-parallels-gui
+Provides:   open-xchange-meta-parallels-ui
+
+%description -n open-xchange-meta-parallels-ui-ox6
+Helper package for Open-Xchange Meta package for Parallels integration
+
+Authors:
+--------
+    Open-Xchange
+
+%package -n open-xchange-meta-parallels-ui-appsuite
+Group:      Applications/Productivity
+Summary:    Helper package for Open-Xchange Meta package for Parallels integration
+Requires:   open-xchange-meta-ui-appsuite
+Provides:   open-xchange-meta-parallels-ui
+
+%description -n open-xchange-meta-parallels-ui-appsuite
+Helper package for Open-Xchange Meta package for Parallels integration
+
+Authors:
+--------
+    Open-Xchange
 
 # ----------------------------------------------------------------------------------------------------
 %package -n	open-xchange-meta-outlook
@@ -320,7 +370,23 @@ Authors:
 %defattr(-,root,root)
 %doc README.TXT
 
+%files -n open-xchange-meta-parallels-ui-ox6
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-parallels-ui-appsuite
+%defattr(-,root,root)
+%doc README.TXT
+
 %files -n open-xchange-meta-mobility
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-mobility-ui-ox6
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-meta-mobility-ui-appsuite
 %defattr(-,root,root)
 %doc README.TXT
 
@@ -333,8 +399,18 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Wed Apr 10 2013 Carsten Hoeger <choeger@open-xchange.com>
+Fourth candidate for 7.2.0 release
+* Tue Apr 09 2013 Carsten Hoeger <choeger@open-xchange.com>
+Third candidate for 7.2.0 release
 * Tue Apr 02 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-04-04
+* Tue Apr 02 2013 Carsten Hoeger <choeger@open-xchange.com>
+Second candidate for 7.2.0 release
+* Tue Mar 26 2013 Carsten Hoeger <choeger@open-xchange.com>
+First release candidate for 7.2.0
+* Fri Mar 15 2013 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 7.2.0
 * Tue Mar 12 2013 Carsten Hoeger <choeger@open-xchange.com>
 Sixth release candidate for 6.22.2/7.0.2
 * Mon Mar 11 2013 Carsten Hoeger <choeger@open-xchange.com>
@@ -346,9 +422,9 @@ Third release candidate for 6.22.2/7.0.2
 * Thu Mar 07 2013 Carsten Hoeger <choeger@open-xchange.com>
 Second release candidate for 6.22.2/7.0.2
 * Mon Mar 04 2013 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2013-03-08
-* Fri Mar 01 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-03-07
+* Mon Mar 04 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-03-08
 * Fri Mar 01 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-03-07
 * Wed Feb 27 2013 Carsten Hoeger <choeger@open-xchange.com>

@@ -151,11 +151,18 @@ import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
+import com.openexchange.quota.Quota;
+import com.openexchange.quota.QuotaService;
+import com.openexchange.quota.Resource;
+import com.openexchange.quota.ResourceDescription;
+import com.openexchange.quota.UnlimitedQuota;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.I18nServices;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
 import com.openexchange.sessiond.impl.SessiondServiceImpl;
@@ -348,6 +355,7 @@ public final class Init {
         startAndInjectHTMLService();
         startAndInjectServerConfiguration();
         startAndInjectNotification();
+        startAndInjectQuotaService();
         startAndInjectCache();
         startAndInjectCalendarServices();
         startAndInjectDatabaseBundle();
@@ -798,6 +806,26 @@ public final class Init {
             });
             TestServiceRegistry.getInstance().addService(EventAdmin.class, TestEventAdmin.getInstance());
             PushServiceRegistry.getServiceRegistry().addService(EventAdmin.class, TestEventAdmin.getInstance());
+        }
+    }
+
+    public static void startAndInjectQuotaService() {
+        if (null == TestServiceRegistry.getInstance().getService(QuotaService.class)) {
+            QuotaService quotaService = new QuotaService() {
+                
+                @Override
+                public Quota getQuotaFor(Resource resource, ResourceDescription desc, Session session) throws OXException {
+                    return UnlimitedQuota.getInstance();
+                }
+                
+                @Override
+                public Quota getQuotaFor(Resource resource, Session session) throws OXException {
+                    return UnlimitedQuota.getInstance();
+                }
+            };
+            services.put(QuotaService.class, quotaService);
+            TestServiceRegistry.getInstance().addService(QuotaService.class, quotaService);
+            ServerServiceRegistry.getInstance().addService(QuotaService.class, quotaService);
         }
     }
 

@@ -62,7 +62,6 @@ public abstract class AbstractJSONConverter extends AbstractGoodQualityConverter
 
     @Override
     public String getInputFormat() {
-        // TODO Auto-generated method stub
         return "json";
     }
 

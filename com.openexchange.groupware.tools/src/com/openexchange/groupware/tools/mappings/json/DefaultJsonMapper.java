@@ -106,20 +106,25 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 		return this.serialize(object, fields, (TimeZone)null);
 	}
 
-	@Override
-	public JSONObject serialize(final O object, final E[] fields, final String timeZoneID) throws JSONException, OXException {
-		return this.serialize(object, fields, null != timeZoneID ? getTimeZone(timeZoneID) : null);
-	}
+    @Override
+    public JSONObject serialize(final O object, final E[] fields, final String timeZoneID) throws JSONException, OXException {
+        return this.serialize(object, fields, null != timeZoneID ? getTimeZone(timeZoneID) : null);
+    }
 
 	@Override
-	public void serialize(O object, JSONObject to, E[] fields, TimeZone timeZone, Session session) throws JSONException, OXException {
+    public void serialize(O object, JSONObject to, E[] fields, String timeZoneID, Session session) throws JSONException, OXException {
+	    this.serialize(object, to, fields, null != timeZoneID ? getTimeZone(timeZoneID) : null, session);
+    }
+
+    @Override
+    public void serialize(O object, JSONObject to, E[] fields, TimeZone timeZone, Session session) throws JSONException, OXException {
         for (final E field : fields) {
-        	final JsonMapping<? extends Object, O> mapping = this.get(field);
-        	if (null != mapping) {
-        		mapping.serialize(object, to, timeZone, session);
-        	}
-		}
-	}
+            final JsonMapping<? extends Object, O> mapping = this.get(field);
+            if (null != mapping) {
+                mapping.serialize(object, to, timeZone, session);
+            }
+        }
+    }
 
 	@Override
 	public JSONObject serialize(O object, E[] fields, TimeZone timeZone, Session session) throws JSONException, OXException {

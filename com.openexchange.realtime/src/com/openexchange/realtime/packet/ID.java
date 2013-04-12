@@ -55,6 +55,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
@@ -79,6 +81,8 @@ public class ID implements Serializable {
     private static final long serialVersionUID = -5237507998711320109L;
 
     private static ConcurrentHashMap<ID, ConcurrentHashMap<String, List<IDEventHandler>>> listeners = new ConcurrentHashMap<ID, ConcurrentHashMap<String, List<IDEventHandler>>>();
+
+    private static ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>> locks = new ConcurrentHashMap<ID, ConcurrentHashMap<String, Lock>>();
 
     private String protocol;
 
@@ -186,7 +190,9 @@ public class ID implements Serializable {
             if (isEmpty(component)) {
                 component = null;
             } else {
-                component = component.substring(1);
+                if (component.startsWith(".")) {
+                    component = component.substring(1);
+                }
             }
         }
 
@@ -414,6 +420,7 @@ public class ID implements Serializable {
         }
         if (event.equals("dispose")) {
             clearListeners();
+            clearLocks();
         }
     }
 
@@ -431,7 +438,7 @@ public class ID implements Serializable {
             listeners.put(this, events);
         }
 
-        List<IDEventHandler> list = events.get(events);
+        List<IDEventHandler> list = events.get(event);
 
         if (list == null) {
             list = new CopyOnWriteArrayList<IDEventHandler>();
@@ -441,7 +448,7 @@ public class ID implements Serializable {
         return list;
 
     }
-
+    
     private class OneOf implements IDEventHandler {
 
         IDEventHandler delegate;
@@ -456,6 +463,35 @@ public class ID implements Serializable {
             delegate.handle(event, id, source, properties);
             id.off(event, this);
         }
-
+    }
+    
+    public void clearLocks() {
+        locks.remove(this);
+    }
+    
+    public void lock(String scope) {
+        getLock(scope).lock();
+    }
+    
+    public void unlock(String scope) {
+        getLock(scope).unlock();
+    }
+    
+    public Lock getLock(String scope) {
+        ConcurrentHashMap<String, Lock> locksPerId = locks.get(this);
+        if (locksPerId == null) {
+            locksPerId = new ConcurrentHashMap<String, Lock>();
+            ConcurrentHashMap<String, Lock> meantime = locks.putIfAbsent(this, locksPerId);
+            locksPerId = (meantime != null) ?  meantime : locksPerId;
+        }
+        
+        Lock lock = locksPerId.get(scope);
+        if (lock == null) {
+            lock = new ReentrantLock();
+            Lock l = locksPerId.putIfAbsent(scope, lock);
+            lock = (l != null) ? l : lock;
+        }
+        
+        return lock;
     }
 }

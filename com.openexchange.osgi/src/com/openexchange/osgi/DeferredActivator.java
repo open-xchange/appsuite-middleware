@@ -354,18 +354,22 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                     startUp(false);
                     started.set(true);
                 } catch (final Exception e) {
+                    Throwable t = e;
+                    if (t.getCause() instanceof BundleException) {
+                        t = t.getCause();
+                    }
                     final Bundle bundle = context.getBundle();
                     final StringBuilder errorBuilder = new StringBuilder(64);
                     final boolean errorEnabled = LOG.isErrorEnabled();
                     if (errorEnabled) {
                         errorBuilder.append("\nStart-up of bundle \"").append(bundle.getSymbolicName()).append("\" failed: ");
-                        final String errorMsg = e.getMessage();
+                        final String errorMsg = t.getMessage();
                         if (null == errorMsg || "null".equals(errorMsg)) {
-                            errorBuilder.append(e.getClass().getName());
+                            errorBuilder.append(t.getClass().getName());
                         } else {
                             errorBuilder.append(errorMsg);
                         }
-                        LOG.error(errorBuilder.toString(), e);
+                        LOG.error(errorBuilder.toString(), t);
                     }
                     /*
                      * Shut-down

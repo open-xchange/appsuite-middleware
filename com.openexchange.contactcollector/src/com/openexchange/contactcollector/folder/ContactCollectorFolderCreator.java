@@ -123,6 +123,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
         final OXFolderAccess folderAccess = new OXFolderAccess(con, ctx);
         if (folderId != null && folderAccess.exists(folderId.intValue())) {
             // Folder already exists
+            session.setParameter("__ccf#", folderId);
             return true;
         }
         if (!serverUserSetting.isContactCollectionEnabled(cid, userId).booleanValue() && isConfigured(serverUserSetting, cid, userId)) {
@@ -159,7 +160,9 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
          * Remember folder ID
          */
         final ServerUserSetting serverUserSetting = ServerUserSetting.getInstance(con);
-        serverUserSetting.setContactCollectionFolder(cid, userId, Integer.valueOf(collectFolderID));
+        final Integer folder = Integer.valueOf(collectFolderID);
+        serverUserSetting.setContactCollectionFolder(cid, userId, folder);
+        session.setParameter("__ccf#", folder);
         serverUserSetting.setContactCollectOnMailAccess(cid, userId, serverUserSetting.isContactCollectOnMailAccess(cid, userId).booleanValue());
         serverUserSetting.setContactCollectOnMailTransport(cid, userId, serverUserSetting.isContactCollectOnMailTransport(cid, userId).booleanValue());
         if (LOG.isInfoEnabled()) {

@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-ajp-2.2.20-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-ajp-2.2.20-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-comet-2.2.22-SNAPSHOT-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-comet-2.2.22-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-framework-2.2.22-SNAPSHOT-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-framework-2.2.22-SNAPSHOT.jar" sourcepath="lib/grizzly-framework-2.2.22-SNAPSHOT-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-2.2.22-SNAPSHOT-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-2.2.22-SNAPSHOT.jar" sourcepath="lib/grizzly-http-2.2.22-SNAPSHOT-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-ajp-2.2.22-SNAPSHOT-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-ajp-2.2.22-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-server-2.2.22-SNAPSHOT-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-server-2.2.22-SNAPSHOT.jar" sourcepath="lib/grizzly-http-server-2.2.22-SNAPSHOT-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-servlet-2.2.22-SNAPSHOT-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-servlet-2.2.22-SNAPSHOT.jar" sourcepath="lib/grizzly-http-servlet-2.2.22-SNAPSHOT-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-portunif-2.2.22-SNAPSHOT-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-portunif-2.2.22-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-rcm-2.2.22-SNAPSHOT-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-rcm-2.2.22-SNAPSHOT.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-websockets-2.2.22-SNAPSHOT-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/grizzly-websockets-2.2.22-SNAPSHOT.jar" sourcepath="lib/grizzly-websockets-2.2.22-SNAPSHOT-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/annotation-detector-3.0.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-comet-2.2.20-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-comet-2.2.20-SNAPSHOT.jar" sourcepath="lib/grizzly-comet-2.2.20-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-framework-2.2.20-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-framework-2.2.20-SNAPSHOT.jar" sourcepath="lib/grizzly-framework-2.2.20-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-2.2.20-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-2.2.20-SNAPSHOT.jar" sourcepath="lib/grizzly-http-2.2.20-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-server-2.2.20-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-server-2.2.20-SNAPSHOT.jar" sourcepath="lib/grizzly-http-server-2.2.20-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-servlet-2.2.20-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-http-servlet-2.2.20-SNAPSHOT.jar" sourcepath="lib/grizzly-http-servlet-2.2.20-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-portunif-2.2.20-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-portunif-2.2.20-SNAPSHOT.jar" sourcepath="lib/grizzly-portunif-2.2.20-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-rcm-2.2.20-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-rcm-2.2.20-SNAPSHOT.jar" sourcepath="lib/grizzly-rcm-2.2.20-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-websockets-2.2.20-SNAPSHOT-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/grizzly-websockets-2.2.20-SNAPSHOT.jar" sourcepath="lib/grizzly-websockets-2.2.20-SNAPSHOT-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/atmosphere-compat-jbossweb-1.1.0-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/atmosphere-compat-tomcat-1.1.0-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/atmosphere-compat-tomcat7-1.1.0-SNAPSHOT.jar"/>

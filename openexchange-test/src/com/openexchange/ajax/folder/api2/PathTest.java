@@ -142,9 +142,9 @@ public class PathTest extends AbstractAJAXSession {
             final JSONArray jsonArray = (JSONArray) pathResponse.getResponse().getData();
             final int length = jsonArray.length();
 
-            System.out.println(jsonArray);
+            // System.out.println(jsonArray);
 
-            assertEquals("Unexpected path length.", 2, length);
+            assertEquals("Unexpected path length:"+System.getProperty("line.separator")+ jsonArray, 2, length);
 
             assertEquals("Unexpected path element.", newId, jsonArray.getJSONArray(0).getString(0));
             assertEquals("Unexpected path element.", PRIVATE_FOLDER_ID, jsonArray.getJSONArray(1).getString(0));

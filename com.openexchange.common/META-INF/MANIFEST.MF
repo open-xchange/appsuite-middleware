@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Common
 Bundle-SymbolicName: com.openexchange.common
-Bundle-Version: 7.0.2
+Bundle-Version: 7.2.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: javax.activation
@@ -19,6 +19,13 @@ Import-Package: com.openexchange.tools.ssl,
  javax.security.sasl,
  javax.servlet,
  javax.servlet.http,
+ javax.xml,
+ javax.xml.bind,
+ javax.xml.stream,
+ javax.xml.stream.events,
+ javax.xml.stream.util,
+ javax.xml.transform,
+ javax.xml.transform.stream,
  org.apache.commons.lang,
  org.apache.commons.lang.builder,
  org.apache.commons.lang.enum,
@@ -60,6 +67,7 @@ Import-Package: com.openexchange.tools.ssl,
 Bundle-ClassPath: .,
  lib/apache-mime4j-core-0.7.2.jar,
  lib/apache-mime4j-dom-0.7.2.jar,
+ lib/apache-mime4j-examples-0.7.2.jar,
  lib/apache-mime4j-storage-0.7.2.jar,
  lib/automaton-1.11-8.jar,
  lib/backport-util-concurrent-3.1.jar,

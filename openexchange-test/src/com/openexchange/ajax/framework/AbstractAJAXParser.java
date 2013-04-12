@@ -89,7 +89,14 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse> extends
         if (failOnError && response.hasError()) {
             final OXException exception = response.getException();
             if (null != exception) {
-                assertTrue(exception.getMessage(), Category.CATEGORY_WARNING.getType().equals(exception.getCategory().getType()));
+                final StringBuilder sb = new StringBuilder(exception.getMessage());
+                final StackTraceElement[] trace = exception.getStackTrace();
+                if (null != trace) {
+                    final String lineSeparator = System.getProperty("line.separator");
+                    sb.append(lineSeparator);
+                    appendStackTrace(trace, lineSeparator, sb);                    
+                }
+                assertTrue(sb.toString(), Category.CATEGORY_WARNING.getType().equals(exception.getCategory().getType()));
             }
         }
         return response;
@@ -119,4 +126,39 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse> extends
     protected boolean isFailOnError() {
         return failOnError;
     }
+
+    // --------------------------------------------------------------------------------------------------- //
+
+    private static final int MAX_STACK_TRACE_ELEMENTS = 1000;
+
+    private static void appendStackTrace(final StackTraceElement[] trace, final String lineSeparator, final StringBuilder sb) {
+        if (null == trace) {
+            return;
+        }
+        final int length = (MAX_STACK_TRACE_ELEMENTS <= trace.length) ? MAX_STACK_TRACE_ELEMENTS : trace.length;
+        for (int i = 0; i < length; i++) {
+            final StackTraceElement ste = trace[i];
+            final String className = ste.getClassName();
+            if (null != className) {
+                sb.append("    at ").append(className).append('.').append(ste.getMethodName());
+                if (ste.isNativeMethod()) {
+                    sb.append("(Native Method)");
+                } else {
+                    final String fileName = ste.getFileName();
+                    if (null == fileName) {
+                        sb.append("(Unknown Source)");
+                    } else {
+                        final int lineNumber = ste.getLineNumber();
+                        sb.append('(').append(fileName);
+                        if (lineNumber >= 0) {
+                            sb.append(':').append(lineNumber);
+                        }
+                        sb.append(')');
+                    }
+                }
+                sb.append(lineSeparator);
+            }
+        }
+    }
+
 }

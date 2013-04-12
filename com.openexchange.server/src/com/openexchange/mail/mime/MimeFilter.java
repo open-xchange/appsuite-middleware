@@ -62,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.utils.MessageUtility;
 
 /**
  * {@link MimeFilter}
@@ -148,7 +149,8 @@ public class MimeFilter {
             }
             final MimeMultipart newMultipart = new MimeMultipart(getSubType(contentType, "mixed"));
             handlePart((Multipart) mimeMessage.getContent(), newMultipart);
-            mimeMessage.setContent(newMultipart);
+            MessageUtility.setContent(newMultipart, mimeMessage);
+            // mimeMessage.setContent(newMultipart);
             mimeMessage.saveChanges();
             // Restore original Message-Id header
             if (null == messageId) {
@@ -212,15 +214,32 @@ public class MimeFilter {
                 contentType = LocaleTools.toLowerCase(contentType.trim());
                 if (contentType.startsWith("multipart/")) {
                     final MimeMultipart newSubMultipart = new MimeMultipart(getSubType(contentType, "mixed"));
-                    handlePart((Multipart) bodyPart.getContent(), newSubMultipart);
+                    {
+                        final Object content = bodyPart.getContent();
+                        if (content instanceof Multipart) {
+                            handlePart((Multipart) content, newSubMultipart);
+                        } else {
+                            handlePart(new MimeMultipart(bodyPart.getDataHandler().getDataSource()), newSubMultipart);
+                        }
+                    }
                     final MimeBodyPart mimeBodyPart = new MimeBodyPart();
-                    mimeBodyPart.setContent(newSubMultipart);
+                    MessageUtility.setContent(newSubMultipart, mimeBodyPart);
+                    // mimeBodyPart.setContent(newSubMultipart);
                     newMultipart.addBodyPart(mimeBodyPart);
                 } else if (contentType.startsWith("message/rfc822")) {
                     final MimeFilter nestedFilter = new MimeFilter(ignorableContentTypes);
-                    final MimeMessage filteredMessage = nestedFilter.filter((MimeMessage) bodyPart.getContent());
+                    final MimeMessage filteredMessage;
+                    {
+                        final Object content = bodyPart.getContent();
+                        if (content instanceof MimeMessage) {
+                            filteredMessage = nestedFilter.filter((MimeMessage) content);
+                        } else {
+                            filteredMessage = nestedFilter.filter(new MimeMessage(MimeDefaultSession.getDefaultSession(), bodyPart.getInputStream()));
+                        }
+                    }
                     final MimeBodyPart mimeBodyPart = new MimeBodyPart();
-                    mimeBodyPart.setContent(filteredMessage, "message/rfc822");
+                    MessageUtility.setContent(filteredMessage, mimeBodyPart);
+                    // mimeBodyPart.setContent(filteredMessage, "message/rfc822");
                     newMultipart.addBodyPart(mimeBodyPart);
                 } else if (!ignorable(contentType, bodyPart)) {
                     newMultipart.addBodyPart(bodyPart);

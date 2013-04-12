@@ -58,6 +58,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.writer.DataWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.ImportResult;
 import com.openexchange.json.OXJSONWriter;
@@ -103,7 +104,7 @@ public class ImportWriter extends DataWriter {
             writeDepth1(jsonObject);
 
             final List<ConversionWarning> warnings = importResult.getWarnings();
-            if(warnings != null && warnings.size() > 0) {
+            if (warnings != null && warnings.size() > 0) {
             	jsonwriter.key("warnings");
                 jsonwriter.array();
                 for (final ConversionWarning warning : warnings) {
@@ -115,6 +116,10 @@ public class ImportWriter extends DataWriter {
                 }
                 jsonwriter.endArray();
 
+                writeParameter("id", importResult.getObjectId());
+                writeParameter("last_modified", importResult.getDate());
+                writeParameter("folder_id", importResult.getFolder());
+            } else if (Category.CATEGORY_WARNING.getType().equals(exception.getCategory().getType())) {
                 writeParameter("id", importResult.getObjectId());
                 writeParameter("last_modified", importResult.getDate());
                 writeParameter("folder_id", importResult.getFolder());

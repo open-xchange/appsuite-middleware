@@ -57,11 +57,6 @@ package com.openexchange.i18n;
  */
 public interface LocalizableStrings {
 
-    /**
-     * Line separator string.
-     * <p>
-     * This is the value of the line.separator property at the moment that the <tt>LocalizableStrings</tt> class was loaded.
-     */
-    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    // Empty interface for classes containing string to translate.
 
 }

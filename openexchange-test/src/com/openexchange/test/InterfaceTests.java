@@ -76,8 +76,7 @@ public final class InterfaceTests {
 
         tests.addTest(com.openexchange.ajax.mailaccount.MailAccountSuite.suite());
         tests.addTest(com.openexchange.ajax.appointment.AppointmentAJAXSuite.suite());
-        tests.addTestSuite(com.openexchange.ajax.attach.SimpleAttachmentTest.class);
-        tests.addTestSuite(com.openexchange.ajax.attach.TaskAttachmentTest.class);
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.attach.AttachmentTests.class));
         tests.addTest(com.openexchange.ajax.config.ConfigTestSuite.suite());
         tests.addTest(com.openexchange.ajax.contact.ContactAJAXSuite.suite());
         tests.addTest(com.openexchange.ajax.folder.FolderTestSuite.suite());
@@ -87,7 +86,7 @@ public final class InterfaceTests {
         tests.addTest(com.openexchange.ajax.links.LinksTestSuite.suite());
         tests.addTest(com.openexchange.ajax.mail.MailTestSuite.suite());
         tests.addTest(com.openexchange.ajax.mail.filter.MailFilterTestSuite.suite());
-        // tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.redirect.RedirectTests.class)); deactivated for release
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.redirect.RedirectTests.class));
         tests.addTest(com.openexchange.ajax.reminder.ReminderAJAXSuite.suite());
         tests.addTest(com.openexchange.ajax.session.SessionTestSuite.suite());
         tests.addTest(com.openexchange.ajax.task.TaskTestSuite.suite());

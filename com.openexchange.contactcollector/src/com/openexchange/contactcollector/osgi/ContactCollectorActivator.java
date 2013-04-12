@@ -104,6 +104,7 @@ public class ContactCollectorActivator extends HousekeepingActivator {
             if (!cService.getBoolProperty("com.openexchange.contactcollector.enabled", true)) {
                 final Log log = com.openexchange.log.Log.loggerFor(ContactCollectorActivator.class);
                 log.info("Canceled start-up of bundle: com.openexchange.contactcollector. Disabled by configuration setting \"com.openexchange.contactcollector.enabled=false\"");
+                registerPreferenceItems();
                 return;
             }
         }
@@ -145,6 +146,11 @@ public class ContactCollectorActivator extends HousekeepingActivator {
          */
         registerService(LoginHandlerService.class, new ContactCollectorFolderCreator());
         registerService(ContactCollectorService.class, collectorInstance);
+        registerPreferenceItems();
+    }
+
+    /** Registers PreferencesItemService instances */
+    private void registerPreferenceItems() {
         registerService(PreferencesItemService.class, new ContactCollectFolder());
         registerService(PreferencesItemService.class, new ContactCollectEnabled());
         registerService(PreferencesItemService.class, new ContactCollectOnMailAccess());

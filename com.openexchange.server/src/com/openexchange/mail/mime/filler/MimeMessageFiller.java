@@ -137,6 +137,7 @@ import com.openexchange.mail.mime.utils.sourcedimage.SourcedImage;
 import com.openexchange.mail.mime.utils.sourcedimage.SourcedImageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -842,7 +843,8 @@ public class MimeMessageFiller {
                     primaryMultipart = alternativeMultipart;
                 } else {
                     final BodyPart bodyPart = new MimeBodyPart();
-                    bodyPart.setContent(alternativeMultipart);
+                    MessageUtility.setContent(alternativeMultipart, bodyPart);
+                    //bodyPart.setContent(alternativeMultipart);
                     primaryMultipart.addBodyPart(bodyPart);
                 }
             } else if (embeddedImages && !mail.getContentType().startsWith(MimeTypes.MIME_TEXT_PLAIN)) {
@@ -851,7 +853,8 @@ public class MimeMessageFiller {
                     primaryMultipart = relatedMultipart;
                 } else {
                     final BodyPart bodyPart = new MimeBodyPart();
-                    bodyPart.setContent(relatedMultipart);
+                    MessageUtility.setContent(relatedMultipart, bodyPart);
+                    // bodyPart.setContent(relatedMultipart);
                     primaryMultipart.addBodyPart(bodyPart);
                 }
             } else {
@@ -1023,7 +1026,8 @@ public class MimeMessageFiller {
                         primaryMultipart = (Multipart) cto;
                     }
                 }
-                mimeMessage.setContent(primaryMultipart);
+                MessageUtility.setContent(primaryMultipart, mimeMessage);
+                // mimeMessage.setContent(primaryMultipart);
             }
             return;
         }
@@ -1078,12 +1082,14 @@ public class MimeMessageFiller {
                 } else {
                     mailText = htmlService.getConformHTML(content, contentType.getCharsetParameter());
                 }
-                mimeMessage.setContent(mailText, contentType.toString());
+                mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(mailText, contentType)));
+                // mimeMessage.setContent(mailText, contentType.toString());
                 mimeMessage.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
                 mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
             } else {
                 final MimeBodyPart msgBodyPart = new MimeBodyPart();
-                msgBodyPart.setContent(mail.getContent(), contentType.toString());
+                mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(mail.getContent().toString(), contentType)));
+                // msgBodyPart.setContent(mail.getContent(), contentType.toString());
                 msgBodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
                 msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
                 primaryMultipart.addBodyPart(msgBodyPart);
@@ -1096,7 +1102,8 @@ public class MimeMessageFiller {
                 mp = primaryMultipart;
             }
             final MimeBodyPart msgBodyPart = new MimeBodyPart();
-            msgBodyPart.setText("", charset);
+            MessageUtility.setText("", charset, msgBodyPart);
+            // msgBodyPart.setText("", charset);
             final String disposition = msgBodyPart.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null);
             if (disposition == null) {
                 msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, Part.INLINE);
@@ -1121,7 +1128,8 @@ public class MimeMessageFiller {
          * Finally set multipart
          */
         if (primaryMultipart != null) {
-            mimeMessage.setContent(primaryMultipart);
+            MessageUtility.setContent(primaryMultipart, mimeMessage);
+            // mimeMessage.setContent(primaryMultipart);
         }
     }
 
@@ -1214,7 +1222,8 @@ public class MimeMessageFiller {
              * Add multipart/related as a body part to superior multipart
              */
             final BodyPart altBodyPart = new MimeBodyPart();
-            altBodyPart.setContent(relatedMultipart);
+            MessageUtility.setContent(relatedMultipart, altBodyPart);
+            // altBodyPart.setContent(relatedMultipart);
             alternativeMultipart.addBodyPart(altBodyPart);
         } else {
             /*
@@ -1539,7 +1548,8 @@ public class MimeMessageFiller {
                 textContent = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(content, usm.getAutoLinebreak());
             }
         }
-        text.setText(textContent, charset);
+        MessageUtility.setText(textContent, charset, text);
+        // text.setText(textContent, charset);
         // text.setText(performLineFolding(getConverter().convertWithQuotes(
         // htmlContent), false, usm.getAutoLinebreak()),
         // MailConfig.getDefaultMimeCharset());
@@ -1557,18 +1567,25 @@ public class MimeMessageFiller {
      * @param charset The charset
      * @return A body part of type <code>text/html</code> from given HTML content
      * @throws MessagingException If a messaging error occurs
+     * @throws OXException 
      */
-    protected final BodyPart createHtmlBodyPart(final String wellFormedHTMLContent, final String charset) throws MessagingException {
-        final String contentType = PAT_HTML_CT.replaceFirst(REPLACE_CS, com.openexchange.java.Strings.quoteReplacement(charset));
-        final MimeBodyPart html = new MimeBodyPart();
-        if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
-            html.setContent(htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(HTML_SPACE, ""), contentType);
-        } else {
-            html.setContent(wellFormedHTMLContent, contentType);
+    protected final BodyPart createHtmlBodyPart(final String wellFormedHTMLContent, final String charset) throws MessagingException, OXException {
+        try {
+            final String contentType = PAT_HTML_CT.replaceFirst(REPLACE_CS, com.openexchange.java.Strings.quoteReplacement(charset));
+            final MimeBodyPart html = new MimeBodyPart();
+            if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
+                html.setDataHandler(new DataHandler(new MessageDataSource(htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(HTML_SPACE, ""), contentType)));
+                // html.setContent(htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(HTML_SPACE, ""), contentType);
+            } else {
+                html.setDataHandler(new DataHandler(new MessageDataSource(wellFormedHTMLContent, contentType)));
+                // html.setContent(wellFormedHTMLContent, contentType);
+            }
+            html.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
+            html.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType);
+            return html;
+        } catch (final UnsupportedEncodingException e) {
+            throw new MessagingException("Unsupported encoding.", e);
         }
-        html.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
-        html.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType);
-        return html;
     }
 
     private static final Pattern PATTERN_IMG = Pattern.compile("<img[^>]*/?>", Pattern.CASE_INSENSITIVE);

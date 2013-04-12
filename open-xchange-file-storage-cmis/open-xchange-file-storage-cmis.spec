@@ -47,7 +47,19 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Apr 02 2013 Thorben Betten <thorben.betten@open-xchange.com>
+Second candidate for 7.2.0 release
+* Tue Mar 26 2013 Thorben Betten <thorben.betten@open-xchange.com>
+First release candidate for 7.2.0
+* Fri Mar 15 2013 Thorben Betten <thorben.betten@open-xchange.com>
+prepare for 7.2.0
+* Thu Jan 10 2013 Thorben Betten <thorben.betten@open-xchange.com>
+prepare for 7.0.1
+* Tue Dec 04 2012 Thorben Betten <thorben.betten@open-xchange.com>
+prepare for 7.0.0 release
 * Tue Nov 13 2012 Thorben Betten <thorben.betten@open-xchange.com>
 First release candidate for EDP drop #6
+* Fri Oct 26 2012 Thorben Betten <thorben.betten@open-xchange.com>
+prepare for 6.22.1
 * Wed Oct 17 2012 Thorben Betten <thorben.betten@open-xchange.com>
-Initial release
+prepare for 6.23.0

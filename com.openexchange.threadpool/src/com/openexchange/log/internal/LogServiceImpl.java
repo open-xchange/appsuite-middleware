@@ -59,6 +59,7 @@ import org.apache.commons.logging.Log;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogService;
 import com.openexchange.log.Loggable;
+import com.openexchange.log.PropertiesAppender;
 import com.openexchange.log.Loggable.Level;
 import com.openexchange.log.Props;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -71,22 +72,25 @@ import com.openexchange.threadpool.behavior.AbortBehavior;
  */
 public final class LogServiceImpl implements LogService {
 
-    private static final int CAPACITY = 1048576;
+    /**
+     * The default queue capacity.
+     */
+    private static final int DEFAULT_CAPACITY = 8192;
 
     private final BlockingQueue<Loggable> queue;
-
     private final Future<Object> future;
-
     private final LoggerTask loggerTask;
+    private final boolean enabled;
 
     /**
      * Initializes a new {@link LogServiceImpl}.
      */
-    public LogServiceImpl(final ThreadPoolService threadPool) {
+    public LogServiceImpl(final ThreadPoolService threadPool, final int queueCapacity) {
         super();
-        queue = new LinkedBlockingQueue<Loggable>(CAPACITY);
+        queue = new LinkedBlockingQueue<Loggable>(queueCapacity > 0 ? queueCapacity : DEFAULT_CAPACITY);
         loggerTask = new LoggerTask(queue);
         future = threadPool.submit(loggerTask, AbortBehavior.getInstance());
+        enabled = LogProperties.isEnabled();
     }
 
     /**
@@ -130,9 +134,9 @@ public final class LogServiceImpl implements LogService {
     }
 
     @Override
-    public Loggable loggableFor(final Level level, final Log log, final String message, final Throwable throwable) {
+    public Loggable loggableFor(final Level level, final Log log, final Object message, final Throwable throwable) {
         final LoggableImpl loggable = new LoggableImpl(level, log, message, throwable, new Throwable());
-        if (LogProperties.isEnabled()) {
+        if (enabled && !(message instanceof PropertiesAppender)) {
             final Props props = LogProperties.optLogProperties();
             loggable.putProperties(null == props ? null : props.getMap());
         }
@@ -140,9 +144,9 @@ public final class LogServiceImpl implements LogService {
     }
 
     @Override
-    public Loggable loggableFor(final Level level, final Log log, final String message) {
+    public Loggable loggableFor(final Level level, final Log log, final Object message) {
         final LoggableImpl loggable = new LoggableImpl(level, log, message, null, new Throwable());
-        if (LogProperties.isEnabled()) {
+        if (enabled && !(message instanceof PropertiesAppender)) {
             final Props props = LogProperties.optLogProperties();
             loggable.putProperties(null == props ? null : props.getMap());
         }

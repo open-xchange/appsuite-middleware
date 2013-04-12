@@ -8,7 +8,7 @@ BuildRequires:  java-devel >= 1.6.0
 BuildRequires:  open-xchange-core
 BuildRequires:  open-xchange-admin
 Version:        @OXVERSION@
-%define         ox_release 6
+%define         ox_release 4
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -37,6 +37,10 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
+%post
+. /opt/open-xchange/lib/oxfunctions.sh
+ox_update_permissions "/opt/open-xchange/etc/upsell.properties" root:open-xchange 640
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -49,12 +53,23 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %dir /opt/open-xchange/etc
 %dir /opt/open-xchange/etc/settings
 %config(noreplace) /opt/open-xchange/etc/*
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/upsell.properties
 %config(noreplace) /opt/open-xchange/etc/settings/*
 %doc com.openexchange.upsell.multiple/ChangeLog
 
 %changelog
+* Wed Apr 10 2013 Carsten Hoeger <choeger@open-xchange.com>
+Fourth candidate for 7.2.0 release
+* Tue Apr 09 2013 Carsten Hoeger <choeger@open-xchange.com>
+Third candidate for 7.2.0 release
 * Tue Apr 02 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-04-04
+* Tue Apr 02 2013 Carsten Hoeger <choeger@open-xchange.com>
+Second candidate for 7.2.0 release
+* Tue Mar 26 2013 Carsten Hoeger <choeger@open-xchange.com>
+First release candidate for 7.2.0
+* Fri Mar 15 2013 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 7.2.0
 * Tue Mar 12 2013 Carsten Hoeger <choeger@open-xchange.com>
 Sixth release candidate for 6.22.2/7.0.2
 * Mon Mar 11 2013 Carsten Hoeger <choeger@open-xchange.com>
@@ -66,9 +81,9 @@ Third release candidate for 6.22.2/7.0.2
 * Thu Mar 07 2013 Carsten Hoeger <choeger@open-xchange.com>
 Second release candidate for 6.22.2/7.0.2
 * Mon Mar 04 2013 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2013-03-08
-* Fri Mar 01 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-03-07
+* Mon Mar 04 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-03-08
 * Fri Mar 01 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-03-07
 * Wed Feb 27 2013 Carsten Hoeger <choeger@open-xchange.com>

@@ -97,6 +97,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -273,7 +274,8 @@ public class DefaultMailSenderService implements MailSenderService {
 
     private BodyPart toPart(Multipart multipart) throws MessagingException {
     	MimeBodyPart part = new MimeBodyPart();
-    	part.setContent(multipart);
+    	MessageUtility.setContent(multipart, part);
+    	// part.setContent(multipart);
     	return part;
 	}
 
@@ -340,7 +342,8 @@ public class DefaultMailSenderService implements MailSenderService {
     private Multipart generateTextAndHtmlAndIcalAndIcalAttachment(NotificationMail mail, String charset, Session session, boolean iCalAsAttachment) throws MessagingException, OXException, UnsupportedEncodingException {
         BodyPart textAndHtml = new MimeBodyPart();
         Multipart textAndHtmlAndIcalMultipart = generateTextAndIcalAndHtmlMultipart(mail, charset, session);
-        textAndHtml.setContent(textAndHtmlAndIcalMultipart);
+        MessageUtility.setContent(textAndHtmlAndIcalMultipart, textAndHtml);
+        // textAndHtml.setContent(textAndHtmlAndIcalMultipart);
         BodyPart iCalAttachment = generateIcalAttachmentPart(mail, charset, session);
 
         MimeMultipart multipart = new MimeMultipart("mixed");
@@ -469,22 +472,28 @@ public class DefaultMailSenderService implements MailSenderService {
     }
 
     private BodyPart generateHtmlPart(NotificationMail mail, String charset) throws MessagingException {
-        MimeBodyPart htmlPart = new MimeBodyPart();
-        final ContentType ct = new ContentType();
-        ct.setPrimaryType("text");
-        ct.setSubType("html");
-        ct.setCharsetParameter(charset);
-        String contentType = ct.toString();
-        final String wellFormedHTMLContent = htmlService.getConformHTML(mail.getHtml(), charset);
-        htmlPart.setContent(wellFormedHTMLContent, contentType);
-        htmlPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-        htmlPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType);
-        return htmlPart;
+        try {
+            MimeBodyPart htmlPart = new MimeBodyPart();
+            final ContentType ct = new ContentType();
+            ct.setPrimaryType("text");
+            ct.setSubType("html");
+            ct.setCharsetParameter(charset);
+            String contentType = ct.toString();
+            final String wellFormedHTMLContent = htmlService.getConformHTML(mail.getHtml(), charset);
+            htmlPart.setDataHandler(new DataHandler(new MessageDataSource(wellFormedHTMLContent, ct)));
+            // htmlPart.setContent(wellFormedHTMLContent, contentType);
+            htmlPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
+            htmlPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType);
+            return htmlPart;
+        } catch (final UnsupportedEncodingException e) {
+            throw new MessagingException("Unsupported encoding", e);
+        }
     }
 
     private BodyPart generateTextPart(NotificationMail mail, String charset) throws MessagingException {
         final MimeBodyPart textPart = new MimeBodyPart();
-        textPart.setText(mail.getText(), charset);
+        MessageUtility.setText(mail.getText(), charset, textPart);
+        // textPart.setText(mail.getText(), charset);
         textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
         final ContentType ct = new ContentType();
         ct.setPrimaryType("text");

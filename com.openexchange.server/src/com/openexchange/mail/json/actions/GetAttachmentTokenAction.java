@@ -150,7 +150,7 @@ public final class GetAttachmentTokenAction extends AbstractMailAction {
             token.setAccessInfo(mailInterface.getAccountID(), session);
             token.setAttachmentInfo(folderPath, uid, sequenceId);
             AttachmentTokenRegistry.getInstance().putToken(token.setOneTime(oneTime).setCheckIp(checkIp), session);
-            final JSONObject attachmentObject = new JSONObject();
+            final JSONObject attachmentObject = new JSONObject(2);
             attachmentObject.put("id", token.getId());
             attachmentObject.put("jsessionid", token.getJSessionId());
             /*

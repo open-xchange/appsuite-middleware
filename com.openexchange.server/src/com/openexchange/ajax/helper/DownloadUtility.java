@@ -260,6 +260,22 @@ public final class DownloadUtility {
      * </pre>
      *
      * @param fileName The file name
+     * @param userAgent The user agent identifier
+     * @param appendTo The {@link StringBuilder} instance to append to
+     */
+    public static void appendFilenameParameter(final String fileName, final String userAgent, final StringBuilder appendTo) {
+        appendFilenameParameter(fileName, null, userAgent, appendTo);
+    }
+
+    /**
+     * Appends the <tt>"filename"</tt> parameter to specified {@link StringBuilder} instance; e.g.
+     *
+     * <pre>
+     * "attachment; filename="readme.txt"
+     *            ^---------------------^
+     * </pre>
+     *
+     * @param fileName The file name
      * @param baseCT The base content type; e.g <tt>"application/octet-stream"</tt> or <tt>"text/plain"</tt>
      * @param userAgent The user agent identifier
      * @param appendTo The {@link StringBuilder} instance to append to
@@ -303,6 +319,22 @@ public final class DownloadUtility {
             appendTo.append("; filename*=UTF-8''").append(URLCoder.encode(fn));
         }
         appendTo.append("; filename=\"").append(foo).append('"');
+    }
+
+    /**
+     * Appends the <tt>"filename"</tt> parameter to specified {@link StringBuilder} instance; e.g.
+     *
+     * <pre>
+     * "attachment; filename="readme.txt"
+     *            ^---------------------^
+     * </pre>
+     *
+     * @param fileName The file name
+     * @param userAgent The user agent identifier
+     * @param appendTo The {@link com.openexchange.java.StringAllocator} instance to append to
+     */
+    public static void appendFilenameParameter(final String fileName, final String userAgent, final com.openexchange.java.StringAllocator appendTo) {
+        appendFilenameParameter(fileName, null, userAgent, appendTo);
     }
 
     /**

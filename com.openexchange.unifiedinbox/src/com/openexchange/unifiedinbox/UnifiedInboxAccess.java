@@ -49,9 +49,6 @@
 
 package com.openexchange.unifiedinbox;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailProperties;
@@ -59,6 +56,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.session.Session;
 import com.openexchange.unifiedinbox.config.MailAccountUnifiedINBOXProperties;
 import com.openexchange.unifiedinbox.config.UnifiedInboxConfig;
@@ -76,39 +74,34 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(UnifiedInboxAccess.class));
 
     /**
-     * Fullname of INBOX.
+     * Full name of INBOX.
      */
-    public static final String INBOX = "INBOX";
+    public static final String INBOX = UnifiedInboxManagement.INBOX;
 
     /**
-     * Fullname of Trash.
+     * Full name of Trash.
      */
-    public static final String TRASH = "Trash";
+    public static final String TRASH = UnifiedInboxManagement.TRASH;
 
     /**
-     * Fullname of Sent.
+     * Full name of Sent.
      */
-    public static final String SENT = "Sent";
+    public static final String SENT = UnifiedInboxManagement.SENT;
 
     /**
-     * Fullname of Spam.
+     * Full name of Spam.
      */
-    public static final String SPAM = "Spam";
+    public static final String SPAM = UnifiedInboxManagement.SPAM;
 
     /**
-     * Fullname of Drafts.
+     * Full name of Drafts.
      */
-    public static final String DRAFTS = "Drafts";
+    public static final String DRAFTS = UnifiedInboxManagement.DRAFTS;
 
     /**
      * A set containing all known default folders for an Unified Mail account.
      */
-    public static final Set<String> KNOWN_FOLDERS;
-
-    static {
-        final Set<String> tmp = new HashSet<String>(Arrays.asList(new String[] { INBOX, DRAFTS, SENT, SPAM, TRASH }));
-        KNOWN_FOLDERS = Collections.unmodifiableSet(tmp);
-    }
+    public static final Set<String> KNOWN_FOLDERS = UnifiedInboxManagement.KNOWN_FOLDERS;
 
     /*-
      * Members

@@ -131,7 +131,6 @@ import com.sun.mail.pop3.POP3Folder;
  */
 public final class MimeMessageConverter {
 
-
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMessageConverter.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
@@ -1789,25 +1788,46 @@ public final class MimeMessageConverter {
                     mail.setContentType(MimeTypes.MIME_DEFAULT);
                 }
             }
-            {
+           {
                 final ContentType ct = mail.getContentType();
-                final Object content = msg.getContent();
-                try {
-                    mail.setHasAttachment(ct.startsWith(MULTI_PRIMTYPE) && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) || hasAttachments((Multipart) content, ct.getSubType())));
-                } catch (final ClassCastException e) {
-                    // Cast to javax.mail.Multipart failed
-                    LOG.warn(new com.openexchange.java.StringAllocator(256).append(
-                        "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
-                        content.getClass().getName()).append(
-                        ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
-                    mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
-                } catch (final MessagingException e) {
-                    // A messaging error occurred
-                    LOG.warn(new com.openexchange.java.StringAllocator(256).append(
-                        "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
-                        e.getMessage()).append(
-                        ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
-                    mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
+                if (ct.startsWith(MULTI_PRIMTYPE)) {
+                    if (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType())) {
+                        // For convenience consider multipart/mixed to hold file attachments
+                        mail.setHasAttachment(true);
+                    } else {
+                        // Examine Multipart object
+                        Object content = null;
+                        try {
+                            content = msg.getContent();
+                        } catch (final Exception ignore) {
+                            // Ignore
+                        }
+                        if (null == content) {
+                            // No multipart object
+                            mail.setHasAttachment(false);
+                        } else {
+                            try {
+                                mail.setHasAttachment(hasAttachments((Multipart) content, ct.getSubType()));
+                            } catch (final ClassCastException e) {
+                                // Cast to javax.mail.Multipart failed
+                                LOG.warn(new com.openexchange.java.StringAllocator(256).append(
+                                    "Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(
+                                    content.getClass().getName()).append(
+                                    ".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
+                                mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
+                            } catch (final MessagingException e) {
+                                // A messaging error occurred
+                                LOG.warn(new com.openexchange.java.StringAllocator(256).append(
+                                    "Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(
+                                    e.getMessage()).append(
+                                    ".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
+                                mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
+                            }
+                        }
+                    }
+                } else {
+                    // No multipart/*
+                    mail.setHasAttachment(false);
                 }
             }
             {

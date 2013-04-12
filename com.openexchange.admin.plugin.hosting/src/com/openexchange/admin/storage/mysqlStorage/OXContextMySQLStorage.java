@@ -1122,6 +1122,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             oxCon.commit();
             // TODO: cutmasta call setters and fill all required fields
             ctx.setEnabled(Boolean.TRUE);
+            adminUser.setId(Integer.valueOf(adminId));
             return ctx;
         } catch (final DataTruncation e) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, e);

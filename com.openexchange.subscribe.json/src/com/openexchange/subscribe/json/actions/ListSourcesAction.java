@@ -49,8 +49,13 @@
 
 package com.openexchange.subscribe.json.actions;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-
+import java.util.Set;
 import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -60,39 +65,44 @@ import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.json.SubscriptionSourceJSONWriter;
 
 /**
- *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- *
  */
-public class ListSourcesAction extends AbstractSubscribeSourcesAction{
+public class ListSourcesAction extends AbstractSubscribeSourcesAction {
 
-	public ListSourcesAction(ServiceLookup services) {
-		this.services = services;
-	}
+    /**
+     * Initializes a new {@link ListSourcesAction}.
+     */
+    public ListSourcesAction(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
 
-	@Override
-	public AJAXRequestResult perform(SubscribeRequest subscribeRequest)
-			throws OXException {
-		final int module = getModule(subscribeRequest.getRequestData().getModule());
-        final List<SubscriptionSource> sources = getAvailableSources(subscribeRequest.getServerSession()).getSources(module);
-        final String[] columns = new String[]{"id", "displayName", "icon", "module",  "formDescription"};
-        final JSONArray json = new SubscriptionSourceJSONWriter(createTranslator(subscribeRequest.getServerSession())).writeJSONArray(sources, columns);
-//        JSONArray json;
-//		try {
-//			json = new JSONArray("[[\"com.openexchange.subscribe.crawler.google.calendar\",\"GoogleCalendar\",null,\"calendar\",[{\"mandatory\":true,\"name\":\"login\",\"displayName\":\"Login\",\"widget\":\"input\"},{\"mandatory\":true,\"name\":\"password\",\"displayName\":\"Password\",\"widget\":\"password\"}]],[\"com.openexchange.subscribe.crawler.googlemail\",\"GoogleMail\",null,\"contacts\",[{\"mandatory\":true,\"name\":\"login\",\"displayName\":\"Login\",\"widget\":\"input\"},{\"mandatory\":true,\"name\":\"password\",\"displayName\":\"Password\",\"widget\":\"password\"}]],[\"com.openexchange.subscribe.microformats.contacts.http\",\"OXMF Contacts\",null,\"contacts\",[{\"mandatory\":true,\"name\":\"url\",\"displayName\":\"URL\",\"widget\":\"input\"}]],[\"com.openexchange.subscribe.microformats.infostore.http\",\"OXMF Infostore\",null,\"infostore\",[{\"mandatory\":true,\"name\":\"url\",\"displayName\":\"URL\",\"widget\":\"input\"}]],[\"com.openexchange.subscribe.crawler.suncalendar\",\"Sun Calendar\",null,\"calendar\",[{\"mandatory\":true,\"name\":\"login\",\"displayName\":\"Login\",\"widget\":\"input\"},{\"mandatory\":true,\"name\":\"password\",\"displayName\":\"Password\",\"widget\":\"password\"}]],[\"com.openexchange.subscribe.crawler.suncontacts\",\"Sun Contacts\",null,\"contacts\",[{\"mandatory\":true,\"name\":\"login\",\"displayName\":\"Login\",\"widget\":\"input\"},{\"mandatory\":true,\"name\":\"password\",\"displayName\":\"Password\",\"widget\":\"password\"}]],[\"com.openexchange.subscribe.crawler.suntasks\",\"Sun Tasks\",null,\"tasks\",[{\"mandatory\":true,\"name\":\"login\",\"displayName\":\"Login\",\"widget\":\"input\"},{\"mandatory\":true,\"name\":\"password\",\"displayName\":\"Password\",\"widget\":\"password\"}]],[\"com.openexchange.subscribe.xing\",\"XING\",null,\"contacts\",[{\"mandatory\":true,\"name\":\"login\",\"displayName\":\"Login\",\"widget\":\"input\"},{\"mandatory\":true,\"name\":\"password\",\"displayName\":\"Password\",\"widget\":\"password\"}]],[\"com.openexchange.subscribe.crawler.gmx.com\",\"gmx.com\",null,\"contacts\",[{\"mandatory\":true,\"name\":\"login\",\"displayName\":\"Login\",\"widget\":\"input\"},{\"mandatory\":true,\"name\":\"password\",\"displayName\":\"Password\",\"widget\":\"password\"}]],[\"com.openexchange.subscribe.crawler.gmx\",\"gmx.de\",null,\"contacts\",[{\"mandatory\":true,\"name\":\"login\",\"displayName\":\"Login\",\"widget\":\"input\"},{\"mandatory\":true,\"name\":\"password\",\"displayName\":\"Password\",\"widget\":\"password\"}]],[\"com.openexchange.subscribe.crawler.t-online.de\",\"t-online.de\",null,\"contacts\",[{\"mandatory\":true,\"name\":\"login\",\"displayName\":\"Login\",\"widget\":\"input\"},{\"mandatory\":true,\"name\":\"password\",\"displayName\":\"Password\",\"widget\":\"password\"}]],[\"com.openexchange.subscribe.crawler.webde\",\"web.de\",null,\"contacts\",[{\"mandatory\":true,\"name\":\"login\",\"displayName\":\"Login\",\"widget\":\"input\"},{\"mandatory\":true,\"name\":\"password\",\"displayName\":\"Password\",\"widget\":\"password\"}]],[\"com.openexchange.subscribe.crawler.yahoocom\",\"yahoo.com\",null,\"contacts\",[{\"mandatory\":true,\"name\":\"login\",\"displayName\":\"Login\",\"widget\":\"input\"},{\"mandatory\":true,\"name\":\"password\",\"displayName\":\"Password\",\"widget\":\"password\"}]]]");
-			return new AJAXRequestResult(json, "json");
-//		} catch (JSONException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//        return null;
-	}
+    private static final String[] FIELDS = new String[] { "id", "displayName", "icon", "module", "formDescription" };
 
-	protected int getModule(String moduleAsString) {
-        if(moduleAsString == null) {
+    private static final Set<String> IGNOREES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("com.openexchange.subscribe.crawler.facebook", "com.openexchange.subscribe.crawler.gmx")));
+
+    @Override
+    public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException {
+        final int module = getModule(subscribeRequest.getRequestData().getModule());
+        // Retrieve subscription sources
+        final List<SubscriptionSource> sources =
+            new ArrayList<SubscriptionSource>(getAvailableSources(subscribeRequest.getServerSession()).getSources(module));
+        for (final Iterator<SubscriptionSource> iterator = sources.iterator(); iterator.hasNext();) {
+            final SubscriptionSource subscriptionSource = iterator.next();
+            if (IGNOREES.contains(subscriptionSource.getId())) {
+                iterator.remove();
+            }
+        }
+        // Generate appropriate JSON
+        final JSONArray json = new SubscriptionSourceJSONWriter(createTranslator(subscribeRequest.getServerSession())).writeJSONArray(sources, FIELDS);
+        return new AJAXRequestResult(json, "json");
+    }
+
+    protected int getModule(String moduleAsString) {
+        if (moduleAsString == null) {
             return -1;
         }
-        if(moduleAsString.equals("contacts")) {
+        if (moduleAsString.equals("contacts")) {
             return FolderObject.CONTACT;
         } else if (moduleAsString.equals("calendar")) {
             return FolderObject.CALENDAR;

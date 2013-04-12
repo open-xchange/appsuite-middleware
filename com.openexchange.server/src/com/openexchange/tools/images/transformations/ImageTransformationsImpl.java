@@ -327,7 +327,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
 
     private static void write(BufferedImage image, String formatName, OutputStream output) throws IOException {
         if (false == ImageIO.write(image, formatName, output)) {
-            throw new IOException("no appropriate writer is found");
+            throw new IOException("no appropriate writer found for " + formatName);
         }
     }
 
@@ -494,6 +494,10 @@ public class ImageTransformationsImpl implements ImageTransformations {
         if ("x-png".equals(val)) {
             LOG.debug("Assuming 'png' for image format " + val);
             return "png";
+        }
+        if ("x-ms-bmp".equals(val)) {
+            LOG.debug("Assuming 'bmp' for image format " + val);
+            return "bmp";
         }
         return val;
     }

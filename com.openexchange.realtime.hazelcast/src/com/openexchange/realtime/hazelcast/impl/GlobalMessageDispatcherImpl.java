@@ -56,16 +56,21 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import org.apache.commons.logging.Log;
 import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.realtime.RealtimeExceptionCodes;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.ResourceDirectory;
@@ -75,6 +80,7 @@ import com.openexchange.realtime.hazelcast.Services;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
 import com.openexchange.realtime.hazelcast.channel.StanzaDispatcher;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.IDMap;
 import com.openexchange.threadpool.ThreadPools;
@@ -89,15 +95,30 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
     private static final Log LOG = com.openexchange.log.Log.loggerFor(GlobalMessageDispatcherImpl.class);
 
     private final ResourceDirectory directory;
-
+    
+    private ResponseChannel channel = null;
+    
     public GlobalMessageDispatcherImpl(ResourceDirectory directory) {
         super();
         this.directory = directory;
+        this.channel = new ResponseChannel(directory);
     }
-
+    
+    @Override
+    public Stanza sendSynchronously(Stanza stanza, long timeout, TimeUnit unit) throws OXException {
+        String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
+        channel.setUp(uuid, stanza);
+        send(stanza);
+        return channel.waitFor(uuid, timeout, unit);
+    }
+    
     @Override
     public Map<ID, OXException> send(Stanza stanza) throws OXException {
         return send(stanza, directory.get(stanza.getTo()));
+    }
+    
+    public ResponseChannel getChannel() {
+        return channel;
     }
 
     @Override
@@ -137,10 +158,11 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
     private Map<ID, OXException> deliver(Stanza stanza, Map<Member, Set<ID>> targets) throws OXException {
         final HazelcastInstance hazelcastInstance = HazelcastAccess.getHazelcastInstance();
         Member localMember = hazelcastInstance.getCluster().getLocalMember();
-        Set<ID> localIds = targets.remove(localMember);
         Map<ID, OXException> exceptions = new HashMap<ID, OXException>();
+        Set<ID> localIds = targets.remove(localMember);
         if (localIds != null) {
             // Send via local message dispatcher to locally reachable receivers
+            ensureSequence(stanza, localMember);
             Map<ID, OXException> sent = Services.getService(LocalMessageDispatcher.class).send(stanza, localIds);
             exceptions.putAll(sent);
         }
@@ -150,8 +172,8 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
         for (Member receiver : targets.keySet()) {
             Set<ID> ids = targets.get(receiver);
             LOG.debug("Sending to '" + stanza.getTo() + "' @ " + receiver);
-
-            FutureTask<Map<ID, OXException>> task = new DistributedTask<Map<ID, OXException>>(new StanzaDispatcher(stanza, ids), receiver);
+            ensureSequence(stanza, receiver);
+            FutureTask<Map<ID, OXException>> task = new DistributedTask<Map<ID, OXException>>(new StanzaDispatcher(stanza, ids) , receiver);
             executorService.execute(task);
             futures.add(task);
         }
@@ -170,5 +192,35 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
 
         return exceptions;
     }
+    
+    private ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>> peerMapPerID = new ConcurrentHashMap<ID, ConcurrentHashMap<String, AtomicLong>>();
 
+    private void ensureSequence(Stanza stanza, Member receiver) {
+        if (stanza.getSequenceNumber() != -1) {
+            ConcurrentHashMap<String, AtomicLong> peerMap = peerMapPerID.get(stanza.getSequencePrincipal());
+            if (peerMap == null) {
+                peerMap = new ConcurrentHashMap<String, AtomicLong>();
+                ConcurrentHashMap<String, AtomicLong> otherPeerMap = peerMapPerID.putIfAbsent(stanza.getSequencePrincipal(), peerMap);
+                if (otherPeerMap == null) {
+                    stanza.getSequencePrincipal().on("dispose", new IDEventHandler() {
+
+                        @Override
+                        public void handle(String event, ID id, Object source, Map<String, Object> properties) {
+                            peerMapPerID.remove(id);
+                        }
+                        
+                    });
+                } else {
+                    peerMap = otherPeerMap;
+                }
+            }
+            AtomicLong nextNumber = peerMap.get(receiver.getUuid());
+            if (nextNumber == null) {
+                nextNumber = new AtomicLong(0);
+                AtomicLong otherNextNumber = peerMap.putIfAbsent(receiver.getUuid(), nextNumber);
+                nextNumber = (otherNextNumber != null) ? otherNextNumber : nextNumber;
+            }
+            stanza.setSequenceNumber(nextNumber.incrementAndGet() - 1);
+        }
+    }
 }

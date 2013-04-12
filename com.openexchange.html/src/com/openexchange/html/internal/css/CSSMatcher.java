@@ -260,9 +260,9 @@ public final class CSSMatcher {
     }
 
     /** Matches a starting CSS block */
-    private static final Pattern PATTERN_STYLE_STARTING_BLOCK = Pattern.compile("(?:#|\\.|@|[a-zA-Z])[^{]*?\\{");
+    private static final Pattern PATTERN_STYLE_STARTING_BLOCK = Pattern.compile("(?:#|\\.|@|[a-zA-Z])[^{/]*?\\{");
     /** Matches a complete CSS block, but not appropriate for possible nested blocks */
-    private static final Pattern PATTERN_STYLE_BLOCK = Pattern.compile("((?:#|\\.|[a-zA-Z])[^{]*?\\{)([^}]+)\\}");
+    private static final Pattern PATTERN_STYLE_BLOCK = Pattern.compile("((?:#|\\.|[a-zA-Z])[^{]*?\\{)([^}/]+)\\}");
     /** Matches a CR?LF plus indention */
     private static final Pattern CRLF = Pattern.compile("\r?\n( {2,})?");
 
@@ -415,43 +415,70 @@ public final class CSSMatcher {
             builder.append(line);
             return;
         }
-        final String[] words = SPLIT_WORDS.split(line, 0);
+        final String[] splits = SPLIT_COMMA.split(line, 0);
+        if (1 == splits.length) {
+            handleWords(line, cssPrefix, builder, helper);
+        } else {
+            boolean fst = true;
+            for (final String sWords : splits) {
+                if (!isEmpty(sWords)) {
+                    if (fst) {
+                        fst = false;
+                    } else {
+                        builder.append(", ");
+                    }
+                    handleWords(sWords, cssPrefix, builder, helper);
+                }
+            }
+        }
+    }
+
+    private static void handleWords(final String sWords, final String cssPrefix, final StringBuilder builder, final StringBuilder helper) {
+        final String[] words = SPLIT_WORDS.split(sWords, 0);
         if (1 == words.length && toLowerCase(words[0]).indexOf("body") >= 0) {
             // Special treatment for "body" selector
             builder.append('#').append(cssPrefix).append(' ');
         } else {
-            for (final String wordi : words) {
-                if (isEmpty(wordi)) {
-                    builder.append(wordi);
+            boolean first = true;
+            for (final String word : words) {
+                if (isEmpty(word)) {
+                    builder.append(word);
                 } else {
-                    boolean fst = true;
-                    for (final String selector : SPLIT_COMMA.split(wordi, 0)) {
-                        if (!isEmpty(selector)) {                            
-                            if (fst) {
-                                fst = false;
-                            } else {
-                                builder.append(',');
-                            }
-                            final char first = selector.charAt(0);
-                            if ('.' == first) {
-                                // .class -> #prefix .prefix-class
-                                builder.append('#').append(cssPrefix).append(' ');
-                                builder.append('.').append(cssPrefix).append('-');
-                                builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper)).append(' ');
-                            } else if ('#' == first) {
-                                // #id -> #prefix #prefix-id
-                                builder.append('#').append(cssPrefix).append(' ');
-                                builder.append('#').append(cssPrefix).append('-');
-                                builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper)).append(' ');
-                            } else {
-                                // element -> #prefix element
-                                builder.append('#').append(cssPrefix).append(' ');
-                                builder.append(replaceDotsAndHashes(selector, cssPrefix, helper)).append(' ');
-                            }
-                        }
-                    } // End of for loop
+                    if (first) {
+                        handleSelector(cssPrefix, builder, helper, word, true);
+                        first = false;
+                    } else {
+                        builder.append(' ');
+                        handleSelector(cssPrefix, builder, helper, word, false);
+                    }
                 }
             }
+            builder.append(' ');
+        }
+    }
+
+    private static void handleSelector(final String cssPrefix, final StringBuilder builder, final StringBuilder helper, final String selector, final boolean first) {
+        final char firstChar = selector.charAt(0);
+        if ('.' == firstChar) {
+            // .class -> #prefix .prefix-class
+            if (first) {
+                builder.append('#').append(cssPrefix).append(' ');
+            }
+            builder.append('.').append(cssPrefix).append('-');
+            builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper));
+        } else if ('#' == firstChar) {
+            // #id -> #prefix #prefix-id
+            if (first) {
+                builder.append('#').append(cssPrefix).append(' ');
+            }
+            builder.append('#').append(cssPrefix).append('-');
+            builder.append(replaceDotsAndHashes(selector.substring(1), cssPrefix, helper));
+        } else {
+            // element -> #prefix element
+            if (first) {
+                builder.append('#').append(cssPrefix).append(' ');
+            }
+            builder.append(replaceDotsAndHashes(selector, cssPrefix, helper));
         }
     }
 

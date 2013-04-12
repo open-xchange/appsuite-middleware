@@ -190,6 +190,9 @@ public final class ContactImageDataSource implements ImageDataSource {
          * Get contact
          */
         final Contact contact = optContact(session, objectId, folder, ContactField.IMAGE1, ContactField.IMAGE1_CONTENT_TYPE);
+        if (null == contact) {
+            throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(Integer.valueOf(objectId), Integer.valueOf(session.getContextId()));
+        }
         /*
          * Return contact image
          */

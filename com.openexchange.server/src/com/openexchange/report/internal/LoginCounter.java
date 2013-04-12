@@ -213,7 +213,7 @@ public class LoginCounter implements LoginCounterMBean {
             }
         }
 
-        results.put("sum", sum);
+        results.put(SUM, sum);
         return results;
     }
 

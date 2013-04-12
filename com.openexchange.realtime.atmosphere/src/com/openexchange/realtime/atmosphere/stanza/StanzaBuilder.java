@@ -103,6 +103,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
         to();
         id();
         selector();
+        sequence();
         payloads();
     }
 
@@ -129,6 +130,12 @@ public abstract class StanzaBuilder<T extends Stanza> {
     private void selector() {
         if (json.has("selector")) {
             stanza.setSelector(json.optString("selector"));
+        }
+    }
+    
+    private void sequence() {
+        if (json.has("seq")) {
+            stanza.setSequenceNumber(json.optLong("seq"));
         }
     }
 
@@ -192,6 +199,7 @@ public abstract class StanzaBuilder<T extends Stanza> {
      * their own PayloadElements PEj, PEk and so on. If a JSONObject contains a nested array container it is attached as seperate
      * PayloadTreeNode (PTNi) but the contained PayloadElement (PEi) doesn't contain any data. Instead the Elements of the array are
      * attached as children to the PayloadTreeNode.
+     * If the payload is marked as verbatim, the data is not transformed further but kept as-is
      *
      * @param payload The payload data
      * @return the PayloadTreeNode with the filled PayloadElement and possible children attached.
@@ -222,8 +230,9 @@ public abstract class StanzaBuilder<T extends Stanza> {
         }
 
         payloadElement = new PayloadElement(null, JSON, namespace, elementName);
-
-        if (data instanceof JSONArray) {
+        if (payload.optBoolean("verbatim", false)) {
+            payloadElement.setData(data, JSON);
+        } else if (data instanceof JSONArray) {
             // attach nested containers as children
             JSONArray array = (JSONArray) data;
             addPayloadsFromArray(node, array);

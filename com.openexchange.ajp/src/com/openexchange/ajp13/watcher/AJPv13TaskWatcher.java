@@ -313,6 +313,8 @@ public class AJPv13TaskWatcher {
              * Log exceeded task if it is not marked as a long-running task
              */
             {
+                final Throwable t = new Throwable();
+                t.setStackTrace(task.getStackTrace());
                 final Map<String, Object> taskProperties;
                 {
                     final Props taskProps = LogProperties.optLogProperties(task.getThread());
@@ -324,7 +326,7 @@ public class AJPv13TaskWatcher {
                     logBuilder.append("msec -> Processing time: ").append(now - task.getProcessingStartTime());
                     logBuilder.append("msec");
                     logBuilder.append(lineSeparator);
-                    appendStackTrace(task.getStackTrace(), lineSeparator, logBuilder);
+                    appendStackTrace(t, lineSeparator, logBuilder);
                     log.info(logBuilder);
                 } else {
                     final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(2048);
@@ -344,9 +346,13 @@ public class AJPv13TaskWatcher {
                     logBuilder.append("\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime());
                     logBuilder.append("msec -> Processing time: ").append(now - task.getProcessingStartTime());
                     logBuilder.append("msec");
-                    logBuilder.append(lineSeparator);
-                    appendStackTrace(task.getStackTrace(), lineSeparator, logBuilder);
-                    log.info(logBuilder);
+                    if (Log.appendTraceToMessage()) {
+                        logBuilder.append(lineSeparator);
+                        appendStackTrace(t, lineSeparator, logBuilder);                        
+                        log.info(logBuilder);
+                    } else {
+                        log.info(logBuilder, t);
+                    }
                 }
             }
             if (max > 0 && task.getProcessingStartTime() < max) {
@@ -356,12 +362,14 @@ public class AJPv13TaskWatcher {
 
         private static final int MAX_STACK_TRACE_ELEMENTS = 1000;
 
-        private static void appendStackTrace(final StackTraceElement[] trace, final String lineSeparator, final com.openexchange.java.StringAllocator sb) {
-            if (null == trace) {
+        private static void appendStackTrace(final Throwable throwable, final String lineSeparator, final com.openexchange.java.StringAllocator sb) {
+            if (null == throwable) {
                 return;
             }
-            for (int i = 0; i < trace.length && i < MAX_STACK_TRACE_ELEMENTS; i++) {
-                final StackTraceElement ste = trace[i];
+            final StackTraceElement[] t = throwable.getStackTrace();
+            final int length = (MAX_STACK_TRACE_ELEMENTS <= t.length) ? MAX_STACK_TRACE_ELEMENTS : t.length;
+            for (int i = 0; i < length; i++) {
+                final StackTraceElement ste = t[i];
                 final String className = ste.getClassName();
                 if (null != className) {
                     sb.append("    at ").append(className).append('.').append(ste.getMethodName());

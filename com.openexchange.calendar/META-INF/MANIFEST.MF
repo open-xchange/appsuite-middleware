@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Calendar Module
 Bundle-SymbolicName: com.openexchange.calendar
-Bundle-Version: 7.0.2
+Bundle-Version: 7.2.0
 Bundle-Activator: com.openexchange.calendar.osgi.CalendarActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -54,6 +54,7 @@ Import-Package: com.openexchange.ajax.fields,
  com.openexchange.mail.mime,
  com.openexchange.mail.mime.utils,
  com.openexchange.mail.usersetting,
+ com.openexchange.mail.utils,
  com.openexchange.osgi,
  com.openexchange.preferences,
  com.openexchange.quota,
@@ -77,6 +78,7 @@ Import-Package: com.openexchange.ajax.fields,
  com.openexchange.tools.stream,
  com.openexchange.tx,
  com.openexchange.user,
+ com.sun.mail.handlers,
  javax.activation,
  javax.mail,
  javax.mail.internet,

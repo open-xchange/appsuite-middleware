@@ -47,9 +47,9 @@ public class AllTest extends AbstractAJAXSession {
 
         final JSONArray users = (JSONArray) response.getData();
 
-        assertTrue("Empty but shouldn't", users.length() > 0);
+        assertTrue("Empty but shouldn't: " + users, users.length() > 0);
 
-        System.out.println(users);
+        // System.out.println(users);
     }
 
     public void testAllWithSort2() throws Exception {
@@ -60,9 +60,9 @@ public class AllTest extends AbstractAJAXSession {
 
         final JSONArray users = (JSONArray) response.getData();
 
-        assertTrue("Empty but shouldn't", users.length() > 0);
+        assertTrue("Empty but shouldn't: " + users, users.length() > 0);
 
-        System.out.println(users);
+        // System.out.println(users);
     }
 
 }

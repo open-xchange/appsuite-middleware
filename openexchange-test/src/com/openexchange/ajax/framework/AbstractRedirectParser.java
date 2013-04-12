@@ -71,14 +71,20 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
 
     private String location;
     private final boolean cookiesNeeded;
+    private final boolean failOnNonRedirect;
 
     protected AbstractRedirectParser() {
         this(true);
     }
 
     protected AbstractRedirectParser(boolean cookiesNeeded) {
+        this(cookiesNeeded, true);
+    }
+
+    protected AbstractRedirectParser(boolean cookiesNeeded, boolean failOnNonRedirect) {
         super(true);
         this.cookiesNeeded = cookiesNeeded;
+        this.failOnNonRedirect = failOnNonRedirect;
     }
 
     @Override
@@ -88,7 +94,15 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
 
     @Override
     public String checkResponse(HttpResponse resp) throws ParseException, IOException {
-        assertEquals("Response code is not okay.", HttpServletResponse.SC_MOVED_TEMPORARILY, resp.getStatusLine().getStatusCode());
+        if (failOnNonRedirect) {
+            assertEquals("Response code is not okay.", HttpServletResponse.SC_MOVED_TEMPORARILY, resp.getStatusLine().getStatusCode());            
+        } else {
+            final int statusCode = resp.getStatusLine().getStatusCode();
+            if (statusCode >= HttpServletResponse.SC_BAD_REQUEST) {
+                final String reasonPhrase = resp.getStatusLine().getReasonPhrase();
+                return Integer.toString(statusCode) + (null == reasonPhrase ? "" : reasonPhrase);
+            }
+        }
         Header[] headers = resp.getHeaders("Location");
         assertEquals("There should be exactly one Location header.", 1, headers.length);
         location = headers[0].getValue();
@@ -116,7 +130,7 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
 
     @Override
     public final T parse(String body) throws JSONException {
-        return createResponse(location);
+        return createResponse(null == location ? body : location);
     }
 
     @Override

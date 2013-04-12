@@ -201,15 +201,15 @@ public final class HazelcastInitializer {
              */
             HazelcastConfigurationService configService = activator.getService(HazelcastConfigurationService.class);
             if (null == configService) {
-                throw new IllegalStateException(
-                    new BundleException("Unable to access configuration service.", BundleException.ACTIVATOR_ERROR));
+                final BundleException bundleException = new BundleException("Unable to access configuration service.", BundleException.ACTIVATOR_ERROR);
+                throw wrap(bundleException);
             }
             Config config = null;
             try {
                 config = configService.getConfig();
             } catch (OXException e) {
-                throw new IllegalStateException(
-                    new BundleException("Unable to get hazelcast configuration", BundleException.ACTIVATOR_ERROR, e));
+                final BundleException bundleException = new BundleException("Unable to get hazelcast configuration: " + e.getPlainLogMessage(), BundleException.ACTIVATOR_ERROR, e);
+                throw wrap(bundleException);
             }
             configureNetworkJoin(nodes, false, config, logger);
             /*
@@ -293,22 +293,21 @@ public final class HazelcastInitializer {
             tcpIpConfig.clear();
             tcpIpConfig.setMembers(new ArrayList<String>(cur));
             return InitMode.RE_INITIALIZED;
-        } else {
-            final Set<String> members = resolve2Members(nodes, config.getNetworkConfig().getInterfaces().getInterfaces());
-            if (!members.isEmpty()) {
-                if (logger.isInfoEnabled()) {
-                    logger.info("\nHazelcast:\n\tConfiguring Hazelcast instance:\n\tInitial members: " + members + "\n");
-                }
-                join.getTcpIpConfig().setMembers(new ArrayList<String>(members));
-                return InitMode.INITIALIZED;
-            } else {
-                if (logger.isInfoEnabled()) {
-                    logger.info("\nHazelcast:\n\tConfiguring Hazelcast instance:\n\tNo initial members\n");
-                }
-                join.getTcpIpConfig().clear();
-                return InitMode.INITIALIZED;
-            }
         }
+        // Don't append
+        final Set<String> members = resolve2Members(nodes, config.getNetworkConfig().getInterfaces().getInterfaces());
+        if (members.isEmpty()) {
+            if (logger.isInfoEnabled()) {
+                logger.info("\nHazelcast:\n\tConfiguring Hazelcast instance:\n\tNo initial members\n");
+            }
+            join.getTcpIpConfig().clear();
+        } else {
+            if (logger.isInfoEnabled()) {
+                logger.info("\nHazelcast:\n\tConfiguring Hazelcast instance:\n\tInitial members: " + members + "\n");
+            }
+            join.getTcpIpConfig().setMembers(new ArrayList<String>(members));
+        }
+        return InitMode.INITIALIZED;
     }
 
     private static final Pattern SPLIT = Pattern.compile("\\%");
@@ -338,6 +337,10 @@ public final class HazelcastInitializer {
         } catch (final UnknownHostException e) {
             return Collections.emptySet();
         }
+    }
+
+    private RuntimeException wrap(final BundleException bundleException) {
+        return new IllegalStateException(bundleException);
     }
 
 }

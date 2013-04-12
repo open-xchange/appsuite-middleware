@@ -148,6 +148,25 @@ public final class FilterJerichoHandler implements JerichoHandler {
         SINGLE_TAGS = Collections.unmodifiableSet(s);
     }
 
+    
+    /**
+     * Gets the static HTML map.
+     * 
+     * @return The HTML map
+     */
+    public static Map<String, Map<String, Set<String>>> getStaticHTMLMap() {
+        return staticHTMLMap;
+    }
+
+    /**
+     * Gets the static CSS map.
+     * 
+     * @return The CSS map
+     */
+    public static Map<String, Set<String>> getStaticStyleMap() {
+        return staticStyleMap;
+    }
+
     /*-
      * Member stuff
      */
@@ -188,7 +207,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     private String cssPrefix;
 
-    private boolean changed = false;
+    private final boolean changed = false;
 
     /**
      * Initializes a new {@link FilterJerichoHandler}.

@@ -83,8 +83,11 @@ public class IdLookup {
         if (userService == null) {
             throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(UserService.class.getName());
         }
-
-        int contextId = contextService.getContextId(id.getContext());
+        String ctxName = id.getContext();
+        if (ctxName == null || ctxName.equals("")) {
+            ctxName = "defaultcontext";
+        }
+        int contextId = contextService.getContextId(ctxName);
         if (contextId == -1) {
             return null;
         }

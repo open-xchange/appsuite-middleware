@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -54,5 +54,11 @@ ox_update_permissions /opt/open-xchange/etc/aws.properties root:open-xchange 640
 /opt/open-xchange/sbin/setupautoscaling
 
 %changelog
+* Tue Apr 02 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Second candidate for 7.2.0 release
+* Tue Mar 26 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+First release candidate for 7.2.0
+* Fri Mar 15 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+prepare for 7.2.0
 * Tue Sep 11 2012 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Initial release

@@ -58,6 +58,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.regex.Matcher;
 import javax.activation.DataHandler;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
@@ -74,12 +75,12 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.java.Streams;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.dataobjects.compose.ComposeType;
+import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -90,8 +91,10 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.mime.datasource.MimeMessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.version.Version;
@@ -112,8 +115,7 @@ public class MailObject {
     private static volatile UnknownHostException warnSpam;
 
     static {
-        // Ensure every mail-related stuff is orderly started
-        MailInitialization.MailcapInitialization.getInstance().start();
+        // Host name initialization
         try {
             staticHostName = InetAddress.getLocalHost().getCanonicalHostName();
         } catch (final UnknownHostException e) {
@@ -448,37 +450,46 @@ public class MailObject {
             final String subType = ct.getSubType();
             if (multipart == null) {
                 if ("html".equalsIgnoreCase(subType) || "htm".equalsIgnoreCase(subType)) {
-                    msg.setContent(text, ct.toString());
+                    msg.setDataHandler(new DataHandler(new MessageDataSource(text.toString(), ct)));
+                    // msg.setContent(text, ct.toString());
                 } else if ("plain".equalsIgnoreCase(subType) || "enriched".equalsIgnoreCase(subType)) {
                     if (!ct.containsCharsetParameter()) {
-                        msg.setText((String) text);
+                        MessageUtility.setText((String) text, msg);
+                        // msg.setText((String) text);
                     } else {
-                        msg.setText((String) text, ct.getCharsetParameter());
+                        MessageUtility.setText((String) text, ct.getCharsetParameter(), msg);
+                        // msg.setText((String) text, ct.getCharsetParameter());
                     }
                 } else if (ct.startsWith("multipart/")) {
-                    msg.setContent((Multipart) text);
+                    MessageUtility.setContent((Multipart) text, msg);
+                    // msg.setContent((Multipart) text);
                 } else {
                     throw MailExceptionCode.UNSUPPORTED_MIME_TYPE.create(ct.toString());
                 }
             } else {
                 final MimeBodyPart textPart = new MimeBodyPart();
                 if ("html".equalsIgnoreCase(subType) || "htm".equalsIgnoreCase(subType)) {
-                    textPart.setContent(text, ct.toString());
+                    textPart.setDataHandler(new DataHandler(new MessageDataSource(text.toString(), ct)));
+                    // textPart.setContent(text, ct.toString());
                 } else if ("plain".equalsIgnoreCase(subType) || "enriched".equalsIgnoreCase(subType)) {
                     if (!ct.containsCharsetParameter()) {
-                        textPart.setText((String) text);
+                        MessageUtility.setText((String) text, textPart);
+                        // textPart.setText((String) text);
                     } else {
-                        textPart.setText((String) text, ct.getCharsetParameter());
+                        MessageUtility.setText((String) text, ct.getCharsetParameter(), textPart);
+                        // textPart.setText((String) text, ct.getCharsetParameter());
                     }
                 } else if (ct.startsWith("multipart/")) {
-                    textPart.setContent((Multipart) text);
+                    MessageUtility.setContent((Multipart) text, textPart);
+                    // textPart.setContent((Multipart) text);
                 } else {
                     throw MailExceptionCode.UNSUPPORTED_MIME_TYPE.create(ct.toString());
                 }
                 textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
                 multipart.addBodyPart(textPart, 0);
-                msg.setContent(multipart);
+                MessageUtility.setContent(multipart, msg);
+                // msg.setContent(multipart);
             }
             /*
              * Disposition notification
@@ -553,12 +564,7 @@ public class MailObject {
              */
             final MailTransport transport = MailTransport.getInstance(session);
             try {
-                final ByteArrayOutputStream bos = Streams.newByteArrayOutputStream(2048);
-                writeTo(msg, bos);
-                transport.sendRawMessage(bos.toByteArray());
-                if (DEBUG) {
-                    LOG.debug("Sent mail:\n" + new String(bos.toByteArray()));
-                }
+                transport.sendMailMessage(new ContentAwareComposedMailMessage(msg, session, null), ComposeType.NEW);
             } finally {
                 transport.close();
             }
@@ -569,30 +575,26 @@ public class MailObject {
         }
     }
 
-    private void writeTo(final MimeMessage msg, final ByteArrayOutputStream bos) throws IOException, MessagingException {
+    private MimeMessageDataSource writeTo(final MimeMessage msg, final ByteArrayOutputStream bos) throws IOException, MessagingException {
         try {
             msg.writeTo(bos);
+            return null;
         } catch (final javax.activation.UnsupportedDataTypeException e) {
-            final String cts = msg.getHeader("Content-Type", null);
-            if (null == cts || !cts.startsWith("multipart/")) {
-                throw e;
+            // Check for "no object DCH for MIME type xxxxx/yyyy"
+            if (toLowerCase(e.getMessage()).indexOf("no object dch") >= 0) {
+                // Not able to recover from JAF's "no object DCH for MIME type xxxxx/yyyy" error
+                // Perform the alternative transport with custom JAF DataHandler
+                LOG.warn(e.getMessage().replaceFirst("[dD][cC][hH]", Matcher.quoteReplacement("javax.activation.DataContentHandler")));
+                try {
+                    final MimeMessageDataSource dataSource = new MimeMessageDataSource(msg);
+                    bos.reset();
+                    dataSource.writeTo(bos);
+                    return dataSource;
+                } catch (final Exception ignore) {
+                    // Ignore
+                }
             }
-            boolean throwIt = false;
-            try {
-                final Multipart multipart = (Multipart) msg.getContent();
-                final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(2048);
-                multipart.writeTo(baos);
-                msg.setDataHandler(new DataHandler(new MessageDataSource(Streams.asInputStream(baos), multipart.getContentType())));
-                saveChangesSafe(msg);
-                bos.reset();
-                msg.writeTo(bos);
-                throwIt = false;
-            } catch (final Exception ignore) {
-                // Ignore
-            }
-            if (throwIt) {
-                throw e;
-            }
+            throw e;
         }
     }
 
@@ -733,5 +735,18 @@ public class MailObject {
         return arr;
     }
 
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
+    }
 
 }

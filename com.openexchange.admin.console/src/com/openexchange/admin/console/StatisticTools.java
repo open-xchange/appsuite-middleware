@@ -276,6 +276,7 @@ public class StatisticTools extends AbstractJMXTools {
             if (0 == count) {
                 final MBeanServerConnection initConnection = initConnection(admin, env);
                 System.out.print(getStats(initConnection, "org.json", "name", "JSONMBean"));
+                count++;
             }
         }
         if (null != parser.getOptionValue(this.clusterStats)) {

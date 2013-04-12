@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange System Extension Bundle
 Bundle-Description: Open-Xchange Extension Bundle exporting Sun classes
 Bundle-SymbolicName: com.openexchange.system.extension
-Bundle-Version: 7.0.2
+Bundle-Version: 7.2.0
 Bundle-Vendor: Open-Xchange Inc.
 Fragment-Host: system.bundle;extension:=framework
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -16,6 +16,15 @@ Export-Package: sun.security,
  com.sun.xml.internal.ws,
  com.sun.xml.internal.ws.addressing,
  com.sun.xml.internal.ws.api,
+ com.sun.xml.internal.ws.api.addressing,
+ com.sun.xml.internal.ws.api.client,
+ com.sun.xml.internal.ws.api.fastinfoset,
+ com.sun.xml.internal.ws.api.handler,
+ com.sun.xml.internal.ws.api.message,
+ com.sun.xml.internal.ws.api.model,
+ com.sun.xml.internal.ws.api.pipe,
+ com.sun.xml.internal.ws.api.server,
+ com.sun.xml.internal.ws.api.streaming,
  com.sun.xml.internal.ws.binding,
  com.sun.xml.internal.ws.client,
  com.sun.xml.internal.ws.developer,

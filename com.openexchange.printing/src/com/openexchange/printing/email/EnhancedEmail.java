@@ -49,6 +49,8 @@
 
 package com.openexchange.printing.email;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import com.openexchange.exception.OXException;
@@ -69,5 +71,8 @@ public class EnhancedEmail {
 		this.ctx = ctx;
 	}
 
-	
+	public List<Object> getAttachments(String folder, String id) {
+		List<Object> attachments = new LinkedList<Object>();
+		return attachments ;
+	}
 }

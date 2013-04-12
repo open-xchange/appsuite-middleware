@@ -139,7 +139,7 @@ public class SolrActivator extends HousekeepingActivator {
                 @Override
                 public void added(ServiceReference<QuartzService> ref, QuartzService service) {
                     try {
-                        Scheduler scheduler = service.getLocalScheduler();
+                        Scheduler scheduler = service.getDefaultScheduler();
                         if (scheduler.isStarted()) {
                             JobDetail jobDetail = JobBuilder
                                 .newJob(SolrConsistencyJob.class)

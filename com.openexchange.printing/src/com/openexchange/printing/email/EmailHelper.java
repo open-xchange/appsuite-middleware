@@ -61,8 +61,9 @@ import com.openexchange.printing.TemplateLabels;
 import com.openexchange.server.ServiceLookup;
 
 public class EmailHelper {
+
 	private final DateFormatter formatters;
-	private final EnhancedTaskOrAppointment enhanced;
+	private final EnhancedEmail enhanced;
 	private final TemplateLabels labels;
 
 	public EmailHelper(Map<String, Object> contact, Locale locale,
@@ -70,7 +71,7 @@ public class EmailHelper {
 			throws OXException {
 		super();
 		this.formatters = new DateFormatter(locale, timezone);
-		this.enhanced   = new EnhancedTaskOrAppointment(contact, services, ctx);
+		this.enhanced   = new EnhancedEmail(contact, services, ctx);
 		this.labels     = new TemplateLabels(locale, services);
 	}
 
@@ -78,7 +79,7 @@ public class EmailHelper {
 		return formatters;
 	}
 
-	public EnhancedTaskOrAppointment getEnhanced() {
+	public EnhancedEmail getEnhanced() {
 		return enhanced;
 	}
 

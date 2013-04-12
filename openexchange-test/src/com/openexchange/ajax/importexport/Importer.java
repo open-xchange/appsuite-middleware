@@ -75,7 +75,7 @@ public class Importer {
             if (i == 1043 || i == 7551 || i == 1051 || i == 1059 || i == 1713) {
                 continue;
             }
-            System.out.println(i);
+            // System.out.println(i);
             AJAXSession session = new AJAXSession();
             AJAXClient client = new AJAXClient(session, false); // normally true, but there is an explicit call at the end of the method
             LoginResponse loginResponse = client.execute(new LoginRequest(

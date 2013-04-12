@@ -82,12 +82,12 @@ public class SyncCollectionReport implements Report, DeltaVConstants {
 
     @Override
     public void init(DavResource dr, ReportInfo ri) throws DavException {
-    	System.out.println("init");
+    	// System.out.println("init");
     }
 
     @Override
     public Element toXml(Document dcmnt) {
-    	System.out.println("toxml");
+    	// System.out.println("toxml");
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

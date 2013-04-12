@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Server
 Bundle-SymbolicName: com.openexchange.server
-Bundle-Version: 7.0.2
+Bundle-Version: 7.2.0
 Bundle-Activator: com.openexchange.server.osgi.ServerCompositeActivator
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.damienmiller,
@@ -92,6 +92,7 @@ Import-Package: com.damienmiller,
  com.openexchange.version,
  com.openexchange.xml.jdom,
  com.openexchange.xml.spring,
+ com.sun.mail.handlers,
  com.sun.mail.iap,
  com.sun.mail.imap,
  com.sun.mail.imap.protocol,
@@ -139,7 +140,11 @@ Import-Package: com.damienmiller,
  javax.swing.text.html.parser,
  javax.swing.text.rtf,
  javax.swing.tree,
+ javax.xml,
+ javax.xml.bind,
  javax.xml.parsers,
+ javax.xml.stream,
+ javax.xml.stream.util,
  javax.xml.transform,
  javax.xml.transform.dom,
  javax.xml.transform.stream,
@@ -283,6 +288,7 @@ Export-Package: com.openexchange.ajax,
  com.openexchange.eav,
  com.openexchange.event.impl,
  com.openexchange.event.impl.osgi,
+ com.openexchange.filemanagement.internal,
  com.openexchange.folder,
  com.openexchange.folderstorage,
  com.openexchange.folderstorage.database.contentType,

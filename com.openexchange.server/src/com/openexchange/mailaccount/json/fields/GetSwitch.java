@@ -60,11 +60,15 @@ import com.openexchange.mailaccount.MailAccountDescription;
  */
 public class GetSwitch implements AttributeSwitch {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(GetSwitch.class));
-
     private final MailAccountDescription desc;
 
+    /**
+     * Initializes a new {@link GetSwitch}.
+     * 
+     * @param desc The account description
+     */
     public GetSwitch(final MailAccountDescription desc) {
+        super();
         this.desc = desc;
     }
 

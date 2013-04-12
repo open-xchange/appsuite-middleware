@@ -105,7 +105,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.glassfish.grizzly.ConnectionProbe;
 import org.glassfish.grizzly.Grizzly;
 import org.glassfish.grizzly.PortRange;
@@ -118,18 +117,6 @@ import org.glassfish.grizzly.filterchain.TransportFilter;
 import org.glassfish.grizzly.http.ContentEncoding;
 import org.glassfish.grizzly.http.GZipContentEncoding;
 import org.glassfish.grizzly.http.LZMAContentEncoding;
-import org.glassfish.grizzly.http.server.AddOn;
-import org.glassfish.grizzly.http.server.CompressionEncodingFilter;
-import org.glassfish.grizzly.http.server.CompressionLevel;
-import org.glassfish.grizzly.http.server.FileCacheFilter;
-import org.glassfish.grizzly.http.server.HttpHandler;
-import org.glassfish.grizzly.http.server.HttpHandlerChain;
-import org.glassfish.grizzly.http.server.HttpServer;
-import org.glassfish.grizzly.http.server.HttpServerFilter;
-import org.glassfish.grizzly.http.server.NetworkListener;
-import org.glassfish.grizzly.http.server.ServerConfiguration;
-import org.glassfish.grizzly.http.server.ServerFilterConfiguration;
-import org.glassfish.grizzly.http.server.StaticHttpHandler;
 import org.glassfish.grizzly.http.server.filecache.FileCache;
 import org.glassfish.grizzly.http.server.jmx.JmxEventListener;
 import org.glassfish.grizzly.memory.MemoryProbe;
@@ -143,8 +130,10 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.grizzly.ssl.SSLFilter;
 import org.glassfish.grizzly.threadpool.DefaultWorkerThread;
 import org.glassfish.grizzly.threadpool.ThreadPoolProbe;
+import org.glassfish.grizzly.utils.Charsets;
 import org.glassfish.grizzly.utils.DelayedExecutor;
 import org.glassfish.grizzly.utils.IdleTimeoutFilter;
+import com.openexchange.http.grizzly.GrizzlyConfig;
 
 
 /**
@@ -694,6 +683,10 @@ public class OXHttpServer extends HttpServer {
             }
 
             config.setTraceEnabled(config.isTraceEnabled() || listener.isTraceEnabled());
+            config.setMaxFormPostSize(listener.getMaxFormPostSize());
+            config.setMaxBufferedPostSize(listener.getMaxBufferedPostSize());
+            config.setDefaultQueryEncoding(Charsets.lookupCharset(GrizzlyConfig.getInstance().getDefaultEncoding()));
+            
 
             webServerFilter.setHttpHandler(httpHandlerChain);
 

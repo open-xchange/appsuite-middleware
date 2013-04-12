@@ -212,6 +212,10 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
         } else {
             userConfig = getUserConfigurationWithoutExtended(cache, ctx, userId, groups);
         }
+        if (null == userConfig) {
+            // TODO: or -->   throw UserConfigurationCodes.NOT_FOUND.create(Integer.valueOf(userId), Integer.valueOf(ctx.getContextId()));
+            return getFallback().getUserConfiguration(userId, groups, ctx, initExtendedPermissions);
+        }
         return userConfig;
     }
 
@@ -265,7 +269,8 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
      * Convenience method for calling the single array style implementation.
      */
     private UserConfiguration getUserConfigurationWithoutExtended(Cache cache, Context ctx, int userId, int[] groups) throws OXException {
-        return getUserConfigurationWithoutExtended(cache, ctx, new int[] { userId }, new int[][] { groups })[0];
+        final UserConfiguration[] ret = getUserConfigurationWithoutExtended(cache, ctx, new int[] { userId }, new int[][] { groups });
+        return null == ret || 0 == ret.length ? null : ret[0];
     }
 
     private static TIntObjectMap<UserConfiguration> getCachedUserConfiguration(Cache cache, Context ctx, int[] userIds, boolean extendedPermissions) {
@@ -288,7 +293,10 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     private static UserConfiguration[] convert(TIntObjectMap<UserConfiguration> map, int[] userIds) {
         List<UserConfiguration> retval = new ArrayList<UserConfiguration>(map.size());
         for (int userId : userIds) {
-            retval.add(map.get(userId).clone());
+            final UserConfiguration userConfiguration = map.get(userId);
+            if (null != userConfiguration) {
+                retval.add(userConfiguration.clone());
+            }
         }
         return retval.toArray(new UserConfiguration[map.size()]);
     }
@@ -332,13 +340,17 @@ public class CachingUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     private void loadUserConfiguration(Cache cache, TIntObjectMap<UserConfiguration> map, Context ctx, int[] userIds, int[][] groups, boolean extendedPermissions) throws OXException {
+        if (null == userIds || 0 == userIds.length) {
+            return;
+        }
         final UserConfiguration[] loaded;
-        if (0 == userIds.length) {
-            loaded = new UserConfiguration[0];
-        } else if (extendedPermissions) {
+        if (extendedPermissions) {
             loaded = getUserConfigurationWithoutExtended(cache, ctx, userIds, groups);
         } else {
             loaded = delegateStorage.getUserConfigurationWithoutExtended(ctx, userIds, groups);
+        }
+        if (null == loaded) {
+            return;
         }
         for (UserConfiguration userConfig : loaded) {
             int userId = userConfig.getUserId();

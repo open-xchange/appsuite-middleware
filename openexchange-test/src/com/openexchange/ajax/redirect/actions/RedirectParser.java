@@ -58,8 +58,8 @@ import com.openexchange.ajax.framework.AbstractRedirectParser;
  */
 public final class RedirectParser extends AbstractRedirectParser<RedirectResponse> {
 
-    RedirectParser() {
-        super(false);
+    RedirectParser(boolean failOnNonRedirect) {
+        super(false, failOnNonRedirect);
     }
 
     @Override

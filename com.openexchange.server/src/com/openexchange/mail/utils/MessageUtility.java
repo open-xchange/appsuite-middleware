@@ -53,32 +53,46 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Locale;
 import java.util.regex.Pattern;
+import javax.activation.DataContentHandler;
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.Part;
+import javax.mail.internet.HeaderTokenizer;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeUtility;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.datasource.DataContentHandlerDataSource;
+import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.datasource.StreamDataSource.InputStreamProvider;
 
 /**
  * {@link MessageUtility} - Provides various helper methods for message processing.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MessageUtility {
 
     private static final String STR_EMPTY = "";
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessageUtility.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MessageUtility.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -104,7 +118,7 @@ public final class MessageUtility {
 
     /**
      * Gets a valid charset-encoding for specified textual part; meaning its content type matches <code>text/&#42;</code>.
-     *
+     * 
      * @param p The part to detect a charset for
      * @param ct The part's content type
      * @return A valid charset-encoding for specified textual part.
@@ -129,7 +143,7 @@ public final class MessageUtility {
 
     /**
      * Gets a valid charset-encoding for specified textual part; meaning its content type matches <code>text/&#42;</code>.
-     *
+     * 
      * @param p The part to detect a charset for
      * @param ct The part's content type
      * @return A valid charset-encoding for specified textual part.
@@ -153,7 +167,7 @@ public final class MessageUtility {
 
     /**
      * Gets the input stream of specified part.
-     *
+     * 
      * @param p The part whose input stream shall be returned
      * @return The part's input stream.
      */
@@ -200,7 +214,7 @@ public final class MessageUtility {
      * Reads the string out of MIME part's input stream. On first try the input stream retrieved by
      * <code>javax.mail.Part.getInputStream()</code> is used. If an I/O error occurs (<code>java.io.IOException</code>) then the next try is
      * with part's raw input stream. If everything fails an empty string is returned.
-     *
+     * 
      * @param p The <code>javax.mail.Part</code> object
      * @param ct The part's content type
      * @return The string read from part's input stream or the empty string "" if everything failed
@@ -221,7 +235,7 @@ public final class MessageUtility {
      * Reads the string out of MIME part's input stream. On first try the input stream retrieved by
      * <code>javax.mail.Part.getInputStream()</code> is used. If an I/O error occurs (<code>java.io.IOException</code>) then the next try is
      * with part's raw input stream. If everything fails an empty string is returned.
-     *
+     * 
      * @param p The <code>javax.mail.Part</code> object
      * @param charset The charset
      * @return The string read from part's input stream or the empty string "" if everything failed
@@ -291,7 +305,7 @@ public final class MessageUtility {
 
     /**
      * Reads the stream content from given mail part.
-     *
+     * 
      * @param mailPart The mail part
      * @param charset The charset encoding used to generate a {@link String} object from raw bytes
      * @return the <code>String</code> read from mail part's stream
@@ -322,7 +336,7 @@ public final class MessageUtility {
 
     /**
      * Reads a string from given input stream using direct buffering.
-     *
+     * 
      * @param bytes The bytes to read
      * @param charset The charset
      * @return The <code>String</code> read from input stream
@@ -348,7 +362,7 @@ public final class MessageUtility {
 
     /**
      * Reads a string from given input stream using direct buffering.
-     *
+     * 
      * @param streamProvider The input stream provider
      * @param charset The charset
      * @return The <code>String</code> read from input stream
@@ -412,7 +426,7 @@ public final class MessageUtility {
 
     /**
      * Reads a string from given input stream using direct buffering.
-     *
+     * 
      * @param inStream The input stream
      * @param charset The charset
      * @return The <code>String</code> read from input stream
@@ -567,7 +581,7 @@ public final class MessageUtility {
 
     /**
      * Checks if specified charset name can be considered as BIG5.
-     *
+     * 
      * @param charset The charset name to check
      * @return <code>true</code> if charset name can be considered as BIG5; otherwise <code>false</code>
      */
@@ -587,7 +601,7 @@ public final class MessageUtility {
 
     /**
      * Checks if specified charset name can be considered as GB2312.
-     *
+     * 
      * @param charset The charset name to check
      * @return <code>true</code> if charset name can be considered as GB2312; otherwise <code>false</code>
      */
@@ -600,7 +614,7 @@ public final class MessageUtility {
 
     /**
      * Gets the byte content from specified input stream.
-     *
+     * 
      * @param in The input stream to get the byte content from
      * @return The byte content
      * @throws IOException If an I/O error occurs
@@ -636,7 +650,7 @@ public final class MessageUtility {
 
     /**
      * Check if specified bytes contain ascii-only content.
-     *
+     * 
      * @param bytes The bytes to check
      * @return <code>true</code> if bytes are ascii-only; otherwise <code>false</code>
      */
@@ -656,7 +670,7 @@ public final class MessageUtility {
 
     /**
      * Detects possible duplicate &lt;html&gt; tags and removes all but last.
-     *
+     * 
      * @param html The HTML content
      * @return The HTML content with duplicate &lt;html&gt; tags removed
      */
@@ -681,9 +695,9 @@ public final class MessageUtility {
         // Threshold exceeded
         int pos = lc.lastIndexOf(sub);
         if (pos > 0) {
-            pos = lc.lastIndexOf(sub, pos-1);
+            pos = lc.lastIndexOf(sub, pos - 1);
             if (pos >= 0) {
-                return html.substring(pos+6);
+                return html.substring(pos + 6);
             }
         }
         return html;
@@ -699,6 +713,251 @@ public final class MessageUtility {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    // ---------------------------------- JAF DataHandler stuff ---------------------------------------- //
+
+    private static volatile Field dataContentHandlerField;
+    private static Field dataContentHandlerField() {
+        Field f = dataContentHandlerField;
+        if (null == f) {
+            synchronized (MessageUtility.class) {
+                f = dataContentHandlerField;
+                if (null == f) {
+                    try {
+                        f = DataHandler.class.getDeclaredField("dataContentHandler");
+                        f.setAccessible(true);
+                    } catch (final Exception e) {
+                        f = null;
+                    }
+                    dataContentHandlerField = f;
+                }
+            }
+        }
+        return f;
+    }
+
+    private static volatile Field objectField;
+    private static Field objectField() {
+        Field f = objectField;
+        if (null == f) {
+            synchronized (MessageUtility.class) {
+                f = objectField;
+                if (null == f) {
+                    try {
+                        f = DataHandler.class.getDeclaredField("object");
+                        f.setAccessible(true);
+                    } catch (final Exception e) {
+                        f = null;
+                    }
+                    objectField = f;
+                }
+            }
+        }
+        return f;
+    }
+
+    private static volatile Field objectMimeTypeField;
+    private static Field objectMimeTypeField() {
+        Field f = objectMimeTypeField;
+        if (null == f) {
+            synchronized (MessageUtility.class) {
+                f = objectMimeTypeField;
+                if (null == f) {
+                    try {
+                        f = DataHandler.class.getDeclaredField("objectMimeType");
+                        f.setAccessible(true);
+                    } catch (final Exception e) {
+                        f = null;
+                    }
+                    objectMimeTypeField = f;
+                }
+            }
+        }
+        return f;
+    }
+
+    private static void setField(final Field field, final Object obj, final Object value, final String name) throws MessagingException {
+        try {
+            if (null == field) {
+                throw new NoSuchFieldException(name);
+            }
+            field.set(obj, value);
+        } catch (final SecurityException e) {
+            throw new MessagingException(e.getMessage(), e);
+        } catch (final IllegalArgumentException e) {
+            throw new MessagingException(e.getMessage(), e);
+        } catch (final NoSuchFieldException e) {
+            throw new MessagingException(e.getMessage(), e);
+        } catch (final IllegalAccessException e) {
+            throw new MessagingException(e.getMessage(), e);
+        } catch (final RuntimeException e) {
+            throw new MessagingException(e.getMessage(), e);
+        }
+    }
+
+    private static DataHandler setFields(final DataHandler dataHandler, final DataContentHandler dch, final Object object, final String objectMimeType) throws MessagingException {
+        if (null == dataHandler) {
+            return dataHandler;
+        }
+        if (null != dch) {
+            setField(dataContentHandlerField(), dataHandler, dch, "dataContentHandler");
+        }
+        if (null != object) {
+            setField(objectField(), dataHandler, object, "object");
+        }
+        if (null != objectMimeType) {
+            setField(objectMimeTypeField(), dataHandler, objectMimeType, "objectMimeType");
+        }
+        return dataHandler;
+    }
+
+    private static final com.sun.mail.handlers.multipart_mixed  DCH_MULTIPART   = new com.sun.mail.handlers.multipart_mixed();
+    private static final com.sun.mail.handlers.message_rfc822   DCH_MESSAGE     = new com.sun.mail.handlers.message_rfc822();
+    private static final com.sun.mail.handlers.text_plain       DCH_TEXT_PLAIN  = new com.sun.mail.handlers.text_plain();
+    private static final com.sun.mail.handlers.text_html        DCH_TEXT_HTML   = new com.sun.mail.handlers.text_html();
+    private static final com.sun.mail.handlers.text_xml         DCH_TEXT_XML    = new com.sun.mail.handlers.text_xml();
+
+    private static DataContentHandler dchFor(final String subtype) {
+        if (subtype.startsWith("plain")) {
+            return DCH_TEXT_PLAIN;
+        } else if (subtype.startsWith("htm")) {
+            return DCH_TEXT_HTML;
+        } else if (subtype.startsWith("xml")) {
+            return DCH_TEXT_XML;
+        }
+        return null;
+    }
+
+    /**
+     * Creates a new {@code DataHandler} with specified {@code DataSource}, {@code DataContentHandler}, object and MIME type set.
+     * 
+     * @param dataSource The data source
+     * @param dch The data content handler (<i>optional</i>; <code>null</code> is accepted)
+     * @param object The object (<i>optional</i>; <code>null</code> is accepted)
+     * @param objectMimeType The MIME type (<i>optional</i>; <code>null</code> is accepted)
+     * @return The resulting data handler
+     * @throws MessagingException If creating such a data handler fail
+     */
+    public static DataHandler dhFor(final DataSource dataSource, final DataContentHandler dch, final Object object, final String objectMimeType) throws MessagingException {
+        return setFields(new DataHandler(dataSource), dch, object, objectMimeType);
+    }
+
+    /**
+     * Sets the message content
+     * 
+     * @param message The message to set
+     * @param part The part
+     * @throws MessagingException If setting content fails
+     */
+    public static void setContent(final Message message, final Part part) throws MessagingException {
+        if (null == message || null == part) {
+            return;
+        }
+        part.setDataHandler(dhFor(new DataContentHandlerDataSource(message, "message/rfc822", DCH_MESSAGE), DCH_MESSAGE, message, "message/rfc822"));
+    }
+
+    /**
+     * Sets the multipart content
+     * 
+     * @param multipart The multipart to set
+     * @param part The part
+     * @throws MessagingException If setting content fails
+     */
+    public static void setContent(final Multipart multipart, final Part part) throws MessagingException {
+        setContent(multipart, null, part);
+    }
+
+    /**
+     * Sets the multipart content
+     * 
+     * @param multipart The multipart to set
+     * @param contentType The content type
+     * @param part The part
+     * @throws MessagingException If setting content fails
+     */
+    public static void setContent(final Multipart multipart, final String contentType, final Part part) throws MessagingException {
+        if (null == multipart || null == part) {
+            return;
+        }
+        final String objectMimeType = null == contentType ? multipart.getContentType() : contentType;
+        part.setDataHandler(dhFor(new DataContentHandlerDataSource(multipart, objectMimeType, DCH_MULTIPART), DCH_MULTIPART, multipart, objectMimeType));
+    }
+
+    /**
+     * Convenience method that sets the given String as this part's content, with a primary MIME type of "text/plain; charset=us-ascii".
+     * 
+     * @param text The text content to set
+     * @param charset The charset to use for the text
+     * @exception MessagingException If an error occurs
+     */
+    public static void setText(final String text, final Part part) throws MessagingException {
+        setText(text, null, null, part);
+    }
+
+    /**
+     * Convenience method that sets the given String as this part's content, with a primary MIME type of "text/plain".
+     * <p>
+     * The given Unicode string will be charset-encoded using the specified charset. The charset is also used to set the "charset"
+     * parameter.
+     * 
+     * @param text The text content to set
+     * @param charset The charset to use for the text
+     * @exception MessagingException If an error occurs
+     */
+    public static void setText(final String text, final String charset, final Part part) throws MessagingException {
+        setText(text, charset, null, part);
+    }
+
+    private static final String HDR_CONTENT_TYPE = MessageHeaders.HDR_CONTENT_TYPE;
+
+    /**
+     * Convenience method that sets the given String as this part's content, with a primary MIME type of "text" and the specified MIME
+     * subtype.
+     * <p>
+     * The given Unicode string will be charset-encoded using the specified charset. The charset is also used to set the "charset"
+     * parameter.
+     * 
+     * @param text The text content to set
+     * @param charset The charset to use for the text
+     * @param subtype The MIME subtype to use (e.g., "html")
+     * @exception MessagingException If an error occurs
+     */
+    public static void setText(final String text, final String charset, final String subtype, final Part part) throws MessagingException {
+        if (null == text || null == part) {
+            return;
+        }
+        final String st = null == subtype ? "plain" : subtype;
+        final String objectMimeType = new StringAllocator(32).append("text/").append(st).append("; charset=").append(
+            MimeUtility.quote(null == charset ? "us-ascii" : charset, HeaderTokenizer.MIME)).toString();
+        final DataContentHandler dch = dchFor(toLowerCase(st));
+        if (null == dch) {
+            // No object DCH for MIME type
+            try {
+                part.setDataHandler(new DataHandler(new MessageDataSource(text, objectMimeType)));
+            } catch (final UnsupportedEncodingException e) {
+                throw new MessagingException("Unsupported encoding", e);
+            } catch (final OXException e) {
+                throw new MessagingException("Invalid MIME type", e);
+            }
+        } else {
+            part.setDataHandler(dhFor(new DataContentHandlerDataSource(text, objectMimeType, dch), dch, text, objectMimeType));
+        }
+        part.setHeader(HDR_CONTENT_TYPE, objectMimeType);
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

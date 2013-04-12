@@ -61,12 +61,17 @@ import javax.management.MBeanException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface LoginCounterMBean {
+    
+    /**
+     * The key to receive the summed up number of logins.
+     */
+    public static final String SUM = "sum";
 
     /**
      * Gets the number of logins happened in specified range.
      * This is a mapping "client identifier => number of logins in time range".
      * The map always contains a key "sum" that sums up all logins. If the aggregate parameter
-     * is set to <code>true</code>, the map only contains the sum key.
+     * is set to <code>true</code>, the map only contains the sum key. Use {@link #SUM} to receive the according number.
      *
      * @param startDate The start time
      * @param endDate The end time
@@ -92,19 +97,5 @@ public interface LoginCounterMBean {
      * @throws MBeanException If retrieval fails
      */
     List<Object[]> getLastLoginTimeStamp(int userId, int contextId, String client) throws MBeanException;
-
-//    /**
-//     * Sets the device wildcard to filter by; e.g. <code>"com.openexchange.*"</code>
-//     *
-//     * @param wildcard The device wildcard
-//     */
-//    public void setDeviceWildcard(String wildcard);
-//
-//    /**
-//     * Gets the device wildcard to filter by; e.g. <code>"com.openexchange.*"</code>
-//     *
-//     * @return The device wildcard or <code>null</code>
-//     */
-//    public String getDeviceWildcard();
 
 }

@@ -52,6 +52,7 @@ package com.openexchange.service.indexing.monitoring.console;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.Map;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
@@ -67,7 +68,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-import com.openexchange.service.indexing.IndexingServiceMBean;
+import com.openexchange.service.indexing.JobMonitoringMBean;
 
 
 /**
@@ -87,8 +88,9 @@ public class IndexingServiceMonitoringCLT {
         Options options = new Options();
         options.addOption(createOption("h", "help", false, "Prints a help text.", false));
         options.addOption(createOption("r", "running", false, "Lists only jobs that are currently running on this node.", false));
-        options.addOption(createOption("s", "scheduled", false, "Lists only all cluster-wide scheduled jobs.", false));
-        options.addOption(createOption("d", "details", false, "Does not only list the numbers of jobs but also the job names.", false));
+        options.addOption(createOption("w", "waiting", false, "Lists all locally stored jobs that are waiting to get fired.", false));
+        options.addOption(createOption("s", "stored", false, "Lists only all cluster-wide stored jobs.", false));
+        options.addOption(createOption("d", "details", false, "Does not only print the numbers of jobs but also the job names.", false));
         CommandLineParser parser = new PosixParser();
         JMXConnector jmxConnector = null;
         try {
@@ -98,40 +100,62 @@ public class IndexingServiceMonitoringCLT {
                 return 0;
             }
 
+            boolean showDetails = cmd.hasOption('d');
+            boolean listRunning = cmd.hasOption('r');
+            boolean listWaiting = cmd.hasOption('w');
+            boolean listStored = cmd.hasOption('s');
+            if (!listRunning && !listWaiting && !listStored) {
+                listRunning = true;
+                listWaiting = true;
+                listStored = true;
+            }
+            
             JMXServiceURL url = new JMXServiceURL(JMX_URL);
             jmxConnector = JMXConnectorFactory.connect(url, null);
             MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
-            IndexingServiceMBean proxy = indexingServiceMBeanProxy(mbsc);
-            List<String> scheduledJobs = null;
-            List<String> runningJobs = null;
-            if (cmd.hasOption('s')) {
-                scheduledJobs = proxy.getAllScheduledJobs();
-            } else if (cmd.hasOption('r')) {
-                runningJobs = proxy.getAllLocalRunningJobs();
+            JobMonitoringMBean proxy = indexingServiceMBeanProxy(mbsc);
+            StringBuilder sb = new StringBuilder();
+            if (showDetails) {
+                if (listStored) {
+                    List<String> storedJobs = proxy.getStoredJobInfos();
+                    sb.append("All scheduled jobs: ").append(storedJobs.size()).append('\n');
+                    for (String job : storedJobs) {
+                        sb.append("    ").append(job).append('\n');
+                    }
+                    sb.append('\n');
+                }
+                
+                if (listRunning) {
+                    Map<String, String> runningJobs = proxy.getRunningJobs();
+                    sb.append("Currently running jobs on this node: ").append(runningJobs.size()).append('\n');
+                    for (String job : runningJobs.keySet()) {
+                        sb.append("    ").append(job).append('\n');
+                    }
+                    sb.append('\n');
+                }
+                
+                if (listWaiting) {
+                    List<String> triggers = proxy.getLocalTriggers();
+                    sb.append("Locally waiting jobs: ").append(triggers.size()).append('\n');
+                    for (String trigger : triggers) {
+                        sb.append("    ").append(trigger).append('\n');
+                    }
+                }
             } else {
-                scheduledJobs = proxy.getAllScheduledJobs();
-                runningJobs = proxy.getAllLocalRunningJobs();
-            }
-            
-            if (scheduledJobs != null) {
-                System.out.println("All scheduled jobs: " + scheduledJobs.size());
-                if (cmd.hasOption('d')) {
-                    for (String job : scheduledJobs) {
-                        System.out.println("    " + job);
-                    }
+                if (listStored) {
+                    sb.append("All scheduled jobs: ").append(proxy.countStoredJobInfos()).append('\n');
+                } 
+                
+                if (listRunning) {
+                    sb.append("Currently running jobs on this node: ").append(proxy.countRunningJobs()).append('\n');
+                }
+                
+                if (listWaiting) {
+                    sb.append("Locally waiting jobs: ").append(proxy.countLocalTriggers()).append('\n');
                 }
             }
             
-            System.out.println();
-            if (runningJobs != null) {
-                System.out.println("Currently running jobs on this node: " + runningJobs.size());
-                if (cmd.hasOption('d')) {
-                    for (String job : runningJobs) {
-                        System.out.println("    " + job);
-                    }
-                }
-            }
-
+            System.out.print(sb.toString());
             return 0;
         } catch (ParseException e) {
             printHelp(options);
@@ -159,18 +183,18 @@ public class IndexingServiceMonitoringCLT {
         }
     }
 
-    private static IndexingServiceMBean indexingServiceMBeanProxy(MBeanServerConnection mbsc) throws MalformedObjectNameException {
-        IndexingServiceMBean mBean = MBeanServerInvocationHandler.newProxyInstance(mbsc, new ObjectName(
-            IndexingServiceMBean.DOMAIN,
-            IndexingServiceMBean.KEY,
-            IndexingServiceMBean.VALUE), IndexingServiceMBean.class, false);
+    private static JobMonitoringMBean indexingServiceMBeanProxy(MBeanServerConnection mbsc) throws MalformedObjectNameException {
+        JobMonitoringMBean mBean = MBeanServerInvocationHandler.newProxyInstance(mbsc, new ObjectName(
+            JobMonitoringMBean.DOMAIN,
+            JobMonitoringMBean.KEY,
+            JobMonitoringMBean.VALUE), JobMonitoringMBean.class, false);
 
         return mBean;
     }
 
     private static void printHelp(Options options) {
         HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp("listindexingjobs", "Lists all scheduled indexing jobs and the ones that are currently running on this node.", options, null, false);
+        formatter.printHelp("listindexingjobs", "Lists all scheduled indexing jobs and the ones that are stored and currently running on this node.", options, null, false);
     }
 
     private static Option createOption(String shortArg, String longArg, boolean hasArg, String description, boolean required) {

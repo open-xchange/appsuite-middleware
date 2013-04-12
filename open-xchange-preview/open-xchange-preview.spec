@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 5
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -44,12 +44,24 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.2.0 release
+* Tue Mar 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First release candidate for 7.2.0
+* Fri Mar 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.2.0
+* Thu Jan 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.0.1
+* Tue Dec 04 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.0.0 release
 * Tue Nov 13 2012 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for EDP drop #6
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Third release build for EDP drop #5
 * Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Second release build for EDP drop #5
+* Fri Oct 26 2012 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 6.22.1
 * Thu Oct 11 2012 Marcus Klein <marcus.klein@open-xchange.com>
 Release build for EDP drop #5
 * Tue Sep 04 2012 Marcus Klein <marcus.klein@open-xchange.com>

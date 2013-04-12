@@ -51,9 +51,13 @@ package com.openexchange.ajax.requesthandler;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -64,6 +68,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.RequestConstants;
@@ -75,6 +80,7 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.strings.StringParser;
 
@@ -157,6 +163,9 @@ public class AJAXRequestData {
     /** The eTag */
     private String eTag;
 
+    /** The <code>User-Agent</code> value */
+    private String userAgent;
+
     /** The expires millis */
     private long expires;
 
@@ -174,6 +183,9 @@ public class AJAXRequestData {
 
     /** The path prefix; &lt;prefix&gt; + <code>'/'</code> + &lt;module&gt; */
     private String prefix;
+
+    /** The optional <code>HttpServletResponse</code> instance */
+    private HttpServletResponse httpServletResponse;
 
     /**
      * Initializes a new {@link AJAXRequestData}.
@@ -241,6 +253,7 @@ public class AJAXRequestData {
         copy.remoteAddress = remoteAddress;
         copy.route = route;
         copy.servletRequestUri = servletRequestUri;
+        copy.userAgent = userAgent;
         /*
          * Not sure about following members, therefore leave to null
          */
@@ -248,6 +261,41 @@ public class AJAXRequestData {
         copy.uploadEvent = null;
         copy.uploadStreamProvider = null;
         return copy;
+    }
+    
+    /**
+     * Sets the <code>User-Agent</code> value
+     * 
+     * @param userAgent The <code>User-Agent</code> value
+     */
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+    
+    /**
+     * Gets the <code>User-Agent</code> value
+     * 
+     * @return The <code>User-Agent</code> value
+     */
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    /**
+     * Sets the <code>HttpServletResponse</code> instance to enable support for:
+     * <ul>
+     * <li> {@link #optOutputStream()} </li>
+     * <li> {@link #optWriter()} </li>
+     * <li> {@link #setCharacterEncoding(String)} </li>
+     * <ul>
+     * <p>
+     * 
+     * @param resp The <code>HttpServletResponse</code> instance
+     * @return This request data with <code>HttpServletResponse</code> instance applied
+     */
+    public AJAXRequestData setHttpServletResponse(final HttpServletResponse resp) {
+        this.httpServletResponse = resp;
+        return this;
     }
 
     /**
@@ -288,6 +336,130 @@ public class AJAXRequestData {
     }
 
     /**
+     * Returns a {@link OutputStream} suitable for writing binary data in the response. The servlet container does not encode the
+     * binary data.
+     * <p>
+     * Calling flush() on the OutputStream commits the response. Either this method or {@link #getWriter} may be called to write the
+     * body, not both.
+     * 
+     * @return A {@link OutputStream} for writing binary data or <code>null</code>
+     * @throws IllegalStateException If the <code>getWriter</code> method has already been called
+     * @throws IOException If an input or output exception occurred
+     * @see #optWriter()
+     */
+    public OutputStream optOutputStream() throws IOException {
+        if (null != httpServletResponse) {
+            return httpServletResponse.getOutputStream();
+        }
+        return null;
+    }
+
+    /**
+     * Returns a <code>PrintWriter</code> object that can send character text to the client. The <code>PrintWriter</code> uses the character
+     * encoding returned by {@link #getCharacterEncoding}. If the response's character encoding has not been specified as described in
+     * <code>getCharacterEncoding</code> (i.e., the method just returns the default value <code>ISO-8859-1</code>), <code>getWriter</code>
+     * updates it to <code>ISO-8859-1</code>.
+     * <p>
+     * Calling flush() on the <code>PrintWriter</code> commits the response.
+     * <p>
+     * Either this method or {@link #getOutputStream} may be called to write the body, not both.
+     * 
+     * @return A <code>PrintWriter</code> object that can return character data to the client or <code>null</code>
+     * @throws UnsupportedEncodingException If the character encoding is invalid
+     * @throws IllegalStateException If the <code>getOutputStream</code> method has already been called
+     * @throws IOException If an input or output exception occurred
+     * @see #getOutputStream
+     * @see #setCharacterEncoding
+     */
+    public PrintWriter optWriter() throws IOException {
+        if (null != httpServletResponse) {
+            return httpServletResponse.getWriter();
+        }
+        return null;
+    }
+
+    /**
+     * Sets the character encoding (MIME charset) of the response being sent to the client, for example, to UTF-8.
+     * <p>
+     * This method can be called repeatedly to change the character encoding. This method has no effect if it is called after
+     * <code>optWriter</code> has been called or after the response has been committed.
+     * 
+     * @param charset A String specifying only the character set defined by IANA Character Sets
+     *            (http://www.iana.org/assignments/character-sets)
+     * @return <code>true</code> if set; otherwise <code>false</code>
+     */
+    public boolean setResponseCharacterEncoding(final String charset) {
+        final HttpServletResponse resp = this.httpServletResponse;
+        if (null != resp) {
+            resp.setCharacterEncoding(charset);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Sets specified header.
+     * <p>
+     * Requires a valid {@link HttpServletResponse} instance to be available; otherwise this is a no-op.
+     * 
+     * @param name The name
+     * @param value The value
+     * @return <code>true</code> if set; otherwise <code>false</code>
+     */
+    public boolean setResponseHeader(final String name, final String value) {
+        final HttpServletResponse resp = this.httpServletResponse;
+        if (null != resp) {
+            resp.setHeader(name, value);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Remove <tt>Pragma</tt> response header value if we are going to write directly into servlet's output stream cause then some browsers
+     * do not allow this header.
+     * 
+     * @return <code>true</code> if applied; otherwise <code>false</code>
+     */
+    public boolean removeCachingHeader() {
+        final HttpServletResponse resp = this.httpServletResponse;
+        if (null != resp) {
+            Tools.removeCachingHeader(resp);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>,
+     * <i>Cache-Control</i>, and <i>Pragma</i>)
+     *
+     * @param eTag The ETag value
+     * @param expires The optional expires time, pass <code>-1</code> to set default expiry (+ 1 year)
+     * @return <code>true</code> if set; otherwise <code>false</code>
+     */
+    public boolean setResponseETag(final String eTag, final long expires) {
+        return setResponseETag(eTag, expires > 0 ? new Date(expires) : null);
+    }
+
+    /**
+     * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>,
+     * <i>Cache-Control</i>, and <i>Pragma</i>)
+     *
+     * @param eTag The ETag value
+     * @param expires The optional expires date, pass <code>null</code> to set default expiry (+ 1 year)
+     * @return <code>true</code> if set; otherwise <code>false</code>
+     */
+    public boolean setResponseETag(final String eTag, final Date expires) {
+        final HttpServletResponse resp = this.httpServletResponse;
+        if (null != resp) {
+            Tools.setETag(eTag, expires, resp);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Gets the decorator identifiers
      * 
      * @return The decorator identifiers
@@ -319,7 +491,7 @@ public class AJAXRequestData {
      * 
      * @return The HTTP Servlet request or <code>null</code> if absent
      */
-    public HttpServletRequest getHttpServletRequest() {
+    public HttpServletRequest optHttpServletRequest() {
         return httpServletRequest;
     }
 
@@ -354,16 +526,23 @@ public class AJAXRequestData {
     }
 
     /**
-     * Gets the ETag
+     * Gets the ETag which is the <code>"If-None-Match"</code> header taken from request.
      * 
-     * @return The ETag
+     * @return The ETag or <code>null</code>
      */
     public String getETag() {
+        String eTag = this.eTag;
+        if (null == eTag) {
+            eTag = getHeader("If-None-Match");
+            if (null != eTag) {
+                this.eTag = eTag;
+            }
+        }
         return eTag;
     }
 
     /**
-     * Sets the ETag
+     * Sets the ETag which is the <code>"If-None-Match"</code> header taken from request.
      * 
      * @param eTag The ETag to set
      */
@@ -539,7 +718,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the value mapped to given parameter name.
-     *
+     * 
      * @param name The parameter name
      * @return The value mapped to given parameter name
      * @throws NullPointerException If name is <code>null</code>
@@ -551,7 +730,7 @@ public class AJAXRequestData {
 
     /**
      * Gets the value mapped to given parameter name.
-     *
+     * 
      * @param name The parameter name
      * @return The value mapped to given parameter name
      * @throws NullPointerException If name is <code>null</code>
@@ -707,6 +886,8 @@ public class AJAXRequestData {
 
     /**
      * Whether this request has a secure connection.
+     * <p>
+     * <b>Note</b>: This flag should already consider setting of <tt>'com.openexchange.forceHTTPS'</tt> property
      * 
      * @return <code>true</code> if this request has a secure connection; otherwise <code>false</code>
      */
@@ -744,6 +925,8 @@ public class AJAXRequestData {
 
     /**
      * Sets whether this request has a secure connection.
+     * <p>
+     * <b>Note</b>: This flag should already consider setting of <tt>'com.openexchange.forceHTTPS'</tt> property
      * 
      * @param secure <code>true</code> if this request has a secure connection; otherwise <code>false</code>
      */
@@ -818,7 +1001,7 @@ public class AJAXRequestData {
                 headers.remove(header);
             } else {
                 headers.put(header, value);
-            }            
+            }
         }
     }
 
@@ -1183,13 +1366,13 @@ public class AJAXRequestData {
      * Sets the path prefix.
      * <p>
      * &lt;prefix&gt; + <code>'/'</code> + &lt;module&gt;
-     *
+     * 
      * @param prefix The prefix
      */
     public void setPrefix(String prefix) {
         this.prefix = prefix;
     }
-    
+
     /**
      * Gets the path prefix.
      * <p>

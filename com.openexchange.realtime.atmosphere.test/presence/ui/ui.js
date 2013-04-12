@@ -6,6 +6,7 @@ define("ui/ui", function () {
     $ui.append('<div id="content"></div>');
     $ui.append('<textarea disabled="disabled" id="input">'),
     $ui.append('<button id="send">Send</button>'),
+    $ui.append('<button id="logout">Logout</button>'),
     "<br />",
     $log = $('<pre>', {width: "600px", height: "300px"}).css({overflow: "auto"})
   };
@@ -18,22 +19,24 @@ define("ui/ui", function () {
     var content = $('#content');
     var input = $('#input');
     var send = $('#send')
+    var logout = $('#logout')
 
     var myName = ox.userName;
     var socket = $.atmosphere;
     var splits = document.location.toString().split('/');
-    var proto = splits[0]; var host = splits[2];
+    var proto = splits[0];
+    var host = splits[2];
     var url = proto+"//"+host+"/realtime/atmosphere/rt";
+    var loginUrl = proto+"//"+host+"/appsuite/api/login";
     
     var request = {
-        url: url,
+        url: url+'?session='+session,
         contentType : "application/json",
         logLevel : 'debug',
         transport : 'long-polling' ,
         fallbackTransport: 'long-polling',
-        timeout: 50000,
-        maxRequests : 3,
-        headers : {session: session}
+        timeout: 90000,
+        maxRequests : 3
         };
 
 
@@ -72,7 +75,7 @@ define("ui/ui", function () {
     
 
     send.click(function() {
-    	console.log("button clicked");
+    	console.log("send clicked");
             var msg = input.val();
             console.log("message was:"+msg);
             var json = jQuery.parseJSON(msg);
@@ -81,6 +84,13 @@ define("ui/ui", function () {
             console.log("pushed message:"+jQuery.stringifyJSON(json));
             //input.val('');
     });
+    
+    logout.click(function() {
+    	console.log("logout clicked");
+    	$.post(loginUrl, { action: "logout", session: session } ).done(function(data) {location.reload()});
+    });
+    
+    
 
     function addMessage(message, datetime) {
     	var time =(datetime.getHours() < 10 ? '0' + datetime.getHours() : datetime.getHours()) + ':'

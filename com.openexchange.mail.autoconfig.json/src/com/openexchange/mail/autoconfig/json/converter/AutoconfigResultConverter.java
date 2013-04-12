@@ -84,19 +84,15 @@ public class AutoconfigResultConverter implements ResultConverter {
 
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        Autoconfig autoconfig = (Autoconfig) result.getResultObject();
-
-        result.setResultObject(convert(autoconfig), "json");
+        result.setResultObject(convert((Autoconfig) result.getResultObject()), "json");
     }
 
     private JSONObject convert(Autoconfig autoconfig) throws OXException {
-        JSONObject json = new JSONObject();
-
         if (autoconfig == null) {
-            return json;
+            return new JSONObject(1);
         }
-
         try {
+            JSONObject json = new JSONObject(12);
             json.put("login", autoconfig.getUsername());
             json.put("mail_server", autoconfig.getMailServer());
             json.put("transport_server", autoconfig.getTransportServer());
@@ -104,11 +100,12 @@ public class AutoconfigResultConverter implements ResultConverter {
             json.put("transport_port", autoconfig.getTransportPort());
             json.put("mail_protocol", autoconfig.getMailProtocol());
             json.put("transport_protocol", autoconfig.getTransportProtocol());
+            json.put("mail_secure", autoconfig.isMailSecure());
+            json.put("transport_secure", autoconfig.isTransportSecure());
+            return json;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
-
-        return json;
     }
 
 }

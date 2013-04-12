@@ -452,7 +452,6 @@ public final class SessionHandler {
      * @param session The session to store
      * @param sessionStorageService The storage service
      * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly replacing put
-     * @param async Whether to perform task asynchronously or not
      */
     public static void storeSessionSync(final SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
         storeSession(session, sessionStorageService, addIfAbsent, false, null);
@@ -1225,10 +1224,10 @@ public final class SessionHandler {
             final Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             dic.put(SessiondEventConstants.PROP_SESSION, session);
             dic.put(SessiondEventConstants.PROP_COUNTER, SESSION_COUNTER);
-            final Event event = new Event(SessiondEventConstants.TOPIC_ADD_SESSION, dic);
+            final Event event = new Event(SessiondEventConstants.TOPIC_REACTIVATE_SESSION, dic);
             eventAdmin.postEvent(event);
             if (DEBUG) {
-                LOG.debug("Posted event for added session");
+                LOG.debug("Posted event for reactivated session");
             }
         }
     }

@@ -140,8 +140,8 @@ public class Bug17392Test extends ManagedAppointmentTest {
 		ICalExportRequest request = new ICalExportRequest(folder.getObjectID());
 		ICalExportResponse response = getClient().execute(request);
 		String ical = (String) response.getData();
-		System.out.println(ical);
-		assertTrue("Export should contain a TZID for " + tzid, ical.contains("DTSTART;TZID="+tzid));
+		// System.out.println(ical);
+		assertTrue("Export should contain a TZID for " + tzid + System.getProperty("line.separator") + ical, ical.contains("DTSTART;TZID="+tzid));
 	}
 
 	public void roundtrip(String tzid) throws Exception{

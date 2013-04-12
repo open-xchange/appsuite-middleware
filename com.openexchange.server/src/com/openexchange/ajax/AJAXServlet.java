@@ -279,6 +279,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String ACTION_REFRESH_SECRET = "refreshSecret";
 
     public static final String ACTION_TERMSEARCH = "advancedSearch";
+    
+    public static final String ACTION_GETCHANGEEXCEPTIONS = "getChangeExceptions";
 
     /**
      * The parameter 'from' specifies index of starting entry in list of objects dependent on given order criteria and folder id
@@ -388,6 +390,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String PARAMETER_FILTER = "filter";
 
     public static final String PARAMETER_COLLATION = "collation";
+
+    public static final String PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR = "includeStackTraceOnError";
 
     /**
      * The content type if the response body contains javascript data. Set it with
@@ -738,8 +742,6 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return uri;
     }
 
-    private static final URLCodec URL_CODEC = new URLCodec(CharEncoding.ISO_8859_1);
-
     /**
      * BitSet of www-form-url safe characters.
      */
@@ -862,6 +864,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             return s;
         }
     }
+
+    private static final URLCodec URL_CODEC = new URLCodec(CharEncoding.ISO_8859_1);
 
     /**
      * URL decodes given string.
@@ -1119,14 +1123,14 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             final Throwable cause = e.getCause();
             if (cause instanceof IOException) {
                 final String message = cause.getMessage();
-                if (message.startsWith("Max. byte count of ")) {
+                if (null != message && message.startsWith("Max. byte count of ")) {
                     // E.g. Max. byte count of 10240 exceeded.
                     final int pos = message.indexOf(" exceeded", 19 + 1);
                     final String limit = message.substring(19, pos);
                     throw UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, limit);
                 }
             }
-            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : cause.getMessage());
+            throw UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage()  : cause.getMessage()));
         }
         /*
          * Create the upload event

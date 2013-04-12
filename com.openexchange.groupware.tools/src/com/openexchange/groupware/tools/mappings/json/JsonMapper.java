@@ -255,17 +255,30 @@ public interface JsonMapper<O, E extends Enum<E>> extends Mapper<O, E> {
 	 */
 	void serialize(O object, JSONObject to, E[] fields, TimeZone timeZone, Session session) throws JSONException, OXException;
 
-	/**
-	 * Serializes the supplied object to JSON.
-	 *
-	 * @param object the object to read the values from
-	 * @param to the JSONObject to serialize into
-	 * @param fields the fields to be set
-	 * @param timeZoneID the client time zone identifier to consider
-	 * @throws JSONException
-	 * @throws OXException
-	 */
-	void serialize(O object, JSONObject to, E[] fields, String timeZoneID) throws JSONException, OXException;
+    /**
+     * Serializes the supplied object to JSON.
+     *
+     * @param object the object to read the values from
+     * @param to the JSONObject to serialize into
+     * @param fields the fields to be set
+     * @param timeZoneID the client time zone identifier to consider
+     * @throws JSONException
+     * @throws OXException
+     */
+    void serialize(O object, JSONObject to, E[] fields, String timeZoneID) throws JSONException, OXException;
+
+    /**
+     * Serializes the supplied object to JSON.
+     *
+     * @param object the object to read the values from
+     * @param to the JSONObject to serialize into
+     * @param fields the fields to be set
+     * @param timeZoneID the client time zone identifier to consider
+     * @param session the underlying session
+     * @throws JSONException
+     * @throws OXException
+     */
+    void serialize(O object, JSONObject to, E[] fields, String timeZoneID, Session session) throws JSONException, OXException;
 
 	/**
 	 * Serializes the supplied objects to JSON arrays inside a JSON array.

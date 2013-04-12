@@ -53,7 +53,7 @@ package com.openexchange.ajax.framework;
  * Super class for list parsers.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public abstract class AbstractListParser<T extends CommonListResponse> extends AbstractColumnsParser<T> {
+public abstract class AbstractListParser<T extends AbstractColumnsResponse> extends AbstractColumnsParser<T> {
 
     public AbstractListParser(final boolean failOnError, final int[] columns) {
         super(failOnError, columns);

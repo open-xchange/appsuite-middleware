@@ -25,6 +25,7 @@
         <chmod perm="755" file="${sbinInstallDir}/jobcontrol" />
         <chmod perm="755" file="${sbinInstallDir}/createcontext" />
         <chmod perm="755" file="${sbinInstallDir}/createuser" />
+    	<chmod perm="755" file="${sbinInstallDir}/getpublication" />
         <chmod perm="755" file="${sbinInstallDir}/generatempasswd" />
         <chmod perm="755" file="${sbinInstallDir}/initconfigdb" />
         <chmod perm="755" file="${sbinInstallDir}/oxinstaller" />
@@ -43,7 +44,7 @@
     </target>
 
     <target name="patchScripts">
-        <replace dir="${patchSbinDir}" includes="allpluginsloaded jobcontrol createcontext createuser generatempasswd initconfigdb oxinstaller oxsysreport showruntimestats">
+        <replace dir="${patchSbinDir}" includes="allpluginsloaded jobcontrol createcontext createuser getpublication generatempasswd initconfigdb oxinstaller oxsysreport showruntimestats">
             <replacefilter token="@oxfunctions@" value="${prefix}/${libDir}/oxfunctions.sh" />
             <replacefilter token="@oxscriptconf@" value="${confInstallDir}/ox-scriptconf.sh" />
             <replacefilter token="@confDir@" value="${confInstallDir}" />
@@ -61,6 +62,8 @@
         <foreach list="${contextLinks}" target="createContextLink" param="linkName" />
         <property name="userLinks" value="deleteuser,changeuser,listuser,existsuser,creategroup,deletegroup,changegroup,listgroup,createresource,deleteresource,changeresource,listresource,getaccesscombinationnameforuser,changeaccessglobal" />
         <foreach list="${userLinks}" target="createUserLink" param="linkName" />
+    	<property name="publicationLinks" value="deletepublication" />
+    	<foreach list="${publicationLinks}" target="getPublicationLink" param="linkName" />
     </target>
 
     <target name="createContextLink">
@@ -70,6 +73,10 @@
     <target name="createUserLink">
         <symlink resource="${prefix}/${sbinDir}/createuser" link="${destDir}/${prefix}/${sbinDir}/${linkName}" overwrite="true" />
     </target>
+
+	<target name="getPublicationLink">
+	        <symlink resource="${prefix}/${sbinDir}/getpublication" link="${destDir}/${prefix}/${sbinDir}/${linkName}" overwrite="true" />
+	</target>
 
     <target name="postClean">
         <delete dir="${tmpDir}" />

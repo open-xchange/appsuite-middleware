@@ -2,13 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Mail Filter
 Bundle-SymbolicName: com.openexchange.mail.filter
-Bundle-Version: 7.0.2
+Bundle-Version: 7.2.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.mailfilter.osgi.Activator
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.container,
  com.openexchange.ajax.writer,
+ com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.configuration,
  com.openexchange.dispatcher,

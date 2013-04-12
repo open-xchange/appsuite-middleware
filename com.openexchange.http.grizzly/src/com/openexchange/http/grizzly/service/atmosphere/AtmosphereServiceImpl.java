@@ -49,6 +49,7 @@
 
 package com.openexchange.http.grizzly.service.atmosphere;
 
+import java.util.EnumSet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
@@ -58,11 +59,14 @@ import org.atmosphere.cpr.AtmosphereHandler;
 import org.atmosphere.cpr.AtmosphereServlet;
 import org.atmosphere.cpr.Broadcaster;
 import org.glassfish.grizzly.http.server.OXHttpServer;
+import org.glassfish.grizzly.servlet.DispatcherType;
+import org.glassfish.grizzly.servlet.FilterRegistration;
 import org.glassfish.grizzly.servlet.ServletRegistration;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.osgi.framework.Bundle;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.grizzly.osgi.GrizzlyServiceRegistry;
+import com.openexchange.http.grizzly.servletfilter.WrappingFilter;
 
 
 /**
@@ -83,6 +87,8 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
         atmosphereServletMapping = configurationService.getProperty("com.openexchange.http.atmosphere.servletMapping", "/atmosphere/*");
 
         WebappContext realtimeContext = new WebappContext("Realtime context", realtimeContextPath);
+        FilterRegistration filterRegistration = realtimeContext.addFilter(WrappingFilter.class.getName(), new WrappingFilter());
+        filterRegistration.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), "/*");
 
         AtmosphereServlet atmosphereServlet = new AtmosphereServlet(false, false);
         atmosphereFramework = atmosphereServlet.framework();
@@ -90,7 +96,6 @@ public class AtmosphereServiceImpl  implements AtmosphereService {
             .and("org.atmosphere.cpr.broadcasterLifeCyclePolicy","NEVER")
             .build();
         atmosphereFramework.init(config);
-//        atmosphereFramework.setAsyncSupport(new Grizzly2CometSupport(atmosphereFramework.getAtmosphereConfig()));
         atmosphereFramework.setAsyncSupport(new Grizzly2WebSocketSupport(atmosphereFramework.getAtmosphereConfig()));
 
         ServletRegistration atmosphereRegistration = realtimeContext.addServlet("AtmosphereServlet", atmosphereServlet);

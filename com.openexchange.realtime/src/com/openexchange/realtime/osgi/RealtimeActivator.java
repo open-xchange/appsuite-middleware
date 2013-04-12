@@ -62,6 +62,7 @@ import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.payload.converter.PayloadTreeConverter;
 import com.openexchange.realtime.payload.converter.impl.DefaultPayloadTreeConverter;
 import com.openexchange.realtime.synthetic.SyntheticChannel;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
@@ -75,14 +76,14 @@ public class RealtimeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{ ContextService.class, UserService.class, TimerService.class, SimpleConverter.class };
+        return new Class[]{ ContextService.class, UserService.class, TimerService.class, SimpleConverter.class, ThreadPoolService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         RealtimeServiceRegistry.SERVICES.set(this);
         
-        final SyntheticChannel synth = new SyntheticChannel();
+        final SyntheticChannel synth = new SyntheticChannel(this);
         
         TimerService timerService = getService(TimerService.class);
         timerService.scheduleAtFixedRate(synth, 0, 1, TimeUnit.MINUTES);

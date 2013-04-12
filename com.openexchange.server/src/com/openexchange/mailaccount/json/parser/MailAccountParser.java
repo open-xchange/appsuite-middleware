@@ -49,6 +49,9 @@
 
 package com.openexchange.mailaccount.json.parser;
 
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -57,6 +60,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.json.fields.MailAccountFields;
@@ -69,6 +73,45 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailAccountParser extends DataParser {
+
+    private static final class StandardPorts {
+
+        private final TIntSet ports;
+        private final TIntSet sslPorts;
+
+        StandardPorts(final TIntSet ports, final TIntSet sslPorts) {
+            super();
+            this.ports = ports;
+            this.sslPorts = sslPorts;
+        }
+
+        boolean isDefaultPort(final int port) {
+            return ports.contains(port);
+        }
+
+        boolean isDefaultSSLPort(final int port) {
+            return sslPorts.contains(port);
+        }
+    } // End of class StandardPorts
+
+    private static final Map<String, StandardPorts> PORTS;
+    static {
+        final Map<String, StandardPorts> m = new HashMap<String, StandardPorts>(4);
+        // IMAP
+        TIntSet ports = new TIntHashSet(new int[] {143});
+        TIntSet sslPorts = new TIntHashSet(new int[] {993});
+        m.put("imap", new StandardPorts(ports, sslPorts));
+        // POP3
+        ports = new TIntHashSet(new int[] {110});
+        sslPorts = new TIntHashSet(new int[] {995});
+        m.put("pop3", new StandardPorts(ports, sslPorts));
+        // SMTP
+        ports = new TIntHashSet(new int[] {25});
+        sslPorts = new TIntHashSet(new int[] {465, 587});
+        m.put("smtp", new StandardPorts(ports, sslPorts));
+
+        PORTS = Collections.unmodifiableMap(m);
+    }
 
     private static final MailAccountParser INSTANCE = new MailAccountParser();
 
@@ -160,6 +203,10 @@ public class MailAccountParser extends DataParser {
                 account.setTransportServer(account.getTransportServer().trim());
             }
         }
+        // Check port for standards
+        checkMailPort(account);
+        checkTransportPort(account);
+        // Conitinue parsing
         if (json.has(MailAccountFields.TRANSPORT_LOGIN)) {
             account.setTransportLogin(parseString(json, MailAccountFields.TRANSPORT_LOGIN));
             attributes.add(Attribute.TRANSPORT_LOGIN_LITERAL);
@@ -292,6 +339,73 @@ public class MailAccountParser extends DataParser {
          */
         account.setProperties(props);
         return attributes;
+    }
+
+    private static void checkMailPort(final MailAccountDescription account) {
+        final String mailProtocol = account.getMailProtocol();
+        if (isEmpty(mailProtocol)) {
+            return;
+        }
+        final StandardPorts standardPorts = PORTS.get(toLowerCase(mailProtocol));
+        if (null != standardPorts) {
+            final int port = account.getMailPort();
+            if (account.isMailSecure()) {
+                if (standardPorts.isDefaultPort(port)) {
+                    account.setMailSecure(false);
+                }
+            } else {
+                if (standardPorts.isDefaultSSLPort(port)) {
+                    account.setMailSecure(true);
+                }
+            }
+        }
+    }
+
+    private static void checkTransportPort(final MailAccountDescription account) {
+        final String transportProtocol = account.getTransportProtocol();
+        if (isEmpty(transportProtocol)) {
+            return;
+        }
+        final StandardPorts standardPorts = PORTS.get(toLowerCase(transportProtocol));
+        if (null != standardPorts) {
+            final int port = account.getTransportPort();
+            if (account.isTransportSecure()) {
+                if (standardPorts.isDefaultPort(port)) {
+                    account.setTransportSecure(false);
+                }
+            } else {
+                if (standardPorts.isDefaultSSLPort(port)) {
+                    account.setTransportSecure(true);
+                }
+            }
+        }
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

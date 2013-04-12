@@ -55,6 +55,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.calendar.json.actions.AllAction;
+import com.openexchange.calendar.json.actions.ChangeExceptionsAction;
 import com.openexchange.calendar.json.actions.ConfirmAction;
 import com.openexchange.calendar.json.actions.CopyAction;
 import com.openexchange.calendar.json.actions.DeleteAction;
@@ -105,6 +106,7 @@ public class AppointmentActionFactory implements AJAXActionServiceFactory {
         actions.put("freebusy", new FreeBusyAction(services));
         actions.put("copy", new CopyAction(services));
         actions.put("resolveuid", new ResolveUIDAction(services));
+        actions.put("getChangeExceptions", new ChangeExceptionsAction(services));
     }
 
     @Override

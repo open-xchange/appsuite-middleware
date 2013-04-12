@@ -51,6 +51,7 @@ package com.openexchange.calendar.osgi;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.activation.MailcapCommandMap;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.api.CalendarFeature;
@@ -98,7 +99,6 @@ public class ITipActivator extends HousekeepingActivator {
         return new Class<?>[] { ContextService.class, ResourceService.class, UserService.class, GroupService.class, TemplateService.class, TimerService.class, ITipEmitter.class, ConfigurationService.class, HtmlService.class, AttachmentBase.class };
     }
 
-
     @Override
     protected void startBundle() throws Exception {
         final ContextService contexts = getService(ContextService.class);
@@ -139,6 +139,9 @@ public class ITipActivator extends HousekeepingActivator {
         features.add(new NotifyFeature(mails, sender, attachmentMemory, this));
         features.add(new ITipFeature(this));
         setFeatureIfPossible();
+
+        track(MailcapCommandMap.class, new MailcapServiceTracker(context));
+        openTrackers();
     }
 
 

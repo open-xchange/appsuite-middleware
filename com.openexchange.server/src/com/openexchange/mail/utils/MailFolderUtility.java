@@ -49,11 +49,14 @@
 
 package com.openexchange.mail.utils;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 
@@ -63,6 +66,13 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailFolderUtility {
+
+    /**
+     * Virtual full name of mailbox's root folder
+     *
+     * @value "default"
+     */
+    private static final String DEFAULT_FOLDER_ID = MailFolder.DEFAULT_FOLDER_ID;
 
     /**
      * Initializes a new {@link MailFolderUtility}.
@@ -91,7 +101,7 @@ public final class MailFolderUtility {
         return BASE64MailboxDecoder.decode(encoded);
     }
 
-    private static final int LEN = MailFolder.DEFAULT_FOLDER_ID.length();
+    private static final int LEN = DEFAULT_FOLDER_ID.length();
 
     /**
      * Parses specified full name argument to an appropriate instance of {@link FullnameArgument}.
@@ -111,7 +121,7 @@ public final class MailFolderUtility {
         if (fullnameArgument == null) {
             return null;
         }
-        if (!fullnameArgument.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+        if (!fullnameArgument.startsWith(DEFAULT_FOLDER_ID)) {
             return new FullnameArgument(fullnameArgument);
         }
         final int len = fullnameArgument.length();
@@ -134,7 +144,7 @@ public final class MailFolderUtility {
             throw err;
         }
         if (index >= len) {
-            return new FullnameArgument(accountId, MailFolder.DEFAULT_FOLDER_ID);
+            return new FullnameArgument(accountId, DEFAULT_FOLDER_ID);
         }
         return new FullnameArgument(accountId, fullnameArgument.substring(index + 1));
     }
@@ -174,21 +184,21 @@ public final class MailFolderUtility {
             return null;
         }
         final int length = fullname.length();
-        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname) || (0 == length)) {
+        if (DEFAULT_FOLDER_ID.equals(fullname) || (0 == length)) {
             return new com.openexchange.java.StringAllocator(length + 4).append(fullname).append(accountId).toString();
         }
-        if (fullname.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+        if (fullname.startsWith(DEFAULT_FOLDER_ID)) {
             /*
              * Ensure given account ID is contained
              */
             final String tmpFullname = prepareMailFolderParam(fullname).getFullname();
-            if (MailFolder.DEFAULT_FOLDER_ID.equals(tmpFullname)) {
+            if (DEFAULT_FOLDER_ID.equals(tmpFullname)) {
                 return new com.openexchange.java.StringAllocator(length + 4).append(fullname).append(tmpFullname).toString();
             }
-            return new com.openexchange.java.StringAllocator(LEN + length + 4).append(MailFolder.DEFAULT_FOLDER_ID).append(accountId).append(
+            return new com.openexchange.java.StringAllocator(LEN + length + 4).append(DEFAULT_FOLDER_ID).append(accountId).append(
                 MailProperties.getInstance().getDefaultSeparator()).append(tmpFullname).toString();
         }
-        return new com.openexchange.java.StringAllocator(LEN + length + 4).append(MailFolder.DEFAULT_FOLDER_ID).append(accountId).append(
+        return new com.openexchange.java.StringAllocator(LEN + length + 4).append(DEFAULT_FOLDER_ID).append(accountId).append(
             MailProperties.getInstance().getDefaultSeparator()).append(fullname).toString();
     }
 
@@ -208,6 +218,47 @@ public final class MailFolderUtility {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private static final Pattern P_FOLDER;
+    static {
+        final StringBuilder sb = new StringBuilder(64);
+        // List of known folders
+        sb.append("(?:");
+        boolean first = true;
+        for (final String name : UnifiedInboxManagement.KNOWN_FOLDERS) {
+            if (first) {
+                first = false;
+            } else {
+                sb.append('|');
+            }
+            sb.append(name);
+        }
+        sb.append(')');
+        // Appendix: <sep> + "default" + <number> + <sep> + <rest>
+        sb.append("[./]").append(DEFAULT_FOLDER_ID).append("[0-9]+[./](.+)");
+        P_FOLDER = Pattern.compile(sb.toString());
+    }
+
+    /**
+     * Sanitizes given folder full name.
+     * <p>
+     * Common problem are messed-up folder full names like:
+     * <pre>
+     *   "INBOX/default0/actual/folder/path"
+     *     ==&gt;
+     *   "actual/folder/path"
+     * </pre>
+     * 
+     * @param fullName The full name
+     * @return The possibly sanitized full name
+     */
+    public static String sanitizeFullName(final String fullName) {
+        if (null == fullName || fullName.indexOf(DEFAULT_FOLDER_ID) < 0) {
+            return fullName;
+        }
+        final Matcher m = P_FOLDER.matcher(fullName);
+        return m.matches() ? m.group(1) : fullName;
     }
 
 }

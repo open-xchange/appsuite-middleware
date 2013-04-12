@@ -304,7 +304,7 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         assertTrue(sb.toString(), value1 == value2);
     }
     private void check(final String string, final InternetAddress[] address1, final InternetAddress[] address2, final String mail1name, final String mail2name) {
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder(128);
         sb.append(string);
         sb.append(" of ");
         sb.append(mail1name);
@@ -315,7 +315,28 @@ public abstract class MessageStorageTest extends AbstractMailTest {
         sb.append(": ``");
         sb.append(Arrays.toString(address2));
         sb.append("''");
-        assertTrue(sb.toString(), Arrays.equals(address1, address2));
+        assertTrue(sb.toString(), equals(address1, address2));
+    }
+
+    private boolean equals(final InternetAddress[] a, final InternetAddress[] a2) {
+        if (a==a2) {
+            return true;
+        }
+        if (a==null || a2==null) {
+            return false;
+        }
+        int length = a.length;
+        if (a2.length != length) {
+            return false;
+        }
+        for (int i=0; i<length; i++) {
+            InternetAddress o1 = a[i];
+            InternetAddress o2 = a2[i];
+            if (!(o1==null ? o2==null : o1.getAddress().equals(o2.getAddress()))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void check(final String string, final long value1, final long value2, final String mail1name, final String mail2name) {

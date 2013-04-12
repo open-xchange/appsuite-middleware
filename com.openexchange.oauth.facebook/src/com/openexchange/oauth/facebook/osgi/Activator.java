@@ -51,12 +51,16 @@ package com.openexchange.oauth.facebook.osgi;
 
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
-
+import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -73,7 +77,7 @@ public final class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{CapabilityService.class};
+        return new Class[]{CapabilityService.class, ConfigViewFactory.class};
     }
 
     @Override
@@ -81,6 +85,22 @@ public final class Activator extends HousekeepingActivator {
         final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + OAuthService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DeferringURLService.class.getName() + "))");
         track(filter, new FacebookRegisterer(context));
         openTrackers();
+        registerService(CapabilityChecker.class, new CapabilityChecker() {
+
+            @Override
+            public boolean isEnabled(String capability, ServerSession session) throws OXException {
+                if ("facebook".equals(capability)) {
+                    if (session.isAnonymous()) {
+                        return false;
+                    }
+                    final ConfigViewFactory factory = getService(ConfigViewFactory.class);
+                    final ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+                    return view.opt("com.openexchange.oauth.facebook", boolean.class, Boolean.TRUE).booleanValue();
+                }
+                return true;
+                
+            }
+        });
         getService(CapabilityService.class).declareCapability("facebook");
 
     }

@@ -52,7 +52,6 @@ package com.openexchange.smtp;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -67,6 +66,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.regex.Matcher;
 import javax.activation.DataHandler;
 import javax.mail.Address;
 import javax.mail.Message.RecipientType;
@@ -92,29 +92,29 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
-import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.ContentAware;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeHeaderNameChecker;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.mime.datasource.MimeMessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
@@ -456,7 +456,15 @@ public final class SMTPTransport extends MailTransport {
             return;
         }
         SMTPConfig smtpConfig = null;
+        // There is an issue in the OSGi framework preventing the MailCap
+        // from loading correctly. When getting the session here,
+        // temporarily set the ClassLoader to the loader inside the bundle
+        // that houses javax.mail. Reset at the end.
+        // ClassLoader tcl = Thread.currentThread().getContextClassLoader();
         try {
+            // Set the ClassLoader to the javax.mail bundle loader.
+            // Thread.currentThread().setContextClassLoader(MailMessage.class.getClassLoader());
+            // Go ahead...
             final InternetAddress dispNotification = srcMail.getDispositionNotification();
             if (dispNotification == null) {
                 throw SMTPExceptionCode.MISSING_NOTIFICATION_HEADER.create(MessageHeaders.HDR_DISP_TO, Long.valueOf(srcMail.getMailId()));
@@ -519,15 +527,15 @@ public final class SMTPTransport extends MailTransport {
             final Date sentDate = srcMail.getSentDate();
             {
                 final MimeBodyPart text = new MimeBodyPart();
-                text.setText(
-                    performLineFolding(
-                        strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT).replaceFirst(
-                            "#DATE#",
-                            sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG, locale).format(sentDate))).replaceFirst(
-                            "#RECIPIENT#",
-                            quoteReplacement(from)).replaceFirst("#SUBJECT#", quoteReplacement(srcMail.getSubject())),
-                        usm.getAutoLinebreak()),
-                    defaultMimeCS);
+                final String txt = performLineFolding(
+                    strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT).replaceFirst(
+                        "#DATE#",
+                        sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG, locale).format(sentDate))).replaceFirst(
+                        "#RECIPIENT#",
+                        quoteReplacement(from)).replaceFirst("#SUBJECT#", quoteReplacement(srcMail.getSubject())),
+                    usm.getAutoLinebreak());
+                MessageUtility.setText(txt, defaultMimeCS, text);
+                // text.setText(txt,defaultMimeCS);
                 text.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
                 mixedMultipart.addBodyPart(text);
@@ -539,11 +547,11 @@ public final class SMTPTransport extends MailTransport {
             {
                 final MimeBodyPart ack = new MimeBodyPart();
                 final String msgId = srcMail.getFirstHeader(MessageHeaders.HDR_MESSAGE_ID);
-                ack.setText(
-                    strHelper.getString(ACK_TEXT).replaceFirst("#FROM#", quoteReplacement(from)).replaceFirst(
-                        "#MSG ID#",
-                        quoteReplacement(msgId)),
-                    defaultMimeCS);
+                final String txt = strHelper.getString(ACK_TEXT).replaceFirst("#FROM#", quoteReplacement(from)).replaceFirst(
+                    "#MSG ID#",
+                    quoteReplacement(msgId));
+                MessageUtility.setText(txt, defaultMimeCS, ack);
+                // ack.setText(txt,defaultMimeCS);
                 ack.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 ack.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
                 ack.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, CD_READ_ACK);
@@ -552,33 +560,15 @@ public final class SMTPTransport extends MailTransport {
             /*
              * Set message content
              */
-            smtpMessage.setContent(mixedMultipart);
+            MessageUtility.setContent(mixedMultipart, smtpMessage);
+            // smtpMessage.setContent(mixedMultipart);
             /*
              * Transport message
              */
             final long start = System.currentTimeMillis();
             final Transport transport = getSMTPSession().getTransport(SMTP);
             try {
-                final String server = IDNA.toASCII(smtpConfig.getServer());
-                final int port = smtpConfig.getPort();
-                if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
-                    if (isKerberosAuth()) {
-                        try {
-                            Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(
-                                transport,
-                                server,
-                                port,
-                                smtpConfig.getLogin(),
-                                encodePassword(smtpConfig.getPassword())));
-                        } catch (final PrivilegedActionException e) {
-                            handlePrivilegedActionException(e);
-                        }
-                    } else {
-                        transport.connect(server, port, smtpConfig.getLogin(), encodePassword(smtpConfig.getPassword()));
-                    }
-                } else {
-                    transport.connect(server, port, null, null);
-                }
+                connectTransport(transport, smtpConfig);
                 saveChangesSafe(smtpMessage);
                 transport(smtpMessage, smtpMessage.getAllRecipients(), transport, smtpConfig);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
@@ -588,14 +578,25 @@ public final class SMTPTransport extends MailTransport {
                 transport.close();
             }
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, smtpConfig);
+            throw MimeMailException.handleMessagingException(e, smtpConfig, session);
+        } finally {
+            // Restore the ClassLoader
+            // Thread.currentThread().setContextClassLoader(tcl);
         }
     }
 
     @Override
     public MailMessage sendRawMessage(final byte[] asciiBytes, final Address[] allRecipients) throws OXException {
         final SMTPConfig smtpConfig = getTransportConfig0();
+        // There is an issue in the OSGi framework preventing the MailCap
+        // from loading correctly. When getting the session here,
+        // temporarily set the ClassLoader to the loader inside the bundle
+        // that houses javax.mail. Reset at the end.
+        // ClassLoader tcl = Thread.currentThread().getContextClassLoader();
         try {
+            // Set the ClassLoader to the javax.mail bundle loader.
+            // Thread.currentThread().setContextClassLoader(Address.class.getClassLoader());
+            // Go ahead...
             final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession(), MimeHeaderNameChecker.sanitizeHeaderNames(asciiBytes));
             smtpMessage.removeHeader("x-original-headers");
             /*
@@ -607,26 +608,7 @@ public final class SMTPTransport extends MailTransport {
                 final long start = System.currentTimeMillis();
                 final Transport transport = getSMTPSession().getTransport(SMTP);
                 try {
-                    final String server = IDNA.toASCII(smtpConfig.getServer());
-                    final int port = smtpConfig.getPort();
-                    if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
-                        if (isKerberosAuth()) {
-                            try {
-                                Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(
-                                    transport,
-                                    server,
-                                    port,
-                                    smtpConfig.getLogin(),
-                                    encodePassword(smtpConfig.getPassword())));
-                            } catch (final PrivilegedActionException e) {
-                                handlePrivilegedActionException(e);
-                            }
-                        } else {
-                            transport.connect(server, port, smtpConfig.getLogin(), encodePassword(smtpConfig.getPassword()));
-                        }
-                    } else {
-                        transport.connect(server, port, null, null);
-                    }
+                    connectTransport(transport, smtpConfig);
                     saveChangesSafe(smtpMessage);
                     transport(smtpMessage, recipients, transport, smtpConfig);
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
@@ -636,18 +618,74 @@ public final class SMTPTransport extends MailTransport {
                     transport.close();
                 }
             } catch (final MessagingException e) {
-                throw MimeMailException.handleMessagingException(e, smtpConfig);
+                throw MimeMailException.handleMessagingException(e, smtpConfig, session);
             }
             return MimeMessageConverter.convertMessage(smtpMessage);
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, smtpConfig);
+            throw MimeMailException.handleMessagingException(e, smtpConfig, session);
+        } finally {
+            // Restore the ClassLoader
+            // Thread.currentThread().setContextClassLoader(tcl);
         }
     }
 
     @Override
     public MailMessage sendMailMessage(final ComposedMailMessage composedMail, final ComposeType sendType, final Address[] allRecipients) throws OXException {
         final SMTPConfig smtpConfig = getTransportConfig0();
+        // There is an issue in the OSGi framework preventing the MailCap
+        // from loading correctly. When getting the session here,
+        // temporarily set the ClassLoader to the loader inside the bundle
+        // that houses javax.mail. Reset at the end.
+        // ClassLoader tcl = Thread.currentThread().getContextClassLoader();
         try {
+            // Set the ClassLoader to the javax.mail bundle loader.
+            // Thread.currentThread().setContextClassLoader(ComposedMailMessage.class.getClassLoader());
+            // Go ahead...
+            /*
+             * Message content available?
+             */
+            MimeMessage mimeMessage = null;
+            if (composedMail instanceof ContentAware) {
+                try {
+                    Object content = composedMail.getContent();
+                    if (content instanceof MimeMessage) {
+                        mimeMessage = (MimeMessage) content;
+                    }
+                } catch (final Exception e) {
+                    // Ignore
+                }
+            }
+            /*
+             * Proceed
+             */
+            if (null != mimeMessage) {
+                mimeMessage.removeHeader("x-original-headers");
+                /*
+                 * Check recipients
+                 */
+                final Address[] recipients = allRecipients == null ? mimeMessage.getAllRecipients() : allRecipients;
+                checkRecipients(recipients);
+                try {
+                    final long start = System.currentTimeMillis();
+                    final Transport transport = getSMTPSession().getTransport(SMTP);
+                    try {
+                        connectTransport(transport, smtpConfig);
+                        saveChangesSafe(mimeMessage);
+                        transport(mimeMessage, recipients, transport, smtpConfig);
+                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    } catch (final javax.mail.AuthenticationFailedException e) {
+                        throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
+                    } finally {
+                        transport.close();
+                    }
+                } catch (final MessagingException e) {
+                    throw MimeMailException.handleMessagingException(e, smtpConfig, session);
+                }
+                return MimeMessageConverter.convertMessage(mimeMessage);
+            }
+            /*
+             * Fill from scratch
+             */
             final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession());
             /*
              * Fill message dependent on send type
@@ -658,7 +696,6 @@ public final class SMTPTransport extends MailTransport {
             composedMail.setFiller(smtpFiller);
             try {
                 smtpFiller.fillMail(composedMail, smtpMessage, sendType);
-
                 /*
                  * Check recipients
                  */
@@ -685,26 +722,7 @@ public final class SMTPTransport extends MailTransport {
                 final long start = System.currentTimeMillis();
                 final Transport transport = getSMTPSession().getTransport(SMTP);
                 try {
-                    final String server = IDNA.toASCII(smtpConfig.getServer());
-                    final int port = smtpConfig.getPort();
-                    if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
-                        if (isKerberosAuth()) {
-                            try {
-                                Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(
-                                    transport,
-                                    server,
-                                    port,
-                                    smtpConfig.getLogin(),
-                                    encodePassword(smtpConfig.getPassword())));
-                            } catch (final PrivilegedActionException e) {
-                                handlePrivilegedActionException(e);
-                            }
-                        } else {
-                            transport.connect(server, port, smtpConfig.getLogin(), encodePassword(smtpConfig.getPassword()));
-                        }
-                    } else {
-                        transport.connect(server, port, null, null);
-                    }
+                    connectTransport(transport, smtpConfig);
                     /*
                      * Save changes
                      */
@@ -724,37 +742,75 @@ public final class SMTPTransport extends MailTransport {
             }
             return MimeMessageConverter.convertMessage(smtpMessage);
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, smtpConfig);
+            throw MimeMailException.handleMessagingException(e, smtpConfig, session);
         } catch (final IOException e) {
             throw SMTPExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
+        //finally {
+            // Restore the ClassLoader
+            // Thread.currentThread().setContextClassLoader(tcl);
+        //}
     }
 
-    private void transport(final SMTPMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
+    private void connectTransport(final Transport transport, final SMTPConfig smtpConfig) throws OXException, MessagingException {
+        final String server = IDNA.toASCII(smtpConfig.getServer());
+        final int port = smtpConfig.getPort();
+        if (smtpConfig.getSMTPProperties().isSmtpAuth()) {
+            final String encodedPassword = encodePassword(smtpConfig.getPassword());
+            if (isKerberosAuth()) {
+                try {
+                    Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(transport, server, port, smtpConfig.getLogin(), encodedPassword));
+                } catch (final PrivilegedActionException e) {
+                    handlePrivilegedActionException(e);
+                }
+            } else {
+                transport.connect(server, port, smtpConfig.getLogin(), encodedPassword);
+            }
+        } else {
+            transport.connect(server, port, null, null);
+        }
+    }
+
+    private void transport(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
         try {
             transport.sendMessage(smtpMessage, recipients);
         } catch (final MessagingException e) {
-            boolean throwIt = true;
             if (e.getNextException() instanceof javax.activation.UnsupportedDataTypeException) {
-                try {
-                    final String cts = smtpMessage.getHeader("Content-Type", null);
-                    if ((null != cts) && cts.startsWith("multipart/")) {
-                            final Multipart multipart = (Multipart) smtpMessage.getContent();
-                            final ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(8192);
-                            multipart.writeTo(baos);
-                            smtpMessage.setDataHandler(new DataHandler(new MessageDataSource(Streams.asInputStream(baos), multipart.getContentType())));
-                            saveChangesSafe(smtpMessage);
-                            transport.sendMessage(smtpMessage, recipients);
-                            throwIt = false;
-                    }
-                } catch (final Exception ignore) {
-                    // Ignore
-                    LOG.warn("Attempt to recover from \"" + e.getNextException().getMessage() + "\" failed.", ignore);
+                // Check for "no object DCH for MIME type xxxxx/yyyy"
+                final String message = e.getNextException().getMessage();
+                if (toLowerCase(message).indexOf("no object dch") >= 0) {
+                    // Not able to recover from JAF's "no object DCH for MIME type xxxxx/yyyy" error
+                    // Perform the alternative transport with custom JAF DataHandler
+                    LOG.warn(message.replaceFirst("[dD][cC][hH]", Matcher.quoteReplacement("javax.activation.DataContentHandler")));
+                    transportAlt(smtpMessage, recipients, transport, smtpConfig);
+                    return;
                 }
             }
-            if (throwIt) {
-                throw MimeMailException.handleMessagingException(e, smtpConfig);
+            throw MimeMailException.handleMessagingException(e, smtpConfig, session);
+        }
+    }
+
+    private void transportAlt(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
+        try {
+            final MimeMessageDataSource dataSource = new MimeMessageDataSource(smtpMessage, smtpConfig, session);
+            smtpMessage.setDataHandler(new DataHandler(dataSource));
+            if (!transport.isConnected()) {
+                connectTransport(transport, smtpConfig);
             }
+            transport.sendMessage(smtpMessage, recipients);
+            invokeLater(new Runnable() {
+                
+                @Override
+                public void run() {
+                    try {
+                        dataSource.cleanUp();
+                    } catch (final Exception e) {
+                        // Ignore
+                    }
+                }
+            });
+        } catch (final MessagingException me) {
+            throw MimeMailException.handleMessagingException(me, smtpConfig, session);
         }
     }
 
@@ -775,12 +831,10 @@ public final class SMTPTransport extends MailTransport {
     protected void shutdown() {
         SMTPSessionProperties.resetDefaultSessionProperties();
         SMTPCapabilityCache.tearDown();
-        MailInitialization.MailcapInitialization.getInstance().stop();
     }
 
     @Override
     protected void startup() {
-        MailInitialization.MailcapInitialization.getInstance().start();
         SMTPCapabilityCache.init();
     }
 
@@ -831,32 +885,13 @@ public final class SMTPTransport extends MailTransport {
         final SMTPConfig config = getTransportConfig0();
         try {
             try {
-                final String server = IDNA.toASCII(config.getServer());
-                final int port = config.getPort();
-                if (config.getSMTPProperties().isSmtpAuth()) {
-                    if (isKerberosAuth()) {
-                        try {
-                            Subject.doAs(kerberosSubject, new SaslSmtpLoginAction(
-                                transport,
-                                server,
-                                port,
-                                config.getLogin(),
-                                encodePassword(config.getPassword())));
-                        } catch (final PrivilegedActionException e) {
-                            handlePrivilegedActionException(e);
-                        }
-                    } else {
-                        transport.connect(server, port, config.getLogin(), encodePassword(config.getPassword()));
-                    }
-                } else {
-                    transport.connect(server, port, null, null);
-                }
+                connectTransport(transport, config);
                 close = true;
             } catch (final javax.mail.AuthenticationFailedException e) {
                 throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, config.getServer(), e.getMessage());
             }
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, config);
+            throw MimeMailException.handleMessagingException(e, config, session);
         } finally {
             if (close) {
                 try {
@@ -936,6 +971,20 @@ public final class SMTPTransport extends MailTransport {
             }
         }
         return sb.toString();
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
     private static boolean isEmpty(final String string) {

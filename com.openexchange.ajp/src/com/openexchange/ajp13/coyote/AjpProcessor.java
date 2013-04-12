@@ -841,14 +841,13 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
                         sb.append("400 - Bad Request: Error preparing forward-request: ").append(t.getClass().getName());
                         sb.append(" message=").append(t.getMessage());
-                        if (debug) {
-                            sb.append('\n');
-                            appendStackTrace(t.getStackTrace(), sb);
-                        }
-                        if (t instanceof RuntimeException) {
-                            LOG.warn(sb.toString(), t);
-                        } else {
+                        if (Log.appendTraceToMessage()) {
+                            final String lineSeparator = System.getProperty("line.separator");
+                            sb.append(lineSeparator);
+                            appendStackTrace(t.getStackTrace(), sb, lineSeparator);
                             LOG.warn(sb.toString());
+                        } else {
+                            LOG.warn(sb.toString(), t);
                         }
                     }
                     response.setStatus(400);
@@ -2371,11 +2370,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     } // End of class
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb) {
+    private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb, final String lineSeparator) {
         if (null == trace) {
             return;
         }
-        final String lineSeparator = System.getProperty("line.separator");
         for (final StackTraceElement ste : trace) {
             final String className = ste.getClassName();
             if (null != className) {

@@ -78,7 +78,6 @@ public interface QuotaService {
      * @param session The user session
      * @return The quota
      * @throws OXException If querying quota fails
-     * @see ResourceDescription#EMPTY_RESOURCE_DESCRIPTION
      */
     Quota getQuotaFor(Resource resource, Session session) throws OXException;
 
@@ -103,7 +102,7 @@ public interface QuotaService {
      * @param session The user session
      * @return The quota
      * @throws OXException If querying quota fails
-     * @see ResourceDescription#EMPTY_RESOURCE_DESCRIPTION
+     * @see ResourceDescription#getEmptyResourceDescription()
      */
     Quota getQuotaFor(Resource resource, ResourceDescription desc, Session session) throws OXException;
 }

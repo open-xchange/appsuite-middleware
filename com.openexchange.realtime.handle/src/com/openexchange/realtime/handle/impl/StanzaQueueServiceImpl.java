@@ -49,8 +49,8 @@
 
 package com.openexchange.realtime.handle.impl;
 
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import com.openexchange.realtime.handle.StanzaQueueService;
 import com.openexchange.realtime.packet.IQ;
 import com.openexchange.realtime.packet.Message;
@@ -66,18 +66,17 @@ import com.openexchange.realtime.packet.Stanza;
  */
 public class StanzaQueueServiceImpl implements StanzaQueueService {
 
-    private final BlockingQueue<Presence> presenceQueue = new ArrayBlockingQueue<Presence>(1024);
+    private final BlockingQueue<Presence> presenceQueue = new LinkedBlockingQueue<Presence>(Integer.MAX_VALUE);
 
-    private final BlockingQueue<Message> messageQueue = new ArrayBlockingQueue<Message>(2048);
+    private final BlockingQueue<Message> messageQueue = new LinkedBlockingQueue<Message>(Integer.MAX_VALUE);
 
-    private final BlockingQueue<IQ> iqQueue = new ArrayBlockingQueue<IQ>(2048);
+    private final BlockingQueue<IQ> iqQueue = new LinkedBlockingQueue<IQ>(Integer.MAX_VALUE);
 
     @Override
-    public boolean enqueueStanza(Stanza stanza) {
+    public synchronized boolean enqueueStanza(Stanza stanza) {
         if (stanza == null) {
             throw new IllegalArgumentException("Parameter 'stanza' must not be null!");
         }
-
         if (stanza instanceof Presence) {
             return presenceQueue.offer((Presence) stanza);
         } else if (stanza instanceof Message) {

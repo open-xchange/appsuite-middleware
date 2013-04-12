@@ -60,6 +60,7 @@ import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.log.Log;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.sun.mail.imap.IMAPStore;
@@ -95,12 +96,11 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
         }
     }
 
-    protected static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb) {
+    protected static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb, final String lineSeparator) {
         if (null == trace) {
             sb.append("<missing stack trace>\n");
             return;
         }
-        final String lineSeparator = System.getProperty("line.separator");
         for (final StackTraceElement ste : trace) {
             final String className = ste.getClassName();
             if (null != className) {
@@ -159,9 +159,17 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                                 }
                                 final Thread t = entry.getKey();
                                 sb.append(t.getName()).append(" occupies IMAPStore \"");
-                                sb.append(server).append("\" instance for login ").append(login).append('\n');
-                                appendStackTrace(t.getStackTrace(), sb);
-                                LOG.info(sb.toString());
+                                sb.append(server).append("\" instance for login ").append(login);
+                                if (Log.appendTraceToMessage()) {
+                                    final String lineSeparator = System.getProperty("line.separator");
+                                    sb.append(lineSeparator);
+                                    appendStackTrace(t.getStackTrace(), sb, lineSeparator);
+                                    LOG.info(sb.toString());
+                                } else {
+                                    final Throwable throwable = new Throwable();
+                                    throwable.setStackTrace(t.getStackTrace());
+                                    LOG.info(sb.toString(), throwable);
+                                }
                             }
                         }
                     };
@@ -202,8 +210,17 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                 for (final Entry<Thread, CountedIMAPStore> entry : stores.entrySet()) {
                     final Thread t = entry.getKey();
                     sb.append("\n--- ").append(t.getName()).append(" occupies IMAPStore \"");
-                    sb.append(server).append("\" instance for login ").append(login).append('\n');
-                    appendStackTrace(t.getStackTrace(), sb);
+                    sb.append(server).append("\" instance for login ").append(login);
+                    if (Log.appendTraceToMessage()) {
+                        final String lineSeparator = System.getProperty("line.separator");
+                        sb.append(lineSeparator);
+                        appendStackTrace(t.getStackTrace(), sb, lineSeparator);
+                        LOG.info(sb.toString());
+                    } else {
+                        final Throwable throwable = new Throwable();
+                        throwable.setStackTrace(t.getStackTrace());
+                        LOG.info(sb.toString(), throwable);
+                    }
                 }
                 final Throwable t = new Throwable(sb.toString());
                 final OXException e = IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, t, server, login);
@@ -295,11 +312,13 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(512);
                         sb.append(maxCount - count).append(" permits available for \"").append(server);
                         sb.append("\" for login ").append(login);
+                        final String lineSeparator = System.getProperty("line.separator");
                         for (final Entry<Thread, CountedIMAPStore> entry : stores.entrySet()) {
                             final Thread t = entry.getKey();
-                            sb.append("\n--- ").append(t.getName()).append(" occupies IMAPStore \"");
-                            sb.append(server).append("\" instance for login ").append(login).append('\n');
-                            appendStackTrace(t.getStackTrace(), sb);
+                            sb.append(lineSeparator).append("--- ").append(t.getName()).append(" occupies IMAPStore \"");
+                            sb.append(server).append("\" instance for login ").append(login);
+                            sb.append(lineSeparator);
+                            appendStackTrace(t.getStackTrace(), sb, lineSeparator);
                         }
                         final Throwable t = new Throwable(sb.toString());
                         final OXException e = IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, t, server, login);

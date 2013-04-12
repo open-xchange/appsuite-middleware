@@ -51,6 +51,7 @@ package com.openexchange.image;
 
 import java.io.InputStream;
 import java.util.Map.Entry;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -61,6 +62,7 @@ import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -76,8 +78,8 @@ import com.openexchange.tools.session.ServerSession;
 public class ImageGetAction implements AJAXActionService {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(ImageGetAction.class);
-
     private static final boolean DEBUG = LOG.isDebugEnabled();
+    private static final boolean WARN = LOG.isWarnEnabled();
 
     /**
      * Initializes a new {@link ImageGetAction}.
@@ -150,24 +152,25 @@ public class ImageGetAction implements AJAXActionService {
                 return requestResult;
             }
             requestResult = new AJAXRequestResult();
-            outputImageData(dataSource, imageLocation, session, requestResult);
+            obtainImageData(dataSource, imageLocation, session, requestResult);
         } catch (OXException e) {
-            if (DEBUG) {
-                LOG.debug("Writing image data failed.", e);
+            if (WARN) {
+                LOG.warn("Retrieving image failed.", e);
+            }
+            if (ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e)) {
+                throw AjaxExceptionCodes.HTTP_ERROR.create(e, Integer.valueOf(HttpServletResponse.SC_NOT_FOUND), e.getSoleMessage());
             }
             throw AjaxExceptionCodes.BAD_REQUEST.create(e, new Object[0]);
         }
         return requestResult;
     }
 
-    private static void outputImageData(ImageDataSource dataSource, ImageLocation imageLocation, Session session, AJAXRequestResult requestResult) throws OXException {
+    private static void obtainImageData(ImageDataSource dataSource, ImageLocation imageLocation, Session session, AJAXRequestResult requestResult) throws OXException {
         Data<InputStream> data = dataSource.getData(InputStream.class, dataSource.generateDataArgumentsFrom(imageLocation), session);
-        String ct;
-        String fileName;
 
         DataProperties dataProperties = data.getDataProperties();
-        ct = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
-        fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
+        String ct = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
+        String fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
 
         InputStream in = data.getData();
         FileHolder fileHolder = new FileHolder(in, -1, ct, fileName);

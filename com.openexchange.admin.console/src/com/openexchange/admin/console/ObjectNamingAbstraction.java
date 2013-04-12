@@ -114,8 +114,10 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
             sb.append(" in context ");
             sb.append(ctxid);
         }
-        sb.append(" ");
-        sb.append(type);
+        if (null != type) {
+            sb.append(" ");
+            sb.append(type);
+        }
         if( null != parser && parser.checkNoNewLine()) {
             final String output = sb.toString().replace("\n", "");
             if (followingtext) {

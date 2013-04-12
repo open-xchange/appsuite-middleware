@@ -52,6 +52,7 @@ package com.openexchange.groupware.notify;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -146,6 +147,7 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.EffectivePermission;
@@ -1150,23 +1152,32 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
              */
             final BodyPart textPart = new MimeBodyPart();
             if (Participant.RESOURCE == p.type) {
-                /*
-                 * Prepend resource prefix to first text/plain body part
-                 */
-                textPart.setContent(
-                    b.append(String.format(strings.getString(Notifications.RESOURCE_PREFIX), p.displayName)).append(": ").append(text).toString(),
-                    "text/plain; charset=UTF-8");
-                b.setLength(0);
+                try {
+                    /*
+                     * Prepend resource prefix to first text/plain body part
+                     */
+                    textPart.setDataHandler(new DataHandler(new MessageDataSource(b.append(String.format(strings.getString(Notifications.RESOURCE_PREFIX), p.displayName)).append(": ").append(text).toString(), "text/plain; charset=UTF-8")));
+                    //textPart.setContent(b.append(String.format(strings.getString(Notifications.RESOURCE_PREFIX), p.displayName)).append(": ").append(text).toString(), "text/plain; charset=UTF-8");
+                    textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "text/plain; charset=UTF-8");
+                    b.setLength(0);
+                } catch (final UnsupportedEncodingException e) {
+                    throw new MessagingException("Unsupported encoding.", e);
+                }
             } else {
-                /*
-                 * Apply text as given
-                 */
-                textPart.setContent(text, "text/plain; charset=UTF-8");
+                try {
+                    /*
+                     * Apply text as given
+                     */
+                    textPart.setDataHandler(new DataHandler(new MessageDataSource(text, "text/plain; charset=UTF-8")));
+                    // textPart.setContent(text, "text/plain; charset=UTF-8");
+                    textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "text/plain; charset=UTF-8");
+                } catch (final UnsupportedEncodingException e) {
+                    throw new MessagingException("Unsupported encoding.", e);
+                }
             }
             /*
              * Compose iCal part
              */
-
             final ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
             final ICalSession icalSession = emitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK));
             Date until = null;
@@ -1252,7 +1263,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
              * Return appropriate multipart
              */
             final BodyPart altBodyPart = new MimeBodyPart();
-            altBodyPart.setContent(alternativeMultipart);
+            MessageUtility.setContent(alternativeMultipart, altBodyPart);
+            // altBodyPart.setContent(alternativeMultipart);
             mixedMultipart.addBodyPart(altBodyPart, 0);
             return mixedMultipart;
         } catch (final MessagingException e) {

@@ -106,6 +106,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.log.LogFactory;
+import com.openexchange.quota.Resource;
 import com.openexchange.tools.pipesnfilters.Filter;
 
 public class OXContext extends OXContextCommonImpl implements OXContextInterface {
@@ -132,6 +133,16 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         if (isEmpty(module)) {
             throw new InvalidDataException("No valid module specified.");
         }
+        {
+            final Resource[] resources = Resource.values();
+            boolean found = false;
+            for (int i = 0; !found && i < resources.length; i++) {
+                found = resources[i].getIdentifier().equalsIgnoreCase(module);
+            }
+            if (!found) {
+                throw new InvalidDataException("Unknown module: \"" + module + "\" (known modules: " + Arrays.toString(Resource.allIdentifiers()) + ")");
+            }
+        }
 
         final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
 
@@ -143,7 +154,16 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             throw new NoSuchContextException(e);
         }
 
-        final long quota = quotaValue <= 0 ? -1L : quotaValue;
+        final long quota;
+        if (quotaValue <= 0) {
+            quota = -1L;
+        } else {
+            // MySQL int(10) unsigned: the allowable range is from 0 to 4294967295
+            if (quotaValue > 4294967295L) {
+                throw new InvalidDataException("Quota value is out of range (allowable range is from 0 to 4294967295): " + quotaValue);
+            }
+            quota = quotaValue;
+        }
 
         log.debug(ctx+" - "+module + " - " + quota);
 
@@ -390,7 +410,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             if (null != cacheService) {
                 try {
                     final Cache cache = cacheService.getCache("MailAccount");
-                    cache.invalidateGroup(Integer.toString(contextID));
+                    cache.clear();
                 } catch (final OXException e) {
                     log.error(e.getMessage(), e);
                 } finally {

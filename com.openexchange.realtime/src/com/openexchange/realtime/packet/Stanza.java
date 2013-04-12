@@ -77,12 +77,16 @@ public abstract class Stanza implements Serializable {
     private static final long serialVersionUID = 1L;
 
     // recipient and sender
-    private ID to, from;
+    private ID to, from, sequencePrincipal;
 
     // All 3 basic stanza types either have an optional or mandatory id field
     private String id = "";
 
     private String selector = "default";
+    
+    private long sequenceNumber = -1;
+    
+    
 
     // Payloads carried by this Stanza as n-ary trees
     Map<ElementPath, List<PayloadTree>> payloads;
@@ -146,6 +150,46 @@ public abstract class Stanza implements Serializable {
      */
     public void setFrom(final ID from) {
         this.from = from;
+    }
+    
+    
+    /**
+     * Sets the sequenceNumber
+     *
+     * @param sequenceNumber The sequenceNumber to set
+     */
+    public void setSequenceNumber(long sequenceNumber) {
+        this.sequenceNumber = sequenceNumber;
+    }
+    
+    
+    /**
+     * Gets the sequenceNumber
+     *
+     * @return The sequenceNumber, -1 if the sequenceNumber is invalid/not set
+     */
+    public long getSequenceNumber() {
+        return sequenceNumber;
+    }
+    
+    
+    /**
+     * Sets the sequencePrincipal
+     *
+     * @param sequencePrincipal The sequencePrincipal to set
+     */
+    public void setSequencePrincipal(ID sequencePrincipal) {
+        this.sequencePrincipal = sequencePrincipal;
+    }
+    
+    
+    /**
+     * Gets the sequencePrincipal
+     *
+     * @return The SequencePrincipal (ID) set via setSequencePrincipal or the SequencePrincipal of the sender ID
+     */
+    public ID getSequencePrincipal() {
+        return (sequencePrincipal != null) ? sequencePrincipal : from;
     }
 
     /**
@@ -377,5 +421,13 @@ public abstract class Stanza implements Serializable {
             return false;
         return true;
     }
+    
+    @Override
+    public String toString() {
+
+        return "From: " + from + "\nTo: " + to + "\nPayloads:\n" + payloads;
+    }
+
+    
 
 }

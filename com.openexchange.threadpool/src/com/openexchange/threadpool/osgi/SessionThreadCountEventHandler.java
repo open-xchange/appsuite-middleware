@@ -102,22 +102,22 @@ public final class SessionThreadCountEventHandler extends ServiceTracker<Session
             return;
         }
         final StringBuilder info = new StringBuilder(1024);
+        final String lineSeparator = System.getProperty("line.separator");
         info.append("Detected ").append(num).append(" threads belonging to session \"").append(sessionId);
-        info.append("\" (user=").append(session.getUserId()).append(", context=").append(session.getContextId()).append("):\n");
+        info.append("\" (user=").append(session.getUserId()).append(", context=").append(session.getContextId()).append("):").append(lineSeparator);
 
         for (final Thread thread : threads) {
-            info.append("\n--------------------------------------------------------------------------\n");
-            appendStackTrace(thread.getStackTrace(), info);
+            info.append(lineSeparator).append("--------------------------------------------------------------------------").append(lineSeparator);
+            appendStackTrace(thread.getStackTrace(), info, lineSeparator);
         }
         LOG.warn(info.toString());
     }
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb, final String lineSeparator) {
         if (null == trace) {
             sb.append("<missing stack trace>\n");
             return;
         }
-        final String lineSeparator = System.getProperty("line.separator");
         for (final StackTraceElement ste : trace) {
             final String className = ste.getClassName();
             if (null != className) {

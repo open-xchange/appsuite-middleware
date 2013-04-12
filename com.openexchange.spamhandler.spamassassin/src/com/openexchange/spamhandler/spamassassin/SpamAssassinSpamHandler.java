@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Locale;
 import org.apache.spamassassin.spamc.Spamc;
 import org.apache.spamassassin.spamc.Spamc.SpamdResponse;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
@@ -190,6 +191,12 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
     @Override
     public String getSpamHandlerName() {
         return NAME;
+    }
+
+    @Override
+    public boolean isUnsubscribeSpamFolders() {
+        final ConfigurationService configurationService = ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        return null == configurationService ? true : configurationService.getBoolProperty("com.openexchange.spamhandler.spamassassin.unsubscribeSpamFolders", true);
     }
 
     @Override

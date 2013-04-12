@@ -232,19 +232,19 @@ public class AdminCache {
         return ret;
     }
 
-    public HashMap<String, UserModuleAccess> getAccessCombinationNames() {
+    public synchronized HashMap<String, UserModuleAccess> getAccessCombinationNames() {
         return named_access_combinations;
     }
 
-    public UserModuleAccess getNamedAccessCombination(String name) {
+    public synchronized UserModuleAccess getNamedAccessCombination(String name) {
         return named_access_combinations.get(name);
     }
 
-    public boolean existsNamedAccessCombination(String name) {
+    public synchronized boolean existsNamedAccessCombination(String name) {
         return named_access_combinations.containsKey(name);
     }
 
-    public String getNameForAccessCombination(UserModuleAccess access_combination) {
+    public synchronized String getNameForAccessCombination(UserModuleAccess access_combination) {
         if(named_access_combinations.containsValue(access_combination)){
             Iterator<String> names = named_access_combinations.keySet().iterator();
             String retval = null;
@@ -260,7 +260,12 @@ public class AdminCache {
         return null;
     }
 
-    public void initAccessCombinations() throws ClassNotFoundException, OXGenericException  {
+    public synchronized void reinitAccessCombinations() throws ClassNotFoundException, OXGenericException  {
+        named_access_combinations = null;
+        initAccessCombinations();
+    }
+
+    public synchronized void initAccessCombinations() throws ClassNotFoundException, OXGenericException  {
         if (named_access_combinations == null) {
             try {
                 log.info("Processing access combinations...");

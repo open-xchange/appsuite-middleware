@@ -2,11 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Google Common library
 Bundle-SymbolicName: com.google.common
-Bundle-Version: 14.0.0
+Bundle-Version: 14.0.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-BuddyPolicy: registered
-Bundle-ClassPath: lib/guava-14.0.jar
+Bundle-ClassPath: lib/guava-14.0.1.jar
 Export-Package: com.google.common.annotations,
  com.google.common.base,
  com.google.common.base.internal,

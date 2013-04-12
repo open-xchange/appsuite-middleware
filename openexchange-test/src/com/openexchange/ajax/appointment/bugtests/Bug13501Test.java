@@ -86,7 +86,7 @@ public class Bug13501Test extends AbstractAJAXSession {
         appointment.setLastModified(response.getTimestamp());
         update.setObjectID(response.getId());
         update.setLastModified(response.getTimestamp());
-        System.out.println(appointment.getObjectID());
+        // System.out.println(appointment.getObjectID());
 
         UpdateRequest updateRequest = new UpdateRequest(update, client.getValues().getTimeZone());
         UpdateResponse updateResponse = client.execute(updateRequest);

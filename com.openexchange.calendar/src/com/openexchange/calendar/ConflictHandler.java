@@ -296,6 +296,9 @@ public class ConflictHandler {
 
     private List<UserParticipant> getConflictUsers() {
         final List<UserParticipant> relevantUsers = new ArrayList<UserParticipant>();
+        if (cdao.getUsers() == null) {
+            return relevantUsers;
+        }
         for (final UserParticipant user : cdao.getUsers()) {
             switch (user.getConfirm()) {
             case CalendarObject.ACCEPT:

@@ -245,7 +245,12 @@ public class SieveHandler {
          * Connect with the connect-timeout of the config file
          */
         final int timeout = Integer.parseInt(config.getProperty(MailFilterProperties.Values.SIEVE_CONNECTION_TIMEOUT.property));
-        s_sieve.connect(new InetSocketAddress(sieve_host, sieve_host_port), timeout);
+        try {
+            s_sieve.connect(new InetSocketAddress(sieve_host, sieve_host_port), timeout);
+        } catch (final java.net.ConnectException e) {
+            // Connection refused
+            throw new OXSieveHandlerException("Sieve server not reachable. Please disable Sieve service if not supported by mail backend.", sieve_host, sieve_host_port, null, e);
+        }
         /*
          * Set timeout to the one specified in the config file
          */

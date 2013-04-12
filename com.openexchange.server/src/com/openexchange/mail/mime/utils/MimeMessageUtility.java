@@ -376,7 +376,7 @@ public final class MimeMessageUtility {
      */
     public static boolean containsContentId(final String contentId, final Collection<String> contentIds) {
         boolean contains = false;
-        for (Iterator<String> iterator = contentIds.iterator(); !contains && iterator.hasNext();) {
+        for (final Iterator<String> iterator = contentIds.iterator(); !contains && iterator.hasNext();) {
             contains = equalsCID(contentId, iterator.next());
         }
         return contains;
@@ -406,19 +406,54 @@ public final class MimeMessageUtility {
     /**
      * Compares (case insensitive) the given values of message header "Content-ID". The leading/trailing characters '<code>&lt;</code>' and
      * ' <code>&gt;</code>' are ignored during comparison
-     *
+     * 
      * @param contentId1 The first content ID
      * @param contentId2 The second content ID
      * @return <code>true</code> if both are equal; otherwise <code>false</code>
      */
     public static boolean equalsCID(final String contentId1, final String contentId2) {
-        if (null != contentId1 && null != contentId2) {
-            final int length1 = contentId1.length();
-            final int length2 = contentId2.length();
-            final String cid1 = length1 > 0 && contentId1.charAt(0) == '<' ? contentId1.substring(1, length1 - 1) : contentId1;
-            return cid1.equalsIgnoreCase(length2 > 0 && contentId2.charAt(0) == '<' ? contentId2.substring(1, length2 - 1) : contentId2);
+        return equalsCID(contentId1, contentId2, null);
+    }
+
+    /**
+     * Compares (case insensitive) the given values of message header "Content-ID". The leading/trailing characters '<code>&lt;</code>' and
+     * ' <code>&gt;</code>' are ignored during comparison
+     *
+     * @param contentId1 The first content ID
+     * @param contentId2 The second content ID
+     * @param ignorableSuffix The optional ignorable suffix; e.g. <code>"@Open-Xchange"</code>
+     * @return <code>true</code> if both are equal; otherwise <code>false</code>
+     */
+    public static boolean equalsCID(final String contentId1, final String contentId2, final String ignorableSuffix) {
+        final String cid1 = trimContentId(contentId1, ignorableSuffix);
+        final String cid2 = trimContentId(contentId2, ignorableSuffix);
+        if (null == cid1) {
+            if (null != cid2) {
+                return false;
+            }
+        } else {
+            if ((null == cid2) || !cid1.equalsIgnoreCase(cid2)) {
+                return false;
+            }
         }
-        return false;
+        return true;
+    }
+
+    private static String trimContentId(final String contentId, final String ignorableSuffix) {
+        if (null == contentId) {
+            return null;
+        }
+        String ret = contentId.trim();
+        if (ret.startsWith("<")) {
+            ret = ret.substring(1);
+            if (ret.endsWith(">")) {
+                ret = ret.substring(0, ret.length() - 1);
+            }
+        }
+        if (null != ignorableSuffix && ret.endsWith(ignorableSuffix)) {
+            ret = ret.substring(0, ret.lastIndexOf(ignorableSuffix));
+        }
+        return ret;
     }
 
     private static final String IMAGE_ALIAS_APPENDIX = ImageActionFactory.ALIAS_APPENDIX;
@@ -543,6 +578,9 @@ public final class MimeMessageUtility {
      * @throws IOException If an I/O error occurs
      */
     public static boolean hasAttachments(final Multipart mp, final String subtype) throws MessagingException, OXException, IOException {
+        if (null == mp) {
+            return false;
+        }
         if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(subtype)) {
             if (mp.getCount() > 2) {
                 return true;
@@ -1171,7 +1209,7 @@ public final class MimeMessageUtility {
             return s;
         }
         final int length = s.length();
-        final StringBuilder sb = new StringBuilder(length << 1);
+        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(length << 1);
         for (int i = 0; i < length; i++) {
             final char c = s.charAt(i);
             if (c == '\\') {
@@ -1219,6 +1257,9 @@ public final class MimeMessageUtility {
         return quotePhrase(personal, true);
     }
 
+    private static final Pattern P_REPL1 = Pattern.compile("\\\\");
+    private static final Pattern P_REPL2 = Pattern.compile("\"");
+
     /**
      * Quotes given phrase if needed.
      *
@@ -1249,8 +1290,9 @@ public final class MimeMessageUtility {
             if (!needQuoting) {
                 return encode ? MimeUtility.encodeWord(phrase) : phrase;
             }
-            final String replaced = phrase.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\\\"");
-            return new StringBuilder(len + 2).append('"').append(
+            final String replaced = P_REPL2.matcher(P_REPL1.matcher(phrase).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"");
+            // final String replaced = phrase.replaceAll("\\\\", "\\\\\\\\").replaceAll("\"", "\\\\\\\"");
+            return new com.openexchange.java.StringAllocator(len + 2).append('"').append(
                 encode ? MimeUtility.encodeWord(replaced) : replaced).append('"').toString();
         } catch (final UnsupportedEncodingException e) {
             LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
@@ -1366,81 +1408,81 @@ public final class MimeMessageUtility {
         if (null == headerLine) {
             return null;
         }
-        com.openexchange.java.StringAllocator sb = null;
         int i;
-        if ((i = headerLine.indexOf('\r')) >= 0 || (i = headerLine.indexOf('\n')) >= 0) {
-            /*-
-             * Check folded encoded-words as per RFC 2047:
-             *
-             * An 'encoded-word' may not be more than 75 characters long, including
-             * 'charset', 'encoding', 'encoded-text', and delimiters.  If it is
-             * desirable to encode more text than will fit in an 'encoded-word' of
-             * 75 characters, multiple 'encoded-word's (separated by CRLF SPACE) may
-             * be used.
-             *
-             * In this case the SPACE character is not part of the header and should
-             * be discarded.
-             */
-            String s;
-            if (headerLine.indexOf("=?") < 0) {
-                s = headerLine;
-            } else {
-                s = unfoldEncodedWords(headerLine);
-                if ((i = s.indexOf('\r')) < 0 && (i = s.indexOf('\n')) < 0) {
-                    return s;
-                }
+        if ((i = headerLine.indexOf('\r')) < 0 && (i = headerLine.indexOf('\n')) < 0) {
+            return headerLine;
+        }
+        /*-
+         * Check folded encoded-words as per RFC 2047:
+         *
+         * An 'encoded-word' may not be more than 75 characters long, including
+         * 'charset', 'encoding', 'encoded-text', and delimiters.  If it is
+         * desirable to encode more text than will fit in an 'encoded-word' of
+         * 75 characters, multiple 'encoded-word's (separated by CRLF SPACE) may
+         * be used.
+         *
+         * In this case the SPACE character is not part of the header and should
+         * be discarded.
+         */
+        String s;
+        if (headerLine.indexOf("=?") < 0) {
+            s = headerLine;
+        } else {
+            s = unfoldEncodedWords(headerLine);
+            if ((i = s.indexOf('\r')) < 0 && (i = s.indexOf('\n')) < 0) {
+                return s;
             }
-            do {
-                final int start = i;
-                final int len = s.length();
-                i++; // skip CR or NL
-                if ((i < len) && (s.charAt(i - 1) == '\r') && (s.charAt(i) == '\n')) {
-                    i++; // skip LF
-                }
-                if (start == 0 || s.charAt(start - 1) != '\\') {
-                    char c;
-                    /*
-                     * If next line starts with whitespace, skip all of it
-                     */
-                    if ((i < len) && (((c = s.charAt(i)) == ' ') || (c == '\t'))) {
-                        i++; // skip whitespace
-                        while ((i < len) && (((c = s.charAt(i)) == ' ') || (c == '\t'))) {
-                            i++;
-                        }
-                        if (sb == null) {
-                            sb = new com.openexchange.java.StringAllocator(s.length());
-                        }
-                        if (start != 0) {
-                            sb.append(s.substring(0, start));
-                            sb.append(' ');
-                        }
-                        s = s.substring(i);
-                    } else {
-                        /*
-                         * It's not a continuation line, just leave it in
-                         */
-                        if (sb == null) {
-                            sb = new com.openexchange.java.StringAllocator(s.length());
-                        }
-                        sb.append(s.substring(0, i));
-                        s = s.substring(i);
+        }
+        com.openexchange.java.StringAllocator sb = null;
+        do {
+            final int start = i;
+            final int len = s.length();
+            i++; // skip CR or NL
+            if ((i < len) && (s.charAt(i - 1) == '\r') && (s.charAt(i) == '\n')) {
+                i++; // skip LF
+            }
+            if (start == 0 || s.charAt(start - 1) != '\\') {
+                char c;
+                /*
+                 * If next line starts with whitespace, skip all of it
+                 */
+                if ((i < len) && (((c = s.charAt(i)) == ' ') || (c == '\t'))) {
+                    i++; // skip whitespace
+                    while ((i < len) && (((c = s.charAt(i)) == ' ') || (c == '\t'))) {
+                        i++;
                     }
+                    if (sb == null) {
+                        sb = new com.openexchange.java.StringAllocator(s.length());
+                    }
+                    if (start != 0) {
+                        sb.append(s.substring(0, start));
+                        sb.append(' ');
+                    }
+                    s = s.substring(i);
                 } else {
                     /*
-                     * There's a backslash at "start - 1", strip it out, but leave in the line break
+                     * It's not a continuation line, just leave it in
                      */
                     if (sb == null) {
                         sb = new com.openexchange.java.StringAllocator(s.length());
                     }
-                    sb.append(s.substring(0, start - 1));
-                    sb.append(s.substring(start, i));
+                    sb.append(s.substring(0, i));
                     s = s.substring(i);
                 }
-            } while ((i = s.indexOf('\r')) >= 0 || (i = s.indexOf('\n')) >= 0);
-            sb.append(s);
-            return sb.toString();
-        }
-        return headerLine;
+            } else {
+                /*
+                 * There's a backslash at "start - 1", strip it out, but leave in the line break
+                 */
+                if (sb == null) {
+                    sb = new com.openexchange.java.StringAllocator(s.length());
+                }
+                sb.append(s.substring(0, start - 1));
+                sb.append(s.substring(start, i));
+                s = s.substring(i);
+            }
+        } while ((i = s.indexOf('\r')) >= 0 || (i = s.indexOf('\n')) >= 0);
+        sb.append(s);
+        return sb.toString();
     }
 
     private static final Pattern PAT_ENC_WORDS;

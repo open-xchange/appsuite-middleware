@@ -64,6 +64,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
@@ -116,23 +117,23 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         }
 
         Connection writeConnection = null;
+        boolean rollback = false;
         try {
             writeConnection = dbProvider.getWriteConnection(subscription.getContext());
             txPolicy.setAutoCommit(writeConnection, false);
+            rollback = true;
             delete(subscription, writeConnection);
             txPolicy.commit(writeConnection);
+            rollback = false;
         } catch (final SQLException e) {
             throw SQLException.create(e);
         } finally {
             if (writeConnection != null) {
-                try {
-                    txPolicy.rollback(writeConnection);
-                    txPolicy.setAutoCommit(writeConnection, true);
-                } catch (final SQLException e) {
-                    throw SQLException.create(e);
-                } finally {
-                    dbProvider.releaseWriteConnection(subscription.getContext(), writeConnection);
+                if (rollback) {
+                    Databases.rollback(writeConnection);
                 }
+                Databases.autocommit(writeConnection);
+                dbProvider.releaseWriteConnection(subscription.getContext(), writeConnection);
             }
         }
     }
@@ -262,24 +263,24 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         }
 
         Connection writeConnection = null;
+        boolean rollback = false;
         try {
             writeConnection = dbProvider.getWriteConnection(subscription.getContext());
             txPolicy.setAutoCommit(writeConnection, false);
+            rollback = true;
             final int id = save(subscription, writeConnection);
             subscription.setId(id);
             txPolicy.commit(writeConnection);
+            rollback = false;
         } catch (final SQLException e) {
             throw SQLException.create(e);
         } finally {
             if (writeConnection != null) {
-                try {
-                    txPolicy.rollback(writeConnection);
-                    txPolicy.setAutoCommit(writeConnection, true);
-                } catch (final SQLException e) {
-                    throw SQLException.create(e);
-                } finally {
-                    dbProvider.releaseWriteConnection(subscription.getContext(), writeConnection);
+                if (rollback) {
+                    Databases.rollback(writeConnection);
                 }
+                Databases.autocommit(writeConnection);
+                dbProvider.releaseWriteConnection(subscription.getContext(), writeConnection);
             }
         }
     }
@@ -291,23 +292,23 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         }
 
         Connection writeConnection = null;
+        boolean rollback = false;
         try {
             writeConnection = dbProvider.getWriteConnection(subscription.getContext());
             txPolicy.setAutoCommit(writeConnection, false);
+            rollback = true;
             update(subscription, writeConnection);
             txPolicy.commit(writeConnection);
+            rollback = false;
         } catch (final SQLException e) {
             throw SQLException.create(e);
         } finally {
             if (writeConnection != null) {
-                try {
-                    txPolicy.rollback(writeConnection);
-                    txPolicy.setAutoCommit(writeConnection, true);
-                } catch (final SQLException e) {
-                    throw SQLException.create(e);
-                } finally {
-                    dbProvider.releaseWriteConnection(subscription.getContext(), writeConnection);
+                if (rollback) {
+                    Databases.rollback(writeConnection);
                 }
+                Databases.autocommit(writeConnection);
+                dbProvider.releaseWriteConnection(subscription.getContext(), writeConnection);
             }
         }
     }

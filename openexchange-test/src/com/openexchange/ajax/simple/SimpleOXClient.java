@@ -76,7 +76,7 @@ public class SimpleOXClient {
 
     private static final String BASE = "/ajax";
 
-    private boolean debug = System.getProperty("ebug") != null && System.getProperty("ebug").equals("true");
+    private boolean debug = "true".equals(System.getProperty("ebug"));
 
     private final HttpClient client = new HttpClient();
     private String sessionID;

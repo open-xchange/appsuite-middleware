@@ -49,7 +49,6 @@
 
 package com.openexchange.admin.rmi.dataobjects;
 
-import com.openexchange.admin.rmi.dataobjects.Context;
 
 /**
  * {@link Publication}
@@ -63,34 +62,49 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
      */
     private static final long serialVersionUID = -1272376727507395566L;
     
-    private int userId;
-    
+    private Integer userId;
     private boolean userIdSet = false;
 
     private Context context;
-    
     private boolean contextSet = false;
 
     private Integer id;
-    
     private boolean idSet = false;
 
     private String entityId;
-    
     private boolean entityIdSet = false;
 
     private String module;
-    
     private boolean moduleSet = false;
 
     private String name;
-    
     private boolean nameSet = false;
 
-    private Boolean enabled = null;
+    private String description;
+    private boolean descriptionSet = false;
+
+    private String url;
 
     public String getEntityId() {
         return entityId;
+    }
+    
+    /**
+     * Gets the url
+     *
+     * @return The url
+     */
+    public String getUrl() {
+        return url;
+    }
+    
+    /**
+     * Sets the url
+     *
+     * @param url The url to set
+     */
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public void setEntityId(final String entityId) {
@@ -209,8 +223,164 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
         return null;
     }
 
+    /**
+     * Gets the description
+     *
+     * @return The description
+     */
+    public String getDescription() {
+        return description;
+    }
 
+    /**
+     * Sets the description
+     *
+     * @param description The description to set
+     */
+    public void setDescription(String description) {
+        if (null == description) {
+            this.descriptionSet = true;
+        }
+        this.description = description;
+    }
+    
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + ((context == null) ? 0 : context.hashCode());
+        result = prime * result + (contextSet ? 1231 : 1237);
+        result = prime * result + ((description == null) ? 0 : description.hashCode());
+        result = prime * result + (descriptionSet ? 1231 : 1237);
+        result = prime * result + ((entityId == null) ? 0 : entityId.hashCode());
+        result = prime * result + (entityIdSet ? 1231 : 1237);
+        result = prime * result + ((module == null) ? 0 : module.hashCode());
+        result = prime * result + (moduleSet ? 1231 : 1237);
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + (idSet ? 1231 : 1237);
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + (nameSet ? 1231 : 1237);
+        result = prime * result + ((userId == null) ? 0 : userId.hashCode());
+        result = prime * result + (userIdSet ? 1231 : 1237);
+        return result;
+    }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!super.equals(obj)) {
+            return false;
+        }
+        if (!(obj instanceof Publication)) {
+            return false;
+        }
+        final Publication other = (Publication) obj;
+        if (context == null) {
+            if (other.context != null) {
+                return false;
+            }
+        } else if (!context.equals(other.context)) {
+            return false;
+        }
+        if (contextSet != other.contextSet) {
+            return false;
+        }
+        if (description == null) {
+            if (other.description != null) {
+                return false;
+            }
+        } else if (!description.equals(other.description)) {
+            return false;
+        }
+        if (descriptionSet != other.descriptionSet) {
+            return false;
+        }
+        if (entityId == null) {
+            if (other.entityId != null) {
+                return false;
+            }
+        } else if (!entityId.equals(other.entityId)) {
+            return false;
+        }
+        if (entityIdSet != other.entityIdSet) {
+            return false;
+        }
+        if (id == null) {
+            if (other.id != null) {
+                return false;
+            }
+        } else if (!id.equals(other.id)) {
+            return false;
+        }
+        if (idSet != other.idSet) {
+            return false;
+        }
+        if (module == null) {
+            if (other.module != null) {
+                return false;
+            }
+        } else if (!module.equals(other.module)) {
+            return false;
+        }
+        if (moduleSet != other.moduleSet) {
+            return false;
+        }
+        if (name == null) {
+            if (other.name != null) {
+                return false;
+            }
+        } else if (!name.equals(other.name)) {
+            return false;
+        }
+        if (nameSet != other.nameSet) {
+            return false;
+        }if (userId == null) {
+            if (other.userId != null) {
+                return false;
+            }
+        } else if (!userId.equals(other.userId)) {
+            return false;
+        }
+        if (userIdSet != other.userIdSet) {
+            return false;
+        }
+        return true;
+    }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(256);
+        builder.append("Publication [");
+        if (userId != null) {
+            builder.append("userId=").append(userId).append(", ");
+        }
+        if (context != null) {
+            builder.append("context=").append(context).append(", ");
+        }
+        if (id != null) {
+            builder.append("id=").append(id).append(", ");
+        }
+        if (entityId != null) {
+            builder.append("entityId=").append(entityId).append(", ");
+        }
+        if (module != null) {
+            builder.append("module=").append(module).append(", ");
+        }
+        if (name != null) {
+            builder.append("name=").append(name).append(", ");
+        }
+        if (description != null) {
+            builder.append("description=").append(description).append(", ");
+        }
+        if (url != null) {
+            builder.append("url=").append(url);
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
+    
 
 }

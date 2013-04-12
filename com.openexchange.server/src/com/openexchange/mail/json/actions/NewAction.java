@@ -80,6 +80,7 @@ import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -87,6 +88,7 @@ import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -192,6 +194,7 @@ public final class NewAction extends AbstractMailAction {
                 if (msgIdentifier == null) {
                     throw MailExceptionCode.DRAFT_FAILED_UNKNOWN.create();
                 }
+                warnings.addAll(mailInterface.getWarnings());
             } else {
                 /*
                  * ... and send message
@@ -209,6 +212,7 @@ public final class NewAction extends AbstractMailAction {
                 for (int i = 1; i < composedMails.length; i++) {
                     mailInterface.sendMessage(composedMails[i], sendType, accountId);
                 }
+                warnings.addAll(mailInterface.getWarnings());
                 /*
                  * Trigger contact collector
                  */
@@ -227,7 +231,12 @@ public final class NewAction extends AbstractMailAction {
             }
         }
         if (msgIdentifier == null) {
-            throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();
+            if (warnings.isEmpty()) {
+                throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();                            
+            }
+            final AJAXRequestResult result = new AJAXRequestResult(JSONObject.NULL, "json");
+            result.addWarnings(warnings);
+            return result;
         }
         /*
          * Create JSON response object
@@ -355,7 +364,12 @@ public final class NewAction extends AbstractMailAction {
             /*
              * Send raw message source
              */
-            final MailMessage sentMail = transport.sendRawMessage(m.getSourceBytes());
+            final MailMessage sentMail;
+            if (m instanceof MimeMailMessage) {
+                sentMail = transport.sendMailMessage(new ContentAwareComposedMailMessage(((MimeMailMessage) m).getMimeMessage(), session, null), ComposeType.NEW);
+            } else {
+                sentMail = transport.sendRawMessage(m.getSourceBytes());
+            }
             JSONObject responseData = null;
             if (!session.getUserSettingMail().isNoCopyIntoStandardSentFolder()) {
                 /*

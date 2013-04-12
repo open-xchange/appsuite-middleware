@@ -2,12 +2,20 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Halo LinkedIn Interface
 Bundle-SymbolicName: com.openexchange.halo.linkedin
-Bundle-Version: 7.0.2
+Bundle-Version: 7.2.0
 Bundle-Vendor: Open-Xchange Inc
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.capabilities,
+ com.openexchange.config,
+ com.openexchange.contact,
  com.openexchange.exception,
+ com.openexchange.groupware.contact.helpers,
  com.openexchange.groupware.container,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.ldap,
+ com.openexchange.groupware.settings,
+ com.openexchange.groupware.userconfiguration,
  com.openexchange.halo,
  com.openexchange.oauth,
  com.openexchange.oauth.linkedin,
@@ -19,4 +27,3 @@ Import-Package: com.openexchange.ajax.requesthandler,
  org.json,
  org.osgi.framework
 Bundle-Activator: com.openexchange.halo.linkedin.osgi.LinkedinHaloActivator
-Require-Bundle: com.openexchange.server

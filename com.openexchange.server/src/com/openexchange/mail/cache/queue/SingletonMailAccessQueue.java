@@ -80,6 +80,11 @@ public final class SingletonMailAccessQueue implements MailAccessQueue {
     }
 
     @Override
+    public int getCapacity() {
+        return 1;
+    }
+
+    @Override
     public PooledMailAccess pollDelayed() {
         PooledMailAccess tmp;
         do {

@@ -229,6 +229,15 @@ public class Context {
         }
         return this.loginMappings;
     }
+    
+    /**
+     * Sets the loginMappings
+     *
+     * @param loginMappings The loginMappings to set
+     */
+    public void setLoginMappings(List<String> loginMappings) {
+        this.loginMappings = loginMappings;
+    }
 
     /**
      * Ruft den Wert der maxQuota-Eigenschaft ab.

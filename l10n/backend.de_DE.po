@@ -9357,7 +9357,7 @@ msgid ""
 "Request rejected because its size (%1$s) exceeds the maximum configured size "
 "of %2$s"
 msgstr ""
-"Anfrage abgelehnt. Die Größe (%1$s) übersteigt die maximal konfigurierte "
+"Anfrage abgelehnt. Die Größe (%1$s) übersteigt die maximal zulässige "
 "Größe von %2$d"
 
 #. *

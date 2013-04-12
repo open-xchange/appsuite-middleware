@@ -172,7 +172,7 @@ public class FreeBusyTest extends ManagedAppointmentTest {
                 Pattern pattern = Pattern.compile("FBTYPE=(.+)?:(.+)?/(.+)");
                 Matcher matcher = pattern.matcher(line);
                 matcher.find();
-                assertEquals("Must find three groups", 3, matcher.groupCount());
+                assertEquals("Must find three groups."+System.getProperty("line.separator")+text, 3, matcher.groupCount());
                 String type = matcher.group(1);
                 String start = matcher.group(2);
                 String end = matcher.group(3);
@@ -180,7 +180,7 @@ public class FreeBusyTest extends ManagedAppointmentTest {
             }
 
         }
-        System.out.println(text);
+        // System.out.println(text);
         return result;
     }
 

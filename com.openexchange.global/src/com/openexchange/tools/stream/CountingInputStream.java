@@ -101,7 +101,7 @@ public class CountingInputStream extends FilterInputStream {
     public int read() throws IOException {
         final int result = in.read();
         final long max = this.max;
-        if (count.addAndGet((result >= 0L) ? result : 0L) > max) {
+        if (count.addAndGet((result >= 0L) ? 1 : 0L) > max) {
             throw new IOException("Max. byte count of " + max + " exceeded.");
         }
         return result;

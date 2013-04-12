@@ -58,11 +58,14 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.service.http.HttpService;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.mailfilter.ajax.actions.MailfilterAction;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
+import com.openexchange.mailfilter.internal.MailFilterChecker;
 import com.openexchange.mailfilter.internal.MailFilterPreferencesItem;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
 import com.openexchange.mailfilter.internal.MailFilterServletInit;
@@ -83,6 +86,8 @@ public class Activator extends DeferredActivator {
 
     private ServiceRegistration<EventHandler> handlerRegistration;
 
+    private ServiceRegistration<CapabilityChecker> capabilityRegistration;
+
     /**
      * Initializes a new {@link MailFilterServletActivator}
      */
@@ -93,7 +98,7 @@ public class Activator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class };
+        return new Class<?>[] { ConfigurationService.class, HttpService.class, SessiondService.class, DispatcherPrefixService.class, CapabilityService.class };
     }
 
 
@@ -177,6 +182,8 @@ public class Activator extends DeferredActivator {
             }
 
             serviceRegistration = context.registerService(PreferencesItemService.class, new MailFilterPreferencesItem(), null);
+            getService(CapabilityService.class).declareCapability(MailFilterChecker.CAPABILITY);
+            capabilityRegistration = context.registerService(CapabilityChecker.class, new MailFilterChecker(), null);
         } catch (final Throwable t) {
             throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
@@ -193,6 +200,10 @@ public class Activator extends DeferredActivator {
             if (null != serviceRegistration) {
                 serviceRegistration.unregister();
                 serviceRegistration = null;
+            }
+            if (null != capabilityRegistration) {
+                capabilityRegistration.unregister();
+                capabilityRegistration = null;
             }
             MailFilterServletInit.getInstance().stop();
 

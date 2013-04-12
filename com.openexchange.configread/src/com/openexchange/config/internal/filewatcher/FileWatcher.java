@@ -113,12 +113,13 @@ public final class FileWatcher {
     }
 
     private static void initTimer() {
-        Timer tmp = fileWatcherTimer;
-        if (null == tmp) {
+        Timer timer = fileWatcherTimer;
+        if (null == timer) {
             synchronized (FileWatcher.class) {
-                tmp = fileWatcherTimer;
-                if (null == tmp) {
-                    fileWatcherTimer = tmp = new Timer("FileWatcherTimer");
+                timer = fileWatcherTimer;
+                if (null == timer) {
+                    timer = new Timer("FileWatcherTimer");
+                    fileWatcherTimer = timer;
                 }
             }
         }
@@ -128,10 +129,12 @@ public final class FileWatcher {
      * Drops the associated timer thread.
      */
     public static void dropTimer() {
-        if (null != fileWatcherTimer) {
+        Timer timer = fileWatcherTimer;
+        if (null != timer) {
             synchronized (FileWatcher.class) {
-                if (null != fileWatcherTimer) {
-                    fileWatcherTimer.cancel();
+                timer = fileWatcherTimer;
+                if (null != timer) {
+                    timer.cancel();
                     fileWatcherTimer = null;
                 }
             }
@@ -190,16 +193,12 @@ public final class FileWatcher {
     public void startFileWatcher(final long period) {
         if (!started.get()) {
             synchronized (this) {
-                if (started.get()) {
-                    /*
-                     * Already started
-                     */
-                    return;
+                if (!started.get()) {
+                    timerTask = new FileWatcherTimerTask();
+                    initTimer();
+                    fileWatcherTimer.schedule(timerTask, 1000, period);
+                    started.set(true);
                 }
-                timerTask = new FileWatcherTimerTask();
-                initTimer();
-                fileWatcherTimer.schedule(timerTask, 1000, period);
-                started.set(true);
             }
         }
     }
@@ -210,15 +209,11 @@ public final class FileWatcher {
     public void stopFileWatcher() {
         if (started.get()) {
             synchronized (this) {
-                if (!started.get()) {
-                    /*
-                     * Already stopped
-                     */
-                    return;
+                if (started.get()) {
+                    timerTask.cancel();
+                    fileWatcherTimer.purge();
+                    started.set(false);
                 }
-                timerTask.cancel();
-                fileWatcherTimer.purge();
-                started.set(false);
             }
         }
     }

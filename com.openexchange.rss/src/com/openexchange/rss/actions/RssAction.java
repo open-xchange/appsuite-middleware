@@ -148,8 +148,13 @@ public class RssAction implements AJAXActionService {
         for (SyndFeed feed : feeds) {
             for (Object obj : feed.getEntries()) {
                 SyndEntry entry = (SyndEntry) obj;
-                RssResult result = new RssResult().setAuthor(entry.getAuthor()).setSubject(entry.getTitle()).setUrl(entry.getUri()).setFeedUrl(
-                    feed.getLink()).setFeedTitle(feed.getTitle()).setDate(entry.getUpdatedDate(), entry.getPublishedDate(), new Date());
+                RssResult result = new RssResult()
+                	.setAuthor(entry.getAuthor())
+                	.setSubject(entry.getTitle())
+                	.setUrl(entry.getLink())
+                	.setFeedUrl(feed.getLink())
+                	.setFeedTitle(feed.getTitle())
+                	.setDate(entry.getUpdatedDate(), entry.getPublishedDate(), new Date());
 
                 if (feed.getImage() != null) {
                     result.setImageUrl(feed.getImage().getLink());

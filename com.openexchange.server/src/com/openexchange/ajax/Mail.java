@@ -133,6 +133,7 @@ import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.log.Log;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
@@ -154,6 +155,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
@@ -236,21 +238,26 @@ public class Mail extends PermissionServlet implements UploadListener {
         final String message = cause.getMessage();
         if (LOG.isWarnEnabled()) {
             final StringBuilder warnBuilder = new StringBuilder(140);
-            warnBuilder.append("An unexpected exception occurred, which is going to be wrapped for proper display.\n");
-            warnBuilder.append("For safety reason its original content is displayed here.\n");
-            warnBuilder.append(null == message ? "[Not available]" : message).append('\n');
-            appendStackTrace(cause.getStackTrace(), warnBuilder);
-            LOG.warn(warnBuilder.toString());
+            final String lineSeparator = System.getProperty("line.separator");
+            warnBuilder.append("An unexpected exception occurred, which is going to be wrapped for proper display.").append(lineSeparator);
+            warnBuilder.append("For safety reason its original content is displayed here.").append(lineSeparator);
+            warnBuilder.append(null == message ? "[Not available]" : message);
+            if (Log.appendTraceToMessage()) {
+                warnBuilder.append(lineSeparator);
+                appendStackTrace(cause.getStackTrace(), warnBuilder, lineSeparator);
+                LOG.warn(warnBuilder.toString());
+            } else {
+                LOG.warn(warnBuilder.toString(), cause);
+            }
         }
         return MailExceptionCode.UNEXPECTED_ERROR.create(cause, null == message ? "[Not available]" : message);
     }
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb, final String lineSeparator) {
         if (null == trace) {
-            sb.append("<missing stack trace>\n");
+            sb.append("<missing stack trace>").append(lineSeparator);
             return;
         }
-        final String lineSeparator = System.getProperty("line.separator");
         for (final StackTraceElement ste : trace) {
             final String className = ste.getClassName();
             if (null != className) {
@@ -4058,9 +4065,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             /*
              * Get message bytes
              */
-            final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream();
-            m.writeTo(tmp);
-            final MailMessage sentMail = transport.sendRawMessage(tmp.toByteArray());
+            final MailMessage sentMail = transport.sendMailMessage(new ContentAwareComposedMailMessage(m, session, null), ComposeType.NEW);
             JSONObject responseData = null;
             /*
              * Set \Answered flag (if appropriate) & append to sent folder
@@ -4154,7 +4159,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             return responseData;
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
+        } catch (final RuntimeException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
@@ -4861,7 +4866,17 @@ public class Mail extends PermissionServlet implements UploadListener {
                         }
                     }
                     if (msgIdentifier == null) {
-                        throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();
+                        warnings.addAll(mailServletInterface.getWarnings());
+                        if (warnings.isEmpty()) {
+                            throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();                            
+                        }
+                        final Response response = new Response(session);
+                        response.setData(JSONObject.NULL);
+                        response.addWarnings(warnings);
+                        final String jsResponse = substituteJS(ResponseWriter.getJSON(response).toString(), actionStr);
+                        writer.write(jsResponse);
+                        writer.flush();
+                        return true;
                     }
                     /*
                      * Create JSON response object

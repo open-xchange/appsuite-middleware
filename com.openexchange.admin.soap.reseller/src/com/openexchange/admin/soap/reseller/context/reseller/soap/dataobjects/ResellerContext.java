@@ -158,6 +158,10 @@ public class ResellerContext
         return this.restriction;
     }
 
+    public void setRestriction(List<Restriction> restriction) {
+        this.restriction = restriction;
+    }
+
     /**
      * Ruft den Wert der sid-Eigenschaft ab.
      *

@@ -84,7 +84,7 @@ public interface Loggable {
      *
      * @return The log message
      */
-    public String getMessage();
+    public Object getMessage();
 
     /**
      * Gets the {@link Throwable} instance.

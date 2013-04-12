@@ -55,14 +55,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
-
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -74,6 +70,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogFactory;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.session.Session;
@@ -150,7 +147,7 @@ public class ContactPictureServlet extends OnlinePublicationServlet {
 
     private void writeImage(final Contact contact, final HttpServletRequest req, final HttpServletResponse resp, final Session session) throws IOException, OXException {
 
-        final AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(req, false, false, ServerSessionAdapter.valueOf(session), "/publications/");
+        final AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(req, false, false, ServerSessionAdapter.valueOf(session), "/publications/", resp);
 
         final ByteArrayFileHolder holder = new ByteArrayFileHolder(contact.getImage1());
         holder.setContentType(contact.getImageContentType());

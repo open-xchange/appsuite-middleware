@@ -69,7 +69,7 @@ import com.openexchange.tools.servlet.http.Cookies;
 
 /**
  * {@link OXRequest}
- *
+ * 
  * @author <a href="mailto:marc	.arens@open-xchange.com">Marc Arens</a>
  */
 public class OXRequest extends Request {
@@ -109,7 +109,7 @@ public class OXRequest extends Request {
 
     /**
      * Gets the XForwardProto e.g. http/s
-     *
+     * 
      * @return The XForwardProto
      */
     public String getXForwardProto() {
@@ -118,7 +118,7 @@ public class OXRequest extends Request {
 
     /**
      * Sets the xForwardProto e.g. http/s
-     *
+     * 
      * @param XForwardProto The XForwardProto to set
      */
     public void setxForwardProto(String XForwardProto) {
@@ -127,7 +127,7 @@ public class OXRequest extends Request {
 
     /**
      * Gets the XForwardPort
-     *
+     * 
      * @return The XForwardPort
      */
     public int getXForwardPort() {
@@ -136,7 +136,7 @@ public class OXRequest extends Request {
 
     /**
      * Sets the XForwardPort
-     *
+     * 
      * @param XForwardPort The XForwardPort to set
      */
     public void setXForwardPort(int XForwardPort) {
@@ -200,8 +200,8 @@ public class OXRequest extends Request {
         } else {
             String sessionId = createSessionID();
             registerNewSession(sessionId);
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Set new JSessionId Cookie: " + sessionId);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Set new JSessionId Cookie: " + sessionId);
             }
         }
         return session;
@@ -209,7 +209,7 @@ public class OXRequest extends Request {
 
     /**
      * Register a new Session in the list of sessions, add it as Cookie to the Response and add the string value to the LogProperties.
-     *
+     * 
      * @param sessionId The new SessionId that has to be registered
      */
     private void registerNewSession(String sessionId) {
@@ -226,12 +226,12 @@ public class OXRequest extends Request {
 
     /**
      * Remove invalid JSession cookie used in the Request. Cookies are invalid when:
-     *
+     * 
      * @param invalidSessionId The invalid sessionId requested by the browser/cookie
      */
     private void removeInvalidSessionCookie(String invalidSessionId) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Removing invalid JSessionId Cookie: " + invalidSessionId);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Removing invalid JSessionId Cookie: " + invalidSessionId);
         }
         for (Cookie cookie : cookies) {
             if (cookie.getName().startsWith(Globals.SESSION_COOKIE_NAME)) {
@@ -249,7 +249,7 @@ public class OXRequest extends Request {
 
     /**
      * Generate a invalidation Cookie that can be added to the response to prompt the browser to remove that cookie.
-     *
+     * 
      * @param invalidCookie The invalid Cookie from the incoming request
      * @return an invalidation Cookie that can be added to the response to prompt the browser to remove that cookie.
      */
@@ -263,7 +263,7 @@ public class OXRequest extends Request {
     /**
      * Generate a invalidation Cookie with domain that can be added to the response to prompt the browser to remove that cookie. The domain
      * is needed for IE to change/remove cookies.
-     *
+     * 
      * @param invalidCookie The invalid Cookie from the incoming request
      * @param domain The domain to set in the invalidation cookie
      * @return an invalidation Cookie that can be added to the response to prompt the browser to remove that cookie.
@@ -277,7 +277,7 @@ public class OXRequest extends Request {
     /**
      * Create a new JSessioID String that consists of a (random)-(the urlencoded domain of this server with dots and dashes
      * encoded).(backendRoute).
-     *
+     * 
      * @return A new JSessionId value as String
      */
     private String createSessionID() {
@@ -296,7 +296,7 @@ public class OXRequest extends Request {
 
     /**
      * Creates a new JSessionIdCookie based on a sessionID and the server configuration.
-     *
+     * 
      * @param sessionID The sessionId to use for cookie generation
      * @return The new JSessionId Cookie
      */
@@ -330,74 +330,8 @@ public class OXRequest extends Request {
     }
 
     /**
-     * Parse request parameters. This differs from the original implementation in a way that we don't use ISO-8859-1 as fallback encoding
-     * but the one configured in server.properties via "DefaultEncoding".
-     */
-    @Override
-    protected void parseRequestParameters() {
-
-        // getCharacterEncoding() may have been overridden to search for
-        // hidden form field containing request encoding
-        final String enc = getCharacterEncoding();
-
-        // Delay updating requestParametersParsed to TRUE until
-        // after getCharacterEncoding() has been called, because
-        // getCharacterEncoding() may cause setCharacterEncoding() to be
-        // called, and the latter will ignore the specified encoding if
-        // requestParametersParsed is TRUE
-        requestParametersParsed = true;
-
-        Charset charset;
-
-        if (enc != null) {
-            try {
-                charset = Charsets.lookupCharset(enc);
-            } catch (Exception e) {
-                charset = Charsets.lookupCharset(grizzlyConfig.getDefaultEncoding());
-            }
-        } else {
-            charset = Charsets.lookupCharset(grizzlyConfig.getDefaultEncoding());
-        }
-
-        parameters.setEncoding(charset);
-        parameters.setQueryStringEncoding(charset);
-
-        parameters.handleQueryParameters();
-
-        if (usingInputStream || usingReader) {
-            return;
-        }
-
-        if (!Method.POST.equals(getMethod())) {
-            return;
-        }
-
-        final int len = getContentLength();
-
-        if (len > 0) {
-
-            if (!checkPostContentType(getContentType())) {
-                return;
-            }
-
-            try {
-                final Buffer formData = getPostBody(len);
-                parameters.processParameters(formData, formData.position(), len);
-            } catch (Exception ignored) {
-            } finally {
-                try {
-                    skipPostBody(len);
-                } catch (Exception e) {
-                    LOG.warn("Exception occurred during body skip", e);
-                }
-            }
-        }
-
-    }
-
-    /**
      * Override isSecure by first checking the X-Forward-Proto Header. Fallback is the original implementation of the header wasn't present.
-     *
+     * 
      * @return True if the X-Forward-Proto header indicates a secure connection or a real https connection was used.
      */
     @Override
@@ -406,6 +340,41 @@ public class OXRequest extends Request {
             return XForwardProto.equals("https");
         }
         return super.isSecure();
+    }
+
+    /**
+     * Lookup a Charset based on a String value.
+     * If the lookup fails try to fall back to the default encoding from GrizzlyConfig. If that fails, too use UTF-8.
+     * The resulting Charset is used to e.g decode parameters sent via request bodies.
+     * 
+     * @param enc The String representing the encoding
+     * @return The Charset loked up, or the default encoding specified in GrizzlyConfig, or UTF-8
+     */
+    @Override
+    protected Charset lookupCharset(final String enc) {
+        Charset charset;
+        
+        if (enc != null) {
+            try {
+                charset = Charsets.lookupCharset(enc);
+            } catch (Exception e) {
+                try {
+                    String defaultEncoding = GrizzlyConfig.getInstance().getDefaultEncoding();
+                    charset = Charsets.lookupCharset(defaultEncoding);
+                } catch (Exception ex) {
+                    charset = Charsets.UTF8_CHARSET;
+                }
+            }
+        } else {
+            try {
+                String defaultEncoding = GrizzlyConfig.getInstance().getDefaultEncoding();
+                charset = Charsets.lookupCharset(defaultEncoding);
+            } catch (Exception ex) {
+                charset = Charsets.UTF8_CHARSET;
+            }
+        }
+
+        return charset;
     }
 
 }

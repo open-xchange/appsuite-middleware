@@ -3985,6 +3985,8 @@ public class Contact extends CommonObject {
             return getAddressHome();
         case ADDRESS_OTHER:
             return getAddressOther();
+        case SPECIAL_SORTING:
+            return getSortName();
         default:
             return super.get(field);
 

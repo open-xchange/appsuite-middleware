@@ -49,12 +49,11 @@
 
 package com.openexchange.filemanagement.json.actions;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
@@ -73,7 +72,6 @@ import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link GetAction}
@@ -133,38 +131,35 @@ public final class GetAction implements ETagAwareAJAXActionService {
             final String fileName = file.getFileName();
             final String disposition = file.getContentDisposition();
             final ContentType contentType = new ContentType(file.getContentType());
-            if (contentType.getBaseType().equalsIgnoreCase("application/octet-stream")) {
-                /*
-                 * Try to determine MIME type
-                 */
-                final String ct = MimeType2ExtMap.getContentType(fileName);
-                final int pos = ct.indexOf('/');
-                contentType.setPrimaryType(ct.substring(0, pos));
-                contentType.setSubType(ct.substring(pos + 1));
-            }
-
-            if (fileName != null) {
+            if (null != fileName) {
+                // Resolve Content-Type by file name if set to default
+                if (contentType.startsWith("application/octet-stream")) {
+                    /*
+                     * Try to determine MIME type
+                     */
+                    final String ct = MimeType2ExtMap.getContentType(fileName);
+                    final int pos = ct.indexOf('/');
+                    contentType.setPrimaryType(ct.substring(0, pos));
+                    contentType.setSubType(ct.substring(pos + 1));
+                }
+                // Set as "name" parameter
                 contentType.setParameter("name", fileName);
             }
-
             /*
              * Write from content's input stream to response output stream
              */
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
-            final InputStream contentInputStream = new FileInputStream(file.getFile());
-            try {
-                final byte[] buffer = new byte[0xFFFF];
-                for (int len; (len = contentInputStream.read(buffer)) > 0;) {
-                    out.write(buffer, 0, len);
+            final ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+            {
+                final InputStream contentInputStream = new FileInputStream(file.getFile());
+                try {
+                    fileHolder.write(contentInputStream);
+                } finally {
+                    Streams.close(contentInputStream);
                 }
-                out.flush();
-            } finally {
-                Streams.close(contentInputStream);
             }
             /*
-             * Create file holder
+             * Parameterize file holder
              */
-            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(out.toByteArray());
             if (fileName != null) {
                 fileHolder.setName(fileName);
             }

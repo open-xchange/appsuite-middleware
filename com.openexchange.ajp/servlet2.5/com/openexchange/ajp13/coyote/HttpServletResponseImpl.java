@@ -93,9 +93,9 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.java.AsciiWriter;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.version.Version;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
+import com.openexchange.version.Version;
 
 /**
  * {@link HttpServletResponseImpl}
@@ -430,7 +430,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     @Override
     public PrintWriter getWriter() throws UnsupportedEncodingException, IOException {
-        if (outputSelection == OUTPUT_STREAM) {
+        if (false && outputSelection == OUTPUT_STREAM) {
             throw new IllegalStateException("Servlet's OutputStream has already been selected as output");
         }
         if (null != writer) {
@@ -449,7 +449,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         /*
          * Check if getOutputSteam hasn't been called before
          */
-        if (outputSelection == OUTPUT_STREAM) {
+        if (false && outputSelection == OUTPUT_STREAM) {
             throw new IllegalStateException("Servlet's OutputStream has already been selected as output");
         }
         if (outputSelection == OUTPUT_NOT_SELECTED) {

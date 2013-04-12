@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Core implementation for copying users between contexts
 Bundle-SymbolicName: com.openexchange.user.copy
-Bundle-Version: 7.0.2
+Bundle-Version: 7.2.0
 Bundle-Activator: com.openexchange.user.copy.osgi.Activator
 Bundle-Vendor: Open-Xchange, Inc.
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.context,
  com.openexchange.database,
  com.openexchange.exception,

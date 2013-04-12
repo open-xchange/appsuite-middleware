@@ -23,13 +23,13 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.cs_CZ.po\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2013-02-21 13:39+0100\n"
+"PO-Revision-Date: 2013-03-26 16:15+0100\n"
 "Last-Translator: Robert Krátký <kratky@rob.cz>\n"
 "Language-Team: Czech <cs@bureau-cornavin.com>\n"
+"Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: cs\n"
 "#-#-#-#-#  server.cs_CZ.po  #-#-#-#-#\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Lokalize 1.4\n"
@@ -205,6 +205,7 @@ msgstr "Chybí konfigurační soubor cache v: %1$s"
 #.
 #. An I/O error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caching/src/com/openexchange/caching/CacheExceptionMessage.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.capabilities/src/com/openexchange/capabilities/CapabilityExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion/src/com/openexchange/conversion/DataExceptionMessages.java:80
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.document.converter/src/com/openexchange/document/converter/DocumentConverterExceptionMessages.java:81
@@ -212,6 +213,7 @@ msgstr "Chybí konfigurační soubor cache v: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:65
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:72
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.langdetect/src/com/openexchange/langdetect/LanguageDetectionExceptionMessages.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.loxandra/src/com/openexchange/loxandra/LoxandraExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:92
@@ -225,6 +227,7 @@ msgstr "Chybí konfigurační soubor cache v: %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rdiff/src/com/openexchange/rdiff/RdiffExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/configuration/ConfigurationExceptionMessage.java:94
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:117
@@ -313,12 +316,34 @@ msgid "Location"
 msgstr "Místo"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:67
 msgid "Participants"
 msgstr "Účastníci"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:73
 msgid "Comments"
 msgstr "Komentáře"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:62
+msgid "Accepted"
+msgstr "Přijal(a)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:63
+msgid "Declined"
+msgstr "Odmítl(a)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:64
+msgid "Tentatively accepted"
+msgstr "Předběžně přijal(a)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:65
+msgid "Undecided"
+msgstr "Nerozhodný(á)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:273
+msgid "Resources"
+msgstr "Zdroje"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:61
 msgid "No recurrence"
@@ -981,10 +1006,6 @@ msgstr ""
 msgid "Reschedule the event. Original date: %1$s. New date: %2$s"
 msgstr "Naplánujte událost na jindy. Původní datum: %1$s. Nové datum: %2$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:273
-msgid "Resources"
-msgstr "Zdroje"
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:275
 msgid "The entire day"
 msgstr "Celý den"
@@ -1058,6 +1079,7 @@ msgstr ""
 #. * An error occurred: %1$s
 #.
 #. An error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.capabilities/src/com/openexchange/capabilities/CapabilityExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.config.cascade/src/com/openexchange/config/cascade/ConfigCascadeExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.config.objects/src/com/openexchange/config/objects/ConfigObjectsExceptionMessages.java:63
@@ -1072,6 +1094,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.frontend.uwa/src/com/openexchange/frontend/uwa/UWAWidgetExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.groupware.dataRetrieval/src/com/openexchange/groupware/dataRetrieval/DataRetrievalExceptionMessages.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.loxandra/src/com/openexchange/loxandra/LoxandraExceptionMessages.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mdns/src/com/openexchange/mdns/MDNSExceptionMessages.java:63
@@ -1088,6 +1111,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.proxy/src/com/openexchange/proxy/ProxyExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.push/src/com/openexchange/push/PushExceptionMessages.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rdiff/src/com/openexchange/rdiff/RdiffExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:124
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/delete/DeleteFailedExceptionMessage.java:76
@@ -1098,7 +1122,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.solr/src/com/openexchange/solr/SolrExceptionMessages.java:116
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:14
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/XingSubscribeExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.textxtraction/src/com/openexchange/textxtraction/TextXtractExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:63
@@ -1106,8 +1130,57 @@ msgstr ""
 msgid "An error occurred: %1$s"
 msgstr "Došlo k chybě: %1$s"
 
+#. A JSON error occurred: %1$s
+#. *
+#. * A JSON error occurred: %1$s
+#.
+#. A JSON error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.capabilities/src/com/openexchange/capabilities/CapabilityExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion.servlet/src/com/openexchange/conversion/servlet/ConversionServletExceptionMessage.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:65
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:65
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mdns/src/com/openexchange/mdns/MDNSExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.servlet/src/com/openexchange/passwordchange/servlet/PasswordChangeServletExceptionMessage.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:92
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:391
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:72
+msgid "A JSON error occurred: %1$s"
+msgstr "Došlo k chybě JSON: %1$s"
+
+#. A SQL error occurred: %1$s
+#. *
+#. * A SQL error occurred: %1$s
+#.
+#. A SQL error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.capabilities/src/com/openexchange/capabilities/CapabilityExceptionMessages.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.datatypes.genericonf.storage/src/com/openexchange/datatypes/genericonf/storage/GenericConfigurationStorageExceptionMessage.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:68
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:87
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:120
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/delete/DeleteFailedExceptionMessage.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/downgrade/DowngradeFailedExceptionMessage.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/userconfiguration/UserConfigurationExceptionMessage.java:71
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:324
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:78
+msgid "A SQL error occurred: %1$s"
+msgstr "Došlo k chybě SQL: %1$s"
+
 #. Method is not supported.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.chat/src/com/openexchange/chat/ChatExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:69
 msgid "Method is not supported."
 msgstr "Metoda není podporovaná."
 
@@ -1183,19 +1256,19 @@ msgstr "%1$s se připojil(a) k chatu"
 
 #. Could not coerce value %1$s into class %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.config.cascade/src/com/openexchange/config/cascade/ConfigCascadeExceptionMessages.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:17
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:66
 msgid "Could not coerce value %1$s into class %2$s"
 msgstr "Hodnotu %1$s se nepodařilo vnutit do třídy %2$s"
 
 #. Can not define metadata %1$s in scope %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.config.cascade/src/com/openexchange/config/cascade/ConfigCascadeExceptionMessages.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:20
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:69
 msgid "Can not define metadata %1$s in scope %2$s"
 msgstr "Nelze definovat metadata %1$s in rozsahu %2$s"
 
 #. Can not set property %1$s in scope %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.config.cascade/src/com/openexchange/config/cascade/ConfigCascadeExceptionMessages.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:23
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.spamsettings.generic/src/com/openexchange/spamsettings/generic/service/SpamSettingExceptionMessages.java:72
 msgid "Can not set property %1$s in scope %2$s"
 msgstr "Nelze nastavit položku %1$s v rozsahu %2$s"
 
@@ -1593,29 +1666,6 @@ msgstr "Hodnota daná pro storagePriority „%s“ v souboru „%s“ není cel�
 msgid "Unable to map contact property \"%s\""
 msgstr "Nemohu mapovat vlastnost kontaktu „%s“"
 
-#. A JSON error occurred: %1$s
-#. *
-#. * A JSON error occurred: %1$s
-#.
-#. A JSON error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion.servlet/src/com/openexchange/conversion/servlet/ConversionServletExceptionMessage.java:70
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:65
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.smal.impl/src/com/openexchange/mail/smal/impl/SmalExceptionMessages.java:71
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mdns/src/com/openexchange/mdns/MDNSExceptionMessages.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:72
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:69
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.servlet/src/com/openexchange/passwordchange/servlet/PasswordChangeServletExceptionMessage.java:71
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:92
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:391
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:72
-msgid "A JSON error occurred: %1$s"
-msgstr "Došlo k chybě JSON: %1$s"
-
 #. Missing parameter %1$s
 #. *
 #. * Missing parameter %1$s
@@ -1669,8 +1719,8 @@ msgstr "Neznámý identifikátor obsluhy dat: %1$s"
 msgid ""
 "No matching type could be found for data source %1$s and data handler %2$s"
 msgstr ""
-"Nepodařilo se nalézt odpovídající typ pro datový zdroj %1$s a obsluhu dat %2"
-"$s"
+"Nepodařilo se nalézt odpovídající typ pro datový zdroj %1$s a obsluhu dat "
+"%2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.conversion/src/com/openexchange/conversion/DataExceptionMessages.java:75
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.document.converter/src/com/openexchange/document/converter/DocumentConverterExceptionMessages.java:76
@@ -1731,6 +1781,127 @@ msgid "Arbitrary byte sequence is missing to generate a secure key."
 msgstr ""
 "Není zadaná náhodná posloupnost znaků pro vygenerování bezpečného klíče."
 
+#. The server is unable to connect to the configuration database.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:63
+msgid "Cannot get connection to config DB."
+msgstr "Nelze se připojit ke konfigurační DB."
+
+#. It was not possible to determine the database server for a specific OX server and a context.
+#. %1$d is replaced with the context identifier.
+#. %2$d is replaced with the server identifier.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:68
+msgid "Database for context %1$d and server %2$d can not be resolved"
+msgstr "Nelze zjistit databázi pro kontext %1$d a server %2$d"
+
+#. The connection to the database could not be established.
+#. %1$d is replaced with the database pool identifier.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:72
+msgid "No connection to database %1$d"
+msgstr "Nepodařilo se připojit k databázi %1$d"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:74
+msgid "Schema can not be set on database connection"
+msgstr "Nelze nastavit schéma připojení k databázi"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:76
+msgid "Null is returned to connection pool."
+msgstr "NULL je vráceno do zásobníku spojení."
+
+#. %1$s is replaced with some SQL command.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:79
+msgid "Problem with executing SQL: %1$s"
+msgstr "Problém s provedením SQL: %1$s"
+
+#. %1$d is replaced with the database pool identifier.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:82
+msgid "Cannot get information for pool %1$d."
+msgstr "Nelze získat informace o zásobníku %1$d."
+
+#. %1$s is replace with some java class name representing the JDBC driver.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:85
+msgid "Driver class %1$s missing."
+msgstr "Chybí třída ovladače %1$s."
+
+#. The pool throws this exception if it believes the connection does not belong to it.
+#. "Return" in terms of giving a previously obtained pooled connection back into connection pool.
+#. %1$s is replaced with the object identifier of the database connection object.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:90
+msgid ""
+"Object %1$s does not belong to this pool. The object will be removed. If "
+"there was a previous message about this object not having been returned to "
+"the pool, the object was just in use too long."
+msgstr ""
+"Objekt %1$s do tohoto zásobníku nepatří a bude odstraněn. Pokud se již dříve "
+"objevila zpráva o tom, že nebyl objekt vrácen do zásobníku, byl objekt "
+"používán příliš dlouho."
+
+#. A property defining the server name was not found in the configuration properties files.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:93
+msgid "Server name is not defined."
+msgstr "Název serveru není nastaven."
+
+#. %1$s is replaced with some class name where that class has not been initialized before calling its methods.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:96
+msgid "%1$s is not initialized."
+msgstr "%1$s není inicializována."
+
+#. %1$d is replaced with the time in milliseconds the connection has been used.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:99
+msgid "Connection used for %1$d milliseconds."
+msgstr "Spojení použito %1$d milisekund."
+
+#. %1$d is replaced with the number of statements that have not been closed before returning the connection.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:102
+msgid "%1$d statements are not closed."
+msgstr "Neuzavřených transakcí %1$d."
+
+#. %1$s is replaced with the URL parameter string that is not parseable.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:105
+msgid "Parsing problem in URL parameter \"%1$s\"."
+msgstr "Problém s parsováním URL parametru „%1$s“."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:107
+msgid "Configuration file for database configuration is missing."
+msgstr "Chybí konfigurační soubor databáze."
+
+#. %1$s is replaced with the name of the required property that is not found.
+#. Property "%1$s" is not defined.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/configuration/ConfigurationExceptionMessage.java:82
+msgid "Property \"%1$s\" is not defined."
+msgstr "Nastavení „%1$s“ není definováno."
+
+#. %1$s is replaced with the name of the java class that should be initialized a second time.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:113
+msgid "%1$s is already initialized."
+msgstr "%1$s už je inicializována."
+
+#. %1$s is replaced with the defined server name.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:116
+msgid "Cannot resolve server id for server %1$s."
+msgstr "Nelze zjistit id serveru %1$s."
+
+#. This error message is only for administrators to show that some coding problem exists.
+#. %1$d is replaced with a unique identifier of a database connection pool.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:120
+msgid "Nothing known about pool %1$d."
+msgstr "Žádné informace o zásobníku %1$d."
+
+#. This is a technical exception message for administrators. For monitoring the replication a replicationMonitor table with a
+#. transaction counter is used. If this transaction counter is missing this exception gets thrown.
+#. %1$d is replaced with the context identifier that is stored in the schema.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:125
+msgid "Transaction counter is missing for context %1$d."
+msgstr "Chybí počítadlo transakcí v kontextu %1$d."
+
+#. This error message may happen when provisioning contexts. Writing the database assigment failed in database.
+#. %1$d is replaced with the context identifier.
+#. %2$d is replaced with the server identifier.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:130
+msgid "Inserting database assignment for context %1$d and server %2$d failed!"
+msgstr ""
+"Nepodařilo se vložit přiřazení databáze pro kontext %1$d a server %2$d!"
+
 #. Data retention failed: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dataretention/src/com/openexchange/dataretention/DataRetentionExceptionStrings.java:62
 msgid "Data retention failed: %1$s."
@@ -1740,28 +1911,6 @@ msgstr "Úschova dat selhala: %1$s."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dataretention/src/com/openexchange/dataretention/DataRetentionExceptionStrings.java:65
 msgid "An I/O error occurred: %1$s."
 msgstr "Došlo k chybě I/O: %1$s"
-
-#. A SQL error occurred: %1$s
-#. *
-#. * A SQL error occurred: %1$s
-#.
-#. A SQL error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.datatypes.genericonf.storage/src/com/openexchange/datatypes/genericonf/storage/GenericConfigurationStorageExceptionMessage.java:68
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:67
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/id/IDExceptionMessages.java:68
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/tools/iterator/SearchIteratorExceptionMessages.java:61
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.facebook/src/com/openexchange/messaging/facebook/FacebookMessagingExceptionMessages.java:67
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.mail/src/com/openexchange/messaging/mail/MailMessagingExceptionMessages.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:67
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/OAuthProviderExceptionMessages.java:87
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:120
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/delete/DeleteFailedExceptionMessage.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/downgrade/DowngradeFailedExceptionMessage.java:70
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/userconfiguration/UserConfigurationExceptionMessage.java:71
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:324
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetExceptionMessages.java:78
-msgid "A SQL error occurred: %1$s"
-msgstr "Došlo k chybě SQL: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.datatypes.genericonf.storage/src/com/openexchange/datatypes/genericonf/storage/GenericConfigurationStorageExceptionMessage.java:70
 msgid "Object type is not supported: %1$s"
@@ -2370,8 +2519,8 @@ msgstr "Adresář „%1$s“ nesmí být aktualizován."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:88
 msgid "Invalid or missing credentials to access WebDAV server \"%1$s\"."
 msgstr ""
-"Neplatné nebo chybějící přihlašovací údaje pro přístup k serveru WebDAV „%1"
-"$s“."
+"Neplatné nebo chybějící přihlašovací údaje pro přístup k serveru WebDAV "
+"„%1$s“."
 
 #. The resource is not a file: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/WebDAVFileStorageExceptionMessages.java:91
@@ -2386,8 +2535,8 @@ msgstr "WebDAV nepodporuje ukládání verzí."
 #. File storage account %1$s of service "%2$s" could not be found for user %3$s in context %4$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:76
 msgid ""
-"File storage account %1$s of service \"%2$s\" could not be found for user %3"
-"$s in context %4$s."
+"File storage account %1$s of service \"%2$s\" could not be found for user "
+"%3$s in context %4$s."
 msgstr ""
 "Účet %1$s pro ukládání souborů služby „%2$s“ se pro uživatele %3$s v "
 "kontextu %4$s nepodařilo nalézt."
@@ -2774,127 +2923,6 @@ msgstr "URL „%s“ má špatný formát."
 msgid "Extras link is not implemented."
 msgstr "Odkaz Extra není implementován."
 
-#. The server is unable to connect to the configuration database.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:63
-msgid "Cannot get connection to config DB."
-msgstr "Nelze se připojit ke konfigurační DB."
-
-#. It was not possible to determine the database server for a specific OX server and a context.
-#. %1$d is replaced with the context identifier.
-#. %2$d is replaced with the server identifier.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:68
-msgid "Database for context %1$d and server %2$d can not be resolved"
-msgstr "Nelze zjistit databázi pro kontext %1$d a server %2$d"
-
-#. The connection to the database could not be established.
-#. %1$d is replaced with the database pool identifier.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:72
-msgid "No connection to database %1$d"
-msgstr "Nepodařilo se připojit k databázi %1$d"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:74
-msgid "Schema can not be set on database connection"
-msgstr "Nelze nastavit schéma připojení k databázi"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:76
-msgid "Null is returned to connection pool."
-msgstr "NULL je vráceno do zásobníku spojení."
-
-#. %1$s is replaced with some SQL command.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:79
-msgid "Problem with executing SQL: %1$s"
-msgstr "Problém s provedením SQL: %1$s"
-
-#. %1$d is replaced with the database pool identifier.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:82
-msgid "Cannot get information for pool %1$d."
-msgstr "Nelze získat informace o zásobníku %1$d."
-
-#. %1$s is replace with some java class name representing the JDBC driver.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:85
-msgid "Driver class %1$s missing."
-msgstr "Chybí třída ovladače %1$s."
-
-#. The pool throws this exception if it believes the connection does not belong to it.
-#. "Return" in terms of giving a previously obtained pooled connection back into connection pool.
-#. %1$s is replaced with the object identifier of the database connection object.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:90
-msgid ""
-"Object %1$s does not belong to this pool. The object will be removed. If "
-"there was a previous message about this object not having been returned to "
-"the pool, the object was just in use too long."
-msgstr ""
-"Objekt %1$s do tohoto zásobníku nepatří a bude odstraněn. Pokud se již dříve "
-"objevila zpráva o tom, že nebyl objekt vrácen do zásobníku, byl objekt "
-"používán příliš dlouho."
-
-#. A property defining the server name was not found in the configuration properties files.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:93
-msgid "Server name is not defined."
-msgstr "Název serveru není nastaven."
-
-#. %1$s is replaced with some class name where that class has not been initialized before calling its methods.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:96
-msgid "%1$s is not initialized."
-msgstr "%1$s není inicializována."
-
-#. %1$d is replaced with the time in milliseconds the connection has been used.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:99
-msgid "Connection used for %1$d milliseconds."
-msgstr "Spojení použito %1$d milisekund."
-
-#. %1$d is replaced with the number of statements that have not been closed before returning the connection.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:102
-msgid "%1$d statements are not closed."
-msgstr "Neuzavřených transakcí %1$d."
-
-#. %1$s is replaced with the URL parameter string that is not parseable.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:105
-msgid "Parsing problem in URL parameter \"%1$s\"."
-msgstr "Problém s parsováním URL parametru „%1$s“."
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:107
-msgid "Configuration file for database configuration is missing."
-msgstr "Chybí konfigurační soubor databáze."
-
-#. %1$s is replaced with the name of the required property that is not found.
-#. Property "%1$s" is not defined.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:110
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/configuration/ConfigurationExceptionMessage.java:82
-msgid "Property \"%1$s\" is not defined."
-msgstr "Nastavení „%1$s“ není definováno."
-
-#. %1$s is replaced with the name of the java class that should be initialized a second time.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:113
-msgid "%1$s is already initialized."
-msgstr "%1$s už je inicializována."
-
-#. %1$s is replaced with the defined server name.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:116
-msgid "Cannot resolve server id for server %1$s."
-msgstr "Nelze zjistit id serveru %1$s."
-
-#. This error message is only for administrators to show that some coding problem exists.
-#. %1$d is replaced with a unique identifier of a database connection pool.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:120
-msgid "Nothing known about pool %1$d."
-msgstr "Žádné informace o zásobníku %1$d."
-
-#. This is a technical exception message for administrators. For monitoring the replication a replicationMonitor table with a
-#. transaction counter is used. If this transaction counter is missing this exception gets thrown.
-#. %1$d is replaced with the context identifier that is stored in the schema.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:125
-msgid "Transaction counter is missing for context %1$d."
-msgstr "Chybí počítadlo transakcí v kontextu %1$d."
-
-#. This error message may happen when provisioning contexts. Writing the database assigment failed in database.
-#. %1$d is replaced with the context identifier.
-#. %2$d is replaced with the server identifier.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/database/DBPoolingExceptionStrings.java:130
-msgid "Inserting database assignment for context %1$d and server %2$d failed!"
-msgstr ""
-"Nepodařilo se vložit přiřazení databáze pro kontext %1$d a server %2$d!"
-
 #. Text displayed to user if there is no message.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:63
 msgid "[Not available]"
@@ -3159,23 +3187,23 @@ msgstr "Nepodařilo se najít poskytovatele dat pro id: %1$s"
 msgid "Missing parameter: %1$s"
 msgstr "Chybí parametr: %1$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:6
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:55
 msgid "The embedded Apache client threw an error: %1$s"
 msgstr "Vestavěný klient Apache vrátil chybu: %1$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:7
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:56
 msgid "Parsing this JSON did not work: %1$s"
 msgstr "Nepodařilo se parsovat tento JSON: %1$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:8
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:57
 msgid "Parsing this XML with SAX did not work: %1$s"
 msgstr "Nepodařilo se parsovat toto XML pomocí SAX: %1$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:9
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:58
 msgid "Some generic exception was thrown: %1$s"
 msgstr "Vrácena obecná výjimka: %1$s"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:10
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.client/src/com/openexchange/http/client/exceptions/OxHttpClientExceptionMessages.java:59
 msgid "An IO error occurred: %1$s"
 msgstr "Došlo k chybě I/O: %1$s"
 
@@ -3186,7 +3214,7 @@ msgstr "Nepodařilo se spustit server grizzly."
 
 #. * The following needed service is missing: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.http.grizzly/src/com/openexchange/http/grizzly/GrizzlyExceptionMessage.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:66
 msgid "The following needed service is missing: \"%1$s\""
 msgstr "Chybí následující potřebná služba: „%1$s“"
 
@@ -3259,11 +3287,11 @@ msgstr "Implementační třídu se nepodařilo nalézt"
 #. An I/O error occurred while creating the socket connection to IMAP server (%1$s): %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:73
 msgid ""
-"An I/O error occurred while creating the socket connection to IMAP server (%1"
-"$s): %2$s"
+"An I/O error occurred while creating the socket connection to IMAP server "
+"(%1$s): %2$s"
 msgstr ""
-"Došlo k chybě I/O při vytváření soketového připojení k IMAP serveru (%1$s): %"
-"2$s"
+"Došlo k chybě I/O při vytváření soketového připojení k IMAP serveru (%1$s): "
+"%2$s"
 
 #. Missing property %1$s in system.properties.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessage.java:82
@@ -3545,6 +3573,21 @@ msgstr ""
 msgid "Index-based search is not supported for module: %1$s"
 msgstr "Modul %1$d nemá podporu indexovaného vyhledávání"
 
+#. There is no search handler for field %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:71
+msgid "There is no search handler for field %1$s."
+msgstr "Pro pole %1$s chybí obsluha vyhledávání."
+
+#. The Internet proxy is not enabled.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:75
+msgid "The Internet proxy is not enabled."
+msgstr "Internetová proxy není zapnutá."
+
+#. There is no such Internet proxy for id %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.inet.proxy/src/com/openexchange/inet/proxy/InetProxyExceptionMessages.java:78
+msgid "There is no such Internet proxy for id %1$s."
+msgstr "Pro id %1$s žádná taková internetová proxy neexistuje."
+
 #. No JSlob storage found for identifier: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:68
 msgid "No JSlob storage found for identifier: %1$s"
@@ -3746,8 +3789,8 @@ msgid ""
 "%3$s"
 msgstr ""
 "Chybí oprávnění „%1$s“ k přihlášení na Facebook s přihlašovacím jménem %2$s. "
-"Zkopírujte, prosím, následující URL do svého prohlížeče, přihlaste se jako %2"
-"$s (pokud už nejste přihlášení) a povolte přístup:\n"
+"Zkopírujte, prosím, následující URL do svého prohlížeče, přihlaste se jako "
+"%2$s (pokud už nejste přihlášení) a povolte přístup:\n"
 "%3$s"
 
 #. An error occurred during the processing of a script.
@@ -3762,8 +3805,8 @@ msgid ""
 "API key: %1$s\n"
 "Please grant access for that application in your Facebook account settings."
 msgstr ""
-"Chybí oprávnění pro aplikaci přiřazenou k nastavenému klíči API Facebooku: %1"
-"$s\n"
+"Chybí oprávnění pro aplikaci přiřazenou k nastavenému klíči API Facebooku: "
+"%1$s\n"
 "Povolte, prosím, přístup této aplikaci v nastavení vašeho účtu na Facebooku."
 
 #. FQL query result size (%1$s) does not match requested number of post identifiers (%2$s).
@@ -3984,8 +4027,8 @@ msgid ""
 "access:\n"
 "%3$s"
 msgstr ""
-"Chybí oprávnění „%1$s“ pro přihlášení na Facebook s přihlašovacím jménem %2"
-"$s. Zkopírujte, prosím, následující URL do svého prohlížeče, přihlaste se "
+"Chybí oprávnění „%1$s“ pro přihlášení na Facebook s přihlašovacím jménem "
+"%2$s. Zkopírujte, prosím, následující URL do svého prohlížeče, přihlaste se "
 "jako %2$s (pokud už nejste přihlášení) a povolte přístup:\n"
 "%3$s"
 
@@ -4072,8 +4115,8 @@ msgstr "K poštovní složce %1$s nemám přístup povolující vytvářet "
 #. No attachment found with section identifier %1$s in message %2$s in folder %3$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:130
 msgid ""
-"No attachment found with section identifier %1$s in message %2$s in folder %3"
-"$s."
+"No attachment found with section identifier %1$s in message %2$s in folder "
+"%3$s."
 msgstr ""
 "Ve zprávě %2$s ve složce %3$s nebyla nalezena žádná příloha s "
 "identifikátorem sekce %1$s."
@@ -4634,8 +4677,8 @@ msgid ""
 "Message(s) %1$s in folder %2$s could not be deleted due to the following "
 "error: %3$s"
 msgstr ""
-"Zprávu(y) %1$s ve složce %2$s se nepodařilo smazat kvůli následující chybě: %"
-"3$s"
+"Zprávu(y) %1$s ve složce %2$s se nepodařilo smazat kvůli následující chybě: "
+"%3$s"
 
 #. *
 #. * Not allowed to open folder %1$s due to missing read access
@@ -4857,8 +4900,8 @@ msgid ""
 "Missing required capability %1$s on server %2$s with login %3$s (user=%4$s, "
 "context=%5$s)."
 msgstr ""
-"Chybí vyžadovaná podpora funkce %1$s na serveru %2$s s přihlašovacím jménem %"
-"3$s (uživatel=%4$s, kontext=%5$s)."
+"Chybí vyžadovaná podpora funkce %1$s na serveru %2$s s přihlašovacím jménem "
+"%3$s (uživatel=%4$s, kontext=%5$s)."
 
 #. *
 #. * POP3 storage path "%1$s" cannot be created for user %2$s in context %3$s.
@@ -4895,6 +4938,20 @@ msgstr ""
 "Ověřování přístupových údajů k POP3 je vypnuto kvůli možným omezením pro "
 "přihlašování ze strany poskytovatele. Jinak by následné pokusy o přihlášení "
 "nemusely fungovat."
+
+#. POP3 messages cannot be imported because of existing quota constraints on primary mail account. Please free some space.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:332
+msgid ""
+"POP3 messages cannot be imported because of existing quota constraints on "
+"primary mail account. Please free some space."
+msgstr ""
+"Nelze importovat zprávy přes POP3 kvůli stávajícímu nastavení limitů u "
+"primárního poštovního účtu. Uvolněte, prosím, nějaký prostor."
+
+#. Thumbnail image not available.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:72
+msgid "Thumbnail image not available."
+msgstr "Náhled obrázku není k dispozici."
 
 #. Duplicate proxy registration: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.proxy/src/com/openexchange/proxy/ProxyExceptionMessages.java:66
@@ -5172,20 +5229,12 @@ msgstr "Chybí přenášená data v balíku datagramu."
 msgid "No UDP channel is configured."
 msgstr "Není nastaven žádný UDP kanál."
 
-#. * The following obligatory element is missing: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere.presence/src/com/openexchange/realtime/atmosphere/presence/AtmospherePresenceExceptionMessage.java:62
-msgid "The following obligatory element is missing: \"%1$s\""
-msgstr "Následující povinný prvek chybí: „%1$s“"
-
-#. * Malformed Presence Data
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere.presence/src/com/openexchange/realtime/atmosphere/presence/AtmospherePresenceExceptionMessage.java:64
-msgid "Malformed Presence Data"
-msgstr "Špatný formát údajů o prezenci"
-
-#. * Malformed Presence Element: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere.presence/src/com/openexchange/realtime/atmosphere/presence/AtmospherePresenceExceptionMessage.java:66
-msgid "Malformed Presence Element: \"%1$s\""
-msgstr "Špatný formát prezenčního prvku: „%1$s“"
+#. Quota exceeded. Please delete some items in order to create new ones.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:69
+msgid "Quota exceeded. Please delete some items in order to create new ones."
+msgstr ""
+"Limit překročen. Smažte, prosím, některé položky, aby bylo možné vytvářet "
+"nové."
 
 #. * The mandatory session information is missing.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:62
@@ -5212,39 +5261,56 @@ msgstr "Chyba při sestavování Stanza: „%1$s“"
 msgid "Could not find a transformer for the PayloadElement: \"%1$s\""
 msgstr "Nepodařilo se najít transformační nástroj pro obsahový prvek: „%1$s“"
 
-#. * Could not find a handler for the specified stanza
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:72
-msgid "Could not find a handler for the given stanza: . \"%1$s\""
-msgstr "Nepodařilo se najít nástroj vhodný pro danou větu: . „%1$s“"
-
 #. * Could not find an initializer for the specified stanza
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:72
 msgid "Could not find an initializer for the given stanza: . \"%1$s\""
 msgstr "Nepodařilo se najít inicializátor vhodný pro danou větu: . „%1$s“"
 
 #. * Error while transforming a PayloadElement: \"%1$s. %2$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:74
 msgid "Error while transforming a PayloadElement: \"%1$s, %2$s\""
 msgstr "Chyba při transformaci obsahového prvku: „%1$s, %2$s“"
 
 #. * Error while converting a PayloadElement: \"%1$s\"
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:76
 msgid "Error while converting PayloadElement data: \"%1$s\""
 msgstr "Chyba při konverzi dat obsahového prvku: „%1$s“"
 
-#. * Unknown channel %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:63
+#. * The following obligatory element is missing: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:78
+msgid "The following obligatory element is missing: \"%1$s\""
+msgstr "Následující povinný prvek chybí: „%1$s“"
+
+#. * Malformed Presence Data
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:80
+msgid "Malformed Presence Data"
+msgstr "Špatný formát údajů o prezenci"
+
+#. * Malformed Presence Element: \"%1$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:82
+msgid "Malformed Presence Element: \"%1$s\""
+msgstr "Špatný formát prezenčního prvku: „%1$s“"
+
+#. * Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.atmosphere/src/com/openexchange/realtime/atmosphere/AtmosphereExceptionMessage.java:84
+msgid "Illegal value \"%1$s\" for key \"%1$s\" in: \"%3$s\""
+msgstr "Neplatná hodnota „%1$s“ v klíči „%2$s“ v „%3$s“"
+
+#. Could not find a handler for the specified stanza
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:63
+msgid "Could not find a handler for the given stanza: . \"%1$s\""
+msgstr "Nepodařilo se najít nástroj vhodný pro danou větu: . „%1$s“"
+
+#. Could not send stanza to resource. Resource was offline: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:66
+msgid "Could not send stanza to resource. Resource was offline: %1$s"
+msgstr "Nepodařilo se odeslat větu ke zdroji. Zdroj byl offline: %1$s"
+
+#. Unknown channel %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:69
 msgid "Unknown channel %1$s"
 msgstr "Neznámý kanál: %1$s"
 
-#. * No appropriate channel found for recipient %1$s with payload namespace %2$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:66
-msgid ""
-"No appropriate channel found for recipient %1$s with payload namespace %2$s"
-msgstr ""
-"Není k dispozici odpovídající kanál pro příjemce %1$s se jmenným prostorem "
-"přenášených dat %2$s"
-
 #. Unexpected error: %1$s
 #. *
 #. * Unexpected error: %1$s
@@ -5253,7 +5319,8 @@ msgstr ""
 #. *
 #. * Unexpected error: %1$s
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:151
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/ReminderExceptionMessage.java:120
@@ -5262,6 +5329,34 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/webdav/WebdavExceptionMessage.java:126
 msgid "Unexpected error: %1$s"
 msgstr "Neočekávaná chyba: %1$s"
+
+#. * Could not send directed Presence to resource: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.handle/src/com/openexchange/realtime/handle/HandleExceptionMessage.java:63
+msgid "Could not send directed Presence to resource: %1$s"
+msgstr "Nepodařilo se odeslat informace o účasti ke zdroji: %1$s."
+
+#. * Invalid context ID. Couldn't find context for: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.presence.subscribe/src/com/openexchange/realtime/presence/subscribe/PresenceSubscribeExceptionMessages.java:63
+msgid "Invalid context ID. Couldn't find context for: %1$s"
+msgstr "Neplatná ID kontextu. Nepodařilo se nalézt kontext pro: %1$s"
+
+#. * No appropriate channel found for recipient %1$s with payload namespace %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:63
+msgid ""
+"No appropriate channel found for recipient %1$s with payload namespace %2$s"
+msgstr ""
+"Není k dispozici odpovídající kanál pro příjemce %1$s se jmenným prostorem "
+"přenášených dat %2$s"
+
+#. * Invalid ID. Resource identifier is missing.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:72
+msgid "Invalid ID. Resource identifier is missing."
+msgstr "Neplatné ID. Chybí identifikátor zdroje."
+
+#. * Resource not available.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/RealtimeExceptionMessages.java:75
+msgid "Resource not available."
+msgstr "Zdroj je nedostupný."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rmi/src/com/openexchange/rmi/exceptions/OXRMIExceptionMessage.java:62
 msgid "Start of RMI service failed."
@@ -5465,16 +5560,16 @@ msgid ""
 "No appropriate folder storage for tree identifier \"%1$s\" and folder "
 "identifier \"%2$s\"."
 msgstr ""
-"Není k dispozici odpovídající úložiště složek pro identifikátor stromu „%1"
-"$s“ a identifikátor složky „%2$s“."
+"Není k dispozici odpovídající úložiště složek pro identifikátor stromu "
+"„%1$s“ a identifikátor složky „%2$s“."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:76
 msgid ""
 "No appropriate folder storage for tree identifier \"%1$s\" and content type "
 "\"%2$s\"."
 msgstr ""
-"Není k dispozici odpovídající úložiště složek pro identifikátor stromu „%1"
-"$s“ a typ obsahu „%2$s“."
+"Není k dispozici odpovídající úložiště složek pro identifikátor stromu "
+"„%1$s“ a typ obsahu „%2$s“."
 
 #. Missing session.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:79
@@ -5597,8 +5692,8 @@ msgstr "Došlo k dočasné chybě. Zkuste to, prosím, znovu."
 #. User "%2$s" must not create subfolders below folder "%2$s" in context "%3$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:149
 msgid ""
-"User \"%2$s\" must not create subfolders below folder \"%2$s\" in context \"%"
-"3$s\"."
+"User \"%2$s\" must not create subfolders below folder \"%2$s\" in context "
+"\"%3$s\"."
 msgstr ""
 "Uživatel „%2$s“ nesmí vytvářet podsložky ve složce „%2$s“ v kontextu „%3$s“."
 
@@ -6398,8 +6493,8 @@ msgstr "Schůzka není opakovaná."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
 msgid ""
-"Found a user contact outside global address book in folder %1$d in context %2"
-"$d."
+"Found a user contact outside global address book in folder %1$d in context "
+"%2$d."
 msgstr ""
 "Ve složce %1$i a kontextu %2$i byl nalezen uživatelský kontakt mimo globální "
 "adresář."
@@ -6459,16 +6554,16 @@ msgid ""
 "Unable to synchronize the old contact with the new changes: context %1$d "
 "object %2$d"
 msgstr ""
-"Nemohu synchronizovat starý kontakt s novými změnami: kontext %1$d objekt %2"
-"$d"
+"Nemohu synchronizovat starý kontakt s novými změnami: kontext %1$d objekt "
+"%2$d"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:81
 msgid ""
 "You are not allowed to mark this contact as private contact: context %1$d "
 "object %2$d"
 msgstr ""
-"Nemáte oprávnění označit tento kontakt jako soukromý: kontext %1$d objekt %2"
-"$d"
+"Nemáte oprávnění označit tento kontakt jako soukromý: kontext %1$d objekt "
+"%2$d"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:85
 msgid "An error occurred: object id is -1"
@@ -6477,8 +6572,8 @@ msgstr "Došlo k chybě: ID objektu je -1"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:87
 msgid "No changes found. No update required. context %1$d object %2$d"
 msgstr ""
-"Nebyly nalezeny žádné změny. Aktualizace není potřeba. kontext %1$d objekt %2"
-"$d"
+"Nebyly nalezeny žádné změny. Aktualizace není potřeba. kontext %1$d objekt "
+"%2$d"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:89
 msgid "Contact %1$d not found in context %2$d."
@@ -6522,8 +6617,8 @@ msgid ""
 "Unable to move this contact because it is marked as private: context %1$d "
 "object %2$d"
 msgstr ""
-"Nemohu přesunout tento kontakt, protože je označen jako soukromý: kontext %1"
-"$d objekt %2$d"
+"Nemohu přesunout tento kontakt, protože je označen jako soukromý: kontext "
+"%1$d objekt %2$d"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:105
 msgid "Your display name is mandatory. Please enter it."
@@ -6555,8 +6650,8 @@ msgstr "MIME typ není definován."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:115
 msgid ""
-"A contact with private flag cannot be stored in a public folder. Folder: %1"
-"$d context %2$d user %3$d"
+"A contact with private flag cannot be stored in a public folder. Folder: "
+"%1$d context %2$d user %3$d"
 msgstr ""
 "Kontakt se soukromým příznakem nelze uložit do veřejné složky. Složka: %1$d "
 "kontext %2$d uživatel %3$d"
@@ -8938,8 +9033,8 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:74
 msgid ""
-"Unable to determine next update task to execute. Executed: %1$s. Enqueued: %2"
-"$s. Scheduled: %3$s."
+"Unable to determine next update task to execute. Executed: %1$s. Enqueued: "
+"%2$s. Scheduled: %3$s."
 msgstr ""
 "Nemohu určit, který další aktualizační úkol spustit. Spuštěné: %1$s. Ve "
 "frontě: %2$s. Naplánované: %3$s."
@@ -8950,8 +9045,8 @@ msgid ""
 "Processed a wrong number of rows in database. Expected %1$d rows but worked "
 "on %2$d rows."
 msgstr ""
-"Zpracován chybný počet řádků v databázi. Očekáváno %1$d, ale pracovalo se s %"
-"2$d."
+"Zpracován chybný počet řádků v databázi. Očekáváno %1$d, ale pracovalo se s "
+"%2$d."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:78
 msgid "Updating schema %1$s failed. Cause: %2$s."
@@ -9078,8 +9173,8 @@ msgstr "Nahraný soubor s id %1$s se nepodařilo nalézt"
 msgid ""
 "Upload file's content type \"%1$s\" does not match given file filter \"%2$s\""
 msgstr ""
-"Typ obsahu nahraného souboru „%1$s“ neodpovídá danému souborovému filtru „%2"
-"$s“"
+"Typ obsahu nahraného souboru „%1$s“ neodpovídá danému souborovému filtru "
+"„%2$s“"
 
 #. Request rejected because its size exceeds the maximum configured size of %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:128
@@ -9285,8 +9380,8 @@ msgstr "Pole zprávy %1$s nelze zpracovat"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:192
 msgid ""
-"Message field %1$s cannot be handled on server %2$s with login %3$s (user=%4"
-"$s, context=%5$s)"
+"Message field %1$s cannot be handled on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)"
 msgstr ""
 "Pole zprávy %1$s nelze na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
 "%4$s, kontext=%5$s) zpracovat"
@@ -9561,8 +9656,8 @@ msgstr "Zadaná e-mailová adresa %1$s nespadá mezi povolené e-mailové aliasy
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:367
 msgid ""
-"Checking default folders on server %1$s for user %2$s (%3$s) in context on %4"
-"$s failed: %5$s"
+"Checking default folders on server %1$s for user %2$s (%3$s) in context on "
+"%4$s failed: %5$s"
 msgstr ""
 "Kontrola výchozích složek na serveru %1$s pro uživatele %2$s (%3$s) v "
 "kontextu na %4$s selhala: %5$s"
@@ -9615,8 +9710,8 @@ msgstr "Složka s názvem %1$s již existuje."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:402
 msgid ""
-"A folder named %1$s already exists on server %2$s with login %3$s (user=%4"
-"$s, context=%5$s)."
+"A folder named %1$s already exists on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)."
 msgstr ""
 "Složka s názvem %1$s již na serveru %2$s s přihlašovacím jménem %3$s "
 "existuje (uživatel=%4 $s, kontext=%5$s)."
@@ -9626,8 +9721,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:412
 msgid ""
-"No create access on mail folder %1$s on server %2$s with login %3$s (user=%4"
-"$s, context=%5$s)."
+"No create access on mail folder %1$s on server %2$s with login %3$s (user="
+"%4$s, context=%5$s)."
 msgstr ""
 "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
 "%4$s, kontext=%5$s) nemám přístup povolující vytvářet."
@@ -9778,8 +9873,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:517
 msgid ""
-"Mail folder cannot be created/renamed. Folder name exceeds max length of %1"
-"$s."
+"Mail folder cannot be created/renamed. Folder name exceeds max length of "
+"%1$s."
 msgstr ""
 "Poštovní složku nelze vytvořit/přejmenovat. Název složky přesahuje maximální "
 "délku %1$s."
@@ -9840,8 +9935,8 @@ msgid ""
 "Wrong or missing login data to access mail server %1$s. Error message from "
 "mail server: %2$s"
 msgstr ""
-"Chybné nebo chybějící přihlašovací údaje pro přístup k poštovnímu serveru %1"
-"$s. Chybová zpráva poštovního serveru: %2$s"
+"Chybné nebo chybějící přihlašovací údaje pro přístup k poštovnímu serveru "
+"%1$s. Chybová zpráva poštovního serveru: %2$s"
 
 #. *
 #. * Wrong or missing login data to access mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message from mail server:
@@ -9852,9 +9947,9 @@ msgid ""
 "Wrong or missing login data to access mail server %1$s with login %2$s (user="
 "%3$s, context=%4$s). Error message from mail server: %5$s"
 msgstr ""
-"Chybné nebo chybějící přihlašovací údaje pro přístup k poštovnímu serveru %1"
-"$s s přihlašovacím jménem %2$s (uživatel=%3$s, kontext=%4$s). Chybová zpráva "
-"poštovního serveru: %5$s"
+"Chybné nebo chybějící přihlašovací údaje pro přístup k poštovnímu serveru "
+"%1$s s přihlašovacím jménem %2$s (uživatel=%3$s, kontext=%4$s). Chybová "
+"zpráva poštovního serveru: %5$s"
 
 #. *
 #. * Mail folder "%1$s" could not be found.
@@ -9897,8 +9992,8 @@ msgstr "Váš požadavek pravděpodobně trval příliš dlouho."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:110
 msgid ""
-"Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user=%4"
-"$s, context=%5$s) ."
+"Folder \"%1$s\" has been closed on mail server %2$s with login %3$s (user="
+"%4$s, context=%5$s) ."
 msgstr ""
 "Složka „%1$s“ na poštovním serveru %2$s s přihlašovacím jménem %3$s "
 "(uživatel=%4$s, kontext=%5$s) byla zavřena."
@@ -10012,11 +10107,11 @@ msgstr "Spojení s poštovním serverem bylo ztraceno."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:197
 msgid ""
-"Connection closed to mail server %1$s with login %2$s (user=%3$s, context=%4"
-"$s)."
+"Connection closed to mail server %1$s with login %2$s (user=%3$s, context="
+"%4$s)."
 msgstr ""
-"Spojení s poštovním serverem %1$s s přihlašovacím jménem %2$s (uživatel=%3"
-"$s, kontext=%4$s) ukončeno."
+"Spojení s poštovním serverem %1$s s přihlašovacím jménem %2$s (uživatel="
+"%3$s, kontext=%4$s) ukončeno."
 
 #. *
 #. * Could not bind mail connection to local port %1$s
@@ -10105,8 +10200,8 @@ msgid ""
 "The quota on mail server \"%1$s\" exceeded with login %2$s (user=%3$s, "
 "context=%4$s)."
 msgstr ""
-"Kvóta na poštovním serveru „%1$s“ byla překročena s přihlašovacím jménem %2"
-"$s (uživatel=%3$s, kontext=%4$s)."
+"Kvóta na poštovním serveru „%1$s“ byla překročena s přihlašovacím jménem "
+"%2$s (uživatel=%3$s, kontext=%4$s)."
 
 #. *
 #. * A command to mail server failed. Server response: %1$s
@@ -10120,8 +10215,8 @@ msgstr "Příkaz poštovnímu serveru selhal. Odpověď serveru: %1$s."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:274
 msgid ""
-"A command failed on mail server %1$s with login %2$s (user=%3$s, context=%4"
-"$s). Server response: %5$s"
+"A command failed on mail server %1$s with login %2$s (user=%3$s, context="
+"%4$s). Server response: %5$s"
 msgstr ""
 "Selhal příkaz na poštovním serveru %1$s s přihlašovacím jménem %2$s "
 "(uživatel=%3$s, kontext=%4$s). Odpověď serveru: %5$s"
@@ -10141,8 +10236,8 @@ msgid ""
 "Bad command indicated by mail server %1$s with login %2$s (user=%3$s, "
 "context=%4$s). Server response: %5$s"
 msgstr ""
-"Poštovní server %1$s s přihlašovacím jménem %2$s (uživatel=%3$s, kontext=%4"
-"$s) ohlásil neplatný příkaz. Odpověď serveru: %5$s"
+"Poštovní server %1$s s přihlašovacím jménem %2$s (uživatel=%3$s, kontext="
+"%4$s) ohlásil neplatný příkaz. Odpověď serveru: %5$s"
 
 #. *
 #. * Error in mail server protocol. Error message: %1$s
@@ -10156,8 +10251,8 @@ msgstr "Chyba v protokolu poštovního serveru. Chybová zpráva: %1$s"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:294
 msgid ""
-"Error in protocol to mail server %1$s with login %2$s (user=%3$s, context=%4"
-"$s). Error message: %5$s"
+"Error in protocol to mail server %1$s with login %2$s (user=%3$s, context="
+"%4$s). Error message: %5$s"
 msgstr ""
 "Chyba v protokolu poštovního serveru %1$s s přihlašovacím jménem %2$s "
 "(uživatel=%3$s, kontext=%4). Chybová zpráva: %5$s"
@@ -10200,8 +10295,9 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:320
 msgid ""
-"Wrong or missing login data to access mail transport server %1$s with login %"
-"2$s (user=%3$s, context=%4$s). Error message from mail transport server: %5$s"
+"Wrong or missing login data to access mail transport server %1$s with login "
+"%2$s (user=%3$s, context=%4$s). Error message from mail transport server: "
+"%5$s"
 msgstr ""
 "Chybné nebo chybějící přihlašovací údaje pro přístup k transportnímu serveru "
 "%1$s s přihlašovacím jménem %2$s (uživatel=%3$s, kontext=%4$s). Chybová "
@@ -10279,11 +10375,11 @@ msgstr ""
 #. Found two mail accounts with same identifier %1$s for user %2$s in context %3$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:68
 msgid ""
-"Found two mail accounts with same identifier %1$s for user %2$s in context %3"
-"$s."
+"Found two mail accounts with same identifier %1$s for user %2$s in context "
+"%3$s."
 msgstr ""
-"Nalezeny dva poštovní účty s identifikátorem %1$s uživatele %2$s v kontextu %"
-"3$s."
+"Nalezeny dva poštovní účty s identifikátorem %1$s uživatele %2$s v kontextu "
+"%3$s."
 
 #. Found two mail accounts with same email address %1$s for user %2$s in context %3$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:71
@@ -10309,8 +10405,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:83
 msgid "Denied update of default mail account of user %1$s in context %2$s."
 msgstr ""
-"Zamítnuta aktualizace výchozího poštovního účtu uživatele %1$s v kontextu %2"
-"$s."
+"Zamítnuta aktualizace výchozího poštovního účtu uživatele %1$s v kontextu "
+"%2$s."
 
 #. No duplicate default account allowed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:86
@@ -10332,8 +10428,8 @@ msgid ""
 "Password decryption failed for login %1$s on server %2$s (user=%3$s, context="
 "%4$s)."
 msgstr ""
-"Dešifrování hesla pro přihlašovací jméno %1$s na serveru %2$s (uživatel=%3"
-"$s, kontext=%4$s) selhalo."
+"Dešifrování hesla pro přihlašovací jméno %1$s na serveru %2$s (uživatel="
+"%3$s, kontext=%4$s) selhalo."
 
 #. The Unified Mail account already exists for user %1$s in context %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:95
@@ -10642,8 +10738,8 @@ msgstr ""
 msgid ""
 "User %1$s has no create-subfolder permission on folder %2$s in context %3$s"
 msgstr ""
-"Uživatel %1$s nemá oprávnění vytvářet podsložky ve složce %2$s v kontextu %3"
-"$s"
+"Uživatel %1$s nemá oprávnění vytvářet podsložky ve složce %2$s v kontextu "
+"%3$s"
 
 #. *
 #. * Missing field %1$s in folder %2$s in context %3$s
@@ -10726,11 +10822,11 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:159
 msgid ""
-"Parent folder %1$s does not allow folder's module setting (%2$s) in context %"
-"3$s"
+"Parent folder %1$s does not allow folder's module setting (%2$s) in context "
+"%3$s"
 msgstr ""
-"Nadřazená složka %1$s nepovoluje nastavení modulu složky (%2$s) v kontextu %3"
-"$s"
+"Nadřazená složka %1$s nepovoluje nastavení modulu složky (%2$s) v kontextu "
+"%3$s"
 
 #. *
 #. * Only one admin permission is allowed on a private folder
@@ -10892,8 +10988,8 @@ msgstr "Cílová a zdrojová složka nemohou být v kontextu %1$s stejné"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:264
 msgid ""
-"User %1$s is not allowed to move all subfolders of folder %2$s in context %3"
-"$s"
+"User %1$s is not allowed to move all subfolders of folder %2$s in context "
+"%3$s"
 msgstr ""
 "Uživatel %1$s nemá právo přesouvat podsložky ve složce %2$s v kontextu %3$s"
 
@@ -10927,8 +11023,8 @@ msgstr "Uživatel %1$s nemá právo smazat výchozí složku %2$s v kontextu %3$
 msgid ""
 "User %1$s is not allowed to delete all objects in folder %2$s in context %3$s"
 msgstr ""
-"Uživatel %1$s nemá právo smazat všechny objekty ve složce %2$s v kontextu %3"
-"$s"
+"Uživatel %1$s nemá právo smazat všechny objekty ve složce %2$s v kontextu "
+"%3$s"
 
 #. *
 #. * No admin user found in context %1$s
@@ -10950,8 +11046,8 @@ msgstr "V kontextu %1$s nebyl nalezen žádný uživatel administrátor"
 msgid ""
 "No default folder could be found in module %1$s for user %2$s in context %3$s"
 msgstr ""
-"Nepodařilo se nalézt výchozí složku v modulu %1$s uživatele %2$s v kontextu %"
-"3$s"
+"Nepodařilo se nalézt výchozí složku v modulu %1$s uživatele %2$s v kontextu "
+"%3$s"
 
 #. *
 #. * Folder %1$s could not be loaded in context %2$s
@@ -10984,8 +11080,8 @@ msgid ""
 "Effective permission of folder %1$s could not be determined for user %2$s in "
 "context %3$s"
 msgstr ""
-"Platné oprávnění uživatele %2$s pro složku %1$s se nepodařilo v kontextu %3"
-"$s zjistit"
+"Platné oprávnění uživatele %2$s pro složku %1$s se nepodařilo v kontextu "
+"%3$s zjistit"
 
 #. *
 #. * A DBPool error occurred in context %1$s
@@ -11202,8 +11298,8 @@ msgid ""
 "User %1$s grants invalid permissions on shared folder %2$s in context %3$s. "
 "Only the owner of parental shared folder %4$s can be the folder admin."
 msgstr ""
-"Uživatel %1$s přiděluje neplatná oprávnění sdílené složce %2$s v kontextu %3"
-"$s. Pouze vlastník nadřazené sdílené složky %4$s může být administrátorem "
+"Uživatel %1$s přiděluje neplatná oprávnění sdílené složce %2$s v kontextu "
+"%3$s. Pouze vlastník nadřazené sdílené složky %4$s může být administrátorem "
 "složky."
 
 #. *
@@ -11318,8 +11414,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:499
 msgid ""
-"Only the folder visibility permission is allowed to be changed for folder %1"
-"$s in context %2$s."
+"Only the folder visibility permission is allowed to be changed for folder "
+"%1$s in context %2$s."
 msgstr ""
 "U složky %1$s v kontextu %2$s lze měnit pouze oprávnění určující viditelnost "
 "složky."
@@ -11384,8 +11480,8 @@ msgid ""
 "Delete cannot be performed because of locked documents in folder %1$s in "
 "context %2$s."
 msgstr ""
-"Mazání nelze provést kvůli uzamčeným dokumentům ve složce %1$s v kontextu %2"
-"$s."
+"Mazání nelze provést kvůli uzamčeným dokumentům ve složce %1$s v kontextu "
+"%2$s."
 
 #. *
 #. * Operation may only be performed for context administrator.
@@ -12360,6 +12456,18 @@ msgstr "Přístup k souboru zamítnut kvůli oprávněním operačního systému
 msgid "File access denied."
 msgstr "Přístup k souboru zamítnut."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:88
+msgid ""
+"This template was not whitelisted in 'com.openexchange.templating."
+"templateWhitelist'."
+msgstr ""
+"Tato šablona není na seznamu povolených v "
+"‚com.openexchange.templating.templateWhitelist‘."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:90
+msgid "This template was not whitelisted,"
+msgstr "Tato šablona nebyla přidána na seznam povolených."
+
 #. The consumer key/consumer secret pair is missing in configuration.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.twitter/src/com/openexchange/twitter/TwitterExceptionMessages.java:72
 msgid "The consumer key/consumer secret pair is missing in configuration."
@@ -12539,6 +12647,31 @@ msgstr "Nepodařilo se uložit uživatelské nastavení pošty."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.user.copy/src/com/openexchange/user/copy/UserCopyExceptionMessages.java:81
 msgid "A user named %1$s already exists in destination context %2$s."
 msgstr "Uživatel se jménem %1$s již v cílovém kontextu %2$s existuje."
+
+#. No configuration service found
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:63
+msgid "No configuration service found."
+msgstr "Nepodařilo se nalézt žádnou konfigurační službu."
+
+#. The value given in the property %1$s is no integer value
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:66
+msgid "The value given in the property %1$s is no integer value."
+msgstr "Hodnota daná v parametru %1$s není celé číslo."
+
+#. Property %1$s not set but required.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:69
+msgid "Property %1$s not set but required."
+msgstr "Parametr %1$s není nastavený, ale je vyžadován."
+
+#. Property %1$s claims to have condition but condition not set.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:72
+msgid "Property %1$s claims to have condition but condition not set."
+msgstr "Parametr %1$s vyžaduje podmínku, ale podmínka není nastavená."
+
+#. Property %1$s must be set if %2$s is set to %3$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.utils/src/com/openexchange/utils/propertyhandling/internal/ConfigurationExceptionMessages.java:75
+msgid "Property %1$s must be set if %2$s is set to %3$s"
+msgstr "Parametr %1$s musí být nastaven, pokud je %2$s nastaveno na %3$s"
 
 #. Missing main extension attribute for user %1$s in context %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.voipnow.json/src/com/openexchange/voipnow/json/VoipNowExceptionMessages.java:71
@@ -14674,8 +14807,8 @@ msgstr "Zulu"
 #~ "The mail folder cannot be created/renamed. The name must not contain the "
 #~ "character '%1$s'."
 #~ msgstr ""
-#~ "Poštovní složku nelze vytvořit/přejmenovat. Název nesmí obsahovat znak ‚%1"
-#~ "$s‘."
+#~ "Poštovní složku nelze vytvořit/přejmenovat. Název nesmí obsahovat znak "
+#~ "‚%1$s‘."
 
 #~ msgid "Missing parameter: %1$2"
 #~ msgstr "Chybí parametr: %1$2"
@@ -14727,8 +14860,8 @@ msgstr "Zulu"
 
 #~ msgid "Please reschedule the event. Original date: %1$s. New date: %2$s"
 #~ msgstr ""
-#~ "Naplánujte, prosím, událost na jindy. Původní datum: %1$s. Nové datum: %2"
-#~ "$s"
+#~ "Naplánujte, prosím, událost na jindy. Původní datum: %1$s. Nové datum: "
+#~ "%2$s"
 
 #~ msgid "Sent Items"
 #~ msgstr "Odeslané položky"
@@ -14808,8 +14941,8 @@ msgstr "Zulu"
 #~ "(uživatel=%4$s, kontext=%5$s) smazat"
 
 #~ msgid ""
-#~ "Default folder %1$s must not be unsubscribed on server %2$s with login %3"
-#~ "$s (user=%4$s, context=%5$s)"
+#~ "Default folder %1$s must not be unsubscribed on server %2$s with login "
+#~ "%3$s (user=%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "Výchozí složka %1$s nesmí být na serveru %2$s s přihlašovacím jménem %3$s "
 #~ "(uživatel=%4$s, kontext=%5$s) odhlášena."
@@ -14839,8 +14972,8 @@ msgstr "Zulu"
 
 #~ msgid "Error in low level connection to sieve server %1$s at port %2$s"
 #~ msgstr ""
-#~ "Došlo k chybě v nízkoúrovňovém spojení se sieve serverem %1$s na portu %2"
-#~ "$s"
+#~ "Došlo k chybě v nízkoúrovňovém spojení se sieve serverem %1$s na portu "
+#~ "%2$s"
 
 #~ msgid ""
 #~ "Error while communicating with the sieve server %1$s at port %2$s for "
@@ -14883,8 +15016,8 @@ msgstr "Zulu"
 #~ msgstr "IMAP složku %1$s se nepodařilo vytvořit"
 
 #~ msgid ""
-#~ "IMAP default folder %1$s could not be created on server %2$s with login %3"
-#~ "$s (user=%4$s, context=%5$s)"
+#~ "IMAP default folder %1$s could not be created on server %2$s with login "
+#~ "%3$s (user=%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "Výchozí složku IMAP %1$s se nepodařilo na serveru %2$s s přihlašovacím "
 #~ "jménem %3$s (uživatel=%4$s, kontext=%5$s) vytvořit."
@@ -14896,8 +15029,8 @@ msgstr "Zulu"
 #~ "IMAP search failed due to reason \"%1$s\" on server %2$s with login %3$s "
 #~ "(user=%4$s, context=%5$s). Switching to application-based search."
 #~ msgstr ""
-#~ "IMAP vyhledávání na serveru %2$s s přihlašovacím jménem %3$s (uživatel=%4"
-#~ "$s, kontext=%5$s) selhalo z tohoto důvodu: „%1$s“. Přepínám na "
+#~ "IMAP vyhledávání na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
+#~ "%4$s, kontext=%5$s) selhalo z tohoto důvodu: „%1$s“. Přepínám na "
 #~ "vyhledávání v aplikaci."
 
 #~ msgid ""
@@ -14972,8 +15105,8 @@ msgstr "Zulu"
 #~ "názvu složky)"
 
 #~ msgid ""
-#~ "Mail folder %1$s must not be moved to subsequent folder %2$s on server %3"
-#~ "$s with login %4$s (user=%5$s, context=%6$s)"
+#~ "Mail folder %1$s must not be moved to subsequent folder %2$s on server "
+#~ "%3$s with login %4$s (user=%5$s, context=%6$s)"
 #~ msgstr ""
 #~ "Poštovní složku %1$s nelze na poštovním serveru %3$s s přihlašovacím "
 #~ "jménem %4$s (uživatel=%5$s, kontext=%6$s) přesunout do složky %2$s"
@@ -15009,8 +15142,8 @@ msgstr "Zulu"
 #~ "Message move aborted for user %1$s. Source and destination folder are "
 #~ "equal to \"%2$s\""
 #~ msgstr ""
-#~ "Přesun zrušen pro uživatele %1$s. Zdrojová a cílová složka je stejná: „%2"
-#~ "$s“"
+#~ "Přesun zrušen pro uživatele %1$s. Zdrojová a cílová složka je stejná: "
+#~ "„%2$s“"
 
 #~ msgid ""
 #~ "Message move aborted for user %1$s. Source and destination folder are "
@@ -15029,8 +15162,8 @@ msgstr "Zulu"
 #~ "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\" "
 #~ "on server %4$s with login %5$s (user=%6$s, context=%7$s)"
 #~ msgstr ""
-#~ "Zprávu(y) %1$s ve složce %2$s se na serveru %4$s s přihlašovacím jménem %5"
-#~ "$s (uživatel=%6$s, kontext=%7$s) nepodařilo smazat kvůli chybě „%3$s“"
+#~ "Zprávu(y) %1$s ve složce %2$s se na serveru %4$s s přihlašovacím jménem "
+#~ "%5$s (uživatel=%6$s, kontext=%7$s) nepodařilo smazat kvůli chybě „%3$s“"
 
 #~ msgid ""
 #~ "Missing %1$s folder in mail move operation on server %2$s with login %3$s "
@@ -15098,8 +15231,8 @@ msgstr "Zulu"
 #~ "No administer permission specified for folder %1$s on server %2$s with "
 #~ "login %3$s (user=%4$s, context=%5$s)"
 #~ msgstr ""
-#~ "Pro složku %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel=%4"
-#~ "$s, kontext=%5$s) nejsou určena žádná administrátorská práva"
+#~ "Pro složku %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
+#~ "%4$s, kontext=%5$s) nejsou určena žádná administrátorská práva"
 
 #~ msgid ""
 #~ "No attachment was found with id %1$s in message on server %2$s with login "
@@ -15120,8 +15253,8 @@ msgstr "Zulu"
 
 #~ msgid ""
 #~ "No data provided from web server: input stream returned \"-1\" while "
-#~ "reading AJP magic bytes in package #%1$d. Wait for input data took %2"
-#~ "$dmsec."
+#~ "reading AJP magic bytes in package #%1$d. Wait for input data took "
+#~ "%2$dmsec."
 #~ msgstr ""
 #~ "Web server neposkytl žádná data: Vstupní proud při čtení magických AJP "
 #~ "bajtů v balíku #%1$d vrátil „-1“. Čekání na vstupní data zabralo %2$dmsec."
@@ -15162,8 +15295,8 @@ msgstr "Zulu"
 #~ "Pro výjimku série %s nebyla nalezena žádná nadřazená opakující se schůzka"
 
 #~ msgid ""
-#~ "No read access to mail folder %1$s on server %2$s with login %3$s (user=%4"
-#~ "$s, context=%5$s)"
+#~ "No read access to mail folder %1$s on server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s)"
 #~ msgstr ""
 #~ "K poštovní složce %1$s na serveru %2$s s přihlašovacím jménem %3$s "
 #~ "(uživatel=%4$s, kontext=%5$s) nemám přístup povolující čtení"
@@ -15188,28 +15321,28 @@ msgstr "Zulu"
 #~ msgstr "Funkce „THREAD=REFERENCES“ není podporována"
 
 #~ msgid ""
-#~ "No support of capability \"THREAD=REFERENCES\" on server %2$s with login %"
-#~ "3$s (user=%4$s, context=%5$s)"
+#~ "No support of capability \"THREAD=REFERENCES\" on server %2$s with login "
+#~ "%3$s (user=%4$s, context=%5$s)"
 #~ msgstr ""
-#~ "Funkce „THREAD=REFERENCES“ není na serveru %2$s s přihlašovacím jménem %3"
-#~ "$s (uživatel=%4$s, kontext=%5$s) podporována"
+#~ "Funkce „THREAD=REFERENCES“ není na serveru %2$s s přihlašovacím jménem "
+#~ "%3$s (uživatel=%4$s, kontext=%5$s) podporována"
 
 #~ msgid "No write access to IMAP folder %1$s"
 #~ msgstr "K IMAP složce %1$s nemám přístup povolující zápis"
 
 #~ msgid ""
-#~ "No write access to IMAP folder %1$s on server %2$s with login %3$s (user=%"
-#~ "4$s, context=%5$s)"
+#~ "No write access to IMAP folder %1$s on server %2$s with login %3$s (user="
+#~ "%4$s, context=%5$s)"
 #~ msgstr ""
-#~ "K IMAP složce %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel=%"
-#~ "4$s, kontext=%5$s) nemám přístup povolující zápis."
+#~ "K IMAP složce %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
+#~ "%4$s, kontext=%5$s) nemám přístup povolující zápis."
 
 #~ msgid ""
 #~ "Not allowed to open folder %1$s due to missing read access on server %2$s "
 #~ "with login %3$s (user=%4$s, context=%5$s)"
 #~ msgstr ""
-#~ "Není povoleno otevřít složku %1$s na serveru %2$s s přihlašovacím jménem %"
-#~ "3$s (uživatel=%4$s, kontext=%5$s), protože nemám přístup ke čtení"
+#~ "Není povoleno otevřít složku %1$s na serveru %2$s s přihlašovacím jménem "
+#~ "%3$s (uživatel=%4$s, kontext=%5$s), protože nemám přístup ke čtení"
 
 #~ msgid "Problem with a thread."
 #~ msgstr "Problém s vláknem."
@@ -15240,11 +15373,11 @@ msgstr "Zulu"
 #~ msgstr "Mapování servletů se nepodařilo nahrát kvůli následující chybě: %s"
 
 #~ msgid ""
-#~ "Socket closed by web server. Wait for input data of package #%1$d took %2"
-#~ "$dmsec."
+#~ "Socket closed by web server. Wait for input data of package #%1$d took "
+#~ "%2$dmsec."
 #~ msgstr ""
-#~ "Soket uzavřen webserverem. Čekání na vstupní data balíku #%1$d trvalo %2"
-#~ "$dmsec."
+#~ "Soket uzavřen webserverem. Čekání na vstupní data balíku #%1$d trvalo "
+#~ "%2$dmsec."
 
 #~ msgid "Sort field %1$s is not supported via IMAP SORT command"
 #~ msgstr "Třídící pole %1$s není příkazem IMAP SORT podporováno"
@@ -15253,8 +15386,8 @@ msgstr "Zulu"
 #~ "Sort field %1$s is not supported via IMAP SORT command on server %2$s "
 #~ "with login %3$s (user=%4$s, context=%5$s)"
 #~ msgstr ""
-#~ "Třídící pole %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel=%4"
-#~ "$s, kontext=%5$s) nepodporuje příkaz IMAP SORT"
+#~ "Třídící pole %1$s na serveru %2$s s přihlašovacím jménem %3$s (uživatel="
+#~ "%4$s, kontext=%5$s) nepodporuje příkaz IMAP SORT"
 
 #~ msgid "String parse exception: No ending 0x00 found"
 #~ msgstr "Výjimka při parsování řetězce: Nebylo nalezeno zakončení 0x00"
@@ -15325,8 +15458,8 @@ msgstr "Zulu"
 #~ msgstr "Nemohu parsovat URI IMAP serveru „%1$s“."
 
 #~ msgid ""
-#~ "Unexpected empty body package received from web server. Total-Received: %1"
-#~ "$d | Content-Length: %2$d.\n"
+#~ "Unexpected empty body package received from web server. Total-Received: "
+#~ "%1$d | Content-Length: %2$d.\n"
 #~ "Corresponding AJP forward package:\n"
 #~ "%3$s"
 #~ msgstr ""

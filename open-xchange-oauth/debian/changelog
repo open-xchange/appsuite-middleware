@@ -1,3 +1,33 @@
+open-xchange-oauth (7.2.0-4) UNRELEASED; urgency=low
+
+  * Fourth candidate for 7.2.0 release
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Wed, 10 Apr 2013 17:31:29 +0200
+
+open-xchange-oauth (7.2.0-3) UNRELEASED; urgency=low
+
+  * Third candidate for 7.2.0 release
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Tue, 09 Apr 2013 10:25:01 +0200
+
+open-xchange-oauth (7.2.0-2) UNRELEASED; urgency=low
+
+  * Second candidate for 7.2.0 release
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Tue, 02 Apr 2013 15:07:14 +0200
+
+open-xchange-oauth (7.2.0-1) UNRELEASED; urgency=low
+
+  * First release candidate for 7.2.0
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Tue, 26 Mar 2013 10:12:29 +0100
+
+open-xchange-oauth (7.2.0-0) UNRELEASED; urgency=low
+
+  * prepare for 7.2.0
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Fri, 15 Mar 2013 13:33:26 +0100
+
 open-xchange-oauth (7.0.2-7) unstable; urgency=low
 
   * Build for patch 2013-04-04

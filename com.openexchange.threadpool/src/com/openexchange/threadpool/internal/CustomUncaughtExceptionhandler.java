@@ -75,21 +75,22 @@ final class CustomUncaughtExceptionhandler implements UncaughtExceptionHandler {
          */
         final Map<Thread, StackTraceElement[]> stackMap = Thread.getAllStackTraces();
         final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(256);
+        final String lineSeparator = System.getProperty("line.separator");
         for (final Thread thread : stackMap.keySet()) {
             sb.append(thread.getName()).append(" ID:").append(thread.getId());
-            sb.append(" State:").append(thread.getState()).append(" Prio:").append(thread.getPriority()).append('\n');
-            appendStackTrace(stackMap.get(thread), sb);
-            sb.append('\n');
+            sb.append(" State:").append(thread.getState()).append(" Prio:").append(thread.getPriority());
+            sb.append(lineSeparator);
+            appendStackTrace(stackMap.get(thread), sb, lineSeparator);
+            sb.append(lineSeparator);
         }
         LOG.fatal(sb.toString());
     }
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb) {
+    private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb, final String lineSeparator) {
         if (null == trace) {
             sb.append("<missing stack trace>\n");
             return;
         }
-        final String lineSeparator = System.getProperty("line.separator");
         for (final StackTraceElement ste : trace) {
             final String className = ste.getClassName();
             if (null != className) {

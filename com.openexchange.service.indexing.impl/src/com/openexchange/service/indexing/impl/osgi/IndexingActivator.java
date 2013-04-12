@@ -54,6 +54,7 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.osgi.framework.ServiceReference;
+import org.quartz.Scheduler;
 import org.quartz.service.QuartzService;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
@@ -70,10 +71,12 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.service.indexing.IndexingService;
-import com.openexchange.service.indexing.IndexingServiceMBean;
-import com.openexchange.service.indexing.impl.internal.IndexingServiceImpl;
-import com.openexchange.service.indexing.impl.internal.IndexingServiceMBeanImpl;
+import com.openexchange.service.indexing.JobMonitoringMBean;
+import com.openexchange.service.indexing.impl.internal.IndexingProperties;
+import com.openexchange.service.indexing.impl.internal.SchedulerConfig;
 import com.openexchange.service.indexing.impl.internal.Services;
+import com.openexchange.service.indexing.impl.internal.nonclustered.IndexingServiceImpl;
+import com.openexchange.service.indexing.impl.internal.nonclustered.JobMonitoringMBeanImpl;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
@@ -88,11 +91,11 @@ public class IndexingActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexingActivator.class));
 
-    private ObjectName indexingMBeanName;
-
-    private IndexingServiceMBeanImpl indexingMBean;
-
     private IndexingServiceImpl serviceImpl;
+
+    private JobMonitoringMBeanImpl monitoringMBean;
+
+    private ObjectName monitoringMBeanName;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -115,6 +118,18 @@ public class IndexingActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("Starting bundle: com.openexchange.service.indexing");
         Services.setServiceLookup(this);
+        
+        /*
+         * Preconfigure scheduler
+         */
+        ConfigurationService config = getService(ConfigurationService.class);
+        int threadCount = config.getIntProperty(IndexingProperties.WORKER_THREADS, 3);
+        SchedulerConfig.setSchedulerName("com.openexchange.service.indexing");
+        SchedulerConfig.setThreadCount(threadCount);
+        SchedulerConfig.setStart(true);
+        QuartzService quartzService = getService(QuartzService.class);
+        Scheduler scheduler = quartzService.getScheduler(SchedulerConfig.getSchedulerName(), SchedulerConfig.start(), SchedulerConfig.getThreadCount());
+        
         serviceImpl = new IndexingServiceImpl();
         addService(IndexingService.class, serviceImpl);
         registerService(IndexingService.class, serviceImpl);
@@ -123,7 +138,7 @@ public class IndexingActivator extends HousekeepingActivator {
 //        sessionProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
 //        registerService(EventHandler.class, new SessionEventHandler(), sessionProperties);
 
-        registerMBean(serviceImpl);
+        registerMBean(scheduler);
         openTrackers();
     }
 
@@ -132,26 +147,23 @@ public class IndexingActivator extends HousekeepingActivator {
         super.stopBundle();
 
         ManagementService managementService = Services.optService(ManagementService.class);
-        if (managementService != null && indexingMBeanName != null) {
-            managementService.unregisterMBean(indexingMBeanName);
-            indexingMBean = null;
-        }
-
-        if (serviceImpl != null) {
-            serviceImpl.shutdown();
+        if (managementService != null && monitoringMBeanName != null) {
+            managementService.unregisterMBean(monitoringMBeanName);
+            monitoringMBean = null;
+            monitoringMBeanName = null;
         }
     }
 
-    private void registerMBean(IndexingServiceImpl indexingService) {
+    private void registerMBean(Scheduler scheduler) throws NotCompliantMBeanException {
         try {
-            indexingMBeanName = new ObjectName(IndexingServiceMBean.DOMAIN, IndexingServiceMBean.KEY, IndexingServiceMBean.VALUE);
-            indexingMBean = new IndexingServiceMBeanImpl(indexingService);
+            monitoringMBeanName = new ObjectName(JobMonitoringMBean.DOMAIN, JobMonitoringMBean.KEY, JobMonitoringMBean.VALUE);
+            monitoringMBean = new JobMonitoringMBeanImpl(scheduler);
             track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
 
                 @Override
                 public void added(ServiceReference<ManagementService> ref, ManagementService service) {
                     try {
-                        service.registerMBean(indexingMBeanName, indexingMBean);
+                        service.registerMBean(monitoringMBeanName, monitoringMBean);
                     } catch (OXException e) {
                         LOG.error(e.getMessage(), e);
                     }
@@ -160,7 +172,7 @@ public class IndexingActivator extends HousekeepingActivator {
                 @Override
                 public void removed(ServiceReference<ManagementService> ref, ManagementService service) {
                     try {
-                        service.unregisterMBean(indexingMBeanName);
+                        service.unregisterMBean(monitoringMBeanName);
                     } catch (OXException e) {
                         LOG.warn(e.getMessage(), e);
                     }
@@ -168,9 +180,6 @@ public class IndexingActivator extends HousekeepingActivator {
             });
         } catch (MalformedObjectNameException e) {
             LOG.error(e.getMessage(), e);
-        } catch (NotCompliantMBeanException e) {
-            LOG.error(e.getMessage(), e);
         }
     }
-
 }

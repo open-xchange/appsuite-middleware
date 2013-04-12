@@ -330,91 +330,75 @@ public final class AllFetch {
                  */
                 final String command;
                 {
-                    final String lowCostItems = getFetchCommand(items);
-                    command =
-                        new com.openexchange.java.StringAllocator(12 + lowCostItems.length()).append("FETCH ").append(1 == messageCount ? "1" : "1:*").append(" (").append(
-                            lowCostItems).append(')').toString();
+                    final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(64);
+                    sb.append("FETCH ").append(1 == messageCount ? "1" : "1:*").append(" (");
+                    appendFetchCommand(items, sb);
+                    sb.append(')');
+                    command = sb.toString();
                 }
                 /*
-                 * Enable tracer
+                 * Perform command
                  */
-                final SBOutputStream sbout = DEBUG ? new SBOutputStream() : null;
-                final IMAPTracer.TracerState tracerState = DEBUG ? traceStateFor(protocol, sbout) : null;
-                try {
-                    final Response[] r = performCommand(protocol, command);
-                    final int len = r.length - 1;
-                    final Response response = r[len];
-                    final List<MailMessage> l = new ArrayList<MailMessage>(len);
-                    if (response.isOK()) {
-                        // final int recentCount = imapFolder.getNewMessageCount();
-                        final String fullname = imapFolder.getFullName();
-                        for (int j = 0; j < len; j++) {
-                            final Response resp = r[j];
-                            if (resp instanceof FetchResponse) {
-                                final FetchResponse fr = (FetchResponse) resp;
-                                try {
-                                    final MailMessage m = new IDMailMessage(null, fullname);
-                                    // m.setRecentCount(recentCount);
-                                    for (final LowCostItem lowCostItem : items) {
-                                        final Item item =
-                                            getItemOf(lowCostItem.getItemClass(), fr, lowCostItem.getItemString(), config, session);
-                                        try {
-                                            lowCostItem.getItemHandler().handleItem(item, m, LOG);
-                                        } catch (final OXException e) {
-                                            LOG.error(e.getMessage(), e);
-                                        }
-                                    }
-                                    l.add(m);
-                                } catch (final ProtocolException e) {
-                                    if (tracerState != null) {
-                                        final com.openexchange.java.StringAllocator sb = sbout.getTrace();
-                                        sb.insert(0, "\nIMAP trace:\n");
-                                        sb.insert(0, e.getMessage());
-                                        sb.insert(0, "Detected invalid FETCH response which will be ignored. Error:\n");
-                                        LOG.warn(sb.toString(), e);
-                                    } else {
-                                        LOG.warn(e.getMessage(), e);
+                final Response[] r = performCommand(protocol, command);
+                final int len = r.length - 1;
+                final Response response = r[len];
+                final List<MailMessage> l = new ArrayList<MailMessage>(len);
+                if (response.isOK()) {
+                    // final int recentCount = imapFolder.getNewMessageCount();
+                    final String fullname = imapFolder.getFullName();
+                    for (int j = 0; j < len; j++) {
+                        final Response resp = r[j];
+                        if (resp instanceof FetchResponse) {
+                            final FetchResponse fr = (FetchResponse) resp;
+                            try {
+                                final MailMessage m = new IDMailMessage(null, fullname);
+                                // m.setRecentCount(recentCount);
+                                for (final LowCostItem lowCostItem : items) {
+                                    final Item item = getItemOf(lowCostItem.getItemClass(), fr, lowCostItem.getItemString(), config, session);
+                                    try {
+                                        lowCostItem.getItemHandler().handleItem(item, m, LOG);
+                                    } catch (final OXException e) {
+                                        LOG.error(e.getMessage(), e);
                                     }
                                 }
-                                r[j] = null;
+                                l.add(m);
+                            } catch (final ProtocolException e) {
+                                // Ignore that FETCH response
                             }
+                            r[j] = null;
                         }
-                        protocol.notifyResponseHandlers(r);
-                    } else if (response.isBAD()) {
-                        if (ImapUtility.isInvalidMessageset(response)) {
+                    }
+                    protocol.notifyResponseHandlers(r);
+                } else if (response.isBAD()) {
+                    if (ImapUtility.isInvalidMessageset(response)) {
+                        return new MailMessage[0];
+                    }
+                    throw new BadCommandException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        command,
+                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                } else if (response.isNO()) {
+                    /*
+                     * Check number of messages
+                     */
+                    try {
+                        if (IMAPCommandsCollection.getTotal(imapFolder) <= 0) {
                             return new MailMessage[0];
                         }
-                        throw new BadCommandException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
-                    } else if (response.isNO()) {
-                        /*
-                         * Check number of messages
-                         */
-                        try {
-                            if (IMAPCommandsCollection.getTotal(imapFolder) <= 0) {
-                                return new MailMessage[0];
-                            }
-                        } catch (final MessagingException e) {
-                            LOG.warn("STATUS command failed. Throwing original exception: " + response.toString(), e);
-                        }
-                        throw new CommandFailedException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
-                    } else {
-                        protocol.handleResult(response);
+                    } catch (final MessagingException e) {
+                        LOG.warn("STATUS command failed. Throwing original exception: " + response.toString(), e);
                     }
-                    Collections.sort(l, ascending ? ASC_COMP : DESC_COMP);
-                    return l.toArray(new MailMessage[l.size()]);
-                    // } catch (final MessagingException e) {
-                    // throw new ProtocolException(e.getMessage(), e);
-                } finally {
-                    if (DEBUG) {
-                        restoreTracerFor(protocol, sbout, tracerState);
-                    }
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(
+                        IMAPException.Code.PROTOCOL_ERROR,
+                        command,
+                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                } else {
+                    protocol.handleResult(response);
                 }
+                Collections.sort(l, ascending ? ASC_COMP : DESC_COMP);
+                return l.toArray(new MailMessage[l.size()]);
+                // } catch (final MessagingException e) {
+                // throw new ProtocolException(e.getMessage(), e);
             }
         }));
     }
@@ -589,7 +573,7 @@ public final class AllFetch {
      * @return The item associated with given class in specified <i>FETCH</i> response.
      */
     static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse, final String itemName, final IMAPConfig config, final Session session) throws ProtocolException {
-        final I retval = getItemOf(clazz, fetchResponse);
+        final I retval = optItemOf(clazz, fetchResponse);
         if (null == retval) {
             throw missingFetchItem(itemName, config, session);
         }
@@ -605,7 +589,7 @@ public final class AllFetch {
      * @return The item associated with given class in specified <i>FETCH</i> response or <code>null</code>.
      * @see #getItemOf(Class, FetchResponse, String)
      */
-    static <I extends Item> I getItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse) {
+    static <I extends Item> I optItemOf(final Class<? extends I> clazz, final FetchResponse fetchResponse) {
         final int len = fetchResponse.getItemCount();
         for (int i = 0; i < len; i++) {
             final Item item = fetchResponse.getItem(i);
@@ -639,12 +623,22 @@ public final class AllFetch {
      * @return The string representation
      */
     public static String getFetchCommand(final LowCostItem[] items) {
-        final StringBuilder command = new StringBuilder(64);
+        final com.openexchange.java.StringAllocator command = new com.openexchange.java.StringAllocator(64);
+        appendFetchCommand(items, command);
+        return command.toString();
+    }
+
+    /**
+     * Gets the fetch items' string representation; e.g <code>"UID INTERNALDATE"</code>.
+     *
+     * @param items The items
+     * @return The string representation
+     */
+    public static void appendFetchCommand(final LowCostItem[] items, final com.openexchange.java.StringAllocator command) {
         command.append(items[0].getItemString());
         for (int i = 1; i < items.length; i++) {
             command.append(' ').append(items[i].getItemString());
         }
-        return command.toString();
     }
 
 }

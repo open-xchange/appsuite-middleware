@@ -94,6 +94,11 @@ public final class MailAccessQueueImpl implements MailAccessQueue {
         priorityQueue = new PriorityQueue<PooledMailAccess>();
     }
 
+    @Override
+    public int getCapacity() {
+        return capacity;
+    }
+
     /**
      * Marks this queue as deprecated.
      */

@@ -49,6 +49,7 @@
 
 package com.openexchange.log;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.log.Loggable.Level;
 
@@ -59,11 +60,31 @@ import com.openexchange.log.Loggable.Level;
  */
 public final class Log implements org.apache.commons.logging.Log {
 
+    private static final AtomicBoolean APPEND_TRACE_TO_MESSAGE = new AtomicBoolean();
+
+    /**
+     * Sets whether to prefer to append stack traces to message itself or pass them as separate argument.
+     * 
+     * @param appendTraceToMessage <code>true</code> to append stack traces to message; otherwise <code>false</code>
+     */
+    public static void setAppendTraceToMessage(final boolean appendTraceToMessage) {
+        APPEND_TRACE_TO_MESSAGE.set(appendTraceToMessage);
+    }
+
+    /**
+     * Checks whether to prefer to append stack traces to message itself or pass them as separate argument.
+     * 
+     * @return <code>true</code> to append stack traces to message; otherwise <code>false</code>
+     */
+    public static boolean appendTraceToMessage() {
+        return APPEND_TRACE_TO_MESSAGE.get();
+    }
+
     private static final AtomicReference<LogService> LOGSERVICE_REFERENCE = new AtomicReference<LogService>();
 
     /**
      * Sets the log service.
-     *
+     * 
      * @param logService The log service
      */
     public static void set(final LogService logService) {
@@ -149,7 +170,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.trace(message);
         } else {
-            logService.log(logService.loggableFor(Level.TRACE, delegate, null == message ? null : message.toString()));
+            logService.log(logService.loggableFor(Level.TRACE, delegate, message));
         }
     }
 
@@ -159,7 +180,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.trace(message, t);
         } else {
-            logService.log(logService.loggableFor(Level.TRACE, delegate, null == message ? null : message.toString(), t));
+            logService.log(logService.loggableFor(Level.TRACE, delegate, message, t));
         }
     }
 
@@ -169,7 +190,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.debug(message);
         } else {
-            logService.log(logService.loggableFor(Level.DEBUG, delegate, null == message ? null : message.toString()));
+            logService.log(logService.loggableFor(Level.DEBUG, delegate, message));
         }
     }
 
@@ -179,7 +200,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.debug(message, t);
         } else {
-            logService.log(logService.loggableFor(Level.DEBUG, delegate, null == message ? null : message.toString(), t));
+            logService.log(logService.loggableFor(Level.DEBUG, delegate, message, t));
         }
     }
 
@@ -189,7 +210,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.info(message);
         } else {
-            logService.log(logService.loggableFor(Level.INFO, delegate, null == message ? null : message.toString()));
+            logService.log(logService.loggableFor(Level.INFO, delegate, message));
         }
     }
 
@@ -199,7 +220,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.info(message, t);
         } else {
-            logService.log(logService.loggableFor(Level.INFO, delegate, null == message ? null : message.toString(), t));
+            logService.log(logService.loggableFor(Level.INFO, delegate, message, t));
         }
     }
 
@@ -209,7 +230,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.warn(message);
         } else {
-            logService.log(logService.loggableFor(Level.WARNING, delegate, null == message ? null : message.toString()));
+            logService.log(logService.loggableFor(Level.WARNING, delegate, message));
         }
     }
 
@@ -219,7 +240,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.warn(message, t);
         } else {
-            logService.log(logService.loggableFor(Level.WARNING, delegate, null == message ? null : message.toString(), t));
+            logService.log(logService.loggableFor(Level.WARNING, delegate, message, t));
         }
     }
 
@@ -229,7 +250,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.error(message);
         } else {
-            logService.log(logService.loggableFor(Level.ERROR, delegate, null == message ? null : message.toString()));
+            logService.log(logService.loggableFor(Level.ERROR, delegate, message));
         }
     }
 
@@ -239,7 +260,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.error(message, t);
         } else {
-            logService.log(logService.loggableFor(Level.ERROR, delegate, null == message ? null : message.toString(), t));
+            logService.log(logService.loggableFor(Level.ERROR, delegate, message, t));
         }
     }
 
@@ -249,7 +270,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.fatal(message);
         } else {
-            logService.log(logService.loggableFor(Level.FATAL, delegate, null == message ? null : message.toString()));
+            logService.log(logService.loggableFor(Level.FATAL, delegate, message));
         }
     }
 
@@ -259,7 +280,7 @@ public final class Log implements org.apache.commons.logging.Log {
         if (null == logService) {
             delegate.fatal(message, t);
         } else {
-            logService.log(logService.loggableFor(Level.FATAL, delegate, null == message ? null : message.toString(), t));
+            logService.log(logService.loggableFor(Level.FATAL, delegate, message, t));
         }
     }
 

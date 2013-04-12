@@ -50,9 +50,12 @@
 package com.openexchange.admin.rmi.dataobjects;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -120,6 +123,8 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
     private boolean userAttribtuesset;
 
     private boolean listrun;
+
+    private List<Object[]> quotas;
 
     public Context() {
         super();
@@ -363,6 +368,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
         this.writeDatabase = null;
         this.login_mappings = null;
         this.listrun = false;
+        this.quotas = Collections.emptyList();
     }
 
     /**
@@ -395,6 +401,34 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
     @Override
     public String[] getMandatoryMembersRegister() {
         return null;
+    }
+    
+    /**
+     * Gets the quotas
+     * <pre>
+     *  (["calendar", 1000000L], ["contact", 1000000L], ...)
+     * </pre>
+     *
+     * @return The quotas
+     */
+    public List<Object[]> getQuotas() {
+        return Collections.unmodifiableList(quotas);
+    }
+    
+    /**
+     * Sets the quotas
+     * <pre>
+     *  (["calendar", 1000000L], ["contact", 1000000L], ...)
+     * </pre>
+     *
+     * @param quotas The quotas to set
+     */
+    public void setQuotas(List<Object[]> quotas) {
+        if (null == quotas) {
+            this.quotas = Collections.emptyList();
+        } else {
+            this.quotas = new ArrayList<Object[]>(quotas);
+        }
     }
 
     /**

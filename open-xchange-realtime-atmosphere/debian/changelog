@@ -1,0 +1,23 @@
+open-xchange-realtime-atmosphere (7.2.0-3) UNRELEASED; urgency=low
+
+  * Fourth candidate for 7.2.0 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 10 Apr 2013 17:31:38 +0200
+
+open-xchange-realtime-atmosphere (7.2.0-2) UNRELEASED; urgency=low
+
+  * Third candidate for 7.2.0 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 09 Apr 2013 10:25:09 +0200
+
+open-xchange-realtime-atmosphere (7.2.0-1) UNRELEASED; urgency=low
+
+  * Second candidate for 7.2.0 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 02 Apr 2013 15:07:23 +0200
+
+open-xchange-realtime-atmosphere (7.2.0-0) UNRELEASED; urgency=low
+
+  * prepare for 7.2.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 28 Mar 2013 16:32:43 +0100

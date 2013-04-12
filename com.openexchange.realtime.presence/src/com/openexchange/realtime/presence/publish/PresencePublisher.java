@@ -108,7 +108,9 @@ public class PresencePublisher implements ChangeListener {
      */
     @Override
     public void added(ID id, Resource resource) {
-        LOG.info(String.format("Added: %1$s - %2$s", id, resource.getPresence()));
+        if(LOG.isDebugEnabled()) {
+            LOG.debug(String.format("Added: %1$s - %2$s", id, resource.getPresence()));
+        }
         if (hasPresence(resource)) {
             // TODO: restore from expirer list if present
             Presence presence = resource.getPresence();
@@ -138,7 +140,7 @@ public class PresencePublisher implements ChangeListener {
     public void updated(ID id, Resource currentResource, Resource previousResource) {
         if (hasPresence(currentResource)) {
             if (LOG.isDebugEnabled()) {
-                LOG.info("Resource has Presence");
+                LOG.debug("Resource has Presence");
             }
             Presence currentPresence = currentResource.getPresence();
             if (!currentPresence.equals(previousResource.getPresence())) {
@@ -147,7 +149,7 @@ public class PresencePublisher implements ChangeListener {
                     List<ID> subscribers = presenceSubscriptionService.getSubscribers(currentPresence.getFrom());
                     if (!subscribers.isEmpty()) {
                         if (LOG.isDebugEnabled()) {
-                            LOG.info("Pushing Presence to " + subscribers.size() + "subscriber(s)");
+                            LOG.debug("Pushing Presence to " + subscribers.size() + "subscriber(s)");
                         }
                         MessageDispatcher messageDispatcher = getMessageDispatcher();
                         for (ID subscriber : subscribers) {
@@ -164,19 +166,21 @@ public class PresencePublisher implements ChangeListener {
                 }
             } else {
                 if (LOG.isDebugEnabled()) {
-                    LOG.info("Resource's Presence didn't differ from previous");
+                    LOG.debug("Resource's Presence didn't differ from previous");
                 }
             }
         } else {
             if (LOG.isDebugEnabled()) {
-                LOG.info("Resource didn't carry Presence");
+                LOG.debug("Resource didn't carry Presence");
             }
         }
     }
 
     @Override
     public void removed(ID id, Resource resource) {
-        LOG.info(String.format("Removed: %1$s - %2$s", id, resource.getPresence()));
+        if(LOG.isDebugEnabled()) {
+            LOG.debug(String.format("Removed: %1$s - %2$s", id, resource.getPresence()));
+        }
 
         /*
          * Check if Resource contains Presence. Check if id is still registered in directory. If no longer registered - if Presence was

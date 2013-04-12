@@ -58,6 +58,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import com.openexchange.databaseold.Database;
@@ -486,16 +488,13 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
     }
 
     private static UserConfiguration[] loadUserConfigurationWithoutExtended(Context ctx, Connection con, int[] userIds, int[][] groupsArg) throws OXException, SQLException {
-        int length = userIds.length;
         PreparedStatement stmt = null;
         ResultSet result = null;
-        final UserConfiguration[] retval = new UserConfiguration[length];
         try {
+            final int length = userIds.length;
             final TIntIntMap userMap;
             if (length <= LIMIT) {
-                String sql = "SELECT user,permissions FROM user_configuration WHERE cid=? AND user IN (";
-                sql = getIN(sql, length);
-                stmt = con.prepareStatement(sql);
+                stmt = con.prepareStatement(getIN("SELECT user,permissions FROM user_configuration WHERE cid=? AND user IN (", length));
                 int pos = 1;
                 stmt.setInt(pos++, ctx.getContextId());
                 userMap = new TIntIntHashMap(length, 1);
@@ -512,19 +511,19 @@ public class RdbUserConfigurationStorage extends UserConfigurationStorage {
                 }
             }
             result = stmt.executeQuery();
+            final List<UserConfiguration> list = new ArrayList<UserConfiguration>(length);
             while (result.next()) {
                 final int userId = result.getInt(1);
                 if (userMap.containsKey(userId)) {
                     final int pos = userMap.get(userId);
                     final int[] groups = groupsArg[pos] == null ? UserStorage.getInstance().getUser(userId, ctx).getGroups() : groupsArg[pos];
-                    final UserConfiguration userConfiguration = new UserConfiguration(result.getInt(2), userId, groups, ctx);
-                    retval[pos] = userConfiguration;
+                    list.add(new UserConfiguration(result.getInt(2), userId, groups, ctx));
                 }
             }
+            return list.toArray(new UserConfiguration[0]);
         } finally {
             closeSQLStuff(result, stmt);
         }
-        return retval;
     }
 
     /*-
