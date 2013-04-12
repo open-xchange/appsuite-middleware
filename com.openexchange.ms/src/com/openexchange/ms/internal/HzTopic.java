@@ -109,6 +109,14 @@ public final class HzTopic<E> implements Topic<E> {
         timerTask = timerService.scheduleWithFixedDelay(r, 3000, 3000);
     }
 
+    /**
+     * Cancels the timer.
+     */
+    @Override
+    public void cancel() {
+        timerTask.cancel();
+    }
+
     @Override
     public String getSenderId() {
         return senderId;
