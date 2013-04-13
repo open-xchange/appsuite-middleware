@@ -305,6 +305,10 @@ public class Multiple extends SessionServlet {
 
     private static final Pattern SPLIT = Pattern.compile("/");
 
+    private static final String HOSTNAME = MultipleHandler.HOSTNAME;
+    private static final String ROUTE = MultipleHandler.ROUTE;
+    private static final String REMOTE_ADDRESS = MultipleHandler.REMOTE_ADDRESS;
+
     protected static final AJAXState doAction(final String module, final String action, final JSONObject jsonObj, final ServerSession session, final HttpServletRequest req, final OXJSONWriter jsonWriter, final AJAXState ajaxState) {
         AJAXState state = ajaxState;
         try {
@@ -314,14 +318,14 @@ public class Multiple extends SessionServlet {
             {
                 final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
                 if (null == hostnameService) {
-                    jsonObj.put(MultipleHandler.HOSTNAME, req.getServerName());
+                    jsonObj.put(HOSTNAME, req.getServerName());
                 } else {
                     final String hn = hostnameService.getHostname(session.getUserId(), session.getContextId());
-                    jsonObj.put(MultipleHandler.HOSTNAME, null == hn ? req.getServerName() : hn);
+                    jsonObj.put(HOSTNAME, null == hn ? req.getServerName() : hn);
                 }
             }
-            jsonObj.put(MultipleHandler.ROUTE, Tools.getRoute(req.getSession(true).getId()));
-            jsonObj.put(MultipleHandler.REMOTE_ADDRESS, req.getRemoteAddr());
+            jsonObj.put(ROUTE, Tools.getRoute(req.getSession(true).getId()));
+            jsonObj.put(REMOTE_ADDRESS, req.getRemoteAddr());
             final Dispatcher dispatcher = getDispatcher();
             final StringBuilder moduleCandidate = new StringBuilder(32);
             boolean handles = false;
