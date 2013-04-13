@@ -2596,6 +2596,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             LOG.warn("Draft mail cannot be deleted.", e);
                         }
                     }
+                } else if (ComposeType.DRAFT_DELETE_ON_TRANSPORT.equals(type)) {
+                    try {
+                        deleteDraft(composedMail.getMsgref());
+                    } catch (final Exception e) {
+                        LOG.warn("Draft mail cannot be deleted.", e);
+                    }
                 }
             } catch (final OXException e) {
                 mailAccess.addWarnings(Collections.singletonList(MailExceptionCode.FLAG_FAIL.create(e, new Object[0])));
