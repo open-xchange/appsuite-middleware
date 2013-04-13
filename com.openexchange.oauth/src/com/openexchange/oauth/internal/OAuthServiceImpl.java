@@ -176,17 +176,24 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             }
             final List<OAuthAccount> accounts = new ArrayList<OAuthAccount>(8);
             do {
-                final DefaultOAuthAccount account = new DefaultOAuthAccount();
-                account.setId(rs.getInt(1));
-                account.setDisplayName(rs.getString(2));
                 try {
-                    account.setToken(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessToken", contextId, account.getId())));
-                    account.setSecret(encryptionService.decrypt(session, rs.getString(4), new PWUpdate("accessSecret", contextId, account.getId())));
+                    final DefaultOAuthAccount account = new DefaultOAuthAccount();
+                    account.setMetaData(registry.getService(rs.getString(5), user, contextId));
+                    account.setId(rs.getInt(1));
+                    account.setDisplayName(rs.getString(2));
+                    try {
+                        account.setToken(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessToken", contextId, account.getId())));
+                        account.setSecret(encryptionService.decrypt(session, rs.getString(4), new PWUpdate("accessSecret", contextId, account.getId())));
+                    } catch (final OXException e) {
+                        // IGNORE
+                    }
+                    accounts.add(account);
                 } catch (final OXException e) {
-                    // IGNORE
+                    if (!OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.equals(e)) {
+                        throw e;
+                    }
+                    // Obviously associated service is not available. Ignore...
                 }
-                account.setMetaData(registry.getService(rs.getString(5), user, contextId));
-                accounts.add(account);
             } while (rs.next());
             return accounts;
         } catch (final SQLException e) {
