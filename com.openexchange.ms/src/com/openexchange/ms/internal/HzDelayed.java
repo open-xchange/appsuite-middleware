@@ -63,7 +63,7 @@ public final class HzDelayed<E> implements Delayed {
     /**
      * The delay for pooled messages.
      */
-    private static final long MSEC_DELAY = 5000L;
+    private static final long DELAY_MSEC = HzDataUtility.DELAY_MSEC;
 
     private final long stamp;
     private final boolean immediateDelivery;
@@ -102,7 +102,7 @@ public final class HzDelayed<E> implements Delayed {
 
     @Override
     public long getDelay(final TimeUnit unit) {
-        return immediateDelivery ? 0L : unit.convert(MSEC_DELAY - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS);
+        return immediateDelivery ? 0L : unit.convert(DELAY_MSEC - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS);
     }
 
     @Override

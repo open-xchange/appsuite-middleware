@@ -112,7 +112,8 @@ public final class HzTopic<E> implements Topic<E> {
                 }
             }
         };
-        timerTask = timerService.scheduleWithFixedDelay(r, 3000, 3000);
+        final int delay = HzDataUtility.DELAY_FREQUENCY;
+        timerTask = timerService.scheduleWithFixedDelay(r, delay, delay);
     }
 
     /**

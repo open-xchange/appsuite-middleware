@@ -52,7 +52,6 @@ package com.openexchange.ms.internal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-
 /**
  * {@link HzDataUtility} - A utility class for Hazelcast-based messaging.
  *
@@ -66,6 +65,18 @@ public final class HzDataUtility {
     private HzDataUtility() {
         super();
     }
+
+    // ------------------------------------- DELAY STUFF -------------------------------------------- //
+
+    /**
+     * The delay for pooled messages.
+     */
+    public static final long DELAY_MSEC = 5000L;
+
+    /**
+     * The frequency to check for delayed pooled messages.
+     */
+    public static final int DELAY_FREQUENCY = 3000;
 
     // ------------------------------------- MESSAGE DATA ------------------------------------------- //
 
@@ -106,7 +117,6 @@ public final class HzDataUtility {
         }
         return map;
     }
-
 
     // ------------------------------------- OTHER STIFF ------------------------------------------- //
 
