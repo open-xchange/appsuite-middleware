@@ -647,9 +647,17 @@ public final class ReaderBasedJsonParser
             // been handled earlier
             _reportUnexpectedChar(i, "expected a value");
         case INT_t:
-            _matchToken("true", 1);
-            t = JsonToken.VALUE_TRUE;
-            break;
+            {
+                int in = _inputPtr;
+                try {
+                    _matchToken("true", 1);
+                    t = JsonToken.VALUE_TRUE;
+                } catch (JsonParseException e) {
+                    _inputPtr = in;
+                    t = _handleUnexpectedValue(i);
+                }
+                break;
+            }
         case INT_f:
             {
                 int in = _inputPtr;
@@ -663,10 +671,17 @@ public final class ReaderBasedJsonParser
                 break;
             }
         case INT_n:
-            _matchToken("null", 1);
-            t = JsonToken.VALUE_NULL;
-            break;
-
+            {
+                int in = _inputPtr;
+                try {
+                    _matchToken("null", 1);
+                    t = JsonToken.VALUE_NULL;
+                } catch (JsonParseException e) {
+                    _inputPtr = in;
+                    t = _handleUnexpectedValue(i);
+                }
+                break;
+            }
         case INT_MINUS:
             /* Should we have separate handling for plus? Although
              * it is not allowed per se, it may be erroneously used,
