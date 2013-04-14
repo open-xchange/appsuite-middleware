@@ -982,7 +982,7 @@ public final class ReaderBasedJsonParser
                 }
             }
 
-            if (Character.isLetter(ch)) {
+            if (errorOnLetter && Character.isLetter(ch)) {
                 throw _constructError("Parse me as string, please.");
             }
 
