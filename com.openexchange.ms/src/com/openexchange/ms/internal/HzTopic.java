@@ -186,6 +186,7 @@ public final class HzTopic<E> implements Topic<E> {
     }
 
     private static final int CHUNK_SIZE = 10;
+    private static final int CHUNK_THRESHOLD = 2;
 
     /**
      * (Immediately) Publishes specified message to queue.
@@ -197,8 +198,10 @@ public final class HzTopic<E> implements Topic<E> {
         if (0 == size) {
             return;
         }
-        if (1 == size) {
-            hzTopic.publish(HzDataUtility.generateMapFor(messages.get(0), senderId));
+        if (size <= CHUNK_THRESHOLD) {
+            for (int i = 0; i < size; i++) {
+                hzTopic.publish(HzDataUtility.generateMapFor(messages.get(i), senderId));
+            }
         }
         // Chunk-wise
         final StringBuilder sb = new StringBuilder(MULTIPLE_PREFIX);
