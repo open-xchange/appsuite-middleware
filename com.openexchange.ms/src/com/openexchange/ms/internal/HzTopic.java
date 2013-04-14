@@ -185,6 +185,8 @@ public final class HzTopic<E> implements Topic<E> {
         }
     }
 
+    private static final int CHUNK_SIZE = 10;
+
     /**
      * (Immediately) Publishes specified message to queue.
      *
@@ -198,15 +200,28 @@ public final class HzTopic<E> implements Topic<E> {
         if (1 == size) {
             hzTopic.publish(HzDataUtility.generateMapFor(messages.get(0), senderId));
         }
-        final Map<String, Object> multiple = new LinkedHashMap<String, Object>(size + 1);
-        multiple.put(MULTIPLE_MARKER, Boolean.TRUE);
+        // Chunk-wise
         final StringBuilder sb = new StringBuilder(MULTIPLE_PREFIX);
         final int reset = MULTIPLE_PREFIX.length();
-        for (int i = 0; i < size; i++) {
-            sb.setLength(reset);
-            multiple.put(sb.append(i+1).toString(), HzDataUtility.generateMapFor(messages.get(i), senderId));
+        final int chunkSize = CHUNK_SIZE;
+        int off = 0;
+        while (off < size) {
+            // Determine end index
+            int end = off + chunkSize;
+            if (end > size) {
+                end = size;
+            }
+            // Create map carrying multiple messages
+            final Map<String, Object> multiple = new LinkedHashMap<String, Object>(chunkSize + 1);
+            multiple.put(MULTIPLE_MARKER, Boolean.TRUE);
+            for (int i = off; i < end; i++) {
+                sb.setLength(reset);
+                multiple.put(sb.append(i+1).toString(), HzDataUtility.generateMapFor(messages.get(i), senderId));
+            }
+            // Publish
+            hzTopic.publish(multiple);
+            off = end;
         }
-        hzTopic.publish(multiple);
     }
 
     // ------------------------------------------------------------------------ //
