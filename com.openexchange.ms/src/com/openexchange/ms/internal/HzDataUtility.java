@@ -80,6 +80,16 @@ public final class HzDataUtility {
     public static final String MESSAGE_DATA_OBJECT = "__object".intern();
 
     /**
+     * The property to mark as a multiple transport.
+     */
+    public static final String MULTIPLE_MARKER = "__multiple".intern();
+
+    /**
+     * The property prefix on a multiple transport.
+     */
+    public static final String MULTIPLE_PREFIX = "__map".intern();
+
+    /**
      * Generates message data for given arguments.
      *
      * @param e The message data object; POJOs preferred
@@ -97,7 +107,7 @@ public final class HzDataUtility {
         return map;
     }
 
-    
+
     // ------------------------------------- OTHER STIFF ------------------------------------------- //
 
 }

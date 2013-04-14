@@ -49,7 +49,11 @@
 
 package com.openexchange.ms.internal;
 
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -65,15 +69,17 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link HzTopic}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HzTopic<E> implements Topic<E> {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HzTopic.class);
 
-    private static final String MESSAGE_DATA_OBJECT = HzDataUtility.MESSAGE_DATA_OBJECT;
-    private static final String MESSAGE_DATA_SENDER_ID = HzDataUtility.MESSAGE_DATA_SENDER_ID;
+    static final String MESSAGE_DATA_OBJECT = HzDataUtility.MESSAGE_DATA_OBJECT;
+    static final String MESSAGE_DATA_SENDER_ID = HzDataUtility.MESSAGE_DATA_SENDER_ID;
+    static final String MULTIPLE_PREFIX = HzDataUtility.MULTIPLE_PREFIX;
+    static final String MULTIPLE_MARKER = HzDataUtility.MULTIPLE_MARKER;
 
     private final ITopic<Map<String, Object>> hzTopic;
     private final String senderId;
@@ -96,7 +102,7 @@ public final class HzTopic<E> implements Topic<E> {
         final TimerService timerService = Services.getService(TimerService.class);
         final Log log = LOG;
         final Runnable r = new Runnable() {
-            
+
             @Override
             public void run() {
                 try {
@@ -167,19 +173,39 @@ public final class HzTopic<E> implements Topic<E> {
      * Triggers all due messages.
      */
     public void triggerPublish() {
-        HzDelayed<E> polled;
-        while ((polled = publishQueue.poll()) != null) {
-            publishNow(polled.getData());
+        HzDelayed<E> polled = publishQueue.poll();
+        if (null != polled) {
+            final List<E> messages = new LinkedList<E>();
+            do {
+                messages.add(polled.getData());
+                polled = publishQueue.poll();
+            } while (polled != null);
+            publishNow(messages);
         }
     }
 
     /**
      * (Immediately) Publishes specified message to queue.
-     * 
-     * @param message The messahe to publish
+     *
+     * @param message The message to publish
      */
-    public void publishNow(final E message) {
-        hzTopic.publish(HzDataUtility.generateMapFor(message, senderId));
+    private void publishNow(final List<E> messages) {
+        final int size = messages.size();
+        if (0 == size) {
+            return;
+        }
+        if (1 == size) {
+            hzTopic.publish(HzDataUtility.generateMapFor(messages.get(0), senderId));
+        }
+        final Map<String, Object> multiple = new LinkedHashMap<String, Object>(size + 1);
+        multiple.put(MULTIPLE_MARKER, Boolean.TRUE);
+        final StringBuilder sb = new StringBuilder(MULTIPLE_PREFIX);
+        final int reset = MULTIPLE_PREFIX.length();
+        for (int i = 0; i < size; i++) {
+            sb.setLength(reset);
+            multiple.put(sb.append(i+1).toString(), HzDataUtility.generateMapFor(messages.get(i), senderId));
+        }
+        hzTopic.publish(multiple);
     }
 
     // ------------------------------------------------------------------------ //
@@ -201,9 +227,22 @@ public final class HzTopic<E> implements Topic<E> {
         @Override
         public void onMessage(final com.hazelcast.core.Message<Map<String, Object>> message) {
             final Map<String, Object> messageData = message.getMessageObject();
+            if (messageData.containsKey(MULTIPLE_MARKER)) {
+                final String name = message.getSource().toString();
+                for (final Entry<String, Object> entry : messageData.entrySet()) {
+                    if (entry.getKey().startsWith(MULTIPLE_PREFIX)) {
+                        onMessageReceived(name, (Map<String, Object>) entry.getValue());
+                    }
+                }
+            } else {
+                onMessageReceived(message.getSource().toString(), messageData);
+            }
+        }
+
+        private void onMessageReceived(final String name, final Map<String, Object> messageData) {
             final String messageSender = (String) messageData.get(MESSAGE_DATA_SENDER_ID);
             listener.onMessage(new Message<E>(
-                message.getSource().toString(),
+                name,
                 messageSender,
                 (E) messageData.get(MESSAGE_DATA_OBJECT),
                 !senderId.equals(messageSender)));
