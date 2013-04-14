@@ -697,8 +697,16 @@ public final class ReaderBasedJsonParser
         case INT_7:
         case INT_8:
         case INT_9:
-            t = parseNumberText(i);
-            break;
+            {
+                int in = _inputPtr;
+                try {
+                    t = parseNumberText(i, true);
+                } catch (JsonParseException e) {
+                    _inputPtr = in;
+                    t = _handleUnexpectedValue(i);
+                }
+                break;
+            }
         default:
             t = _handleUnexpectedValue(i);
             break;
@@ -870,7 +878,7 @@ public final class ReaderBasedJsonParser
      * deferred, since it is usually the most complicated and costliest
      * part of processing.
      */
-    protected JsonToken parseNumberText(int ch)
+    protected JsonToken parseNumberText(int ch, boolean errorOnLetter)
         throws IOException, JsonParseException
     {
         /* Although we will always be complete with respect to textual
@@ -972,6 +980,10 @@ public final class ReaderBasedJsonParser
                 if (expLen == 0) {
                     reportUnexpectedNumberChar(ch, "Exponent indicator not followed by a digit");
                 }
+            }
+
+            if (Character.isLetter(ch)) {
+                throw _constructError("Parse me as string, please.");
             }
 
             // Got it all: let's add to text buffer for parsing, access
