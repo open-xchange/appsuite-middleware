@@ -77,6 +77,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.collections.PropertizedList;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
@@ -320,6 +321,7 @@ public final class AllAction extends AppointmentAction {
                         appointmentList = appointmentList.subList(fromIndex, size);
                     }
                 }
+                appointmentList = new PropertizedList<Appointment>(appointmentList).setProperty("more", Integer.valueOf(size));
             }
 
             return new AJAXRequestResult(appointmentList, timestamp, "appointment");
