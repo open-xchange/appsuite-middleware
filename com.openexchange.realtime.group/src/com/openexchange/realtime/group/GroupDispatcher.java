@@ -114,6 +114,17 @@ public class GroupDispatcher implements ComponentHandle {
     public GroupDispatcher(ID id, ActionHandler handler) {
         this.id = id;
         this.handler = handler;
+        id.on("dispose", new IDEventHandler() {
+
+            @Override
+            public void handle(String event, ID id, Object source, Map<String, Object> properties) {
+                try {
+                    onDispose(null);
+                } catch (OXException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        });
     }
 
     /**
