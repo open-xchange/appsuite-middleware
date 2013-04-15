@@ -1,3 +1,9 @@
+open-xchange-blackwhitelist (7.2.1-0) UNRELEASED; urgency=low
+
+  * prepare for 7.2.1
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 15 Apr 2013 10:22:12 +0200
+
 open-xchange-blackwhitelist (7.2.0-4) UNRELEASED; urgency=low
 
   * Fourth candidate for 7.2.0 release

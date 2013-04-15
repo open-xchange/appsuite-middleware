@@ -1,3 +1,9 @@
+open-xchange-core (7.2.1-0) UNRELEASED; urgency=low
+
+  * prepare for 7.2.1
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Apr 2013 10:21:47 +0200
+
 open-xchange-core (7.2.0-4) UNRELEASED; urgency=low
 
   * Fourth candidate for 7.2.0 release

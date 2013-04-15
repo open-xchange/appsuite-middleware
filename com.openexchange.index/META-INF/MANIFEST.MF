@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Index Bundle
 Bundle-SymbolicName: com.openexchange.index
-Bundle-Version: 7.2.0
+Bundle-Version: 7.2.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.openexchange.index

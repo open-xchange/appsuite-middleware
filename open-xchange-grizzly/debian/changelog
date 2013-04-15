@@ -1,3 +1,9 @@
+open-xchange-grizzly (7.2.1-0) UNRELEASED; urgency=low
+
+  * prepare for 7.2.1
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Mon, 15 Apr 2013 10:22:32 +0200
+
 open-xchange-grizzly (7.2.0-4) UNRELEASED; urgency=low
 
   * Fourth candidate for 7.2.0 release
