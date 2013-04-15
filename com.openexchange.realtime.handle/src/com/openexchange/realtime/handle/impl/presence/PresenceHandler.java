@@ -103,6 +103,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
             if (Type.NONE == type || Type.UNAVAILABLE == type) {
                 handleBroadcastPresence(stanza);
             } else {
+                stanza.trace("Discarding. Only Stanzas of type NONE or UNAVAILABLE are suported for broadcasting.");
                 throw new IllegalArgumentException("Only Stanzas of type NONE or UNAVAILABLE are suported for broadcasting.");
             }
         } catch (Exception e) {
@@ -117,6 +118,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
          * recipient's server (a) SHOULD silently ignore the stanza (i.e., neither deliver it nor return an error) if it is a presence
          * stanza [...]
          */
+        stanza.trace("Discarding. Accound does not exist.");
         return;
     }
 
@@ -134,6 +136,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
         } else if (Type.NONE == type || Type.UNAVAILABLE == type) {
             handleDirectedPresence(presence);
         } else {
+            presence.trace("Discarding. Handling of Type " + type + " isn't implemented yet!");
             throw new UnsupportedOperationException("Handling of Type " + type + " isn't implemented yet!");
         }
     }
@@ -172,6 +175,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
     @Override
     public void handleOutboundStanza(Presence stanza) {
         try {
+            stanza.trace("Unable to handle broadcast stanza. Not implemented yet.");
             throw new UnsupportedOperationException("Not implemented yet.");
         } catch (Exception e) {
             // TODO: send error stanza to stanza.from or other proper error handling for messages depending on this case.
@@ -207,6 +211,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
      */
     private void handleSubscribe(Presence stanza) {
         try {
+            stanza.trace("handle subscribe");
             PresenceSubscriptionService subscriptionService = Services.getService(PresenceSubscriptionService.class);
             if (subscriptionService == null) {
                 throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(PresenceSubscriptionService.class.getName());
@@ -237,6 +242,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
      */
     private void handleSubscribed(Presence stanza) {
         try {
+            stanza.trace("handle subscribed");
             PresenceSubscriptionService subscriptionService = Services.getService(PresenceSubscriptionService.class);
             if (subscriptionService == null) {
                 throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(PresenceSubscriptionService.class.getName());
@@ -264,6 +270,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
      */
     private void handleUnSubscribe(Presence stanza) {
         try {
+            stanza.trace("handle unsubscribe");
             PresenceSubscriptionService subscriptionService = Services.getService(PresenceSubscriptionService.class);
             if (subscriptionService == null) {
                 throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(PresenceSubscriptionService.class.getName());
@@ -298,6 +305,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
      */
     private void handleUnSubscribed(Presence stanza) {
         try {
+            stanza.trace("handle unsubscribed");
             PresenceSubscriptionService subscriptionService = Services.getService(PresenceSubscriptionService.class);
             if (subscriptionService == null) {
                 throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(PresenceSubscriptionService.class.getName());
@@ -322,6 +330,7 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
             Map<ID, OXException> failedDeliveries = Collections.emptyMap();
             ID from = presence.getFrom().toGeneralForm();
             ID to = presence.getTo().toGeneralForm();
+            presence.trace("Handle directed presence. From: " + from + " To: " + to);
             IDMap<Resource> idMap = resourceDirectory.get(to);
 
             if (idMap.isEmpty()) {
@@ -382,10 +391,19 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
      * @throws OXException If stanza conversion fails or the status can't be changed
      */
     private void handleBroadcastPresence(Presence presence) throws OXException {
+        presence.trace("Handle broadcast presence");
         ResourceDirectory resourceDirectory = getResourceDirectory();
         DefaultResource presenceResource = new DefaultResource(presence);
         Resource old = resourceDirectory.set(presence.getFrom(), presenceResource);
         if (old != null) {
+            presence.trace(String.format(
+                "Update Presence: Old was: %1$s, %2$s, %3$d, %4$tT, %5$s",
+                old.getPresence().getState(),
+                old.getPresence().getMessage(),
+                old.getPresence().getPriority(),
+                old.getTimestamp(),
+                old.getRoutingInfo()));
+            
             if (LOG.isDebugEnabled()) {
                 if (old.getPresence() != null) {
                     LOG.debug(String.format(
@@ -410,10 +428,15 @@ public class PresenceHandler extends AbstractStrategyHandler<Presence> {
      */
     private void handleError(Presence presence, OXException oxException) {
         try {
+            presence.trace("error", oxException);
             MessageDispatcher messageDispatcher = getMessageDispatcher();
             Presence errorPresence = new Presence(presence);
             errorPresence.setTo(presence.getFrom());
             errorPresence.setError(oxException);
+            if (presence.traceEnabled()) {
+                errorPresence.addLogMessages(presence.getLogEntries());
+                errorPresence.setTracer(presence.getTracer());
+            }
             messageDispatcher.send(errorPresence);
         } catch (Exception e) {
             LOG.error(e);

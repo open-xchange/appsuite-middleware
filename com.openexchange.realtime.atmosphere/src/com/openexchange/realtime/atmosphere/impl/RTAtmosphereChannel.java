@@ -106,6 +106,7 @@ public class RTAtmosphereChannel implements Channel {
 
     @Override
     public void send(Stanza stanza, ID recipient) throws OXException {
+        stanza.trace("RTAtmosphereChannel send");
         stanza.transformPayloads("json");
         handler.send(stanza, recipient);
     }

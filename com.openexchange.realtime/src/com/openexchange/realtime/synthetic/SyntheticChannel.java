@@ -168,10 +168,14 @@ public class SyntheticChannel implements Channel, Runnable {
 
     @Override
     public void send(final Stanza stanza, ID recipient) throws OXException {
+        stanza.trace("SyntheticChannel delivering to " + recipient);
         final ComponentHandle handle = handles.get(recipient);
         if (handle == null) {
+            stanza.trace("Unknown recipient: "+ stanza.getTo());
             throw RealtimeExceptionCodes.INVALID_ID.create(stanza.getTo());
         }
+        stanza.trace("Delivering to handle " + handle);
+        stanza.trace("Updating last access");
         lastAccess.put(stanza.getTo(), System.currentTimeMillis());
 
         SyntheticChannelRunLoop runLoop = runLoopsPerID.get(recipient);

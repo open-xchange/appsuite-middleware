@@ -95,6 +95,7 @@ public class StanzaDispatcher implements Callable<Map<ID, OXException>>, Seriali
 
     @Override
     public Map<ID, OXException> call() throws Exception {
+        stanza.trace("Received remove delivery. Dispatching locally");
         LocalMessageDispatcher dispatcher = Services.getService(LocalMessageDispatcher.class);
         return dispatcher.send(stanza, targets);
     }

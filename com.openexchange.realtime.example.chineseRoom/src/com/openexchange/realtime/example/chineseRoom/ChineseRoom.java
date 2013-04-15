@@ -95,6 +95,7 @@ public class ChineseRoom extends GroupDispatcher implements ComponentHandle {
     public void handleSay(Stanza stanza) throws OXException {
         // We only allow members to say something in the chat room
         if (!isMember(stanza.getFrom())) {
+            stanza.trace( stanza.getFrom() + " does not seem to be a member. Discarding.");
             return; // Discard
         }
         // Retrieve the message from the payloads
@@ -104,14 +105,28 @@ public class ChineseRoom extends GroupDispatcher implements ComponentHandle {
             // Simply append all messages
             message.append(messages.getRoot().getData().toString());
         }
+        stanza.trace(stanza.getFrom()+": " + message);
+        System.out.println(stanza.getFrom()+ ": " + message);
         // Turn the message into pseudo chinese
         String chineseMessage = chineseVersionOf (message.toString());
+        stanza.trace("Chinese message: " + chineseMessage);
         
         // Modify the shared state
         messages.add(new LoggedMessage(chineseMessage, stanza.getFrom()));
     
         // Send the message to all participants in the chat (including the one who said it originally
+        stanza.trace("Send to all");
         sendToAll( stanza, chineseMessage);
+    }
+    
+    @Override
+    protected void onJoin(ID id) {
+        System.out.println("JOIN: "+id);
+    }
+    
+    @Override
+    protected void onLeave(ID id) {
+        System.out.println("LEAVE: "+id);
     }
     
     // Get a replay of old messages
@@ -125,7 +140,9 @@ public class ChineseRoom extends GroupDispatcher implements ComponentHandle {
     //    }
     public void handleGetLog(Stanza stanza) throws OXException {
         // Again, only members may retrieve the history
+        stanza.trace("handleGetLog");
         if (!isMember(stanza.getFrom()) && !stanza.getFrom().getProtocol().equals("call")) {
+            stanza.trace("Not a member");
             return; // Discard
         }
         // As an answer, we create a new message
