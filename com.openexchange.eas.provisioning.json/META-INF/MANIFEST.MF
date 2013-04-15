@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Mobility Configuration Servlet
 Bundle-SymbolicName: com.openexchange.eas.provisioning.json
-Bundle-Version: 7.2.0
+Bundle-Version: 7.4.0
 Bundle-Activator: com.openexchange.mobile.configuration.json.osgi.MobilityProvisioningActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

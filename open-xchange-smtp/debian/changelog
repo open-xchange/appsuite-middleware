@@ -1,3 +1,9 @@
+open-xchange-smtp (7.4.0-0) UNRELEASED; urgency=low
+
+  * prepare for 7.4.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Apr 2013 10:30:08 +0200
+
 open-xchange-smtp (7.2.0-4) UNRELEASED; urgency=low
 
   * Fourth candidate for 7.2.0 release

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange mDNS bundle
 Bundle-SymbolicName: com.openexchange.mdns
-Bundle-Version: 7.2.0
+Bundle-Version: 7.4.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-ClassPath: .,
  lib/jmdns-3.4.1.jar

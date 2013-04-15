@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Publishes Free/Busy information of internal users into a MS Exchange system using EWS
 Bundle-SymbolicName: com.openexchange.freebusy.publisher.ews
-Bundle-Version: 7.2.0
+Bundle-Version: 7.4.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.microsoft.schemas.exchange.services._2006.messages,
