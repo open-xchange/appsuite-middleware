@@ -171,67 +171,7 @@ final class LoggerTask extends AbstractTask<Object> {
                     queue.drainTo(loggables);
                     final boolean quit = loggables.remove(POISON);
                     for (final Loggable loggable : loggables) {
-                        final Throwable t = loggable.getThrowable();
-                        final Log log = loggable.getLog();
-                        final Object message = null == loggable.getMessage() ? "" : loggable.getMessage();
-                        switch (loggable.getLevel()) {
-                        case FATAL:
-                            if (log.isFatalEnabled()) {
-                                if (null == t) {
-                                    log.fatal(prependLocation(message, loggable, LogPropertyName.LogLevel.FATAL));
-                                } else {
-                                    log.fatal(prependLocation(message, loggable, LogPropertyName.LogLevel.FATAL), t);
-                                }
-                            }
-                            break;
-                        case ERROR:
-                            if (log.isErrorEnabled()) {
-                                if (null == t) {
-                                    log.error(prependLocation(message, loggable, LogPropertyName.LogLevel.ERROR));
-                                } else {
-                                    log.error(prependLocation(message, loggable, LogPropertyName.LogLevel.ERROR), t);
-                                }
-                            }
-                            break;
-                        case WARNING:
-                            if (log.isWarnEnabled()) {
-                                if (null == t) {
-                                    log.warn(prependLocation(message, loggable, LogPropertyName.LogLevel.WARNING));
-                                } else {
-                                    log.warn(prependLocation(message, loggable, LogPropertyName.LogLevel.WARNING), t);
-                                }
-                            }
-                            break;
-                        case INFO:
-                            if (log.isInfoEnabled()) {
-                                if (null == t) {
-                                    log.info(prependLocation(message, loggable, LogPropertyName.LogLevel.INFO));
-                                } else {
-                                    log.info(prependLocation(message, loggable, LogPropertyName.LogLevel.INFO), t);
-                                }
-                            }
-                            break;
-                        case DEBUG:
-                            if (log.isDebugEnabled()) {
-                                if (null == t) {
-                                    log.debug(prependLocation(message, loggable, LogPropertyName.LogLevel.DEBUG));
-                                } else {
-                                    log.debug(prependLocation(message, loggable, LogPropertyName.LogLevel.DEBUG), t);
-                                }
-                            }
-                            break;
-                        case TRACE:
-                            if (log.isTraceEnabled()) {
-                                if (null == t) {
-                                    log.trace(prependLocation(message, loggable, LogPropertyName.LogLevel.TRACE));
-                                } else {
-                                    log.trace(prependLocation(message, loggable, LogPropertyName.LogLevel.TRACE), t);
-                                }
-                            }
-                            break;
-                        default:
-                            // No-op
-                        }
+                        logIt(loggable);
                     }
                     loggables.clear();
                     if (quit) {
@@ -245,6 +185,70 @@ final class LoggerTask extends AbstractTask<Object> {
             // Log task failed...
         }
         return null;
+    }
+
+    private void logIt(final Loggable loggable) {
+        final Throwable t = loggable.getThrowable();
+        final Log log = loggable.getLog();
+        final Object message = null == loggable.getMessage() ? "" : loggable.getMessage();
+        switch (loggable.getLevel()) {
+        case FATAL:
+            if (log.isFatalEnabled()) {
+                if (null == t) {
+                    log.fatal(prependLocation(message, loggable, LogPropertyName.LogLevel.FATAL));
+                } else {
+                    log.fatal(prependLocation(message, loggable, LogPropertyName.LogLevel.FATAL), t);
+                }
+            }
+            break;
+        case ERROR:
+            if (log.isErrorEnabled()) {
+                if (null == t) {
+                    log.error(prependLocation(message, loggable, LogPropertyName.LogLevel.ERROR));
+                } else {
+                    log.error(prependLocation(message, loggable, LogPropertyName.LogLevel.ERROR), t);
+                }
+            }
+            break;
+        case WARNING:
+            if (log.isWarnEnabled()) {
+                if (null == t) {
+                    log.warn(prependLocation(message, loggable, LogPropertyName.LogLevel.WARNING));
+                } else {
+                    log.warn(prependLocation(message, loggable, LogPropertyName.LogLevel.WARNING), t);
+                }
+            }
+            break;
+        case INFO:
+            if (log.isInfoEnabled()) {
+                if (null == t) {
+                    log.info(prependLocation(message, loggable, LogPropertyName.LogLevel.INFO));
+                } else {
+                    log.info(prependLocation(message, loggable, LogPropertyName.LogLevel.INFO), t);
+                }
+            }
+            break;
+        case DEBUG:
+            if (log.isDebugEnabled()) {
+                if (null == t) {
+                    log.debug(prependLocation(message, loggable, LogPropertyName.LogLevel.DEBUG));
+                } else {
+                    log.debug(prependLocation(message, loggable, LogPropertyName.LogLevel.DEBUG), t);
+                }
+            }
+            break;
+        case TRACE:
+            if (log.isTraceEnabled()) {
+                if (null == t) {
+                    log.trace(prependLocation(message, loggable, LogPropertyName.LogLevel.TRACE));
+                } else {
+                    log.trace(prependLocation(message, loggable, LogPropertyName.LogLevel.TRACE), t);
+                }
+            }
+            break;
+        default:
+            // No-op
+        }
     }
 
     private static final Pattern CRLF = Pattern.compile("\r?\n");
