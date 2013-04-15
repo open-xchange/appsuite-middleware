@@ -109,7 +109,7 @@ public class LinkedInXMLParser {
         final NodeList positions = person.getElementsByTagName("positions");
         if (null != positions && positions.getLength() > 0) {
             final Element position = (Element) positions.item(0);
-            contact.setTitle(getTextValue(position, "title"));
+            contact.setPosition(getTextValue(position, "title"));
             final NodeList companies = position.getElementsByTagName("company");
             if (companies != null && companies.getLength() > 0) {
                 final Element company = (Element) companies.item(0);
