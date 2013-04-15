@@ -267,7 +267,6 @@ public class GroupDispatcher implements ComponentHandle {
         ids.remove(id);
         stamps.remove(id);
         if (ids.isEmpty()) {
-            onDispose(id);
             this.id.trigger("dispose", this);
         }
         onLeave(id);
