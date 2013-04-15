@@ -185,8 +185,8 @@ public final class HzTopic<E> implements Topic<E> {
         }
     }
 
-    private static final int CHUNK_SIZE = 10;
-    private static final int CHUNK_THRESHOLD = 2;
+    private static final int CHUNK_SIZE = HzDataUtility.CHUNK_SIZE;
+    private static final int CHUNK_THRESHOLD = HzDataUtility.CHUNK_THRESHOLD;
 
     /**
      * (Immediately) Publishes specified message to queue.

@@ -78,6 +78,18 @@ public final class HzDataUtility {
      */
     public static final int DELAY_FREQUENCY = 3000;
 
+    // ------------------------------------- CHUNK STUFF -------------------------------------------- //
+
+    /**
+     * The chunk size of a multiple message.
+     */
+    public static final int CHUNK_SIZE = 10;
+
+    /**
+     * The threshold when to switch to a multiple message.
+     */
+    public static final int CHUNK_THRESHOLD = 2;
+
     // ------------------------------------- MESSAGE DATA ------------------------------------------- //
 
     /**
