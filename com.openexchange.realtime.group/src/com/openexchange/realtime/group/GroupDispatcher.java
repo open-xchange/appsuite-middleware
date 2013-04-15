@@ -125,10 +125,20 @@ public class GroupDispatcher implements ComponentHandle {
      */
     @Override
     public void process(Stanza stanza) throws OXException {
-        if (handleGroupCommand(stanza)) {
-            return;
+        stanza.trace("Arrived in group dispatcher: " + id);
+        if (!handleGroupCommand(stanza)) {
+            processStanza(stanza);
         }
-        processStanza(stanza);
+        if (stanza.traceEnabled()) {
+            // Send analysis back
+            stanza.trace("------------- SENDING RECEIPT ----------------");
+            Stanza stanza2 = stanza.newInstance();
+            stanza2.setFrom(id);
+            stanza2.setTo(stanza.getFrom());
+            stanza2.setTracer(stanza.getTracer());
+            stanza2.addLogMessages(stanza.getLogEntries());
+            send(stanza2);
+        }
     }
 
     /**

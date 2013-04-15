@@ -107,6 +107,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
     @Override
     public Stanza sendSynchronously(Stanza stanza, long timeout, TimeUnit unit) throws OXException {
         String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
+        stanza.trace("Send synchronously. UUID: " + uuid);
         channel.setUp(uuid, stanza);
         send(stanza);
         return channel.waitFor(uuid, timeout, unit);
@@ -128,6 +129,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
         }
 
         if (recipients == null) {
+            stanza.trace("Parameter 'recipients' must not be null!");
             throw new IllegalArgumentException("Parameter 'recipients' must not be null!");
         }
 
@@ -163,6 +165,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
         if (localIds != null) {
             // Send via local message dispatcher to locally reachable receivers
             ensureSequence(stanza, localMember);
+            stanza.trace("Deliver locally");
             Map<ID, OXException> sent = Services.getService(LocalMessageDispatcher.class).send(stanza, localIds);
             exceptions.putAll(sent);
         }
@@ -172,6 +175,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
         for (Member receiver : targets.keySet()) {
             Set<ID> ids = targets.get(receiver);
             LOG.debug("Sending to '" + stanza.getTo() + "' @ " + receiver);
+            stanza.trace("Sending to '" + stanza.getTo() + "' @ " + receiver);
             ensureSequence(stanza, receiver);
             FutureTask<Map<ID, OXException>> task = new DistributedTask<Map<ID, OXException>>(new StanzaDispatcher(stanza, ids) , receiver);
             executorService.execute(task);
@@ -189,7 +193,9 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
                 throw ThreadPools.launderThrowable(e, OXException.class);
             }
         }
-
+        if (!exceptions.isEmpty()) {
+            stanza.trace(exceptions);
+        }
         return exceptions;
     }
     
@@ -221,6 +227,7 @@ public class GlobalMessageDispatcherImpl implements MessageDispatcher {
                 nextNumber = (otherNextNumber != null) ? otherNextNumber : nextNumber;
             }
             stanza.setSequenceNumber(nextNumber.incrementAndGet() - 1);
+            stanza.trace("Updating sequence number for " + receiver + ": " + stanza.getSequenceNumber());
         }
     }
 }

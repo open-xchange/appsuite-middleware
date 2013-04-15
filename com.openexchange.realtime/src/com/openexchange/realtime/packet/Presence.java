@@ -596,5 +596,6 @@ public class Presence extends Stanza {
             return false;
         return true;
     }
+
     
 }

@@ -79,9 +79,16 @@ public abstract class StanzaSequenceGate {
 
     private ConcurrentHashMap<ID, List<Stanza>> inboxes = new ConcurrentHashMap<ID, List<Stanza>>();
 
+    private String name;
+    
+    public StanzaSequenceGate(String name) {
+        this.name = name;
+    }
+    
     public void handle(Stanza stanza, ID recipient) throws OXException {
         /* Stanza didn't carry a valid Sequencenumber, just handle it without pestering the gate and return */ 
         if (stanza.getSequenceNumber() == -1) {
+            stanza.trace("Stanza Gate: (" + name + ") : No sequence number, so let it pass");
             handleInternal(stanza, recipient);
             return;
         }
@@ -113,13 +120,15 @@ public abstract class StanzaSequenceGate {
             if (stanza.getSequenceNumber() == 0) {
                 threshhold.set(0);
             }
+            stanza.trace("Stanza Gate ("+ name + ") : " + stanza.getSequencePrincipal()+":"+stanza.getSequenceNumber() + ":" + threshhold);
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Stanza Gate: " + stanza.getSequencePrincipal()+":"+stanza.getSequenceNumber() + ":" + threshhold);
+                LOG.debug("Stanza Gate ("+ name + ") : " + stanza.getSequencePrincipal()+":"+stanza.getSequenceNumber() + ":" + threshhold);
             }
             if (threshhold.compareAndSet(stanza.getSequenceNumber(), stanza.getSequenceNumber() + 1)) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Best case, Threshold: " + threshhold.get());
                 }
+                stanza.trace("Passing gate " + name);
                 handleInternal(stanza, recipient);
                 /* Drain Stanzas accumulated while waiting for the missing SequenceNumber */
                 List<Stanza> stanzas = inboxes.remove(stanza.getSequencePrincipal());
@@ -135,6 +144,7 @@ public abstract class StanzaSequenceGate {
 
                 });
                 for (Stanza s : stanzas) {
+                    s.trace("Passing gate " + name);
                     handle(s, s.getTo());
                 }
 
@@ -142,8 +152,10 @@ public abstract class StanzaSequenceGate {
             } else {
                 if (threshhold.get() > stanza.getSequenceNumber()) {
                     // Discard as this stanza already passed the gate once
+                    stanza.trace("Discarded as this sequence number has already successfully passed this gate: " + stanza.getSequenceNumber());
                     return;
                 }
+                stanza.trace("Not in sequence, enqueing");
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Stanzas not in sequence, Threshold: " + threshhold.get() + " SequenceNumber: " + stanza.getSequenceNumber());
                 }

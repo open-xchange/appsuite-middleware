@@ -123,20 +123,20 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * Give resources time to linger before finally cleaning up
      */
     AtmosphereResourceReaper atmosphereResourceReaper = new AtmosphereResourceReaper();
-    
+
     /*
      * Maintain a mapping of all IDs that use a certain session
      */
     private ConcurrentHashMap<String, Set<ID>> idsPerSession = new ConcurrentHashMap<String, Set<ID>>();
 
-    private StanzaSequenceGate gate = new StanzaSequenceGate() {
-        
+    private StanzaSequenceGate gate = new StanzaSequenceGate("RTAtmosphereHandler") {
+
         @Override
         public void handleInternal(Stanza stanza, ID recipient) throws OXException {
             handleIncoming(stanza);
         }
     };
-    
+
     /**
      * Initializes a new {@link RTAtmosphereHandler}.
      */
@@ -217,6 +217,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                             sessionValidator.getServerSession(),
                             json);
                         Stanza stanza = stanzaBuilder.build();
+                        if (stanza.traceEnabled()) {
+                            stanza.trace("received in atmosphere handler");
+                        }
                         gate.handle(stanza, stanza.getTo());
                     }
                 }
@@ -260,7 +263,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * 
      * @param concreteID The concrete ID of the connected client
      * @param atmosphereResource The resource of the connected client
-     * @param serverSession 
+     * @param serverSession
      * @throws OXException
      */
     private void trackConnectedUser(ID concreteID, AtmosphereResource atmosphereResource, final ServerSession session) throws OXException {
@@ -293,11 +296,14 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Added to concreteIDMap -> atmosphereResourceMap: " + concreteID + " -> " + atmosphereResource.uuid());
         }
-        
-        final Set<ID> idSet = com.openexchange.tools.Collections.opt(idsPerSession, session.getSessionID(), Collections.synchronizedSet(new HashSet<ID>()));
+
+        final Set<ID> idSet = com.openexchange.tools.Collections.opt(
+            idsPerSession,
+            session.getSessionID(),
+            Collections.synchronizedSet(new HashSet<ID>()));
         if (idSet.add(concreteID)) {
             concreteID.on("dispose", new IDEventHandler() {
-                
+
                 @Override
                 public void handle(String event, ID id, Object source, Map<String, Object> properties) {
                     idSet.remove(id);
@@ -380,16 +386,22 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         stanza.initializeDefaults();
 
         StanzaQueueService stanzaQueueService = atmosphereServiceRegistry.getService(StanzaQueueService.class);
+        
         if (!stanzaQueueService.enqueueStanza(stanza)) {
             // TODO: exception?
             LOG.error("Couldn't enqueue Stanza: " + stanza);
         } else {
             if (stanza.getSequenceNumber() != -1) {
                 // Return receipt
+                stanza.trace("Send return receipt for sequence number: " + stanza.getSequenceNumber());
                 Message msg = new Message();
                 msg.setTo(stanza.getFrom());
                 msg.setFrom(stanza.getFrom());
-                msg.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(stanza.getSequenceNumber(), "json", "atmosphere", "received").build()));
+                msg.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
+                    stanza.getSequenceNumber(),
+                    "json",
+                    "atmosphere",
+                    "received").build()));
                 send(msg, msg.getTo());
             }
         }
@@ -399,6 +411,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     public void send(Stanza stanza, ID recipient) throws OXException {
         try {
             recipient.lock("rt-atmosphere-outbox");
+            stanza.trace("Enqueing stanza in atmosphere outbox for ID: " + recipient );
             outboxFor(recipient).add(stanza);
             drainOutbox(recipient);
         } finally {
@@ -434,6 +447,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 JSONArray array = new JSONArray();
                 StanzaWriter stanzaWriter = new StanzaWriter();
                 for (Stanza stanza : outbox) {
+                    stanza.trace("Drained from outbox");
                     array.put(stanzaWriter.write(stanza));
                 }
                 if (LOG.isDebugEnabled()) {

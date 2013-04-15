@@ -164,5 +164,13 @@ public class DefaultResource implements Resource {
             return false;
         return true;
     }
+    
+    @Override
+    public String toString() {
+        if (routingInfo != null) {
+            return routingInfo.toString();
+        }
+        return super.toString();
+    }
 
 }
