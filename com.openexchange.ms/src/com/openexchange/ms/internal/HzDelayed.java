@@ -115,9 +115,6 @@ public final class HzDelayed<E> implements Delayed {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
         if (!(obj instanceof HzDelayed)) {
             return false;
         }
