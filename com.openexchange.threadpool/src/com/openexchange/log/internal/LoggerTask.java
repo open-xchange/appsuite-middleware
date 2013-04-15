@@ -154,40 +154,38 @@ final class LoggerTask extends AbstractTask<Object> {
     }
 
     @Override
-    public Object call() throws Exception {
-        try {
-            final List<Loggable> loggables = new ArrayList<Loggable>(16);
-            while (keepgoing.get()) {
+    public Object call() {
+        final List<Loggable> loggables = new ArrayList<Loggable>(16);
+        while (keepgoing.get()) {
+            try {
                 loggables.clear();
-                try {
-                    if (queue.isEmpty()) {
-                        /*
-                         * Blocking wait for at least 1 Loggable to arrive.
-                         */
-                        final Loggable loggable = queue.take();
-                        if (POISON == loggable) {
-                            return null;
-                        }
-                        loggables.add(loggable);
-                    }
-                    queue.drainTo(loggables);
-                    final boolean quit = loggables.remove(POISON);
-                    for (final Loggable loggable : loggables) {
-                        logIt(loggable);
-                    }
-                    if (quit) {
+                if (queue.isEmpty()) {
+                    /*
+                     * Blocking wait for at least 1 Loggable to arrive.
+                     */
+                    final Loggable loggable = queue.take();
+                    if (POISON == loggable) {
                         return null;
                     }
-                } catch (final RuntimeException e) {
-                    // Log task run failed...
+                    loggables.add(loggable);
+                }
+                queue.drainTo(loggables);
+                final boolean quit = loggables.remove(POISON);
+                for (final Loggable loggable : loggables) {
+                    logIt(loggable);
+                }
+                if (quit) {
+                    return null;
+                }
+            } catch (final Exception e) {
+                // Log task run failed...
+                try {
                     final org.apache.commons.logging.Log logger = LogFactory.getLog(LoggerTask.class);
                     logger.error("LoggerTask run failed", e);
+                } catch (final Exception x) {
+                    // Ignore
                 }
             }
-        } catch (final Exception e) {
-            // Log task failed...
-            final org.apache.commons.logging.Log logger = LogFactory.getLog(LoggerTask.class);
-            logger.error("LoggerTask run failed", e);
         }
         return null;
     }
