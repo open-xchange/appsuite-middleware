@@ -1,3 +1,7 @@
+* 2013-04-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25898: Added alias for odd charset name "iso-UTF-8"
+
 * 2013-04-12 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 25799: Don't pass field 570 down to the storage layer
