@@ -1,3 +1,7 @@
+* 2013-04-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25799: Don't pass field 570 down to the storage layer
+ 
 * 2013-04-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 25252: Fixed API call

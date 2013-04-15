@@ -230,10 +230,10 @@ public class ContactRequest {
     	 * check for special handling
     	 */
     	for (int i = 0; i < columnIDs.length; i++) {
-    	    if (Contact.IMAGE1_URL == columnIDs[i]) {
+    	    if (Contact.IMAGE1_URL == columnIDs[i] || Contact.IMAGE1 == columnIDs[i]) {
     	        columnIDs[i] = Contact.NUMBER_OF_IMAGES; // query NUMBER_OF_IMAGES to set image URL afterwards
     	    } else if (DataObject.LAST_MODIFIED_UTC == columnIDs[i]) {
-                columnIDs[i] = DataObject.LAST_MODIFIED; // query LAST_MODIFIED to set image URL afterwards
+                columnIDs[i] = DataObject.LAST_MODIFIED; // query LAST_MODIFIED to set LAST_MODIFIED_UTC afterwards
     	    }
     	}
     	/*
