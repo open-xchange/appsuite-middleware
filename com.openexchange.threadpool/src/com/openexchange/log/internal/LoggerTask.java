@@ -57,6 +57,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogPropertyName;
 import com.openexchange.log.Loggable;
@@ -157,6 +158,7 @@ final class LoggerTask extends AbstractTask<Object> {
         try {
             final List<Loggable> loggables = new ArrayList<Loggable>(16);
             while (keepgoing.get()) {
+                loggables.clear();
                 try {
                     if (queue.isEmpty()) {
                         /*
@@ -173,16 +175,19 @@ final class LoggerTask extends AbstractTask<Object> {
                     for (final Loggable loggable : loggables) {
                         logIt(loggable);
                     }
-                    loggables.clear();
                     if (quit) {
                         return null;
                     }
                 } catch (final RuntimeException e) {
                     // Log task run failed...
+                    final org.apache.commons.logging.Log logger = LogFactory.getLog(LoggerTask.class);
+                    logger.error("LoggerTask run failed", e);
                 }
             }
         } catch (final Exception e) {
             // Log task failed...
+            final org.apache.commons.logging.Log logger = LogFactory.getLog(LoggerTask.class);
+            logger.error("LoggerTask run failed", e);
         }
         return null;
     }

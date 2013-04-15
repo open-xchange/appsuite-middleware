@@ -1,3 +1,7 @@
+* 2013-04-15 - marc.arens@open-xchange.com
+
+ - Fix for bug 25863: Move ArrayList.clear() to beginning of runloop and add logging in case of error
+
 * 2013-04-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 25898: Added alias for odd charset name "iso-UTF-8"
