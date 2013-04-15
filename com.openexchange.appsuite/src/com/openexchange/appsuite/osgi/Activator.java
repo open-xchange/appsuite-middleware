@@ -81,7 +81,7 @@ public class Activator extends HousekeepingActivator {
         }
         File path = new File(property);
         File apps = new File(path, "apps");
-        File zoneinfo = new File(config.getProperty("com.openexchange.apps.zoneinfo", "/usr/share/zoneinfo/"));
+        File zoneinfo = new File(config.getProperty("com.openexchange.apps.tzdata", "/usr/share/zoneinfo/"));
         HttpService service = getService(HttpService.class);
         service.registerServlet(prefix + "apps/load", new AppsLoadServlet(apps, zoneinfo), null, null);
     }
