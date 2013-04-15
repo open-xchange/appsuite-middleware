@@ -1,3 +1,7 @@
+* 2013-04-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25903: Added null guard when reading settings
+
 * 2013-04-15 - martin.herfurth@open-xchange.com
 
  - Fix for bug 25895: Cropped files at 500kb fixed.
