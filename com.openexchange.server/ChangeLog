@@ -9,6 +9,7 @@
 * 2013-04-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 25898: Added alias for odd charset name "iso-UTF-8"
+ - Fix for bug 25903: Added null guard when reading settings
 
 * 2013-04-12 - tobias.friedrich@open-xchange.com
 
