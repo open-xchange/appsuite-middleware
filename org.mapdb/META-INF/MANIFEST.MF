@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: MapDB Bundle
+Bundle-SymbolicName: org.mapdb
+Bundle-Version: 0.9.1
+Bundle-Vendor: kotek.net
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: org.mapdb
