@@ -113,7 +113,8 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
         moduleId = requireNumber(requestData, AJAXServlet.PARAMETER_MODULE);
         id = requireNumber(requestData, AJAXServlet.PARAMETER_ID);
 
-        requestData.setFormat("file");
+        if(!requestData.getFormat().equals("preview_image"))
+            requestData.setFormat("file");
         return document(
             session, folderId,
             attachedId,
@@ -174,7 +175,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
             boolean isImage = false;
             {
                 final String lc = toLowerCase(sContentType);
-                if (lc.startsWith("image/")) {
+                if (lc.startsWith("image/")|| requestData.getFormat().equals("preview_image")) {
                     isImage = true;
                 } else if (lc.startsWith(APPLICATION_OCTET_STREAM)) {
                     final String fileName = attachment.getFilename();
