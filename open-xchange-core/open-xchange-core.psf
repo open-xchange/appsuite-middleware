@@ -117,6 +117,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,org.ho.jyaml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,org.javasimon"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,org.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,org.mapdb"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,org.xmlpull"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,oxscripts"/>
 </provider>
