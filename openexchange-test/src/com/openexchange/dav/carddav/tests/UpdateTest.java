@@ -52,7 +52,6 @@ package com.openexchange.dav.carddav.tests;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.carddav.CardDAVTest;
@@ -60,16 +59,16 @@ import com.openexchange.dav.carddav.VCardResource;
 import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link UpdateTest} - Tests contact updates via the CardDAV interface 
- * 
+ * {@link UpdateTest} - Tests contact updates via the CardDAV interface
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class UpdateTest extends CardDAVTest {
 
 	public UpdateTest(String name) {
 		super(name);
-	}	
-	
+	}
+
 	public void testUpdateSimpleOnClient() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
@@ -101,7 +100,7 @@ public class UpdateTest extends CardDAVTest {
          * verify contact on server
          */
         Contact contact = super.getContact(uid);
-        super.rememberForCleanUp(contact);        
+        super.rememberForCleanUp(contact);
         assertEquals("uid wrong", uid, contact.getUid());
         assertEquals("firstname wrong", firstName, contact.getGivenName());
         assertEquals("lastname wrong", lastName, contact.getSurName());
@@ -112,23 +111,23 @@ public class UpdateTest extends CardDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
         VCardResource card = assertContains(uid, addressData);
-        assertEquals("N wrong", firstName, card.getVCard().getName().getGivenName());
-        assertEquals("N wrong", lastName, card.getVCard().getName().getFamilyName());
-        assertEquals("FN wrong", firstName + " " + lastName, card.getVCard().getFormattedName().getFormattedName());
+        assertEquals("N wrong", firstName, card.getGivenName());
+        assertEquals("N wrong", lastName, card.getFamilyName());
+        assertEquals("FN wrong", firstName + " " + lastName, card.getFN());
         /*
          * update contact on client
          */
     	String updatedFirstName = "test2";
     	String udpatedLastName = "horst2";
-    	card.getVCard().getName().setFamilyName(udpatedLastName);
-    	card.getVCard().getName().setGivenName(updatedFirstName);
-    	card.getVCard().getFormattedName().setFormattedName(updatedFirstName + " " + udpatedLastName);
+    	card.getVCard().getN().setFamilyName(udpatedLastName);
+    	card.getVCard().getN().setGivenName(updatedFirstName);
+    	card.getVCard().getFN().setFormattedName(updatedFirstName + " " + udpatedLastName);
 		assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCardUpdate(card.getUID(), card.toString(), card.getETag()));
         /*
          * verify updated contact on server
          */
         final Contact updatedContact = super.getContact(uid);
-        super.rememberForCleanUp(updatedContact);        
+        super.rememberForCleanUp(updatedContact);
         assertEquals("uid wrong", uid, updatedContact.getUid());
         assertEquals("firstname wrong", updatedFirstName, updatedContact.getGivenName());
         assertEquals("lastname wrong", udpatedLastName, updatedContact.getSurName());
@@ -139,11 +138,11 @@ public class UpdateTest extends CardDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         addressData = super.addressbookMultiget(eTags.keySet());
         card = assertContains(uid, addressData);
-        assertEquals("N wrong", updatedFirstName, card.getVCard().getName().getGivenName());
-        assertEquals("N wrong", udpatedLastName, card.getVCard().getName().getFamilyName());
-        assertEquals("FN wrong", updatedFirstName + " " + udpatedLastName, card.getVCard().getFormattedName().getFormattedName());
+        assertEquals("N wrong", updatedFirstName, card.getGivenName());
+        assertEquals("N wrong", udpatedLastName, card.getFamilyName());
+        assertEquals("FN wrong", updatedFirstName + " " + udpatedLastName, card.getFN());
 	}
-	
+
 	public void testUpdateSimpleOnServer() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
@@ -154,7 +153,7 @@ public class UpdateTest extends CardDAVTest {
 		 */
     	String uid = randomUID();
     	String firstName = "test";
-    	String lastName = "waldemar";    	
+    	String lastName = "waldemar";
 		Contact contact = new Contact();
 		contact.setSurName(lastName);
 		contact.setGivenName(firstName);
@@ -168,9 +167,9 @@ public class UpdateTest extends CardDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
         VCardResource card = assertContains(uid, addressData);
-        assertEquals("N wrong", firstName, card.getVCard().getName().getGivenName());
-        assertEquals("N wrong", lastName, card.getVCard().getName().getFamilyName());
-        assertEquals("FN wrong", firstName + " " + lastName, card.getVCard().getFormattedName().getFormattedName());
+        assertEquals("N wrong", firstName, card.getGivenName());
+        assertEquals("N wrong", lastName, card.getFamilyName());
+        assertEquals("FN wrong", firstName + " " + lastName, card.getFN());
         /*
          * update contact on server
          */
@@ -187,11 +186,11 @@ public class UpdateTest extends CardDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         addressData = super.addressbookMultiget(eTags.keySet());
         card = assertContains(uid, addressData);
-        assertEquals("N wrong", updatedFirstName, card.getVCard().getName().getGivenName());
-        assertEquals("N wrong", udpatedLastName, card.getVCard().getName().getFamilyName());
-        assertEquals("FN wrong", updatedFirstName + " " + udpatedLastName, card.getVCard().getFormattedName().getFormattedName());
+        assertEquals("N wrong", updatedFirstName, card.getGivenName());
+        assertEquals("N wrong", udpatedLastName, card.getFamilyName());
+        assertEquals("FN wrong", updatedFirstName + " " + udpatedLastName, card.getFN());
 	}
-	
+
 	public void testUpdateWithQuotedETag() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
@@ -223,7 +222,7 @@ public class UpdateTest extends CardDAVTest {
          * verify contact on server
          */
         Contact contact = super.getContact(uid);
-        super.rememberForCleanUp(contact);        
+        super.rememberForCleanUp(contact);
         assertEquals("uid wrong", uid, contact.getUid());
         assertEquals("firstname wrong", firstName, contact.getGivenName());
         assertEquals("lastname wrong", lastName, contact.getSurName());
@@ -234,23 +233,23 @@ public class UpdateTest extends CardDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
         VCardResource card = assertContains(uid, addressData);
-        assertEquals("N wrong", firstName, card.getVCard().getName().getGivenName());
-        assertEquals("N wrong", lastName, card.getVCard().getName().getFamilyName());
-        assertEquals("FN wrong", firstName + " " + lastName, card.getVCard().getFormattedName().getFormattedName());
+        assertEquals("N wrong", firstName, card.getGivenName());
+        assertEquals("N wrong", lastName, card.getFamilyName());
+        assertEquals("FN wrong", firstName + " " + lastName, card.getFN());
         /*
          * update contact on client
          */
     	String updatedFirstName = "otto2";
     	String udpatedLastName = "horst2";
-    	card.getVCard().getName().setFamilyName(udpatedLastName);
-    	card.getVCard().getName().setGivenName(updatedFirstName);
-    	card.getVCard().getFormattedName().setFormattedName(updatedFirstName + " " + udpatedLastName);
+    	card.getVCard().getN().setFamilyName(udpatedLastName);
+    	card.getVCard().getN().setGivenName(updatedFirstName);
+    	card.getVCard().getFN().setFormattedName(updatedFirstName + " " + udpatedLastName);
 		assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCardUpdate(card.getUID(), card.toString(), "\"" + card.getETag() + "\""));
         /*
          * verify updated contact on server
          */
         final Contact updatedContact = super.getContact(uid);
-        super.rememberForCleanUp(updatedContact);        
+        super.rememberForCleanUp(updatedContact);
         assertEquals("uid wrong", uid, updatedContact.getUid());
         assertEquals("firstname wrong", updatedFirstName, updatedContact.getGivenName());
         assertEquals("lastname wrong", udpatedLastName, updatedContact.getSurName());
@@ -261,11 +260,11 @@ public class UpdateTest extends CardDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         addressData = super.addressbookMultiget(eTags.keySet());
         card = assertContains(uid, addressData);
-        assertEquals("N wrong", updatedFirstName, card.getVCard().getName().getGivenName());
-        assertEquals("N wrong", udpatedLastName, card.getVCard().getName().getFamilyName());
-        assertEquals("FN wrong", updatedFirstName + " " + udpatedLastName, card.getVCard().getFormattedName().getFormattedName());
+        assertEquals("N wrong", updatedFirstName, card.getGivenName());
+        assertEquals("N wrong", udpatedLastName, card.getFamilyName());
+        assertEquals("FN wrong", updatedFirstName + " " + udpatedLastName, card.getFN());
 	}
-	
+
 	public void testUpdateWithDifferentFilename() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
@@ -298,7 +297,7 @@ public class UpdateTest extends CardDAVTest {
          * verify contact on server
          */
         Contact contact = super.getContact(uid);
-        super.rememberForCleanUp(contact);        
+        super.rememberForCleanUp(contact);
         assertEquals("uid wrong", uid, contact.getUid());
         assertEquals("firstname wrong", firstName, contact.getGivenName());
         assertEquals("lastname wrong", lastName, contact.getSurName());
@@ -309,23 +308,23 @@ public class UpdateTest extends CardDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
         VCardResource card = assertContains(uid, addressData);
-        assertEquals("N wrong", firstName, card.getVCard().getName().getGivenName());
-        assertEquals("N wrong", lastName, card.getVCard().getName().getFamilyName());
-        assertEquals("FN wrong", firstName + " " + lastName, card.getVCard().getFormattedName().getFormattedName());
+        assertEquals("N wrong", firstName, card.getGivenName());
+        assertEquals("N wrong", lastName, card.getFamilyName());
+        assertEquals("FN wrong", firstName + " " + lastName, card.getFN());
         /*
          * update contact on client
          */
     	String updatedFirstName = "test2";
     	String udpatedLastName = "horst2";
-    	card.getVCard().getName().setFamilyName(udpatedLastName);
-    	card.getVCard().getName().setGivenName(updatedFirstName);
-    	card.getVCard().getFormattedName().setFormattedName(updatedFirstName + " " + udpatedLastName);
+    	card.getVCard().getN().setFamilyName(udpatedLastName);
+    	card.getVCard().getN().setGivenName(updatedFirstName);
+    	card.getVCard().getFN().setFormattedName(updatedFirstName + " " + udpatedLastName);
 		assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCardUpdate(filename, card.toString(), card.getETag()));
         /*
          * verify updated contact on server
          */
         final Contact updatedContact = super.getContact(uid);
-        super.rememberForCleanUp(updatedContact);        
+        super.rememberForCleanUp(updatedContact);
         assertEquals("uid wrong", uid, updatedContact.getUid());
         assertEquals("firstname wrong", updatedFirstName, updatedContact.getGivenName());
         assertEquals("lastname wrong", udpatedLastName, updatedContact.getSurName());
@@ -336,9 +335,9 @@ public class UpdateTest extends CardDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         addressData = super.addressbookMultiget(eTags.keySet());
         card = assertContains(uid, addressData);
-        assertEquals("N wrong", updatedFirstName, card.getVCard().getName().getGivenName());
-        assertEquals("N wrong", udpatedLastName, card.getVCard().getName().getFamilyName());
-        assertEquals("FN wrong", updatedFirstName + " " + udpatedLastName, card.getVCard().getFormattedName().getFormattedName());
+        assertEquals("N wrong", updatedFirstName, card.getGivenName());
+        assertEquals("N wrong", udpatedLastName, card.getFamilyName());
+        assertEquals("FN wrong", updatedFirstName + " " + udpatedLastName, card.getFN());
 	}
-	
+
 }

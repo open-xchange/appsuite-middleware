@@ -59,9 +59,9 @@ import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link Bug23046Test}
- * 
+ *
  * Exception for URL format when synchronizing
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug23046Test extends CardDAVTest {
@@ -69,7 +69,7 @@ public class Bug23046Test extends CardDAVTest {
 	public Bug23046Test(String name) {
 		super(name);
 	}
-	
+
 	public void testCreateWithURLWithoutAuthority() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
@@ -98,7 +98,7 @@ public class Bug23046Test extends CardDAVTest {
          * verify contact on server
          */
         Contact contact = super.getContact(uid);
-        super.rememberForCleanUp(contact);        
+        super.rememberForCleanUp(contact);
         assertEquals("uid wrong", uid, contact.getUid());
         assertEquals("url wrong", url, contact.getURL());
         /*
@@ -108,10 +108,10 @@ public class Bug23046Test extends CardDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         final List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
         final VCardResource card = assertContains(uid, addressData);
-        assertEquals("N wrong", firstName, card.getVCard().getName().getGivenName());
-        assertEquals("N wrong", lastName, card.getVCard().getName().getFamilyName());
-        assertEquals("FN wrong", firstName + " " + lastName, card.getVCard().getFormattedName().getFormattedName());
-        assertNotNull("URL wrong", card.getVCard().getURLs().next());
+        assertEquals("N wrong", firstName, card.getGivenName());
+        assertEquals("N wrong", lastName, card.getFamilyName());
+        assertEquals("FN wrong", firstName + " " + lastName, card.getFN());
+        assertNotNull("URL wrong", card.getVCard().getUrls().get(0));
 	}
-	
+
 }

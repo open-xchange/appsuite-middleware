@@ -60,27 +60,27 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
- * {@link DeleteTest} - Tests various delete operations via the CardDAV interface 
- * 
+ * {@link DeleteTest} - Tests various delete operations via the CardDAV interface
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class DeleteTest extends CardDAVTest {
 
 	public DeleteTest(String name) {
 		super(name);
-	}	
+	}
 
 	public void testDeleteContactOnServer() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
 		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());		
+		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
 		/*
 		 * create contact on server
 		 */
     	String uid = randomUID();
     	String firstName = "test";
-    	String lastName = "banane";    	
+    	String lastName = "banane";
 		Contact contact = new Contact();
 		contact.setSurName(lastName);
 		contact.setGivenName(firstName);
@@ -94,15 +94,15 @@ public class DeleteTest extends CardDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
         VCardResource contactCard = assertContains(uid, addressData);
-        assertEquals("N wrong", firstName, contactCard.getVCard().getName().getGivenName());
-        assertEquals("N wrong", lastName, contactCard.getVCard().getName().getFamilyName());
-        assertEquals("FN wrong", firstName + " " + lastName, contactCard.getVCard().getFormattedName().getFormattedName());
+        assertEquals("N wrong", firstName, contactCard.getGivenName());
+        assertEquals("N wrong", lastName, contactCard.getFamilyName());
+        assertEquals("FN wrong", firstName + " " + lastName, contactCard.getFN());
         /*
          * delete contact on server
          */
         super.delete(contact);
         /*
-         * verify deletion on client        
+         * verify deletion on client
          */
         SyncCollectionResponse syncCollectionResponse = super.syncCollection(syncToken);
         assertTrue("no resource deletions reported on sync collection", 0 < syncCollectionResponse.getHrefsStatusNotFound().size());
@@ -113,7 +113,7 @@ public class DeleteTest extends CardDAVTest {
 		/*
 		 * fetch sync token for later synchronization
 		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());		
+		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
 		/*
 		 * create folder and contact on server
 		 */
@@ -122,7 +122,7 @@ public class DeleteTest extends CardDAVTest {
 		super.rememberForCleanUp(folder);
     	String uid = randomUID();
     	String firstName = "test";
-    	String lastName = "otto";    	
+    	String lastName = "otto";
 		Contact contact = new Contact();
 		contact.setSurName(lastName);
 		contact.setGivenName(firstName);
@@ -136,15 +136,15 @@ public class DeleteTest extends CardDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
         VCardResource contactCard = assertContains(uid, addressData);
-        assertEquals("N wrong", firstName, contactCard.getVCard().getName().getGivenName());
-        assertEquals("N wrong", lastName, contactCard.getVCard().getName().getFamilyName());
-        assertEquals("FN wrong", firstName + " " + lastName, contactCard.getVCard().getFormattedName().getFormattedName());
+        assertEquals("N wrong", firstName, contactCard.getGivenName());
+        assertEquals("N wrong", lastName, contactCard.getFamilyName());
+        assertEquals("FN wrong", firstName + " " + lastName, contactCard.getFN());
         /*
          * delete contact on server
          */
         super.delete(contact);
         /*
-         * verify deletion on client        
+         * verify deletion on client
          */
         SyncCollectionResponse syncCollectionResponse = super.syncCollection(syncToken);
         assertTrue("no resource deletions reported on sync collection", 0 < syncCollectionResponse.getHrefsStatusNotFound().size());
@@ -154,13 +154,13 @@ public class DeleteTest extends CardDAVTest {
 		/*
 		 * fetch sync token for later synchronization
 		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());		
+		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
 		/*
 		 * create contact on server
 		 */
     	String uid = randomUID();
     	String firstName = "test";
-    	String lastName = "manfred";    	
+    	String lastName = "manfred";
 		Contact contact = new Contact();
 		contact.setSurName(lastName);
 		contact.setGivenName(firstName);
@@ -174,9 +174,9 @@ public class DeleteTest extends CardDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
         VCardResource card = assertContains(uid, addressData);
-        assertEquals("N wrong", firstName, card.getVCard().getName().getGivenName());
-        assertEquals("N wrong", lastName, card.getVCard().getName().getFamilyName());
-        assertEquals("FN wrong", firstName + " " + lastName, card.getVCard().getFormattedName().getFormattedName());
+        assertEquals("N wrong", firstName, card.getGivenName());
+        assertEquals("N wrong", lastName, card.getFamilyName());
+        assertEquals("FN wrong", firstName + " " + lastName, card.getFN());
         /*
          * delete contact on client
          */
@@ -186,7 +186,7 @@ public class DeleteTest extends CardDAVTest {
          */
         assertNull("contact not deleted on server", super.getContact(uid));
         /*
-         * verify deletion on client        
+         * verify deletion on client
          */
         SyncCollectionResponse syncCollectionResponse = super.syncCollection(syncToken);
         assertTrue("no resource deletions reported on sync collection", 0 < syncCollectionResponse.getHrefsStatusNotFound().size());

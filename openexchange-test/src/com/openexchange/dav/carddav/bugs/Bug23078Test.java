@@ -60,22 +60,22 @@ import com.openexchange.groupware.container.FolderObject;
 
 /**
  * {@link Bug23078Test}
- * 
+ *
  * Contacts don't get removed on OSX when removing their contacts folder
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug23078Test extends CardDAVTest {
 
 	public Bug23078Test(String name) {
 		super(name);
-	}	
-	
+	}
+
 	public void testReportItemsFromDeletedFolder() throws Exception {
 	    /*
          * fetch sync token for later synchronization
          */
-        SyncToken syncToken = new SyncToken(super.fetchSyncToken());        
+        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
         /*
          * create subfolder and contacts on server
          */
@@ -84,7 +84,7 @@ public class Bug23078Test extends CardDAVTest {
         super.rememberForCleanUp(subFolder);
         String uid = randomUID();
         String firstName = "doktor";
-        String lastName = "horst";       
+        String lastName = "horst";
         Contact contact = new Contact();
         contact.setSurName(lastName);
         contact.setGivenName(firstName);
@@ -98,9 +98,9 @@ public class Bug23078Test extends CardDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
         VCardResource contactCard = assertContains(uid, addressData);
-        assertEquals("N wrong", firstName, contactCard.getVCard().getName().getGivenName());
-        assertEquals("N wrong", lastName, contactCard.getVCard().getName().getFamilyName());
-        assertEquals("FN wrong", firstName + " " + lastName, contactCard.getVCard().getFormattedName().getFormattedName());
+        assertEquals("N wrong", firstName, contactCard.getGivenName());
+        assertEquals("N wrong", lastName, contactCard.getFamilyName());
+        assertEquals("FN wrong", firstName + " " + lastName, contactCard.getFN());
         /*
          * delete folder (and contents) on server
          */
@@ -119,5 +119,5 @@ public class Bug23078Test extends CardDAVTest {
         }
         assertTrue("contact not reported as deleted", found);
 	}
-	
+
 }
