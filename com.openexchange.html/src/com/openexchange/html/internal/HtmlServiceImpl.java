@@ -1062,6 +1062,7 @@ public final class HtmlServiceImpl implements HtmlService {
                     pos = m.start(2);
                     epos = m.end(2);
                 }
+                href = trimHref(href);
                 if (!href.startsWith("cid") && !href.startsWith("http")) {
                     if (href.charAt(0) != '/') {
                         href = '/' + href;
@@ -1074,6 +1075,16 @@ public final class HtmlServiceImpl implements HtmlService {
         mr.appendTail(sb);
         html = sb.toString();
         return html;
+    }
+
+    private static String trimHref(final String href) {
+        if (isEmpty(href)) {
+            return href;
+        }
+        if (href.startsWith("\"")) {
+            return href.endsWith("\"") ? href.substring(1, href.length() - 1) : href.substring(1);
+        }
+        return href;
     }
 
     @Override
