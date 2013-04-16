@@ -79,17 +79,45 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
             return null;
         }
         try {
-            final Integer contextId = (Integer) pojo.get("__contextId");
-            final Boolean remote = (Boolean) pojo.get("__remote");
-            final Integer folderId = (Integer) pojo.get("__folderId");
-            final Integer module = (Integer) pojo.get("__module");
-            final Integer hash = (Integer) pojo.get("__hash");
+            final int contextId;
+            {
+                final Integer i = (Integer) pojo.get("__contextId");
+                contextId = null == i ? 0 : i.intValue();
+            }
+            final boolean remote;
+            {
+                final Boolean b = (Boolean) pojo.get("__remote");
+                remote = null == b ? false : b.booleanValue();
+            }
+            final int folderId;
+            {
+                final Integer i = (Integer) pojo.get("__folderId");
+                folderId = null == i ? 0 : i.intValue();
+            }
+            final int module;
+            {
+                final Integer i = (Integer) pojo.get("__module");
+                module = null == i ? 0 : i.intValue();
+            }
+            final int hash;
+            {
+                final Integer i = (Integer) pojo.get("__hash");
+                hash = null == i ? 0 : i.intValue();
+            }
             final int[] users = (int[]) pojo.get("__users");
-            final Long creationDate = (Long) pojo.get("__creationDate");
-            final Long timestamp = (Long) pojo.get("__timestamp");
+            final long creationDate;
+            {
+                final Long l = (Long) pojo.get("__creationDate");
+                creationDate = null == l ? 0 : l.longValue();
+            }
+            final long timestamp;
+            {
+                final Long l = (Long) pojo.get("__timestamp");
+                timestamp = null == l ? 0 : l.longValue();
+            }
             final String hostname = (String) pojo.get("__hostname");
             final String topicName = (String) pojo.get("__topicName");
-            return new PushMsObject(folderId.intValue(), module.intValue(), contextId.intValue(), users, remote.booleanValue(), timestamp.longValue(), topicName, hostname, hash.intValue(), new Date(creationDate.longValue()));
+            return new PushMsObject(folderId, module, contextId, users, remote, timestamp, topicName, hostname, hash, new Date(creationDate));
         } catch (final NullPointerException npe) {
             LOG.warn("Missing required attribute.", npe);
             return null;
@@ -137,7 +165,7 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
 
     /**
      * Initializes a new {@link PushMsObject}.
-     * 
+     *
      * @param folderId The folder ID
      * @param module The module
      * @param contextId The context ID
