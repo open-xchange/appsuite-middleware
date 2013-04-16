@@ -86,7 +86,7 @@ public class PushMsListener implements MessageListener<Map<String, Object>> {
     @Override
     public void onMessage(final Message<Map<String, Object>> message) {
         final PushMsObject pushObj = PushMsObject.valueFor(message.getMessageObject());
-        if (!getHostname().equals(pushObj.getHostname())) {
+        if ((null != pushObj) && !getHostname().equals(pushObj.getHostname())) {
             final ServiceLookup registry = Services.getServiceLookup();
             final EventAdmin eventAdmin = registry.getService(EventAdmin.class);
             final EventFactoryService eventFactoryService = registry.getService(EventFactoryService.class);
