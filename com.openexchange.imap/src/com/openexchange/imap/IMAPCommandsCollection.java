@@ -119,7 +119,9 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.tools.Collections.SmartIntArray;
+import com.openexchange.version.Version;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.ByteArray;
@@ -2861,8 +2863,10 @@ public final class IMAPCommandsCollection {
         }));
     }
 
+    private static final String SUFFIX = "@" + Version.NAME;
+
     protected static BodyAndId getBODYSTRUCTUREByContentId(final String contentId, final BODYSTRUCTURE bodystructure, final String prefix, final int partCount, final boolean[] mpDetected) throws MessagingException {
-        if (contentId.equals(bodystructure.id)) {
+        if (MimeMessageUtility.equalsCID(contentId, bodystructure.id, SUFFIX)) {
             final String sequenceId = getSequenceId(prefix, partCount);
             return new BodyAndId(bodystructure, sequenceId);
         }
