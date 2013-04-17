@@ -260,6 +260,18 @@ public class Streams {
     }
 
     /**
+     * Creates a new non-thread-safe {@link ByteArrayInputStream} instance carrying specified bytes.
+     *
+     * @param bytes The bytes
+     * @param offset The offset in the buffer of the first byte to read
+     * @param length The maximum number of bytes to read from the buffer
+     * @return A new non-thread-safe {@link ByteArrayInputStream} instance
+     */
+    public static ByteArrayInputStream newByteArrayInputStream(final byte[] bytes, final int offset, final int length) {
+        return new UnsynchronizedByteArrayInputStream(bytes, offset, length);
+    }
+
+    /**
      * Safely closes specified {@link Closeable} instance.
      *
      * @param toClose The {@link Closeable} instance

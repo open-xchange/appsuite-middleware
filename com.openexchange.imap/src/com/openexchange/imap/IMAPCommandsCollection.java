@@ -58,11 +58,11 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TObjectLongMap;
-import gnu.trove.map.hash.TIntLongHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -96,6 +96,7 @@ import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.util.IMAPUpdateableData;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -2227,51 +2228,7 @@ public final class IMAPCommandsCollection {
         }));
     }
 
-    protected static String getResponseType(final Response response) {
-        if (response.isBAD()) {
-            return "BAD";
-        }
-        if (response.isBYE()) {
-            return "BYE";
-        }
-        if (response.isNO()) {
-            return "NO";
-        }
-        if (response.isOK()) {
-            return "OK";
-        }
-        return "UNKNOWN";
-    }
-
     private static final String TEMPL_FETCH_UID = "FETCH %s (UID)";
-
-    /**
-     * Detects the corresponding UIDs to message range according to specified starting/ending sequence numbers.
-     *
-     * @param imapFolder The IMAP folder
-     * @param startSeqNum The starting sequence number
-     * @param endSeqNum The ending sequence number
-     * @return The corresponding UIDs
-     * @throws MessagingException If an error occurs in underlying protocol
-     */
-    public static long[] seqNums2UID(final IMAPFolder imapFolder, final int startSeqNum, final int endSeqNum) throws MessagingException {
-        return seqNums2UID(
-            imapFolder,
-            new String[] { new StringAllocator(16).append(startSeqNum).append(':').append(endSeqNum).toString() },
-            endSeqNum - startSeqNum + 1);
-    }
-
-    /**
-     * Detects the corresponding UIDs to message range according to specified sequence numbers.
-     *
-     * @param imapFolder The IMAP folder
-     * @param seqNums The sequence numbers
-     * @return The corresponding UIDs
-     * @throws MessagingException If an error occurs in underlying protocol
-     */
-    public static long[] seqNums2UID(final IMAPFolder imapFolder, final int[] seqNums) throws MessagingException {
-        return seqNums2UID(imapFolder, IMAPNumArgSplitter.splitSeqNumArg(seqNums, true, 12), seqNums.length); // "FETCH <nums> (UID)"
-    }
 
     /**
      * Detects the corresponding UIDs to message range according to specified arguments
@@ -2595,74 +2552,6 @@ public final class IMAPCommandsCollection {
         }));
     }
 
-    /**
-     * Generates a map resolving corresponding sequence numbers to specified UIDs.
-     *
-     * @param imapFolder The IMAP folder
-     * @param uids The UIDs
-     * @return A map resolving corresponding sequence numbers to specified UIDs
-     * @throws MessagingException If a messaging error occurs
-     */
-    public static TIntLongHashMap seqNums2uidsMap(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
-        if (imapFolder.getMessageCount() <= 0) {
-            /*
-             * Empty folder...
-             */
-            return new TIntLongHashMap(0);
-        }
-        return (TIntLongHashMap) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-
-            @Override
-            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                final TIntLongHashMap seqNum2uid = new TIntLongHashMap(uids.length);
-                final String[] args = IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
-                for (int k = 0; k < args.length; k++) {
-                    /*-
-                     * Arguments:  sequence set
-                     * message data item names or macro
-                     *
-                     * Responses:  untagged responses: FETCH
-                     *
-                     * Result:     OK - fetch completed
-                     *             NO - fetch error: can't fetch that data
-                     *             BAD - command unknown or arguments invalid
-                     */
-                    final String command = String.format(TEMPL_UID_FETCH_UID, args[k]);
-                    final Response[] r = performCommand(p, command);
-                    final int len = r.length - 1;
-                    final Response response = r[len];
-                    r[len] = null;
-                    if (response.isOK()) {
-                        for (int j = 0; j < len; j++) {
-                            if (STR_FETCH.equals(((IMAPResponse) r[j]).getKey())) {
-                                final FetchResponse fr = (FetchResponse) r[j];
-                                final UID uidItem = getItemOf(UID.class, fr);
-                                if (uidItem != null) {
-                                    seqNum2uid.put(fr.getNumber(), uidItem.uid);
-                                }
-                                r[j] = null;
-                            }
-                        }
-                        notifyResponseHandlers(r, p);
-                    } else if (response.isBAD()) {
-                        throw new BadCommandException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
-                    } else if (response.isNO()) {
-                        throw new CommandFailedException(IMAPException.getFormattedMessage(
-                            IMAPException.Code.PROTOCOL_ERROR,
-                            command,
-                            ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
-                    } else {
-                        p.handleResult(response);
-                    }
-                }
-                return seqNum2uid;
-            }
-        }));
-    }
-
     private static final String COMMAND_FETCH_UID_FLAGS = "FETCH 1:* (UID FLAGS)";
 
     /**
@@ -2781,26 +2670,44 @@ public final class IMAPCommandsCollection {
     }
 
     /**
-     * Compares given object references being <code>null</code>.
+     * Gets the data of the part associated with given section identifier.
      *
-     * @param o1 The first object reference
-     * @param o2 The second object reference
-     * @return An {@link Integer} of <code>-1</code> if first reference is <code>null</code> but the second is not, an {@link Integer} of
-     *         <code>1</code> if first reference is not <code>null</code> but the second is, an {@link Integer} of <code>0</code> if both
-     *         references are <code>null</code>, or returns <code>null</code> if both references are not <code>null</code>
+     * @param imapFolder The IMAP folder
+     * @param uid The UID
+     * @param sectionId The section identifier
+     * @param peek Whether to peek or to fetch (\Seen flag set)
+     * @return The data or <code>null</code>
+     * @throws MessagingException If a messaging error occurs
      */
-    protected static Integer compareReferences(final Object o1, final Object o2) {
-        if ((o1 == null) && (o2 != null)) {
-            return Integer.valueOf(-1);
-        } else if ((o1 != null) && (o2 == null)) {
-            return Integer.valueOf(1);
-        } else if ((o1 == null) && (o2 == null)) {
-            return Integer.valueOf(0);
+    public static InputStream getPart(final IMAPFolder imapFolder, final long uid, final String sectionId, final boolean peek) throws MessagingException {
+        if (imapFolder.getMessageCount() <= 0) {
+            /*
+             * Empty folder...
+             */
+            return null;
         }
-        /*
-         * Both references are not null
-         */
-        return null;
+        return (InputStream) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            @Override
+            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                final ByteArray byteArray;
+                if (p.isREV1()) {
+                    final BODY b = peek ? p.peekBody(uid, sectionId) : p.fetchBody(uid, sectionId);
+                    if (null == b) {
+                        return null;
+                    }
+                    byteArray = b.getByteArray();
+                } else {
+                    final UID sequenceNumber = p.fetchSequenceNumber(uid);
+                    final RFC822DATA rd = p.fetchRFC822(sequenceNumber.seqnum, null);
+                    if (null == rd) {
+                        return null;
+                    }
+                    byteArray = rd.getByteArray();
+                }
+                return Streams.newByteArrayInputStream(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount());
+            }
+        }));
     }
 
     private static final String TEMPL_UID_EXPUNGE = "UID EXPUNGE %s";
