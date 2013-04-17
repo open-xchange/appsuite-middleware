@@ -7,9 +7,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.messaging.rss"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.messaging.twitter"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rss"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.snippet"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.snippet.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.snippet.mime"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.twitter"/>
 </provider>
 </psf>

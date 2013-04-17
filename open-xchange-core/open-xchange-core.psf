@@ -102,6 +102,9 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.server"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sessiond"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sessionstorage"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.snippet"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.snippet.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.snippet.mime"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sql"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.tasks.json"/>
