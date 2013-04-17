@@ -96,6 +96,7 @@ import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.StoreClosedException;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParameterList;
 import net.htmlparser.jericho.Renderer;
@@ -901,7 +902,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     return part;
                 }
             } else if (ct.startsWith("multipart/")) {
-                final Multipart m = (Multipart) part.getContent();
+                final Multipart m;
+                {
+                    final Object content = part.getContent();
+                    if (content instanceof Multipart) {
+                        m = (Multipart) content;
+                    } else {
+                        m = new MimeMultipart(part.getDataHandler().getDataSource());
+                    }
+                }
                 final int count = m.getCount();
                 for (int i = 0; i < count; i++) {
                     final Part p = examinePart(m.getBodyPart(i), contentId);
