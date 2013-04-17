@@ -1,3 +1,7 @@
+* 2013-04-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25957: Deny "vbscript" URLs
+
 * 2013-02-25 - marcus.klein@open-xchange.com
 
  - Fix for bug 23666: Nearly all information of a database is necessary if a new schema needs to be created for the new context.
