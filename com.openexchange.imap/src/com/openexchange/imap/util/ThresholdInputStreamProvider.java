@@ -69,7 +69,7 @@ import com.openexchange.mail.MailExceptionCode;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ThresholdInputStreamProvider implements Closeable {
+public final class ThresholdInputStreamProvider implements Closeable, InputStreamProvider {
 
     /** The default in-memory threshold of 500KB. */
     public static final int DEFAULT_IN_MEMORY_THRESHOLD = 500 * 1024; // 500KB
@@ -305,12 +305,10 @@ public final class ThresholdInputStreamProvider implements Closeable {
         }
     }
 
-    /**
-     * Gets the input stream.
-     *
-     * @return The input stream
-     * @throws OXException If input stream cannot be returned
+    /* (non-Javadoc)
+     * @see com.openexchange.imap.util.InputStreamProvider#getInputStream()
      */
+    @Override
     public InputStream getInputStream() throws OXException {
         final ByteArrayOutputStream buf = this.buf;
         if (null != buf) {
