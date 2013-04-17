@@ -1,4 +1,8 @@
-* 2013-03-04 - marcus.klein@open-xchange.com
+* 2013-04-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25957: Deny "vbscript" URLs
+
+* 2012-11-06 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 25168: Fix for bug 25168: Do not encode uiWebPath parameter provided in request. This breaks absolute Location headers
 

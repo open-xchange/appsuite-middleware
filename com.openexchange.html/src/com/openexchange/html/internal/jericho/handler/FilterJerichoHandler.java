@@ -147,6 +147,24 @@ public final class FilterJerichoHandler implements JerichoHandler {
         SINGLE_TAGS = Collections.unmodifiableSet(s);
     }
 
+    /**
+     * Gets the static HTML map.
+     *
+     * @return The HTML map
+     */
+    public static Map<String, Map<String, Set<String>>> getStaticHTMLMap() {
+        return staticHTMLMap;
+    }
+
+    /**
+     * Gets the static CSS map.
+     *
+     * @return The CSS map
+     */
+    public static Map<String, Set<String>> getStaticStyleMap() {
+        return staticStyleMap;
+    }
+
     /*-
      * Member stuff
      */
@@ -668,7 +686,11 @@ public final class FilterJerichoHandler implements JerichoHandler {
     }
 
     private static boolean isNonJavaScriptURL(final String val) {
-        return (null != val && !val.trim().toLowerCase(Locale.US).startsWith("javascript:"));
+        if (null == val) {
+            return false;
+        }
+        final String lc = toLowerCase(val.trim());
+        return !lc.startsWith("javascript:") && !lc.startsWith("vbscript:");
     }
 
     @Override
