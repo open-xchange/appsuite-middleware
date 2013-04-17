@@ -97,7 +97,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
 import com.openexchange.imap.command.MessageFetchIMAPCommand;
-import com.openexchange.imap.config.IMAPSessionProperties;
 import com.openexchange.imap.dataobjects.ExtendedIMAPFolder;
 import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.util.IMAPUpdateableData;
@@ -2744,10 +2743,16 @@ public final class IMAPCommandsCollection {
                 // Stream or byte-array based?
                 boolean streamed = false;
                 if (p.isREV1()) {
+                    /*-
+                     * Would always yield true since hard-coded: properties.put("mail.imap.fetchsize", "51200");
+                     *
                     final String property = IMAPSessionProperties.getDefaultSessionProperties().getProperty("mail.imap.fetchsize");
                     if (null != property && Integer.parseInt(property.trim()) > 0) {
                         streamed = true;
                     }
+                     *
+                     */
+                    streamed = true;
                 }
 
                 if (streamed) {
@@ -2866,10 +2871,16 @@ public final class IMAPCommandsCollection {
                 // Stream or byte-array based?
                 boolean streamed = false;
                 if (p.isREV1()) {
+                    /*-
+                     * Would always yield true since hard-coded: properties.put("mail.imap.fetchsize", "51200");
+                     *
                     final String property = IMAPSessionProperties.getDefaultSessionProperties().getProperty("mail.imap.fetchsize");
                     if (null != property && Integer.parseInt(property.trim()) > 0) {
                         streamed = true;
                     }
+                     *
+                     */
+                    streamed = true;
                 }
 
                 if (streamed) {
