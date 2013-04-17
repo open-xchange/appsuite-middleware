@@ -166,6 +166,7 @@ public class CapabilityServiceImpl implements CapabilityService {
                 capabilities.add(getCapability(cap));
             }
         }
+        // ------------- Combined capabilities/permissions ------------ //
         // Portal
         if (!session.isAnonymous()) {
             if (session.getUserConfiguration().hasPortal()) {
@@ -202,7 +203,7 @@ public class CapabilityServiceImpl implements CapabilityService {
                 capabilities.add(getCapability("pim"));
             }
         }
-        // Now the ones from database
+        // ---------------- Now the ones from database ------------------ //
         {
             final Set<String> set = new HashSet<String>();
             final Set<String> removees = new HashSet<String>();
