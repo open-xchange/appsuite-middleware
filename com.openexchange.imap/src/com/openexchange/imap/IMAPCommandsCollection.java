@@ -62,12 +62,14 @@ import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -77,6 +79,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
+import javax.activation.DataHandler;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
 import javax.mail.Folder;
@@ -87,6 +90,8 @@ import javax.mail.Quota;
 import javax.mail.Store;
 import javax.mail.StoreClosedException;
 import javax.mail.event.FolderEvent;
+import javax.mail.internet.MimeUtility;
+import javax.mail.internet.ParameterList;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
@@ -95,17 +100,24 @@ import com.openexchange.imap.dataobjects.ExtendedIMAPFolder;
 import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.util.IMAPUpdateableData;
 import com.openexchange.imap.util.ImapUtility;
+import com.openexchange.imap.util.ThresholdInputStreamProvider;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.ContentDisposition;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.dataobjects.MimeRawSource;
+import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.BadCommandException;
@@ -121,6 +133,7 @@ import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 import com.sun.mail.imap.protocol.BODY;
+import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 import com.sun.mail.imap.protocol.ENVELOPE;
 import com.sun.mail.imap.protocol.FLAGS;
 import com.sun.mail.imap.protocol.FetchResponse;
@@ -2679,17 +2692,48 @@ public final class IMAPCommandsCollection {
      * @return The data or <code>null</code>
      * @throws MessagingException If a messaging error occurs
      */
-    public static InputStream getPart(final IMAPFolder imapFolder, final long uid, final String sectionId, final boolean peek) throws MessagingException {
+    public static MailPart getPart(final IMAPFolder imapFolder, final long uid, final String sectionId, final boolean peek) throws MessagingException {
         if (imapFolder.getMessageCount() <= 0) {
             /*
              * Empty folder...
              */
             return null;
         }
-        return (InputStream) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+        return (MailPart) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                BODYSTRUCTURE bodystructure = null;
+                {
+                    final Response[] r = p.fetch(uid, "BODYSTRUCTURE");
+                    p.notifyResponseHandlers(r);
+
+                    final int mlen = r.length-1;
+                    final Response response = r[mlen];
+                    if (response.isOK()) {
+                        for (int i = 0; null == bodystructure && i < mlen; i++) {
+                            bodystructure = getItemOf(BODYSTRUCTURE.class, (FetchResponse) r[i], "BODYSTRUCTURE");
+                        }
+                    } else if (response.isNO()) {
+                        return null;
+                    } else {
+                        p.handleResult(response);
+                        return null;
+                    }
+                }
+
+                BodyAndId bid = null;
+                try {
+                    bid = getBODYSTRUCTURE(sectionId, bodystructure, null, 1, new boolean[1]);
+                } catch (final MessagingException e) {
+                    final Exception cause = e.getNextException();
+                    throw new ProtocolException(e.getMessage(), null == cause ? e : cause);
+                }
+                if (null == bid) {
+                    return null;
+                }
+                bodystructure = null;
+
                 final ByteArray byteArray;
                 if (p.isREV1()) {
                     final BODY b = peek ? p.peekBody(uid, sectionId) : p.fetchBody(uid, sectionId);
@@ -2705,9 +2749,225 @@ public final class IMAPCommandsCollection {
                     }
                     byteArray = rd.getByteArray();
                 }
-                return Streams.newByteArrayInputStream(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount());
+
+                return toMailPart(byteArray, bid.bodystructure);
             }
         }));
+    }
+
+    protected static BodyAndId getBODYSTRUCTURE(final String sectionId, final BODYSTRUCTURE bodystructure, final String prefix, final int partCount, final boolean[] mpDetected) throws MessagingException {
+        final String sequenceId = getSequenceId(prefix, partCount);
+        if (sectionId.equals(sequenceId)) {
+            return new BodyAndId(bodystructure, sequenceId);
+        }
+        /*
+         * A multipart or message/rfc822
+         */
+        final BODYSTRUCTURE[] bodies = bodystructure.bodies;
+        if (null != bodies) {
+            final int count = bodies.length;
+            if (count > 0) {
+                final String mpId = null == prefix && !mpDetected[0] ? "" : getSequenceId(prefix, partCount);
+                final String mpPrefix;
+                if (mpDetected[0]) {
+                    mpPrefix = mpId;
+                } else {
+                    mpPrefix = prefix;
+                    mpDetected[0] = true;
+                }
+                for (int i = 0; i < count; i++) {
+                    final BodyAndId bid = getBODYSTRUCTURE(sectionId, bodies[i], mpPrefix, i + 1, mpDetected);
+                    if (bid != null) {
+                        return bid;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets the data of the part associated with given section identifier.
+     *
+     * @param imapFolder The IMAP folder
+     * @param uid The UID
+     * @param contentId The Content-ID value
+     * @param peek Whether to peek or to fetch (\Seen flag set)
+     * @return The data or <code>null</code>
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static MailPart getPartByContentId(final IMAPFolder imapFolder, final long uid, final String contentId, final boolean peek) throws MessagingException {
+        if (imapFolder.getMessageCount() <= 0) {
+            /*
+             * Empty folder...
+             */
+            return null;
+        }
+        return (MailPart) (imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            @Override
+            public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                BODYSTRUCTURE bodystructure = null;
+                {
+                    final Response[] r = p.fetch(uid, "BODYSTRUCTURE");
+                    p.notifyResponseHandlers(r);
+
+                    final int mlen = r.length-1;
+                    final Response response = r[mlen];
+                    if (response.isOK()) {
+                        for (int i = 0; null == bodystructure && i < mlen; i++) {
+                            bodystructure = getItemOf(BODYSTRUCTURE.class, (FetchResponse) r[i], "BODYSTRUCTURE");
+                        }
+                    } else if (response.isNO()) {
+                        return null;
+                    } else {
+                        p.handleResult(response);
+                        return null;
+                    }
+                }
+
+                BodyAndId bid = null;
+                try {
+                    bid = getBODYSTRUCTUREByContentId(contentId, bodystructure, null, 1, new boolean[1]);
+                } catch (final MessagingException e) {
+                    final Exception cause = e.getNextException();
+                    throw new ProtocolException(e.getMessage(), null == cause ? e : cause);
+                }
+                if (null == bid) {
+                    return null;
+                }
+                bodystructure = null;
+
+                final ByteArray byteArray;
+                if (p.isREV1()) {
+                    final BODY b = peek ? p.peekBody(uid, bid.sectionId) : p.fetchBody(uid, bid.sectionId);
+                    if (null == b) {
+                        return null;
+                    }
+                    byteArray = b.getByteArray();
+                } else {
+                    final UID sequenceNumber = p.fetchSequenceNumber(uid);
+                    final RFC822DATA rd = p.fetchRFC822(sequenceNumber.seqnum, null);
+                    if (null == rd) {
+                        return null;
+                    }
+                    byteArray = rd.getByteArray();
+                }
+
+                return toMailPart(byteArray, bid.bodystructure);
+            }
+
+        }));
+    }
+
+    protected static BodyAndId getBODYSTRUCTUREByContentId(final String contentId, final BODYSTRUCTURE bodystructure, final String prefix, final int partCount, final boolean[] mpDetected) throws MessagingException {
+        if (contentId.equals(bodystructure.id)) {
+            final String sequenceId = getSequenceId(prefix, partCount);
+            return new BodyAndId(bodystructure, sequenceId);
+        }
+        /*
+         * A multipart or message/rfc822
+         */
+        final BODYSTRUCTURE[] bodies = bodystructure.bodies;
+        if (null != bodies) {
+            final int count = bodies.length;
+            if (count > 0) {
+                final String mpId = null == prefix && !mpDetected[0] ? "" : getSequenceId(prefix, partCount);
+                final String mpPrefix;
+                if (mpDetected[0]) {
+                    mpPrefix = mpId;
+                } else {
+                    mpPrefix = prefix;
+                    mpDetected[0] = true;
+                }
+                for (int i = 0; i < count; i++) {
+                    final BodyAndId bid = getBODYSTRUCTUREByContentId(contentId, bodies[i], mpPrefix, i + 1, mpDetected);
+                    if (bid != null) {
+                        return bid;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    protected static MailPart toMailPart(final ByteArray byteArray, final BODYSTRUCTURE bodystructure) throws ProtocolException {
+        try {
+            final MailPart ret = new MailPartImpl(byteArray, bodystructure);
+            {
+                final String disposition = bodystructure.disposition;
+                final ParameterList dParams = bodystructure.dParams;
+                if (null != disposition || null != dParams) {
+                    final ContentDisposition contentDisposition = new ContentDisposition();
+                    if (null != disposition) {
+                        contentDisposition.setDisposition(disposition);
+                    }
+                    if (null != dParams) {
+                        for (final Enumeration<?> names = dParams.getNames(); names.hasMoreElements();) {
+                            final String name = names.nextElement().toString();
+                            contentDisposition.setParameter(name, dParams.get(name));
+                        }
+                    }
+                    ret.setContentDisposition(contentDisposition);
+                }
+            }
+            {
+                final ParameterList cParams = bodystructure.cParams;
+                if (null != bodystructure.type || null != bodystructure.subtype || null != cParams) {
+                    final ContentType contentType = new ContentType();
+                    if (null != bodystructure.type) {
+                        contentType.setPrimaryType(bodystructure.type);
+                    }
+                    if (null != bodystructure.subtype) {
+                        contentType.setSubType(bodystructure.subtype);
+                    }
+                    if (null != cParams) {
+                        for (final Enumeration<?> names = cParams.getNames(); names.hasMoreElements();) {
+                            final String name = names.nextElement().toString();
+                            contentType.setParameter(name, cParams.get(name));
+                        }
+                    }
+                    ret.setContentType(contentType);
+                }
+            }
+            {
+                final String encoding = bodystructure.encoding;
+                if (null != encoding) {
+                    ret.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, encoding);
+                }
+            }
+            {
+                final String fileName = bodystructure.attachment;
+                if (null != fileName) {
+                    ret.getContentDisposition().setFilenameParameter(fileName);
+                }
+            }
+            {
+                final int size = bodystructure.size;
+                if (size > 0) {
+                    ret.setSize(size);
+                }
+            }
+            return ret;
+        } catch (final IOException e) {
+            throw new ProtocolException(e.getMessage(), e);
+        } catch (final RuntimeException e) {
+            throw new ProtocolException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Composes part's sequence ID from given prefix and part's count
+     *
+     * @param prefix The prefix (may be <code>null</code>)
+     * @param partCount The part count
+     * @return The sequence ID
+     */
+    private static String getSequenceId(final String prefix, final int partCount) {
+        if (prefix == null) {
+            return String.valueOf(partCount);
+        }
+        return new com.openexchange.java.StringAllocator(prefix).append('.').append(partCount).toString();
     }
 
     private static final String TEMPL_UID_EXPUNGE = "UID EXPUNGE %s";
@@ -3189,6 +3449,90 @@ public final class IMAPCommandsCollection {
         final long time = System.currentTimeMillis() - start;
         mailInterfaceMonitor.addUseTime(time);
         return responses;
+    }
+
+    static final class BodyAndId {
+
+        final BODYSTRUCTURE bodystructure;
+        final String sectionId;
+
+        BodyAndId(final BODYSTRUCTURE bodystructure, final String sectionId) {
+            super();
+            this.bodystructure = bodystructure;
+            this.sectionId = sectionId;
+        }
+
+    }
+
+    static final class MailPartImpl extends MailPart implements MimeRawSource {
+
+        private static final long serialVersionUID = 6469037985453175593L;
+
+        private final ThresholdInputStreamProvider inProvider;
+        private final BODYSTRUCTURE body;
+
+        MailPartImpl(final ByteArray byteArray, final BODYSTRUCTURE body) throws IOException {
+            super();
+            inProvider = new ThresholdInputStreamProvider();
+            inProvider.write(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount());
+            this.body = body;
+        }
+
+        @Override
+        public void prepareForCaching() {
+            // Nope
+        }
+
+        @Override
+        public void loadContent() throws OXException {
+            // Nope
+        }
+
+        @Override
+        public InputStream getInputStream() throws OXException {
+            final String encoding = getFirstHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC);
+            if (null != encoding) {
+                try {
+                    return MimeUtility.decode(inProvider.getInputStream(), encoding);
+                } catch (final MessagingException e) {
+                    throw MimeMailException.handleMessagingException(e);
+                }
+            }
+            return inProvider.getInputStream();
+        }
+
+        @Override
+        public InputStream getRawInputStream() throws OXException {
+            return inProvider.getInputStream();
+        }
+
+        @Override
+        public MailPart getEnclosedMailPart(final int index) throws OXException {
+            return null;
+        }
+
+        @Override
+        public int getEnclosedCount() throws OXException {
+            return MailPart.NO_ENCLOSED_PARTS;
+        }
+
+        @Override
+        public DataHandler getDataHandler() throws OXException {
+            try {
+                return new DataHandler(new MessageDataSource(getInputStream(), body.type + "/" + body.subtype));
+            } catch (final IOException e) {
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            }
+        }
+
+        @Override
+        public Object getContent() throws OXException {
+            try {
+                return getDataHandler().getContent();
+            } catch (final IOException e) {
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            }
+        }
     }
 
 }

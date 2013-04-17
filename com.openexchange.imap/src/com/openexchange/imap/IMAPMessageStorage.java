@@ -168,8 +168,11 @@ import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mail.parser.MailMessageParser;
+import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.text.TextFinder;
 import com.openexchange.mail.utils.MailMessageComparator;
@@ -585,7 +588,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     imapAccess.addWarnings(Collections.singletonList(e));
                     mails[j] = null;
                 } catch (final Exception e) {
-                    OXException oxe = MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+                    final OXException oxe = MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
                     oxe.setCategory(Category.CATEGORY_WARNING);
                     imapAccess.addWarnings(Collections.singletonList(oxe));
                     mails[j] = null;
@@ -823,6 +826,60 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
+    public MailPart getAttachmentLong(final String fullName, final long msgUID, final String sequenceId) throws OXException {
+        if (msgUID < 0 || null == sequenceId) {
+            return null;
+        }
+        try {
+            try {
+                imapFolder = setAndOpenFolder(imapFolder, fullName, READ_ONLY);
+            } catch (final MessagingException e) {
+                final Exception next = e.getNextException();
+                if (!(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                    throw MimeMailException.handleMessagingException(e, imapConfig, session, imapFolder);
+                }
+                throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
+            }
+            if (0 >= imapFolder.getMessageCount()) {
+                return null;
+            }
+            /*
+             * Try by Content-ID
+             */
+            try {
+                final MailPart part = IMAPCommandsCollection.getPart(imapFolder, msgUID, sequenceId, false);
+                if (null != part) {
+                    return part;
+                }
+            } catch (final Exception e) {
+                // Ignore
+            }
+            /*
+             * Regular look-up
+             */
+            final IMAPMessage msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
+            if (null == msg) {
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(msgUID), fullName);
+            }
+            msg.setUID(msgUID);
+            final MimeMailMessage mail = new MimeMailMessage(msg);
+            final MailPartHandler handler = new MailPartHandler(sequenceId);
+            new MailMessageParser().parseMailMessage(mail, handler);
+            if (handler.getMailPart() == null) {
+                throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(sequenceId, Long.valueOf(msgUID), fullName);
+            }
+            return handler.getMailPart();
+        } catch (final MessagingException e) {
+            if (ImapUtility.isInvalidMessageset(e)) {
+                return null;
+            }
+            throw MimeMailException.handleMessagingException(e, imapConfig, session, imapFolder);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
+    @Override
     public MailPart getImageAttachmentLong(final String fullName, final long msgUID, final String contentId) throws OXException {
         if (msgUID < 0 || null == contentId) {
             return null;
@@ -840,6 +897,20 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (0 >= imapFolder.getMessageCount()) {
                 return null;
             }
+            /*
+             * Try by Content-ID
+             */
+            try {
+                final MailPart partByContentId = IMAPCommandsCollection.getPartByContentId(imapFolder, msgUID, contentId, false);
+                if (null != partByContentId) {
+                    return partByContentId;
+                }
+            } catch (final Exception e) {
+                // Ignore
+            }
+            /*
+             * Regular look-up
+             */
             final IMAPMessage msg = (IMAPMessage) imapFolder.getMessageByUID(msgUID);
             if (null == msg) {
                 throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(msgUID), fullName);
