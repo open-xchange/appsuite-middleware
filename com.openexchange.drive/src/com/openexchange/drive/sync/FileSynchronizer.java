@@ -95,7 +95,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
             /*
              * deleted on server, delete file on client, too
              */
-            result.addActionForClient(new RemoveFileAction(clientVersion));
+            result.addActionForClient(new RemoveFileAction(clientVersion, path));
             break;
         case MODIFIED:
         case NEW:
@@ -116,7 +116,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
             /*
              * deleted on client, delete on server, too, let client remove it's metadata
              */
-            result.addActionForServer(new RemoveFileAction(serverVersion));
+            result.addActionForServer(new RemoveFileAction(serverVersion, path));
             result.addActionForClient(new AcknowledgeFileAction(originalVersion, null, path));
             break;
         case MODIFIED:

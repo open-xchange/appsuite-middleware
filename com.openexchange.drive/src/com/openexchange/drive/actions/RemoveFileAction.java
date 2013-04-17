@@ -66,9 +66,11 @@ public class RemoveFileAction extends AbstractAction<FileVersion> {
      * Initializes a new {@link RemoveFileAction}.
      *
      * @param file The file to delete
+     * @param path The path to the parent directory
      */
-    public RemoveFileAction(FileVersion file) {
+    public RemoveFileAction(FileVersion file, String path) {
         super(file, null);
+        parameters.put("path", path);
     }
 
     @Override

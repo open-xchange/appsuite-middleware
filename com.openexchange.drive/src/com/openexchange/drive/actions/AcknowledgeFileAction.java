@@ -73,6 +73,7 @@ public class AcknowledgeFileAction extends AbstractAction<FileVersion> {
      *
      * @param file The original/previous file
      * @param newFile The new file
+     * @param path The path to the parent directory
      */
     public AcknowledgeFileAction(FileVersion file, FileVersion newFile, String path) {
         super(file, newFile);
