@@ -326,8 +326,12 @@ public class AJPv13TaskWatcher {
                     logBuilder.append("msec -> Processing time: ").append(now - task.getProcessingStartTime());
                     logBuilder.append("msec");
                     logBuilder.append(lineSeparator);
-                    appendStackTrace(t, lineSeparator, logBuilder);
-                    log.info(logBuilder);
+                    if (Log.appendTraceToMessage()) {
+                        appendStackTrace(t, lineSeparator, logBuilder);
+                        log.info(logBuilder);
+                    } else {
+                        log.info(logBuilder, t);
+                    }
                 } else {
                     final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(2048);
                     final Map<String, String> sorted = new TreeMap<String, String>();
@@ -348,7 +352,7 @@ public class AJPv13TaskWatcher {
                     logBuilder.append("msec");
                     if (Log.appendTraceToMessage()) {
                         logBuilder.append(lineSeparator);
-                        appendStackTrace(t, lineSeparator, logBuilder);                        
+                        appendStackTrace(t, lineSeparator, logBuilder);
                         log.info(logBuilder);
                     } else {
                         log.info(logBuilder, t);

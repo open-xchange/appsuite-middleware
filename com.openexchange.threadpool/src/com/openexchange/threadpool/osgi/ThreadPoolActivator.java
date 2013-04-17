@@ -125,6 +125,8 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             final int queueCapacity = confService.getIntProperty("com.openexchange.log.queueCapacity", -1);
             final boolean appendTraceToMessage = confService.getBoolProperty("com.openexchange.log.appendTraceToMessage", false);
             Log.setAppendTraceToMessage(appendTraceToMessage);
+            final int maxMessageLength = confService.getIntProperty("com.openexchange.log.maxMessageLength", -1);
+            Log.setMaxMessageLength(maxMessageLength);
             final LogServiceImpl logService = new LogServiceImpl(threadPool, queueCapacity);
             this.logService = logService;
             Log.set(logService);
