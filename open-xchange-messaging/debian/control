@@ -8,7 +8,7 @@ Homepage: http://www.open-xchange.com
 
 Package: open-xchange-messaging
 Architecture: all
-Depends: ${misc:Depends}, open-xchange-oauth (>= @OXVERSION@), open-xchange-xerces
+Depends: ${misc:Depends}, open-xchange-oauth (>= @OXVERSION@), open-xchange-xerces, open-xchange-core (>= 7.2.1-0)
 Replaces: open-xchange-messaging-facebook, open-xchange-messaging-generic, open-xchange-messaging-json, open-xchange-messaging-rss, open-xchange-messaging-twitter, open-xchange-twitter
 Conflicts: open-xchange-messaging-facebook, open-xchange-messaging-generic, open-xchange-messaging-json, open-xchange-messaging-rss, open-xchange-messaging-twitter, open-xchange-twitter
 Description: The Open Xchange backend messaging extension
