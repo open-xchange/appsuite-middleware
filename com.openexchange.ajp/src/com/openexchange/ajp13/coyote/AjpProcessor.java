@@ -970,6 +970,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     finish();
                 } catch (final IOException e) {
                     // Lost connection
+                    if (debug) {
+                        LOG.debug("Lost connection to web server.", e);
+                    }
                     error = true;
                 } catch (final Throwable t) {
                     ExceptionUtils.handleThrowable(t);
@@ -1975,7 +1978,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         {
             sink.reset();
             for (final Entry<String, List<String>> entry : response.getHeaderEntrySet()) {
-                for (String value : entry.getValue()) {
+                for (final String value : entry.getValue()) {
                     writeHeaderSafe(entry.getKey(), value, sink);
                     numHeaders++;
                 }
