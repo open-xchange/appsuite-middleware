@@ -1,6 +1,7 @@
 * 2013-04-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 25939: Moved snippet bundles to core package
+ - Fix for bug 25942: Check object's type before casting to Multipart
 
 * 2013-04-16 - thorben.betten@open-xchange.com
 
