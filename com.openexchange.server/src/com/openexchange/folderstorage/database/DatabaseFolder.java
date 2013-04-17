@@ -73,7 +73,7 @@ import com.openexchange.server.impl.OCLPermission;
  */
 public class DatabaseFolder extends AbstractFolder {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(DatabaseFolder.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(DatabaseFolder.class);
 
     private static final long serialVersionUID = -4035221612481906228L;
 
