@@ -172,6 +172,36 @@ public class CapabilityServiceImpl implements CapabilityService {
                 capabilities.add(getCapability("portal"));
             }
         }
+        // Free-Busy
+        if (!session.isAnonymous()) {
+            if (session.getUserConfiguration().hasFreeBusy()) {
+                capabilities.add(getCapability("freebusy"));
+            }
+        }
+        // Conflict-Handling
+        if (!session.isAnonymous()) {
+            if (session.getUserConfiguration().hasConflictHandling()) {
+                capabilities.add(getCapability("conflict_handling"));
+            }
+        }
+        // Participants-Dialog
+        if (!session.isAnonymous()) {
+            if (session.getUserConfiguration().hasParticipantsDialog()) {
+                capabilities.add(getCapability("participants_dialog"));
+            }
+        }
+        // Group-ware
+        if (!session.isAnonymous()) {
+            if (session.getUserConfiguration().hasGroupware()) {
+                capabilities.add(getCapability("groupware"));
+            }
+        }
+        // PIM
+        if (!session.isAnonymous()) {
+            if (session.getUserConfiguration().hasPIM()) {
+                capabilities.add(getCapability("pim"));
+            }
+        }
         // Now the ones from database
         {
             final Set<String> set = new HashSet<String>();
