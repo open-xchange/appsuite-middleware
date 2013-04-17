@@ -84,8 +84,10 @@ public class DriveConstants {
     /**
      * The used fields when retrieving file metadata
      */
-    public static final List<Field> FILE_FIELDS = Arrays.asList(
-        new Field[] { Field.ID, Field.FOLDER_ID, Field.LAST_MODIFIED, Field.TITLE, Field.FILENAME, Field.FILE_MD5SUM, Field.FILE_SIZE, Field.VERSION });
+    public static final List<Field> FILE_FIELDS = Arrays.asList(new Field[] {
+        Field.ID, Field.FOLDER_ID, Field.LAST_MODIFIED, Field.TITLE, Field.FILENAME, Field.FILE_MD5SUM, Field.FILE_SIZE, Field.VERSION,
+        Field.SEQUENCE_NUMBER
+    });
 
     /**
      * The MD5 checksum for an empty input

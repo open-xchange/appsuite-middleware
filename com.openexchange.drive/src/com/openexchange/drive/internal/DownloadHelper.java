@@ -49,15 +49,12 @@
 
 package com.openexchange.drive.internal;
 
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
-import com.openexchange.drive.checksum.ChecksumProvider;
-import com.openexchange.drive.storage.filter.FileFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -94,12 +91,23 @@ public class DownloadHelper {
      */
     public IFileHolder perform(String path, FileVersion fileVersion, long offset, long length) throws OXException {
         /*
-         * get the file
+         * get the file's input stream
          */
-        File file = find(path, fileVersion);
+        File file = session.getStorage().findFileByNameAndChecksum(path, fileVersion.getName(), fileVersion.getChecksum());
         if (null == file) {
+            throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(fileVersion.getName(), fileVersion.getChecksum(), path);
+        }
+        InputStream inputStream = getInputStream(file, offset, length);
+        /*
+         * wrap stream into file holder and return
+         */
+        if (null == inputStream) {
             throw DriveExceptionCodes.FILE_NOT_FOUND.create(fileVersion.getName(), path);
         }
+        return new FileHolder(inputStream, -1, "application/octet-stream", fileVersion.getName());
+    }
+
+    private InputStream getInputStream(File file, long offset, long length) throws OXException {
         FileStorageFileAccess fileAccess = session.getStorage().getFileAccess();
         InputStream inputStream = null;
         if (0 < offset || 0 < length) {
@@ -107,10 +115,12 @@ public class DownloadHelper {
              * offset or maximum length is requested, get partial stream
              */
             if (FileStorageRandomFileAccess.class.isInstance(fileAccess)) {
-                inputStream = ((FileStorageRandomFileAccess)fileAccess).getDocument(file.getFolderId(), file.getId(), file.getVersion(), offset, length);
+                inputStream = ((FileStorageRandomFileAccess)fileAccess).getDocument(
+                    file.getFolderId(), file.getId(), file.getVersion(), offset, length);
             } else {
                 try {
-                    inputStream = new PartialInputStream(fileAccess.getDocument(file.getFolderId(), file.getId(), file.getVersion()), offset, length);
+                    inputStream = new PartialInputStream(
+                        fileAccess.getDocument(file.getFolderId(), file.getId(), file.getVersion()), offset, length);
                 } catch (IOException e) {
                     throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
                 }
@@ -121,73 +131,7 @@ public class DownloadHelper {
              */
             inputStream = fileAccess.getDocument(file.getFolderId(), file.getId(), file.getVersion());
         }
-        /*
-         * wrap stream into file holder and return
-         */
-        if (null == inputStream) {
-            throw DriveExceptionCodes.FILE_NOT_FOUND.create(fileVersion.getName(), path);
-        }
-        return new FileHolder(inputStream, -1, "application/octet-stream", fileVersion.getName());
-    }
-
-    private static class PartialInputStream extends FilterInputStream {
-
-        private final long length;
-        private long bytesRead;
-
-        public PartialInputStream(InputStream in, long offset, long length) throws IOException {
-            super(in);
-            this.length = length;
-            this.skip(offset);
-            this.bytesRead = 0;
-        }
-
-        @Override
-        public int read() throws IOException {
-            if (-1 != length && bytesRead >= length) {
-                return -1;
-            }
-            int read = super.read();
-            if (-1 != read) {
-                bytesRead++;
-            }
-            return read;
-        }
-
-        @Override
-        public int read(byte[] b) throws IOException {
-            return this.read(b, 0, b.length);
-        }
-
-        @Override
-        public int read(byte[] b, int off, int len) throws IOException {
-            if (-1 != length && bytesRead >= length) {
-                return -1;
-            }
-            int toRead = -1 == length ? len : Math.min((int)(length - bytesRead), len);
-            int read = super.read(b, off, toRead);
-            if (-1 != read) {
-                this.bytesRead += read;
-            }
-            return read;
-        }
-
-    }
-    private File find(String path, final FileVersion fileVersion) throws OXException {
-        File file = session.getStorage().findFile(path, new FileFilter() {
-
-            @Override
-            public boolean accept(File file) throws OXException {
-                if (null != file) {
-                    return fileVersion.getChecksum().equals(ChecksumProvider.getMD5(session, file));
-                }
-                return false;
-            }
-        });
-        if (null == file) {
-            throw DriveExceptionCodes.FILE_NOT_FOUND.create(fileVersion.getName(), path);
-        }
-        return file;
+        return inputStream;
     }
 
 }

@@ -50,9 +50,9 @@
 package com.openexchange.drive.checksum;
 
 import java.util.Collection;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ChecksumStore}
@@ -64,31 +64,44 @@ public interface ChecksumStore {
     /**
      * Adds a checksum for the supplied file.
      *
-     * @param session The current session
      * @param file The file
      * @param checksum The checksum
      */
-    void addChecksum(ServerSession session, File file, String checksum) throws OXException;
+    void addChecksum(File file, String checksum) throws OXException;
 
     /**
      * Gets the checksum for the supplied file.
      *
-     * @param session The current session
      * @param file The file
      * @return The checksum, or <code>null</code> if unknown
      * @throws OXException
      */
-    String getChecksum(ServerSession session, File file) throws OXException;
+    String getChecksum(File file) throws OXException;
 
     /**
      * Removes stored the checksum for all versions of the supplied file.
      *
-     * @param session The current session
      * @param file The file
      */
-    void removeChecksums(ServerSession session, File file) throws OXException;
+    void removeChecksums(File file) throws OXException;
 
-    Collection<File> getFiles(ServerSession session, String checksum) throws OXException;
+    /**
+     * Gets all files matching the supplied checksum.
+     *
+     * @param checksum The checksum
+     * @return The matching files
+     * @throws OXException
+     */
+    Collection<File> getFiles(String checksum) throws OXException;
+
+    /**
+     * Gets all files and the corresponding checksums in the supplied folder.
+     *
+     * @param folderID The folder ID
+     * @return The matching files, each mapped to it's stored checksum
+     * @throws OXException
+     */
+    Map<File, String> getFilesInFolder(String folderID) throws OXException;
 
 }
 

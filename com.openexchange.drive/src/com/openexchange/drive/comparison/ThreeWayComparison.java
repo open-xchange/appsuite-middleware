@@ -147,4 +147,9 @@ public class ThreeWayComparison<T extends DriveVersion> {
         this.serverVersion = serverVersion;
     }
 
+    @Override
+    public String toString() {
+        return "ThreeWayComparison [clientVersion=" + clientVersion + ", originalVersion=" + originalVersion + ", serverVersion=" + serverVersion + "]";
+    }
+
 }

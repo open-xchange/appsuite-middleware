@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,62 +47,80 @@
  *
  */
 
-package com.openexchange.drive.osgi;
+package com.openexchange.drive.checksum.sim;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.drive.DriveService;
-import com.openexchange.drive.checksum.rdb.DriveCreateTableService;
-import com.openexchange.drive.checksum.rdb.DriveCreateTableTask;
-import com.openexchange.drive.checksum.rdb.DriveDeleteListener;
-import com.openexchange.drive.internal.DriveServiceImpl;
-import com.openexchange.drive.internal.DriveServiceLookup;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import com.openexchange.drive.checksum.ChecksumStore;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
 
 /**
- * {@link DriveActivator}
+ * {@link SimChecksumStore}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DriveActivator extends HousekeepingActivator {
+public class SimChecksumStore implements ChecksumStore {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveActivator.class);
+    private final Map<File, String> checksums;
+    private final Map<String, Set<File>> files;
 
     /**
-     * Initializes a new {@link DriveActivator}.
+     * Initializes a new {@link SimChecksumStore}.
      */
-    public DriveActivator() {
+    public SimChecksumStore() {
         super();
+        this.checksums = new HashMap<File, String>();
+        this.files = new HashMap<String, Set<File>>();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { IDBasedFileAccessFactory.class, ManagedFileManagement.class, FileStorageServiceRegistry.class,
-            DatabaseService.class };
+    public String getChecksum(File file) {
+        return checksums.get(file);
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
-        DriveServiceLookup.set(this);
-        registerService(DriveService.class, new DriveServiceImpl());
-        registerService(CreateTableService.class, new DriveCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveCreateTableTask()));
-        registerService(DeleteListener.class, new DriveDeleteListener());
+    public Collection<File> getFiles(String checksum) {
+        return files.get(checksum);
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: " + context.getBundle().getSymbolicName());
-        DriveServiceLookup.set(null);
-        super.stopBundle();
+    public synchronized void addChecksum(File file, String checksum) {
+        checksums.put(file, checksum);
+        Set<File> ids = files.get(checksum);
+        if (null == ids) {
+            ids = new HashSet<File>();
+            files.put(checksum, ids);
+        }
+        ids.add(file);
+    }
+
+    @Override
+    public synchronized void removeChecksums(File file) {
+        String checksum = checksums.remove(file);
+        Set<File> ids = files.get(checksum);
+        if (null != ids) {
+            ids.remove(checksum);
+        }
+        if (0 == ids.size()) {
+            files.remove(ids);
+        }
+    }
+
+    @Override
+    public Map<File, String> getFilesInFolder(String folderID) throws OXException {
+        Map<File, String> files = new HashMap<File, String>();
+        for (Entry<File, String> entry : this.checksums.entrySet()) {
+            if (folderID.equals(entry.getKey().getFolderId())) {
+                files.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return files;
     }
 
 }
+

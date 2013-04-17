@@ -50,7 +50,8 @@
 package com.openexchange.drive.internal;
 
 import com.openexchange.drive.checksum.ChecksumStore;
-import com.openexchange.drive.checksum.SimChecksumStore;
+import com.openexchange.drive.checksum.rdb.OnDemandCalculatingChecksumStore;
+import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
@@ -70,6 +71,9 @@ public class DriveSession {
 
     /**
      * Initializes a new {@link DriveSession}.
+     *
+     * @param session The underlying server session
+     * @param rootFolderID The root folder ID
      */
     public DriveSession(ServerSession session, String rootFolderID) {
         super();
@@ -77,10 +81,20 @@ public class DriveSession {
         this.rootFolderID = rootFolderID;
     }
 
+    /**
+     * Gets the underlying server session
+     *
+     * @return The server session
+     */
     public ServerSession getServerSession() {
         return session;
     }
 
+    /**
+     * Gets the drive storage
+     *
+     * @return The drive storage
+     */
     public DriveStorage getStorage() {
         if (null == storage) {
             storage = new DriveStorage(this, rootFolderID);
@@ -92,14 +106,13 @@ public class DriveSession {
      * Gets the checksumStore
      *
      * @return The checksumStore
-     * @throws OXException
-     * @throws NumberFormatException
      */
     public ChecksumStore getChecksumStore() throws OXException {
         if (null == checksumStore) {
-            checksumStore = new SimChecksumStore();
-//            checksumStore = new RdbChecksumStore(
-//                getStorage().getAccountAccess().getService().getId(), getStorage().getAccountAccess().getAccountId());
+            RdbChecksumStore delegate = new RdbChecksumStore(getServerSession(),
+                getStorage().getAccountAccess().getService().getId(), getStorage().getAccountAccess().getAccountId());
+            checksumStore = new OnDemandCalculatingChecksumStore(delegate, getStorage());
+//            checksumStore = new SimChecksumStore();
         }
         return checksumStore;
     }

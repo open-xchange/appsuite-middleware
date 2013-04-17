@@ -47,47 +47,50 @@
  *
  */
 
-package com.openexchange.drive.checksum;
+package com.openexchange.drive.checksum.rdb;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
+import java.util.Collection;
+import java.util.Map;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.drive.DriveExceptionCodes;
-import com.openexchange.drive.internal.DriveSession;
-import com.openexchange.drive.storage.DriveConstants;
+import com.openexchange.drive.checksum.ChecksumStore;
+import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 
 /**
- * {@link ChecksumProvider}
+ * {@link OnDemandCalculatingChecksumStore}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ChecksumProvider {
+public class OnDemandCalculatingChecksumStore implements ChecksumStore {
 
-    public static String getMD5(DriveSession session, List<File> files) throws OXException {
-        if (null == files || 0 == files.size()) {
-            return DriveConstants.EMPTY_MD5;
-        }
-        try {
-            MD md5 = new MD("MD5");
-            for (File file : files) {
-                if (null != file.getFileName()) {
-                    md5.update(file.getFileName().getBytes(Charsets.UTF_8));
-                    md5.update(getMD5(session, file).getBytes(Charsets.UTF_8));
-                }
-            }
-            return md5.getFormattedValue();
-        } catch (NoSuchAlgorithmException e) {
-            throw new OXException(e);
-        }
+    private final ChecksumStore delegate;
+    private final DriveStorage storage;
+
+    /**
+     * Initializes a new {@link OnDemandCalculatingChecksumStore}.
+     *
+     * @param delegate The underlying checksum store
+     * @param storage The drive storage
+     */
+    public OnDemandCalculatingChecksumStore(ChecksumStore delegate, DriveStorage storage) {
+        super();
+        this.delegate = delegate;
+        this.storage = storage;
     }
 
-    public static String getMD5(DriveSession session, File file) throws OXException {
+    @Override
+    public void addChecksum(File file, String checksum) throws OXException {
+        delegate.addChecksum(file, checksum);
+    }
+
+    @Override
+    public String getChecksum(File file) throws OXException {
         /*
          * try available metadata first
          */
@@ -96,33 +99,50 @@ public class ChecksumProvider {
             /*
              * query checksum store
              */
-            md5sum = session.getChecksumStore().getChecksum(session.getServerSession(), file);
+            md5sum = delegate.getChecksum(file);
             if (null == md5sum) {
                 /*
                  * calculate and store checksum
                  */
-                InputStream document = null;
-                try {
-                    document = session.getStorage().getDocument(file);
-                    md5sum = getMD5(document);
-                } catch (IOException e) {
-                    throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
-                } finally {
-                    Streams.close(document);
-                }
+                md5sum = calculateMD5(file);
                 if (null != md5sum) {
-                    session.getChecksumStore().addChecksum(session.getServerSession(), file, md5sum);
+                    delegate.addChecksum(file, md5sum);
+                } else {
+                    throw DriveExceptionCodes.IO_ERROR.create("Unable to calculate md5 checksum for file " + file);
                 }
             }
         }
         return md5sum;
     }
 
-    public static void invalidateChecksums(DriveSession session, File file) throws OXException {
-        session.getChecksumStore().removeChecksums(session.getServerSession(), file);
+    @Override
+    public void removeChecksums(File file) throws OXException {
+        delegate.removeChecksums(file);
     }
 
-    public static String getMD5(InputStream inputStream) throws IOException {
+    @Override
+    public Collection<File> getFiles(String checksum) throws OXException {
+        return delegate.getFiles(checksum);
+    }
+
+    @Override
+    public Map<File, String> getFilesInFolder(String folderID) throws OXException {
+        return delegate.getFilesInFolder(folderID);
+    }
+
+    private String calculateMD5(File file) throws OXException {
+        InputStream document = null;
+        try {
+            document =  storage.getDocument(file);
+            return calculateMD5(document);
+        } catch (IOException e) {
+            throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(document);
+        }
+    }
+
+    private static String calculateMD5(InputStream inputStream) throws IOException {
         byte[] buffer = new byte[1024];
         try {
             MD md5 = new MD("MD5");

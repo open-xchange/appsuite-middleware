@@ -60,10 +60,8 @@ import java.util.Arrays;
 import java.util.List;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
-import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.storage.DriveConstants;
-import com.openexchange.drive.storage.filter.FileFilter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -106,24 +104,29 @@ public class UploadHelper {
                 /*
                  * overwrite original file if still valid and unchanged
                  */
-                File currentFile = session.getStorage().findFileByName(path, originalVersion.getName());
-                if (null != currentFile && originalVersion.getChecksum().equals(ChecksumProvider.getMD5(session, currentFile))) {
+                File originalFile = session.getStorage().findFileByNameAndChecksum(path, originalVersion.getName(), originalVersion.getChecksum());
+                if (null != originalFile) {
                     //TODO: overwrite directly during update
 //                    session.getStorage().updateFile(uploadFile, newVersion.getName(), path);
                     //workaround:
                     {
                         //TODO: transactional
-                        saveDocumentAndChecksum(currentFile, session.getStorage().getDocument(uploadFile),
+                        saveDocumentAndChecksum(originalFile, session.getStorage().getDocument(uploadFile),
                             uploadFile.getSequenceNumber(), DriveConstants.FILE_FIELDS, false);
                         session.getStorage().deleteFile(uploadFile, true);
                     }
-                    return new ServerFileVersion(currentFile, newVersion.getChecksum());//TODO: validate checksum
+                    return new ServerFileVersion(originalFile, newVersion.getChecksum());//TODO: validate checksum
+                } else {
+
+
                 }
             }
             /*
              * file transfer finished, save document & rename file to target file name
              */
             File updatedFile = session.getStorage().updateFile(uploadFile, newVersion.getName(), path);
+            session.getChecksumStore().removeChecksums(uploadFile);
+            session.getChecksumStore().addChecksum(updatedFile, newVersion.getChecksum());
             return new ServerFileVersion(updatedFile, newVersion.getChecksum());//TODO: validate checksum
         } else {
             /*
@@ -151,17 +154,12 @@ public class UploadHelper {
         List<Field> modifiedFields = Arrays.asList(File.Field.FILE_SIZE);
         if (0 == offset) {
             /*
-             * write initial file data, preferably not incrementing the version number
+             * write initial file data, setting the first version number
              */
-            if (FileStorageIgnorableVersionFileAccess.class.isInstance(fileAccess)) {
-                ((FileStorageIgnorableVersionFileAccess)fileAccess).saveDocument(
-                    uploadFile, uploadStream, uploadFile.getSequenceNumber(), modifiedFields, false);
-            } else {
-                fileAccess.saveDocument(uploadFile, uploadStream, uploadFile.getSequenceNumber());
-            }
+            saveDocumentAndChecksum(uploadFile, uploadStream, uploadFile.getSequenceNumber(), modifiedFields, false);
         } else if (FileStorageRandomFileAccess.class.isInstance(fileAccess)) {
             /*
-             * append file data via random file access
+             * append file data via random file access, preferably not incrementing the version number
              */
             ((FileStorageRandomFileAccess)fileAccess).saveDocument(
                 uploadFile, uploadStream, uploadFile.getSequenceNumber(), modifiedFields, false, offset);
@@ -207,7 +205,7 @@ public class UploadHelper {
             }
             byte[] digest = digestStream.getMessageDigest().digest();
             String checksum = jonelo.jacksum.util.Service.format(digest);
-            session.getChecksumStore().addChecksum(session.getServerSession(), file, checksum);
+            session.getChecksumStore().addChecksum(file, checksum);
         } catch (NoSuchAlgorithmException e) {
             throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
@@ -226,14 +224,7 @@ public class UploadHelper {
          */
         final String uploadFileName = getUploadFilename(checksum);
         session.getStorage().getFolder(TEMP_PATH, true); // to ensure the temp folder exists
-        File uploadFile = session.getStorage().findFile(TEMP_PATH, new FileFilter() {
-
-            @Override
-            public boolean accept(File file) throws OXException {
-                return null != file && (uploadFileName.equals(file.getFileName()) ||
-                    null == file.getFileName() && uploadFileName.equals(file.getTitle()));
-            }
-        });
+        File uploadFile = session.getStorage().findFileByName(TEMP_PATH, uploadFileName);
         if (null == uploadFile && createIfAbsent) {
             /*
              * create new upload file

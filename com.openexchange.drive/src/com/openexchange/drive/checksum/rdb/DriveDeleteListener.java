@@ -47,62 +47,46 @@
  *
  */
 
-package com.openexchange.drive.osgi;
+package com.openexchange.drive.checksum.rdb;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.drive.DriveService;
-import com.openexchange.drive.checksum.rdb.DriveCreateTableService;
-import com.openexchange.drive.checksum.rdb.DriveCreateTableTask;
-import com.openexchange.drive.checksum.rdb.DriveDeleteListener;
-import com.openexchange.drive.internal.DriveServiceImpl;
-import com.openexchange.drive.internal.DriveServiceLookup;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.filemanagement.ManagedFileManagement;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link DriveActivator}
+ * {@link DriveDeleteListener}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DriveActivator extends HousekeepingActivator {
-
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveActivator.class);
-
-    /**
-     * Initializes a new {@link DriveActivator}.
-     */
-    public DriveActivator() {
-        super();
-    }
+public class DriveDeleteListener implements DeleteListener {
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { IDBasedFileAccessFactory.class, ManagedFileManagement.class, FileStorageServiceRegistry.class,
-            DatabaseService.class };
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
+        if (DeleteEvent.TYPE_CONTEXT == event.getType()) {
+            try {
+                deleteChecksums(writeCon, event.getContext().getContextId());
+            } catch (final SQLException e) {
+                throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } catch (final Exception e) {
+                throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
+            }
+        }
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
-        DriveServiceLookup.set(this);
-        registerService(DriveService.class, new DriveServiceImpl());
-        registerService(CreateTableService.class, new DriveCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveCreateTableTask()));
-        registerService(DeleteListener.class, new DriveDeleteListener());
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: " + context.getBundle().getSymbolicName());
-        DriveServiceLookup.set(null);
-        super.stopBundle();
+    private static int deleteChecksums(Connection connection, int cid) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement("DELETE FROM checksums WHERE cid=?;");
+            stmt.setInt(1, cid);
+            return SQL.logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
     }
 
 }

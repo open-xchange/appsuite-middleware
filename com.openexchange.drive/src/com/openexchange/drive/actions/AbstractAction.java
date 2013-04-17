@@ -94,7 +94,7 @@ public abstract class AbstractAction<T extends DriveVersion> implements DriveAct
 
     @Override
     public String toString() {
-        return "Action " + getAction() + " [version=" + version + ", newVersion=" + newVersion + ", parameters=" + parameters + "]";
+        return getAction() + " [version=" + version + ", newVersion=" + newVersion + ", parameters=" + parameters + "]";
     }
 
 }

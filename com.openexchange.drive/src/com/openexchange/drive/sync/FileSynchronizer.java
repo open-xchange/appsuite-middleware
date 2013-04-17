@@ -117,7 +117,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
              * deleted on client, delete on server, too, let client remove it's metadata
              */
             result.addActionForServer(new RemoveFileAction(serverVersion));
-            result.addActionForClient(new AcknowledgeFileAction(originalVersion, null));
+            result.addActionForClient(new AcknowledgeFileAction(originalVersion, null, path));
             break;
         case MODIFIED:
         case NEW:
@@ -137,7 +137,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
             /*
              * both deleted, just let client remove it's metadata
              */
-            result.addActionForClient(new AcknowledgeFileAction(originalVersion, null));
+            result.addActionForClient(new AcknowledgeFileAction(originalVersion, null, path));
         } else if ((Change.NEW == clientChange || Change.MODIFIED == clientChange) &&
             (Change.NEW == serverChange || Change.MODIFIED == serverChange)) {
             /*
@@ -147,7 +147,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 /*
                  * same file version, let client update it's metadata
                  */
-                result.addActionForClient(new AcknowledgeFileAction(originalVersion, clientVersion));
+                result.addActionForClient(new AcknowledgeFileAction(originalVersion, clientVersion, path));
             } else {
                 /*
                  * keep both client- and server versions, let client first rename it's file...

@@ -95,7 +95,8 @@ public class FileCopyOptimizer implements ActionOptimizer<FileVersion> {
                     String folderID = (String)clientAction.getParameters().get("folder");
                     optimizedActionsForClient.remove(clientAction);
                     optimizedActionsForServer.add(new DownloadFileAction(knownFile, clientAction.getNewVersion(), folderID, -1));
-                    optimizedActionsForClient.add(new AcknowledgeFileAction(clientAction.getVersion(), clientAction.getNewVersion()));
+                    optimizedActionsForClient.add(new AcknowledgeFileAction(clientAction.getVersion(), clientAction.getNewVersion(),
+                        (String)clientAction.getParameters().get("path")));
 
                     if (null != clientAction.getVersion()) {
                         //TODO: replacement of server file in case of client update? DeleteAction?

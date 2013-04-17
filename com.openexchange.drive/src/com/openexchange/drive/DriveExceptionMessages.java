@@ -66,6 +66,7 @@ public final class DriveExceptionMessages implements LocalizableStrings {
     public static final String IO_ERROR_MSG = "An I/O error occurred: \"%1$s\"";
     public static final String INVALID_FILE_OFFSET_MSG = "The file offset \"%1$d\" is invalid";
     public static final String DB_ERROR_MSG = "Unexpected database error: \"%1$s\"";
+    public static final String FILEVERSION_NOT_FOUND_MSG = "The file \"%1$s\" with checksum \"%2$s\" was not found at \"%3$s\"";
 
 
     /**

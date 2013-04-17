@@ -99,13 +99,13 @@ public class FileRenameOptimizer implements ActionOptimizer<FileVersion> {
                             break;
                         }
                     }
-
                     /*
                      * edit server file instead
                      */
                     optimizedActionsForClient.remove(clientAction);
                     optimizedActionsForClient.remove(matchingClientAction);
-                    optimizedActionsForClient.add(new AcknowledgeFileAction(clientAction.getVersion(), clientAction.getNewVersion()));
+                    optimizedActionsForClient.add(new AcknowledgeFileAction(matchingClientAction.getVersion(), clientAction.getNewVersion(),
+                        (String)clientAction.getParameters().get("path")));
                     optimizedActionsForServer.remove(matchingServerAction);
                     optimizedActionsForServer.add(new EditFileAction(matchingServerAction.getVersion(), clientAction.getNewVersion()));
                 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,62 +47,76 @@
  *
  */
 
-package com.openexchange.drive.osgi;
+package com.openexchange.drive.internal;
 
-import org.apache.commons.logging.Log;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.drive.DriveService;
-import com.openexchange.drive.checksum.rdb.DriveCreateTableService;
-import com.openexchange.drive.checksum.rdb.DriveCreateTableTask;
-import com.openexchange.drive.checksum.rdb.DriveDeleteListener;
-import com.openexchange.drive.internal.DriveServiceImpl;
-import com.openexchange.drive.internal.DriveServiceLookup;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
- * {@link DriveActivator}
+ * {@link PartialInputStream}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DriveActivator extends HousekeepingActivator {
+public class PartialInputStream extends FilterInputStream {
 
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveActivator.class);
+    private final long length;
+    private long bytesRead;
 
     /**
-     * Initializes a new {@link DriveActivator}.
+     * Initializes a new {@link PartialInputStream}.
+     *
+     * @param in the underlying input stream
+     * @param offset The offset where to start reading
+     * @param length The number of bytes to read from the offset, or <code>-1</code> to read until the end
+     * @throws IOException
      */
-    public DriveActivator() {
-        super();
+    public PartialInputStream(InputStream in, long offset, long length) throws IOException {
+        super(in);
+        this.length = length;
+        this.skip(offset);
+        this.bytesRead = 0;
+    }
+
+    /**
+     * Initializes a new {@link PartialInputStream}.
+     *
+     * @param in the underlying input stream
+     * @param offset The offset where to start reading
+     * @throws IOException
+     */
+    public PartialInputStream(InputStream in, long offset) throws IOException {
+        this(in, offset, -1);
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { IDBasedFileAccessFactory.class, ManagedFileManagement.class, FileStorageServiceRegistry.class,
-            DatabaseService.class };
+    public int read() throws IOException {
+        if (-1 != length && bytesRead >= length) {
+            return -1;
+        }
+        int read = super.read();
+        if (-1 != read) {
+            bytesRead++;
+        }
+        return read;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: " + context.getBundle().getSymbolicName());
-        DriveServiceLookup.set(this);
-        registerService(DriveService.class, new DriveServiceImpl());
-        registerService(CreateTableService.class, new DriveCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveCreateTableTask()));
-        registerService(DeleteListener.class, new DriveDeleteListener());
+    public int read(byte[] b) throws IOException {
+        return this.read(b, 0, b.length);
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: " + context.getBundle().getSymbolicName());
-        DriveServiceLookup.set(null);
-        super.stopBundle();
+    public int read(byte[] b, int off, int len) throws IOException {
+        if (-1 != length && bytesRead >= length) {
+            return -1;
+        }
+        int toRead = -1 == length ? len : Math.min((int)(length - bytesRead), len);
+        int read = super.read(b, off, toRead);
+        if (-1 != read) {
+            this.bytesRead += read;
+        }
+        return read;
     }
 
 }

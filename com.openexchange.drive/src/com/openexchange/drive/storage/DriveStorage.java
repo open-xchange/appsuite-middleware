@@ -60,7 +60,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.drive.DriveExceptionCodes;
-import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.drive.storage.filter.FileFilter;
@@ -214,7 +213,7 @@ public class DriveStorage {
 
             @Override
             public boolean accept(File file) throws OXException {
-                return null != file && checksum.equals(ChecksumProvider.getMD5(session, file));
+                return null != file && checksum.equals(session.getChecksumStore().getChecksum(file));
             }
         });
     }
@@ -224,7 +223,7 @@ public class DriveStorage {
 
             @Override
             public boolean accept(File file) throws OXException {
-                return null != file && checksum.equals(ChecksumProvider.getMD5(session, file));
+                return null != file && checksum.equals(session.getChecksumStore().getChecksum(file));
             }
         });
     }

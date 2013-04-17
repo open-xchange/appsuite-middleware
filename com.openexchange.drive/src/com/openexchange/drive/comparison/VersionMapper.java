@@ -54,8 +54,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.drive.DriveVersion;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -174,5 +177,29 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
         }
         return comparison;
     }
+
+    @Override
+    public String toString() {
+        StringAllocator stringAllocator = new StringAllocator();
+        stringAllocator.append("                                 | Original Version                 | Client Version                   | Server Version                  \n");
+        stringAllocator.append("---------------------------------+----------------------------------+----------------------------------+---------------------------------\n");
+        for (Entry<String, ThreeWayComparison<T>> entry : this) {
+            String name = Strings.abbreviate(entry.getKey(), entry.getKey().length(), 32);
+            ThreeWayComparison<T> comparison = entry.getValue();
+            stringAllocator.append(name);
+            for (int i = 0; i < 32 - name.length(); i++) {
+                stringAllocator.append(' ');
+            }
+            stringAllocator.append(" | ");
+            stringAllocator.append(null != comparison.getOriginalVersion() ? comparison.getOriginalVersion().getChecksum() : "                                ");
+            stringAllocator.append(" | ");
+            stringAllocator.append(null != comparison.getClientVersion() ? comparison.getClientVersion().getChecksum() : "                                ");
+            stringAllocator.append(" | ");
+            stringAllocator.append(null != comparison.getServerVersion() ? comparison.getServerVersion().getChecksum() : "                                ");
+            stringAllocator.append('\n');
+        }
+        return stringAllocator.toString();
+    }
+
 
 }

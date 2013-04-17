@@ -79,6 +79,8 @@ public enum DriveExceptionCodes implements OXExceptionCode {
     /** Unexpected database error: \"%1$s\" */
     DB_ERROR(DriveExceptionMessages.DB_ERROR_MSG, Category.CATEGORY_ERROR, 6),
 
+    /** The file \"%1$s\" with checksum \"%2$s\" was not found at \"%3$s\" */
+    FILEVERSION_NOT_FOUND(DriveExceptionMessages.FILE_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 7),
 
     ;
 

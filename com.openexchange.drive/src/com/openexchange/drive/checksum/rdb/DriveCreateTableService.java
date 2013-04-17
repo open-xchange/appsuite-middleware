@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,67 +47,68 @@
  *
  */
 
-package com.openexchange.drive.checksum;
+package com.openexchange.drive.checksum.rdb;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import com.openexchange.file.storage.File;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.database.AbstractCreateTableImpl;
 
 /**
- * {@link SimChecksumStore}
+ * {@link DriveCreateTableService}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SimChecksumStore implements ChecksumStore {
-
-    private final Map<File, String> checksums;
-    private final Map<String, Set<File>> files;
+public class DriveCreateTableService extends AbstractCreateTableImpl {
 
     /**
-     * Initializes a new {@link SimChecksumStore}.
+     * Initializes a new {@link DriveCreateTableService}.
      */
-    public SimChecksumStore() {
+    public DriveCreateTableService() {
         super();
-        this.checksums = new HashMap<File, String>();
-        this.files = new HashMap<String, Set<File>>();
+    }
+
+    /**
+     * Gets the table names.
+     *
+     * @return The table names.
+     */
+    public static String[] getTablesToCreate() {
+        return new String[] { "checksums" };
+    }
+
+    /**
+     * Gets the CREATE-TABLE statements.
+     *
+     * @return The CREATE statements
+     */
+    public static String[] getCreateStmts() {
+        String createChecksumsStmt =
+            "CREATE TABLE checksums (" +
+                "uuid BINARY(16) NOT NULL," +
+                "cid INT4 UNSIGNED NOT NULL," +
+                "service VARCHAR(255) NOT NULL," +
+                "account VARCHAR(255) NOT NULL," +
+                "folder VARCHAR(255) NOT NULL," +
+                "file VARCHAR(255) NOT NULL," +
+                "version VARCHAR(255)," +
+                "sequence BIGINT(20) NOT NULL," +
+                "checksum BINARY(16) NOT NULL," +
+                "PRIMARY KEY  (`uuid`)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        return new String[] { createChecksumsStmt };
     }
 
     @Override
-    public String getChecksum(ServerSession session, File file) {
-        return checksums.get(file);
+    public String[] requiredTables() {
+        return NO_TABLES;
     }
 
     @Override
-    public Collection<File> getFiles(ServerSession session, String checksum) {
-        return files.get(checksum);
+    public String[] tablesToCreate() {
+        return getTablesToCreate();
     }
 
     @Override
-    public synchronized void addChecksum(ServerSession session, File file, String checksum) {
-        checksums.put(file, checksum);
-        Set<File> ids = files.get(checksum);
-        if (null == ids) {
-            ids = new HashSet<File>();
-            files.put(checksum, ids);
-        }
-        ids.add(file);
-    }
-
-    @Override
-    public synchronized void removeChecksums(ServerSession session, File file) {
-        String checksum = checksums.remove(file);
-        Set<File> ids = files.get(checksum);
-        if (null != ids) {
-            ids.remove(checksum);
-        }
-        if (0 == ids.size()) {
-            files.remove(ids);
-        }
+    protected String[] getCreateStatements() {
+        return getCreateStmts();
     }
 
 }
-
