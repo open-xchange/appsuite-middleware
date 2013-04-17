@@ -86,6 +86,7 @@ import javax.mail.Folder;
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Part;
 import javax.mail.Quota;
 import javax.mail.Store;
 import javax.mail.StoreClosedException;
@@ -3504,6 +3505,11 @@ public final class IMAPCommandsCollection {
         @Override
         public InputStream getRawInputStream() throws OXException {
             return inProvider.getInputStream();
+        }
+
+        @Override
+        public Part getPart() {
+            return null;
         }
 
         @Override
