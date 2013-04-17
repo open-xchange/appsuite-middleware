@@ -1,3 +1,7 @@
+* 2013-04-17 - marcus.klein@open-xchange.com
+
+ - Fix for bug 25911: Package com.openexchange.audit component for tracking user actions.
+
 * 2013-04-17 - martin.herfurth@open-xchange.com
 
  - Fix for bug 25952: Added missing change and delete exception field to get request for appointments.
