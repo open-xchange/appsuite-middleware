@@ -2758,6 +2758,9 @@ public final class IMAPCommandsCollection {
                 if (streamed) {
                     try {
                         final Message message = imapFolder.getMessageByUID(uid);
+                        if (null == message) {
+                            return null;
+                        }
                         return toMailPart((IMAPMessage) message, sectionId, peek, bid.bodystructure);
                     } catch (final Exception e) {
                         // Ignore
@@ -2886,6 +2889,9 @@ public final class IMAPCommandsCollection {
                 if (streamed) {
                     try {
                         final Message message = imapFolder.getMessageByUID(uid);
+                        if (null == message) {
+                            return null;
+                        }
                         return toMailPart((IMAPMessage) message, bid.sectionId, peek, bid.bodystructure);
                     } catch (final Exception e) {
                         // Ignore
