@@ -50,7 +50,6 @@
 package com.openexchange.log;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.log.Loggable.Level;
 
@@ -79,26 +78,6 @@ public final class Log implements org.apache.commons.logging.Log {
      */
     public static boolean appendTraceToMessage() {
         return APPEND_TRACE_TO_MESSAGE.get();
-    }
-
-    private static final AtomicInteger MAX_MESSAGE_LENGTH = new AtomicInteger(-1);
-
-    /**
-     * Sets the max. message length.
-     *
-     * @param maxMessageLength The max. message length
-     */
-    public static void setMaxMessageLength(final int maxMessageLength) {
-        MAX_MESSAGE_LENGTH.set(maxMessageLength);
-    }
-
-    /**
-     * Gets the max. message length.
-     *
-     * @return The max. message length
-     */
-    public static int maxMessageLength() {
-        return MAX_MESSAGE_LENGTH.get();
     }
 
     private static final AtomicReference<LogService> LOGSERVICE_REFERENCE = new AtomicReference<LogService>();

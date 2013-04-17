@@ -116,17 +116,20 @@ final class LoggerTask extends AbstractTask<Object> {
     private final BlockingQueue<Loggable> queue;
     private final AtomicBoolean keepgoing;
     private final String lineSeparator;
+    private final int maxMessageLength;
 
     /**
      * Initializes a new {@link LoggerTask}.
      *
      * @param queue
+     * @param maxMessageLength
      */
-    protected LoggerTask(final BlockingQueue<Loggable> queue) {
+    protected LoggerTask(final BlockingQueue<Loggable> queue, final int maxMessageLength) {
         super();
         lineSeparator = System.getProperty("line.separator");
         keepgoing = new AtomicBoolean(true);
         this.queue = queue;
+        this.maxMessageLength = maxMessageLength;
     }
 
     /**
@@ -345,12 +348,12 @@ final class LoggerTask extends AbstractTask<Object> {
         }
         sb.append(msg);
         // Finally, invoke callback with appropriate message chunks
-        final int maxLen = com.openexchange.log.Log.maxMessageLength();
-        if (maxLen > 0 && sb.length() > maxLen) {
+        final int maxMessageLength = this.maxMessageLength;
+        if (maxMessageLength > 0 && sb.length() > maxMessageLength) {
             final String delim = lineSeparator + " ";
             boolean first = true;
             do {
-                final int pos = sb.lastIndexOf(delim, maxLen);
+                final int pos = sb.lastIndexOf(delim, maxMessageLength);
                 if (pos > 0) {
                     String substring = sb.substring(0, pos);
                     if (first) {
@@ -361,16 +364,16 @@ final class LoggerTask extends AbstractTask<Object> {
                     sb.delete(0, pos + delim.length());
                     callback.log(substring + "...", sb.length() <= 0 ? loggable.getThrowable() : null);
                 } else {
-                    String substring = sb.substring(0, maxLen);
+                    String substring = sb.substring(0, maxMessageLength);
                     if (first) {
                         first = false;
                     } else {
                         substring = "..." + delim + substring;
                     }
-                    sb.delete(0, maxLen);
+                    sb.delete(0, maxMessageLength);
                     callback.log(substring + "...", sb.length() <= 0 ? loggable.getThrowable() : null);
                 }
-            } while (sb.length() > maxLen);
+            } while (sb.length() > maxMessageLength);
             if (sb.length() > 0) {
                 callback.log("..." + delim + sb.toString(), loggable.getThrowable());
             }
