@@ -690,7 +690,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
         if (null == val) {
             return false;
         }
-        final String lc = toLowerCase(val.trim());
+        final String lc = val.trim().toLowerCase(Locale.US);
         return !lc.startsWith("javascript:") && !lc.startsWith("vbscript:");
     }
 
