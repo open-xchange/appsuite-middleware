@@ -274,6 +274,21 @@ public final class MimeType2ExtMap {
     }
 
     /**
+     * Gets the file extension for given MIME type.
+     *
+     * @param mimeType The MIME type
+     * @return The file extension for given MIME type or <code>dat</code> if none found
+     */
+    public static String getFileExtension(String mimeType) {
+        init();
+        if (!extMap.containsKey(mimeType.toLowerCase(Locale.ENGLISH))) {
+            return "dat";
+        }
+        final List<String> list = extMap.get(mimeType);
+        return null == list || list.isEmpty() ? "dat" : list.get(0);
+    }
+
+    /**
      * Loads the MIME type file specified through <code>fileStr</code>.
      *
      * @param fileStr The MIME type file to load
