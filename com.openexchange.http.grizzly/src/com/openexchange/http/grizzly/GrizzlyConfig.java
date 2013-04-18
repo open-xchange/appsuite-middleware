@@ -201,7 +201,8 @@ public class GrizzlyConfig implements Initialization {
         this.httpsProtoValue = configService.getProperty("com.openexchange.server.httpsProtoValue", "https");
         this.httpProtoPort = configService.getIntProperty("com.openexchange.server.httpProtoPort", 80);
         this.httpsProtoPort = configService.getIntProperty("com.openexchange.server.httpsProtoPort", 443);
-        this.maxBodySize = configService.getIntProperty("com.openexchange.servlet.maxBodySize", 104857600);
+        final int configuredMaxBodySize = configService.getIntProperty("com.openexchange.servlet.maxBodySize", 104857600);
+        this.maxBodySize = configuredMaxBodySize <= 0 ? Integer.MAX_VALUE : configuredMaxBodySize;
 
         this.httpHost = configService.getProperty("com.openexchange.connector.networkListenerHost", "127.0.0.1");
         // keep backwards compatibility with ajp config
