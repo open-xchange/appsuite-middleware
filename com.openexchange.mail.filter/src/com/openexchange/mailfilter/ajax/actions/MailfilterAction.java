@@ -74,6 +74,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -981,8 +982,10 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         if (null != msg) {
             if (msg.startsWith(OXMailfilterExceptionCode.ERR_PREFIX_REJECTED_ADDRESS)) {
                 ret.setCategory(Category.CATEGORY_USER_INPUT);
+                ret.setLogLevel(LogLevel.ERROR);
             } else if (msg.startsWith(OXMailfilterExceptionCode.ERR_PREFIX_INVALID_ADDRESS)) {
                 ret.setCategory(Category.CATEGORY_USER_INPUT);
+                ret.setLogLevel(LogLevel.ERROR);
             }
         }
         return ret;
