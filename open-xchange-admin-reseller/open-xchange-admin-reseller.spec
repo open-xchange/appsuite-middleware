@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 6
+%define        ox_release 7
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -70,6 +70,8 @@ done
 %doc ./com.openexchange.admin.reseller/ChangeLog
 
 %changelog
+* Thu Apr 18 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2013-05-09
 * Tue Apr 02 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2013-04-04
 * Mon Mar 04 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
