@@ -1,3 +1,7 @@
+* 2013-04-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26003: Deal with possibly unknown MIME type when determining file extension
+
 * 2013-04-17 - marcus.klein@open-xchange.com
 
  - Fix for bug 25911: Package com.openexchange.audit component for tracking user actions.

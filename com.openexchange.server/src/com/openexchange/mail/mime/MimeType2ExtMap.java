@@ -271,8 +271,11 @@ public final class MimeType2ExtMap {
      */
     public static List<String> getFileExtensions(String mimeType) {
         init();
-        mimeType = mimeType.toLowerCase(Locale.ENGLISH);
-        return extMap.containsKey(mimeType) ? Collections.unmodifiableList(extMap.get(mimeType)) : DEFAULT_EXT;
+        if (!extMap.containsKey(mimeType.toLowerCase(Locale.ENGLISH))) {
+            return DEFAULT_EXT;
+        }
+        final List<String> list = extMap.get(mimeType);
+        return null == list ? DEFAULT_EXT : Collections.unmodifiableList(list);
     }
 
     /**
