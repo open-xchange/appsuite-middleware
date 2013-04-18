@@ -854,9 +854,11 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
                 final String oldFileName = oldDocument.getFileName();
                 if (document.getFileName() != null && !document.getFileName().equals(oldFileName)) {
+                    long targetFolderId = updatedCols.contains(Metadata.FOLDER_ID_LITERAL) && 0 < document.getFolderId() ?
+                        document.getFolderId() : oldDocument.getFolderId();
                     final InfostoreFilenameReservation reservation = reserve(
                         document.getFileName(),
-                        oldDocument.getFolderId(),
+                        targetFolderId,
                         oldDocument.getId(),
                         context, true);
                     reservations.add(reservation);
