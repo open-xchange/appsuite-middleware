@@ -83,7 +83,7 @@ public class GrizzlyConfig implements Initialization {
     private String httpHost = "0.0.0.0";
 
     /** The default port for the http network listener. */
-    private int httpPort = 8080;
+    private int httpPort = 8009;
 
     /** Enable grizzly monitoring via JMX? */
     private boolean isJMXEnabled = false;
@@ -148,6 +148,9 @@ public class GrizzlyConfig implements Initialization {
     
     /** The name of the echo header whose value is echoed for each request providing that header, see mod_id for apache */
     private String echoHeader = "X-Echo-Header";
+    
+    /** The maximum allowed size for PUT and POST bodies */
+    private int maxBodySize = 104857600; 
 
     // sessiond properties
 
@@ -198,6 +201,7 @@ public class GrizzlyConfig implements Initialization {
         this.httpsProtoValue = configService.getProperty("com.openexchange.server.httpsProtoValue", "https");
         this.httpProtoPort = configService.getIntProperty("com.openexchange.server.httpProtoPort", 80);
         this.httpsProtoPort = configService.getIntProperty("com.openexchange.server.httpsProtoPort", 443);
+        this.maxBodySize = configService.getIntProperty("com.openexchange.servlet.maxBodySize", 104857600);
 
         this.httpHost = configService.getProperty("com.openexchange.connector.networkListenerHost", "127.0.0.1");
         // keep backwards compatibility with ajp config
@@ -446,6 +450,11 @@ public class GrizzlyConfig implements Initialization {
      */
     public String getEchoHeader() {
         return this.echoHeader;
+    }
+    
+    /** Get the maximum allowed size for PUT and POST bodies */
+    public int getMaxBodySize() {
+        return maxBodySize;
     }
 
 }
