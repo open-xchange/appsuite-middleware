@@ -212,6 +212,8 @@ public final class MimeType2ExtMap {
         return getContentType(file.getName());
     }
 
+    private static final String MIME_APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
+
     /**
      * Gets the MIME type associated with given file name.
      *
@@ -221,19 +223,19 @@ public final class MimeType2ExtMap {
     public static String getContentType(final String fileName) {
         init();
         if (null == fileName) {
-            return MimeTypes.MIME_APPL_OCTET;
+            return MIME_APPL_OCTET;
         }
         final int pos = fileName.lastIndexOf('.');
         if (pos < 0) {
-            return MimeTypes.MIME_APPL_OCTET;
+            return MIME_APPL_OCTET;
         }
         final String s1 = fileName.substring(pos + 1);
         if (s1.length() == 0) {
-            return MimeTypes.MIME_APPL_OCTET;
+            return MIME_APPL_OCTET;
         }
         final String type = typeMap.get(s1.toLowerCase(Locale.ENGLISH));
         if (null == type) {
-            return MimeTypes.MIME_APPL_OCTET;
+            return MIME_APPL_OCTET;
         }
         return type;
     }
@@ -247,11 +249,11 @@ public final class MimeType2ExtMap {
     public static String getContentTypeByExtension(final String extension) {
         init();
         if (null == extension || 0 == extension.length()) {
-            return MimeTypes.MIME_APPL_OCTET;
+            return MIME_APPL_OCTET;
         }
         final String type = typeMap.get(extension.toLowerCase(Locale.ENGLISH));
         if (null == type) {
-            return MimeTypes.MIME_APPL_OCTET;
+            return MIME_APPL_OCTET;
         }
         return type;
     }
