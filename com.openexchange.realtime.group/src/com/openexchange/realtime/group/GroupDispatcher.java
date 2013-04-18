@@ -119,7 +119,8 @@ public class GroupDispatcher implements ComponentHandle {
             @Override
             public void handle(String event, ID id, Object source, Map<String, Object> properties) {
                 try {
-                    onDispose(id);
+                    ID memberId = ids.get(0);
+                    onDispose(memberId != null ? memberId : id);
                 } catch (OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
