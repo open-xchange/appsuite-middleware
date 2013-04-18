@@ -101,6 +101,7 @@ import com.openexchange.imap.dataobjects.ExtendedIMAPFolder;
 import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.util.IMAPUpdateableData;
 import com.openexchange.imap.util.ImapUtility;
+import com.openexchange.imap.util.InputStreamProvider;
 import com.openexchange.imap.util.ThresholdInputStreamProvider;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
@@ -132,6 +133,8 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPInputStream;
+import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
@@ -2737,6 +2740,33 @@ public final class IMAPCommandsCollection {
                 }
                 bodystructure = null;
 
+                // Stream or byte-array based?
+                boolean streamed = false;
+                if (p.isREV1()) {
+                    /*-
+                     * Would always yield true since hard-coded: properties.put("mail.imap.fetchsize", "51200");
+                     *
+                    final String property = IMAPSessionProperties.getDefaultSessionProperties().getProperty("mail.imap.fetchsize");
+                    if (null != property && Integer.parseInt(property.trim()) > 0) {
+                        streamed = true;
+                    }
+                     *
+                     */
+                    streamed = true;
+                }
+
+                if (streamed) {
+                    try {
+                        final Message message = imapFolder.getMessageByUID(uid);
+                        if (null == message) {
+                            return null;
+                        }
+                        return toMailPart((IMAPMessage) message, sectionId, peek, bid.bodystructure);
+                    } catch (final Exception e) {
+                        // Ignore
+                    }
+                }
+
                 final ByteArray byteArray;
                 if (p.isREV1()) {
                     final BODY b = peek ? p.peekBody(uid, sectionId) : p.fetchBody(uid, sectionId);
@@ -2841,6 +2871,33 @@ public final class IMAPCommandsCollection {
                 }
                 bodystructure = null;
 
+                // Stream or byte-array based?
+                boolean streamed = false;
+                if (p.isREV1()) {
+                    /*-
+                     * Would always yield true since hard-coded: properties.put("mail.imap.fetchsize", "51200");
+                     *
+                    final String property = IMAPSessionProperties.getDefaultSessionProperties().getProperty("mail.imap.fetchsize");
+                    if (null != property && Integer.parseInt(property.trim()) > 0) {
+                        streamed = true;
+                    }
+                     *
+                     */
+                    streamed = true;
+                }
+
+                if (streamed) {
+                    try {
+                        final Message message = imapFolder.getMessageByUID(uid);
+                        if (null == message) {
+                            return null;
+                        }
+                        return toMailPart((IMAPMessage) message, bid.sectionId, peek, bid.bodystructure);
+                    } catch (final Exception e) {
+                        // Ignore
+                    }
+                }
+
                 final ByteArray byteArray;
                 if (p.isREV1()) {
                     final BODY b = peek ? p.peekBody(uid, bid.sectionId) : p.fetchBody(uid, bid.sectionId);
@@ -2896,68 +2953,82 @@ public final class IMAPCommandsCollection {
         return null;
     }
 
+    protected static MailPart toMailPart(final IMAPMessage msg, final String sectionId, final boolean peek, final BODYSTRUCTURE bodystructure) throws ProtocolException {
+        try {
+            final MailPart ret = new MailPartImpl(msg, sectionId, peek, bodystructure);
+            applyBodyStructure(bodystructure, ret);
+            return ret;
+        } catch (final RuntimeException e) {
+            throw new ProtocolException(e.getMessage(), e);
+        }
+    }
+
     protected static MailPart toMailPart(final ByteArray byteArray, final BODYSTRUCTURE bodystructure) throws ProtocolException {
         try {
             final MailPart ret = new MailPartImpl(byteArray, bodystructure);
-            {
-                final String disposition = bodystructure.disposition;
-                final ParameterList dParams = bodystructure.dParams;
-                if (null != disposition || null != dParams) {
-                    final ContentDisposition contentDisposition = new ContentDisposition();
-                    if (null != disposition) {
-                        contentDisposition.setDisposition(disposition);
-                    }
-                    if (null != dParams) {
-                        for (final Enumeration<?> names = dParams.getNames(); names.hasMoreElements();) {
-                            final String name = names.nextElement().toString();
-                            contentDisposition.setParameter(name, dParams.get(name));
-                        }
-                    }
-                    ret.setContentDisposition(contentDisposition);
-                }
-            }
-            {
-                final ParameterList cParams = bodystructure.cParams;
-                if (null != bodystructure.type || null != bodystructure.subtype || null != cParams) {
-                    final ContentType contentType = new ContentType();
-                    if (null != bodystructure.type) {
-                        contentType.setPrimaryType(bodystructure.type);
-                    }
-                    if (null != bodystructure.subtype) {
-                        contentType.setSubType(bodystructure.subtype);
-                    }
-                    if (null != cParams) {
-                        for (final Enumeration<?> names = cParams.getNames(); names.hasMoreElements();) {
-                            final String name = names.nextElement().toString();
-                            contentType.setParameter(name, cParams.get(name));
-                        }
-                    }
-                    ret.setContentType(contentType);
-                }
-            }
-            {
-                final String encoding = bodystructure.encoding;
-                if (null != encoding) {
-                    ret.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, encoding);
-                }
-            }
-            {
-                final String fileName = bodystructure.attachment;
-                if (null != fileName) {
-                    ret.getContentDisposition().setFilenameParameter(fileName);
-                }
-            }
-            {
-                final int size = bodystructure.size;
-                if (size > 0) {
-                    ret.setSize(size);
-                }
-            }
+            applyBodyStructure(bodystructure, ret);
             return ret;
         } catch (final IOException e) {
             throw new ProtocolException(e.getMessage(), e);
         } catch (final RuntimeException e) {
             throw new ProtocolException(e.getMessage(), e);
+        }
+    }
+
+    private static void applyBodyStructure(final BODYSTRUCTURE bodystructure, final MailPart ret) {
+        {
+            final String disposition = bodystructure.disposition;
+            final ParameterList dParams = bodystructure.dParams;
+            if (null != disposition || null != dParams) {
+                final ContentDisposition contentDisposition = new ContentDisposition();
+                if (null != disposition) {
+                    contentDisposition.setDisposition(disposition);
+                }
+                if (null != dParams) {
+                    for (final Enumeration<?> names = dParams.getNames(); names.hasMoreElements();) {
+                        final String name = names.nextElement().toString();
+                        contentDisposition.setParameter(name, dParams.get(name));
+                    }
+                }
+                ret.setContentDisposition(contentDisposition);
+            }
+        }
+        {
+            final ParameterList cParams = bodystructure.cParams;
+            if (null != bodystructure.type || null != bodystructure.subtype || null != cParams) {
+                final ContentType contentType = new ContentType();
+                if (null != bodystructure.type) {
+                    contentType.setPrimaryType(bodystructure.type);
+                }
+                if (null != bodystructure.subtype) {
+                    contentType.setSubType(bodystructure.subtype);
+                }
+                if (null != cParams) {
+                    for (final Enumeration<?> names = cParams.getNames(); names.hasMoreElements();) {
+                        final String name = names.nextElement().toString();
+                        contentType.setParameter(name, cParams.get(name));
+                    }
+                }
+                ret.setContentType(contentType);
+            }
+        }
+        {
+            final String encoding = bodystructure.encoding;
+            if (null != encoding) {
+                ret.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, encoding);
+            }
+        }
+        {
+            final String fileName = bodystructure.attachment;
+            if (null != fileName) {
+                ret.getContentDisposition().setFilenameParameter(fileName);
+            }
+        }
+        {
+            final int size = bodystructure.size;
+            if (size > 0) {
+                ret.setSize(size);
+            }
         }
     }
 
@@ -3473,13 +3544,26 @@ public final class IMAPCommandsCollection {
 
         private static final long serialVersionUID = 6469037985453175593L;
 
-        private final ThresholdInputStreamProvider inProvider;
+        private final InputStreamProvider inProvider;
         private final BODYSTRUCTURE body;
 
         MailPartImpl(final ByteArray byteArray, final BODYSTRUCTURE body) throws IOException {
             super();
-            inProvider = new ThresholdInputStreamProvider();
+            final ThresholdInputStreamProvider inProvider = new ThresholdInputStreamProvider();
             inProvider.write(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount());
+            this.inProvider = inProvider;
+            this.body = body;
+        }
+
+        MailPartImpl(final IMAPMessage msg, final String sectionId, final boolean peek, final BODYSTRUCTURE body) {
+            super();
+            inProvider = new InputStreamProvider() {
+
+                @Override
+                public InputStream getInputStream() throws OXException {
+                    return new IMAPInputStream(msg, sectionId, body.size, peek);
+                }
+            };
             this.body = body;
         }
 

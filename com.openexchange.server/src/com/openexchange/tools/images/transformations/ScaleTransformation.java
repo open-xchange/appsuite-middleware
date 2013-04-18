@@ -84,6 +84,9 @@ public class ScaleTransformation implements ImageTransformation {
             constrain = new CoverDimensionConstrain(maxWidth, maxHeight);
             break;
         case CONTAIN:
+            if (null != sourceImage && maxWidth >= sourceImage.getWidth() && maxHeight >= sourceImage.getHeight()) {
+                return sourceImage; // nothing to do
+            }
             constrain = new ContainDimensionConstrain(maxWidth, maxHeight);
             break;
         default:

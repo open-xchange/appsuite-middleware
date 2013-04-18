@@ -51,6 +51,7 @@ package com.openexchange.realtime.group;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -119,7 +120,14 @@ public class GroupDispatcher implements ComponentHandle {
             @Override
             public void handle(String event, ID id, Object source, Map<String, Object> properties) {
                 try {
-                    onDispose(id);
+                    ID memberId = ids.get(0);
+                    if (memberId == null) {
+                        memberId = (ID) properties.get("id");
+                    }
+                    if (memberId == null) {
+                        memberId = id;
+                    }
+                    onDispose(memberId != null ? memberId : id);
                 } catch (OXException e) {
                     LOG.error(e.getMessage(), e);
                 }
@@ -267,7 +275,9 @@ public class GroupDispatcher implements ComponentHandle {
         ids.remove(id);
         stamps.remove(id);
         if (ids.isEmpty()) {
-            id.trigger("dispose", this);
+            Map<String, Object> properties = new HashMap<String, Object>();
+            properties.put("id", id);
+            id.trigger("dispose", this, properties);
         }
         onLeave(id);
     }

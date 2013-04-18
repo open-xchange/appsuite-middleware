@@ -58,6 +58,7 @@ public class AsyncWriteEngine extends EngineWrapper implements Engine {
     protected final int asyncFlushDelay;
 
 
+    //TODO use thread factory here
     protected final Thread newRecidsThread = new Thread("MapDB prealloc #"+threadNum){
         @Override public void run() {
             try{
@@ -74,6 +75,7 @@ public class AsyncWriteEngine extends EngineWrapper implements Engine {
         }
     };
 
+    //TODO use thread factory here
     protected final Thread writerThread = new Thread("MapDB writer #"+threadNum){
         @Override public void run() {
             try{
@@ -124,7 +126,7 @@ public class AsyncWriteEngine extends EngineWrapper implements Engine {
 
 
 
-    protected AsyncWriteEngine(Engine engine, int _asyncFlushDelay) {
+    public AsyncWriteEngine(Engine engine, int _asyncFlushDelay) {
         super(engine);
 
         newRecidsThread.setDaemon(true);
@@ -219,8 +221,8 @@ public class AsyncWriteEngine extends EngineWrapper implements Engine {
     public void close() {
         commitLock.writeLock().lock();
         try {
-            checkState();
             if(closeInProgress) return;
+            checkState();
             closeInProgress = true;
             //notify background threads
             itemsQueue.put(new CountDownLatch(0));

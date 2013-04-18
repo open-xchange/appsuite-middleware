@@ -1,3 +1,11 @@
+* 2013-04-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26003: Deal with possibly unknown MIME type when determining file extension
+
+* 2013-04-17 - marcus.klein@open-xchange.com
+
+ - Fix for bug 25911: Package com.openexchange.audit component for tracking user actions.
+
 * 2013-04-17 - martin.herfurth@open-xchange.com
 
  - Fix for bug 25952: Added missing change and delete exception field to get request for appointments.
@@ -6,6 +14,7 @@
 
  - Fix for bug 25939: Moved snippet bundles to core package
  - Fix for bug 25942: Check object's type before casting to Multipart
+ - Fix for bug 25957: Deny "vbscript" URLs
 
 * 2013-04-16 - thorben.betten@open-xchange.com
 

@@ -220,6 +220,19 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         if (stanza.traceEnabled()) {
                             stanza.trace("received in atmosphere handler");
                         }
+                        if (stanza.getSequenceNumber() != -1) {
+                            // Return receipt
+                            stanza.trace("Send return receipt for sequence number: " + stanza.getSequenceNumber());
+                            Message msg = new Message();
+                            msg.setTo(stanza.getFrom());
+                            msg.setFrom(stanza.getFrom());
+                            msg.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
+                                stanza.getSequenceNumber(),
+                                "json",
+                                "atmosphere",
+                                "received").build()));
+                            send(msg, msg.getTo());
+                        }
                         gate.handle(stanza, stanza.getTo());
                     }
                 }
@@ -390,20 +403,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         if (!stanzaQueueService.enqueueStanza(stanza)) {
             // TODO: exception?
             LOG.error("Couldn't enqueue Stanza: " + stanza);
-        } else {
-            if (stanza.getSequenceNumber() != -1) {
-                // Return receipt
-                stanza.trace("Send return receipt for sequence number: " + stanza.getSequenceNumber());
-                Message msg = new Message();
-                msg.setTo(stanza.getFrom());
-                msg.setFrom(stanza.getFrom());
-                msg.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
-                    stanza.getSequenceNumber(),
-                    "json",
-                    "atmosphere",
-                    "received").build()));
-                send(msg, msg.getTo());
-            }
         }
     }
 
