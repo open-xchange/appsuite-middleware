@@ -851,19 +851,29 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     }
                 }
 
-
                 final String oldFileName = oldDocument.getFileName();
-                if (document.getFileName() != null && !document.getFileName().equals(oldFileName)) {
-                    long targetFolderId = updatedCols.contains(Metadata.FOLDER_ID_LITERAL) && 0 < document.getFolderId() ?
-                        document.getFolderId() : oldDocument.getFolderId();
+                if (updatedCols.contains(Metadata.FOLDER_ID_LITERAL) && oldDocument.getFolderId() != document.getFolderId()) {
+                    // this is a move - reserve in target folder
+                    String fileName = null != document.getFileName() ? document.getFileName() : oldFileName;
                     final InfostoreFilenameReservation reservation = reserve(
-                        document.getFileName(),
-                        targetFolderId,
+                        fileName,
+                        document.getFolderId(),
                         oldDocument.getId(),
                         context, true);
                     reservations.add(reservation);
                     document.setFileName(reservation.getFilename());
-                	updatedCols.add(Metadata.FILENAME_LITERAL);
+                    updatedCols.add(Metadata.FILENAME_LITERAL);
+                } else if (updatedCols.contains(Metadata.FILENAME_LITERAL) && null != document.getFileName() &&
+                    false == document.getFileName().equals(oldFileName)) {
+                    // this is a rename - reserve in current folder
+                    final InfostoreFilenameReservation reservation = reserve(
+                        document.getFileName(),
+                        oldDocument.getFolderId(),
+                        oldDocument.getId(),
+                        context, true);
+                    reservations.add(reservation);
+                    document.setFileName(reservation.getFilename());
+                    updatedCols.add(Metadata.FILENAME_LITERAL);
                 }
 
                 final String oldTitle = oldDocument.getTitle();
