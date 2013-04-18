@@ -34,4 +34,10 @@ public interface InputBuffer {
      */
     public int doRead(ByteChunk chunk, HttpServletRequestImpl request) throws IOException;
 
+    /**
+     * Return from the input stream. IMPORTANT: the current model assumes that the protocol will 'own' the buffer and return a pointer to it
+     * in ByteChunk ( i.e. the param will have chunk.getBytes()==null before call, and the result after the call ).
+     */
+    public int doRead(ByteChunk chunk, HttpServletRequestImpl request, boolean refillIfEmpty) throws IOException;
+
 }

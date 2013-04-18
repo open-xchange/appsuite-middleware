@@ -1082,6 +1082,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 final Lock hardLock = mainLock.writeLock();
                 hardLock.lock();
                 try {
+                    boolean doReadMessage = true;
                     if (response.isCommitted()) {
                         /*
                          * Write empty SEND-BODY-CHUNK package
@@ -1102,18 +1103,40 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         /*
                          * Receive probably empty body chunk
                          */
-                        final ByteChunk byteChunk = new ByteChunk(8192);
-                        final int read = inputBuffer.doRead(byteChunk, request);
-                        if (read > 0) {
-                            // Received a non-empty data chunk...
-                            // Dump that chunk to ServletInputStream
-                            int len = byteChunk.getLength();
-                            if (len > read) {
-                                len = read;
+                        if (doReadMessage) {
+                            // ... by separate AJP message
+                            final AjpMessage bodyMessage = new AjpMessage(packetSize);
+                            readMessage(bodyMessage);
+                            // No data received.
+                            if (bodyMessage.getLen() > 0) {
+                                final int blen = bodyMessage.peekInt();
+                                if (blen > 0) {
+                                    // Received a non-empty data chunk...
+                                    // Dump that chunk to ServletInputStream
+                                    final MessageBytes bodyBytes = MessageBytes.newInstance();
+                                    bodyMessage.getBytes(bodyBytes);
+                                    final ByteChunk bc = bodyBytes.getByteChunk();
+                                    final int len = bc.getLength();
+                                    final byte[] chunk = new byte[len];
+                                    System.arraycopy(bc.getBuffer(), bc.getStart(), chunk, 0, len);
+                                    request.appendToBuffer(chunk);
+                                }
                             }
-                            final byte[] chunk = new byte[len];
-                            System.arraycopy(byteChunk.getBuffer(), byteChunk.getStart(), chunk, 0, len);
-                            request.appendToBuffer(chunk);
+                        } else {
+                            // ... by ByteChunk read attempt
+                            final ByteChunk byteChunk = new ByteChunk(8192);
+                            final int read = inputBuffer.doRead(byteChunk, request, false);
+                            if (read > 0) {
+                                // Received a non-empty data chunk...
+                                // Dump that chunk to ServletInputStream
+                                int len = byteChunk.getLength();
+                                if (len > read) {
+                                    len = read;
+                                }
+                                final byte[] chunk = new byte[len];
+                                System.arraycopy(byteChunk.getBuffer(), byteChunk.getStart(), chunk, 0, len);
+                                request.appendToBuffer(chunk);
+                            }
                         }
                         if (DEBUG) {
                             LOG.debug("Performed keep-alive through an empty get-body-chunk package (and received requested chunk).");
@@ -2224,6 +2247,14 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          */
         @Override
         public int doRead(final ByteChunk chunk, final HttpServletRequestImpl req) throws IOException {
+            return doRead(chunk, req, true);
+        }
+
+        /**
+         * Read bytes into the specified chunk.
+         */
+        @Override
+        public int doRead(final ByteChunk chunk, final HttpServletRequestImpl req, final boolean refillIfEmpty) throws IOException {
             if (endOfStream) {
                 return -1;
             }
@@ -2235,7 +2266,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     return 0;
                 }
             } else if (empty) {
-                if (!refillReadBuffer()) {
+                if (!refillIfEmpty || !refillReadBuffer()) {
                     return -1;
                 }
             }
