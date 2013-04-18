@@ -1,3 +1,7 @@
+* 2013-04-18 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 26015: Added missing missing timezone for halo calls.
+
 * 2013-04-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 26003: Deal with possibly unknown MIME type when determining file extension
