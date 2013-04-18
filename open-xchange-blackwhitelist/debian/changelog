@@ -1,3 +1,9 @@
+open-xchange-blackwhitelist (6.22.0-11) unstable; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 18 Apr 2013 14:10:58 +0200
+
 open-xchange-blackwhitelist (6.22.0-10) unstable; urgency=low
 
   * Build for patch 2013-04-04
