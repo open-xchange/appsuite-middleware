@@ -1,0 +1,222 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <style type="text/css">
+* {
+    text-decoration: none;
+    font-size: 12px;
+    outline: none;
+    padding: 0;
+    margin: 0;
+    line-height: 1.2em;
+}
+
+html {
+    color: #000;
+}
+
+body {
+    font-size: 1em;
+    background-color: transparent;
+    font-family: arial, sans-serif;
+}
+
+tr,th,td {
+    text-align: left;
+    font-weight: normal;
+    width: auto;
+    height: auto;
+    background-color: transparent;
+    vertical-align: inherit;
+    border: none;
+}
+
+.calendar {
+    border: 0;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.calendar td {
+    margin: 0;
+    vertical-align: top;
+}
+
+.outDate {
+    filter: alpha(opacity=40);
+    opacity: 0.4;
+    background-color: #E0E0EF;
+}
+
+#currentDate {
+    background-color: #C6CCD9;
+}
+
+.weekEndDay {
+    background-color: #F8EFC2;
+}
+
+.appointmentDayStartEnd {
+    background: #6cb8e1;
+    overflow: hidden;
+    margin: 1px 0;
+    padding: 1px 2px;
+    border: 1px solid #000;
+}
+
+#calendarWeek {
+    width: 100%;
+}
+
+#calendarWeek .appointmentsDay {
+    border-bottom: 1px solid gray;
+}
+
+#calendarWeek th {
+    height: auto;
+}
+
+#calendarWeek .wrapper {
+    overflow: hidden;
+}
+
+#calendarWeek td {
+    border-right: 1px solid silver;
+}
+
+#calendarWeek td.last {
+    border-right: 1px solid silver;
+}
+
+#calendarWeek span {
+    padding: 2px 2px 0;
+    background: #f5f5f5;
+    font-weight: 700;
+}
+
+#calendarWeek ol span {
+    text-align: left;
+    display: block;
+    border-bottom: 1px solid gray;
+}
+
+#calendarWeek ol ol span {
+    display: inline;
+    border: none;
+    padding-left: 3px;
+}
+
+#calendarWeek .days {
+    height: 30px;
+}
+
+#calendarWeek .day {
+    border-bottom: 1px solid #999;
+}
+
+#calendarWeek .time {
+    text-align: right;
+    vertical-align: middle;
+    width: auto;
+    padding-right: 5px;
+}
+
+#calendarWeek .appointments {
+    border-bottom: 1px solid silver;
+    height: 60px;
+}
+
+#calendarWeek .appointmentsWeekEnd {
+    border-bottom: 1px solid silver;
+    background-color: #eee;
+}
+
+#calendarWeek .appointments span {
+    border: 0;
+    background: none;
+}
+
+#calendarWeek .appointment {
+    padding: 2px 2px 0px 2px;
+    overflow: hidden;
+    background-color: #6cb8e1;
+}
+</style>
+<title>${documentTitle} - ${i18n.tr("Calendar")} - ${i18n.tr("Week")} ${days[0].format("w", days[0].time)}</title>
+</head>
+<body onload="window.print()">
+  <div id="layout" class="flexChilds">
+    <div id="headArea">
+    </div>
+    <div id="contentArea">
+      <table border="0" id="calendarWeek" class="calendar">
+        <thead>
+          <tr>
+            <th>
+            </th>
+            <#list days as day>
+            <th class="day">
+              ${day.format("EEEE", day.time)}
+            </th>
+            </#list>
+          </tr>
+        </thead>
+        <tbody>
+          <#setting locale="en"/>
+          <#setting number_format="0.##">
+          <#assign columnWidth = 100 / days?size>
+          <tr>
+            <td></td>
+            <#list days as day>
+            <td class="appointmentsDay">
+              <div class="wrapper">
+                <#list day.wholeDayAppointments as appointment>
+                <div class="appointmentDayStartEnd">${appointment.title}</div>
+                </#list>
+              </div>
+            </td>
+            </#list>
+          </tr>
+          <#list 0..23 as hour>
+          <tr>
+            <#if hour % 2 == 0 >
+            <#assign inlineStyle = "border-right: 1px solid #C0C0C1;">
+            <#else>
+            <#assign inlineStyle = "">
+            </#if>
+            <td class="time" style="${inlineStyle}">${hour}</td>
+            <#list days as day>
+            <#if day.weekEnd>
+            <td class="appointmentsWeekEnd" style="width: ${columnWidth}%; ${inlineStyle}">
+              <#else>
+              <td class="appointments" style="width: ${columnWidth}%; ${inlineStyle}">
+                </#if>
+                <div style="position: relative; ">
+                  <#assign appointmentWidth = 100 / day.columns?size>
+                  <#list day.getAppointmentsStartingBetween(hour * 60, (hour + 1) * 60) as appointment>
+                  <div style="position: absolute; top: ${appointment.startMinutes - hour * 60}px; min-height: 30px; margin-left: ${day.getColumn(appointment) * appointmentWidth}%; height: ${appointment.durationInMinutes}px; width: ${appointmentWidth}%; ">
+                    <div style="position:absolute; top:0px; bottom: 0px; right:0px; left:0px; border: 1px solid #000;">
+                      <div class="appointment" style="position:absolute; top:0px; bottom: 0px; right:0px; left:0px;">
+                        <div>${appointment.format("HH:mm", appointment.startDate)} ${appointment.title}</div>
+                        <#if appointment.location?has_content>
+                        ${appointment.location}
+                        </#if>
+                      </div>
+                    </div>
+                  </div>
+                  </#list>
+                </div>
+              </td>
+              </#list>
+            </tr>
+            </#list>
+          </tbody>
+        </table>
+      </div>
+      <div id="footerArea">
+      </div>
+    </div>
+  </body>
+  </html>

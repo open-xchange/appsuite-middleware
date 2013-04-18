@@ -1,0 +1,210 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <#assign day = days[0]>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <style type="text/css">
+/* reset
+---------------------------------------------------*/
+*                                                 { text-decoration:none; font-size: 1em; outline: none; padding: 0; margin: 0; }
+html                                              { color: black; line-height: 1; font-family: arial, sans-serif; font-size: 125%; }
+body                                              { font-size: 50%; background-color: transparent; }
+th,                                               { font-weight: normal; }
+
+th,
+td                                                { text-align: left; }
+
+ul,
+ol                                                { list-style: none; }
+ol                                                { list-style-type: decimal; }
+
+tr,
+th,
+td                                                { width: auto; height: auto; background-color: transparent; vertical-align: inherit; border: none; }
+nobr                                              { white-space: normal; }
+
+th,
+thead td,
+dt                                                { font-weight: bold; }
+
+/* typography
+---------------------------------------------------*/
+body                                              { font-family: arial, sans-serif; }
+*                                                 { line-height: 1.4em; }
+table                                             { font-size: 12px; }
+th                                                { font-weight: bold; }
+ul,
+ol                                                { font-size: 12px; margin: .5em 0 1em 1.6em; }
+
+li                                                { font-size: 12px; }
+
+li ul,
+li ol                                             { margin: 0 0 0 1.6em; }
+.calendar                                         { border: 0; border-collapse: collapse; width: 100% }
+
+.calendar th                                      { text-align: center }
+.calendar td                                      { margin: 0; vertical-align: top; }
+
+.outDate                                          { filter:alpha(opacity=40); opacity: 0.4; background-color: #E0E0EF !important; }
+
+#currentDate                                      { background-color: #C6CCD9 !important; }
+
+.weekEndDay                                       { background-color: #F8EFC2 !important; }
+
+ol,
+ol ol                                             { list-style-type: none; margin: 0; min-height: 60px; }
+ol ol li                                          { margin: 1px 5px; margin-left: 18px; }
+ol ol ol li                                       { background: none; padding: 0 }
+
+.appointmentDayStartEnd                           { background: #6CB8E1; height: 15px; overflow: hidden; padding: 0 0 2px 5px; border: 1px solid #808080;}
+
+/* Name
+---------------------------------------------------*/
+#calendarDay                                      { width: 100%; }
+
+#calendarDay .wrapper                             { overflow: hidden; }
+
+#calendarDay td                                   { border-right: 1px solid black; }
+
+#calendarDay span                                 { padding: 2px 2px 0 2px; background: #6CB8E1; font-weight: bold; }
+#calendarDay li li span                           { padding: 0; background: none; }
+
+#calendarDay li li                                { margin-top: 10px }
+#calendarDay ol ol ol                             { margin-left: 60px; }
+#calendarDay ol ol ol li                          { margin-top: 1px }
+
+#calendarDay ol span                              { text-align: left; display: block; border-bottom: 1px solid gray }
+#calendarDay ol ol span                           { display: inline; border: none; padding-left: 3px }
+
+#calendarDay .time                                { text-align: right; vertical-align: middle; padding-right: 5px; font-weight: bold; }
+#calendarDay .appointments                        { width: 50%; border-bottom: 1px solid #999999; height: 60px;}
+#calendarDay .appointments span                   { border: 0; background: none; font-weight: normal; }
+#calendarDay .appointments li                     { border-left: 5px solid #ffcb71; padding-left: 5px; }
+#calendarDay #events                              { width: 50%; }
+
+#calendarDay .appointment                         { overflow: hidden; background-color: #6CB8E1; border: 1px solid #000; }
+#calendarDay .appointment div { padding: 2px; }
+    </style>
+    <title>${documentTitle} - ${i18n.tr("Calendar")} - ${day.format("EEEE", day.time)}, ${day.format("d. MMMM", day.time)}</title>
+  </head>
+  <body onload="window.print()">
+    <div id="layout" class="flexChilds">
+      <div id="headArea">
+      </div>
+      <div id="contentArea">
+        <table border="0" id="calendarDay" class="calendar">
+          <tbody>
+            <#setting locale="en"/>
+            <#setting number_format="0.##">
+            <#assign width = 100 / days[0].columns?size>
+            <tr>
+              <td />	
+              <td class="appointments" style="height: auto; ">
+                <div class="wrapper">
+                  <#list days[0].wholeDayAppointments as appointment>
+                  <div class="appointmentDayStartEnd">${appointment.title}</div>
+                  </#list>
+                </div>
+              </td>
+              <td id="events" rowspan="25">
+                <ol>
+                  <#if days[0].wholeDayAppointments?size != 0>
+                  <li>
+                    <span>${i18n.tr("All-day events")}</span>
+                    <ol>
+                      <#list days[0].wholeDayAppointments as appointment>
+                      <li>
+                        <span>${appointment.format("d.M.", appointment.startDate)} ${appointment.title}</span>
+                        <ol>
+                          <#if appointment.location?has_content>
+                          <li>
+                            <span>${i18n.tr("Location")}:</span>
+                            ${appointment.location}
+                          </li>
+                          </#if>
+                          <li>
+                            <span>${i18n.tr("Participants")}:</span>
+                            <#list appointment.participants as participant>
+                            ${participant}<#if participant_has_next>; </#if>
+                            </#list>
+                          </li>
+                          <#if appointment.description?has_content>
+                          <li>
+                            <span>${i18n.tr("Comments")}:</span>
+                            ${appointment.description}
+                          </li>
+                          </#if>
+                        </ol>
+                      </li>
+                      </#list>
+                    </ol>
+                  </li>
+                  </#if>
+                  <#if days[0].appointments?size != 0>
+                  <li>
+                    <span>${i18n.tr("Events")}</span>
+                    <ol>
+                      <#list days[0].appointments as appointment>
+                      <li>
+                        <span>${appointment.format("HH:mm", appointment.startDate)} - ${appointment.format("HH:mm", appointment.endDate)} ${appointment.title}</span>
+                        <ol>
+                          <#if appointment.location?has_content>
+                          <li>
+                            <span>${i18n.tr("Location")}:</span>
+                            ${appointment.location}
+                          </li>
+                          </#if>
+                          <li>
+                            <span>${i18n.tr("Participants")}:</span>
+                            <#list appointment.participants as participant>
+                            ${participant}<#if participant_has_next>; </#if>
+                            </#list>
+                          </li>
+                          <#if appointment.description?has_content>
+                          <li>
+                            <span>${i18n.tr("Comments")}:</span>
+                            ${appointment.description}
+                          </li>
+                          </#if>
+                        </ol>
+                      </li>
+                      </#list>
+                    </ol>
+                  </li>
+                  </#if>
+                </ol>
+              </td>
+            </tr>
+            <#list 0..23 as hour>
+            <tr>
+              <td class="time">
+                ${hour}
+              </td>
+              <td class="appointments">
+                <div style="position: relative; ">
+                  <#assign appointmentsBetween = days[0].getAppointmentsStartingBetween(hour * 60, (hour + 1) * 60)>
+                  <#list appointmentsBetween as appointment>
+                  <div style="position: absolute; top: ${appointment.startMinutes - hour * 60}px; margin-left: ${days[0].getColumn(appointment) * width}%; height: ${appointment.durationInMinutes}px; width: ${width}%; ">
+                  	<div style="position:absolute; top:0px; bottom: 0px; right:0px; left:0px;">
+	                  <div class="appointment" style="position:absolute; top:0px; bottom: 0px; right:0px; left:0px;">
+	                    <div>${appointment.format("HH:mm", appointment.startDate)} ${appointment.title}</div>
+	                    <#if appointment.location?has_content>
+	                    <span>${appointment.location}</span>
+	                    </#if>
+	                  </div>
+	                  </div>
+                  </div>
+                </#list>
+                </div>
+              </td>
+            </tr>
+            </#list>
+          </tbody>
+        </table>
+      </div>
+      <div id="footerArea">
+      </div>
+    </div>
+  </body>
+</html>
