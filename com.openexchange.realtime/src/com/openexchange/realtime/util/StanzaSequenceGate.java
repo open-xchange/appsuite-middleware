@@ -153,6 +153,7 @@ public abstract class StanzaSequenceGate {
                 if (threshhold.get() > stanza.getSequenceNumber()) {
                     // Discard as this stanza already passed the gate once
                     stanza.trace("Discarded as this sequence number has already successfully passed this gate: " + stanza.getSequenceNumber());
+                    LOG.debug("Discarded as this sequence number has already successfully passed this gate: " + stanza.getSequenceNumber());
                     return;
                 }
                 stanza.trace("Not in sequence, enqueing");
