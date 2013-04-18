@@ -50,13 +50,13 @@
 package com.openexchange.drive.internal;
 
 import java.io.InputStream;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
 import jonelo.jacksum.algorithm.MD;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.IFileHolder;
@@ -66,6 +66,7 @@ import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
 import com.openexchange.drive.actions.DriveAction;
 import com.openexchange.drive.actions.EditFileAction;
+import com.openexchange.drive.checksum.DirectoryFragment;
 import com.openexchange.drive.comparison.DirectoryVersionMapper;
 import com.openexchange.drive.comparison.FileVersionMapper;
 import com.openexchange.drive.comparison.ServerDirectoryVersion;
@@ -79,7 +80,6 @@ import com.openexchange.drive.sync.optimize.OptimizingFileSynchronizer;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
@@ -275,7 +275,7 @@ public class DriveServiceImpl implements DriveService {
         return directories;
     }
 
-    private static ServerDirectoryVersion getServerDirectory(String path, DriveSession session) throws OXException {
+    private static Set<DirectoryFragment> getDirectoryFragments(String path, DriveSession session) throws OXException {
         List<File> files = session.getStorage().getFiles(path, new FileFilter() {
 
             @Override
@@ -284,40 +284,41 @@ public class DriveServiceImpl implements DriveService {
             }
         });
         if (null == files || 0 == files.size()) {
-            return new ServerDirectoryVersion(path, DriveConstants.EMPTY_MD5);
+            return Collections.emptySet();
         }
-        Collections.sort(files, new Comparator<File>() {
-
-            @Override
-            public int compare(File file1, File file2) {
-                return file1.getFileName().compareTo(file2.getFileName());
-            }
-        });
+        TreeSet<DirectoryFragment> fragments = new TreeSet<DirectoryFragment>();
         String folderID = session.getStorage().getFolderID(path);
         Map<File, String> knownChecksums = session.getChecksumStore().getFilesInFolder(folderID);
-        try {
-            MD md5 = new MD("MD5");
-            for (File file : files) {
-                if (null != file.getFileName()) {
-                    String knownChecksum = null;
-                    md5.update(file.getFileName().getBytes(Charsets.UTF_8));
-                    for (Entry<File, String> entry : knownChecksums.entrySet()) {
-                        if (entry.getKey().getId().equals(file.getId()) && entry.getKey().getSequenceNumber() == file.getSequenceNumber()) {
-                            knownChecksum = entry.getValue();
-                            break;
-                        }
-                    }
-                    if (null != knownChecksum) {
-                        md5.update(knownChecksum.getBytes(Charsets.UTF_8));
-                    } else {
-                        md5.update(session.getChecksumStore().getChecksum(file).getBytes(Charsets.UTF_8));
+        for (File file : files) {
+            if (null != file.getFileName()) {
+                String knownChecksum = null;
+                for (Entry<File, String> entry : knownChecksums.entrySet()) {
+                    if (entry.getKey().getId().equals(file.getId()) && entry.getKey().getSequenceNumber() == file.getSequenceNumber()) {
+                        knownChecksum = entry.getValue();
+                        break;
                     }
                 }
+                if (null != knownChecksum) {
+                    fragments.add(new DirectoryFragment(file.getFileName(), knownChecksum));
+                } else {
+                    fragments.add(new DirectoryFragment(file.getFileName(), session.getChecksumStore().getChecksum(file)));
+                }
             }
-            return new ServerDirectoryVersion(path, md5.getFormattedValue());
-        } catch (NoSuchAlgorithmException e) {
-            throw new OXException(e);
         }
+        return fragments;
+    }
+
+    private static ServerDirectoryVersion getServerDirectory(String path, DriveSession session) throws OXException {
+        Set<DirectoryFragment> fragments = getDirectoryFragments(path, session);
+        if (null == fragments || 0 == fragments.size()) {
+            return new ServerDirectoryVersion(path, DriveConstants.EMPTY_MD5);
+        }
+        MD md5 = session.newMD5();
+        for (DirectoryFragment directoryFragment : fragments) {
+            md5.update(directoryFragment.getEncodedFileName());
+            md5.update(directoryFragment.getEncodedChecksum());
+        }
+        return new ServerDirectoryVersion(path, md5.getFormattedValue());
     }
 
     private static DriveSession createSession(ServerSession session, String rootFolderID) {

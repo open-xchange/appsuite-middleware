@@ -181,8 +181,8 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
     @Override
     public String toString() {
         StringAllocator stringAllocator = new StringAllocator();
-        stringAllocator.append("                                 | Original Version                 | Client Version                   | Server Version                  \n");
-        stringAllocator.append("---------------------------------+----------------------------------+----------------------------------+---------------------------------\n");
+        stringAllocator.append("                                 | Original Version                 | Client Version                     | Server Version                    \n");
+        stringAllocator.append("---------------------------------+----------------------------------+------------------------------------+-----------------------------------\n");
         for (Entry<String, ThreeWayComparison<T>> entry : this) {
             String name = Strings.abbreviate(entry.getKey(), entry.getKey().length(), 32);
             ThreeWayComparison<T> comparison = entry.getValue();
@@ -194,8 +194,10 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
             stringAllocator.append(null != comparison.getOriginalVersion() ? comparison.getOriginalVersion().getChecksum() : "                                ");
             stringAllocator.append(" | ");
             stringAllocator.append(null != comparison.getClientVersion() ? comparison.getClientVersion().getChecksum() : "                                ");
+            stringAllocator.append(Change.NONE == comparison.getClientChange() ? "  " : ' ' + comparison.getClientChange().toString().substring(0, 1));
             stringAllocator.append(" | ");
             stringAllocator.append(null != comparison.getServerVersion() ? comparison.getServerVersion().getChecksum() : "                                ");
+            stringAllocator.append(Change.NONE == comparison.getServerChange() ? "  " : ' ' + comparison.getServerChange().toString().substring(0, 1));
             stringAllocator.append('\n');
         }
         return stringAllocator.toString();
