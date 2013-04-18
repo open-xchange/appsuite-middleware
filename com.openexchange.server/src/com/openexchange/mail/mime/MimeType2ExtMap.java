@@ -269,9 +269,10 @@ public final class MimeType2ExtMap {
      * @param mimeType The MIME type
      * @return The file extension for given MIME type or <code>dat</code> if none found
      */
-    public static List<String> getFileExtensions(final String mimeType) {
+    public static List<String> getFileExtensions(String mimeType) {
         init();
-        return extMap.containsKey(mimeType.toLowerCase(Locale.ENGLISH)) ? Collections.unmodifiableList(extMap.get(mimeType)) : DEFAULT_EXT;
+        mimeType = mimeType.toLowerCase(Locale.ENGLISH);
+        return extMap.containsKey(mimeType) ? Collections.unmodifiableList(extMap.get(mimeType)) : DEFAULT_EXT;
     }
 
     /**
