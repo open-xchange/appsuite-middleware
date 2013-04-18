@@ -540,7 +540,11 @@ public final class HTMLFilterHandler implements HtmlHandler {
     }
 
     private static boolean isNonJavaScriptURL(final String val) {
-        return (null != val && !val.trim().toLowerCase(Locale.US).startsWith("javascript:"));
+        if (null == val) {
+            return false;
+        }
+        final String lc = val.trim().toLowerCase(Locale.US);
+        return !lc.startsWith("javascript:") && !lc.startsWith("vbscript:");
     }
 
     /**
