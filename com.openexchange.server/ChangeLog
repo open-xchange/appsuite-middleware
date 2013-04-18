@@ -2,7 +2,7 @@
 
  - Fix for bug 26015: Added missing missing timezone for halo calls.
 
-* 2013-04-18 - thorben.betten@open-xchange.com
+* 2013-04-18 - marc.arens@open-xchange.com
 
  - Fix for bug 25842: Use com.openexchange.servlet.maxBodySize for parameters transported via PUT/POST body
 
