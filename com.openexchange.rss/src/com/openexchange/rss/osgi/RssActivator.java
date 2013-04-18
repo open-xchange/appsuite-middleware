@@ -51,10 +51,16 @@ package com.openexchange.rss.osgi;
 
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.rss.RssJsonConverter;
 import com.openexchange.rss.RssServices;
 import com.openexchange.rss.actions.RssActionFactory;
+import com.openexchange.tools.session.ServerSession;
 
 public class RssActivator extends AJAXModuleActivator {
 
@@ -68,6 +74,23 @@ public class RssActivator extends AJAXModuleActivator {
     	RssServices.LOOKUP.set(this);
     	registerModule(new RssActionFactory(), "rss");
     	registerService(ResultConverter.class, new RssJsonConverter());
+    	registerService(CapabilityChecker.class, new CapabilityChecker() {
+
+            @Override
+            public boolean isEnabled(String capability, ServerSession session) throws OXException {
+                if ("rss".equals(capability)) {
+                    if (session.isAnonymous()) {
+                        return false;
+                    }
+                    final ConfigViewFactory factory = getService(ConfigViewFactory.class);
+                    final ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+                    return view.opt("com.openexchange.rss", boolean.class, Boolean.TRUE).booleanValue();
+                }
+                return true;
+
+            }
+        });
+    	getService(CapabilityService.class).declareCapability("rss");
     }
 
     @Override
