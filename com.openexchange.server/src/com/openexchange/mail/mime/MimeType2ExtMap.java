@@ -58,6 +58,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -255,13 +256,7 @@ public final class MimeType2ExtMap {
         return type;
     }
 
-    private static final List<String> DEFAULT_EXT;
-
-    static {
-        final List<String> l = new ArrayList<String>(1);
-        l.add("dat");
-        DEFAULT_EXT = Collections.unmodifiableList(l);
-    }
+    private static final List<String> DEFAULT_EXT = Collections.unmodifiableList(Arrays.asList("dat"));
 
     /**
      * Gets the file extension for given MIME type.
