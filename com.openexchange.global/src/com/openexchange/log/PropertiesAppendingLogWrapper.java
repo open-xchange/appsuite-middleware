@@ -257,6 +257,7 @@ public class PropertiesAppendingLogWrapper implements Log, PropertiesAppender {
         if (!enabled) {
             return Collections.emptySet();
         }
+        // Get all available log properties
         final Map<LogProperties.Name, Object> properties;
         {
             final Props logProps = LogProperties.optLogProperties();
@@ -268,8 +269,8 @@ public class PropertiesAppendingLogWrapper implements Log, PropertiesAppender {
                 return Collections.emptySet();
             }
         }
-        final Set<LogProperties.Name> propertiesToLog = EnumSet.noneOf(LogProperties.Name.class);
         // First add the configured ones
+        final Set<LogProperties.Name> propertiesToLog = EnumSet.noneOf(LogProperties.Name.class);
         {
             final List<LogPropertyName> names = LogProperties.getPropertyNames();
             if (!names.isEmpty()) {
