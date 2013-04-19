@@ -66,15 +66,15 @@ public class RssActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {HtmlService.class};
+        return new Class<?>[] { HtmlService.class, CapabilityService.class };
     }
 
     @Override
-    protected void startBundle() throws Exception {
-    	RssServices.LOOKUP.set(this);
-    	registerModule(new RssActionFactory(), "rss");
-    	registerService(ResultConverter.class, new RssJsonConverter());
-    	registerService(CapabilityChecker.class, new CapabilityChecker() {
+    protected void startBundle() {
+        RssServices.LOOKUP.set(this);
+        registerModule(new RssActionFactory(), "rss");
+        registerService(ResultConverter.class, new RssJsonConverter());
+        registerService(CapabilityChecker.class, new CapabilityChecker() {
 
             @Override
             public boolean isEnabled(String capability, ServerSession session) throws OXException {
@@ -90,12 +90,11 @@ public class RssActivator extends AJAXModuleActivator {
 
             }
         });
-    	getService(CapabilityService.class).declareCapability("rss");
+        getService(CapabilityService.class).declareCapability("rss");
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-    	RssServices.LOOKUP.set(null);
+    protected void stopBundle() {
+        RssServices.LOOKUP.set(null);
     }
-
 }
