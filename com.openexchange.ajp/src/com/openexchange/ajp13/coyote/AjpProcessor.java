@@ -95,6 +95,7 @@ import com.openexchange.ajp13.watcher.AJPv13TaskMonitor;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.java.Charsets;
+import com.openexchange.log.ForceLog;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
@@ -717,7 +718,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 final Props properties = LogProperties.getLogProperties();
                 properties.put(LogProperties.Name.AJP_THREAD_NAME, thread.getName());
                 properties.put(LogProperties.Name.AJP_REMOTE_PORT, Integer.valueOf(socket.getPort()));
-                properties.put(LogProperties.Name.AJP_REMOTE_ADDRESS, socket.getInetAddress().getHostAddress());
+                properties.put(LogProperties.Name.AJP_REMOTE_ADDRESS, ForceLog.valueOf(socket.getInetAddress().getHostAddress()));
             }
             final boolean debug = LOG.isDebugEnabled();
             try {
