@@ -141,6 +141,7 @@ public final class LoginWriter {
     }
 
     private static final String PARAMETER_USER_ID = AJAXServlet.PARAMETER_USER_ID;
+    private static final String PARAMETER_CONTEXT_ID = "context_id";
     private static final String PARAMETER_USER = AJAXServlet.PARAMETER_USER;
     private static final String RANDOM_PARAM = LoginFields.RANDOM_PARAM;
     private static final String PARAMETER_SESSION = AJAXServlet.PARAMETER_SESSION;
@@ -151,6 +152,7 @@ public final class LoginWriter {
         json.put(RANDOM_PARAM, session.getRandomToken());
         json.put(PARAMETER_USER, session.getLogin());
         json.put(PARAMETER_USER_ID, session.getUserId());
+        json.put(PARAMETER_CONTEXT_ID, session.getContextId());
         final Locale loc = locale == null ? resolveLocaleForUser(session, DEFAULT_LOCALE) : locale;
         json.put(PARAMETER_LOCALE, loc.toString());
         if (null != warnings && !warnings.isEmpty()) {
