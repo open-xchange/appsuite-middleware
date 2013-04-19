@@ -1,3 +1,7 @@
+* 2013-04-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25957: Deny "vbscript" URLs
+
 * 2013-03-11 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 25233: Made LDAP contact cache aware of possibly skipped empty distribution lists

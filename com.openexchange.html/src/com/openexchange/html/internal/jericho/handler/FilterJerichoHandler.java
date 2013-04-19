@@ -61,6 +61,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -146,6 +147,24 @@ public final class FilterJerichoHandler implements JerichoHandler {
         s = new HashSet<String>();
         s.add("wbr");
         SINGLE_TAGS = Collections.unmodifiableSet(s);
+    }
+
+    /**
+     * Gets the static HTML map.
+     *
+     * @return The HTML map
+     */
+    public static Map<String, Map<String, Set<String>>> getStaticHTMLMap() {
+        return staticHTMLMap;
+    }
+
+    /**
+     * Gets the static CSS map.
+     *
+     * @return The CSS map
+     */
+    public static Map<String, Set<String>> getStaticStyleMap() {
+        return staticStyleMap;
     }
 
     /*-
@@ -669,7 +688,11 @@ public final class FilterJerichoHandler implements JerichoHandler {
     }
 
     private static boolean isNonJavaScriptURL(final String val) {
-        return (null != val && !toLowerCase(val.trim()).startsWith("javascript:"));
+        if (null == val) {
+            return false;
+        }
+        final String lc = val.trim().toLowerCase(Locale.US);
+        return !lc.startsWith("javascript:") && !lc.startsWith("vbscript:");
     }
 
     @Override
