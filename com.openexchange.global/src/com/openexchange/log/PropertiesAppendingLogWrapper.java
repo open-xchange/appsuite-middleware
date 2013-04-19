@@ -195,7 +195,7 @@ public class PropertiesAppendingLogWrapper implements Log, PropertiesAppender {
 
     /**
      * Appends the log properties
-     * 
+     *
      * @param message The message
      * @param logLevel The log level
      * @return The message with properties appended
@@ -268,14 +268,11 @@ public class PropertiesAppendingLogWrapper implements Log, PropertiesAppender {
                 return Collections.emptySet();
             }
         }
-        final Set<LogProperties.Name> propertiesToLog;
+        final Set<LogProperties.Name> propertiesToLog = EnumSet.noneOf(LogProperties.Name.class);
         // First add the configured ones
         {
             final List<LogPropertyName> names = LogProperties.getPropertyNames();
-            if (names.isEmpty()) {
-                propertiesToLog = Collections.emptySet();
-            } else {
-                propertiesToLog = EnumSet.noneOf(LogProperties.Name.class);
+            if (!names.isEmpty()) {
                 for (final LogPropertyName name : names) {
                     if (name.implies(logLevel)) {
                         propertiesToLog.add(name.getPropertyName());
