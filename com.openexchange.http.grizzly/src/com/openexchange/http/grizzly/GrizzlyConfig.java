@@ -122,8 +122,8 @@ public class GrizzlyConfig implements Initialization {
 
     /** Default encoding for incoming Http Requests, this value must be equal to the web server's default encoding */
     private String defaultEncoding = "UTF-8";
-    
-    /** Do we want to consider X-Forward-* Headers */ 
+
+    /** Do we want to consider X-Forward-* Headers */
     private boolean isConsiderXForwards = false;
 
     /** A comma separated list of known proxies */
@@ -133,7 +133,7 @@ public class GrizzlyConfig implements Initialization {
      * proxy or load balancer
      */
     private String forHeader = "X-Forwarded-For";
-    
+
     /** The name of the protocolHeader used to decide if we are dealing with a in-/secure Request */
     private String protocolHeader = "X-Forwarded-Proto";
 
@@ -145,12 +145,12 @@ public class GrizzlyConfig implements Initialization {
 
     /** The port used for https communication */
     private int httpsProtoPort = 443;
-    
+
     /** The name of the echo header whose value is echoed for each request providing that header, see mod_id for apache */
     private String echoHeader = "X-Echo-Header";
-    
+
     /** The maximum allowed size for PUT and POST bodies */
-    private int maxBodySize = 104857600; 
+    private int maxBodySize = 104857600;
 
     // sessiond properties
 
@@ -188,7 +188,7 @@ public class GrizzlyConfig implements Initialization {
         this.isAJPEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasAJPEnabled", false);
 
         // server properties
-        this.cookieMaxAge = Integer.valueOf(ConfigTools.parseTimespanSecs(configService.getProperty("com.openexchange.cookie.ttl", "1W")));
+        this.cookieMaxAge = Integer.valueOf(ConfigTools.parseTimespanSecs(configService.getProperty("com.openexchange.cookie.ttl", "1W"))).intValue();
         this.cookieMaxInactivityInterval = configService.getIntProperty("com.openexchange.servlet.maxInactiveInterval", 1800);
         this.isForceHttps = configService.getBoolProperty("com.openexchange.forceHTTPS", false);
         this.isCookieHttpOnly = configService.getBoolProperty("com.openexchange.cookie.httpOnly", true);
@@ -368,15 +368,15 @@ public class GrizzlyConfig implements Initialization {
     public List<String> getKnownProxies() {
         return knownProxies;
     }
-    
+
     /**
-     * Gets the name of forward for header 
+     * Gets the name of forward for header
      * @return the forwardHeader
      */
     public String getForHeader() {
         return forHeader;
     }
-    
+
     /**
      * Gets the protocolHeader
      *
@@ -444,15 +444,15 @@ public class GrizzlyConfig implements Initialization {
     public boolean isConsiderXForwards() {
         return isConsiderXForwards;
     }
-    
+
     /**
-     * Get the name of the echo header whose value is echoed for each request providing that header when using KippDta's mod_id. 
+     * Get the name of the echo header whose value is echoed for each request providing that header when using KippDta's mod_id.
      * @return The name of the echo header whose value is echoed for each request providing that header.
      */
     public String getEchoHeader() {
         return this.echoHeader;
     }
-    
+
     /** Get the maximum allowed size for PUT and POST bodies */
     public int getMaxBodySize() {
         return maxBodySize;
