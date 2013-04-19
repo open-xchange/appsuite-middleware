@@ -1,3 +1,7 @@
+* 2013-04-19 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26036: Added required service to needed services list of RSS bundle activator.
+
 * 2013-04-18 - martin.herfurth@open-xchange.com
 
  - Fix for bug 26015: Added missing missing timezone for halo calls.
