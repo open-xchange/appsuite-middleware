@@ -248,7 +248,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                             AtmosphereResource atmosphereResource = concreteIDToResourceMap.get(id);
                             try {
                                 writeExceptionToResource(e, atmosphereResource);
-                                atmosphereResource.getResponse().getWriter().flush();
+                                atmosphereResource.resume();
                             } catch (Throwable t) {
                                 // Give up
                             }
@@ -489,7 +489,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 case JSONP:
                 case AJAX:
                 case LONG_POLLING:
-                    atmosphereResource.getResponse().getWriter().flush();
+                    atmosphereResource.resume();
                     break;
                 default:
                     break;
