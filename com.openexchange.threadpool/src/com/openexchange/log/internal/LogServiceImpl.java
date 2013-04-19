@@ -60,7 +60,6 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogService;
 import com.openexchange.log.Loggable;
 import com.openexchange.log.Loggable.Level;
-import com.openexchange.log.PropertiesAppender;
 import com.openexchange.log.Props;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.AbortBehavior;
