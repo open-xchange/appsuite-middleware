@@ -73,7 +73,7 @@ public class FileRenameOptimizer implements ActionOptimizer<FileVersion> {
         List<DriveAction<FileVersion>> optimizedActionsForServer = new ArrayList<DriveAction<FileVersion>>(result.getActionsForServer());
         for (DriveAction<FileVersion> clientAction : result.getActionsForClient()) {
             /*
-             * check for client UPLOAD / server REMOVE / client acknowledge of identical file
+             * check for client UPLOAD / server REMOVE / client ACKNOWLEDGE of identical file
              *
              * Client: UPLOAD[file=null, newFile={"name":"b.msi","checksum":"152b95f026e5dbe6c258064d49b25e38"}, parameters={folder=56, offset=0}]
              * Server: REMOVE[file=ServerFileVersion [name=a.msi, checksum=152b95f026e5dbe6c258064d49b25e38], newFile=null, parameters={}]
@@ -88,7 +88,6 @@ public class FileRenameOptimizer implements ActionOptimizer<FileVersion> {
                         break;
                     }
                 }
-//                FileAction serverDelete = find(optimizedActionsForServer, clientAction.getNewFile().getChecksum(), Action.REMOVE);
                 if (null != matchingServerAction) {
 
                     DriveAction<FileVersion> matchingClientAction = null;

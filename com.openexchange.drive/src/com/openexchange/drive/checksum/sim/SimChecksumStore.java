@@ -122,5 +122,15 @@ public class SimChecksumStore implements ChecksumStore {
         return files;
     }
 
+    @Override
+    public void updateFolderIDs(String currentFolderID, String newFolderID) throws OXException {
+        for (Entry<File, String> entry : this.checksums.entrySet()) {
+            if (currentFolderID.equals(entry.getKey().getFolderId())) {
+                entry.getKey().setFolderId(newFolderID);
+            }
+        }
+
+    }
+
 }
 

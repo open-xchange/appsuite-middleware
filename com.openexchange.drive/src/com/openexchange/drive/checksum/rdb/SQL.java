@@ -81,7 +81,7 @@ public class SQL {
 
     public static final String SELECT_CHECKSUM_STMT =
         "SELECT LOWER(HEX(checksum)) FROM checksums " +
-        "WHERE cid=? AND service=? AND account=? AND folder=REVERSE(?) AND file=REVERSE(?) AND sequence=?;";
+        "WHERE cid=? AND service=? AND account=? AND folder=REVERSE(?) AND file=REVERSE(?) AND version=? AND sequence=?;";
 
     public static final String SELECT_FILES_STMT =
         "SELECT REVERSE(folder),REVERSE(file),version,sequence FROM checksums " +
@@ -98,6 +98,10 @@ public class SQL {
     public static final String DELETE_CHECKSUMS_STMT =
         "DELETE FROM checksums " +
         "WHERE cid=? AND service=? AND account=? AND folder=REVERSE(?) AND file=REVERSE(?);";
+
+    public static final String UPDATE_FOLDERS_STMT =
+        "UPDATE checksums SET folder=REVERSE(?) " +
+        "WHERE cid=? AND service=? AND account=? AND folder=REVERSE(?);";
 
     public static ResultSet logExecuteQuery(PreparedStatement stmt) throws SQLException {
         if (false == LOG.isDebugEnabled()) {

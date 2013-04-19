@@ -104,7 +104,7 @@ public class RdbChecksumStore implements ChecksumStore {
         Connection connection = databaseService.getReadOnly(session.getContextId());
         try {
             return selectChecksum(connection, session.getContextId(), serviceID, accountID,
-                file.getFolderId(), file.getId(), file.getSequenceNumber());
+                file.getFolderId(), file.getId(), file.getVersion(), file.getSequenceNumber());
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -161,7 +161,19 @@ public class RdbChecksumStore implements ChecksumStore {
         }
     }
 
-    private static String selectChecksum(Connection connection, int cid, String service, String account, String folder, String file, long sequence) throws SQLException {
+    @Override
+    public void updateFolderIDs(String currentFolderID, String newFolderID) throws OXException {
+        Connection connection = databaseService.getWritable(session.getContextId());
+        try {
+            updateFolderIDs(connection, session.getContextId(), serviceID, accountID, currentFolderID, newFolderID);
+        } catch (SQLException e) {
+            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            databaseService.backReadOnly(session.getContextId(), connection);
+        }
+    }
+
+    private static String selectChecksum(Connection connection, int cid, String service, String account, String folder, String file, String version, long sequence) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
         try {
@@ -171,7 +183,8 @@ public class RdbChecksumStore implements ChecksumStore {
             stmt.setString(3, account);
             stmt.setString(4, folder);
             stmt.setString(5, file);
-            stmt.setLong(6, sequence);
+            stmt.setString(6, version);
+            stmt.setLong(7, sequence);
             resultSet = SQL.logExecuteQuery(stmt);
             return resultSet.next() ? resultSet.getString(1) : null;
         } finally {
@@ -259,6 +272,21 @@ public class RdbChecksumStore implements ChecksumStore {
             stmt.setString(3, account);
             stmt.setString(4, folder);
             stmt.setString(5, file);
+            return SQL.logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private static int updateFolderIDs(Connection connection, int cid, String service, String account, String currentFolder, String newFolder) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.UPDATE_FOLDERS_STMT);
+            stmt.setString(1, newFolder);
+            stmt.setInt(2, cid);
+            stmt.setString(3, service);
+            stmt.setString(4, account);
+            stmt.setString(5, currentFolder);
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);

@@ -130,6 +130,11 @@ public class OnDemandCalculatingChecksumStore implements ChecksumStore {
         return delegate.getFilesInFolder(folderID);
     }
 
+    @Override
+    public void updateFolderIDs(String currentFolderID, String newFolderID) throws OXException {
+        delegate.updateFolderIDs(currentFolderID, newFolderID);
+    }
+
     private String calculateMD5(File file) throws OXException {
         InputStream document = null;
         try {

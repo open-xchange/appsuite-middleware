@@ -103,5 +103,7 @@ public interface ChecksumStore {
      */
     Map<File, String> getFilesInFolder(String folderID) throws OXException;
 
+    void updateFolderIDs(String currentFolderID, String newFolderID) throws OXException;
+
 }
 

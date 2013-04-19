@@ -55,6 +55,7 @@ import static com.openexchange.drive.storage.DriveConstants.TEMP_PATH;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -115,6 +116,8 @@ public class DriveStorage {
         copiedFile.setFileName(targetFileName);
         copiedFile.setTitle(targetFileName);
         copiedFile.setFolderId(getFolderID(targetPath, true));
+        copiedFile.setLastModified(new Date());
+        copiedFile.setVersion("1");
         List<Field> fileFields = Arrays.asList(new Field[] { Field.FILENAME, Field.TITLE, Field.FOLDER_ID });
         IDTuple sourceId = new IDTuple(sourceFile.getFolderId(), sourceFile.getId());
         IDTuple targetId = getFileAccess().copy(sourceId, copiedFile.getFolderId(), copiedFile, null, fileFields);
@@ -124,6 +127,8 @@ public class DriveStorage {
     }
 
     public File copyFile(File sourceFile, File targetFile) throws OXException {
+        targetFile.setLastModified(new Date());
+        targetFile.setFileSize(sourceFile.getFileSize());
         getFileAccess().saveDocument(targetFile, getDocument(sourceFile), targetFile.getSequenceNumber());
         return targetFile;
     }
@@ -190,6 +195,14 @@ public class DriveStorage {
             FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
     }
 
+    public File getFile(String path, String id) throws OXException {
+        return getFile(path, id, FileStorageFileAccess.CURRENT_VERSION);
+    }
+
+    public File getFile(String path, String id, String version) throws OXException {
+        return getFileAccess().getFileMetadata(getFolderID(path), id, version);
+    }
+
     public List<File> getFiles(String path, FileFilter filter) throws OXException {
         return Filter.apply(getFilesIterator(path), filter);
     }
@@ -241,9 +254,10 @@ public class DriveStorage {
      *
      * @param path The current path of the folder
      * @param newPath The new path
+     * @return The new ID of the moved folder
      * @throws OXException
      */
-    public void moveFolder(String path, String newPath) throws OXException {
+    public String moveFolder(String path, String newPath) throws OXException {
         if (Strings.isEmpty(newPath) || ROOT_PATH.equals(newPath)) {
             throw DriveExceptionCodes.INVALID_PATH.create(newPath);
         }
@@ -278,15 +292,21 @@ public class DriveStorage {
              */
             folderID = getFolderAccess().renameFolder(folderID, newName);
         }
+        return folderID;
     }
 
-    public void deleteFolder(String path) throws OXException {
+    public String deleteFolder(String path, boolean hard) throws OXException {
         if (Strings.isEmpty(path) || ROOT_PATH.equals(path)) {
             throw DriveExceptionCodes.INVALID_PATH.create(path);
         }
         FileStorageFolder folder = getFolder(path);
-        getFolderAccess().deleteFolder(folder.getId());
         knownFolders.forget(path, folder, true);
+        if (hard) {
+            getFolderAccess().deleteFolder(folder.getId());
+            return null;
+        } else {
+            return getFolderAccess().moveFolder(folder.getId(), getFolderID(TEMP_PATH, true));
+        }
     }
 
     public String getPath(String folderID) throws OXException {
@@ -366,11 +386,11 @@ public class DriveStorage {
             FileStorageFolder folder = getFolderAccess().getFolder(currentFolderID);
             folders.addFirst(folder);
             currentFolderID = folder.getParentId();
-        } while (null != currentFolderID && false == rootFolderID.equals(currentFolderID));
+        } while (null != currentFolderID && false == rootFolderID.getFolderId().equals(currentFolderID));
 
-        if (0 < folders.size() && rootFolderID.equals(folders.getFirst().getId())) {
+        if (0 < folders.size() && rootFolderID.getFolderId().equals(folders.getFirst().getParentId())) {
             StringBuilder pathBuilder = new StringBuilder();
-            for (int i = 1; i < folders.size(); i++) {
+            for (int i = 0; i < folders.size(); i++) {
                 FileStorageFolder folder = folders.get(i);
                 pathBuilder.append(PATH_SEPARATOR).append(folder.getName());
                 knownFolders.remember(pathBuilder.toString(), folder);

@@ -57,6 +57,7 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
@@ -111,9 +112,12 @@ public class UploadHelper {
                     //workaround:
                     {
                         //TODO: transactional
+                        originalFile.setFileSize(uploadFile.getFileSize());
+                        originalFile.setLastModified(new Date());
                         saveDocumentAndChecksum(originalFile, session.getStorage().getDocument(uploadFile),
                             uploadFile.getSequenceNumber(), DriveConstants.FILE_FIELDS, false);
                         session.getStorage().deleteFile(uploadFile, true);
+                        session.getChecksumStore().removeChecksums(uploadFile);
                     }
                     return new ServerFileVersion(originalFile, newVersion.getChecksum());//TODO: validate checksum
                 } else {
