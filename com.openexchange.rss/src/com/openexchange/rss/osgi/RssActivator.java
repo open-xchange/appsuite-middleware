@@ -66,7 +66,7 @@ public class RssActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HtmlService.class, CapabilityService.class };
+        return new Class<?>[] { HtmlService.class, CapabilityService.class, ConfigViewFactory.class };
     }
 
     @Override

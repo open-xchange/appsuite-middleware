@@ -196,7 +196,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         // Handle stream
         InputStream inputStream = getFileAccess(fileID.getService(), fileID.getAccountId()).getDocument(fileID.getFolderId(), fileID.getFileId(), version);
         for (final FileStreamHandler streamHandler : handlers) {
-            inputStream = streamHandler.handleDocumentStream(inputStream, fileID, version);
+            inputStream = streamHandler.handleDocumentStream(inputStream, fileID, version, session.getContextId());
         }
         return inputStream;
     }
