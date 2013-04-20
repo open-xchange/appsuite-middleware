@@ -257,13 +257,29 @@ public class FileResponseRenderer implements ResponseRenderer {
             /*
              * Output binary content
              */
-            final ServletOutputStream outputStream = resp.getOutputStream();
-            final int len = BUFLEN;
-            final byte[] buf = new byte[len];
-            for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
-                outputStream.write(buf, 0, read);
+            try {
+                final ServletOutputStream outputStream = resp.getOutputStream();
+                final int len = BUFLEN;
+                final byte[] buf = new byte[len];
+                for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
+                    outputStream.write(buf, 0, read);
+                }
+                outputStream.flush();
+            } catch (final IOException e) {
+                if ("connection reset by peer".equals(toLowerCase(e.getMessage()))) {
+                    /*-
+                     * The client side has abruptly aborted the connection.
+                     * That can have many causes which are not controllable by us.
+                     *
+                     * For instance, the peer doesn't understand what it received and therefore closes its socket.
+                     * For the next write attempt by us, the peer's TCP stack will issue an RST,
+                     * which results in this exception and message at the sender.
+                     */
+                    LOG.debug("Client dropped connection while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+                } else {
+                    LOG.error("Lost connection to client while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+                }
             }
-            outputStream.flush();
         } catch (final Exception e) {
             LOG.error("Exception while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
         } finally {
