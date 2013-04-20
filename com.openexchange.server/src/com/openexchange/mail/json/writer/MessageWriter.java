@@ -202,6 +202,26 @@ public final class MessageWriter {
      * @throws OXException If writing message fails
      */
     public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail settings, final Collection<OXException> warnings, final boolean token, final int tokenTimeout, final MimeFilter mimeFilter) throws OXException {
+        return writeMailMessage(accountId, mail, displayMode, embedded, session, settings, warnings, token, tokenTimeout, mimeFilter, null);
+    }
+
+    /**
+     * Writes whole mail as a JSON object.
+     *
+     * @param accountId The account ID
+     * @param mail The mail to write
+     * @param displayMode The display mode
+     * @param session The session
+     * @param settings The user's mail settings used for writing message; if <code>null</code> the settings are going to be fetched from
+     *            storage, thus no request-specific preparations will take place.
+     * @param warnings A container for possible warnings
+     * @param tokenTimeout
+     * @param mimeFilter The MIME filter
+     * @token <code>true</code> to add attachment tokens
+     * @return The written JSON object
+     * @throws OXException If writing message fails
+     */
+    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail settings, final Collection<OXException> warnings, final boolean token, final int tokenTimeout, final MimeFilter mimeFilter, final TimeZone optTimeZone) throws OXException {
         final MailPath mailPath;
         final String fullName = mail.getFolder();
         if (fullName != null && mail.getMailId() != null) {
@@ -231,6 +251,9 @@ public final class MessageWriter {
         try {
             final JsonMessageHandler handler =
                 new JsonMessageHandler(accountId, mailPath, mail, displayMode, embedded, session, usm, token, tokenTimeout);
+            if (null != optTimeZone) {
+                handler.setTimeZone(optTimeZone);
+            }
             final MailMessageParser parser = new MailMessageParser().addMimeFilter(mimeFilter);
             parser.parseMailMessage(mail, handler);
             if (null != warnings) {

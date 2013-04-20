@@ -55,6 +55,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
 import org.json.JSONArray;
@@ -90,6 +91,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -483,6 +485,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final String view = null == tmp ? null : tmp.toLowerCase(Locale.ENGLISH);
         tmp = requestData.getParameter(Mail.PARAMETER_UNSEEN);
         final boolean unseen = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
+        tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
+        final TimeZone timeZone = isEmpty(tmp) ? null : TimeZoneUtils.getTimeZone(tmp.trim());
         tmp = requestData.getParameter("token");
         final boolean token = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
         tmp = requestData.getParameter("ttlMillis");
@@ -553,7 +557,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 warnings,
                 token,
                 ttlMillis,
-                mimeFilter);
+                mimeFilter,
+                timeZone);
         } catch (final OXException e) {
             if (MailExceptionCode.MESSAGING_ERROR.equals(e)) {
                 final Throwable cause = e.getCause();

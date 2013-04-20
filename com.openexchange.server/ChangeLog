@@ -1,3 +1,7 @@
+* 2013-04-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26057: Honor optional URL parameter "timezone"
+
 * 2013-04-19 - marcus.klein@open-xchange.com
 
  - Fix for bug 26036: Added required service to needed services list of RSS bundle activator.
