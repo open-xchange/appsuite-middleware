@@ -141,6 +141,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
                 return service;
             } catch (final Exception e) {
                 context.ungetService(serviceReference);
+                LOG.warn("Adding service ("+service.getClass().getName()+") to listener failed. Service released.", e);
                 return null;
             }
         }
