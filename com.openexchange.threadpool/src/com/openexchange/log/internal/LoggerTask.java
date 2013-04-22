@@ -60,6 +60,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Loggable;
+import com.openexchange.log.internal.callback.DebugCallback;
+import com.openexchange.log.internal.callback.ErrorCallback;
+import com.openexchange.log.internal.callback.FatalCallback;
+import com.openexchange.log.internal.callback.InfoCallback;
+import com.openexchange.log.internal.callback.LogCallback;
+import com.openexchange.log.internal.callback.TraceCallback;
+import com.openexchange.log.internal.callback.WarnCallback;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadRenamer;
 
@@ -138,72 +145,12 @@ final class LoggerTask extends AbstractTask<Object> {
         this.queue = queue;
         this.maxMessageLength = maxMessageLength;
 
-        fatalCb = new LogCallback() {
-
-            @Override
-            public void log(final Object message, final Throwable t, final Log log) {
-                if (null == t) {
-                    log.fatal(message);
-                } else {
-                    log.fatal(message, t);
-                }
-            }
-        };
-        errorCb = new LogCallback() {
-
-            @Override
-            public void log(final Object message, final Throwable t, final Log log) {
-                if (null == t) {
-                    log.error(message);
-                } else {
-                    log.error(message, t);
-                }
-            }
-        };
-        warnCb = new LogCallback() {
-
-            @Override
-            public void log(final Object message, final Throwable t, final Log log) {
-                if (null == t) {
-                    log.warn(message);
-                } else {
-                    log.warn(message, t);
-                }
-            }
-        };
-        infoCb = new LogCallback() {
-
-            @Override
-            public void log(final Object message, final Throwable t, final Log log) {
-                if (null == t) {
-                    log.info(message);
-                } else {
-                    log.info(message, t);
-                }
-            }
-        };
-        debugCb = new LogCallback() {
-
-            @Override
-            public void log(final Object message, final Throwable t, final Log log) {
-                if (null == t) {
-                    log.debug(message);
-                } else {
-                    log.debug(message, t);
-                }
-            }
-        };
-        traceCb = new LogCallback() {
-
-            @Override
-            public void log(final Object message, final Throwable t, final Log log) {
-                if (null == t) {
-                    log.trace(message);
-                } else {
-                    log.trace(message, t);
-                }
-            }
-        };
+        fatalCb = new FatalCallback();
+        errorCb = new ErrorCallback();
+        warnCb = new WarnCallback();
+        infoCb = new InfoCallback();
+        debugCb = new DebugCallback();
+        traceCb = new TraceCallback();
     }
 
     /**
@@ -395,11 +342,6 @@ final class LoggerTask extends AbstractTask<Object> {
         } else {
             callback.log(sb.toString(), loggable.getThrowable(), loggable.getLog());
         }
-    }
-
-    private static interface LogCallback {
-
-        void log(Object message, Throwable t, Log log);
     }
 
 }
