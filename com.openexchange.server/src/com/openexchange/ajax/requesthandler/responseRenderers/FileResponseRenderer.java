@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -73,6 +74,7 @@ import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.Utils;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.images.ImageTransformationService;
@@ -299,23 +301,29 @@ public class FileResponseRenderer implements ResponseRenderer {
                     }
                     // If-Range header should either match ETag or be greater then LastModified. If not,
                     // then return full file.
-                    final List<Range> ranges = new ArrayList<Range>(4);
-                    final Range full = new Range(0L, length - 1, length);
-                    final String eTag = result.getHeader("ETag");
-                    final String ifRange = request.getHeader("If-Range");
-                    if (ifRange != null && !ifRange.equals(eTag)) {
-                        try {
-                            final long ifRangeTime = req.getDateHeader("If-Range"); // Throws IAE if invalid.
-                            if (ifRangeTime != -1 && ifRangeTime < result.getExpires()) {
-                                ranges.add(full);
+                    boolean full = false;
+                    {
+                        final String ifRange = request.getHeader("If-Range");
+                        final String eTag = result.getHeader("ETag");
+                        if (ifRange != null && !ifRange.equals(eTag)) {
+                            try {
+                                final long ifRangeTime = req.getDateHeader("If-Range"); // Throws IAE if invalid.
+                                if (ifRangeTime != -1 && ifRangeTime < result.getExpires()) {
+                                    full = true;
+                                }
+                            } catch (final IllegalArgumentException ignore) {
+                                full = true;
                             }
-                        } catch (final IllegalArgumentException ignore) {
-                            ranges.add(full);
                         }
                     }
                     // If any valid If-Range header, then process each part of byte range.
-                    if (ranges.isEmpty()) {
-                        for (final String part : sRange.substring(6).split(",")) {
+                    final List<Range> ranges;
+                    if (full) {
+                        ranges = Collections.emptyList();
+                    } else {
+                        final String[] parts = Strings.splitByComma(sRange.substring(6));
+                        ranges = new ArrayList<Range>(parts.length);
+                        for (final String part : parts) {
                             // Assuming a file with length of 100, the following examples returns bytes at:
                             // 50-80 (50 to 80), 40- (40 to length=100), -20 (length-20=80 to length=100).
                             final int dashPos = part.indexOf('-');
@@ -340,9 +348,9 @@ public class FileResponseRenderer implements ResponseRenderer {
                             ranges.add(new Range(start, end, length));
                         }
                     }
-                    if (ranges.isEmpty() || ranges.get(0) == full) {
+                    if (full || ranges.isEmpty()) {
                         // Return full file.
-                        final Range r = full;
+                        final Range r = new Range(0L, length - 1, length);
                         resp.setHeader("Content-Range", new StringAllocator("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
 
                         // Copy full range.
@@ -359,7 +367,8 @@ public class FileResponseRenderer implements ResponseRenderer {
                         copy(documentData, outputStream, r.start, r.length);
                     } else {
                         // Return multiple parts of file.
-                        resp.setContentType("multipart/byteranges; boundary=" + MULTIPART_BOUNDARY);
+                        final String boundary = MULTIPART_BOUNDARY;
+                        resp.setContentType("multipart/byteranges; boundary=" + boundary);
                         resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 206.
 
                         {
@@ -370,7 +379,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                             for (final Range r : ranges) {
                                 // Add multipart boundary and header fields for every range.
                                 sos.println();
-                                sos.println("--" + MULTIPART_BOUNDARY);
+                                sos.println("--" + boundary);
                                 sos.println("Content-Type: " + contentType);
                                 sos.println("Content-Range: bytes " + r.start + "-" + r.end + "/" + r.total);
 
@@ -380,7 +389,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
                             // End with multipart boundary.
                             sos.println();
-                            sos.println("--" + MULTIPART_BOUNDARY + "--");
+                            sos.println("--" + boundary + "--");
                         }
                     }
                 } else {
@@ -394,9 +403,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             } catch (final java.net.SocketException e) {
                 if ("broken pipe".equals(toLowerCase(e.getMessage()))) {
                     // Assume client-initiated connection closure
-                    LOG.warn("Underlying (TCP) protocol communication aborted while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
-
-                    LOG.debug("Client dropped connection while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
                 } else {
                     LOG.error("Lost connection to client while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
                 }
@@ -570,7 +577,11 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
         // Discard previous bytes
         for (int i = 0; i < start; i++) {
-            input.read();
+            if (input.read() < 0) {
+                // Stream does not provide enough bytes
+                throw new IOException("Start index " + start + " out of range. Got only " + i);
+            }
+            // Valid byte read... Continue.
         }
         long toRead = length;
 
