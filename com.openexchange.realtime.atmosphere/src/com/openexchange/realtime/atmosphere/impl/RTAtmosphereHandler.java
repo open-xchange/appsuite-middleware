@@ -93,6 +93,9 @@ import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.IDMap;
 import com.openexchange.realtime.util.SequenceNumberComparator;
 import com.openexchange.realtime.util.StanzaSequenceGate;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -227,24 +230,20 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                             }
                             
                             if (type.equals("ack")) {
-                                try {
-                                    constructedId.lock("rt-atmosphere-outbox");
-                                    SortedSet<EnqueuedStanza> resendBuffer = resendBufferFor(constructedId);
-                                    EnqueuedStanza found = null;
-                                    long seq = json.optLong("seq");
-                                    
-                                    for (EnqueuedStanza enqueuedStanza : resendBuffer) {
-                                        if (enqueuedStanza.sequenceNumber == seq ) {
-                                            found = enqueuedStanza;
-                                            break;
-                                        }
+                                
+                                SortedSet<EnqueuedStanza> resendBuffer = resendBufferFor(constructedId);
+                                EnqueuedStanza found = null;
+                                long seq = json.optLong("seq");
+                                
+                                for (EnqueuedStanza enqueuedStanza : new LinkedList<EnqueuedStanza>(resendBuffer)) {
+                                    if (enqueuedStanza.sequenceNumber == seq ) {
+                                        found = enqueuedStanza;
+                                        break;
                                     }
-                                    if (found != null) {
-                                        resendBuffer.remove(found);
-                                        found.stanza.trace("Got ack from client");
-                                    }
-                                } finally {
-                                    constructedId.unlock("rt-atmosphere-outbox");
+                                }
+                                if (found != null) {
+                                    resendBuffer.remove(found);
+                                    found.stanza.trace("Got ack from client");
                                 }
                             }
                             return;
@@ -260,7 +259,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         if (stanza.getSequenceNumber() != -1) {
                             // Return receipt
                             stanza.trace("Send return receipt for sequence number: " + stanza.getSequenceNumber());
-                            Message msg = new Message();
+                            final Message msg = new Message();
                             msg.setTo(stanza.getFrom());
                             msg.setFrom(stanza.getFrom());
                             msg.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
@@ -268,7 +267,30 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                                 "json",
                                 "atmosphere",
                                 "received").build()));
-                            send(msg, msg.getTo());
+                            atmosphereServiceRegistry.getService(ThreadPoolService.class).submit(new Task<Object>() {
+
+                                @Override
+                                public void setThreadName(ThreadRenamer threadRenamer) {
+                                    threadRenamer.rename("Acknowledgement Sender");
+                                }
+
+                                @Override
+                                public void beforeExecute(Thread t) {
+                                    
+                                }
+
+                                @Override
+                                public void afterExecute(Throwable t) {
+                                    
+                                }
+
+                                @Override
+                                public Object call() throws Exception {
+                                    send(msg, msg.getTo());                                    
+                                    return null;
+                                }
+                                
+                            }); 
                         }
                         gate.handle(stanza, stanza.getTo());
                     }
@@ -511,7 +533,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 StanzaWriter stanzaWriter = new StanzaWriter();
                 if (resendBuffer != null) {
                     List<EnqueuedStanza> toRemove = new LinkedList<EnqueuedStanza>();
-                    for(EnqueuedStanza stanza: resendBuffer) {
+                    for(EnqueuedStanza stanza: new LinkedList<EnqueuedStanza>(resendBuffer)) {
                         if (stanza.incCounter()) {
                             stanza.stanza.trace("Drained from resendBuffer");
                             array.put(stanzaWriter.write(stanza.stanza));
