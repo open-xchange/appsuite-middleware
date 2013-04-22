@@ -51,10 +51,15 @@ package com.openexchange.ajax.requesthandler.converters.preview;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
@@ -88,6 +93,9 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class PreviewImageResultConverter extends AbstractPreviewResultConverter {
 
+    private static final String PARAMETER_ACTION = AJAXServlet.PARAMETER_ACTION;
+    private static final String PARAMETER_SESSION = AJAXServlet.PARAMETER_SESSION;
+
     /**
      * Initializes a new {@link PreviewImageResultConverter}.
      */
@@ -119,7 +127,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             final String eTag = result.getHeader("ETag");
             final boolean isValidEtag = !isEmpty(eTag);
             if (null != previewCache && isValidEtag) {
-                final String cacheKey = generatePreviewCacheKey(eTag, requestData, new String[0]);
+                final String cacheKey = generatePreviewCacheKey(eTag, requestData, allParameterNames(requestData));
                 final CachedPreview cachedPreview = previewCache.get(cacheKey, session.getUserId(), session.getContextId());
                 if (null != cachedPreview) {
                     requestData.setFormat("file");
@@ -175,7 +183,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                 thumbnail = Streams.newByteArrayInputStream(bytes);
                 size = bytes.length;
                 // Specify task
-                final String cacheKey = generatePreviewCacheKey(eTag, requestData, new String[0]);
+                final String cacheKey = generatePreviewCacheKey(eTag, requestData, allParameterNames(requestData));
                 final AbstractTask<Void> task = new AbstractTask<Void>() {
 
                     @Override
@@ -216,6 +224,25 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private String[] allParameterNames(final AJAXRequestData requestData) {
+        if (null == requestData) {
+            return new String[0];
+        }
+
+        final Map<String, String> parameters = requestData.getParameters();
+        final List<String> l = new ArrayList<String>(parameters.size());
+        final String paramSession = PARAMETER_SESSION;
+        final String paramAction = PARAMETER_ACTION;
+        for (final String name : new TreeMap<String, String>(parameters).keySet()) {
+            final String lc = toLowerCase(name);
+            if (!paramSession.equals(lc) && !paramAction.equals(lc)) {
+                l.add(name);
+            }
+        }
+
+        return l.toArray(new String[0]);
     }
 
     private static final Set<String> INVALIDS = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(
