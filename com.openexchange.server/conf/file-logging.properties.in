@@ -30,3 +30,6 @@ com.hazelcast.level=SEVERE
 # Set to FINE to log SOAP requests for debugging purpose
 org.apache.cxf.level=WARNING
 com.openexchange.soap.cxf.logger.level=WARNING
+
+# Set org.jaudiotagger to WARNING
+org.jaudiotagger.level=WARNING
