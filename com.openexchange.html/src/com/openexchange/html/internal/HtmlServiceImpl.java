@@ -52,6 +52,7 @@ package com.openexchange.html.internal;
 import gnu.inet.encoding.IDNAException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -90,9 +91,7 @@ import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
-import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Charsets;
-import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.proxy.ImageContentTypeRestriction;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
@@ -570,8 +569,8 @@ public final class HtmlServiceImpl implements HtmlService {
             LOG.warn("Stack-overflow during processing HTML content.", soe);
             // Retry with Tika framework
             try {
-                return extractFrom(new UnsynchronizedByteArrayInputStream(htmlContent.getBytes(Charsets.ISO_8859_1)));
-            } catch (final OXException e) {
+                return extractFrom(new java.io.ByteArrayInputStream(htmlContent.getBytes(Charsets.ISO_8859_1)));
+            } catch (final Exception e) {
                 LOG.error("Error during processing HTML content.", e);
                 return "";
             }
@@ -945,7 +944,7 @@ public final class HtmlServiceImpl implements HtmlService {
             /*
              * Serialize
              */
-            final AllocatingStringWriter writer = new AllocatingStringWriter(htmlContent.length());
+            final StringWriter writer = new StringWriter(htmlContent.length());
             SERIALIZER.write(htmlNode, writer, "UTF-8");
             return writer.toString();
         } catch (final UnsupportedEncodingException e) {
@@ -1140,9 +1139,9 @@ public final class HtmlServiceImpl implements HtmlService {
                     final byte[] responseBody = get.getResponseBody();
                     try {
                         final String charSet = get.getResponseCharSet();
-                        css.append(new String(responseBody, null == charSet ? Charsets.ISO_8859_1 : Charsets.forName(charSet)));
+                        css.append(new String(responseBody, null == charSet ? "ISO-8859-1" : charSet));
                     } catch (final UnsupportedCharsetException e) {
-                        css.append(new String(responseBody, Charsets.ISO_8859_1));
+                        css.append(new String(responseBody, "ISO-8859-1"));
                     }
                 }
             } catch (final HttpException e) {
@@ -1512,16 +1511,16 @@ public final class HtmlServiceImpl implements HtmlService {
             /*
              * Serialize
              */
-            final AllocatingStringWriter writer = new AllocatingStringWriter(htmlContent.length());
+            final StringWriter writer = new StringWriter(htmlContent.length());
             SERIALIZER.write(htmlNode, writer, "UTF-8");
-            final com.openexchange.java.StringAllocator builder = writer.getAllocator();
+            final StringBuffer buffer = writer.getBuffer();
             /*
              * Insert DOCTYPE if absent
              */
-            if (builder.indexOf("<!DOCTYPE") < 0) {
-                builder.insert(0, DOCTYPE_DECL);
+            if (buffer.indexOf("<!DOCTYPE") < 0) {
+                buffer.insert(0, DOCTYPE_DECL);
             }
-            return builder.toString();
+            return buffer.toString();
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
             LOG.error("HtmlCleaner library failed to pretty-print HTML content with an unsupported encoding: " + e.getMessage(), e);

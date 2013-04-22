@@ -64,6 +64,8 @@ Third candidate for 7.2.0 release
 Build for patch 2013-04-04
 * Tue Apr 02 2013 Carsten Hoeger <choeger@open-xchange.com>
 Second candidate for 7.2.0 release
+* Tue Apr 02 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-04-04
 * Tue Mar 26 2013 Carsten Hoeger <choeger@open-xchange.com>
 First release candidate for 7.2.0
 * Fri Mar 15 2013 Carsten Hoeger <choeger@open-xchange.com>
