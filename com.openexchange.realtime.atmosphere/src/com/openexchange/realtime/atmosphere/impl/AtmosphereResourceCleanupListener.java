@@ -52,6 +52,7 @@ package com.openexchange.realtime.atmosphere.impl;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.concurrent.ConcurrentHashMap;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResourceEvent;
@@ -98,6 +99,8 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
      */
     private AtmosphereResourceReaper atmosphereResourceReaper;
 
+    private ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>> resendBuffers;
+
     /**
      * Initializes a new {@link AtmosphereResourceCleanupListener}.
      * 
@@ -108,12 +111,13 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
      * @param fullIDToResourceMap Reference to the map of the RTAtmosphereHandler that tracks general ids to full ids.
      * @param outboxes
      */
-    public AtmosphereResourceCleanupListener(AtmosphereResource atmosphereResource, ID fullID, IDMap<Set<ID>> generalToFullIDMap, IDMap<AtmosphereResource> fullIDToResourceMap, ConcurrentHashMap<ID, List<Stanza>> outboxes, AtmosphereResourceReaper atmosphereResourceReaper) {
+    public AtmosphereResourceCleanupListener(AtmosphereResource atmosphereResource, ID fullID, IDMap<Set<ID>> generalToFullIDMap, IDMap<AtmosphereResource> fullIDToResourceMap, ConcurrentHashMap<ID, List<Stanza>> outboxes, ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>> resendBuffers, AtmosphereResourceReaper atmosphereResourceReaper) {
         this.atmosphereResource = atmosphereResource;
         this.fullID = fullID;
         this.generalToConcreteIDMap = generalToFullIDMap;
         this.fullIDToResourceMap = fullIDToResourceMap;
         this.outboxes = outboxes;
+        this.resendBuffers = resendBuffers;
         this.atmosphereResourceReaper = atmosphereResourceReaper;
     }
 
@@ -138,7 +142,7 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
         if (!activeResource.equals(atmosphereResource)) {
             return; // Other resource is active here. No need to clean up just yet.
         } else {
-            atmosphereResourceReaper.add(new Moribund(fullID, atmosphereResource, generalToConcreteIDMap, fullIDToResourceMap, outboxes));
+            atmosphereResourceReaper.add(new Moribund(fullID, atmosphereResource, generalToConcreteIDMap, fullIDToResourceMap, outboxes, resendBuffers));
         }
     }
 

@@ -52,12 +52,16 @@ package com.openexchange.realtime.atmosphere.impl;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.http.HttpServletResponse;
 import org.atmosphere.cpr.AtmosphereHandler;
 import org.atmosphere.cpr.AtmosphereRequest;
@@ -87,6 +91,7 @@ import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.IDMap;
+import com.openexchange.realtime.util.SequenceNumberComparator;
 import com.openexchange.realtime.util.StanzaSequenceGate;
 import com.openexchange.tools.session.ServerSession;
 
@@ -128,6 +133,10 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * Maintain a mapping of all IDs that use a certain session
      */
     private ConcurrentHashMap<String, Set<ID>> idsPerSession = new ConcurrentHashMap<String, Set<ID>>();
+    
+    private ConcurrentHashMap<ID, Long> sequenceNumbers = new ConcurrentHashMap<ID, Long>();
+    
+    private ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>> resendBuffers = new ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>>();
 
     private StanzaSequenceGate gate = new StanzaSequenceGate("RTAtmosphereHandler") {
 
@@ -182,6 +191,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         generalToConcreteIDMap,
                         concreteIDToResourceMap,
                         outboxes,
+                        resendBuffers,
                         atmosphereResourceReaper));
                     // finally suspend the resource until data is available for the clients and resource gets resumed after send
                     drainOutbox(constructedId);
@@ -208,8 +218,34 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         stanzas.add(new JSONObject(postData));
                     }
                     for (JSONObject json : stanzas) {
-                        if (json.has("type") && "ping".equalsIgnoreCase(json.optString("type"))) {
+                        if (json.has("type")) {
                             // ignore
+                            String type = json.optString("type");
+                            if (type.equals("ping")) {
+                                return;
+                            }
+                            
+                            if (type.equals("ack")) {
+                                try {
+                                    constructedId.lock("rt-atmosphere-outbox");
+                                    SortedSet<EnqueuedStanza> resendBuffer = resendBufferFor(constructedId);
+                                    EnqueuedStanza found = null;
+                                    long seq = json.optLong("seq");
+                                    
+                                    for (EnqueuedStanza enqueuedStanza : resendBuffer) {
+                                        if (enqueuedStanza.sequenceNumber == seq ) {
+                                            found = enqueuedStanza;
+                                            break;
+                                        }
+                                    }
+                                    if (found != null) {
+                                        resendBuffer.remove(found);
+                                        found.stanza.trace("Got ack from client");
+                                    }
+                                } finally {
+                                    constructedId.unlock("rt-atmosphere-outbox");
+                                }
+                            }
                             return;
                         }
                         StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(
@@ -411,12 +447,38 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         try {
             recipient.lock("rt-atmosphere-outbox");
             stanza.trace("Enqueing stanza in atmosphere outbox for ID: " + recipient );
-            outboxFor(recipient).add(stanza);
+            if (stanza.getSequenceNumber() != -1) {
+                stamp(stanza, recipient);
+                resendBufferFor(recipient).add(new EnqueuedStanza(stanza));
+            } else {
+                outboxFor(recipient).add(stanza);
+            }
             drainOutbox(recipient);
         } finally {
             recipient.unlock("rt-atmosphere-outbox");
         }
 
+    }
+
+    private void stamp(Stanza stanza, ID recipient) {
+        try {
+            recipient.lock("rt-atmosphere-sequence");
+            stanza.setSequenceNumber(com.openexchange.tools.Collections.opt(sequenceNumbers, recipient, Long.valueOf(0)));
+            sequenceNumbers.put(recipient, stanza.getSequenceNumber()+1);
+        } finally {
+            recipient.unlock("rt-atmosphere-sequence");
+        }
+        
+    }
+    
+    private SortedSet<EnqueuedStanza> resendBufferFor(ID id) {
+        SortedSet<EnqueuedStanza> resendBuffer = resendBuffers.get(id);
+        if (resendBuffer == null) {
+            resendBuffer = new TreeSet<EnqueuedStanza>();
+            SortedSet<EnqueuedStanza> activeBuffer = resendBuffers.putIfAbsent(id, resendBuffer);
+            return (activeBuffer != null) ? activeBuffer : resendBuffer;
+        }
+        return resendBuffer;
     }
 
     private List<Stanza> outboxFor(ID id) {
@@ -442,12 +504,28 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             boolean sent = false;
 
             outbox = outboxes.remove(id);
-            if (outbox != null && !outbox.isEmpty()) {
+            SortedSet<EnqueuedStanza> resendBuffer = resendBuffers.get(id);
+            if ((outbox != null && !outbox.isEmpty()) || (resendBuffer != null && !resendBuffer.isEmpty())) {
                 JSONArray array = new JSONArray();
                 StanzaWriter stanzaWriter = new StanzaWriter();
-                for (Stanza stanza : outbox) {
-                    stanza.trace("Drained from outbox");
-                    array.put(stanzaWriter.write(stanza));
+                if (resendBuffer != null) {
+                    List<EnqueuedStanza> toRemove = new LinkedList<EnqueuedStanza>();
+                    for(EnqueuedStanza stanza: resendBuffer) {
+                        if (stanza.incCounter()) {
+                            stanza.stanza.trace("Drained from resendBuffer");
+                            array.put(stanzaWriter.write(stanza.stanza));
+                        } else {
+                            toRemove.add(stanza);
+                            stanza.stanza.trace("Counted to infinity. Stanza will be lost");
+                        }
+                    }
+                    resendBuffer.removeAll(toRemove);
+                }
+                if (outbox != null) {
+                    for (Stanza stanza : outbox) {
+                        stanza.trace("Drained from outbox");
+                        array.put(stanzaWriter.write(stanza));
+                    }
                 }
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Trying to send: " + array.length() + " stanzas: " + array);

@@ -117,6 +117,10 @@ public class StanzaWriter {
             }
             object.put("log", arr);
         }
+        
+        if (stanza.getSequenceNumber() > -1) {
+            object.put("seq", stanza.getSequenceNumber());
+        }
     }
 
     /**

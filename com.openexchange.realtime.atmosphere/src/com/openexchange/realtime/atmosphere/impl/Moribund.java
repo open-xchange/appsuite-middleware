@@ -51,6 +51,7 @@ package com.openexchange.realtime.atmosphere.impl;
 
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.concurrent.ConcurrentHashMap;
 import org.atmosphere.cpr.AtmosphereResource;
 import com.openexchange.exception.OXException;
@@ -92,6 +93,8 @@ public class Moribund implements Comparable<Moribund> {
      */
     private ConcurrentHashMap<ID, List<Stanza>> outboxes;
 
+    private ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>> resendBuffers;
+
     /**
      * Initializes a new {@link Moribund}.
      * 
@@ -100,13 +103,15 @@ public class Moribund implements Comparable<Moribund> {
      * @param generalToFullIDMap
      * @param fullIDToResourceMap
      * @param outboxes
+     * @param resendBuffers 
      */
-    public Moribund(ID concreteId, AtmosphereResource atmosphereResource, IDMap<Set<ID>> generalToFullIDMap, IDMap<AtmosphereResource> fullIDToResourceMap, ConcurrentHashMap<ID, List<Stanza>> outboxes) {
+    public Moribund(ID concreteId, AtmosphereResource atmosphereResource, IDMap<Set<ID>> generalToFullIDMap, IDMap<AtmosphereResource> fullIDToResourceMap, ConcurrentHashMap<ID, List<Stanza>> outboxes, ConcurrentHashMap<ID,SortedSet<EnqueuedStanza>> resendBuffers) {
         this.concreteID = concreteId;
         this.atmosphereResource = atmosphereResource;
         this.generalToFullIDMap = generalToFullIDMap;
         this.fullIDToResourceMap = fullIDToResourceMap;
         this.outboxes = outboxes;
+        this.resendBuffers = resendBuffers;
         this.lingeringStart = System.currentTimeMillis();
     }
 
@@ -159,7 +164,9 @@ public class Moribund implements Comparable<Moribund> {
 
         // clear outboxes
         outboxes.remove(concreteID);
-
+        resendBuffers.remove(concreteID);
+        
+        
         // remove concreteID from cluster wide resourceDirectory
         ResourceDirectory resourceDirectory = AtmosphereServiceRegistry.getInstance().getService(ResourceDirectory.class);
         try {
