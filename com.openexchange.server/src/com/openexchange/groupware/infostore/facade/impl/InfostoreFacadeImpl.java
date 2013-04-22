@@ -990,6 +990,16 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     perform(updateAction, true);
                 }
 
+                // insert tombstone row to del_infostore table in case of move operations to aid folder based synchronizations
+                if (updatedCols.contains(Metadata.FOLDER_ID_LITERAL) && oldDocument.getFolderId() != document.getFolderId()) {
+                    InsertDocumentIntoDelTableAction tombstoneAction = new InsertDocumentIntoDelTableAction();
+                    tombstoneAction.setContext(context);
+                    tombstoneAction.setDocuments(Arrays.asList(new DocumentMetadata[] { oldDocument }));
+                    tombstoneAction.setProvider(this);
+                    tombstoneAction.setQueryCatalog(QUERIES);
+                    perform(tombstoneAction, true);
+                }
+
                 final long indexFolderId = document.getFolderId() == oldDocument.getFolderId() ? -1L : oldDocument.getFolderId();
                 indexDocument(context, session.getUserId(), oldDocument.getId(), indexFolderId, false);
             } finally {
