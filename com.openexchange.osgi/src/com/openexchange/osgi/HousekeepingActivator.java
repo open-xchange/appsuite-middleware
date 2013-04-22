@@ -279,6 +279,17 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
 
     /**
+     * Gets the classes of the optional services.
+     * <p>
+     * They appear when available in activator's service collection.
+     *
+     * @return The array of {@link Class} instances of optional services
+     */
+    protected Class<?>[] getOptionalServices() {
+        return EMPTY_CLASSES;
+    }
+
+    /**
      * Creates and remembers a new {@link ServiceTracker}. The tracked service is automatically {@link #addService(Class, Object) added to}/
      * {@link #removeService(Class) removed} from tracked services and thus available/disappearing when using this activator as
      * {@link ServiceLookup service look-up}.
@@ -381,6 +392,13 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * Opens all trackers.
      */
     protected void openTrackers() {
+        final Class<?>[] optionalServices = getOptionalServices();
+        if (null != optionalServices) {
+            for (final Class<?> clazz : optionalServices) {
+                trackService(clazz);
+            }
+        }
+
         for (final ServiceTracker<?, ?> tracker : new LinkedList<ServiceTracker<?, ?>>(serviceTrackers)) {
             tracker.open();
         }
