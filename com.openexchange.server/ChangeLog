@@ -1,3 +1,7 @@
+* 2013-04-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26028: Indicate proper file name for single multipart-part
+
 * 2013-04-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 26057: Honor optional URL parameter "timezone"

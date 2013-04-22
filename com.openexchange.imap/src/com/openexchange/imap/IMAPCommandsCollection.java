@@ -2791,7 +2791,9 @@ public final class IMAPCommandsCollection {
     protected static BodyAndId getBODYSTRUCTURE(final String sectionId, final BODYSTRUCTURE bodystructure, final String prefix, final int partCount, final boolean[] mpDetected) throws MessagingException {
         final String sequenceId = getSequenceId(prefix, partCount);
         if (sectionId.equals(sequenceId)) {
-            return new BodyAndId(bodystructure, sequenceId);
+            if (bodystructure.isSingle() || null == bodystructure.bodies) {
+                return new BodyAndId(bodystructure, sequenceId);
+            }
         }
         /*
          * A multipart or message/rfc822
