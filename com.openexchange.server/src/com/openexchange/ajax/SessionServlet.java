@@ -714,7 +714,6 @@ public abstract class SessionServlet extends AJAXServlet {
             return hash;
         }
         // Default is calculate
-        System.out.println(req.getHeader("User-Agent"));
         return HashCalculator.getInstance().getHash(req, client);
     }
 
