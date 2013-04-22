@@ -202,6 +202,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 final java.util.Date e = rs.getTimestamp(3);
                 cdao.setEndDate(e);
                 ft = rs.getInt(4);
+                cdao.setFullTime(ft == 1);
                 sa = rs.getInt(5);
                 cdao.setShownAs(sa);
                 title = rs.getString(6);
