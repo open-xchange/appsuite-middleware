@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -66,14 +66,18 @@ fi
 %doc com.openexchange.authentication.ldap/ChangeLog
 
 %changelog
+* Mon Apr 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.2.1 release
+* Mon Apr 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.2.1
 * Wed Apr 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.2.0 release
 * Tue Apr 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Third candidate for 7.2.0 release
 * Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2013-04-04
-* Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.2.0 release
+* Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-04-04
 * Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-04
 * Tue Mar 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
