@@ -2,6 +2,7 @@
 
  - Fix for bug 26028: Indicate proper file name for single multipart-part
  - Fix for bug 26065: Check if MP3 file provides proper ID2v2 tag
+ - Fix for bug 26032: Properly support media request through AppleCoreMedia user agent
 
 * 2013-04-20 - thorben.betten@open-xchange.com
 

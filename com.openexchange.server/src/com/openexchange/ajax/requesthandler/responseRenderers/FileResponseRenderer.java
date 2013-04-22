@@ -187,6 +187,15 @@ public class FileResponseRenderer implements ResponseRenderer {
                         }
                     }
                 }
+                /*
+                 * Set Content-Length if possible
+                 */
+                {
+                    final long length = file.getLength();
+                    if (length > 0) {
+                        resp.setContentLength((int) length);
+                    }
+                }
                 /*-
                  * Determine preferred Content-Type
                  *
@@ -265,6 +274,9 @@ public class FileResponseRenderer implements ResponseRenderer {
                     outputStream.write(buf, 0, read);
                 }
                 outputStream.flush();
+            } catch (final java.net.SocketException e) {
+                // Assume client-initiated connection closure
+                LOG.debug("Client dropped connection while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
             } catch (final IOException e) {
                 if ("connection reset by peer".equals(toLowerCase(e.getMessage()))) {
                     /*-

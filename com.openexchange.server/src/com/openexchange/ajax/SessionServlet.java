@@ -75,6 +75,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.config.ConfigurationService;
@@ -90,6 +91,7 @@ import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogFactory;
@@ -631,14 +633,14 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Check if the secret encoded in the open-xchange-secret Cookie matches the secret saved in the Session.
-     * 
+     *
      * @param source    The configured CookieHashSource
      * @param req       The incoming HttpServletRequest
      * @param session   The Session object looked up for the incoming request
      * @throws OXException If the secrets differ
      */
     public static void checkSecret(final CookieHashSource source, final HttpServletRequest req, final Session session) throws OXException {
-        final String secret = extractSecret(source, req, session.getHash(), session.getClient());
+        final String secret = extractSecret(source, req, session.getHash(), session.getClient(), (String) session.getParameter("user-agent"));
         if (secret == null || !session.getSecret().equals(secret)) {
             if (INFO && null != secret) {
                 LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");
@@ -656,12 +658,37 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return The secret string or <code>null</code>
      */
     public static String extractSecret(final CookieHashSource cookieHash, final HttpServletRequest req, final String hash, final String client) {
+        return extractSecret(cookieHash, req, hash, client, null);
+    }
+
+    /**
+     * Extracts the secret string from specified cookies using given hash string.
+     *
+     * @param req the HTTP servlet request object.
+     * @param hash remembered hash from session.
+     * @param client the remembered client from the session.
+     * @param originalUserAgent The original User-Agent associated with session
+     * @return The secret string or <code>null</code>
+     */
+    public static String extractSecret(final CookieHashSource cookieHash, final HttpServletRequest req, final String hash, final String client, final String originalUserAgent) {
         final Cookie[] cookies = req.getCookies();
         if (null != cookies) {
-            final String cookieName = Login.SECRET_PREFIX + getHash(cookieHash, req, hash, client);
+            String cookieName = Login.SECRET_PREFIX + getHash(cookieHash, req, hash, client);
             for (final Cookie cookie : cookies) {
                 if (cookieName.equals(cookie.getName())) {
                     return cookie.getValue();
+                }
+            }
+            final String userAgent = req.getHeader("User-Agent");
+            if (null != userAgent && null != originalUserAgent) {
+                final BrowserDetector browserDetector = new BrowserDetector(originalUserAgent);
+                if (browserDetector.isSafari() && toLowerCase(userAgent).startsWith("applecoremedia/")) {
+                    cookieName = Login.SECRET_PREFIX + hash;
+                    for (final Cookie cookie : cookies) {
+                        if (cookieName.equals(cookie.getName())) {
+                            return cookie.getValue();
+                        }
+                    }
                 }
             }
             if (INFO) {
@@ -687,6 +714,7 @@ public abstract class SessionServlet extends AJAXServlet {
             return hash;
         }
         // Default is calculate
+        System.out.println(req.getHeader("User-Agent"));
         return HashCalculator.getInstance().getHash(req, client);
     }
 
@@ -815,6 +843,20 @@ public abstract class SessionServlet extends AJAXServlet {
             }
         }
         return null;
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }
