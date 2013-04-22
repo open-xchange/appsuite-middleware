@@ -54,6 +54,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -95,7 +96,7 @@ public class SolrIndexActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] {
-            DatabaseService.class, UserService.class, ConfigurationService.class, TimerService.class, ThreadPoolService.class,
+            DatabaseService.class, ContextService.class, UserService.class, ConfigurationService.class, TimerService.class, ThreadPoolService.class,
             SolrAccessService.class, TextXtractService.class, InfostoreFacade.class, SolrCoreConfigService.class, EventAdmin.class,
             ConfigViewFactory.class };
     }

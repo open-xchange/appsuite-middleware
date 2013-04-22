@@ -47,30 +47,33 @@
  *
  */
 
-package com.openexchange.index.solr;
+package com.openexchange.index.solr.internal.mail;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import java.util.Comparator;
+import com.openexchange.index.IndexDocument;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.utils.MailMessageComparator;
 
 
 /**
- * {@link UnitTests}
+ * {@link MailDocumentComparator}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    ModuleSetTest.class,
-    SimpleConfigurationTest.class,
-    SolrAttachmentSearchTermVisitorTest.class,
-    SimpleQueryBuilderTest.class,
-    MailSolrIndexAccessTest.class,
-    XMLBasedFieldConfigurationTest.class,
-    SolrMailDocumentConverterTest.class,
-    SolrAttachmentDocumentConverterTest.class
-})
+public class MailDocumentComparator implements Comparator<IndexDocument<MailMessage>> {
+    
+    private final MailMessageComparator innerComparator;
 
-public class UnitTests {
+    public MailDocumentComparator(MailMessageComparator innerComparator) {
+        super();
+        this.innerComparator = innerComparator;
+    }
+
+    @Override
+    public int compare(IndexDocument<MailMessage> d1, IndexDocument<MailMessage> d2) {
+        MailMessage o1 = d1.getObject();
+        MailMessage o2 = d2.getObject();
+        return innerComparator.compare(o1, o2);
+    }
 
 }

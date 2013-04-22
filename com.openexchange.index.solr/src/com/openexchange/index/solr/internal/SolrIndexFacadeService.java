@@ -53,6 +53,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -63,10 +64,13 @@ import org.xml.sax.SAXException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.index.AttachmentIndexField;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.index.InfostoreIndexField;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.index.IndexAccess;
 import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexFacadeService;
@@ -89,6 +93,7 @@ import com.openexchange.solr.SolrCoreIdentifier;
 import com.openexchange.solr.SolrProperties;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.user.UserService;
 
 /**
  * {@link SolrIndexFacadeService} - The Solr {@link IndexFacadeService} implementation.
@@ -308,7 +313,13 @@ public class SolrIndexFacadeService implements IndexFacadeService {
                 if (mailBuilder == null) {
                     throw new IllegalStateException("QueryBuilder for module mail is not initialized.");
                 }
-                return new SolrMailIndexAccess(identifier, mailBuilder, mailFieldConfig);
+                
+                ContextService contextService = Services.getService(ContextService.class);
+                UserService userService = Services.getService(UserService.class);
+                Context context = contextService.getContext(identifier.getContextId());
+                User user = userService.getUser(identifier.getUserId(), context);
+                Locale locale = user.getLocale();
+                return new SolrMailIndexAccess(identifier, mailBuilder, mailFieldConfig, locale);
 
             case Types.INFOSTORE:
                 if (infostoreBuilder == null) {
