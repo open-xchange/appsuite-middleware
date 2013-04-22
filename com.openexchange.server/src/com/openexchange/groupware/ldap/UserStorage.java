@@ -124,12 +124,16 @@ public abstract class UserStorage {
     public abstract User[] getUser(Context ctx) throws OXException;
 
     /**
-     * This method updates some values of a user.
+     * This method updates some values of a user. In the given user object just set the user identifier and the attributes you want to
+     * change. Every attribute with value <code>null</code> will not be touched.
      * <p>
      * Currently supported values for update:
      * <ul>
      * <li>Time zone</li>
      * <li>Language</li>
+     * <li>IMAP server</li>
+     * <li>SMTP server</li>
+     * <li>IMAP login</li>
      * <li>Attributes (if present, not <code>null</code>)</li>
      * </ul>
      * @param user user object with the updated values.

@@ -1,3 +1,7 @@
+* 2013-04-12 - marcus.klein@open-xchange.com
+
+ - Fix for bug 25819: Changing the IMAP server, IMAP login and SMTP server is now possible for user objects.
+
 * 2013-04-10 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 24662: Added dynamic checksum calculation for X-ABCROP-RECTANGLE parameter 

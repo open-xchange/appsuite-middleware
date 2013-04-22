@@ -100,6 +100,8 @@ fi
 %attr(640,root,open-xchange) /opt/open-xchange/etc/contacts-ldap/*/*.example
 
 %changelog
+* Fri Apr 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-04-12
 * Wed Apr 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.2.0 release
 * Tue Apr 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -108,6 +110,8 @@ Third candidate for 7.2.0 release
 Build for patch 2013-04-04
 * Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.2.0 release
+* Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-04-04
 * Tue Mar 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.2.0
 * Fri Mar 15 2013 Marcus Klein <marcus.klein@open-xchange.com>

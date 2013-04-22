@@ -4,6 +4,12 @@ open-xchange-spamhandler-cloudmark (7.4.0-0) UNRELEASED; urgency=low
 
  -- Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>  Mon, 15 Apr 2013 10:30:11 +0200
 
+open-xchange-spamhandler-cloudmark (7.2.0-5) UNRELEASED; urgency=low
+
+  * Build for patch 2013-04-12
+
+ -- Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>  Fri, 12 Apr 2013 15:28:02 +0200
+
 open-xchange-spamhandler-cloudmark (7.2.0-4) UNRELEASED; urgency=low
 
   * Fourth candidate for 7.2.0 release

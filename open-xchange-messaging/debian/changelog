@@ -4,6 +4,12 @@ open-xchange-messaging (7.4.0-0) UNRELEASED; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Apr 2013 10:29:45 +0200
 
+open-xchange-messaging (7.2.0-5) UNRELEASED; urgency=low
+
+  * Build for patch 2013-04-12
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 12 Apr 2013 15:27:44 +0200
+
 open-xchange-messaging (7.2.0-4) UNRELEASED; urgency=low
 
   * Fourth candidate for 7.2.0 release
