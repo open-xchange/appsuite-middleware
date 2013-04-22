@@ -101,6 +101,8 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
 
     private ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>> resendBuffers;
 
+    private ConcurrentHashMap<ID, Long> sequenceNumbers;
+
     /**
      * Initializes a new {@link AtmosphereResourceCleanupListener}.
      * 
@@ -111,13 +113,14 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
      * @param fullIDToResourceMap Reference to the map of the RTAtmosphereHandler that tracks general ids to full ids.
      * @param outboxes
      */
-    public AtmosphereResourceCleanupListener(AtmosphereResource atmosphereResource, ID fullID, IDMap<Set<ID>> generalToFullIDMap, IDMap<AtmosphereResource> fullIDToResourceMap, ConcurrentHashMap<ID, List<Stanza>> outboxes, ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>> resendBuffers, AtmosphereResourceReaper atmosphereResourceReaper) {
+    public AtmosphereResourceCleanupListener(AtmosphereResource atmosphereResource, ID fullID, IDMap<Set<ID>> generalToFullIDMap, IDMap<AtmosphereResource> fullIDToResourceMap, ConcurrentHashMap<ID, List<Stanza>> outboxes, ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>> resendBuffers, ConcurrentHashMap<ID, Long> sequenceNumbers, AtmosphereResourceReaper atmosphereResourceReaper) {
         this.atmosphereResource = atmosphereResource;
         this.fullID = fullID;
         this.generalToConcreteIDMap = generalToFullIDMap;
         this.fullIDToResourceMap = fullIDToResourceMap;
         this.outboxes = outboxes;
         this.resendBuffers = resendBuffers;
+        this.sequenceNumbers = sequenceNumbers;
         this.atmosphereResourceReaper = atmosphereResourceReaper;
     }
 
@@ -142,7 +145,7 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
         if (!activeResource.equals(atmosphereResource)) {
             return; // Other resource is active here. No need to clean up just yet.
         } else {
-            atmosphereResourceReaper.add(new Moribund(fullID, atmosphereResource, generalToConcreteIDMap, fullIDToResourceMap, outboxes, resendBuffers));
+            atmosphereResourceReaper.add(new Moribund(fullID, atmosphereResource, generalToConcreteIDMap, fullIDToResourceMap, outboxes, resendBuffers, sequenceNumbers));
         }
     }
 

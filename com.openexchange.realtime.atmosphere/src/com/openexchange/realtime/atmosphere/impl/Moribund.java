@@ -61,6 +61,7 @@ import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.util.IDMap;
+import com.openexchange.realtime.util.SequenceNumberComparator;
 
 /**
  * {@link Moribund}
@@ -95,6 +96,8 @@ public class Moribund implements Comparable<Moribund> {
 
     private ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>> resendBuffers;
 
+    private ConcurrentHashMap<ID, Long> sequenceNumbers;
+
     /**
      * Initializes a new {@link Moribund}.
      * 
@@ -104,14 +107,16 @@ public class Moribund implements Comparable<Moribund> {
      * @param fullIDToResourceMap
      * @param outboxes
      * @param resendBuffers 
+     * @param sequenceNumbers 
      */
-    public Moribund(ID concreteId, AtmosphereResource atmosphereResource, IDMap<Set<ID>> generalToFullIDMap, IDMap<AtmosphereResource> fullIDToResourceMap, ConcurrentHashMap<ID, List<Stanza>> outboxes, ConcurrentHashMap<ID,SortedSet<EnqueuedStanza>> resendBuffers) {
+    public Moribund(ID concreteId, AtmosphereResource atmosphereResource, IDMap<Set<ID>> generalToFullIDMap, IDMap<AtmosphereResource> fullIDToResourceMap, ConcurrentHashMap<ID, List<Stanza>> outboxes, ConcurrentHashMap<ID,SortedSet<EnqueuedStanza>> resendBuffers, ConcurrentHashMap<ID,Long> sequenceNumbers) {
         this.concreteID = concreteId;
         this.atmosphereResource = atmosphereResource;
         this.generalToFullIDMap = generalToFullIDMap;
         this.fullIDToResourceMap = fullIDToResourceMap;
         this.outboxes = outboxes;
         this.resendBuffers = resendBuffers;
+        this.sequenceNumbers = sequenceNumbers;
         this.lingeringStart = System.currentTimeMillis();
     }
 
@@ -165,7 +170,7 @@ public class Moribund implements Comparable<Moribund> {
         // clear outboxes
         outboxes.remove(concreteID);
         resendBuffers.remove(concreteID);
-        
+        sequenceNumbers.remove(concreteID);
         
         // remove concreteID from cluster wide resourceDirectory
         ResourceDirectory resourceDirectory = AtmosphereServiceRegistry.getInstance().getService(ResourceDirectory.class);
