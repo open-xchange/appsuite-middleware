@@ -619,6 +619,8 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Wed Apr 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-04-09
 * Wed Apr 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.2.0 release
 * Tue Apr 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
