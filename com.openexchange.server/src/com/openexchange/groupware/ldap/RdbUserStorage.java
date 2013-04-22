@@ -92,6 +92,8 @@ import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.user.internal.mapping.UserField;
+import com.openexchange.user.internal.mapping.UserMapper;
 
 /**
  * This class implements the user storage using a relational database instead
@@ -532,12 +534,12 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
+    private static final UserMapper MAPPER = new UserMapper();
+
     @Override
-    public void updateUserInternal(final User user, final Context context) throws OXException {
+    protected void updateUserInternal(final User user, final Context context) throws OXException {
         final int contextId = context.getContextId();
         final int userId = user.getId();
-        final String timeZone = user.getTimeZone();
-        final String preferredLanguage = user.getPreferredLanguage();
         final String password = user.getUserPassword();
         final String mech = user.getPasswordMech();
         final int shadowLastChanged = user.getShadowLastChange();
@@ -554,15 +556,15 @@ public class RdbUserStorage extends UserStorage {
                 condition.resetTransactionRollbackException();
                 try {
                     DBUtils.startTransaction(con);
-                    // Update time zone and language
-                    if (null != timeZone && null != preferredLanguage) {
+                    // Update attribute defined through UserMapper
+                    UserField[] fields = MAPPER.getAssignedFields(user);
+                    if (fields.length > 0) {
                         PreparedStatement stmt = null;
                         try {
-                            final String sql = "UPDATE user SET timeZone=?,preferredLanguage=? WHERE cid=? AND id=?";
+                            final String sql = "UPDATE user SET " + MAPPER.getAssignments(fields) + " WHERE cid=? AND id=?";
                             stmt = con.prepareStatement(sql);
-                            int pos = 1;
-                            stmt.setString(pos++, timeZone);
-                            stmt.setString(pos++, preferredLanguage);
+                            MAPPER.setParameters(stmt, user, fields);
+                            int pos = 1 + fields.length;
                             stmt.setInt(pos++, contextId);
                             stmt.setInt(pos++, userId);
                             stmt.execute();

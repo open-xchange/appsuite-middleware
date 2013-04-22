@@ -69,6 +69,8 @@ done
 First candidate for 7.2.1 release
 * Mon Apr 15 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 prepare for 7.2.1
+* Fri Apr 12 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2013-04-12
 * Wed Apr 10 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Fourth candidate for 7.2.0 release
 * Tue Apr 09 2013 Jan Bauerdick <jan.bauerdick@open-xchange.com>
