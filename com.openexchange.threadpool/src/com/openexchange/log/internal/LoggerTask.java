@@ -225,7 +225,7 @@ final class LoggerTask extends AbstractTask<Object> {
             if (null == message) {
                 msg = "null";
             } else {
-                msg = message.toString();
+                msg = toString(message, loggable);
                 if (msg.startsWith(PREFIX)) {
                     callback.log(msg, loggable.getThrowable(), loggable.getLog());
                     return;
@@ -241,34 +241,7 @@ final class LoggerTask extends AbstractTask<Object> {
         }
         // Stack trace available: <stack-trace> + <LF> + <message>
         final StringBuilder sb = new StringBuilder(1024);
-        {
-            boolean found = false;
-            for (int i = 0; !found && i < trace.length; i++) {
-                final StackTraceElement ste = trace[i];
-                final String className = ste.getClassName();
-                if (null != className && !className.startsWith("com.openexchange.log") && !className.startsWith("com.openexchange.exception.Log") && className.indexOf("LoggingLogic", 16) < 0) {
-                    sb.append(PREFIX).append(className).append('.').append(ste.getMethodName());
-                    if (ste.isNativeMethod()) {
-                        sb.append("(Native Method)");
-                    } else {
-                        final String fileName = ste.getFileName();
-                        if (null == fileName) {
-                            sb.append("(Unknown Source)");
-                        } else {
-                            final int lineNumber = ste.getLineNumber();
-                            sb.append('(').append(fileName);
-                            if (lineNumber >= 0) {
-                                sb.append(':').append(lineNumber);
-                            }
-                            sb.append(')');
-                        }
-                    }
-                    // sb.append(" (").append(loggable.getLog().getClass().getSimpleName()).append(')');
-                    sb.append(lineSeparator).append(' ');
-                    found = true;
-                }
-            }
-        }
+        appendLogLocation(trace, sb);
         sb.append(msg);
         // Finally, invoke callback with appropriate message chunks
         final int maxMessageLength = this.maxMessageLength;
@@ -302,6 +275,58 @@ final class LoggerTask extends AbstractTask<Object> {
             }
         } else {
             callback.log(sb.toString(), loggable.getThrowable(), loggable.getLog());
+        }
+    }
+
+    private void appendLogLocation(final StackTraceElement[] trace, final StringBuilder sb) {
+        boolean found = false;
+        for (int i = 0; !found && i < trace.length; i++) {
+            final StackTraceElement ste = trace[i];
+            final String className = ste.getClassName();
+            if (null != className && !className.startsWith("com.openexchange.log") && !className.startsWith("com.openexchange.exception.Log") && className.indexOf("LoggingLogic", 16) < 0) {
+                sb.append(PREFIX).append(className).append('.').append(ste.getMethodName());
+                if (ste.isNativeMethod()) {
+                    sb.append("(Native Method)");
+                } else {
+                    final String fileName = ste.getFileName();
+                    if (null == fileName) {
+                        sb.append("(Unknown Source)");
+                    } else {
+                        final int lineNumber = ste.getLineNumber();
+                        sb.append('(').append(fileName);
+                        if (lineNumber >= 0) {
+                            sb.append(':').append(lineNumber);
+                        }
+                        sb.append(')');
+                    }
+                }
+                // sb.append(" (").append(loggable.getLog().getClass().getSimpleName()).append(')');
+                sb.append(lineSeparator).append(' ');
+                found = true;
+            }
+        }
+    }
+
+    /**
+     * Gets the message's string representation
+     *
+     * @param message The loggable's message
+     * @param loggable The associated loggable
+     * @return The message's string representation
+     * @throws IllegalArgumentException If {@link Object#toString()} fails
+     */
+    private String toString(final Object message, final Loggable loggable) {
+        try {
+            return message.toString();
+        } catch (final Exception e) {
+            // Bad message object
+            final StringBuilder sb = new StringBuilder(256);
+            sb.append("Bad message object.").append(lineSeparator);
+            final StackTraceElement[] trace = loggable.getCallerTrace();
+            if (null != trace) {
+                appendLogLocation(trace, sb);
+            }
+            throw new IllegalArgumentException(sb.toString(), e);
         }
     }
 
