@@ -275,8 +275,14 @@ public class FileResponseRenderer implements ResponseRenderer {
                 }
                 outputStream.flush();
             } catch (final java.net.SocketException e) {
-                // Assume client-initiated connection closure
-                LOG.debug("Client dropped connection while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+                if ("broken pipe".equals(toLowerCase(e.getMessage()))) {
+                    // Assume client-initiated connection closure
+                    LOG.warn("Underlying (TCP) protocol communication aborted while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+
+                    LOG.debug("Client dropped connection while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+                } else {
+                    LOG.error("Lost connection to client while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+                }
             } catch (final IOException e) {
                 if ("connection reset by peer".equals(toLowerCase(e.getMessage()))) {
                     /*-
