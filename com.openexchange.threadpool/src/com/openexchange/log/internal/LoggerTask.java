@@ -51,6 +51,7 @@ package com.openexchange.log.internal;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -60,6 +61,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Loggable;
+import com.openexchange.log.Loggable.Level;
 import com.openexchange.log.internal.callback.DebugCallback;
 import com.openexchange.log.internal.callback.ErrorCallback;
 import com.openexchange.log.internal.callback.FatalCallback;
@@ -125,12 +127,7 @@ final class LoggerTask extends AbstractTask<Object> {
     private final String lineSeparator;
     private final int maxMessageLength;
 
-    private final LogCallback fatalCb;
-    private final LogCallback traceCb;
-    private final LogCallback debugCb;
-    private final LogCallback infoCb;
-    private final LogCallback warnCb;
-    private final LogCallback errorCb;
+    private final Map<Level, LogCallback> callbacks;
 
     /**
      * Initializes a new {@link LoggerTask}.
@@ -145,12 +142,14 @@ final class LoggerTask extends AbstractTask<Object> {
         this.queue = queue;
         this.maxMessageLength = maxMessageLength;
 
-        fatalCb = new FatalCallback();
-        errorCb = new ErrorCallback();
-        warnCb = new WarnCallback();
-        infoCb = new InfoCallback();
-        debugCb = new DebugCallback();
-        traceCb = new TraceCallback();
+        final Map<Loggable.Level, LogCallback> callbacks = new EnumMap<Loggable.Level, LogCallback>(Loggable.Level.class);
+        callbacks.put(Loggable.Level.DEBUG, new DebugCallback());
+        callbacks.put(Loggable.Level.ERROR, new ErrorCallback());
+        callbacks.put(Loggable.Level.FATAL, new FatalCallback());
+        callbacks.put(Loggable.Level.INFO, new InfoCallback());
+        callbacks.put(Loggable.Level.TRACE, new TraceCallback());
+        callbacks.put(Loggable.Level.WARNING, new WarnCallback());
+        this.callbacks = callbacks;
     }
 
     /**
@@ -195,7 +194,10 @@ final class LoggerTask extends AbstractTask<Object> {
                 queue.drainTo(loggables);
                 final boolean quit = loggables.remove(POISON);
                 for (final Loggable loggable : loggables) {
-                    logIt(loggable);
+                    final LogCallback callback = callbacks.get(loggable.getLevel());
+                    if (null != callback) {
+                        invokeCallback(loggable, callback);
+                    }
                 }
                 if (quit) {
                     return null;
@@ -211,51 +213,6 @@ final class LoggerTask extends AbstractTask<Object> {
             }
         }
         return null;
-    }
-
-    private void logIt(final Loggable loggable) {
-        LogCallback callback = null;
-        {
-            switch (loggable.getLevel()) {
-            case FATAL:
-                if (loggable.getLog().isFatalEnabled()) {
-                    callback = fatalCb;
-                }
-                break;
-            case ERROR:
-                if (loggable.getLog().isErrorEnabled()) {
-                    callback = errorCb;
-                }
-                break;
-            case WARNING:
-                if (loggable.getLog().isWarnEnabled()) {
-                    callback = warnCb;
-                }
-                break;
-            case INFO:
-                if (loggable.getLog().isInfoEnabled()) {
-                    callback = infoCb;
-                }
-                break;
-            case DEBUG:
-                if (loggable.getLog().isDebugEnabled()) {
-                    callback = debugCb;
-                }
-                break;
-            case TRACE:
-                if (loggable.getLog().isTraceEnabled()) {
-                    callback = traceCb;
-                }
-                break;
-            default:
-                // No-op
-            }
-        }
-
-        // Invoke method if a callback has been initialized
-        if (null != callback) {
-            invokeCallback(loggable, callback);
-        }
     }
 
     private static final Pattern CRLF = Pattern.compile("\r?\n");
