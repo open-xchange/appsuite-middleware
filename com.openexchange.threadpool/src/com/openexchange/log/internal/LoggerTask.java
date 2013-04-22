@@ -241,28 +241,32 @@ final class LoggerTask extends AbstractTask<Object> {
         }
         // Stack trace available: <stack-trace> + <LF> + <message>
         final StringBuilder sb = new StringBuilder(1024);
-        for (final StackTraceElement ste : trace) {
-            final String className = ste.getClassName();
-            if (null != className && !className.startsWith("com.openexchange.log") && !className.startsWith("com.openexchange.exception.Log") && className.indexOf("LoggingLogic", 16) < 0) {
-                sb.append(PREFIX).append(className).append('.').append(ste.getMethodName());
-                if (ste.isNativeMethod()) {
-                    sb.append("(Native Method)");
-                } else {
-                    final String fileName = ste.getFileName();
-                    if (null == fileName) {
-                        sb.append("(Unknown Source)");
+        {
+            boolean found = false;
+            for (int i = 0; !found && i < trace.length; i++) {
+                final StackTraceElement ste = trace[i];
+                final String className = ste.getClassName();
+                if (null != className && !className.startsWith("com.openexchange.log") && !className.startsWith("com.openexchange.exception.Log") && className.indexOf("LoggingLogic", 16) < 0) {
+                    sb.append(PREFIX).append(className).append('.').append(ste.getMethodName());
+                    if (ste.isNativeMethod()) {
+                        sb.append("(Native Method)");
                     } else {
-                        final int lineNumber = ste.getLineNumber();
-                        sb.append('(').append(fileName);
-                        if (lineNumber >= 0) {
-                            sb.append(':').append(lineNumber);
+                        final String fileName = ste.getFileName();
+                        if (null == fileName) {
+                            sb.append("(Unknown Source)");
+                        } else {
+                            final int lineNumber = ste.getLineNumber();
+                            sb.append('(').append(fileName);
+                            if (lineNumber >= 0) {
+                                sb.append(':').append(lineNumber);
+                            }
+                            sb.append(')');
                         }
-                        sb.append(')');
                     }
+                    // sb.append(" (").append(loggable.getLog().getClass().getSimpleName()).append(')');
+                    sb.append(lineSeparator).append(' ');
+                    found = true;
                 }
-                // sb.append(" (").append(loggable.getLog().getClass().getSimpleName()).append(')');
-                sb.append(lineSeparator).append(' ');
-                break;
             }
         }
         sb.append(msg);
