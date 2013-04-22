@@ -108,6 +108,8 @@ public class PublicationTargetMultipleHandler implements MultipleHandler {
             } else {
                 throw UNKNOWN_ACTION.create(action);
             }
+        } catch (final OXException x) {
+            throw x;
         } catch (final Throwable t) {
             throw wrapThrowable(t);
         }

@@ -95,7 +95,7 @@ public abstract class AbstractPublicationServlet extends PermissionServlet {
 
     protected OXException wrapThrowable(final Throwable t) {
         ExceptionUtils.handleThrowable(t);
-        return THROWABLE.create(t, t.getMessage());
+        return t instanceof OXException ? (OXException) t : THROWABLE.create(t, t.getMessage());
     }
 
     protected void writeResponseSafely(final Response response, final HttpServletResponse resp, final Session session) {

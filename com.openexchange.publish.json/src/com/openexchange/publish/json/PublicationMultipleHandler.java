@@ -149,6 +149,8 @@ public class PublicationMultipleHandler implements MultipleHandler {
             }
         } catch (final JSONException x) {
             throw x;
+        } catch (final OXException x) {
+            throw x;
         } catch (final Throwable t) {
             throw wrapThrowable(t);
         }
