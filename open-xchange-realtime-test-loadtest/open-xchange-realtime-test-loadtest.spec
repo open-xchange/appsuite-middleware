@@ -4,7 +4,7 @@ BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 BuildRequires: ant
 BuildRequires: ant-nodeps
-BuildRequires: open-xchange-core
+BuildRequires: open-xchange-realtime-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
 %define        ox_release 3
@@ -14,11 +14,11 @@ License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       Bundles for testing the Realtime framework component
-Requires:      open-xchange-core >= @OXVERSION@
+Summary:       Bundles for load testing of the Realtime framework server component
+Requires:      open-xchange-realtime-core >= @OXVERSION@
 
 %description
-
+This package includes all bundles that are required to load test the realtime server component. 
 
 Authors:
 --------
