@@ -1,3 +1,4 @@
+*.swp
 *.class
 .DS_Store
 .lint4jprefs
