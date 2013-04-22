@@ -192,7 +192,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         concreteIDToResourceMap,
                         outboxes,
                         resendBuffers,
-                        sequenceNumbers
+                        sequenceNumbers,
                         atmosphereResourceReaper));
                     // finally suspend the resource until data is available for the clients and resource gets resumed after send
                     drainOutbox(constructedId);
