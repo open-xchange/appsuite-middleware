@@ -51,9 +51,14 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import static com.openexchange.java.Streams.close;
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.regex.Pattern;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -98,6 +103,10 @@ public class FileResponseRenderer implements ResponseRenderer {
     private static final String DOWNLOAD = "download";
     private static final String VIEW = "view";
 
+    private static final String MULTIPART_BOUNDARY = "MULTIPART_BYTERANGES";
+
+    private static final Pattern PATTERN_BYTE_RANGES = Pattern.compile("^bytes=\\d*-\\d*(,\\d*-\\d*)*$");
+
     /**
      * Initializes a new {@link FileResponseRenderer}.
      */
@@ -130,7 +139,18 @@ public class FileResponseRenderer implements ResponseRenderer {
         final String fileName = file.getName();
         InputStream documentData = null;
         try {
+            final long length = file.getLength();
             final String fileContentType = file.getContentType();
+            /*-
+             *
+            if (null != fileName && toLowerCase(fileContentType).startsWith("audio/")) {
+                final String mappedContentType = MimeType2ExtMap.getContentType(fileName);
+                if (!SAVE_AS_TYPE.equals(mappedContentType)) {
+                    fileContentType = mappedContentType;
+                }
+            }
+             *
+             */
             // Check certain parameters
             String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
             if (null == contentType) {
@@ -190,11 +210,9 @@ public class FileResponseRenderer implements ResponseRenderer {
                 /*
                  * Set Content-Length if possible
                  */
-                {
-                    final long length = file.getLength();
-                    if (length > 0) {
-                        resp.setContentLength((int) length);
-                    }
+                if (length > 0) {
+                    resp.setHeader("Accept-Ranges", "bytes");
+                    resp.setHeader("Content-Length", Long.toString(length));
                 }
                 /*-
                  * Determine preferred Content-Type
@@ -219,6 +237,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 }
                 if (contentType == null) {
                     resp.setContentType(preferredContentType);
+                    contentType = preferredContentType;
                 } else {
                     if (SAVE_AS_TYPE.equals(preferredContentType)) {
                         // We don't know better...
@@ -236,6 +255,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                             sb.append(contentType).append(" vs. ").append(preferredContentType).append(").");
                             LOG.warn(sb.toString());
                             resp.setContentType(preferredContentType);
+                            contentType = preferredContentType;
                         }
                     }
                 }
@@ -268,10 +288,107 @@ public class FileResponseRenderer implements ResponseRenderer {
              */
             try {
                 final ServletOutputStream outputStream = resp.getOutputStream();
-                final int len = BUFLEN;
-                final byte[] buf = new byte[len];
-                for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
-                    outputStream.write(buf, 0, read);
+                final String sRange = req.getHeader("Range");
+                if (null != sRange && length > 0) {
+                    // Taken from http://balusc.blogspot.co.uk/2009/02/fileservlet-supporting-resume-and.html
+                    // Range header should match format "bytes=n-n,n-n,n-n...". If not, then return 416.
+                    if (!PATTERN_BYTE_RANGES.matcher(sRange).matches()) {
+                        resp.setHeader("Content-Range", "bytes */" + length); // Required in 416.
+                        resp.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+                        return;
+                    }
+                    // If-Range header should either match ETag or be greater then LastModified. If not,
+                    // then return full file.
+                    final List<Range> ranges = new ArrayList<Range>(4);
+                    final Range full = new Range(0L, length - 1, length);
+                    final String eTag = result.getHeader("ETag");
+                    final String ifRange = request.getHeader("If-Range");
+                    if (ifRange != null && !ifRange.equals(eTag)) {
+                        try {
+                            final long ifRangeTime = req.getDateHeader("If-Range"); // Throws IAE if invalid.
+                            if (ifRangeTime != -1 && ifRangeTime < result.getExpires()) {
+                                ranges.add(full);
+                            }
+                        } catch (final IllegalArgumentException ignore) {
+                            ranges.add(full);
+                        }
+                    }
+                    // If any valid If-Range header, then process each part of byte range.
+                    if (ranges.isEmpty()) {
+                        for (final String part : sRange.substring(6).split(",")) {
+                            // Assuming a file with length of 100, the following examples returns bytes at:
+                            // 50-80 (50 to 80), 40- (40 to length=100), -20 (length-20=80 to length=100).
+                            final int dashPos = part.indexOf('-');
+                            long start = Long.parseLong(part.substring(0, dashPos));
+                            long end = Long.parseLong(part.substring(dashPos + 1, part.length()));
+
+                            if (start == -1) {
+                                start = length - end;
+                                end = length - 1;
+                            } else if (end == -1 || end > length - 1) {
+                                end = length - 1;
+                            }
+
+                            // Check if Range is syntactically valid. If not, then return 416.
+                            if (start > end) {
+                                resp.setHeader("Content-Range", "bytes */" + length); // Required in 416.
+                                resp.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+                                return;
+                            }
+
+                            // Add range.
+                            ranges.add(new Range(start, end, length));
+                        }
+                    }
+                    if (ranges.isEmpty() || ranges.get(0) == full) {
+                        // Return full file.
+                        final Range r = full;
+                        resp.setHeader("Content-Range", new StringAllocator("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
+
+                        // Copy full range.
+                        copy(documentData, outputStream, r.start, r.length);
+                    } else if (ranges.size() == 1) {
+
+                        // Return single part of file.
+                        final Range r = ranges.get(0);
+                        resp.setHeader("Content-Range", new StringAllocator("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
+                        resp.setHeader("Content-Length", String.valueOf(r.length));
+                        resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 206.
+
+                        // Copy single part range.
+                        copy(documentData, outputStream, r.start, r.length);
+                    } else {
+                        // Return multiple parts of file.
+                        resp.setContentType("multipart/byteranges; boundary=" + MULTIPART_BOUNDARY);
+                        resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 206.
+
+                        {
+                            // Cast back to ServletOutputStream to get the easy println methods.
+                            final ServletOutputStream sos = outputStream;
+
+                            // Copy multi part range.
+                            for (final Range r : ranges) {
+                                // Add multipart boundary and header fields for every range.
+                                sos.println();
+                                sos.println("--" + MULTIPART_BOUNDARY);
+                                sos.println("Content-Type: " + contentType);
+                                sos.println("Content-Range: bytes " + r.start + "-" + r.end + "/" + r.total);
+
+                                // Copy single part range of multi part range.
+                                copy(documentData, outputStream, r.start, r.length);
+                            }
+
+                            // End with multipart boundary.
+                            sos.println();
+                            sos.println("--" + MULTIPART_BOUNDARY + "--");
+                        }
+                    }
+                } else {
+                    final int len = BUFLEN;
+                    final byte[] buf = new byte[len];
+                    for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
+                        outputStream.write(buf, 0, read);
+                    }
                 }
                 outputStream.flush();
             } catch (final java.net.SocketException e) {
@@ -306,7 +423,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
     }
 
-    private IFileHolder transformIfImage(AJAXRequestData request, IFileHolder file, String delivery) throws IOException, OXException {
+    private IFileHolder transformIfImage(final AJAXRequestData request, final IFileHolder file, final String delivery) throws IOException, OXException {
         /*
          * check input
          */
@@ -328,41 +445,41 @@ public class FileResponseRenderer implements ResponseRenderer {
             stream.mark(131072); // 128KB
         }
         // start transformations: scale, rotate, ...
-        ImageTransformations transformations = scaler.transfom(stream);
+        final ImageTransformations transformations = scaler.transfom(stream);
         // rotate by default when not delivering as download
-        Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
+        final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
         if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
             transformations.rotate();
         }
         if (request.isSet("cropWidth") || request.isSet("cropHeight")) {
-            int cropX = request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0;
-            int cropY = request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0;
-            int cropWidth = request.getParameter("cropWidth", int.class).intValue();
-            int cropHeight = request.getParameter("cropHeight", int.class).intValue();
+            final int cropX = request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0;
+            final int cropY = request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0;
+            final int cropWidth = request.getParameter("cropWidth", int.class).intValue();
+            final int cropHeight = request.getParameter("cropHeight", int.class).intValue();
             transformations.crop(cropX, cropY, cropWidth, cropHeight);
         }
         if (request.isSet("width") || request.isSet("height")) {
-            int maxWidth = request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0;
-            int maxHeight = request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0;
-            ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
+            final int maxWidth = request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0;
+            final int maxHeight = request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0;
+            final ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
             transformations.scale(maxWidth, maxHeight, scaleType);
         }
         // compress by default when not delivering as download
-        Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
+        final Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
         if ((null == compress && false == DOWNLOAD.equalsIgnoreCase(delivery)) || (null != compress && compress.booleanValue())) {
             transformations.compress();
         }
         /*
          * transform
          */
-        InputStream transformed = transformations.getInputStream(file.getContentType());
+        final InputStream transformed = transformations.getInputStream(file.getContentType());
         if (null == transformed) {
             LOG.warn("Got no resulting input stream from transformation, trying to recover original input");
             if (markSupported) {
                 try {
                     stream.reset();
                     return file;
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     LOG.warn("Error resetting input stream", e);
                 }
             }
@@ -433,5 +550,61 @@ public class FileResponseRenderer implements ResponseRenderer {
         final int pos = contentType.indexOf('/');
         return pos > 0 ? contentType.substring(0, pos) : contentType;
     }
+
+    /**
+     * Copy the given byte range of the given input to the given output.
+     *
+     * @param inputStream The input to copy the given range to the given output for.
+     * @param output The output to copy the given range from the given input for.
+     * @param start Start of the byte range.
+     * @param length Length of the byte range.
+     * @throws IOException If something fails at I/O level.
+     */
+    private void copy(final InputStream inputStream, final OutputStream output, final long start, final long length) throws IOException {
+        // Write partial range.
+        final InputStream input;
+        if (!(inputStream instanceof BufferedInputStream) && !(inputStream instanceof ByteArrayInputStream)) {
+            input = new BufferedInputStream(inputStream, 8192);
+        } else {
+            input = inputStream;
+        }
+        // Discard previous bytes
+        for (int i = 0; i < start; i++) {
+            input.read();
+        }
+        long toRead = length;
+
+        final byte[] buffer = new byte[BUFLEN];
+        int read;
+        while ((read = input.read(buffer)) > 0) {
+            if ((toRead -= read) > 0) {
+                output.write(buffer, 0, read);
+            } else {
+                output.write(buffer, 0, (int) toRead + read);
+                break;
+            }
+        }
+    }
+
+    private static final class Range {
+
+        /** The begin position (inclusive) */
+        final long start;
+        /** The end position (inclusive) */
+        final long end;
+        /** The length */
+        final long length;
+        /** The total length */
+        final long total;
+
+        Range(final long start, final long end, final long total) {
+            super();
+            this.start = start;
+            this.end = end;
+            length = end - start + 1;
+            this.total = total;
+        }
+
+    } // End of class Range
 
 }
