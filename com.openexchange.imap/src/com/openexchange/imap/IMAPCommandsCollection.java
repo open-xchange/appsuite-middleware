@@ -2790,10 +2790,12 @@ public final class IMAPCommandsCollection {
 
     protected static BodyAndId getBODYSTRUCTURE(final String sectionId, final BODYSTRUCTURE bodystructure, final String prefix, final int partCount, final boolean[] mpDetected) throws MessagingException {
         final String sequenceId = getSequenceId(prefix, partCount);
+        boolean candidate = false;
         if (sectionId.equals(sequenceId)) {
-            if (bodystructure.isSingle() || null == bodystructure.bodies) {
+            if (!bodystructure.isMulti()) {
                 return new BodyAndId(bodystructure, sequenceId);
             }
+            candidate = true;
         }
         /*
          * A multipart or message/rfc822
@@ -2818,7 +2820,7 @@ public final class IMAPCommandsCollection {
                 }
             }
         }
-        return null;
+        return candidate ? new BodyAndId(bodystructure, sequenceId) : null;
     }
 
     /**
