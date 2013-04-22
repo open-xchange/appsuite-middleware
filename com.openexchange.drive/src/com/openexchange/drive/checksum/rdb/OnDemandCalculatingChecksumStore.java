@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.checksum.ChecksumStore;
@@ -162,6 +163,21 @@ public class OnDemandCalculatingChecksumStore implements ChecksumStore {
         } catch (NoSuchAlgorithmException e) {
             throw new IOException(e);
         }
+    }
+
+    @Override
+    public void addFolder(String folderID, long sequenceNumber, String checksum) throws OXException {
+        delegate.addFolder(folderID, sequenceNumber, checksum);
+    }
+
+    @Override
+    public void removeFolder(String folderID) throws OXException {
+        delegate.removeFolder(folderID);
+    }
+
+    @Override
+    public Entry<String, Long> getFolder(String folderID) throws OXException {
+        return delegate.getFolder(folderID);
     }
 
 }

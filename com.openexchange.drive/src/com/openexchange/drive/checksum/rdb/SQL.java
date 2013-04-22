@@ -103,6 +103,18 @@ public class SQL {
         "UPDATE checksums SET folder=REVERSE(?) " +
         "WHERE cid=? AND service=? AND account=? AND folder=REVERSE(?);";
 
+    public static final String SELECT_FOLDER_STMT =
+        "SELECT LOWER(HEX(checksum)),sequence FROM checksums " +
+        "WHERE cid=? AND service=? AND account=? AND folder=REVERSE(?) AND file='' AND version='';";
+
+    public static final String INSERT_FOLDER_STMT =
+        "INSERT INTO checksums (uuid,cid,service,account,folder,file,version,sequence,checksum) " +
+        "VALUES (UNHEX(?),?,?,?,REVERSE(?),'','',?,UNHEX(?));";
+
+    public static final String DELETE_FOLDER_STMT =
+        "DELETE FROM checksums " +
+        "WHERE cid=? AND service=? AND account=? AND folder=REVERSE(?) AND file='' AND version='';";
+
     public static ResultSet logExecuteQuery(PreparedStatement stmt) throws SQLException {
         if (false == LOG.isDebugEnabled()) {
             return stmt.executeQuery();

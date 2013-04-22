@@ -51,6 +51,7 @@ package com.openexchange.drive.checksum;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 
@@ -104,6 +105,12 @@ public interface ChecksumStore {
     Map<File, String> getFilesInFolder(String folderID) throws OXException;
 
     void updateFolderIDs(String currentFolderID, String newFolderID) throws OXException;
+
+    void addFolder(String folderID, long sequenceNumber, String checksum) throws OXException;
+
+    void removeFolder(String folderID) throws OXException;
+
+    Entry<String, Long> getFolder(String folderID) throws OXException;
 
 }
 

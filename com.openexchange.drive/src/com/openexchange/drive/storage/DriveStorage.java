@@ -60,6 +60,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.drive.internal.DriveSession;
@@ -80,6 +81,7 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.groupware.results.Delta;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -89,6 +91,8 @@ import com.openexchange.tools.iterator.SearchIterator;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class DriveStorage {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(DriveStorage.class);
 
     private final FolderID rootFolderID;
     private final DriveSession session;
@@ -111,6 +115,15 @@ public class DriveStorage {
         this.knownFolders = new FolderCache();
     }
 
+    /**
+     * Copies an existing file the supplied locations.
+     *
+     * @param sourceFile The source file to copy
+     * @param targetFileName The target filename
+     * @param targetPath The target path
+     * @return A file representing the copied file
+     * @throws OXException
+     */
     public File copyFile(File sourceFile, String targetFileName, String targetPath) throws OXException {
         File copiedFile = new DefaultFile();
         copiedFile.setFileName(targetFileName);
@@ -120,70 +133,252 @@ public class DriveStorage {
         copiedFile.setVersion("1");
         List<Field> fileFields = Arrays.asList(new Field[] { Field.FILENAME, Field.TITLE, Field.FOLDER_ID });
         IDTuple sourceId = new IDTuple(sourceFile.getFolderId(), sourceFile.getId());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(this.toString() + "cp " + getPath(sourceFile.getFolderId()) + '/' + sourceFile.getFileName() + " " +
+                targetPath + '/' + targetFileName);
+        }
         IDTuple targetId = getFileAccess().copy(sourceId, copiedFile.getFolderId(), copiedFile, null, fileFields);
         copiedFile.setFolderId(targetId.getFolder());
         copiedFile.setId(targetId.getId());
         return copiedFile;
     }
 
+    /**
+     * Overwrites an existing file with the contents of another one.
+     *
+     * @param sourceFile The source file to copy
+     * @param targetFile The target file to overwrite
+     * @return A file representing the copied file
+     * @throws OXException
+     */
     public File copyFile(File sourceFile, File targetFile) throws OXException {
         targetFile.setLastModified(new Date());
         targetFile.setFileSize(sourceFile.getFileSize());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(this.toString() + "cp " + getPath(sourceFile.getFolderId()) + '/' + sourceFile.getFileName() + " " +
+                getPath(targetFile.getFolderId()) + '/' + targetFile.getFileName());
+        }
         getFileAccess().saveDocument(targetFile, getDocument(sourceFile), targetFile.getSequenceNumber());
         return targetFile;
     }
 
-    public File deleteFile(File file, boolean hard) throws OXException {
-        if (hard) {
-            IDTuple id = new IDTuple(file.getFolderId(), file.getId());
-            List<IDTuple> notRemoved = getFileAccess().removeDocument(Arrays.asList(new IDTuple[] { id }), file.getSequenceNumber());
-            if (null != notRemoved && 0 < notRemoved.size()) {
-                throw DriveExceptionCodes.FILE_NOT_FOUND.create();//TODO: exception for this
-            }
-            return file;
-        } else {
-            return moveFile(file, TEMP_PATH);
+    /**
+     * Deletes a file.
+     *
+     * @param file The file to delete
+     * @return A file representing the deleted file
+     * @throws OXException
+     */
+    public File deleteFile(File file) throws OXException {
+        IDTuple id = new IDTuple(file.getFolderId(), file.getId());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(this.toString() + "rm " + getPath(file.getFolderId()) + '/' + file.getFileName());
         }
+        List<IDTuple> notRemoved = getFileAccess().removeDocument(Arrays.asList(new IDTuple[] { id }), file.getSequenceNumber());
+        if (null != notRemoved && 0 < notRemoved.size()) {
+            throw DriveExceptionCodes.FILE_NOT_FOUND.create();//TODO: exception for this
+        }
+        return file;
     }
 
-//    public void updateFile(File file, InputStream document) throws OXException {
-//        getFileAccess().saveDocument(file, document, file.getSequenceNumber());
-//    }
-
-    public InputStream getDocument(File file) throws OXException {
-        return getFileAccess().getDocument(file.getFolderId(), file.getId(), file.getVersion());
-    }
-
+    /**
+     * Renames a file.
+     *
+     * @param file The file to rename
+     * @param targetFileName The target filename
+     * @return A file representing the renamed file
+     * @throws OXException
+     */
     public File renameFile(File file, String targetFileName) throws OXException {
-        return updateFile(file, targetFileName, null);
+        return moveFile(file, targetFileName, null);
     }
 
+    /**
+     * Moves a file to another folder
+     *
+     * @param file The file to move
+     * @param targetPath The target folder
+     * @return A file representing the renamed file
+     * @throws OXException
+     */
     public File moveFile(File file, String targetPath) throws OXException {
-        return updateFile(file, null, targetPath);
+        return moveFile(file, null, targetPath);
     }
 
-    public File updateFile(File file, String targetFileName, String targetPath) throws OXException {
-        List<Field> editedFields = new ArrayList<File.Field>();
-        File editedFile = new DefaultFile();
-        editedFile.setId(file.getId());
-        editedFile.setFolderId(file.getFolderId());
+    /**
+     * Moves a file to another folder and/or filename.
+     *
+     * @param file The file to move
+     * @param targetFileName The target filename
+     * @param targetPath The target path
+     * @return A file representing the moved file
+     * @throws OXException
+     */
+    public File moveFile(File file, String targetFileName, String targetPath) throws OXException {
+        List<Field> updatedFields = new ArrayList<File.Field>();
+        File movedFile = new DefaultFile(file);
         if (null != targetFileName && false == targetFileName.equals(file.getFileName())) {
-            editedFile.setFileName(targetFileName);
-            editedFields.add(Field.FILENAME);
+            movedFile.setFileName(targetFileName);
+            updatedFields.add(Field.FILENAME);
             if (null != file.getTitle() && file.getTitle().equals(file.getFileName())) {
-                editedFile.setTitle(targetFileName);
-                editedFields.add(Field.TITLE);
+                movedFile.setTitle(targetFileName);
+                updatedFields.add(Field.TITLE);
             }
         }
         if (null != targetPath) {
             FileStorageFolder targetFolder = getFolder(targetPath, true);
             if (false == file.getFolderId().equals(targetFolder.getId())) {
-                editedFile.setFolderId(targetFolder.getId());
-                editedFields.add(Field.FOLDER_ID);
+                movedFile.setFolderId(targetFolder.getId());
+                updatedFields.add(Field.FOLDER_ID);
             }
         }
-        getFileAccess().saveFileMetadata(editedFile, file.getSequenceNumber(), editedFields);
-        return editedFile;
+        if (0 < updatedFields.size()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(this.toString() + "mv " + getPath(file.getFolderId()) + '/' + file.getFileName() + " " +
+                    getPath(movedFile.getFolderId()) + '/' + movedFile.getFileName());
+            }
+            getFileAccess().saveFileMetadata(movedFile, file.getSequenceNumber(), updatedFields);
+        }
+        return movedFile;
+    }
+
+    /**
+     * Creates a file.
+     *
+     * @param path The target folder path
+     * @param fileName The target filename
+     * @return A file representing the created file
+     * @throws OXException
+     */
+    public File createFile(String path, String fileName) throws OXException {
+        File file = new DefaultFile();
+        file.setFolderId(getFolderID(path, true));
+        file.setFileName(fileName);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(this.toString() + "touch " + path + '/' + fileName);
+        }
+        getFileAccess().saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+        return file;
+    }
+
+    /**
+     * Moves / renames a folder from one path to another.
+     *
+     * @param path The current path of the folder
+     * @param newPath The new path
+     * @return The new ID of the moved folder
+     * @throws OXException
+     */
+    public String moveFolder(String path, String newPath) throws OXException {
+        if (Strings.isEmpty(newPath) || ROOT_PATH.equals(newPath)) {
+            throw DriveExceptionCodes.INVALID_PATH.create(newPath);
+        }
+        if (Strings.isEmpty(path) || ROOT_PATH.equals(path)) {
+            throw DriveExceptionCodes.INVALID_PATH.create(path);
+        }
+        FileStorageFolder folder = getFolder(path);
+        String folderID = folder.getId();
+        knownFolders.forget(path, folder, true);
+        /*
+         * prepare path up to new parent folder
+         */
+        int idx = path.lastIndexOf(PATH_SEPARATOR);
+        String oldName = path.substring(idx + 1);
+        String oldParentPath = 0 == idx ? ROOT_PATH : path.substring(0, idx);
+        idx = newPath.lastIndexOf(PATH_SEPARATOR);
+        String newName = newPath.substring(idx + 1);
+        String newParentPath = 0 == idx ? ROOT_PATH : newPath.substring(0, idx);
+        FileStorageFolder newParentFolder = getFolder(newParentPath, true);
+        /*
+         * check for move and/or rename operations
+         */
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(this.toString() + "mv " + path + " " + newPath);
+        }
+        if (false == oldParentPath.equals(newParentPath)) {
+            /*
+             * perform move
+             */
+            folderID = getFolderAccess().moveFolder(folderID, newParentFolder.getId());
+        }
+        if (false == oldName.equals(newName)) {
+            /*
+             * perform rename
+             */
+            folderID = getFolderAccess().renameFolder(folderID, newName);
+        }
+        return folderID;
+    }
+
+    /**
+     * Creates a new folder, including all denoted subfolders along the path if needed.
+     *
+     * @param path The path to the folder to create
+     * @return The ID of the created folder
+     * @throws OXException
+     */
+    public String createFolder(String path) throws OXException {
+        return getFolderID(path, true);
+    }
+
+    /**
+     * Deletes a folder.
+     *
+     * @param path The path of the folder to delete
+     * @return The ID of the deleted folder
+     * @throws OXException
+     */
+    public String deleteFolder(String path) throws OXException {
+        if (Strings.isEmpty(path) || ROOT_PATH.equals(path)) {
+            throw DriveExceptionCodes.INVALID_PATH.create(path);
+        }
+        FileStorageFolder folder = getFolder(path);
+        knownFolders.forget(path, folder, true);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(this.toString() + "rmdir " + path);
+        }
+        getFolderAccess().deleteFolder(folder.getId());
+        return folder.getId();
+    }
+
+    public boolean supportsFolderSequenceNumbers() {
+        return true;//TODO
+    }
+
+    public long getSequenceNumber(String path) throws OXException {
+        FileStorageFolder folder = getFolder(path);
+        long sequenceNumber = folder.getLastModifiedDate().getTime();
+        // TODO: adding 1 to "since" timestamp - the infostore seems to use a >= comparison in queries
+        Delta<File> delta = getFileAccess().getDelta(folder.getId(), 1 + sequenceNumber,
+            Arrays.asList(new Field[] { Field.LAST_MODIFIED_UTC }), false);
+        if (null != delta) {
+            sequenceNumber = Math.max(sequenceNumber, getMaxSequenceNumber(delta.getNew()));
+            sequenceNumber = Math.max(sequenceNumber, getMaxSequenceNumber(delta.getModified()));
+            sequenceNumber = Math.max(sequenceNumber, getMaxSequenceNumber(delta.getDeleted()));
+        }
+        return sequenceNumber;
+    }
+
+    private static long getMaxSequenceNumber(SearchIterator<File> searchIterator) throws OXException {
+        long sequenceNumber = 0;
+        if (null != searchIterator) {
+            try {
+                while (searchIterator.hasNext()) {
+                    long currentSequenceNumber = searchIterator.next().getSequenceNumber();
+                    if (currentSequenceNumber > sequenceNumber) {
+                        sequenceNumber = currentSequenceNumber;
+                    }
+                }
+
+            } finally {
+                searchIterator.close();
+            }
+        }
+        return sequenceNumber;
+    }
+
+    public InputStream getDocument(File file) throws OXException {
+        return getFileAccess().getDocument(file.getFolderId(), file.getId(), file.getVersion());
     }
 
     private SearchIterator<File> getFilesIterator(String path) throws OXException {
@@ -241,84 +436,12 @@ public class DriveStorage {
         });
     }
 
-    public File createFile(String path, String fileName) throws OXException {
-        File file = new DefaultFile();
-        file.setFolderId(getFolderID(path, true));
-        file.setFileName(fileName);
-        getFileAccess().saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
-        return file;
-    }
-
-    /**
-     * Moves / renames a folder from one path to another.
-     *
-     * @param path The current path of the folder
-     * @param newPath The new path
-     * @return The new ID of the moved folder
-     * @throws OXException
-     */
-    public String moveFolder(String path, String newPath) throws OXException {
-        if (Strings.isEmpty(newPath) || ROOT_PATH.equals(newPath)) {
-            throw DriveExceptionCodes.INVALID_PATH.create(newPath);
-        }
-        if (Strings.isEmpty(path) || ROOT_PATH.equals(path)) {
-            throw DriveExceptionCodes.INVALID_PATH.create(path);
-        }
-        FileStorageFolder folder = getFolder(path);
-        String folderID = folder.getId();
-        knownFolders.forget(path, folder, true);
-        /*
-         * prepare path up to new parent folder
-         */
-        int idx = path.lastIndexOf(PATH_SEPARATOR);
-        String oldName = path.substring(idx + 1);
-        String oldParentPath = 0 == idx ? ROOT_PATH : path.substring(0, idx);
-        idx = newPath.lastIndexOf(PATH_SEPARATOR);
-        String newName = newPath.substring(idx + 1);
-        String newParentPath = 0 == idx ? ROOT_PATH : newPath.substring(0, idx);
-        FileStorageFolder newParentFolder = getFolder(newParentPath, true);
-        /*
-         * check for move and/or rename operations
-         */
-        if (false == oldParentPath.equals(newParentPath)) {
-            /*
-             * perform move
-             */
-            folderID = getFolderAccess().moveFolder(folderID, newParentFolder.getId());
-        }
-        if (false == oldName.equals(newName)) {
-            /*
-             * perform rename
-             */
-            folderID = getFolderAccess().renameFolder(folderID, newName);
-        }
-        return folderID;
-    }
-
-    public String deleteFolder(String path, boolean hard) throws OXException {
-        if (Strings.isEmpty(path) || ROOT_PATH.equals(path)) {
-            throw DriveExceptionCodes.INVALID_PATH.create(path);
-        }
-        FileStorageFolder folder = getFolder(path);
-        knownFolders.forget(path, folder, true);
-        if (hard) {
-            getFolderAccess().deleteFolder(folder.getId());
-            return null;
-        } else {
-            return getFolderAccess().moveFolder(folder.getId(), getFolderID(TEMP_PATH, true));
-        }
-    }
-
     public String getPath(String folderID) throws OXException {
         String path = knownFolders.getPath(folderID);
         if (null == path) {
             path = resolveToRoot(folderID);
         }
         return path;
-    }
-
-    public void createFolder(String path) throws OXException {
-        getFolder(path, true);
     }
 
     public String getFolderID(String path) throws OXException {
@@ -430,6 +553,9 @@ public class DriveStorage {
         for (FileStoragePermission permission : parent.getPermissions()) {
             newFolder.addPermission(permission);
         }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(this.toString() + "mkdir " + getPath(parent.getId()) + '/' + name);
+        }
         String newFolderID = getFolderAccess().createFolder(newFolder);
         return getFolderAccess().getFolder(newFolderID);
     }
@@ -484,6 +610,6 @@ public class DriveStorage {
 
     @Override
     public String toString() {
-        return "DriveStorage[" + rootFolderID + ']';
+        return session.getServerSession().getLogin() + ':' + rootFolderID.toUniqueID() + "# ";
     }
 }

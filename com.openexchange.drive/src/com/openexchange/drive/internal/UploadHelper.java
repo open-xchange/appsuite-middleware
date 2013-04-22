@@ -116,7 +116,7 @@ public class UploadHelper {
                         originalFile.setLastModified(new Date());
                         saveDocumentAndChecksum(originalFile, session.getStorage().getDocument(uploadFile),
                             uploadFile.getSequenceNumber(), DriveConstants.FILE_FIELDS, false);
-                        session.getStorage().deleteFile(uploadFile, true);
+                        session.getStorage().deleteFile(uploadFile);
                         session.getChecksumStore().removeChecksums(uploadFile);
                     }
                     return new ServerFileVersion(originalFile, newVersion.getChecksum());//TODO: validate checksum
@@ -128,7 +128,7 @@ public class UploadHelper {
             /*
              * file transfer finished, save document & rename file to target file name
              */
-            File updatedFile = session.getStorage().updateFile(uploadFile, newVersion.getName(), path);
+            File updatedFile = session.getStorage().moveFile(uploadFile, newVersion.getName(), path);
             session.getChecksumStore().removeChecksums(uploadFile);
             session.getChecksumStore().addChecksum(updatedFile, newVersion.getChecksum());
             return new ServerFileVersion(updatedFile, newVersion.getChecksum());//TODO: validate checksum

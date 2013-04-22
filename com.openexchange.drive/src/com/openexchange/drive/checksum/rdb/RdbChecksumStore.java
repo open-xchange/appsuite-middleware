@@ -53,12 +53,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.drive.DriveExceptionCodes;
@@ -67,6 +69,7 @@ import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
@@ -145,7 +148,7 @@ public class RdbChecksumStore implements ChecksumStore {
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
-            databaseService.backReadOnly(session.getContextId(), connection);
+            databaseService.backWritable(session.getContextId(), connection);
         }
     }
 
@@ -157,7 +160,7 @@ public class RdbChecksumStore implements ChecksumStore {
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
-            databaseService.backReadOnly(session.getContextId(), connection);
+            databaseService.backWritable(session.getContextId(), connection);
         }
     }
 
@@ -169,9 +172,46 @@ public class RdbChecksumStore implements ChecksumStore {
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
+            databaseService.backWritable(session.getContextId(), connection);
+        }
+    }
+
+    @Override
+    public void addFolder(String folderID, long sequenceNumber, String checksum) throws OXException {
+        Connection connection = databaseService.getWritable(session.getContextId());
+        try {
+            insertFolder(connection, session.getContextId(), serviceID, accountID, folderID, sequenceNumber, checksum);
+        } catch (SQLException e) {
+            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            databaseService.backWritable(session.getContextId(), connection);
+        }
+    }
+
+    @Override
+    public void removeFolder(String folderID) throws OXException {
+        Connection connection = databaseService.getWritable(session.getContextId());
+        try {
+            deleteFolder(connection, session.getContextId(), serviceID, accountID, folderID);
+        } catch (SQLException e) {
+            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            databaseService.backWritable(session.getContextId(), connection);
+        }
+    }
+
+    @Override
+    public Entry<String, Long> getFolder(String folderID) throws OXException {
+        Connection connection = databaseService.getReadOnly(session.getContextId());
+        try {
+            return selectFolder(connection, session.getContextId(), serviceID, accountID, folderID);
+        } catch (SQLException e) {
+            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
             databaseService.backReadOnly(session.getContextId(), connection);
         }
     }
+
 
     private static String selectChecksum(Connection connection, int cid, String service, String account, String folder, String file, String version, long sequence) throws SQLException {
         PreparedStatement stmt = null;
@@ -230,13 +270,16 @@ public class RdbChecksumStore implements ChecksumStore {
             stmt.setString(4, folderID);
             resultSet = SQL.logExecuteQuery(stmt);
             while (resultSet.next()) {
-                File file = new DefaultFile();
-                file.setFolderId(folderID);
-                file.setId(resultSet.getString(1));
-                file.setVersion(resultSet.getString(2));
-                file.setLastModified(new Date(resultSet.getLong(3)));
-                String checksum = resultSet.getString(4);
-                files.put(file, checksum);
+                String id = resultSet.getString(1);
+                if (false == Strings.isEmpty(id)) {
+                    File file = new DefaultFile();
+                    file.setFolderId(folderID);
+                    file.setId(id);
+                    file.setVersion(resultSet.getString(2));
+                    file.setLastModified(new Date(resultSet.getLong(3)));
+                    String checksum = resultSet.getString(4);
+                    files.put(file, checksum);
+                }
             }
         } finally {
             DBUtils.closeSQLStuff(resultSet, stmt);
@@ -292,6 +335,57 @@ public class RdbChecksumStore implements ChecksumStore {
             DBUtils.closeSQLStuff(stmt);
         }
     }
+
+    private static Entry<String, Long> selectFolder(Connection connection, int cid, String service, String account, String folderID) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
+        try {
+            stmt = connection.prepareStatement(SQL.SELECT_FOLDER_STMT);
+            stmt.setInt(1, cid);
+            stmt.setString(2, service);
+            stmt.setString(3, account);
+            stmt.setString(4, folderID);
+            resultSet = SQL.logExecuteQuery(stmt);
+            if (resultSet.next()) {
+                return new AbstractMap.SimpleEntry<String, Long>(resultSet.getString(1), Long.valueOf(resultSet.getLong(2)));
+            }
+        } finally {
+            DBUtils.closeSQLStuff(resultSet, stmt);
+        }
+        return null;
+    }
+
+    private static int insertFolder(Connection connection, int cid, String service, String account, String folder, long sequence, String checksum) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.INSERT_FOLDER_STMT);
+            stmt.setString(1, UUIDs.getUnformattedString(UUID.randomUUID()));
+            stmt.setInt(2, cid);
+            stmt.setString(3, service);
+            stmt.setString(4, account);
+            stmt.setString(5, folder);
+            stmt.setLong(6, sequence);
+            stmt.setString(7, checksum);
+            return SQL.logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private static int deleteFolder(Connection connection, int cid, String service, String account, String folder) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.DELETE_FOLDER_STMT);
+            stmt.setInt(1, cid);
+            stmt.setString(2, service);
+            stmt.setString(3, account);
+            stmt.setString(4, folder);
+            return SQL.logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
 
 }
 

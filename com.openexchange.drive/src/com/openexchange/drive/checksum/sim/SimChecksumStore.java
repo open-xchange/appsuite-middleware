@@ -132,5 +132,23 @@ public class SimChecksumStore implements ChecksumStore {
 
     }
 
+    @Override
+    public void addFolder(String folderID, long sequenceNumber, String checksum) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void removeFolder(String folderID) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public Entry<String, Long> getFolder(String folderID) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }
 

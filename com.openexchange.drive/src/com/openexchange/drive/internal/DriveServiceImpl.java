@@ -223,7 +223,7 @@ public class DriveServiceImpl implements DriveService {
                 }
             }
             // delete empty directory
-            session.getStorage().deleteFolder(action.getVersion().getPath(), true);
+            session.getStorage().deleteFolder(action.getVersion().getPath());
             break;
         default:
             throw new IllegalStateException("Can't perform action " + action + " on server");
@@ -237,7 +237,7 @@ public class DriveServiceImpl implements DriveService {
             ServerFileVersion versionToRemove = (ServerFileVersion)action.getVersion();
             session.getChecksumStore().removeChecksums(versionToRemove.getFile());
             // move to trash
-            File removedFile = session.getStorage().updateFile(
+            File removedFile = session.getStorage().moveFile(
                 versionToRemove.getFile(), action.getVersion().getChecksum(), DriveConstants.TEMP_PATH);
             if (null != removedFile) {
                 if (action.getVersion().getChecksum().equals(removedFile.getFileName())) {
@@ -245,7 +245,7 @@ public class DriveServiceImpl implements DriveService {
                     session.getChecksumStore().addChecksum(removedFile, versionToRemove.getChecksum());
                 } else {
                     // file already in trash, cleanup
-                    session.getStorage().deleteFile(removedFile, true);
+                    session.getStorage().deleteFile(removedFile);
                 }
             }
 
@@ -297,10 +297,39 @@ public class DriveServiceImpl implements DriveService {
         return new ServerFileVersion(file, session.getChecksumStore().getChecksum(file));
     }
 
+//    private static List<ServerDirectoryVersion> getServerDirectories1(DriveSession session) throws OXException {
+//        List<ServerDirectoryVersion> directories = new ArrayList<ServerDirectoryVersion>();
+//        Map<String, FileStorageFolder> folders = session.getStorage().getFolders();
+//        for (Map.Entry<String, FileStorageFolder> folder : folders.entrySet()) {
+//            directories.add(getServerDirectory(folder.getKey(), session));
+//        }
+//        return directories;
+//    }
+
     private static List<ServerDirectoryVersion> getServerDirectories(DriveSession session) throws OXException {
         List<ServerDirectoryVersion> directories = new ArrayList<ServerDirectoryVersion>();
         Map<String, FileStorageFolder> folders = session.getStorage().getFolders();
         for (Map.Entry<String, FileStorageFolder> folder : folders.entrySet()) {
+            if (session.getStorage().supportsFolderSequenceNumbers()) {
+                /*
+                 * try to use already known checksum if possible
+                 */
+                Entry<String, Long> knownChecksum = session.getChecksumStore().getFolder(folder.getValue().getId());
+                if (null != knownChecksum) {
+                    long sequenceNumber = session.getStorage().getSequenceNumber(folder.getKey());
+                    if (sequenceNumber == knownChecksum.getValue().longValue()) {
+                        LOG.debug("No changes detected since last calculated checksum for directory " + folder.getKey());
+                        directories.add(new ServerDirectoryVersion(folder.getKey(), knownChecksum.getKey()));
+                        continue;
+                    } else {
+                        LOG.debug("Changes detected since last calculated checksum for directory " + folder.getKey() + " ");
+                        session.getChecksumStore().removeFolder(folder.getValue().getId());
+                    }
+                }
+            }
+            /*
+             * calculate checksum
+             */
             directories.add(getServerDirectory(folder.getKey(), session));
         }
         return directories;
@@ -331,9 +360,9 @@ public class DriveServiceImpl implements DriveService {
                     }
                 }
                 if (null != knownChecksum) {
-                    fragments.add(new DirectoryFragment(file.getFileName(), knownChecksum));
+                    fragments.add(new DirectoryFragment(file, knownChecksum));
                 } else {
-                    fragments.add(new DirectoryFragment(file.getFileName(), session.getChecksumStore().getChecksum(file)));
+                    fragments.add(new DirectoryFragment(file, session.getChecksumStore().getChecksum(file)));
                 }
             }
         }
@@ -341,16 +370,26 @@ public class DriveServiceImpl implements DriveService {
     }
 
     private static ServerDirectoryVersion getServerDirectory(String path, DriveSession session) throws OXException {
+        long sequenceNumber = session.getStorage().getFolder(path).getLastModifiedDate().getTime();
         Set<DirectoryFragment> fragments = getDirectoryFragments(path, session);
+        ServerDirectoryVersion directoryVersion;
         if (null == fragments || 0 == fragments.size()) {
-            return new ServerDirectoryVersion(path, DriveConstants.EMPTY_MD5);
+            directoryVersion = new ServerDirectoryVersion(path, DriveConstants.EMPTY_MD5);
+        } else {
+            MD md5 = session.newMD5();
+            for (DirectoryFragment directoryFragment : fragments) {
+                md5.update(directoryFragment.getEncodedFileName());
+                md5.update(directoryFragment.getEncodedChecksum());
+                if (sequenceNumber < directoryFragment.getFile().getSequenceNumber()) {
+                    sequenceNumber = directoryFragment.getFile().getSequenceNumber();
+                }
+            }
+            directoryVersion = new ServerDirectoryVersion(path, md5.getFormattedValue());
         }
-        MD md5 = session.newMD5();
-        for (DirectoryFragment directoryFragment : fragments) {
-            md5.update(directoryFragment.getEncodedFileName());
-            md5.update(directoryFragment.getEncodedChecksum());
+        if (session.getStorage().supportsFolderSequenceNumbers()) {
+            session.getChecksumStore().addFolder(session.getStorage().getFolderID(path), sequenceNumber, directoryVersion.getChecksum());
         }
-        return new ServerDirectoryVersion(path, md5.getFormattedValue());
+        return directoryVersion;
     }
 
     private static DriveSession createSession(ServerSession session, String rootFolderID) {

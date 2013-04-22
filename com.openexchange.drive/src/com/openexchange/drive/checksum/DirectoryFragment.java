@@ -50,6 +50,7 @@
 package com.openexchange.drive.checksum;
 
 import java.util.Arrays;
+import com.openexchange.file.storage.File;
 import com.openexchange.java.Charsets;
 
 /**
@@ -61,10 +62,12 @@ public class DirectoryFragment implements Comparable<DirectoryFragment> {
 
     private final byte[] encodedFileName;
     private final byte[] encodedChecksum;
+    private final File file;
 
-    public DirectoryFragment(String fileName, String checksum) {
+    public DirectoryFragment(File file, String checksum) {
         super();
-        this.encodedFileName = fileName.getBytes(Charsets.UTF_8);
+        this.file = file;
+        this.encodedFileName = file.getFileName().getBytes(Charsets.UTF_8);
         this.encodedChecksum = checksum.getBytes(Charsets.UTF_8);
     }
 
@@ -96,6 +99,15 @@ public class DirectoryFragment implements Comparable<DirectoryFragment> {
      */
     public byte[] getEncodedFileName() {
         return encodedFileName;
+    }
+
+    /**
+     * Gets the file
+     *
+     * @return The file
+     */
+    public File getFile() {
+        return file;
     }
 
     @Override

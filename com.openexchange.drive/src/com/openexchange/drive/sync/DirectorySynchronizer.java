@@ -140,7 +140,7 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion>{
             /*
              * delete-edit conflict, let client synchronize the directory
              */
-            result.addActionForClient(new SyncDirectoryAction(clientVersion));
+            result.addActionForClient(new SyncDirectoryAction(serverVersion));
         } else if ((Change.NEW == clientChange || Change.MODIFIED == clientChange) && Change.DELETED == serverChange) {
             /*
              * edit-delete conflict, create on server, let client synchronize the directory
