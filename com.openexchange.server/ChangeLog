@@ -6,6 +6,7 @@
 
  - Fix for bug 25791: Reliably enter stop() routine through registering own shut-down hook for document converter
  - Fix for bug 26075: Understandable error message if file name conns illegal characters
+ - Fix for bug 26073: Provide statement's string representation on log invocation
 
 * 2013-04-22 - martin.herfurth@open-xchange.com
 

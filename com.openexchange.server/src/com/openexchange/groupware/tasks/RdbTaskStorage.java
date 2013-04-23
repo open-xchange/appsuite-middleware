@@ -63,7 +63,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
@@ -72,6 +71,7 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.TaskIterator2.StatementSetter;
 import com.openexchange.java.Charsets;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.sql.DBUtils;
@@ -254,7 +254,7 @@ public class RdbTaskStorage extends TaskStorage {
                     stmt.setString(pos++, pattern);
                     stmt.setString(pos++, pattern);
                 }
-                LOG.trace(stmt);
+                LOG.trace(stmt.toString());
             }
         }, -1, columns, ACTIVE);
     }
