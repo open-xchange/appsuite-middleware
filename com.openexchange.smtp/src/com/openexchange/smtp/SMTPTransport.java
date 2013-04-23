@@ -682,6 +682,12 @@ public final class SMTPTransport extends MailTransport {
                     }
                 }
                 /*
+                 * Set common headers
+                 */
+                final SMTPMessageFiller smtpFiller = new SMTPMessageFiller(smtpConfig.getSMTPProperties(), session, ctx, usm);
+                smtpFiller.setAccountId(accountId);
+                smtpFiller.setCommonHeaders(mimeMessage);
+                /*
                  * Check recipients
                  */
                 final Address[] recipients = allRecipients == null ? mimeMessage.getAllRecipients() : allRecipients;

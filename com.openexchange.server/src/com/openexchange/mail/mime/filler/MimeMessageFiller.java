@@ -1059,7 +1059,7 @@ public class MimeMessageFiller {
                             if (HTMLDetector.containsHTMLTags(content.getBytes(Charsets.ISO_8859_1))) {
                                 isHtml = true;
                                 final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
-                                text = wellFormedHTMLContent;                                
+                                text = wellFormedHTMLContent;
                             } else {
                                 isHtml = false;
                                 text = content;
@@ -1567,7 +1567,7 @@ public class MimeMessageFiller {
      * @param charset The charset
      * @return A body part of type <code>text/html</code> from given HTML content
      * @throws MessagingException If a messaging error occurs
-     * @throws OXException 
+     * @throws OXException
      */
     protected final BodyPart createHtmlBodyPart(final String wellFormedHTMLContent, final String charset) throws MessagingException, OXException {
         try {
