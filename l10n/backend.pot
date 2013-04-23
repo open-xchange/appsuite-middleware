@@ -3256,7 +3256,6 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:63
 msgid "Invalid SQL Query: %s"
 msgstr ""
 
@@ -5660,7 +5659,6 @@ msgid "Could not delete files from file store. Context: %d."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:81
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:121
 msgid "Validation failed: %s"
 msgstr ""
 
@@ -6172,7 +6170,6 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:341
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:147
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:111
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:211
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:433
 msgid ""
@@ -7552,6 +7549,10 @@ msgstr ""
 msgid "Some field values are too long."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:63
+msgid "Invalid SQL Query: %1$s"
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:65
 msgid "Cannot pre-fetch results."
 msgstr ""
@@ -7565,7 +7566,7 @@ msgid "Could not load documents to check the permissions"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:71
-msgid "The folder %d is not an Infostore folder"
+msgid "The folder %1$s is not an Infostore folder"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:73
@@ -7630,14 +7631,14 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:101
 msgid ""
-"Files attached to InfoStore items must have unique names. File name: %s. The "
-"other document with this file name is %s."
+"Files attached to InfoStore items must have unique names. File name: %1$s. "
+"The other document with this file name is %2$s."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:103
 msgid ""
-"Could not determine number of versions for info item %s in context %s. "
-"Invalid query: %s"
+"Could not determine number of versions for info item %1$s in context %s. "
+"Invalid query: %2$s"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:105
@@ -7646,17 +7647,22 @@ msgid ""
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:107
-msgid "Illegal argument: document %d contains no file"
+msgid "Illegal argument: document %1$s contains no file"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:109
 msgid ""
-"Folder %d has two subfolders named %s. The database for context %d is not "
-"consistent."
+"Folder %1$s has two subfolders named %2$s. The database for context %3$s is "
+"not consistent."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:111
+msgid ""
+"In order to accomplish the search, %1$s or more characters are required."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:113
-msgid "DocumentMetadata %d could not be deleted. Please try again."
+msgid "DocumentMetadata %1$s could not be deleted. Please try again."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:115
@@ -7672,6 +7678,20 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:119
 msgid "This folder is a virtual folder. It cannot contain documents."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:121
+msgid "Validation failed: %1$s"
+msgstr ""
+
+#. File name must not contain slashes.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:124
+msgid "File name must not contain slashes."
+msgstr ""
+
+#. File name contains illegal characters.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:127
+msgid "File name contains illegal characters."
 msgstr ""
 
 #. *
