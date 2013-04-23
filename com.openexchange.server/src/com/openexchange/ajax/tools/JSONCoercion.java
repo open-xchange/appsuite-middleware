@@ -163,6 +163,9 @@ public class JSONCoercion {
      * @throws JSONException If coercion fails
      */
     public static Object coerceToJSON(final Object value) throws JSONException {
+        if (null == value || JSONObject.NULL.equals(value)) {
+            return JSONObject.NULL;
+        }
         if (value instanceof JSONObject) {
             return value;
         }
@@ -195,9 +198,8 @@ public class JSONCoercion {
             return jsonArray;
         }
         /*
-         * Put directly
+         * Return directly
          */
-        new JSONArray().put(value); // Is valid in JSON?
         return value;
     }
 
