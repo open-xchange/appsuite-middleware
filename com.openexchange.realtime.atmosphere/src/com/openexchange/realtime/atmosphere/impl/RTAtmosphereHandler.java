@@ -575,6 +575,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             outbox = outboxes.remove(id);
             SortedSet<EnqueuedStanza> resendBuffer = resendBuffers.get(id);
             if ((outbox != null && !outbox.isEmpty()) || (resendBuffer != null && !resendBuffer.isEmpty())) {
+                if (outbox != null) {
+                    outbox = Collections.emptyList();
+                }
                 JSONArray array = new JSONArray();
                 StanzaWriter stanzaWriter = new StanzaWriter();
                 if (resendBuffer != null) {
