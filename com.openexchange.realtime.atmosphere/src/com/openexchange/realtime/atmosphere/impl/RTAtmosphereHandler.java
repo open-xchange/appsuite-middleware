@@ -51,6 +51,7 @@ package com.openexchange.realtime.atmosphere.impl;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -561,12 +562,10 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         return outbox;
     }
 
-    private void drainOutbox(ID id) throws OXException {
-        drainOutbox(id, 0);
-    }
 
-    private void drainOutbox(ID id, int count) throws OXException {
+    private void drainOutbox(ID id) throws OXException {
         List<EnqueuedStanza> outbox = null;
+        List<Stanza> stanzasToSend = new LinkedList<Stanza>();
         try {
             id.lock("rt-atmosphere-outbox");
             AtmosphereResource atmosphereResource = concreteIDToResourceMap.get(id);
@@ -584,6 +583,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         if (stanza.incCounter()) {
                             stanza.stanza.trace("Drained from resendBuffer");
                             array.put(stanzaWriter.write(stanza.stanza));
+                            stanzasToSend.add(stanza.stanza);
                         } else {
                             toRemove.add(stanza);
                             stanza.stanza.trace("Counted to infinity. Stanza will be lost");
@@ -598,6 +598,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         if (enqueued.incCounter()) {
                             stanza.trace("Drained from outbox");
                             array.put(stanzaWriter.write(stanza));
+                            stanzasToSend.add(stanza);
                             cleanedOutbox.add(enqueued);
                         }
                     }
@@ -609,6 +610,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
                 if (atmosphereResource == null || atmosphereResource.isCancelled() || atmosphereResource.getResponse().isCommitted()) {
                     // Enqueue again and try later
+                    for (Stanza s: stanzasToSend) {
+                        s.trace("Atmosphere Resource was committed. Enqueue again");
+                    }
                     outboxFor(id).addAll(outbox);
                     outbox = null;
                     failed = true;
@@ -633,6 +637,19 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         // Enqueue again and try later
                         outboxFor(id).addAll(outbox);
                         failed = true;
+                        String stackTrace = null;
+                        for (Stanza s: stanzasToSend) {
+                            if (s.traceEnabled()) {
+                                s.trace("Got IOException: Enqueue again");
+                                if (stackTrace == null) {
+                                    StringWriter w = new StringWriter();
+                                    e.printStackTrace(new PrintWriter(w));
+                                    stackTrace = w.toString();
+                                }
+                                s.trace(stackTrace);
+                            }
+                        }
+
                     }
                     outbox = null;
                 }
@@ -669,6 +686,18 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             }
             if (outbox != null) {
                 outboxFor(id).addAll(outbox);
+            }
+            String stackTrace = null;
+            for (Stanza s: stanzasToSend) {
+                if (s.traceEnabled()) {
+                    s.trace("Got IOException: Enqueue again");
+                    if (stackTrace == null) {
+                        StringWriter w = new StringWriter();
+                        t.printStackTrace(new PrintWriter(w));
+                        stackTrace = w.toString();
+                    }
+                    s.trace(stackTrace);
+                }
             }
         } finally {
             id.unlock("rt-atmosphere-outbox");
