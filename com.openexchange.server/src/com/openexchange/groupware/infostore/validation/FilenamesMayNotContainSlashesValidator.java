@@ -50,6 +50,7 @@
 package com.openexchange.groupware.infostore.validation;
 
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
 
@@ -75,6 +76,7 @@ public class FilenamesMayNotContainSlashesValidator implements InfostoreValidato
         if(filename != null && filename.indexOf('/') >= 0) {
             validation.setError(Metadata.FILENAME_LITERAL, "Filenames may not contain slashes.");
         }
+        validation.setException(InfostoreExceptionCodes.VALIDATION_FAILED_SLASH.create());
         return validation;
     }
 

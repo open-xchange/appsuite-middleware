@@ -121,8 +121,13 @@ public enum InfostoreExceptionCodes implements OXExceptionCode {
     UPDATED_BETWEEN_DO_AND_UNDO(UPDATED_BETWEEN_DO_AND_UNDO_MSG, CATEGORY_CONFLICT, 1303),
     /** This folder is a virtual folder. It cannot contain documents. */
     NO_DOCUMENTS_IN_VIRTUAL_FOLDER(NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG, CATEGORY_USER_INPUT, 1700),
-    /** Validation failed: %s */
-    VALIDATION_FAILED(VALIDATION_FAILED_MSG, CATEGORY_USER_INPUT, 2100);
+    /** Validation failed: %1$s */
+    VALIDATION_FAILED(VALIDATION_FAILED_MSG, CATEGORY_USER_INPUT, 2100),
+    /** File name must not contain slashes. */
+    VALIDATION_FAILED_SLASH(InfostoreExceptionMessages.VALIDATION_FAILED_SLASH_MSG, CATEGORY_USER_INPUT, 2101),
+    /** File name contains illegal characters. */
+    VALIDATION_FAILED_CHARACTERS(InfostoreExceptionMessages.VALIDATION_FAILED_CHARACTERS_MSG, CATEGORY_USER_INPUT, 2101),
+    ;
 
     private final String message;
 

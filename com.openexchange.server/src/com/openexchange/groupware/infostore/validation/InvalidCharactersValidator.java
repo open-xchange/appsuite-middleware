@@ -51,6 +51,7 @@ package com.openexchange.groupware.infostore.validation;
 
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.GetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
@@ -69,6 +70,7 @@ public class InvalidCharactersValidator implements InfostoreValidator{
 				}
 			}
 		}
+		validation.setException(InfostoreExceptionCodes.VALIDATION_FAILED_CHARACTERS.create());
 		return validation;
 	}
 
