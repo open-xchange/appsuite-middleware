@@ -338,8 +338,8 @@ public class FileResponseRenderer implements ResponseRenderer {
                             // Assuming a file with length of 100, the following examples returns bytes at:
                             // 50-80 (50 to 80), 40- (40 to length=100), -20 (length-20=80 to length=100).
                             final int dashPos = part.indexOf('-');
-                            long start = Long.parseLong(part.substring(0, dashPos));
-                            long end = Long.parseLong(part.substring(dashPos + 1, part.length()));
+                            long start = sublong(part, 0, dashPos);
+                            long end = sublong(part, dashPos + 1, part.length());
 
                             if (start == -1) {
                                 start = length - end;
@@ -567,6 +567,21 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
         final int pos = contentType.indexOf('/');
         return pos > 0 ? contentType.substring(0, pos) : contentType;
+    }
+
+    /**
+     * Returns a substring of the given string value from the given begin index to the given end index as a long.
+     * <p>
+     * If the substring is empty, then <code>-1</code> will be returned
+     *
+     * @param value The string value to return a substring as long for.
+     * @param beginIndex The begin index of the substring to be returned as long.
+     * @param endIndex The end index of the substring to be returned as long.
+     * @return A substring of the given string value as long or <code>-1</code> if substring is empty.
+     */
+    private long sublong(String value, int beginIndex, int endIndex) {
+        final String substring = value.substring(beginIndex, endIndex);
+        return (substring.length() > 0) ? Long.parseLong(substring) : -1;
     }
 
     /**
