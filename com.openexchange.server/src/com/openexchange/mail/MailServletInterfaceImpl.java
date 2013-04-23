@@ -107,6 +107,7 @@ import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -1220,6 +1221,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 zipOutput.setUseLanguageEncodingFlag(true);
                 try {
                     final byte[] buf = new byte[8192];
+                    final Set<String> names = new HashSet<String>(files.length);
                     for (int i = 0; i < files.length; i++) {
                         final ManagedFile file = files[i];
                         if (null != file) {
@@ -1230,7 +1232,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                  */
                                 final String subject = mails[i].getSubject();
                                 final String ext = ".eml";
-                                final String name = (isEmpty(subject) ? "mail" + (i+1) : saneForFileName(subject)) + ext;
+                                String name = (isEmpty(subject) ? "mail" + (i+1) : saneForFileName(subject)) + ext;
+                                final int reslen = name.lastIndexOf('.');
+                                int count = 1;
+                                while (false == names.add(name)) {
+                                    // Name already contained
+                                    name = name.substring(0, reslen);
+                                    name = new StringAllocator(name).append("_(").append(count++).append(')').append(ext).toString();
+                                }
                                 ZipArchiveEntry entry;
                                 int num = 1;
                                 while (true) {
