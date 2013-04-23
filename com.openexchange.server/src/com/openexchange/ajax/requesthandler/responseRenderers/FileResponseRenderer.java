@@ -138,6 +138,17 @@ public class FileResponseRenderer implements ResponseRenderer {
     @Override
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
         IFileHolder file = (IFileHolder) result.getResultObject();
+        // Check if file is actually supplied by the request URL.
+        if (file == null) {
+            try {
+                // Do your thing if the file is not supplied to the request URL.
+                // Throw an exception, or send 404, or show default/warning page, or just ignore it.
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            } catch (final IOException e) {
+                LOG.error("Exception while trying to write HTTP response.", e);
+            }
+            return;
+        }
         final String fileName = file.getName();
         InputStream documentData = null;
         try {
