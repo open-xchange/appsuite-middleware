@@ -130,7 +130,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     /*
      * Give resources time to linger before finally cleaning up
      */
-    AtmosphereResourceReaper atmosphereResourceReaper = new AtmosphereResourceReaper();
+    AtmosphereResourceReaper atmosphereResourceReaper = null;
 
     /*
      * Maintain a mapping of all IDs that use a certain session
@@ -158,6 +158,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         concreteIDToResourceMap = new IDMap<AtmosphereResource>();
         outboxes = new ConcurrentHashMap<ID, List<EnqueuedStanza>>();
         this.atmosphereServiceRegistry = AtmosphereServiceRegistry.getInstance();
+        atmosphereResourceReaper = new AtmosphereResourceReaper();
     }
 
     @Override
@@ -176,6 +177,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             ServerSession serverSession = sessionValidator.getServerSession();
             // TODO: respect unique id sent by client as param/header when constructing the ID
             ID constructedId = constructId(resource, serverSession);
+            refreshReaper(constructedId);
 
             if (method.equalsIgnoreCase("GET")) {
                 /*
@@ -187,16 +189,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 if (request.getHeader("negotiating") == null) {
                     // keep track of clients connected via get that are waiting for data
                     trackConnectedUser(constructedId, resource, serverSession);
-                    // and add EventListener that takes care of cleaning up the tracking resources once the client disconnects again
-                    resource.addEventListener(new AtmosphereResourceCleanupListener(
-                        resource,
-                        constructedId,
-                        generalToConcreteIDMap,
-                        concreteIDToResourceMap,
-                        outboxes,
-                        resendBuffers,
-                        sequenceNumbers,
-                        atmosphereResourceReaper));
                     // finally suspend the resource until data is available for the clients and resource gets resumed after send
                     drainOutbox(constructedId);
                 } else {
@@ -348,10 +340,8 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @param serverSession
      * @throws OXException
      */
-    private void trackConnectedUser(ID concreteID, AtmosphereResource atmosphereResource, final ServerSession session) throws OXException {
+    private void trackConnectedUser(final ID concreteID, AtmosphereResource atmosphereResource, final ServerSession session) throws OXException {
         /* if the id was marked for removal via the reaper try to remove it from the reaper */
-        atmosphereResourceReaper.remove(concreteID);
-
         // Adds the concreteID to the generalID -> concreteID map
         ID generalID = concreteID.toGeneralForm();
         if (generalToConcreteIDMap.containsKey(generalID)) {
@@ -402,6 +392,53 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             throw RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(ResourceDirectory.class);
         }
         resourceDirectory.set(concreteID, new DefaultResource());
+    }
+
+
+    private void refreshReaper(final ID concreteID) {
+        atmosphereResourceReaper.remove(concreteID);
+        atmosphereResourceReaper.add(new Moribund(concreteID) {
+
+            @Override
+            public void die() throws OXException {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Disconnecting: " + this);
+                }
+
+                // remove concreteID from general -> concreteID mapping
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Removing from generalID -> conreteID map: " + this);
+                }
+                ID generalID = concreteID.toGeneralForm();
+                Set<ID> fullIDs = generalToConcreteIDMap.get(generalID);
+                if (fullIDs != null) {
+                    fullIDs.remove(concreteID);
+                    if (fullIDs.isEmpty()) {
+                        generalToConcreteIDMap.remove(generalID);
+                    }
+                }
+
+                // remove concreteID -> Resource mapping
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Removing from concreteID -> resource map: " + this);
+                }
+                concreteIDToResourceMap.remove(concreteID);
+
+                // clear outboxes
+                outboxes.remove(concreteID);
+                resendBuffers.remove(concreteID);
+                sequenceNumbers.remove(concreteID);
+                
+                // remove concreteID from cluster wide resourceDirectory
+                ResourceDirectory resourceDirectory = AtmosphereServiceRegistry.getInstance().getService(ResourceDirectory.class);
+                try {
+                    resourceDirectory.remove(concreteID);
+                } catch (OXException e) {
+                    LOG.error("Could not unregister resource with ID: " + concreteID, e);
+                }                
+            }
+            
+        });        
     }
 
     /**

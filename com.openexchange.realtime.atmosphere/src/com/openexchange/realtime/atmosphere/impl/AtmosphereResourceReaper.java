@@ -80,8 +80,8 @@ public class AtmosphereResourceReaper {
     /* Fair Reentrant Lock to synchronize removal of Moribunds */
     private final ReentrantLock moribundRemoveLock;
 
-    /* Define how long a moribund may linger before being reaped */
-    private static final int MORIBUND_MAX_LINGER = 5000;
+    /* Define how long a moribund may linger 2 ping intervals before being reaped */
+    private static final int MORIBUND_MAX_LINGER = 40000;
 
     private volatile ScheduledTimerTask scheduledReaper;
 
@@ -113,8 +113,8 @@ public class AtmosphereResourceReaper {
                         final Moribund moribund = descendingMoribundIterator.next();
                         if (moribund.getLinger() > MORIBUND_MAX_LINGER) {
                             try {
-                                moribund.die();
                                 moribundRegistry.remove(moribund.getConcreteID());
+                                moribund.die();
                                 if (LOG.isDebugEnabled()) {
                                     LOG.debug("Reaped Moribund: " + moribund);
                                 }

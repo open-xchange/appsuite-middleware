@@ -120,9 +120,9 @@ public class GroupDispatcher implements ComponentHandle {
             @Override
             public void handle(String event, ID id, Object source, Map<String, Object> properties) {
                 try {
-                    ID memberId = ids.get(0);
-                    if (memberId == null) {
-                        memberId = (ID) properties.get("id");
+                    ID memberId = (ID) properties.get("id");
+                    if (ids.size() > 0) {
+                        memberId = ids.get(0);
                     }
                     if (memberId == null) {
                         memberId = id;
@@ -268,18 +268,18 @@ public class GroupDispatcher implements ComponentHandle {
         beforeLeave(id);
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("leavinging:" + id.toString());
+            LOG.debug("leaving:" + id.toString());
         }
 
         id.off("dispose", LEAVE);
         ids.remove(id);
         stamps.remove(id);
+        onLeave(id);
         if (ids.isEmpty()) {
             Map<String, Object> properties = new HashMap<String, Object>();
             properties.put("id", id);
-            id.trigger("dispose", this, properties);
+            this.id.trigger("dispose", this, properties);
         }
-        onLeave(id);
     }
 
     /**
