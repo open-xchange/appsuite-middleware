@@ -221,83 +221,94 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     } else {
                         stanzas.add(new JSONObject(postData));
                     }
+                    Exception exception = null;
                     for (JSONObject json : stanzas) {
-                        if (json.has("type")) {
-                            // ignore
-                            String type = json.optString("type");
-                            if (type.equals("ping")) {
-                                return;
-                            }
-                            
-                            if (type.equals("ack")) {
+                        try {
+                            if (json.has("type")) {
+                                // ignore
+                                String type = json.optString("type");
+                                if (type.equals("ping")) {
+                                    return;
+                                }
                                 
-                                SortedSet<EnqueuedStanza> resendBuffer = resendBufferFor(constructedId);
-                                EnqueuedStanza found = null;
-                                long seq = json.optLong("seq");
-                                
-                                for (EnqueuedStanza enqueuedStanza : new LinkedList<EnqueuedStanza>(resendBuffer)) {
-                                    if (enqueuedStanza.sequenceNumber == seq ) {
-                                        found = enqueuedStanza;
-                                        break;
+                                if (type.equals("ack")) {
+                                    
+                                    SortedSet<EnqueuedStanza> resendBuffer = resendBufferFor(constructedId);
+                                    EnqueuedStanza found = null;
+                                    long seq = json.optLong("seq");
+                                    
+                                    for (EnqueuedStanza enqueuedStanza : new LinkedList<EnqueuedStanza>(resendBuffer)) {
+                                        if (enqueuedStanza.sequenceNumber == seq ) {
+                                            found = enqueuedStanza;
+                                            break;
+                                        }
+                                    }
+                                    if (found != null) {
+                                        resendBuffer.remove(found);
+                                        found.stanza.trace("Got ack from client");
                                     }
                                 }
-                                if (found != null) {
-                                    resendBuffer.remove(found);
-                                    found.stanza.trace("Got ack from client");
-                                }
+                                return;
                             }
-                            return;
-                        }
-                        StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(
-                            constructedId,
-                            sessionValidator.getServerSession(),
-                            json);
-                        Stanza stanza = stanzaBuilder.build();
-                        if (stanza.traceEnabled()) {
-                            stanza.trace("received in atmosphere handler");
-                        }
-                        if (stanza.getSequenceNumber() != -1) {
-                            // Return receipt
-                            stanza.trace("Send return receipt for sequence number: " + stanza.getSequenceNumber());
-                            final Message msg = new Message();
-                            msg.setTo(stanza.getFrom());
-                            msg.setFrom(stanza.getFrom());
-                            msg.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
-                                stanza.getSequenceNumber(),
-                                "json",
-                                "atmosphere",
-                                "received").build()));
-                            atmosphereServiceRegistry.getService(ThreadPoolService.class).submit(new Task<Object>() {
-
-                                @Override
-                                public void setThreadName(ThreadRenamer threadRenamer) {
-                                    threadRenamer.rename("Acknowledgement Sender");
-                                }
-
-                                @Override
-                                public void beforeExecute(Thread t) {
+                            StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(
+                                constructedId,
+                                sessionValidator.getServerSession(),
+                                json);
+                            Stanza stanza = stanzaBuilder.build();
+                            if (stanza.traceEnabled()) {
+                                stanza.trace("received in atmosphere handler");
+                            }
+                            if (stanza.getSequenceNumber() != -1) {
+                                // Return receipt
+                                stanza.trace("Send return receipt for sequence number: " + stanza.getSequenceNumber());
+                                final Message msg = new Message();
+                                msg.setTo(stanza.getFrom());
+                                msg.setFrom(stanza.getFrom());
+                                msg.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
+                                    stanza.getSequenceNumber(),
+                                    "json",
+                                    "atmosphere",
+                                    "received").build()));
+                                atmosphereServiceRegistry.getService(ThreadPoolService.class).submit(new Task<Object>() {
+    
+                                    @Override
+                                    public void setThreadName(ThreadRenamer threadRenamer) {
+                                        threadRenamer.rename("Acknowledgement Sender");
+                                    }
+    
+                                    @Override
+                                    public void beforeExecute(Thread t) {
+                                        
+                                    }
+    
+                                    @Override
+                                    public void afterExecute(Throwable t) {
+                                        
+                                    }
+    
+                                    @Override
+                                    public Object call() throws Exception {
+                                        send(msg, msg.getTo());                                    
+                                        return null;
+                                    }
                                     
-                                }
-
-                                @Override
-                                public void afterExecute(Throwable t) {
-                                    
-                                }
-
-                                @Override
-                                public Object call() throws Exception {
-                                    send(msg, msg.getTo());                                    
-                                    return null;
-                                }
-                                
-                            }); 
+                                }); 
+                            }
+                            gate.handle(stanza, stanza.getTo());
+                        } catch (Exception t) {
+                            if (exception == null) {
+                                exception = t;                                
+                            }
+                            LOG.error(t.getMessage(),t);
                         }
-                        gate.handle(stanza, stanza.getTo());
+                        
+                    }
+                    if (exception != null) {
+                        throw exception;
                     }
                 }
             }
         } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
             writeExceptionToResource(e, resource);
             try {
                 if (e.getErrorCode().equals("SES-0203")) {
@@ -321,7 +332,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         } catch (Exception e) {
             // TODO:ExceptionHandling to connected clients
             writeExceptionToResource(e, resource);
-            LOG.error(e.getMessage(), e);
         }
     }
 
