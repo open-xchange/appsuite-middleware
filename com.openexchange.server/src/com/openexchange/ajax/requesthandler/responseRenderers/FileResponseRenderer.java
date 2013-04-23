@@ -579,7 +579,7 @@ public class FileResponseRenderer implements ResponseRenderer {
      * @param endIndex The end index of the substring to be returned as long.
      * @return A substring of the given string value as long or <code>-1</code> if substring is empty.
      */
-    private long sublong(String value, int beginIndex, int endIndex) {
+    private long sublong(final String value, final int beginIndex, final int endIndex) {
         final String substring = value.substring(beginIndex, endIndex);
         return (substring.length() > 0) ? Long.parseLong(substring) : -1;
     }
