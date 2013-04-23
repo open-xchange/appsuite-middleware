@@ -4789,6 +4789,11 @@ msgstr ""
 msgid "Thumbnail image not available."
 msgstr ""
 
+#. No preview service for MIME type %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:75
+msgid "No preview service for MIME type %1$s"
+msgstr ""
+
 #. Duplicate proxy registration: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.proxy/src/com/openexchange/proxy/ProxyExceptionMessages.java:66
 msgid "Duplicate proxy registration: %1$s"
