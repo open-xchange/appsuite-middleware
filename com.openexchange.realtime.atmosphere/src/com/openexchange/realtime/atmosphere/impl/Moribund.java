@@ -92,7 +92,7 @@ public class Moribund implements Comparable<Moribund> {
     /*
      * 
      */
-    private ConcurrentHashMap<ID, List<Stanza>> outboxes;
+    private ConcurrentHashMap<ID, List<EnqueuedStanza>> outboxes;
 
     private ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>> resendBuffers;
 
@@ -109,7 +109,7 @@ public class Moribund implements Comparable<Moribund> {
      * @param resendBuffers 
      * @param sequenceNumbers 
      */
-    public Moribund(ID concreteId, AtmosphereResource atmosphereResource, IDMap<Set<ID>> generalToFullIDMap, IDMap<AtmosphereResource> fullIDToResourceMap, ConcurrentHashMap<ID, List<Stanza>> outboxes, ConcurrentHashMap<ID,SortedSet<EnqueuedStanza>> resendBuffers, ConcurrentHashMap<ID,Long> sequenceNumbers) {
+    public Moribund(ID concreteId, AtmosphereResource atmosphereResource, IDMap<Set<ID>> generalToFullIDMap, IDMap<AtmosphereResource> fullIDToResourceMap, ConcurrentHashMap<ID, List<EnqueuedStanza>> outboxes, ConcurrentHashMap<ID,SortedSet<EnqueuedStanza>> resendBuffers, ConcurrentHashMap<ID,Long> sequenceNumbers) {
         this.concreteID = concreteId;
         this.atmosphereResource = atmosphereResource;
         this.generalToFullIDMap = generalToFullIDMap;

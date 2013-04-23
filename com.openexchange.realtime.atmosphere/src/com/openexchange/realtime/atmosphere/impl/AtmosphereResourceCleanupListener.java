@@ -92,7 +92,7 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
     /*
      * Stored Stanzas for a concreteID
      */
-    private ConcurrentHashMap<ID, List<Stanza>> outboxes;
+    private ConcurrentHashMap<ID, List<EnqueuedStanza>> outboxes;
 
     /*
      * Resource Reaper
@@ -113,7 +113,7 @@ public class AtmosphereResourceCleanupListener implements AtmosphereResourceEven
      * @param fullIDToResourceMap Reference to the map of the RTAtmosphereHandler that tracks general ids to full ids.
      * @param outboxes
      */
-    public AtmosphereResourceCleanupListener(AtmosphereResource atmosphereResource, ID fullID, IDMap<Set<ID>> generalToFullIDMap, IDMap<AtmosphereResource> fullIDToResourceMap, ConcurrentHashMap<ID, List<Stanza>> outboxes, ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>> resendBuffers, ConcurrentHashMap<ID, Long> sequenceNumbers, AtmosphereResourceReaper atmosphereResourceReaper) {
+    public AtmosphereResourceCleanupListener(AtmosphereResource atmosphereResource, ID fullID, IDMap<Set<ID>> generalToFullIDMap, IDMap<AtmosphereResource> fullIDToResourceMap, ConcurrentHashMap<ID, List<EnqueuedStanza>> outboxes, ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>> resendBuffers, ConcurrentHashMap<ID, Long> sequenceNumbers, AtmosphereResourceReaper atmosphereResourceReaper) {
         this.atmosphereResource = atmosphereResource;
         this.fullID = fullID;
         this.generalToConcreteIDMap = generalToFullIDMap;

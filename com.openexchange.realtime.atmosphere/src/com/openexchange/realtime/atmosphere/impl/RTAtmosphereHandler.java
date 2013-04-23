@@ -125,7 +125,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     /*
      * Map for holding outboxes
      */
-    private final ConcurrentHashMap<ID, List<Stanza>> outboxes;
+    private final ConcurrentHashMap<ID, List<EnqueuedStanza>> outboxes;
 
     /*
      * Give resources time to linger before finally cleaning up
@@ -156,7 +156,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         super();
         generalToConcreteIDMap = new IDMap<Set<ID>>();
         concreteIDToResourceMap = new IDMap<AtmosphereResource>();
-        outboxes = new ConcurrentHashMap<ID, List<Stanza>>();
+        outboxes = new ConcurrentHashMap<ID, List<EnqueuedStanza>>();
         this.atmosphereServiceRegistry = AtmosphereServiceRegistry.getInstance();
     }
 
@@ -484,7 +484,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 stamp(stanza, recipient);
                 resendBufferFor(recipient).add(new EnqueuedStanza(stanza));
             } else {
-                outboxFor(recipient).add(stanza);
+                outboxFor(recipient).add(new EnqueuedStanza(stanza));
             }
             drainOutbox(recipient);
         } finally {
@@ -514,11 +514,11 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         return resendBuffer;
     }
 
-    private List<Stanza> outboxFor(ID id) {
-        List<Stanza> outbox = outboxes.get(id);
+    private List<EnqueuedStanza> outboxFor(ID id) {
+        List<EnqueuedStanza> outbox = outboxes.get(id);
         if (outbox == null) {
-            outbox = Collections.synchronizedList(new LinkedList<Stanza>());
-            List<Stanza> activeOutbox = outboxes.putIfAbsent(id, outbox);
+            outbox = Collections.synchronizedList(new LinkedList<EnqueuedStanza>());
+            List<EnqueuedStanza> activeOutbox = outboxes.putIfAbsent(id, outbox);
             return (activeOutbox != null) ? activeOutbox : outbox;
         }
         return outbox;
@@ -529,7 +529,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     }
 
     private void drainOutbox(ID id, int count) throws OXException {
-        List<Stanza> outbox = null;
+        List<EnqueuedStanza> outbox = null;
         try {
             id.lock("rt-atmosphere-outbox");
             AtmosphereResource atmosphereResource = concreteIDToResourceMap.get(id);
@@ -555,10 +555,16 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     resendBuffer.removeAll(toRemove);
                 }
                 if (outbox != null) {
-                    for (Stanza stanza : outbox) {
-                        stanza.trace("Drained from outbox");
-                        array.put(stanzaWriter.write(stanza));
+                    List<EnqueuedStanza> cleanedOutbox = new LinkedList<EnqueuedStanza>();
+                    for (EnqueuedStanza enqueued : outbox) {
+                        Stanza stanza = enqueued.stanza;
+                        if (enqueued.incCounter()) {
+                            stanza.trace("Drained from outbox");
+                            array.put(stanzaWriter.write(stanza));
+                            cleanedOutbox.add(enqueued);
+                        }
                     }
+                    outbox = cleanedOutbox;
                 }
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Trying to send: " + array.length() + " stanzas: " + array);
