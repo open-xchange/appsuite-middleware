@@ -191,11 +191,15 @@ public class GroupDispatcher implements ComponentHandle {
 
         return false;
     }
+    
+    public void relayToAll(Stanza stanza, ID...excluded) throws OXException {
+        relayToAll(stanza, null, excluded);
+    }
 
     /**
      * Send a copy of the stanza to all members of this group, excluding the ones provided as the rest of the arguments.
      */
-    public void relayToAll(Stanza stanza, ID... excluded) throws OXException {
+    public void relayToAll(Stanza stanza, Stanza inResponseTo, ID... excluded) throws OXException {
         MessageDispatcher dispatcher = services.getService(MessageDispatcher.class);
         Set<ID> ex = new HashSet<ID>(Arrays.asList(excluded));
         for (ID id : ids) {
@@ -203,6 +207,14 @@ public class GroupDispatcher implements ComponentHandle {
                 // Send a copy of the stanza
                 Stanza copy = copyFor(stanza, id);
                 stamp(copy);
+                if (inResponseTo != null) {
+                    if (inResponseTo.getTracer() != null) {
+                        copy.setTracer(inResponseTo.getTracer() + " response for " + id);
+                        copy.addLogMessages(inResponseTo.getLogEntries());
+                        copy.trace("---- Response ---");
+                    }
+                    
+                }
                 dispatcher.send(copy);
             }
         }
@@ -214,6 +226,11 @@ public class GroupDispatcher implements ComponentHandle {
     public void relayToAllExceptSender(Stanza stanza) throws OXException {
         relayToAll(stanza, stanza.getFrom());
     }
+    
+    public void relayToAllExceptSender(Stanza stanza, Stanza inResponseTo) throws OXException {
+        relayToAll(stanza, inResponseTo, stanza.getFrom());
+    }
+
 
     /**
      * Deliver this stanza to its recipient. Delegates to the {@link MessageDispatcher}
