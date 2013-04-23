@@ -8,6 +8,7 @@
  - Fix for bug 26075: Understandable error message if file name conns illegal characters
  - Fix for bug 26073: Provide statement's string representation on log invocation
  - Fix for bug 26082: Convert native null object to JSONObject.NULL
+ - Fix for bug 26100: Create a unique file name for each mail inside a ZIP archive
 
 * 2013-04-22 - martin.herfurth@open-xchange.com
 
