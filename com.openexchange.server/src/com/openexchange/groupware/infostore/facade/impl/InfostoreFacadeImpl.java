@@ -911,6 +911,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     if (ignoreVersion) {
                         document.setVersion(oldDocument.getVersion());
                         updatedCols.add(Metadata.VERSION_LITERAL);
+                        updatedCols.add(Metadata.FILESTORE_LOCATION_LITERAL);
 
                         final UpdateVersionAction updateVersionAction = new UpdateVersionAction();
                         updateVersionAction.setContext(context);
@@ -918,7 +919,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                         updateVersionAction.setOldDocuments(Arrays.asList(oldDocument));
                         updateVersionAction.setProvider(this);
                         updateVersionAction.setQueryCatalog(QUERIES);
-                        updateVersionAction.setModified(modifiedCols);
+                        updateVersionAction.setModified(updatedCols.toArray(new Metadata[updatedCols.size()]));
                         updateVersionAction.setTimestamp(sequenceNumber);
 
                         // Remove old file "version"
