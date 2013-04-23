@@ -594,19 +594,18 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     }
                     resendBuffer.removeAll(toRemove);
                 }
-                if (outbox != null) {
-                    List<EnqueuedStanza> cleanedOutbox = new LinkedList<EnqueuedStanza>();
-                    for (EnqueuedStanza enqueued : outbox) {
-                        Stanza stanza = enqueued.stanza;
-                        if (enqueued.incCounter()) {
-                            stanza.trace("Drained from outbox");
-                            array.put(stanzaWriter.write(stanza));
-                            stanzasToSend.add(stanza);
-                            cleanedOutbox.add(enqueued);
-                        }
+                List<EnqueuedStanza> cleanedOutbox = new LinkedList<EnqueuedStanza>();
+                for (EnqueuedStanza enqueued : outbox) {
+                    Stanza stanza = enqueued.stanza;
+                    if (enqueued.incCounter()) {
+                        stanza.trace("Drained from outbox");
+                        array.put(stanzaWriter.write(stanza));
+                        stanzasToSend.add(stanza);
+                        cleanedOutbox.add(enqueued);
                     }
-                    outbox = cleanedOutbox;
                 }
+                outbox = cleanedOutbox;
+
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Trying to send: " + array.length() + " stanzas: " + array);
                 }
