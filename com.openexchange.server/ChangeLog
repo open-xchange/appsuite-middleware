@@ -1,3 +1,7 @@
+* 2013-04-23 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 26076: Deserialize 'image1' field in user update action   
+
 * 2013-04-22 - martin.herfurth@open-xchange.com
 
  - Fix for bug 26046: Fixed conflict bahaviour for DST and Full time recurring appointments.
