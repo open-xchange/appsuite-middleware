@@ -56,9 +56,10 @@ import java.io.InputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.AbstractMap;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
+import java.util.Map.Entry;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.comparison.ServerFileVersion;
@@ -96,42 +97,32 @@ public class UploadHelper {
         /*
          * save data
          */
-        File uploadFile = upload(newVersion, uploadStream, offset);
+        Entry<File, String> uploadEntry = upload(newVersion, uploadStream, offset);
+        String checksum = uploadEntry.getValue();
+        File uploadFile = uploadEntry.getKey();
         /*
          * check if upload is completed
          */
         if (-1 == totalLength || uploadFile.getFileSize() >= totalLength) {
-            if (null != originalVersion) {
-                /*
-                 * overwrite original file if still valid and unchanged
-                 */
-                File originalFile = session.getStorage().findFileByNameAndChecksum(path, originalVersion.getName(), originalVersion.getChecksum());
-                if (null != originalFile) {
-                    //TODO: overwrite directly during update
-//                    session.getStorage().updateFile(uploadFile, newVersion.getName(), path);
-                    //workaround:
-                    {
-                        //TODO: transactional
-                        originalFile.setFileSize(uploadFile.getFileSize());
-                        originalFile.setLastModified(new Date());
-                        saveDocumentAndChecksum(originalFile, session.getStorage().getDocument(uploadFile),
-                            uploadFile.getSequenceNumber(), DriveConstants.FILE_FIELDS, false);
-                        session.getStorage().deleteFile(uploadFile);
-                        session.getChecksumStore().removeChecksums(uploadFile);
-                    }
-                    return new ServerFileVersion(originalFile, newVersion.getChecksum());//TODO: validate checksum
-                } else {
-
-
-                }
+            /*
+             * validate checksum if available
+             */
+            if (null != checksum && false == checksum.equals(newVersion.getChecksum())) {
+                throw DriveExceptionCodes.UPLOADED_FILE_CHECKSUM_ERROR.create(checksum, newVersion.getName(), newVersion.getChecksum());
             }
             /*
-             * file transfer finished, save document & rename file to target file name
+             * save document at target path/name
              */
-            File updatedFile = session.getStorage().moveFile(uploadFile, newVersion.getName(), path);
-            session.getChecksumStore().removeChecksums(uploadFile);
-            session.getChecksumStore().addChecksum(updatedFile, newVersion.getChecksum());
-            return new ServerFileVersion(updatedFile, newVersion.getChecksum());//TODO: validate checksum
+            if (null != originalVersion) {
+                File originalFile = session.getStorage().findFileByNameAndChecksum(path, originalVersion.getName(), originalVersion.getChecksum());
+                if (null != originalFile) {
+                    File copiedFile = session.getStorage().copyFile(uploadFile, originalFile);
+                    session.getStorage().deleteFile(uploadFile);
+                    return new ServerFileVersion(copiedFile, newVersion.getChecksum());
+                }
+            }
+            File movedFile = session.getStorage().moveFile(uploadFile, newVersion.getName(), path);
+            return new ServerFileVersion(movedFile, newVersion.getChecksum());
         } else {
             /*
              * no new version yet
@@ -140,7 +131,7 @@ public class UploadHelper {
         }
     }
 
-    private File upload(FileVersion newVersion, InputStream uploadStream, long offset) throws OXException {
+    private Entry<File, String> upload(FileVersion newVersion, InputStream uploadStream, long offset) throws OXException {
         /*
          * get/create upload file
          */
@@ -154,13 +145,14 @@ public class UploadHelper {
         /*
          * process upload
          */
+        String checksum = null;
         FileStorageFileAccess fileAccess = session.getStorage().getFileAccess();
         List<Field> modifiedFields = Arrays.asList(File.Field.FILE_SIZE);
         if (0 == offset) {
             /*
              * write initial file data, setting the first version number
              */
-            saveDocumentAndChecksum(uploadFile, uploadStream, uploadFile.getSequenceNumber(), modifiedFields, false);
+            checksum = saveDocumentAndChecksum(uploadFile, uploadStream, uploadFile.getSequenceNumber(), modifiedFields, false);
         } else if (FileStorageRandomFileAccess.class.isInstance(fileAccess)) {
             /*
              * append file data via random file access, preferably not incrementing the version number
@@ -171,12 +163,12 @@ public class UploadHelper {
             /*
              * work around filestore limitation and append file data via temporary managed file
              */
-            appendViaTemporaryFile(uploadFile, uploadStream);
+            checksum = appendViaTemporaryFile(uploadFile, uploadStream);
         }
-        return uploadFile;
+        return new AbstractMap.SimpleEntry<File, String>(uploadFile, checksum);
     }
 
-    private void appendViaTemporaryFile(File uploadFile, InputStream uploadStream) throws OXException {
+    private String appendViaTemporaryFile(File uploadFile, InputStream uploadStream) throws OXException {
         ManagedFile managedFile = null;
         try {
             InputStream inputStream = null;
@@ -187,9 +179,8 @@ public class UploadHelper {
                 Streams.close(inputStream);
             }
             List<Field> modifiedFields = Arrays.asList(File.Field.FILE_SIZE);
-            uploadFile.setFileSize(managedFile.getSize());
-            saveDocumentAndChecksum(uploadFile, managedFile.getInputStream(), uploadFile.getSequenceNumber(), modifiedFields, true);
-//            session.getStorage().getFileAccess().saveDocument(uploadFile, managedFile.getInputStream(), uploadFile.getSequenceNumber());
+            uploadFile.setFileSize(managedFile.getFile().length());
+            return saveDocumentAndChecksum(uploadFile, managedFile.getInputStream(), uploadFile.getSequenceNumber(), modifiedFields, true);
         } finally {
             if (null != managedFile) {
                 DriveServiceLookup.getService(ManagedFileManagement.class, true).removeByID(managedFile.getID());
@@ -197,7 +188,7 @@ public class UploadHelper {
         }
     }
 
-    private void saveDocumentAndChecksum(File file, InputStream inputStream, long sequenceNumber, List<Field> modifiedFields, boolean ignoreVersion) throws OXException {
+    private String saveDocumentAndChecksum(File file, InputStream inputStream, long sequenceNumber, List<Field> modifiedFields, boolean ignoreVersion) throws OXException {
         DigestInputStream digestStream = null;
         try {
             digestStream = new DigestInputStream(inputStream, MessageDigest.getInstance("MD5"));
@@ -208,8 +199,7 @@ public class UploadHelper {
                 fileAccess.saveDocument(file, digestStream, sequenceNumber, modifiedFields);
             }
             byte[] digest = digestStream.getMessageDigest().digest();
-            String checksum = jonelo.jacksum.util.Service.format(digest);
-            session.getChecksumStore().addChecksum(file, checksum);
+            return jonelo.jacksum.util.Service.format(digest);
         } catch (NoSuchAlgorithmException e) {
             throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
@@ -226,7 +216,7 @@ public class UploadHelper {
         /*
          * check for existing partial upload
          */
-        final String uploadFileName = getUploadFilename(checksum);
+        String uploadFileName = getUploadFilename(checksum);
         session.getStorage().getFolder(TEMP_PATH, true); // to ensure the temp folder exists
         File uploadFile = session.getStorage().findFileByName(TEMP_PATH, uploadFileName);
         if (null == uploadFile && createIfAbsent) {

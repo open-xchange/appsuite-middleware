@@ -134,8 +134,8 @@ public class DriveStorage {
         List<Field> fileFields = Arrays.asList(new Field[] { Field.FILENAME, Field.TITLE, Field.FOLDER_ID });
         IDTuple sourceId = new IDTuple(sourceFile.getFolderId(), sourceFile.getId());
         if (LOG.isDebugEnabled()) {
-            LOG.debug(this.toString() + "cp " + getPath(sourceFile.getFolderId()) + '/' + sourceFile.getFileName() + " " +
-                targetPath + '/' + targetFileName);
+            LOG.debug(this.toString() + "cp " + combine(getPath(sourceFile.getFolderId()), sourceFile.getFileName()) + " " +
+                combine(targetPath, targetFileName));
         }
         IDTuple targetId = getFileAccess().copy(sourceId, copiedFile.getFolderId(), copiedFile, null, fileFields);
         copiedFile.setFolderId(targetId.getFolder());
@@ -155,8 +155,8 @@ public class DriveStorage {
         targetFile.setLastModified(new Date());
         targetFile.setFileSize(sourceFile.getFileSize());
         if (LOG.isDebugEnabled()) {
-            LOG.debug(this.toString() + "cp " + getPath(sourceFile.getFolderId()) + '/' + sourceFile.getFileName() + " " +
-                getPath(targetFile.getFolderId()) + '/' + targetFile.getFileName());
+            LOG.debug(this.toString() + "cp " + combine(getPath(sourceFile.getFolderId()), sourceFile.getFileName()) + " " +
+                combine(getPath(targetFile.getFolderId()), targetFile.getFileName()));
         }
         getFileAccess().saveDocument(targetFile, getDocument(sourceFile), targetFile.getSequenceNumber());
         return targetFile;
@@ -172,7 +172,7 @@ public class DriveStorage {
     public File deleteFile(File file) throws OXException {
         IDTuple id = new IDTuple(file.getFolderId(), file.getId());
         if (LOG.isDebugEnabled()) {
-            LOG.debug(this.toString() + "rm " + getPath(file.getFolderId()) + '/' + file.getFileName());
+            LOG.debug(this.toString() + "rm " + combine(getPath(file.getFolderId()), file.getFileName()));
         }
         List<IDTuple> notRemoved = getFileAccess().removeDocument(Arrays.asList(new IDTuple[] { id }), file.getSequenceNumber());
         if (null != notRemoved && 0 < notRemoved.size()) {
@@ -234,8 +234,8 @@ public class DriveStorage {
         }
         if (0 < updatedFields.size()) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug(this.toString() + "mv " + getPath(file.getFolderId()) + '/' + file.getFileName() + " " +
-                    getPath(movedFile.getFolderId()) + '/' + movedFile.getFileName());
+                LOG.debug(this.toString() + "mv " + combine(getPath(file.getFolderId()), file.getFileName()) + " " +
+                    combine(getPath(movedFile.getFolderId()), movedFile.getFileName()));
             }
             getFileAccess().saveFileMetadata(movedFile, file.getSequenceNumber(), updatedFields);
         }
@@ -255,7 +255,7 @@ public class DriveStorage {
         file.setFolderId(getFolderID(path, true));
         file.setFileName(fileName);
         if (LOG.isDebugEnabled()) {
-            LOG.debug(this.toString() + "touch " + path + '/' + fileName);
+            LOG.debug(this.toString() + "touch " + combine(path, fileName));
         }
         getFileAccess().saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
         return file;
@@ -345,36 +345,22 @@ public class DriveStorage {
         return true;//TODO
     }
 
-    public long getSequenceNumber(String path) throws OXException {
-        FileStorageFolder folder = getFolder(path);
-        long sequenceNumber = folder.getLastModifiedDate().getTime();
+    public boolean hasChangedSince(String path, long lastSequenceNumber) throws OXException {
         // TODO: adding 1 to "since" timestamp - the infostore seems to use a >= comparison in queries
-        Delta<File> delta = getFileAccess().getDelta(folder.getId(), 1 + sequenceNumber,
-            Arrays.asList(new Field[] { Field.LAST_MODIFIED_UTC }), false);
-        if (null != delta) {
-            sequenceNumber = Math.max(sequenceNumber, getMaxSequenceNumber(delta.getNew()));
-            sequenceNumber = Math.max(sequenceNumber, getMaxSequenceNumber(delta.getModified()));
-            sequenceNumber = Math.max(sequenceNumber, getMaxSequenceNumber(delta.getDeleted()));
-        }
-        return sequenceNumber;
+        // TODO: the 'deleted' iterator will only contain the object id field
+        Delta<File> delta = getFileAccess().getDelta(getFolderID(path), 1 + lastSequenceNumber,
+            Arrays.asList(new Field[] { Field.ID }), false);
+        return null != delta && (isNotEmpty(delta.getNew()) || isNotEmpty(delta.getDeleted()) || isNotEmpty(delta.getModified()));
     }
 
-    private static long getMaxSequenceNumber(SearchIterator<File> searchIterator) throws OXException {
-        long sequenceNumber = 0;
-        if (null != searchIterator) {
-            try {
-                while (searchIterator.hasNext()) {
-                    long currentSequenceNumber = searchIterator.next().getSequenceNumber();
-                    if (currentSequenceNumber > sequenceNumber) {
-                        sequenceNumber = currentSequenceNumber;
-                    }
-                }
-
-            } finally {
+    private static boolean isNotEmpty(SearchIterator<?> searchIterator) throws OXException {
+        try {
+            return null != searchIterator && searchIterator.hasNext();
+        } finally {
+            if (null != searchIterator) {
                 searchIterator.close();
             }
         }
-        return sequenceNumber;
     }
 
     public InputStream getDocument(File file) throws OXException {
@@ -554,7 +540,7 @@ public class DriveStorage {
             newFolder.addPermission(permission);
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug(this.toString() + "mkdir " + getPath(parent.getId()) + '/' + name);
+            LOG.debug(this.toString() + "mkdir " + combine(getPath(parent.getId()), name));
         }
         String newFolderID = getFolderAccess().createFolder(newFolder);
         return getFolderAccess().getFolder(newFolderID);
@@ -572,6 +558,18 @@ public class DriveStorage {
             names.addLast(name);
         }
         return names;
+    }
+
+    private static String combine(String path1, String path2) {
+        if (Strings.isEmpty(path1)) {
+            return path2;
+        } else if (Strings.isEmpty(path2)) {
+            return path1;
+        } else if (path1.endsWith("/")) {
+            return path2.startsWith("/") ? path1 + path2.substring(1) : path1 + path2;
+        } else {
+            return path2.startsWith("/") ? path1 + path2 : path1 + '/' + path2;
+        }
     }
 
     public FileStorageAccountAccess getAccountAccess() throws OXException {

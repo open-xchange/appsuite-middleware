@@ -83,13 +83,13 @@ public interface DriveService {
      * @param session The session
      * @param rootFolderID The identifier of the referenced root folder on the server
      * @param path The path to the synchronized folder, relative to the root folder
-     * @param originalFiles A list of file versions previously known by the client
-     * @param clientFiles A The current list of client file versions
+     * @param originalVersions A list of file versions previously known by the client
+     * @param clientVersions A The current list of client file versions
      * @return A list of resulting actions to execute on the client afterwards
      * @throws OXException
      */
-    List<DriveAction<FileVersion>> syncFiles(ServerSession session, String rootFolderID, String path, List<FileVersion> originalFiles,
-        List<FileVersion> clientFiles) throws OXException;
+    List<DriveAction<FileVersion>> syncFiles(ServerSession session, String rootFolderID, String path, List<FileVersion> originalVersions,
+        List<FileVersion> clientVersions) throws OXException;
 
     /**
      * Processes a file upload to the server.
@@ -98,7 +98,7 @@ public interface DriveService {
      * @param rootFolderID The identifier of the referenced root folder on the server
      * @param path The path to the target folder, relative to the root folder
      * @param uploadStream An input stream for the file data (not closed by the service)
-     * @param originalFile The original file version to be updated, or <code>null</code> for new file uploads
+     * @param originalVersion The original file version to be updated, or <code>null</code> for new file uploads
      * @param file The target file version
      * @param offset The start offset in bytes for the upload when resuming, or <code>0</code> when initially starting an upload
      * @param totalLength The total expected length of the file (required to support resume of uploads), or <code>-1</code> if unknown
@@ -106,7 +106,7 @@ public interface DriveService {
      * @throws OXException
      */
     List<DriveAction<FileVersion>> upload(ServerSession session, String rootFolderID, String path, InputStream uploadStream,
-        FileVersion originalFile, FileVersion newFile, long offset, long totalLength) throws OXException;
+        FileVersion originalVersion, FileVersion newVersion, long offset, long totalLength) throws OXException;
 
     /**
      * Processes a file download from the server.

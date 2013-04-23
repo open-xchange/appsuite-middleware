@@ -105,6 +105,7 @@ public class DriveServiceImpl implements DriveService {
     @Override
     public List<DriveAction<DirectoryVersion>> syncFolders(ServerSession session, String rootFolderID,
         List<DirectoryVersion> originalDirectories, List<DirectoryVersion> clientDirectories) throws OXException {
+        long start = System.currentTimeMillis();
         DriveSession driveSession = createSession(session, rootFolderID);
         /*
          * map directories
@@ -133,12 +134,16 @@ public class DriveServiceImpl implements DriveService {
         /*
          * return actions for client
          */
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("syncFolders completed after " + (System.currentTimeMillis() - start) + "ms.");
+        }
         return syncResult.getActionsForClient();
     }
 
     @Override
     public List<DriveAction<FileVersion>> syncFiles(ServerSession session, String rootFolderID, String path,
         List<FileVersion> originalFiles, List<FileVersion> clientFiles) throws OXException {
+        long start = System.currentTimeMillis();
         DriveSession driveSession = createSession(session, rootFolderID);
         /*
          * map files
@@ -168,6 +173,9 @@ public class DriveServiceImpl implements DriveService {
         /*
          * return actions for client
          */
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("syncFiles completed after " + (System.currentTimeMillis() - start) + "ms.");
+        }
         return syncResult.getActionsForClient();
     }
 
@@ -192,6 +200,10 @@ public class DriveServiceImpl implements DriveService {
         SyncResult<FileVersion> syncResult = new SyncResult<FileVersion>();
         FileVersion createdFile = new UploadHelper(driveSession).perform(path, originalFile, newFile, uploadStream, offset, totalLength);
         if (null != createdFile) {
+            /*
+             * store checksum
+             */
+            driveSession.getChecksumStore().addChecksum(((ServerFileVersion)createdFile).getFile(), newFile.getChecksum());
             /*
              * check if created file still equals uploaded one
              */
@@ -297,15 +309,6 @@ public class DriveServiceImpl implements DriveService {
         return new ServerFileVersion(file, session.getChecksumStore().getChecksum(file));
     }
 
-//    private static List<ServerDirectoryVersion> getServerDirectories1(DriveSession session) throws OXException {
-//        List<ServerDirectoryVersion> directories = new ArrayList<ServerDirectoryVersion>();
-//        Map<String, FileStorageFolder> folders = session.getStorage().getFolders();
-//        for (Map.Entry<String, FileStorageFolder> folder : folders.entrySet()) {
-//            directories.add(getServerDirectory(folder.getKey(), session));
-//        }
-//        return directories;
-//    }
-
     private static List<ServerDirectoryVersion> getServerDirectories(DriveSession session) throws OXException {
         List<ServerDirectoryVersion> directories = new ArrayList<ServerDirectoryVersion>();
         Map<String, FileStorageFolder> folders = session.getStorage().getFolders();
@@ -316,8 +319,8 @@ public class DriveServiceImpl implements DriveService {
                  */
                 Entry<String, Long> knownChecksum = session.getChecksumStore().getFolder(folder.getValue().getId());
                 if (null != knownChecksum) {
-                    long sequenceNumber = session.getStorage().getSequenceNumber(folder.getKey());
-                    if (sequenceNumber == knownChecksum.getValue().longValue()) {
+                    long lastSequenceNumber = knownChecksum.getValue().longValue();
+                    if (false == session.getStorage().hasChangedSince(folder.getKey(), lastSequenceNumber)) {
                         LOG.debug("No changes detected since last calculated checksum for directory " + folder.getKey());
                         directories.add(new ServerDirectoryVersion(folder.getKey(), knownChecksum.getKey()));
                         continue;

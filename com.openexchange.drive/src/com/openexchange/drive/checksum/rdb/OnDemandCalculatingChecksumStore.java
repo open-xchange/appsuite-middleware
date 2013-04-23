@@ -109,7 +109,7 @@ public class OnDemandCalculatingChecksumStore implements ChecksumStore {
                 if (null != md5sum) {
                     delegate.addChecksum(file, md5sum);
                 } else {
-                    throw DriveExceptionCodes.IO_ERROR.create("Unable to calculate md5 checksum for file " + file);
+                    throw DriveExceptionCodes.NO_CHECKSUM_FOR_FILE.create(file);
                 }
             }
         }
