@@ -180,7 +180,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             }
         }
         try {
-            return new String(MessageDigest.getInstance("MD5").digest(sb.toString().getBytes("UTF-8")), "UTF-8");
+            return new String(MessageDigest.getInstance("MD5").digest(sb.toString().getBytes("UTF-8")), "ASCII");
         } catch (UnsupportedEncodingException e) {
             // Shouldn't happen
             LOG.error(e.getMessage(),e);
