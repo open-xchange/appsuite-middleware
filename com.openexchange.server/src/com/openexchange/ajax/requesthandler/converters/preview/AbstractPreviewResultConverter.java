@@ -180,7 +180,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             }
         }
         try {
-            return new String(MessageDigest.getInstance("MD5").digest(sb.toString().getBytes("UTF-8")), "ASCII");
+            return asHex(MessageDigest.getInstance("MD5").digest(sb.toString().getBytes("UTF-8")));
         } catch (UnsupportedEncodingException e) {
             // Shouldn't happen
             LOG.error(e.getMessage(),e);
@@ -189,6 +189,24 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             LOG.error(e.getMessage(),e);
         }
         return sb.toString();
+    }
+    
+    private static final char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+
+    /**
+     * Turns array of bytes into string representing each byte as unsigned hex number.
+     *
+     * @param hash Array of bytes to convert to hex-string
+     * @return Generated hex string
+     */
+    public static String asHex(final byte[] hash) {
+        final int length = hash.length;
+        final char[] buf = new char[length * 2];
+        for (int i = 0, x = 0; i < length; i++) {
+            buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
+            buf[x++] = HEX_CHARS[hash[i] & 0xf];
+        }
+        return new String(buf);
     }
 
     @Override
