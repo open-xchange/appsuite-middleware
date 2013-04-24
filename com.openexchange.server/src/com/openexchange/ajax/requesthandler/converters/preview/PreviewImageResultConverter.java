@@ -127,7 +127,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             final String eTag = result.getHeader("ETag");
             final boolean isValidEtag = !isEmpty(eTag);
             if (null != previewCache && isValidEtag) {
-                final String cacheKey = generatePreviewCacheKey(eTag, requestData, allParameterNames(requestData));
+                final String cacheKey = generatePreviewCacheKey(eTag, requestData);
                 final CachedPreview cachedPreview = previewCache.get(cacheKey, session.getUserId(), session.getContextId());
                 if (null != cachedPreview) {
                     requestData.setFormat("file");
@@ -183,7 +183,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                 thumbnail = Streams.newByteArrayInputStream(bytes);
                 size = bytes.length;
                 // Specify task
-                final String cacheKey = generatePreviewCacheKey(eTag, requestData, allParameterNames(requestData));
+                final String cacheKey = generatePreviewCacheKey(eTag, requestData);
                 final AbstractTask<Void> task = new AbstractTask<Void>() {
 
                     @Override
