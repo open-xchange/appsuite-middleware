@@ -152,7 +152,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         final String fileName = file.getName();
         InputStream documentData = null;
         try {
-            final long length = file.getLength();
+            long length = file.getLength();
             final String fileContentType = file.getContentType();
             /*-
              *
@@ -186,6 +186,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found.");
                 return;
             }
+            length = file.getLength(); // Scaling image could have changed the size
             documentData = null == file.getStream() ? null : new BufferedInputStream(file.getStream());
             if (null == documentData) {
                 // Quit with 404
