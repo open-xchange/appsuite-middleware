@@ -226,25 +226,6 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         }
     }
 
-    private String[] allParameterNames(final AJAXRequestData requestData) {
-        if (null == requestData) {
-            return new String[0];
-        }
-
-        final Map<String, String> parameters = requestData.getParameters();
-        final List<String> l = new ArrayList<String>(parameters.size());
-        final String paramSession = PARAMETER_SESSION;
-        final String paramAction = PARAMETER_ACTION;
-        for (final String name : new TreeMap<String, String>(parameters).keySet()) {
-            final String lc = toLowerCase(name);
-            if (!paramSession.equals(lc) && !paramAction.equals(lc)) {
-                l.add(name);
-            }
-        }
-
-        return l.toArray(new String[0]);
-    }
-
     private static final Set<String> INVALIDS = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(
         "application/octet-stream",
         "application/force-download",
