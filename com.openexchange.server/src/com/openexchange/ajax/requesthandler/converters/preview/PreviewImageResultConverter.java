@@ -128,7 +128,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             final boolean isValidEtag = !isEmpty(eTag);
             if (null != previewCache && isValidEtag) {
                 final String cacheKey = generatePreviewCacheKey(eTag, requestData);
-                final CachedPreview cachedPreview = previewCache.get(cacheKey, session.getUserId(), session.getContextId());
+                final CachedPreview cachedPreview = previewCache.get(cacheKey, 0, session.getContextId());
                 if (null != cachedPreview) {
                     requestData.setFormat("file");
                     // Create appropriate IFileHolder
@@ -189,7 +189,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                     @Override
                     public Void call() throws OXException {
                         final CachedPreview preview = new CachedPreview(bytes, fileName, "image/jpeg", bytes.length);
-                        previewCache.save(cacheKey, preview, session.getUserId(), session.getContextId());
+                        previewCache.save(cacheKey, preview, 0, session.getContextId());
                         return null;
                     }
                 };

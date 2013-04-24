@@ -219,7 +219,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             final boolean isValidEtag = !isEmpty(eTag);
             if (null != previewCache && isValidEtag) {
                 final String cacheKey = generatePreviewCacheKey(eTag, requestData);
-                final CachedPreview cachedPreview = previewCache.get(cacheKey, session.getUserId(), session.getContextId());
+                final CachedPreview cachedPreview = previewCache.get(cacheKey, 0, session.getContextId());
                 if (null != cachedPreview) {
                     /*
                      * Get content according to output format
@@ -324,7 +324,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                                 @Override
                                 public Void call() throws OXException {
                                     final CachedPreview preview = new CachedPreview(bytes, fileName, fileType, bytes.length);
-                                    previewCache.save(cacheKey, preview, session.getUserId(), session.getContextId());
+                                    previewCache.save(cacheKey, preview, 0, session.getContextId());
                                     return null;
                                 }
                             };
