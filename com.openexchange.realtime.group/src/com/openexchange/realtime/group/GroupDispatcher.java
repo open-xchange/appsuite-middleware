@@ -120,7 +120,10 @@ public class GroupDispatcher implements ComponentHandle {
             @Override
             public void handle(String event, ID id, Object source, Map<String, Object> properties) {
                 try {
-                    ID memberId = (ID) properties.get("id");
+                    ID memberId = null;
+                    if (properties != null) {
+                        memberId = (ID) properties.get("id");
+                    }
                     if (ids.size() > 0) {
                         memberId = ids.get(0);
                     }
