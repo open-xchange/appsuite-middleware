@@ -49,6 +49,10 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -56,10 +60,14 @@ import com.openexchange.documentation.annotations.Actions;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAccess;
+import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UpdateAction}
@@ -113,7 +121,20 @@ public class UpdateAction extends AbstractWriteAction {
             fileAccess.saveFileMetadata(file, request.getTimestamp(), request.getSentColumns());
         }
 
-        return success(file.getSequenceNumber());
+        final AJAXRequestResult result = success(file.getSequenceNumber());
+
+        final EventAdmin eventAdmin = Services.getEventAdmin();
+        if (null != eventAdmin) {
+            final Map<String, Object> m = new LinkedHashMap<String, Object>(4);
+            final ServerSession session = request.getSession();
+            m.put("userId", Integer.valueOf(session.getUserId()));
+            m.put("contextId", Integer.valueOf(session.getContextId()));
+            m.put("fileId", file.getId());
+            m.put("eTag", FileStorageUtility.getETagFor(fileAccess.getFileMetadata(file.getId(), FileStorageFileAccess.CURRENT_VERSION)));
+            eventAdmin.postEvent(new Event("com/openexchange/infostore/update", m));
+        }
+
+        return result;
     }
 
 }

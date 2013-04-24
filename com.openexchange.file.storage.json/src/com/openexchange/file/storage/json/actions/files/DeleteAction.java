@@ -49,13 +49,21 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.json.services.Services;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DeleteAction}
@@ -75,7 +83,22 @@ public class DeleteAction extends AbstractWriteAction {
 
         final List<String> conflicting = fileAccess.removeDocument(request.getIds(), request.getTimestamp());
 
-        return result(conflicting, request);
+        final AJAXRequestResult result = result(conflicting, request);
+
+        final EventAdmin eventAdmin = Services.getEventAdmin();
+        if (null != eventAdmin) {
+            for (final String id :  request.getIds()) {
+                final Map<String, Object> m = new LinkedHashMap<String, Object>(4);
+                final ServerSession session = request.getSession();
+                m.put("userId", Integer.valueOf(session.getUserId()));
+                m.put("contextId", Integer.valueOf(session.getContextId()));
+                m.put("fileId", id);
+                m.put("eTag", FileStorageUtility.getETagFor(id, FileStorageFileAccess.CURRENT_VERSION));
+                eventAdmin.postEvent(new Event("com/openexchange/infostore/delete", m));
+            }
+        }
+
+        return result;
     }
 
 }

@@ -63,8 +63,8 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.java.StringAllocator;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -92,7 +92,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         final File fileMetadata = fileAccess.getFileMetadata(id, version);
 
         final IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {
-            
+
             @Override
             public InputStream newStream() throws OXException, IOException {
                 return new BufferedInputStream(fileAccess.getDocument(id, version));
@@ -108,11 +108,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
     }
 
 	private void createAndSetETag(File fileMetadata, InfostoreRequest request, AJAXRequestResult result) throws OXException {
-		setETag(getETag(fileMetadata), 0, result);
-	}
-
-	private String getETag(File fileMetadata) {
-		return new StringAllocator("http://www.open-xchange.com/infostore/").append(fileMetadata.getId()).append('/').append(fileMetadata.getVersion()).toString();
+		setETag(FileStorageUtility.getETagFor(fileMetadata), 0, result);
 	}
 
 	@Override
@@ -121,7 +117,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
 		final AJAXInfostoreRequest request = new AJAXInfostoreRequest(requestData, session);
 		final IDBasedFileAccess fileAccess = request.getFileAccess();
 	    final File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
-		return getETag(fileMetadata).equals(clientETag);
+		return FileStorageUtility.getETagFor(fileMetadata).equals(clientETag);
 	}
 
 	@Override

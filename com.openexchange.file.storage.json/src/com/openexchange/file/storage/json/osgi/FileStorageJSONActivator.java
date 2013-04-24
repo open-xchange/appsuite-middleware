@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.json.osgi;
 
+import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
@@ -75,7 +76,7 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { FileStorageServiceRegistry.class, IDBasedFileAccessFactory.class, AttachmentBase.class, FolderService.class };
+        return new Class[] { FileStorageServiceRegistry.class, IDBasedFileAccessFactory.class, AttachmentBase.class, FolderService.class, EventAdmin.class };
     }
 
     @Override
