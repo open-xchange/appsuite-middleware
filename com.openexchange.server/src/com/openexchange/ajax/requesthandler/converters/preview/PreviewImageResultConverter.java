@@ -127,8 +127,8 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
             final String eTag = result.getHeader("ETag");
             final boolean isValidEtag = !isEmpty(eTag);
             if (null != previewCache && isValidEtag) {
-                final String cacheKey = generatePreviewCacheKey(eTag, requestData, allParameterNames(requestData));
-                final CachedPreview cachedPreview = previewCache.get(cacheKey, session.getUserId(), session.getContextId());
+                final String cacheKey = generatePreviewCacheKey(eTag, requestData);
+                final CachedPreview cachedPreview = previewCache.get(cacheKey, 0, session.getContextId());
                 if (null != cachedPreview) {
                     requestData.setFormat("file");
                     // Create appropriate IFileHolder
@@ -183,13 +183,13 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                 thumbnail = Streams.newByteArrayInputStream(bytes);
                 size = bytes.length;
                 // Specify task
-                final String cacheKey = generatePreviewCacheKey(eTag, requestData, allParameterNames(requestData));
+                final String cacheKey = generatePreviewCacheKey(eTag, requestData);
                 final AbstractTask<Void> task = new AbstractTask<Void>() {
 
                     @Override
                     public Void call() throws OXException {
                         final CachedPreview preview = new CachedPreview(bytes, fileName, "image/jpeg", bytes.length);
-                        previewCache.save(cacheKey, preview, session.getUserId(), session.getContextId());
+                        previewCache.save(cacheKey, preview, 0, session.getContextId());
                         return null;
                     }
                 };
@@ -224,25 +224,6 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         } catch (final RuntimeException e) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-    }
-
-    private String[] allParameterNames(final AJAXRequestData requestData) {
-        if (null == requestData) {
-            return new String[0];
-        }
-
-        final Map<String, String> parameters = requestData.getParameters();
-        final List<String> l = new ArrayList<String>(parameters.size());
-        final String paramSession = PARAMETER_SESSION;
-        final String paramAction = PARAMETER_ACTION;
-        for (final String name : new TreeMap<String, String>(parameters).keySet()) {
-            final String lc = toLowerCase(name);
-            if (!paramSession.equals(lc) && !paramAction.equals(lc)) {
-                l.add(name);
-            }
-        }
-
-        return l.toArray(new String[0]);
     }
 
     private static final Set<String> INVALIDS = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(
