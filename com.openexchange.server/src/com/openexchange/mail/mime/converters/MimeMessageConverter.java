@@ -132,7 +132,7 @@ import com.sun.mail.pop3.POP3Folder;
  */
 public final class MimeMessageConverter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMessageConverter.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MimeMessageConverter.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
