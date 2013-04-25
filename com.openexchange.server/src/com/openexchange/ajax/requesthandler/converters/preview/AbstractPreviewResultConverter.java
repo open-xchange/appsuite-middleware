@@ -112,7 +112,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
     /**
      * Sets the preview cache reference.
-     * 
+     *
      * @param ref The reference
      */
     public static void setPreviewCache(final PreviewCache ref) {
@@ -162,25 +162,24 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
      * @return The appropriate cache key
      */
     protected String generatePreviewCacheKey(final String eTag, final AJAXRequestData requestData) {
-        final StringAllocator sb = new StringAllocator(eTag);
-        sb.append('-').append(requestData.getModule());
+        final StringAllocator sb = new StringAllocator(512);
+        sb.append(requestData.getModule());
         sb.append('-').append(requestData.getAction());
         sb.append('-').append(requestData.getSession().getContextId());
         List<String> parameters = new ArrayList<String>(requestData.getParameters().keySet());
         Collections.sort(parameters);
-        
+
         for (final String name : parameters) {
-            if (name.equalsIgnoreCase("session") || name.equalsIgnoreCase("action")) {
-                continue;
-            }
-            sb.append(name).append('=');
-            final String parameter = requestData.getParameter(name);
-            if (!isEmpty(parameter)) {
-                sb.append('-').append(parameter);
+            if (!name.equalsIgnoreCase("session") && !name.equalsIgnoreCase("action")) {
+                sb.append(name).append('=');
+                final String parameter = requestData.getParameter(name);
+                if (!isEmpty(parameter)) {
+                    sb.append('-').append(parameter);
+                }
             }
         }
         try {
-            return asHex(MessageDigest.getInstance("MD5").digest(sb.toString().getBytes("UTF-8")));
+            return eTag + asHex(MessageDigest.getInstance("MD5").digest(sb.toString().getBytes("UTF-8")));
         } catch (UnsupportedEncodingException e) {
             // Shouldn't happen
             LOG.error(e.getMessage(),e);
@@ -190,7 +189,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         }
         return sb.toString();
     }
-    
+
     private static final char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
     /**
@@ -210,7 +209,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
     }
 
     @Override
-    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {        
+    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         IFileHolder fileHolder = null;
         try {
             // Check cache first
