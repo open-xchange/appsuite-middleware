@@ -1,3 +1,7 @@
+* 2013-04-25 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25799: Don't query contact image data for GET request   
+
 * 2013-04-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 26116: Invalidate cache entry on document change/deletion
