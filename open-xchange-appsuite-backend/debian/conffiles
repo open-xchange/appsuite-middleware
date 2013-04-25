@@ -9,6 +9,6 @@ opt/open-xchange/templates/cp_appsuite_monthview_table.tmpl
 opt/open-xchange/templates/cp_appsuite_weekview_table.tmpl
 opt/open-xchange/templates/cp_appsuite_workweekview_table.tmpl
 opt/open-xchange/templates/print_dayview_table.tmpl
-opt/open-xchange/templates/print_monthview_table.tmpl
+opt/open-xchange/templates/print_monthview_list.tmpl
 opt/open-xchange/templates/print_weekview_table.tmpl
 opt/open-xchange/templates/print_workweekview_table.tmpl
