@@ -413,11 +413,12 @@ public class FileResponseRenderer implements ResponseRenderer {
                 }
                 outputStream.flush();
             } catch (final java.net.SocketException e) {
-                if ("broken pipe".equals(toLowerCase(e.getMessage()))) {
+                final String lmsg = toLowerCase(e.getMessage());
+                if ("broken pipe".equals(lmsg) || "connection reset".equals(lmsg)) {
                     // Assume client-initiated connection closure
                     LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
                 } else {
-                    LOG.error("Lost connection to client while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.warn("Lost connection to client while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
                 }
             } catch (final IOException e) {
                 if ("connection reset by peer".equals(toLowerCase(e.getMessage()))) {
@@ -431,7 +432,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                      */
                     LOG.debug("Client dropped connection while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
                 } else {
-                    LOG.error("Lost connection to client while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.warn("Lost connection to client while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
                 }
             }
         } catch (final Exception e) {
