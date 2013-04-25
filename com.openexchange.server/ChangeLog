@@ -1,3 +1,7 @@
+* 2013-04-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26116: Invalidate cache entry on document change/deletion
+
 * 2013-04-23 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 26076: Deserialize 'image1' field in user update action   
