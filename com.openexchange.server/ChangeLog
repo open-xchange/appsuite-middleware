@@ -2,6 +2,7 @@
 
  - Fix for bug 26116: Invalidate cache entry on document change/deletion
  - Fix for bug 26120: Adapted logging behavior to client actions
+ - Fix for bug 26170: Added template file to Debian packaging file "conffiles"
 
 * 2013-04-23 - tobias.friedrich@open-xchange.com
 
