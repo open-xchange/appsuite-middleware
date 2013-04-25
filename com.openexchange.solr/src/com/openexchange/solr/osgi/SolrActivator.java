@@ -32,7 +32,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.log.LogFactory;
-import com.openexchange.login.LoginHandlerService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -41,7 +40,6 @@ import com.openexchange.solr.SolrCoreConfigService;
 import com.openexchange.solr.SolrIndexEventProperties;
 import com.openexchange.solr.SolrMBean;
 import com.openexchange.solr.SolrProperties;
-import com.openexchange.solr.groupware.SolrCoreLoginHandler;
 import com.openexchange.solr.groupware.SolrCoresCreateTableService;
 import com.openexchange.solr.groupware.SolrCoresCreateTableTask;
 import com.openexchange.solr.groupware.SolrIndexEventHandler;
@@ -122,7 +120,6 @@ public class SolrActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, createTableService);
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SolrCoresCreateTableTask(
             createTableService)));
-        registerService(LoginHandlerService.class, new SolrCoreLoginHandler(embeddedAccess));
         registerMBean(coreService);
 
         /*

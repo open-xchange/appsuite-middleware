@@ -51,6 +51,7 @@ package com.openexchange.index.solr.internal.mail;
 
 import static com.openexchange.index.solr.internal.LuceneQueryTools.buildQueryStringWithOr;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -161,8 +162,13 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         IndexField sortField = parameters.getSortField();
         Order order = parameters.getOrder();
         boolean sortManually = false;
-
-        Set<IndexField> modifiedFields = new HashSet<IndexField>(fields);
+        Set<IndexField> modifiedFields;
+        if (fields == null) {
+            modifiedFields = new HashSet<IndexField>(Arrays.asList(MailIndexField.values()));
+        } else {
+            modifiedFields = new HashSet<IndexField>(fields);
+        }
+        
         QueryParameters newParameters = parameters;
         if (sortField != null) {
             modifiedFields.add(sortField);
