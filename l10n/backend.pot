@@ -7896,6 +7896,14 @@ msgstr ""
 msgid "%s is not a valid timezone."
 msgstr ""
 
+#. This is an internal exception to detect coding problems. A user will never see this exception.
+#. %1$d is replaced with the number of users that attributes should be locked in the database for updating them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:186
+msgid ""
+"Locking attributes of multiple users is not allowed. You tried to lock %1$d "
+"user's attributes."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/links/LinkExceptionMessages.java:61
 msgid ""
 "Unable to access the link between these two objects. Insufficient rights. "
