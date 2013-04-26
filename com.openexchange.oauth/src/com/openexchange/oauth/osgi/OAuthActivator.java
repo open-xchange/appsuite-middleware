@@ -130,7 +130,7 @@ public final class OAuthActivator extends HousekeepingActivator {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.oauth");
             }
-            AbstractOAuthServiceMetaData.SERVICES = this;
+            AbstractOAuthServiceMetaData.SERVICES.set(this);
             /*
              * (Re-)Initialize service registry with available services
              */
@@ -227,6 +227,7 @@ public final class OAuthActivator extends HousekeepingActivator {
             }
             DeleteListenerRegistry.releaseInstance();
             OSGiMetaDataRegistry.releaseInstance();
+            AbstractOAuthServiceMetaData.SERVICES.set(null);
         } catch (final Exception e) {
             log.error("Stopping bundle \"com.openexchange.oauth\" failed.", e);
             throw e;
