@@ -62,8 +62,8 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
- * {@link Bug15354Test}
- * 
+ * Verifies that bug 15354 does not appear again.
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Bug15354Test extends AbstractAJAXSession {
@@ -71,8 +71,6 @@ public class Bug15354Test extends AbstractAJAXSession {
     static final Log LOG = LogFactory.getLog(Bug15354Test.class);
 
     private static final int ITERATIONS = 10000;
-
-    private static final int NEEDED_BROKEN = 10;
 
     private final BetaWriter[] writer = new BetaWriter[5];
 
@@ -122,13 +120,13 @@ public class Bug15354Test extends AbstractAJAXSession {
     }
 
     public void testAliases() throws Throwable {
-        int consecutiveBrokenReads = 0;
-        for (int i = 0; i < ITERATIONS && consecutiveBrokenReads < NEEDED_BROKEN; i++) {
+        boolean stop = false;
+        for (int i = 0; i < ITERATIONS && !stop; i++) {
             Object[] testAliases = client.execute(new GetRequest(Tree.MailAddresses)).getArray();
             if (null == testAliases) {
-                consecutiveBrokenReads++;
+                stop = true;
             } else if (origAliases.length != testAliases.length) {
-                consecutiveBrokenReads++;
+                stop = true;
             } else {
                 Arrays.sort(testAliases);
                 boolean match = true;
@@ -137,11 +135,10 @@ public class Bug15354Test extends AbstractAJAXSession {
                         match = false;
                     }
                 }
-                if (match) {
-                    consecutiveBrokenReads = 0;
-                } else {
-                    consecutiveBrokenReads++;
-                }
+                stop = stop || !match;
+            }
+            for (int j = 0; j < writer.length; j++) {
+                stop = stop || null != writer[j].getThrowable();
             }
         }
         // Final test.
