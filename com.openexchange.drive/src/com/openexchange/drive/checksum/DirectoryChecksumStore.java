@@ -47,34 +47,37 @@
  *
  */
 
-package com.openexchange.drive.sync.optimize;
+package com.openexchange.drive.checksum;
 
-import com.openexchange.drive.FileVersion;
-import com.openexchange.drive.comparison.VersionMapper;
-import com.openexchange.drive.internal.DriveSession;
-import com.openexchange.drive.sync.FileSynchronizer;
-import com.openexchange.drive.sync.SyncResult;
+import java.util.List;
 import com.openexchange.exception.OXException;
 
-
 /**
- * {@link OptimizingFileSynchronizer}
+ * {@link DirectoryChecksumStore}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class OptimizingFileSynchronizer extends FileSynchronizer {
+public interface DirectoryChecksumStore {
 
-    public OptimizingFileSynchronizer(DriveSession session, VersionMapper<FileVersion> mapper, String path) throws OXException {
-        super(session, mapper, path);
-    }
+    DirectoryChecksum insertDirectoryChecksum(String folderID, long sequenceNumber, String checksum) throws OXException;
 
-    @Override
-    public SyncResult<FileVersion> sync() throws OXException {
-        SyncResult<FileVersion> result = super.sync();
-        result = new FileRenameOptimizer(mapper).optimize(session, result);
-        result = new FileCopyOptimizer(mapper).optimize(session, result);
-        result = new FileOrderOptimizer(mapper).optimize(session, result);
-        return result;
-    }
+    List<DirectoryChecksum> insertDirectoryChecksums(List<DirectoryChecksum> directoryChecksums) throws OXException;
+
+    DirectoryChecksum insertDirectoryChecksum(DirectoryChecksum directoryChecksum) throws OXException;
+
+
+    DirectoryChecksum updateDirectoryChecksum(DirectoryChecksum directoryChecksum) throws OXException;
+
+    List<DirectoryChecksum> updateDirectoryChecksums(List<DirectoryChecksum> directoryChecksums) throws OXException;
+
+    boolean updateDirectoryChecksumFolder(String folderID, String newFolderID) throws OXException;
+
+    boolean removeDirectoryChecksum(String folderID) throws OXException;
+
+
+    DirectoryChecksum getDirectoryChecksum(String folderID) throws OXException;
+
+    List<DirectoryChecksum> getDirectoryChecksums(List<String> folderIDs) throws OXException;
 
 }
+

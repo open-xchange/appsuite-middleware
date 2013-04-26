@@ -58,13 +58,66 @@ import com.openexchange.drive.FileVersion;
  */
 public class EditFileAction extends AbstractAction<FileVersion> {
 
+    private int sortKey;
+
     public EditFileAction(FileVersion file, FileVersion newFile) {
+        this(file, newFile, 0);
+    }
+
+    public EditFileAction(FileVersion file, FileVersion newFile, int sortKey) {
         super(file, newFile);
+        this.sortKey = sortKey;
     }
 
     @Override
     public Action getAction() {
         return Action.EDIT;
+    }
+
+    /**
+     * Gets the sortKey
+     *
+     * @return The sortKey
+     */
+    public int getSortKey() {
+        return sortKey;
+    }
+
+    /**
+     * Sets the sortKey
+     *
+     * @param sortKey The sortKey to set
+     */
+    public void setSortKey(int sortKey) {
+        this.sortKey = sortKey;
+    }
+
+    @Override
+    public int compareTo(DriveAction<FileVersion> other) {
+        int result = super.compareTo(other);
+        if (0 != result) {
+            return result;
+        }
+        if (EditFileAction.class.isInstance(other)) {
+            EditFileAction otherEditFileAction = (EditFileAction)other;
+            /*
+             * compare sort keys if available
+             */
+            result = this.getSortKey() - otherEditFileAction.getSortKey();
+            if (0 != result) {
+                return result;
+            }
+            /*
+             * compare new version if available
+             */
+            if (null != this.getNewVersion() && null != otherEditFileAction.getNewVersion()) {
+                result = -1 * this.getNewVersion().getName().compareTo(otherEditFileAction.getNewVersion().getName());
+            }
+            if (0 != result) {
+                return result;
+            }
+        }
+        return result;
     }
 
 }

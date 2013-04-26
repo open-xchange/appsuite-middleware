@@ -49,68 +49,13 @@
 
 package com.openexchange.drive.checksum;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Map.Entry;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
 
 /**
  * {@link ChecksumStore}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface ChecksumStore {
-
-    /**
-     * Adds a checksum for the supplied file.
-     *
-     * @param file The file
-     * @param checksum The checksum
-     */
-    void addChecksum(File file, String checksum) throws OXException;
-
-    /**
-     * Gets the checksum for the supplied file.
-     *
-     * @param file The file
-     * @return The checksum, or <code>null</code> if unknown
-     * @throws OXException
-     */
-    String getChecksum(File file) throws OXException;
-
-    /**
-     * Removes stored the checksum for all versions of the supplied file.
-     *
-     * @param file The file
-     */
-    void removeChecksums(File file) throws OXException;
-
-    /**
-     * Gets all files matching the supplied checksum.
-     *
-     * @param checksum The checksum
-     * @return The matching files
-     * @throws OXException
-     */
-    Collection<File> getFiles(String checksum) throws OXException;
-
-    /**
-     * Gets all files and the corresponding checksums in the supplied folder.
-     *
-     * @param folderID The folder ID
-     * @return The matching files, each mapped to it's stored checksum
-     * @throws OXException
-     */
-    Map<File, String> getFilesInFolder(String folderID) throws OXException;
-
-    void updateFolderIDs(String currentFolderID, String newFolderID) throws OXException;
-
-    void addFolder(String folderID, long sequenceNumber, String checksum) throws OXException;
-
-    void removeFolder(String folderID) throws OXException;
-
-    Entry<String, Long> getFolder(String folderID) throws OXException;
+public interface ChecksumStore extends FileChecksumStore, DirectoryChecksumStore {
 
 }
 

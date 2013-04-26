@@ -53,6 +53,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -64,8 +65,8 @@ public class SQL {
 
     public static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SQL.class));
 
-    public static String getCreateTableStmt() {
-        return "CREATE TABLE checksums (" +
+    public static String getCreateFileChecksumsTableStmt() {
+        return "CREATE TABLE fileChecksums (" +
             "uuid BINARY(16) NOT NULL," +
             "cid INT4 UNSIGNED NOT NULL," +
             "service VARCHAR(255) NOT NULL," +
@@ -79,41 +80,95 @@ public class SQL {
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
-    public static final String SELECT_CHECKSUM_STMT =
-        "SELECT LOWER(HEX(checksum)) FROM checksums " +
-        "WHERE cid=? AND service=? AND account=? AND folder=REVERSE(?) AND file=REVERSE(?) AND version=? AND sequence=?;";
+    public static String getCreateDirectoryChecksumsTableStmt() {
+        return "CREATE TABLE directoryChecksums (" +
+            "uuid BINARY(16) NOT NULL," +
+            "cid INT4 UNSIGNED NOT NULL," +
+            "service VARCHAR(255) NOT NULL," +
+            "account VARCHAR(255) NOT NULL," +
+            "folder VARCHAR(255) NOT NULL," +
+            "sequence BIGINT(20) NOT NULL," +
+            "checksum BINARY(16) NOT NULL," +
+            "PRIMARY KEY  (`uuid`)" +
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+    }
 
-    public static final String SELECT_FILES_STMT =
-        "SELECT REVERSE(folder),REVERSE(file),version,sequence FROM checksums " +
-        "WHERE cid=? AND service=? AND account=? AND checksum=UNHEX(?);";
-
-    public static final String SELECT_FILES_IN_FOLDER_STMT =
-        "SELECT REVERSE(file),version,sequence,LOWER(HEX(checksum)) FROM checksums " +
-        "WHERE cid=? AND service=? AND account=? AND folder=REVERSE(?);";
-
-    public static final String INSERT_CHECKSUM_STMT =
-        "INSERT INTO checksums (uuid,cid,service,account,folder,file,version,sequence,checksum) " +
+    public static final String INSERT_FILE_CHECKSUM_STMT =
+        "INSERT INTO fileChecksums (uuid,cid,service,account,folder,file,version,sequence,checksum) " +
         "VALUES (UNHEX(?),?,?,?,REVERSE(?),REVERSE(?),?,?,UNHEX(?));";
 
-    public static final String DELETE_CHECKSUMS_STMT =
-        "DELETE FROM checksums " +
-        "WHERE cid=? AND service=? AND account=? AND folder=REVERSE(?) AND file=REVERSE(?);";
+    public static final String UPDATE_FILE_CHECKSUM_STMT =
+        "UPDATE fileChecksums SET folder=REVERSE(?),file=REVERSE(?),version=?,sequence=?,checksum=UNHEX(?) " +
+        "WHERE uuid=UNHEX(?);";
 
-    public static final String UPDATE_FOLDERS_STMT =
-        "UPDATE checksums SET folder=REVERSE(?) " +
+    public static final String UPDATE_FILE_CHECKSUM_FOLDERS_STMT =
+        "UPDATE fileChecksums SET folder=REVERSE(?) " +
         "WHERE cid=? AND service=? AND account=? AND folder=REVERSE(?);";
 
-    public static final String SELECT_FOLDER_STMT =
-        "SELECT LOWER(HEX(checksum)),sequence FROM checksums " +
-        "WHERE cid=? AND service=? AND account=? AND folder=REVERSE(?) AND file='' AND version='';";
+    /** DELETE FROM checksums WHERE uuid IN (...);" */
+    public static final String DELETE_FILE_CHECKSUMS_STMT(String[] uuids) {
+        StringAllocator allocator = new StringAllocator();
+        allocator.append("DELETE FROM fileChecksums WHERE uuid IN (");
+        if (0 < uuids.length) {
+            allocator.append("UNHEX('").append(uuids[0]).append("')");
+        }
+        for (int i = 1; i < uuids.length; i++) {
+            allocator.append(",UNHEX('").append(uuids[0]).append("')");
+        }
+        allocator.append(");");
+        return allocator.toString();
+    }
 
-    public static final String INSERT_FOLDER_STMT =
-        "INSERT INTO checksums (uuid,cid,service,account,folder,file,version,sequence,checksum) " +
-        "VALUES (UNHEX(?),?,?,?,REVERSE(?),'','',?,UNHEX(?));";
+    public static final String DELETE_FILE_CHECKSUMS_IN_FOLDER_STMT =
+        "DELETE FROM fileChecksums " +
+        "WHERE cid=? AND service=? AND account=? AND folder=REVERSE(?);";
 
-    public static final String DELETE_FOLDER_STMT =
-        "DELETE FROM checksums " +
-        "WHERE cid=? AND service=? AND account=? AND folder=REVERSE(?) AND file='' AND version='';";
+    public static final String DELETE_FILE_CHECKSUM_STMT =
+        "DELETE FROM fileChecksums " +
+        "WHERE cid=? AND service=? AND account=? AND folder=REVERSE(?) AND file=REVERSE(?) AND version=? AND sequence=?;";
+
+    public static final String SELECT_FILE_CHECKSUM_STMT =
+        "SELECT LOWER(HEX(uuid)),LOWER(HEX(checksum)) FROM fileChecksums " +
+        "WHERE cid=? AND service=? AND account=? AND folder=REVERSE(?) AND file=REVERSE(?) AND version=? AND sequence=?;";
+
+    public static final String SELECT_FILE_CHECKSUMS_IN_FOLDER_STMT =
+        "SELECT LOWER(HEX(uuid)),REVERSE(file),version,sequence,LOWER(HEX(checksum)) FROM fileChecksums " +
+        "WHERE cid=? AND service=? AND account=? AND folder=REVERSE(?);";
+
+    public static final String SELECT_MATCHING_FILE_CHECKSUMS_STMT =
+        "SELECT LOWER(HEX(uuid)),REVERSE(folder),REVERSE(file),version,sequence FROM fileChecksums " +
+        "WHERE cid=? AND service=? AND account=? AND checksum=UNHEX(?);";
+
+    public static final String INSERT_DIRECTORY_CHECKSUM_STMT =
+        "INSERT INTO directoryChecksums (uuid,cid,service,account,folder,sequence,checksum) " +
+        "VALUES (UNHEX(?),?,?,?,REVERSE(?),?,UNHEX(?));";
+
+    public static final String UPDATE_DIRECTORY_CHECKSUM_STMT =
+        "UPDATE directoryChecksums SET folder=REVERSE(?),sequence=?,checksum=UNHEX(?) " +
+        "WHERE uuid=UNHEX(?);";
+
+    public static final String UPDATE_DIRECTORY_CHECKSUM_FOLDER_STMT =
+        "UPDATE directoryChecksums SET folder=REVERSE(?) " +
+        "WHERE cid=? AND service=? AND account=? AND folder=REVERSE(?);";
+
+    public static final String DELETE_DIRECTORY_CHECKSUM_STMT =
+        "DELETE FROM directoryChecksums " +
+        "WHERE cid=? AND service=? AND account=? AND folder=REVERSE(?);";
+
+    /** SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,checksum FROM directoryChecksums WHERE cid=? AND service=? AND account=? AND REVERSE(folder) IN (...);" */
+    public static final String SELECT_DIRECTORY_CHECKSUMS_STMT(String[] folderIDs) {
+        StringAllocator allocator = new StringAllocator();
+        allocator.append("SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,LOWER(HEX(checksum)) FROM directoryChecksums ");
+        allocator.append("WHERE cid=? AND service=? AND account=? AND REVERSE(folder) IN (");
+        if (0 < folderIDs.length) {
+            allocator.append(folderIDs[0]);
+        }
+        for (int i = 1; i < folderIDs.length; i++) {
+            allocator.append(',').append(folderIDs[i]);
+        }
+        allocator.append(");");
+        return allocator.toString();
+    }
 
     public static ResultSet logExecuteQuery(PreparedStatement stmt) throws SQLException {
         if (false == LOG.isDebugEnabled()) {

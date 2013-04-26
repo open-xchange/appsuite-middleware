@@ -51,8 +51,8 @@ package com.openexchange.drive.json.json;
 
 import java.util.Map;
 import com.openexchange.drive.DriveVersion;
+import com.openexchange.drive.actions.AbstractAction;
 import com.openexchange.drive.actions.Action;
-import com.openexchange.drive.actions.DriveAction;
 
 
 /**
@@ -60,39 +60,19 @@ import com.openexchange.drive.actions.DriveAction;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class JsonDriveAction<T extends DriveVersion> implements DriveAction<T> {
+public abstract class JsonDriveAction<T extends DriveVersion> extends AbstractAction<T> {
 
     protected final Action action;
-    protected final T version;
-    protected final T newVersion;
-    protected final Map<String, Object> parameters;
 
     public JsonDriveAction(Action action, T version, T newVersion, Map<String, Object> parameters) {
-        super();
+        super(version, newVersion);
         this.action = action;
-        this.version = version;
-        this.newVersion = newVersion;
-        this.parameters = parameters;
+        super.parameters.putAll(parameters);
     }
 
     @Override
     public Action getAction() {
         return action;
-    }
-
-    @Override
-    public T getVersion() {
-        return version;
-    }
-
-    @Override
-    public T getNewVersion() {
-        return newVersion;
-    }
-
-    @Override
-    public Map<String, Object> getParameters() {
-        return parameters;
     }
 
     /**

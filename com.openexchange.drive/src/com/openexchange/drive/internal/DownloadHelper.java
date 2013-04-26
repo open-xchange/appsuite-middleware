@@ -55,6 +55,7 @@ import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -93,8 +94,8 @@ public class DownloadHelper {
         /*
          * get the file's input stream
          */
-        File file = session.getStorage().findFileByNameAndChecksum(path, fileVersion.getName(), fileVersion.getChecksum());
-        if (null == file) {
+        File file = session.getStorage().findFileByName(path, fileVersion.getName());
+        if (null == file || false == ChecksumProvider.matches(session, file, fileVersion.getChecksum())) {
             throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(fileVersion.getName(), fileVersion.getChecksum(), path);
         }
         InputStream inputStream = getInputStream(file, offset, length);

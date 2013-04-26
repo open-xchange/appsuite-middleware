@@ -51,13 +51,8 @@ package com.openexchange.drive.internal;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
-import jonelo.jacksum.algorithm.MD;
 import org.apache.commons.logging.Log;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.drive.DirectoryVersion;
@@ -67,13 +62,14 @@ import com.openexchange.drive.actions.AcknowledgeFileAction;
 import com.openexchange.drive.actions.DriveAction;
 import com.openexchange.drive.actions.EditFileAction;
 import com.openexchange.drive.actions.RemoveFileAction;
-import com.openexchange.drive.checksum.DirectoryFragment;
+import com.openexchange.drive.checksum.ChecksumProvider;
+import com.openexchange.drive.checksum.DirectoryChecksum;
+import com.openexchange.drive.checksum.FileChecksum;
 import com.openexchange.drive.comparison.DirectoryVersionMapper;
 import com.openexchange.drive.comparison.FileVersionMapper;
 import com.openexchange.drive.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.storage.DriveConstants;
-import com.openexchange.drive.storage.filter.FileFilter;
 import com.openexchange.drive.sync.SyncResult;
 import com.openexchange.drive.sync.Synchronizer;
 import com.openexchange.drive.sync.optimize.OptimizingDirectorySynchronizer;
@@ -82,7 +78,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -192,25 +187,27 @@ public class DriveServiceImpl implements DriveService {
 
     @Override
     public List<DriveAction<FileVersion>> upload(ServerSession session, String rootFolderID, String path, InputStream uploadStream,
-        FileVersion originalFile, FileVersion newFile, long offset, long totalLength) throws OXException {
+        FileVersion originalVersion, FileVersion newVersion, long offset, long totalLength) throws OXException {
         DriveSession driveSession = createSession(session, rootFolderID);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Handling upload: " + newFile);
+            LOG.debug("Handling upload: " + newVersion);
         }
         SyncResult<FileVersion> syncResult = new SyncResult<FileVersion>();
-        FileVersion createdFile = new UploadHelper(driveSession).perform(path, originalFile, newFile, uploadStream, offset, totalLength);
+        File createdFile = new UploadHelper(driveSession).perform(path, originalVersion, newVersion, uploadStream, offset, totalLength);
         if (null != createdFile) {
             /*
              * store checksum
              */
-            driveSession.getChecksumStore().addChecksum(((ServerFileVersion)createdFile).getFile(), newFile.getChecksum());
+            FileChecksum fileChecksum = driveSession.getChecksumStore().insertFileChecksum(createdFile.getFolderId(),
+                createdFile.getId(), createdFile.getVersion(), createdFile.getSequenceNumber(), newVersion.getChecksum());
             /*
              * check if created file still equals uploaded one
              */
-            if (newFile.getName().equals(createdFile.getName())) {
-                syncResult.addActionForClient(new AcknowledgeFileAction(originalFile, createdFile, path));
+            FileVersion createdVersion = new ServerFileVersion(createdFile, fileChecksum);
+            if (newVersion.getName().equals(createdVersion.getName())) {
+                syncResult.addActionForClient(new AcknowledgeFileAction(originalVersion, createdVersion, path));
             } else {
-                syncResult.addActionForClient(new EditFileAction(newFile, createdFile));
+                syncResult.addActionForClient(new EditFileAction(newVersion, createdVersion));
             }
         }
         if (LOG.isDebugEnabled()) {
@@ -222,20 +219,31 @@ public class DriveServiceImpl implements DriveService {
     private static void execute(DriveSession session, DriveAction<DirectoryVersion> action) throws OXException {
         switch (action.getAction()) {
         case EDIT:
+            /*
+             * edit folder name and/or path
+             */
             String folderID = session.getStorage().getFolderID(action.getVersion().getPath());
             String newFolderID = session.getStorage().moveFolder(action.getVersion().getPath(), action.getNewVersion().getPath());
-            session.getChecksumStore().updateFolderIDs(folderID, newFolderID);
+            /*
+             * update stored checksums if needed
+             */
+            if (false == folderID.equals(newFolderID)) {
+                session.getChecksumStore().updateFileChecksumFolders(folderID, newFolderID);
+                session.getChecksumStore().updateDirectoryChecksumFolder(folderID, newFolderID);
+            }
             break;
         case REMOVE:
             if (false == DriveConstants.EMPTY_MD5.equals(action.getVersion().getChecksum())) {
                 // move all files to temp path
+                // TODO: optimize
                 List<ServerFileVersion> serverFileVersions = getServerFiles(session, action.getVersion().getPath());
                 for (ServerFileVersion serverFileVersion : serverFileVersions) {
                     execute(session, action.getVersion().getPath(), new RemoveFileAction(serverFileVersion, action.getVersion().getPath()));
                 }
             }
             // delete empty directory
-            session.getStorage().deleteFolder(action.getVersion().getPath());
+            folderID = session.getStorage().deleteFolder(action.getVersion().getPath());
+            session.getChecksumStore().removeDirectoryChecksum(folderID);
             break;
         default:
             throw new IllegalStateException("Can't perform action " + action + " on server");
@@ -245,45 +253,89 @@ public class DriveServiceImpl implements DriveService {
     private static void execute(DriveSession session, String path, DriveAction<FileVersion> action) throws OXException {
         switch (action.getAction()) {
         case REMOVE:
-            // invalidate checksums
-            ServerFileVersion versionToRemove = (ServerFileVersion)action.getVersion();
-            session.getChecksumStore().removeChecksums(versionToRemove.getFile());
-            // move to trash
+            /*
+             * move to temp folder
+             */
+            ServerFileVersion versionToRemove = ServerFileVersion.valueOf(action.getVersion(), path, session);
+            FileChecksum fileChecksum = versionToRemove.getFileChecksum();
             File removedFile = session.getStorage().moveFile(
-                versionToRemove.getFile(), action.getVersion().getChecksum(), DriveConstants.TEMP_PATH);
-            if (null != removedFile) {
-                if (action.getVersion().getChecksum().equals(removedFile.getFileName())) {
-                    // moved successfully, remember checksum
-                    session.getChecksumStore().addChecksum(removedFile, versionToRemove.getChecksum());
-                } else {
-                    // file already in trash, cleanup
-                    session.getStorage().deleteFile(removedFile);
-                }
+                versionToRemove.getFile(), versionToRemove.getChecksum(), DriveConstants.TEMP_PATH);
+            if (versionToRemove.getChecksum().equals(removedFile.getFileName())) {
+                // moved successfully, update checksum
+                fileChecksum.setFolderID(removedFile.getFolderId());
+                fileChecksum.setFileID(removedFile.getId());
+                fileChecksum.setVersion(removedFile.getVersion());
+                fileChecksum.setSequenceNumber(removedFile.getSequenceNumber());
+                session.getChecksumStore().updateFileChecksum(fileChecksum);
+            } else {
+                // file already in trash, cleanup
+                session.getStorage().deleteFile(removedFile);
+                session.getChecksumStore().removeFileChecksum(fileChecksum);
             }
-
-//            File removedFile = session.getStorage().deleteFile(file.getFile(), false);
-            //TODO check possible edit-delete conflicts
             break;
         case DOWNLOAD:
-            // copy file
-            File sourceFile = ((ServerFileVersion)action.getParameters().get("sourceVersion")).getFile();
-            File targetFile = null != action.getVersion() ? session.getStorage().findFileByNameAndChecksum(
-                path, action.getVersion().getName(), action.getVersion().getChecksum()) : null;
-            File copiedFile;
-            if (null != targetFile) {
-                session.getChecksumStore().removeChecksums(targetFile);
-                copiedFile = session.getStorage().copyFile(sourceFile, targetFile);
-            } else {
-                copiedFile = session.getStorage().copyFile(sourceFile, action.getNewVersion().getName(), path);
+            /*
+             * check source and target files
+             */
+            ServerFileVersion sourceVersion = (ServerFileVersion)action.getParameters().get("sourceVersion");
+            File sourceFile = sourceVersion.getFile();
+            boolean isFromTemp = sourceFile.getFolderId().equals(session.getStorage().getFolderID(DriveConstants.TEMP_PATH));
+            File targetFile = null;
+            if (null != action.getVersion()) {
+                File file = session.getStorage().findFileByName(path, action.getVersion().getName());
+                if (null != file && ChecksumProvider.matches(session, file, action.getVersion().getChecksum())) {
+                    targetFile = file;
+                }
             }
-            session.getChecksumStore().addChecksum(copiedFile, action.getNewVersion().getChecksum());
+            /*
+             * invalidate target file checksum
+             */
+            if (null != targetFile) {
+                session.getChecksumStore().removeFileChecksum(
+                    targetFile.getFolderId(), targetFile.getId(), targetFile.getVersion(), targetFile.getSequenceNumber());
+            }
+            if (isFromTemp) {
+                /*
+                 * move file, update stored checksum
+                 */
+                File movedFile = null != targetFile ? session.getStorage().moveFile(sourceFile, targetFile) :
+                    session.getStorage().moveFile(sourceFile, action.getNewVersion().getName(), path);
+                fileChecksum = sourceVersion.getFileChecksum();
+                fileChecksum.setFolderID(movedFile.getFolderId());
+                fileChecksum.setFileID(movedFile.getId());
+                fileChecksum.setVersion(movedFile.getVersion());
+                fileChecksum.setSequenceNumber(movedFile.getSequenceNumber());
+                session.getChecksumStore().updateFileChecksum(fileChecksum);
+            } else {
+                /*
+                 * copy file, store checksum
+                 */
+                File copiedFile = null != targetFile ? session.getStorage().copyFile(sourceFile, targetFile) :
+                    session.getStorage().copyFile(sourceFile, action.getNewVersion().getName(), path);
+                session.getChecksumStore().insertFileChecksum(copiedFile.getFolderId(), copiedFile.getId(), copiedFile.getVersion(),
+                    copiedFile.getSequenceNumber(), sourceVersion.getChecksum());
+            }
             break;
         case EDIT:
-            // edit file
-            File originalFile = ((ServerFileVersion)action.getVersion()).getFile();
-            session.getChecksumStore().removeChecksums(originalFile);
-            File renamedFile = session.getStorage().renameFile(originalFile, action.getNewVersion().getName());
-            session.getChecksumStore().addChecksum(renamedFile, action.getNewVersion().getChecksum());
+            /*
+             * rename file, update checksum
+             */
+            ServerFileVersion targetVersion = null != action.getParameters().get("targetVersion") ?
+                ServerFileVersion.valueOf((FileVersion)action.getParameters().get("targetVersion"), path, session) : null;
+            ServerFileVersion originalVersion = ServerFileVersion.valueOf(action.getVersion(), path, session);
+            fileChecksum = originalVersion.getFileChecksum();
+            File renamedFile;
+            if (null != targetVersion) {
+                session.getChecksumStore().removeFileChecksum(targetVersion.getFileChecksum());
+                renamedFile = session.getStorage().moveFile(originalVersion.getFile(), targetVersion.getFile());
+            } else {
+                renamedFile = session.getStorage().renameFile(originalVersion.getFile(), action.getNewVersion().getName());
+            }
+            fileChecksum.setFolderID(renamedFile.getFolderId());
+            fileChecksum.setFileID(renamedFile.getId());
+            fileChecksum.setVersion(renamedFile.getVersion());
+            fileChecksum.setSequenceNumber(renamedFile.getSequenceNumber());
+            session.getChecksumStore().updateFileChecksum(fileChecksum);
             break;
         default:
             throw new IllegalStateException("Can't perform action " + action + " on server");
@@ -291,108 +343,28 @@ public class DriveServiceImpl implements DriveService {
     }
 
     private static List<ServerFileVersion> getServerFiles(DriveSession session, String path) throws OXException {
-        List<File> files = session.getStorage().getFiles(path, new FileFilter() {
-            @Override
-            public boolean accept(File file) throws OXException {
-                return null != file && false == Strings.isEmpty(file.getFileName());
-            }
-        });
-
-        List<ServerFileVersion> serverFiles = new ArrayList<ServerFileVersion>();
-        for (File file : files) {
-            serverFiles.add(getServerFile(file, session));
+        String folderID = session.getStorage().getFolderID(path);
+        List<File> files = session.getStorage().getFilesInFolder(folderID);
+        List<FileChecksum> checksums = ChecksumProvider.getChecksums(session, folderID, files);
+        List<ServerFileVersion> serverFiles = new ArrayList<ServerFileVersion>(files.size());
+        for (int i = 0; i < files.size(); i++) {
+            serverFiles.add(new ServerFileVersion(files.get(i), checksums.get(i)));
         }
         return serverFiles;
     }
 
-    private static ServerFileVersion getServerFile(File file, DriveSession session) throws OXException {
-        return new ServerFileVersion(file, session.getChecksumStore().getChecksum(file));
-    }
-
     private static List<ServerDirectoryVersion> getServerDirectories(DriveSession session) throws OXException {
-        List<ServerDirectoryVersion> directories = new ArrayList<ServerDirectoryVersion>();
         Map<String, FileStorageFolder> folders = session.getStorage().getFolders();
-        for (Map.Entry<String, FileStorageFolder> folder : folders.entrySet()) {
-            if (session.getStorage().supportsFolderSequenceNumbers()) {
-                /*
-                 * try to use already known checksum if possible
-                 */
-                Entry<String, Long> knownChecksum = session.getChecksumStore().getFolder(folder.getValue().getId());
-                if (null != knownChecksum) {
-                    long lastSequenceNumber = knownChecksum.getValue().longValue();
-                    if (false == session.getStorage().hasChangedSince(folder.getKey(), lastSequenceNumber)) {
-                        LOG.debug("No changes detected since last calculated checksum for directory " + folder.getKey());
-                        directories.add(new ServerDirectoryVersion(folder.getKey(), knownChecksum.getKey()));
-                        continue;
-                    } else {
-                        LOG.debug("Changes detected since last calculated checksum for directory " + folder.getKey() + " ");
-                        session.getChecksumStore().removeFolder(folder.getValue().getId());
-                    }
-                }
-            }
-            /*
-             * calculate checksum
-             */
-            directories.add(getServerDirectory(folder.getKey(), session));
+        List<String> folderIDs = new ArrayList<String>(folders.size());
+        for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
+            folderIDs.add(entry.getValue().getId());
         }
-        return directories;
-    }
-
-    private static Set<DirectoryFragment> getDirectoryFragments(String path, DriveSession session) throws OXException {
-        List<File> files = session.getStorage().getFiles(path, new FileFilter() {
-
-            @Override
-            public boolean accept(File file) throws OXException {
-                return null != file && false == Strings.isEmpty(file.getFileName());
-            }
-        });
-        if (null == files || 0 == files.size()) {
-            return Collections.emptySet();
+        List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(session, folderIDs);
+        List<ServerDirectoryVersion> serverDirectories = new ArrayList<ServerDirectoryVersion>(folderIDs.size());
+        for (int i = 0; i < folderIDs.size(); i++) {
+            serverDirectories.add(new ServerDirectoryVersion(session.getStorage().getPath(folderIDs.get(i)), checksums.get(i)));
         }
-        TreeSet<DirectoryFragment> fragments = new TreeSet<DirectoryFragment>();
-        String folderID = session.getStorage().getFolderID(path);
-        Map<File, String> knownChecksums = session.getChecksumStore().getFilesInFolder(folderID);
-        for (File file : files) {
-            if (null != file.getFileName()) {
-                String knownChecksum = null;
-                for (Entry<File, String> entry : knownChecksums.entrySet()) {
-                    if (entry.getKey().getId().equals(file.getId()) && entry.getKey().getSequenceNumber() == file.getSequenceNumber() &&
-                        entry.getKey().getVersion().equals(file.getVersion())) {
-                        knownChecksum = entry.getValue();
-                        break;
-                    }
-                }
-                if (null != knownChecksum) {
-                    fragments.add(new DirectoryFragment(file, knownChecksum));
-                } else {
-                    fragments.add(new DirectoryFragment(file, session.getChecksumStore().getChecksum(file)));
-                }
-            }
-        }
-        return fragments;
-    }
-
-    private static ServerDirectoryVersion getServerDirectory(String path, DriveSession session) throws OXException {
-        long sequenceNumber = session.getStorage().getFolder(path).getLastModifiedDate().getTime();
-        Set<DirectoryFragment> fragments = getDirectoryFragments(path, session);
-        ServerDirectoryVersion directoryVersion;
-        if (null == fragments || 0 == fragments.size()) {
-            directoryVersion = new ServerDirectoryVersion(path, DriveConstants.EMPTY_MD5);
-        } else {
-            MD md5 = session.newMD5();
-            for (DirectoryFragment directoryFragment : fragments) {
-                md5.update(directoryFragment.getEncodedFileName());
-                md5.update(directoryFragment.getEncodedChecksum());
-                if (sequenceNumber < directoryFragment.getFile().getSequenceNumber()) {
-                    sequenceNumber = directoryFragment.getFile().getSequenceNumber();
-                }
-            }
-            directoryVersion = new ServerDirectoryVersion(path, md5.getFormattedValue());
-        }
-        if (session.getStorage().supportsFolderSequenceNumbers()) {
-            session.getChecksumStore().addFolder(session.getStorage().getFolderID(path), sequenceNumber, directoryVersion.getChecksum());
-        }
-        return directoryVersion;
+        return serverDirectories;
     }
 
     private static DriveSession createSession(ServerSession session, String rootFolderID) {

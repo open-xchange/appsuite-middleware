@@ -52,12 +52,12 @@ package com.openexchange.drive.sync.optimize;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import org.apache.commons.logging.Log;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.actions.AcknowledgeFileAction;
 import com.openexchange.drive.actions.Action;
 import com.openexchange.drive.actions.DownloadFileAction;
 import com.openexchange.drive.actions.DriveAction;
+import com.openexchange.drive.checksum.FileChecksum;
 import com.openexchange.drive.comparison.ServerFileVersion;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
@@ -71,15 +71,10 @@ import com.openexchange.file.storage.File;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class FileCopyOptimizer implements ActionOptimizer<FileVersion> {
-
-    private static final Log LOG = com.openexchange.log.Log.loggerFor(FileCopyOptimizer.class);
-
-    private final VersionMapper<FileVersion> mapper;
+public class FileCopyOptimizer extends FileActionOptimizer {
 
     public FileCopyOptimizer(VersionMapper<FileVersion> mapper) {
-        super();
-        this.mapper = mapper;
+        super(mapper);
     }
 
     @Override
@@ -129,24 +124,21 @@ public class FileCopyOptimizer implements ActionOptimizer<FileVersion> {
          * check files known by checksum store
          */
         try {
-            Collection<File> files = session.getChecksumStore().getFiles(checksum);
-            if (null != files && 0 < files.size()) {
-                for (File file : files) {
-                    File storageFile = null;
-                    try {
-                        storageFile = session.getStorage().getFile(
-                            session.getStorage().getPath(file.getFolderId()), file.getId(), file.getVersion());
-                    } catch (OXException e) {
-                        LOG.debug("Error accessing file referenced by checksum store", e);
-                    }
-                    if (null == storageFile || storageFile.getSequenceNumber() != file.getSequenceNumber() ||
-                        false == storageFile.getVersion().equals(file.getVersion())) {
-                        LOG.debug("Invalidating stored checksum for file " + file);
-                        session.getChecksumStore().removeChecksums(file);
-                    } else {
-                        LOG.debug("Found matching file in storage for stored checksum: " + storageFile);
-                        return new ServerFileVersion(storageFile, checksum);
-                    }
+            List<FileChecksum> fileChecksums = session.getChecksumStore().getMatchingFileChecksums(checksum);
+            for (FileChecksum fileChecksum : fileChecksums) {
+                File storageFile = null;
+                try {
+                    String path = session.getStorage().getPath(fileChecksum.getFolderID());
+                    storageFile = session.getStorage().getFile(path, fileChecksum.getFileID(), fileChecksum.getVersion());
+                } catch (OXException e) {
+                    LOG.debug("Error accessing file referenced by checksum store", e);
+                }
+                if (null == storageFile || storageFile.getSequenceNumber() != fileChecksum.getSequenceNumber()) {
+                    LOG.debug("Invalidating stored file checksum: " + fileChecksum);
+                    session.getChecksumStore().removeFileChecksum(fileChecksum);
+                } else {
+                    LOG.debug("Found matching file in storage for stored checksum: " + storageFile);
+                    return new ServerFileVersion(storageFile, fileChecksum);
                 }
             }
         } catch (OXException e) {

@@ -192,7 +192,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
         };
     }
 
-    protected static String findAlternativeName(String conflictingName, Set<String> usedFilenames) {
+    public static String findAlternativeName(String conflictingName, Set<String> usedFilenames) {
         int extensionIndex = conflictingName.lastIndexOf('.');
         String fileName, fileExtension;
         if (-1 == extensionIndex) {
@@ -221,7 +221,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 } catch (NumberFormatException e) {
                     // should not get here
                 }
-                fileName = fileName.substring(0, matcher.start()) + '(' + String.valueOf(number) + ')';
+                fileName = fileName.substring(0, matcher.start()) + '(' + String.valueOf(1 + number) + ')';
             }
             alternativeName = fileName + fileExtension;
         } while (usedFilenames.contains(alternativeName));

@@ -47,34 +47,47 @@
  *
  */
 
-package com.openexchange.drive.sync.optimize;
+package com.openexchange.drive.checksum;
 
-import com.openexchange.drive.FileVersion;
-import com.openexchange.drive.comparison.VersionMapper;
-import com.openexchange.drive.internal.DriveSession;
-import com.openexchange.drive.sync.FileSynchronizer;
-import com.openexchange.drive.sync.SyncResult;
+import java.util.List;
 import com.openexchange.exception.OXException;
 
-
 /**
- * {@link OptimizingFileSynchronizer}
+ * {@link FileChecksumStore}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class OptimizingFileSynchronizer extends FileSynchronizer {
+public interface FileChecksumStore {
 
-    public OptimizingFileSynchronizer(DriveSession session, VersionMapper<FileVersion> mapper, String path) throws OXException {
-        super(session, mapper, path);
-    }
 
-    @Override
-    public SyncResult<FileVersion> sync() throws OXException {
-        SyncResult<FileVersion> result = super.sync();
-        result = new FileRenameOptimizer(mapper).optimize(session, result);
-        result = new FileCopyOptimizer(mapper).optimize(session, result);
-        result = new FileOrderOptimizer(mapper).optimize(session, result);
-        return result;
-    }
+    FileChecksum insertFileChecksum(String folderID, String fileID, String version, long sequenceNumber, String checksum) throws OXException;
+
+    FileChecksum insertFileChecksum(FileChecksum fileChecksum) throws OXException;
+
+    List<FileChecksum> insertFileChecksums(List<FileChecksum> fileChecksums) throws OXException;
+
+
+    FileChecksum updateFileChecksum(FileChecksum fileChecksum) throws OXException;
+
+    List<FileChecksum> updateFileChecksums(List<FileChecksum> fileChecksums) throws OXException;
+
+    int updateFileChecksumFolders(String folderID, String newFolderID) throws OXException;
+
+
+    boolean removeFileChecksum(FileChecksum fileChecksum) throws OXException;
+
+    boolean removeFileChecksum(String folderID, String fileID, String version, long sequenceNumber) throws OXException;
+
+    int removeFileChecksums(List<FileChecksum> fileChecksums) throws OXException;
+
+    int removeFileChecksumsInFolder(String folderID) throws OXException;
+
+
+    FileChecksum getFileChecksum(String folderID, String fileID, String version, long sequenceNumber) throws OXException;
+
+    List<FileChecksum> getFileChecksums(String folderID) throws OXException;
+
+    List<FileChecksum> getMatchingFileChecksums(String checksum) throws OXException;
 
 }
+

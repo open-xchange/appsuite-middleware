@@ -49,100 +49,96 @@
 
 package com.openexchange.drive.checksum;
 
-import java.util.Arrays;
-import com.openexchange.file.storage.File;
-import com.openexchange.java.Charsets;
 
 /**
- * {@link DirectoryFragment}
+ * {@link StoredChecksum}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DirectoryFragment implements Comparable<DirectoryFragment> {
+public abstract class StoredChecksum {
 
-    private final byte[] encodedFileName;
-    private final byte[] encodedChecksum;
-    private final File file;
+    protected String uuid;
+    protected String checksum;
+    protected String folderID;
+    protected long sequenceNumber;
 
-    public DirectoryFragment(File file, String checksum) {
+    /**
+     * Initializes a new {@link StoredChecksum}.
+     */
+    public StoredChecksum() {
         super();
-        this.file = file;
-        this.encodedFileName = file.getFileName().getBytes(Charsets.UTF_8);
-        this.encodedChecksum = checksum.getBytes(Charsets.UTF_8);
-    }
-
-    @Override
-    public int compareTo(DirectoryFragment other) {
-        int minLength = Math.min(encodedFileName.length, other.encodedFileName.length);
-        for (int i = 0; i < minLength; i++) {
-            int result = encodedFileName[i] - other.encodedFileName[i];
-            if (result != 0) {
-                return result;
-            }
-        }
-        return encodedFileName.length - other.encodedFileName.length;
     }
 
     /**
-     * Gets the encoded checksum
+     * Gets the checksum
      *
-     * @return The encoded checksum
+     * @return The checksum
      */
-    public byte[] getEncodedChecksum() {
-        return encodedChecksum;
+    public String getChecksum() {
+        return checksum;
     }
 
     /**
-     * Gets the encoded file name
+     * Sets the checksum
      *
-     * @return The encoded file name
+     * @param checksum The checksum to set
      */
-    public byte[] getEncodedFileName() {
-        return encodedFileName;
+    public void setChecksum(String checksum) {
+        this.checksum = checksum;
     }
 
     /**
-     * Gets the file
+     * Gets the folderID
      *
-     * @return The file
+     * @return The folderID
      */
-    public File getFile() {
-        return file;
+    public String getFolderID() {
+        return folderID;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + Arrays.hashCode(encodedChecksum);
-        result = prime * result + Arrays.hashCode(encodedFileName);
-        return result;
+    /**
+     * Sets the folderID
+     *
+     * @param folderID The folderID to set
+     */
+    public void setFolderID(String folderID) {
+        this.folderID = folderID;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof DirectoryFragment)) {
-            return false;
-        }
-        DirectoryFragment other = (DirectoryFragment) obj;
-        if (!Arrays.equals(encodedChecksum, other.encodedChecksum)) {
-            return false;
-        }
-        if (!Arrays.equals(encodedFileName, other.encodedFileName)) {
-            return false;
-        }
-        return true;
+    /**
+     * Gets the sequenceNumber
+     *
+     * @return The sequenceNumber
+     */
+    public long getSequenceNumber() {
+        return sequenceNumber;
     }
 
-    @Override
-    public String toString() {
-        return new String(encodedFileName, Charsets.UTF_8) + " - " + new String(encodedChecksum, Charsets.UTF_8);
+    /**
+     * Sets the sequenceNumber
+     *
+     * @param sequenceNumber The sequenceNumber to set
+     */
+    public void setSequenceNumber(long sequenceNumber) {
+        this.sequenceNumber = sequenceNumber;
+    }
+
+    /**
+     * Gets the uuid
+     *
+     * @return The uuid
+     */
+    public String getUuid() {
+        return uuid;
+    }
+
+    /**
+     * Sets the uuid
+     *
+     * @param uid The uuid to set
+     */
+    public void setUuid(String uid) {
+        this.uuid = uid;
     }
 
 }

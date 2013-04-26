@@ -49,7 +49,12 @@
 
 package com.openexchange.drive.comparison;
 
+import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.checksum.ChecksumProvider;
+import com.openexchange.drive.checksum.FileChecksum;
+import com.openexchange.drive.internal.DriveSession;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 
 
@@ -63,10 +68,16 @@ import com.openexchange.file.storage.File;
  */
 public class ServerFileVersion implements FileVersion {
 
-    private final String checksum;
     private final File file;
+    private final FileChecksum checksum;
 
-    public ServerFileVersion(File file, String checksum) {
+    /**
+     * Initializes a new {@link ServerFileVersion}.
+     *
+     * @param file The file
+     * @param checksum The checksum
+     */
+    public ServerFileVersion(File file, FileChecksum checksum) {
         super();
         this.checksum = checksum;
         this.file = file;
@@ -74,7 +85,7 @@ public class ServerFileVersion implements FileVersion {
 
     @Override
     public String getChecksum() {
-        return checksum;
+        return checksum.getChecksum();
     }
 
     @Override
@@ -82,13 +93,50 @@ public class ServerFileVersion implements FileVersion {
         return file.getFileName();
     }
 
+    /**
+     * Gets the file
+     *
+     * @return The file
+     */
     public File getFile() {
         return file;
     }
 
+    /**
+     * Gets the file checksum
+     *
+     * @return The file checksum
+     */
+    public FileChecksum getFileChecksum() {
+        return checksum;
+    }
+
     @Override
     public String toString() {
-        return "ServerFileVersion [checksum=" + checksum + ", name=" + getName() + "]";
+        return getName() + " | " + getChecksum() + " [" + file.getFolderId() + '/' + file.getId() + ']';
+    }
+
+    /**
+     * Gets the matching server file version to the supplied file version, throwing an exception if it not exists.
+     *
+     * @param fileVersion The file version to match
+     * @param path The path the file version is located in
+     * @param session The drive session
+     * @return The matching server file version, never <code>null</code>
+     * @throws OXException If the file version not exists
+     */
+    public static ServerFileVersion valueOf(FileVersion fileVersion, String path, DriveSession session) throws OXException {
+        if (ServerFileVersion.class.isInstance(fileVersion)) {
+            return (ServerFileVersion)fileVersion;
+        }
+        File file = session.getStorage().findFileByName(path, fileVersion.getName());
+        if (null != file) {
+            FileChecksum fileChecksum = ChecksumProvider.getChecksum(session, file);
+            if (fileVersion.getChecksum().equals(fileChecksum.getChecksum())) {
+                return new ServerFileVersion(file, fileChecksum);
+            }
+        }
+        throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(fileVersion.getName(), fileVersion.getChecksum(), path);
     }
 
 }

@@ -47,34 +47,83 @@
  *
  */
 
-package com.openexchange.drive.sync.optimize;
+package com.openexchange.drive.checksum;
 
-import com.openexchange.drive.FileVersion;
-import com.openexchange.drive.comparison.VersionMapper;
-import com.openexchange.drive.internal.DriveSession;
-import com.openexchange.drive.sync.FileSynchronizer;
-import com.openexchange.drive.sync.SyncResult;
-import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
 
 
 /**
- * {@link OptimizingFileSynchronizer}
+ * {@link FileChecksum}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class OptimizingFileSynchronizer extends FileSynchronizer {
+public class FileChecksum extends StoredChecksum {
 
-    public OptimizingFileSynchronizer(DriveSession session, VersionMapper<FileVersion> mapper, String path) throws OXException {
-        super(session, mapper, path);
+    private String fileID;
+    private String version;
+
+    /**
+     * Initializes a new {@link FileChecksum}.
+     */
+    public FileChecksum() {
+        super();
+    }
+
+    /**
+     * Gets the fileID
+     *
+     * @return The fileID
+     */
+    public String getFileID() {
+        return fileID;
+    }
+
+    /**
+     * Sets the fileID
+     *
+     * @param fileID The fileID to set
+     */
+    public void setFileID(String fileID) {
+        this.fileID = fileID;
+    }
+
+    /**
+     * Gets the version
+     *
+     * @return The version
+     */
+    public String getVersion() {
+        return version;
+    }
+
+    /**
+     * Sets the version
+     *
+     * @param version The version to set
+     */
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    /**
+     * Gets a value indicating whether this stored checksum matches the supplied file.
+     *
+     * @param file The file to check
+     * @return <code>true</code> if the file matches, i.e. the file's ID, folder ID, version and sequence number equals the stored
+     *         checksum's equivalents, <code>false</code>, otherwise
+     */
+    public boolean matches(File file) {
+        return null != file &&
+            null == this.fileID ? null == file.getId() : this.fileID.equals(file.getId()) &&
+            null == this.folderID ? null == file.getFolderId() : this.folderID.equals(file.getFolderId()) &&
+            null == this.version ? null == file.getVersion() : this.version.equals(file.getVersion()) &&
+            this.sequenceNumber == file.getSequenceNumber()
+        ;
     }
 
     @Override
-    public SyncResult<FileVersion> sync() throws OXException {
-        SyncResult<FileVersion> result = super.sync();
-        result = new FileRenameOptimizer(mapper).optimize(session, result);
-        result = new FileCopyOptimizer(mapper).optimize(session, result);
-        result = new FileOrderOptimizer(mapper).optimize(session, result);
-        return result;
+    public String toString() {
+        return getFolderID() + " | " + getFileID() + " | " + getVersion() + " | " + getChecksum() + " | " + getSequenceNumber();
     }
 
 }

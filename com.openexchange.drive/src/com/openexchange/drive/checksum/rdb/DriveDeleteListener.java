@@ -69,19 +69,31 @@ public class DriveDeleteListener implements DeleteListener {
     public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
         if (DeleteEvent.TYPE_CONTEXT == event.getType()) {
             try {
-                deleteChecksums(writeCon, event.getContext().getContextId());
-            } catch (final SQLException e) {
+                deleteFileChecksums(writeCon, event.getContext().getContextId());
+                deleteDirectoryChecksums(writeCon, event.getContext().getContextId());
+            } catch (SQLException e) {
                 throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
             }
         }
     }
 
-    private static int deleteChecksums(Connection connection, int cid) throws SQLException {
+    private static int deleteFileChecksums(Connection connection, int cid) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement("DELETE FROM checksums WHERE cid=?;");
+            stmt = connection.prepareStatement("DELETE FROM fileChecksums WHERE cid=?;");
+            stmt.setInt(1, cid);
+            return SQL.logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private static int deleteDirectoryChecksums(Connection connection, int cid) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement("DELETE FROM directoryChecksums WHERE cid=?;");
             stmt.setInt(1, cid);
             return SQL.logExecuteUpdate(stmt);
         } finally {

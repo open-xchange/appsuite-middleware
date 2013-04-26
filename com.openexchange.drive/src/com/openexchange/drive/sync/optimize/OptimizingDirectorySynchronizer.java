@@ -73,7 +73,7 @@ public class OptimizingDirectorySynchronizer extends DirectorySynchronizer {
         SyncResult<DirectoryVersion> result = super.sync();
         if (false == result.isEmpty()) {
             result = new DirectoryRenameOptimizer().optimize(session, result);
-            result = new DirectoryActionOrderOptimizer().optimize(session, result);
+            result = new DirectoryOrderOptimizer().optimize(session, result);
         }
         return result;
     }

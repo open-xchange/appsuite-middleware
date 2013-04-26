@@ -50,6 +50,7 @@
 package com.openexchange.drive.comparison;
 
 import com.openexchange.drive.DirectoryVersion;
+import com.openexchange.drive.checksum.DirectoryChecksum;
 
 
 /**
@@ -62,12 +63,10 @@ import com.openexchange.drive.DirectoryVersion;
  */
 public class ServerDirectoryVersion implements DirectoryVersion {
 
-    public static final String ROOT_PATH = "/";
-
-    private final String checksum;
     private final String path;
+    private final DirectoryChecksum checksum;
 
-    public ServerDirectoryVersion(String path, String checksum) {
+    public ServerDirectoryVersion(String path, DirectoryChecksum checksum) {
         super();
         this.path = path;
         this.checksum = checksum;
@@ -75,7 +74,7 @@ public class ServerDirectoryVersion implements DirectoryVersion {
 
     @Override
     public String getChecksum() {
-        return checksum;
+        return checksum.getChecksum();
     }
 
     @Override
@@ -83,9 +82,18 @@ public class ServerDirectoryVersion implements DirectoryVersion {
         return path;
     }
 
+    /**
+     * Gets the directory checksum
+     *
+     * @return The directory checksum
+     */
+    public DirectoryChecksum getDirectoryChecksum() {
+        return checksum;
+    }
+
     @Override
     public String toString() {
-        return "ServerDirectoryVersion [checksum=" + checksum + ", path=" + path + "]";
+        return getPath() + " | " + getChecksum() + " [" + getDirectoryChecksum().getFolderID() + ']';
     }
 
 }

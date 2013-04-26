@@ -53,7 +53,6 @@ import java.security.NoSuchAlgorithmException;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.checksum.ChecksumStore;
-import com.openexchange.drive.checksum.rdb.OnDemandCalculatingChecksumStore;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.drive.storage.DriveStorage;
 import com.openexchange.exception.OXException;
@@ -112,9 +111,14 @@ public class DriveSession {
      */
     public ChecksumStore getChecksumStore() throws OXException {
         if (null == checksumStore) {
-            RdbChecksumStore delegate = new RdbChecksumStore(getServerSession(),
+            checksumStore = new RdbChecksumStore(getServerSession().getContextId(),
                 getStorage().getAccountAccess().getService().getId(), getStorage().getAccountAccess().getAccountId());
-            checksumStore = new OnDemandCalculatingChecksumStore(delegate, getStorage());
+
+
+
+//            RdbChecksumStore delegate = new RdbChecksumStore(getServerSession(),
+//                getStorage().getAccountAccess().getService().getId(), getStorage().getAccountAccess().getAccountId());
+//            checksumStore = new OnDemandCalculatingChecksumStore(delegate, getStorage());
 //            checksumStore = new SimChecksumStore();
         }
         return checksumStore;

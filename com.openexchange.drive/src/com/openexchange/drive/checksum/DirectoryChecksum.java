@@ -47,34 +47,33 @@
  *
  */
 
-package com.openexchange.drive.sync.optimize;
-
-import com.openexchange.drive.FileVersion;
-import com.openexchange.drive.comparison.VersionMapper;
-import com.openexchange.drive.internal.DriveSession;
-import com.openexchange.drive.sync.FileSynchronizer;
-import com.openexchange.drive.sync.SyncResult;
-import com.openexchange.exception.OXException;
+package com.openexchange.drive.checksum;
 
 
 /**
- * {@link OptimizingFileSynchronizer}
+ * {@link DirectoryChecksum}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class OptimizingFileSynchronizer extends FileSynchronizer {
+public class DirectoryChecksum extends StoredChecksum {
 
-    public OptimizingFileSynchronizer(DriveSession session, VersionMapper<FileVersion> mapper, String path) throws OXException {
-        super(session, mapper, path);
+    /**
+     * Initializes a new {@link DirectoryChecksum}.
+     */
+    public DirectoryChecksum() {
+        super();
+    }
+
+    public DirectoryChecksum(String folderID, long sequenceNumber, String checksum) {
+        super();
+        this.folderID = folderID;
+        this.sequenceNumber = sequenceNumber;
+        this.checksum = checksum;
     }
 
     @Override
-    public SyncResult<FileVersion> sync() throws OXException {
-        SyncResult<FileVersion> result = super.sync();
-        result = new FileRenameOptimizer(mapper).optimize(session, result);
-        result = new FileCopyOptimizer(mapper).optimize(session, result);
-        result = new FileOrderOptimizer(mapper).optimize(session, result);
-        return result;
+    public String toString() {
+        return getFolderID() + " | " + getChecksum() + " | " + getSequenceNumber();
     }
 
 }

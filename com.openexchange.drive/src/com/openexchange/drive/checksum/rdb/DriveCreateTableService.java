@@ -71,7 +71,7 @@ public class DriveCreateTableService extends AbstractCreateTableImpl {
      * @return The table names.
      */
     public static String[] getTablesToCreate() {
-        return new String[] { "checksums" };
+        return new String[] { "fileChecksums", "directoryChecksums" };
     }
 
     /**
@@ -80,20 +80,7 @@ public class DriveCreateTableService extends AbstractCreateTableImpl {
      * @return The CREATE statements
      */
     public static String[] getCreateStmts() {
-        String createChecksumsStmt =
-            "CREATE TABLE checksums (" +
-                "uuid BINARY(16) NOT NULL," +
-                "cid INT4 UNSIGNED NOT NULL," +
-                "service VARCHAR(255) NOT NULL," +
-                "account VARCHAR(255) NOT NULL," +
-                "folder VARCHAR(255) NOT NULL," +
-                "file VARCHAR(255) NOT NULL," +
-                "version VARCHAR(255)," +
-                "sequence BIGINT(20) NOT NULL," +
-                "checksum BINARY(16) NOT NULL," +
-                "PRIMARY KEY  (`uuid`)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-        return new String[] { createChecksumsStmt };
+        return new String[] { SQL.getCreateFileChecksumsTableStmt(), SQL.getCreateDirectoryChecksumsTableStmt() };
     }
 
     @Override

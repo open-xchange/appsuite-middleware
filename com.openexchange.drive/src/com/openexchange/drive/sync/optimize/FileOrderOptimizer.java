@@ -49,32 +49,38 @@
 
 package com.openexchange.drive.sync.optimize;
 
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.actions.DriveAction;
 import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
-import com.openexchange.drive.sync.FileSynchronizer;
 import com.openexchange.drive.sync.SyncResult;
-import com.openexchange.exception.OXException;
 
 
 /**
- * {@link OptimizingFileSynchronizer}
+ * {@link FileOrderOptimizer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class OptimizingFileSynchronizer extends FileSynchronizer {
+public class FileOrderOptimizer extends FileActionOptimizer {
 
-    public OptimizingFileSynchronizer(DriveSession session, VersionMapper<FileVersion> mapper, String path) throws OXException {
-        super(session, mapper, path);
+    /**
+     * Initializes a new {@link FileOrderOptimizer}.
+     *
+     * @param mapper The file version mapper
+     */
+    public FileOrderOptimizer(VersionMapper<FileVersion> mapper) {
+        super(mapper);
     }
 
     @Override
-    public SyncResult<FileVersion> sync() throws OXException {
-        SyncResult<FileVersion> result = super.sync();
-        result = new FileRenameOptimizer(mapper).optimize(session, result);
-        result = new FileCopyOptimizer(mapper).optimize(session, result);
-        result = new FileOrderOptimizer(mapper).optimize(session, result);
-        return result;
+    public SyncResult<FileVersion> optimize(DriveSession session, SyncResult<FileVersion> result) {
+        List<DriveAction<FileVersion>> actionsForClient = result.getActionsForClient();
+        Collections.sort(actionsForClient);
+        List<DriveAction<FileVersion>> actionsForServer = result.getActionsForServer();
+        Collections.sort(actionsForServer);
+        return new SyncResult<FileVersion>(actionsForServer, actionsForClient);
     }
 
 }

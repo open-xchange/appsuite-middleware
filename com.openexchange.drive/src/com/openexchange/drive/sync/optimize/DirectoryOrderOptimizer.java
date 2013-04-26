@@ -65,11 +65,11 @@ import com.openexchange.drive.sync.SyncResult;
 
 
 /**
- * {@link DirectoryActionOrderOptimizer}
+ * {@link DirectoryOrderOptimizer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DirectoryActionOrderOptimizer extends OrderOptimizer<DirectoryVersion> {
+public class DirectoryOrderOptimizer extends OrderOptimizer<DirectoryVersion> {
 
     @Override
     public SyncResult<DirectoryVersion> optimize(DriveSession session, SyncResult<DirectoryVersion> result) {
@@ -104,7 +104,8 @@ public class DirectoryActionOrderOptimizer extends OrderOptimizer<DirectoryVersi
                 for (Entry<String, String> renamedPath : renamedPaths.entrySet()) {
                     if (action.getVersion().getPath().startsWith(renamedPath.getKey())) {
                         String newOldPath = renamedPath.getValue() + action.getVersion().getPath().substring(renamedPath.getKey().length());
-                        DirectoryVersion modifiedOldVersion = new ServerDirectoryVersion(newOldPath, action.getVersion().getChecksum());
+                        DirectoryVersion modifiedOldVersion = new ServerDirectoryVersion(
+                            newOldPath, ((ServerDirectoryVersion)action.getVersion()).getDirectoryChecksum());
                         action = new EditDirectoryAction(modifiedOldVersion, action.getNewVersion());
                         break;
                     }

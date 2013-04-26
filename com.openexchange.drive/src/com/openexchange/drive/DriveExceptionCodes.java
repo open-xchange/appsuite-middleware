@@ -80,7 +80,7 @@ public enum DriveExceptionCodes implements OXExceptionCode {
     DB_ERROR(DriveExceptionMessages.DB_ERROR_MSG, Category.CATEGORY_ERROR, 6),
 
     /** The file \"%1$s\" with checksum \"%2$s\" was not found at \"%3$s\" */
-    FILEVERSION_NOT_FOUND(DriveExceptionMessages.FILE_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 7),
+    FILEVERSION_NOT_FOUND(DriveExceptionMessages.FILEVERSION_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 7),
 
     /** No checksum for file \"%1$s\" available */
     NO_CHECKSUM_FOR_FILE(DriveExceptionMessages.NO_CHECKSUM_FOR_FILE_MSG, Category.CATEGORY_ERROR, 8),

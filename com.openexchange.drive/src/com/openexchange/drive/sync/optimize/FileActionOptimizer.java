@@ -49,32 +49,77 @@
 
 package com.openexchange.drive.sync.optimize;
 
+import org.apache.commons.logging.Log;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.comparison.VersionMapper;
-import com.openexchange.drive.internal.DriveSession;
-import com.openexchange.drive.sync.FileSynchronizer;
-import com.openexchange.drive.sync.SyncResult;
-import com.openexchange.exception.OXException;
 
 
 /**
- * {@link OptimizingFileSynchronizer}
+ * {@link FileActionOptimizer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class OptimizingFileSynchronizer extends FileSynchronizer {
+public abstract class FileActionOptimizer implements ActionOptimizer<FileVersion> {
 
-    public OptimizingFileSynchronizer(DriveSession session, VersionMapper<FileVersion> mapper, String path) throws OXException {
-        super(session, mapper, path);
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(FileActionOptimizer.class);
+
+    protected final VersionMapper<FileVersion> mapper;
+
+    /**
+     * Initializes a new {@link FileActionOptimizer}.
+     *
+     * @param mapper The file version mapper
+     */
+    public FileActionOptimizer(VersionMapper<FileVersion> mapper) {
+        super();
+        this.mapper = mapper;
     }
 
-    @Override
-    public SyncResult<FileVersion> sync() throws OXException {
-        SyncResult<FileVersion> result = super.sync();
-        result = new FileRenameOptimizer(mapper).optimize(session, result);
-        result = new FileCopyOptimizer(mapper).optimize(session, result);
-        result = new FileOrderOptimizer(mapper).optimize(session, result);
-        return result;
+    protected static boolean matchesByNameAndChecksum(FileVersion v1, FileVersion v2) {
+        return matchesByName(v1, v2) && matchesByChecksum(v1, v2);
+    }
+
+    protected static boolean matchesByName(FileVersion v1, FileVersion v2) {
+        if (null == v1) {
+            return null == v2;
+        } else if (null == v2) {
+            return null == v1;
+        } else {
+            return null == v1.getName() ? null == v2.getName() : v1.getName().equals(v2.getName());
+        }
+    }
+
+    protected static boolean matchesByChecksum(FileVersion v1, FileVersion v2) {
+        if (null == v1) {
+            return null == v2;
+        } else if (null == v2) {
+            return null == v1;
+        } else {
+            return null == v1.getChecksum() ? null == v2.getChecksum() : v1.getChecksum().equals(v2.getChecksum());
+        }
+    }
+
+    protected static class SimpleFileVersion implements FileVersion {
+
+        private final String name;
+        private final String checksum;
+
+        public SimpleFileVersion(String name, String checksum) {
+            super();
+            this.name = name;
+            this.checksum = checksum;
+        }
+
+        @Override
+        public String getChecksum() {
+            return checksum;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
     }
 
 }

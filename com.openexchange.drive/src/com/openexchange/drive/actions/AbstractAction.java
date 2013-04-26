@@ -93,6 +93,16 @@ public abstract class AbstractAction<T extends DriveVersion> implements DriveAct
     }
 
     @Override
+    public int compareTo(DriveAction<T> other) {
+        Action thisAction = this.getAction();
+        Action otherAction = null != other ? other.getAction() : null;
+        if (null == otherAction) {
+            return null == thisAction ? 0 : -1;
+        }
+        return thisAction.compareTo(otherAction);
+    }
+
+    @Override
     public String toString() {
         return getAction() + " [version=" + version + ", newVersion=" + newVersion + ", parameters=" + parameters + "]";
     }

@@ -64,7 +64,6 @@ import org.apache.commons.logging.Log;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.internal.DriveServiceLookup;
 import com.openexchange.drive.internal.DriveSession;
-import com.openexchange.drive.storage.filter.FileFilter;
 import com.openexchange.drive.storage.filter.FileNameFilter;
 import com.openexchange.drive.storage.filter.Filter;
 import com.openexchange.exception.OXException;
@@ -160,6 +159,20 @@ public class DriveStorage {
         }
         getFileAccess().saveDocument(targetFile, getDocument(sourceFile), targetFile.getSequenceNumber());
         return targetFile;
+    }
+
+    /**
+     * Moves an existing file to another one.
+     *
+     * @param sourceFile The source file to move
+     * @param targetFile The target file to overwrite
+     * @return A file representing the moved file
+     * @throws OXException
+     */
+    public File moveFile(File sourceFile, File targetFile) throws OXException {
+        File copiedFile = this.copyFile(sourceFile, targetFile);
+        this.deleteFile(sourceFile);
+        return copiedFile;
     }
 
     /**
@@ -353,6 +366,18 @@ public class DriveStorage {
         return null != delta && (isNotEmpty(delta.getNew()) || isNotEmpty(delta.getDeleted()) || isNotEmpty(delta.getModified()));
     }
 
+    public long getSequenceNumber(String path, long lastSequenceNumber) throws OXException {
+        // TODO: adding 1 to sequence number - the infostore seems to use a >= comparison in queries
+        // TODO: the 'deleted' iterator will only contain the object id field
+        Delta<File> delta = getFileAccess().getDelta(getFolderID(path), 1 + lastSequenceNumber,
+            Arrays.asList(new Field[] { Field.ID }), false);
+        if (null != delta && (isNotEmpty(delta.getNew()) || isNotEmpty(delta.getDeleted()) || isNotEmpty(delta.getModified()))) {
+            return delta.sequenceNumber();
+        } else {
+            return lastSequenceNumber;
+        }
+    }
+
     private static boolean isNotEmpty(SearchIterator<?> searchIterator) throws OXException {
         try {
             return null != searchIterator && searchIterator.hasNext();
@@ -367,13 +392,13 @@ public class DriveStorage {
         return getFileAccess().getDocument(file.getFolderId(), file.getId(), file.getVersion());
     }
 
-    private SearchIterator<File> getFilesIterator(String path) throws OXException {
-        return getFileAccess().getDocuments(getFolderID(path), DriveConstants.FILE_FIELDS, Field.FILENAME, SortDirection.ASC).results();
-    }
-
-    private SearchIterator<File> getFilesIterator(String path, String pattern) throws OXException {
-        return getFileAccess().search(pattern, DriveConstants.FILE_FIELDS, getFolderID(path), Field.FILENAME, SortDirection.ASC,
-            FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+    private SearchIterator<File> getFilesIterator(String folderID, String pattern) throws OXException {
+        if (null != pattern) {
+            return getFileAccess().search(pattern, DriveConstants.FILE_FIELDS, folderID, null, SortDirection.DEFAULT,
+                FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+        } else {
+            return getFileAccess().getDocuments(folderID, DriveConstants.FILE_FIELDS, null, SortDirection.DEFAULT).results();
+        }
     }
 
     public File getFile(String path, String id) throws OXException {
@@ -384,40 +409,26 @@ public class DriveStorage {
         return getFileAccess().getFileMetadata(getFolderID(path), id, version);
     }
 
-    public List<File> getFiles(String path, FileFilter filter) throws OXException {
-        return Filter.apply(getFilesIterator(path), filter);
+    public List<File> getFiles(String path) throws OXException {
+        return getFilesInFolder(getFolderID(path));
     }
 
-    public File findFile(String path, FileFilter filter) throws OXException {
-        return Filter.find(getFilesIterator(path), filter);
+    public List<File> getFilesInFolder(String folderID) throws OXException {
+        return Filter.apply(getFilesIterator(folderID, null), new FileNameFilter() {
+
+            @Override
+            protected boolean accept(String fileName) throws OXException {
+                return null != fileName && false == Strings.isEmpty(fileName);
+            }
+        });
     }
 
     public File findFileByName(String path, final String name) throws OXException {
-        return Filter.find(getFilesIterator(path, name), new FileNameFilter() {
+        return Filter.find(getFilesIterator(getFolderID(path), name), new FileNameFilter() {
 
             @Override
             protected boolean accept(String fileName) throws OXException {
                 return name.equals(fileName);
-            }
-        });
-    }
-
-    public File findFileByNameAndChecksum(String path, String name, final String checksum) throws OXException {
-        return Filter.find(getFilesIterator(path, name), new FileFilter() {
-
-            @Override
-            public boolean accept(File file) throws OXException {
-                return null != file && checksum.equals(session.getChecksumStore().getChecksum(file));
-            }
-        });
-    }
-
-    public File findFileByChecksum(String path, final String checksum) throws OXException {
-        return Filter.find(getFilesIterator(path), new FileFilter() {
-
-            @Override
-            public boolean accept(File file) throws OXException {
-                return null != file && checksum.equals(session.getChecksumStore().getChecksum(file));
             }
         });
     }
@@ -495,8 +506,7 @@ public class DriveStorage {
             FileStorageFolder folder = getFolderAccess().getFolder(currentFolderID);
             folders.addFirst(folder);
             currentFolderID = folder.getParentId();
-        } while (null != currentFolderID && false == rootFolderID.getFolderId().equals(currentFolderID));
-
+        } while (null != currentFolderID && false == "0".equals(currentFolderID) && false == rootFolderID.getFolderId().equals(currentFolderID));
         if (0 < folders.size() && rootFolderID.getFolderId().equals(folders.getFirst().getParentId())) {
             StringBuilder pathBuilder = new StringBuilder();
             for (int i = 0; i < folders.size(); i++) {

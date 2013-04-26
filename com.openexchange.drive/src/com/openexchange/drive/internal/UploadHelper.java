@@ -62,7 +62,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
-import com.openexchange.drive.comparison.ServerFileVersion;
+import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -93,7 +93,7 @@ public class UploadHelper {
         this.session = session;
     }
 
-    public FileVersion perform(String path, FileVersion originalVersion, FileVersion newVersion, InputStream uploadStream, long offset, long totalLength) throws OXException {
+    public File perform(String path, FileVersion originalVersion, FileVersion newVersion, InputStream uploadStream, long offset, long totalLength) throws OXException {
         /*
          * save data
          */
@@ -114,15 +114,15 @@ public class UploadHelper {
              * save document at target path/name
              */
             if (null != originalVersion) {
-                File originalFile = session.getStorage().findFileByNameAndChecksum(path, originalVersion.getName(), originalVersion.getChecksum());
-                if (null != originalFile) {
+                File originalFile = session.getStorage().findFileByName(path, originalVersion.getName());
+                if (null != originalFile && ChecksumProvider.matches(session, originalFile, originalVersion.getChecksum())) {
+                    //TODO: single operation
                     File copiedFile = session.getStorage().copyFile(uploadFile, originalFile);
                     session.getStorage().deleteFile(uploadFile);
-                    return new ServerFileVersion(copiedFile, newVersion.getChecksum());
+                    return copiedFile;
                 }
             }
-            File movedFile = session.getStorage().moveFile(uploadFile, newVersion.getName(), path);
-            return new ServerFileVersion(movedFile, newVersion.getChecksum());
+            return session.getStorage().moveFile(uploadFile, newVersion.getName(), path);
         } else {
             /*
              * no new version yet

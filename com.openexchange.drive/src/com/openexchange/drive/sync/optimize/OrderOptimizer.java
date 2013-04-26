@@ -66,7 +66,7 @@ import com.openexchange.drive.sync.SyncResult;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class OrderOptimizer<T extends DriveVersion> implements ActionOptimizer<T> {
+public abstract class OrderOptimizer<T extends DriveVersion> implements ActionOptimizer<T> {
 
     @Override
     public SyncResult<T> optimize(DriveSession session, SyncResult<T> result) {

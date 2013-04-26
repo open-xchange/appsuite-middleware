@@ -57,7 +57,7 @@ import com.openexchange.drive.DriveVersion;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface DriveAction<T extends DriveVersion> {
+public interface DriveAction<T extends DriveVersion> extends Comparable<DriveAction<T>> {
 
     /**
      * Gets the action.
