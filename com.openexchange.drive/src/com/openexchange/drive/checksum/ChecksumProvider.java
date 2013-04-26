@@ -178,7 +178,7 @@ public class ChecksumProvider {
      * @throws OXException
      */
     public static boolean matches(DriveSession session, File file, String checksum) throws OXException {
-        return checksum.equals(getChecksum(session, file));
+        return checksum.equals(getChecksum(session, file).getChecksum());
     }
 
     private static List<DirectoryChecksum> calculateDirectoryChecksums(DriveSession session, List<String> folderIDs) throws OXException {
