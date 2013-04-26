@@ -324,6 +324,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             }
         } catch (Exception e) {
             // TODO:ExceptionHandling to connected clients
+            LOG.error(e.getMessage(), e);
             writeExceptionToResource(e, resource);
         }
     }
@@ -535,6 +536,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         try {
             recipient.lock("rt-atmosphere-sequence");
             stanza.setSequenceNumber(com.openexchange.tools.Collections.opt(sequenceNumbers, recipient, Long.valueOf(0)));
+            stanza.trace("Stamped outgoing stanza with sequence number " + stanza.getSequenceNumber());
             sequenceNumbers.put(recipient, stanza.getSequenceNumber()+1);
         } finally {
             recipient.unlock("rt-atmosphere-sequence");
