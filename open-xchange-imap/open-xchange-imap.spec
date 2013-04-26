@@ -71,6 +71,8 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Fri Apr 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-04-26
 * Mon Apr 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.2.1 release
 * Mon Apr 15 2013 Marcus Klein <marcus.klein@open-xchange.com>

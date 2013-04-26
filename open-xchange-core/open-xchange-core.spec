@@ -629,6 +629,8 @@ exit 0
 %changelog
 * Mon Apr 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.2.1 release
+* Thu Apr 18 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-04-30
 * Wed Apr 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-09
 * Mon Apr 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
