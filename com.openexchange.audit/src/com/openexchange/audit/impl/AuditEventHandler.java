@@ -166,13 +166,18 @@ public class AuditEventHandler implements EventHandler {
 
                 break ModuleSwitch;
             case Types.CONTACT:
-                final Contact contact;
+                /*
+                 * get as much contact data as possible for log
+                 */
+                Contact contact = null;
                 if (null != commonEvent.getActionObj() && Contact.class.isInstance(commonEvent.getActionObj())) {
                     contact = (Contact)commonEvent.getActionObj();
-                } else if (CommonEvent.DELETE != commonEvent.getAction()) {
+                }
+                if (CommonEvent.DELETE != commonEvent.getAction() && (null == contact ||
+                    false == contact.containsDisplayName() || false == contact.containsCreatedBy() ||
+                    false == contact.containsModifiedBy() || false == contact.containsObjectID() ||
+                    false == contact.containsParentFolderID())) {
                     contact = Contacts.getContactById(((Contact) commonEvent.getActionObj()).getObjectID(), commonEvent.getSession());
-                } else {
-                    contact = null;
                 }
 
                 if (commonEvent.getAction() == CommonEvent.INSERT) {
