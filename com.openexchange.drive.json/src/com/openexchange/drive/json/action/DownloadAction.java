@@ -49,11 +49,14 @@
 
 package com.openexchange.drive.json.action;
 
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.JsonFileVersion;
@@ -104,14 +107,25 @@ public class DownloadAction implements AJAXActionService {
          * get data
          */
         DriveService driveService = Services.getService(DriveService.class, true);
-        IFileHolder fileHolder = driveService.download(session, rootFolderID, path, new JsonFileVersion(checksum, name), offset, length);
+        IFileHolder fileHolder = null;
+        try {
+            fileHolder = driveService.download(session, rootFolderID, path, new JsonFileVersion(checksum, name), offset, length);
+        } catch (OXException e) {
+            if (DriveExceptionCodes.FILEVERSION_NOT_FOUND.equals(e) ||
+                DriveExceptionCodes.FILE_NOT_FOUND.equals(e) ||
+                DriveExceptionCodes.PATH_NOT_FOUND.equals(e)) {
+                throw AjaxExceptionCodes.HTTP_ERROR.create(e, Integer.valueOf(HttpServletResponse.SC_NOT_FOUND), e.getSoleMessage());
+            }
+        }
         if (null == fileHolder) {
-            throw AjaxExceptionCodes.IO_ERROR.create();
+            throw AjaxExceptionCodes.HTTP_ERROR.create(Integer.valueOf(HttpServletResponse.SC_NOT_FOUND));
         }
         /*
          * return file result
          */
-        return new AJAXRequestResult(fileHolder, "file");
+        AJAXRequestResult requestResult = new AJAXRequestResult(fileHolder, "file");
+        requestResult.setType(ResultType.DIRECT);
+        return requestResult;
     }
 
 }
