@@ -2305,15 +2305,19 @@ public class CalendarMySQL implements CalendarSqlImp {
             query.append(sqlin);
             query.append(" ORDER BY object_id");
             rs = stmt.executeQuery(query.toString());
-            Map<Integer, List<CalendarDataObject>> map;
-            final int size = list.size();
-            map = new HashMap<Integer, List<CalendarDataObject>>(size);
-            for (int i = 0; i < size; i++) {
-                final CalendarDataObject cdo = list.get(i);
-                if (!map.containsKey(cdo.getObjectID())) {
-                    map.put(cdo.getObjectID(), new ArrayList<CalendarDataObject>());
+            final TIntObjectMap<List<CalendarDataObject>> map;
+            {
+                final int size = list.size();
+                map = new TIntObjectHashMap<List<CalendarDataObject>>(size);
+                for (int i = 0; i < size; i++) {
+                    final CalendarDataObject cdo = list.get(i);
+                    List<CalendarDataObject> l = map.get(cdo.getObjectID());
+                    if (null == l) {
+                        l = new ArrayList<CalendarDataObject>();
+                        map.put(cdo.getObjectID(), l);
+                    }
+                    l.add(cdo);
                 }
-                map.get(cdo.getObjectID()).add(cdo);
             }
             String temp = null;
             int last_oid = -1;
