@@ -50,8 +50,9 @@
 package com.openexchange.oauth;
 
 import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
+import com.openexchange.exception.LogLevelAwareOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
@@ -60,80 +61,80 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
-public enum OAuthExceptionCodes implements OXExceptionCode {
+public enum OAuthExceptionCodes implements LogLevelAwareOXExceptionCode {
 
     /**
      * An error occurred: %1$s
      */
-    UNEXPECTED_ERROR(OAuthExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR(OAuthExceptionMessages.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1, LogLevel.ERROR),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(OAuthExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2),
+    IO_ERROR(OAuthExceptionMessages.IO_ERROR_MSG, CATEGORY_ERROR, 2, LogLevel.ERROR),
     /**
      * A JSON occurred: %1$s
      */
-    JSON_ERROR(OAuthExceptionMessages.JSON_ERROR_MSG, CATEGORY_ERROR, 3),
+    JSON_ERROR(OAuthExceptionMessages.JSON_ERROR_MSG, CATEGORY_ERROR, 3, LogLevel.ERROR),
     /**
      * Unknown OAuth service meta data: %1$s
      */
-    UNKNOWN_OAUTH_SERVICE_META_DATA(OAuthExceptionMessages.UNKNOWN_OAUTH_SERVICE_META_DATA_MSG, CATEGORY_ERROR, 4),
+    UNKNOWN_OAUTH_SERVICE_META_DATA(OAuthExceptionMessages.UNKNOWN_OAUTH_SERVICE_META_DATA_MSG, CATEGORY_ERROR, 4, LogLevel.ERROR),
     /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR(OAuthExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 5),
+    SQL_ERROR(OAuthExceptionMessages.SQL_ERROR_MSG, CATEGORY_ERROR, 5, LogLevel.ERROR),
     /**
      * Account not found with identifier %1$s for user %2$s in context %3$s.
      */
-    ACCOUNT_NOT_FOUND(OAuthExceptionMessages.ACCOUNT_NOT_FOUND_MSG, CATEGORY_USER_INPUT, 6),
+    ACCOUNT_NOT_FOUND(OAuthExceptionMessages.ACCOUNT_NOT_FOUND_MSG, CATEGORY_USER_INPUT, 6, LogLevel.ERROR),
     /**
      * Unsupported OAuth service: %1$s
      */
-    UNSUPPORTED_SERVICE(OAuthExceptionMessages.UNSUPPORTED_SERVICE_MSG, CATEGORY_ERROR, 7),
+    UNSUPPORTED_SERVICE(OAuthExceptionMessages.UNSUPPORTED_SERVICE_MSG, CATEGORY_ERROR, 7, LogLevel.ERROR),
     /**
      * Missing argument: %1$s
      */
-    MISSING_ARGUMENT(OAuthExceptionMessages.MISSING_ARGUMENT_MSG, CATEGORY_USER_INPUT, 8),
+    MISSING_ARGUMENT(OAuthExceptionMessages.MISSING_ARGUMENT_MSG, CATEGORY_USER_INPUT, 8, LogLevel.ERROR),
     /**
      * Your '%1$s' password changed. You have to authorize the server to use your account with the new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
      */
-    TOKEN_EXPIRED(OAuthExceptionMessages.TOKEN_EXPIRED_MSG, CATEGORY_TRY_AGAIN, 9),
+    TOKEN_EXPIRED(OAuthExceptionMessages.TOKEN_EXPIRED_MSG, CATEGORY_TRY_AGAIN, 9, LogLevel.ERROR),
     /**
      * An OAuth error occurred: %1$s
      */
-    OAUTH_ERROR(OAuthExceptionMessages.OAUTH_ERROR_MSG, CATEGORY_ERROR, 10),
+    OAUTH_ERROR(OAuthExceptionMessages.OAUTH_ERROR_MSG, CATEGORY_ERROR, 10, LogLevel.ERROR),
     /**
      * "The address %1 is not white-listed as for the %2 OAuth API"
      */
-    NOT_A_WHITELISTED_URL(OAuthExceptionMessages.NOT_A_WHITELISTED_URL_MSG, CATEGORY_PERMISSION_DENIED, 11),
+    NOT_A_WHITELISTED_URL(OAuthExceptionMessages.NOT_A_WHITELISTED_URL_MSG, CATEGORY_PERMISSION_DENIED, 11, LogLevel.ERROR),
     /**
      * The request sent was missing its body
      */
-    MISSING_BODY(OAuthExceptionMessages.MISSING_BODY_MSG, CATEGORY_USER_INPUT, 12),
+    MISSING_BODY(OAuthExceptionMessages.MISSING_BODY_MSG, CATEGORY_USER_INPUT, 12, LogLevel.ERROR),
     /**
      * The account is invalid, please recreate it.
      */
-    INVALID_ACCOUNT(OAuthExceptionMessages.INVALID_ACCOUNT_MSG, CATEGORY_TRY_AGAIN, 13),
+    INVALID_ACCOUNT(OAuthExceptionMessages.INVALID_ACCOUNT_MSG, CATEGORY_TRY_AGAIN, 13, LogLevel.ERROR),
     /**
      * Please provide a display name.
      */
-    MISSING_DISPLAY_NAME(OAuthExceptionMessages.MISSING_DISPLAY_NAME_MSG, CATEGORY_USER_INPUT, 14),
+    MISSING_DISPLAY_NAME(OAuthExceptionMessages.MISSING_DISPLAY_NAME_MSG, CATEGORY_USER_INPUT, 14, LogLevel.ERROR),
     /**
      * The associated OAuth provider denied the request: %1$s.
      */
-    DENIED_BY_PROVIDER(OAuthExceptionMessages.DENIED_BY_PROVIDER_MSG, CATEGORY_USER_INPUT, 15),
+    DENIED_BY_PROVIDER(OAuthExceptionMessages.DENIED_BY_PROVIDER_MSG, CATEGORY_USER_INPUT, 15, LogLevel.ERROR),
     ;
 
     private final Category category;
-
     private final int number;
-
     private final String message;
+    private final LogLevel logLevel;
 
-    private OAuthExceptionCodes(final String message, final Category category, final int detailNumber) {
+    private OAuthExceptionCodes(final String message, final Category category, final int detailNumber, final LogLevel logLevel) {
         this.message = message;
         this.number = detailNumber;
         this.category = category;
+        this.logLevel = logLevel;
     }
 
     @Override
@@ -154,6 +155,11 @@ public enum OAuthExceptionCodes implements OXExceptionCode {
     @Override
     public int getNumber() {
         return number;
+    }
+
+    @Override
+    public LogLevel getLogLevel() {
+        return logLevel;
     }
 
     public String getHelp() {
