@@ -55,6 +55,8 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -1667,7 +1669,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private final CalendarDataObject[] insertAppointment0(final CalendarDataObject cdao, final Connection writecon, final Session so, final boolean notify) throws DataTruncation, SQLException, OXException, OXException {
         checkQuota(so);
-        
+
         int i = 1;
         CalendarVolatileCache.getInstance().invalidateGroup(String.valueOf(cdao.getContextID()));
         PreparedStatement pst = null;
@@ -2136,16 +2138,18 @@ public class CalendarMySQL implements CalendarSqlImp {
             query.append(sqlin);
             query.append(" ORDER BY object_id ASC");
             rs = stmt.executeQuery(query.toString());
-            final Map<Integer, List<CalendarDataObject>> map;
+            final TIntObjectMap<List<CalendarDataObject>> map;
             {
                 final int size = list.size();
-                map = new HashMap<Integer, List<CalendarDataObject>>(size);
+                map = new TIntObjectHashMap<List<CalendarDataObject>>(size);
                 for (int i = 0; i < size; i++) {
                     final CalendarDataObject cdo = list.get(i);
-                    if (!map.containsKey(cdo.getObjectID())) {
-                        map.put(cdo.getObjectID(), new ArrayList<CalendarDataObject>());
+                    List<CalendarDataObject> l = map.get(cdo.getObjectID());
+                    if (null == l) {
+                        l = new ArrayList<CalendarDataObject>();
+                        map.put(cdo.getObjectID(), l);
                     }
-                    map.get(cdo.getObjectID()).add(cdo);
+                    l.add(cdo);
                 }
             }
             int last_oid = -1;
@@ -2172,8 +2176,10 @@ public class CalendarMySQL implements CalendarSqlImp {
                     participant = new GroupParticipant(id);
                 } else if (type == Participant.RESOURCE) {
                     participant = new ResourceParticipant(id);
-                    for (final CalendarDataObject cdao : cdaos) {
-                        cdao.setContainsResources(true);
+                    if (null != cdaos) {
+                        for (final CalendarDataObject cdao : cdaos) {
+                            cdao.setContainsResources(true);
+                        }
                     }
                 } else if (type == Participant.RESOURCEGROUP) {
                     participant = new ResourceGroupParticipant(id);
@@ -5461,7 +5467,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             DBUtils.closeResources(rs, stmt, null, true, ctx);
             DBPool.push(ctx, connection);
         }
-        
+
         return 0;
     }
 
