@@ -52,9 +52,11 @@ package com.openexchange.java;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
- * {@link DirectIO}
+ * {@link DirectIO} - A utility class for direct byte buffers and I/O.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -65,6 +67,27 @@ public final class DirectIO {
      */
     private DirectIO() {
         super();
+    }
+
+    private static volatile Method cleanerMethod;
+    private static Method cleanerMethod() {
+        Method m = cleanerMethod;
+        if (null == m) {
+            synchronized (DirectIO.class) {
+                m = cleanerMethod;
+                if (null == m) {
+                    try {
+                        m = ByteBuffer.class.getMethod("cleaner");
+                        m.setAccessible(true);
+                        cleanerMethod = m;
+                    } catch (final Exception e) {
+                        final Log log = LogFactory.getLog(DirectIO.class);
+                        log.error("Couldn't initialze Java Reflection method for \"cleaner\".", e);
+                    }
+                }
+            }
+        }
+        return m;
     }
 
     /**
@@ -80,13 +103,11 @@ public final class DirectIO {
             return;
         }
 
-        final Method cleanerMethod = toBeDestroyed.getClass().getMethod("cleaner");
-        cleanerMethod.setAccessible(true);
+        final Method cleanerMethod = cleanerMethod();
         final Object cleaner = cleanerMethod.invoke(toBeDestroyed);
         final Method cleanMethod = cleaner.getClass().getMethod("clean");
         cleanMethod.setAccessible(true);
         cleanMethod.invoke(cleaner);
-
     }
 
 }
