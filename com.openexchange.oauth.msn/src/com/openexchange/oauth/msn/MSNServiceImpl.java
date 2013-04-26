@@ -97,7 +97,7 @@ public class MSNServiceImpl implements MSNService {
             final com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
             account = oAuthService.getAccount(accountId, session, user, contextId);
             // the account contains the refresh-token in this case
-            final String wrap_access_token = useRefreshTokenToGetAccessToken(account);
+            final String wrap_access_token = useRefreshTokenToGetAccessToken(account, session);
             final JSONObject response = useAccessTokenToAccessData(wrap_access_token);
             contacts = parseIntoContacts(wrap_access_token, response);
 
@@ -235,11 +235,12 @@ public class MSNServiceImpl implements MSNService {
     }
 
     /**
+     * @param session 
      * @param secret
      * @param token
      * @throws OXException
      */
-    private String useRefreshTokenToGetAccessToken(OAuthAccount account) throws OXException {
+    private String useRefreshTokenToGetAccessToken(OAuthAccount account, Session session) throws OXException {
     	String callback = null;
     	try {
     		JSONObject metadata = new JSONObject(account.getSecret());
@@ -251,7 +252,7 @@ public class MSNServiceImpl implements MSNService {
 
     	try {
     		final HttpClient client = new HttpClient();
-    		final PostMethod postMethod = new PostMethod("https://login.live.com/oauth20_token.srf?client_id=" + account.getMetaData().getAPIKey() + "&redirect_uri=" + URLEncoder.encode(callback, "UTF-8") + "&client_secret=" + URLEncoder.encode(account.getMetaData().getAPISecret(), "UTF-8")+"&refresh_token=" + account.getToken() + "&grant_type=refresh_token");
+    		final PostMethod postMethod = new PostMethod("https://login.live.com/oauth20_token.srf?client_id=" + account.getMetaData().getAPIKey(session) + "&redirect_uri=" + URLEncoder.encode(callback, "UTF-8") + "&client_secret=" + URLEncoder.encode(account.getMetaData().getAPISecret(session), "UTF-8")+"&refresh_token=" + account.getToken() + "&grant_type=refresh_token");
 
     		RequestEntity requestEntity;
             requestEntity = new StringRequestEntity(postMethod.getQueryString(), "application/x-www-form-urlencoded", "UTF-8");

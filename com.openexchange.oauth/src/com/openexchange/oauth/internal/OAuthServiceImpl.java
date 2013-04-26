@@ -244,21 +244,21 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     }
 
     @Override
-    public OAuthInteraction initOAuth(final String serviceMetaData, String callbackUrl) throws OXException {
+    public OAuthInteraction initOAuth(final String serviceMetaData, String callbackUrl, Session session) throws OXException {
         try {
             final OAuthServiceMetaData metaData = registry.getService(serviceMetaData, -1, -1);
             /*
              * Get appropriate Scribe service implementation
              */
-            final OAuthInteraction interaction = metaData.initOAuth(callbackUrl);
+            final OAuthInteraction interaction = metaData.initOAuth(callbackUrl, session);
             if (interaction != null) {
                 return interaction;
             }
-            final String modifiedUrl = metaData.modifyCallbackURL(callbackUrl);
+            final String modifiedUrl = metaData.modifyCallbackURL(callbackUrl, session);
             if (modifiedUrl != null) {
                 callbackUrl = modifiedUrl;
             }
-            final org.scribe.oauth.OAuthService service = getScribeService(metaData, callbackUrl);
+            final org.scribe.oauth.OAuthService service = getScribeService(metaData, callbackUrl, session);
             final Token scribeToken;
             if (metaData.needsRequestToken()) {
                 scribeToken = service.getRequestToken();
@@ -703,11 +703,13 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 if (null == requestToken) {
                     throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
                 }
+                
+                Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
                 /*
                  * With the request token and the verifier (which is a number) we need now to get the access token
                  */
                 final Verifier verifier = new Verifier(pin);
-                final org.scribe.oauth.OAuthService service = getScribeService(account.getMetaData(), null);
+                final org.scribe.oauth.OAuthService service = getScribeService(account.getMetaData(), null, session);
                 final Token accessToken = service.getAccessToken(new Token(requestToken.getToken(), requestToken.getSecret()), verifier);
                 /*
                  * Apply to account
@@ -731,7 +733,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
 
     // Helper Methods
 
-    private static org.scribe.oauth.OAuthService getScribeService(final OAuthServiceMetaData metaData, final String callbackUrl) throws OXException {
+    private static org.scribe.oauth.OAuthService getScribeService(final OAuthServiceMetaData metaData, final String callbackUrl, Session session) throws OXException {
         final Class<? extends Api> apiClass;
         if (metaData instanceof com.openexchange.oauth.ScribeAware) {
             apiClass = ((com.openexchange.oauth.ScribeAware) metaData).getScribeService();
@@ -764,7 +766,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             }
         }
         final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(apiClass);
-        serviceBuilder.apiKey(metaData.getAPIKey()).apiSecret(metaData.getAPISecret());
+        serviceBuilder.apiKey(metaData.getAPIKey(session)).apiSecret(metaData.getAPISecret(session));
         if (null != callbackUrl) {
             serviceBuilder.callback(callbackUrl);
         }

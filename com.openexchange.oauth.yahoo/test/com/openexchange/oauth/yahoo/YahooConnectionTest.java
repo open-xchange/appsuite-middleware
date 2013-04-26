@@ -51,6 +51,7 @@ package com.openexchange.oauth.yahoo;
 
 import java.util.List;
 import junit.framework.TestCase;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.yahoo.internal.OAuthServiceMetaDataYahooImpl;
 import com.openexchange.oauth.yahoo.internal.YahooServiceImpl;
@@ -71,10 +72,10 @@ public class YahooConnectionTest extends TestCase {
     private final String tokenSecret = "7a28439ac5d9a3bec5a27f09cc72a402e061bf62";
     private final String callbackURL = "http://www.open-xchange.com";
 
-    public void testUsingExistingAccessToken(){
+    public void testUsingExistingAccessToken() throws OXException{
 
         final YahooOAuthActivator activator = new YahooOAuthActivator();
-        activator.setOAuthMetaData(new OAuthServiceMetaDataYahooImpl(apiKey, apiSecret, null));
+        activator.setOAuthMetaData(new OAuthServiceMetaDataYahooImpl(null));
         final MockOAuthService oAuthService = new MockOAuthService();
         oAuthService.setToken(token);
         oAuthService.setSecret(tokenSecret);

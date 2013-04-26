@@ -51,6 +51,7 @@ package com.openexchange.oauth;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.HTTPClient;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * Creates an appropriate HTTP client for a given OAuth account.
@@ -64,6 +65,6 @@ public interface OAuthHTTPClientFactory {
      * @return The HTTP client
      * @throws OXException If operation fails for any reason
      */
-    HTTPClient create(OAuthAccount account) throws OXException;
+    HTTPClient create(OAuthAccount account, ServerSession session) throws OXException;
 
 }

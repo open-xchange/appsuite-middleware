@@ -173,7 +173,7 @@ public class MockOAuthService implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#initOAuth(java.lang.String, java.lang.String)
      */
     @Override
-    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl) throws OXException {
+    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, Session session) throws OXException {
         // Nothing to do
         return null;
     }

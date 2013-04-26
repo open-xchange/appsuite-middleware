@@ -81,7 +81,7 @@ public class OAuthProxyAction implements AJAXActionService {
 
         OAuthProxyRequest proxyRequest = new OAuthProxyRequest(requestData, session, oauthService);
 
-        HTTPClient client = clients.create(proxyRequest.getAccount());
+        HTTPClient client = clients.create(proxyRequest.getAccount(), session);
 
         final HTTPRequest httpRequest;
         switch (proxyRequest.getMethod()) {
