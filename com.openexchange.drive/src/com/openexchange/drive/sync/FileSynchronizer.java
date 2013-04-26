@@ -65,6 +65,7 @@ import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.drive.internal.UploadHelper;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
 
 
 /**
@@ -89,7 +90,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
     }
 
     @Override
-    protected void processServerChange(SyncResult<FileVersion> result, Change serverChange, FileVersion originalVersion, FileVersion clientVersion, FileVersion serverVersion) {
+    protected void processServerChange(SyncResult<FileVersion> result, Change serverChange, FileVersion originalVersion, FileVersion clientVersion, FileVersion serverVersion) throws OXException {
         switch (serverChange) {
         case DELETED:
             /*
@@ -102,7 +103,8 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
             /*
              * new/modified on server, let client download the file
              */
-            result.addActionForClient(new DownloadFileAction(clientVersion, serverVersion, path, ((ServerFileVersion)serverVersion).getFile().getFileSize()));
+            File serverFile = ServerFileVersion.valueOf(serverVersion, path, session).getFile();
+            result.addActionForClient(new DownloadFileAction(clientVersion, serverVersion, path, serverFile.getFileSize(), serverFile.getFileMIMEType()));
             break;
         default:
             break;
@@ -158,13 +160,15 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  * ... then upload it, and download the server version afterwards
                  */
                 result.addActionForClient(new UploadFileAction(null, renamedVersion, path, getUploadOffset(path, renamedVersion)));
-                result.addActionForClient(new DownloadFileAction(null, serverVersion, path, ((ServerFileVersion)serverVersion).getFile().getFileSize()));
+                File serverFile = ServerFileVersion.valueOf(serverVersion, path, session).getFile();
+                result.addActionForClient(new DownloadFileAction(null, serverVersion, path, serverFile.getFileSize(), serverFile.getFileMIMEType()));
             }
         } else if (Change.DELETED == clientChange && (Change.MODIFIED == serverChange || Change.NEW == serverChange)) {
             /*
              * delete-edit conflict, let client download server version
              */
-            result.addActionForClient(new DownloadFileAction(null, serverVersion, path, ((ServerFileVersion)serverVersion).getFile().getFileSize()));
+            File serverFile = ServerFileVersion.valueOf(serverVersion, path, session).getFile();
+            result.addActionForClient(new DownloadFileAction(null, serverVersion, path, serverFile.getFileSize(), serverFile.getFileMIMEType()));
         } else if ((Change.NEW == clientChange || Change.MODIFIED == clientChange) && Change.DELETED == serverChange) {
             /*
              * edit-delete conflict, let client upload it's file

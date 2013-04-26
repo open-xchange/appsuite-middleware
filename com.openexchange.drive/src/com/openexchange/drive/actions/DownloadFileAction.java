@@ -58,10 +58,11 @@ import com.openexchange.drive.FileVersion;
  */
 public class DownloadFileAction extends AbstractAction<FileVersion> {
 
-    public DownloadFileAction(FileVersion file, FileVersion newFile, String path, long totalLength) {
+    public DownloadFileAction(FileVersion file, FileVersion newFile, String path, long totalLength, String contentType) {
         super(file, newFile);
         parameters.put(PARAMETER_TOTAL_LENGTH, Long.valueOf(totalLength));
         parameters.put(PARAMETER_PATH, path);
+        parameters.put("contentType", contentType);
     }
 
     @Override

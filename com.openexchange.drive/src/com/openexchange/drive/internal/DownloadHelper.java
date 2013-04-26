@@ -105,7 +105,8 @@ public class DownloadHelper {
         if (null == inputStream) {
             throw DriveExceptionCodes.FILE_NOT_FOUND.create(fileVersion.getName(), path);
         }
-        return new FileHolder(inputStream, -1, "application/octet-stream", fileVersion.getName());
+        String contentType = null != file.getFileMIMEType() ? file.getFileMIMEType() : "application/octet-stream";
+        return new FileHolder(inputStream, -1, contentType, fileVersion.getName());
     }
 
     private InputStream getInputStream(File file, long offset, long length) throws OXException {

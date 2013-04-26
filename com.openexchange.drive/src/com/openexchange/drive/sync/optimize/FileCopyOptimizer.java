@@ -94,7 +94,7 @@ public class FileCopyOptimizer extends FileActionOptimizer {
                     String path = (String)clientAction.getParameters().get("path");
                     optimizedActionsForClient.remove(clientAction);
                     DownloadFileAction copyAction = new DownloadFileAction(
-                        clientAction.getVersion(), clientAction.getNewVersion(), path, -1);
+                        clientAction.getVersion(), clientAction.getNewVersion(), path, -1, null);
                     copyAction.getParameters().put("sourceVersion", knownFile);
                     optimizedActionsForServer.add(copyAction);
                     optimizedActionsForClient.add(new AcknowledgeFileAction(clientAction.getVersion(), clientAction.getNewVersion(),
