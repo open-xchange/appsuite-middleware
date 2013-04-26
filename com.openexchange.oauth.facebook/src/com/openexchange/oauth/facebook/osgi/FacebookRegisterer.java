@@ -58,6 +58,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -84,6 +85,7 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer<Object,Objec
     private OAuthService oAuthService;
 
     private DeferringURLService deferrer;
+
 
     public FacebookRegisterer(final BundleContext context) {
         super();
@@ -113,7 +115,7 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer<Object,Objec
             LOG.info("Registering Facebook MetaData service.");
             LOG.info("Parameter com.openexchange.facebook.apiKey : " + configurationService.getProperty("com.openexchange.facebook.apiKey"));
             LOG.info("Parameter com.openexchange.facebook.secretKey :" + configurationService.getProperty("com.openexchange.facebook.secretKey"));
-            final OAuthServiceMetaDataFacebookImpl facebookMetaDataService = new OAuthServiceMetaDataFacebookImpl(configurationService, deferrer);
+            final OAuthServiceMetaDataFacebookImpl facebookMetaDataService = new OAuthServiceMetaDataFacebookImpl(deferrer);
             registration = context.registerService(OAuthServiceMetaData.class,
                 facebookMetaDataService, null);
             LOG.info("Registering Facebook service.");

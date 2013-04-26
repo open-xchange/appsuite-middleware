@@ -60,6 +60,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthAccountInvalidationListener;
 import com.openexchange.oauth.OAuthHTTPClientFactory;
@@ -129,6 +130,7 @@ public final class OAuthActivator extends HousekeepingActivator {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.oauth");
             }
+            AbstractOAuthServiceMetaData.SERVICES = this;
             /*
              * (Re-)Initialize service registry with available services
              */

@@ -52,7 +52,10 @@ package com.openexchange.oauth;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
  * {@link AbstractOAuthServiceMetaData} - The default {@link OAuthServiceMetaData} implementation.
@@ -65,6 +68,11 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     protected String displayName;
     protected String apiKey;
     protected String apiSecret;
+    
+    protected String apiKeyName;
+    protected String apiSecretName;
+    
+    public static ServiceLookup SERVICES;
 
     /**
      * Initializes a new {@link AbstractOAuthServiceMetaData}.
@@ -87,10 +95,53 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     public String getAPIKey() {
         return apiKey;
     }
+    
+    
+    /**
+     * Used to look up the apiKey in the config cascade
+     *
+     * @param apiKeyName The apiKeyName to set
+     */
+    public void setAPIKeyName(String apiKeyName) {
+        this.apiKeyName = apiKeyName;
+    }
+    
+    
+    /**
+     * Used to look up the apiSecret in the config cascade
+     *
+     * @param apiSecretName The apiSecretName to set
+     */
+    public void setAPISecretName(String apiSecretName) {
+        this.apiSecretName = apiSecretName;
+    }
+    
+    @Override
+    public String getAPIKey(Session session) throws OXException {
+        if (session == null || apiKeyName == null) {
+            return getAPIKey();
+        }
+        int context = 0, user = 0;
+        context = session.getContextId();
+        user = session.getUserId();
+        return SERVICES.getService(ConfigViewFactory.class).getView(user, context).get(apiKeyName, String.class);
+    }
 
     @Override
     public String getAPISecret() {
         return apiSecret;
+    }
+    
+
+    @Override
+    public String getAPISecret(Session session) throws OXException {
+        if (session == null || apiSecretName == null) {
+            return getAPISecret();
+        }
+        int context = 0, user = 0;
+        context = session.getContextId();
+        user = session.getUserId();
+        return SERVICES.getService(ConfigViewFactory.class).getView(user, context).get(apiSecretName, String.class);
     }
 
     /**
@@ -113,7 +164,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
     /**
      * Sets the API Key
-     *
+     * @deprecated: Implement {@link #getAPIKey(Session)} instead
      * @param apiKey The API Key to set
      */
     public void setApiKey(final String apiKey) {
@@ -123,6 +174,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     /**
      * Sets the API Secret
      *
+     * @deprecated: Implement {@link #getAPISecret(Session)} instead.
      * @param apiSecret The API Secret to set
      */
     public void setApiSecret(final String apiSecret) {
@@ -140,7 +192,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public OAuthInteraction initOAuth(final String callbackUrl) throws OXException {
+    public OAuthInteraction initOAuth(final String callbackUrl, Session session) throws OXException {
         return null;
     }
 
@@ -165,7 +217,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public String modifyCallbackURL(final String callbackUrl) {
+    public String modifyCallbackURL(final String callbackUrl, Session session) {
         return callbackUrl;
     }
 
