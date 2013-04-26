@@ -6,6 +6,7 @@
 * 2013-04-26 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 26185: Changed default values in contact-storage-ldap/cache.properties template
+ - Fix for bug 26209: Don't try to load contact in case of DELETE event
 
 * 2013-04-25 - tobias.friedrich@open-xchange.com
 

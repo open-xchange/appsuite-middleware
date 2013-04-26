@@ -166,11 +166,14 @@ public class AuditEventHandler implements EventHandler {
 
                 break ModuleSwitch;
             case Types.CONTACT:
-                /*
-                 * Temporary loading full contact object due to bug # Replace by: Contact contact = (Contact)commonEvent.getActionObj();
-                 */
-                final Contact contact =
-                    Contacts.getContactById(((Contact) commonEvent.getActionObj()).getObjectID(), commonEvent.getSession());
+                final Contact contact;
+                if (null != commonEvent.getActionObj() && Contact.class.isInstance(commonEvent.getActionObj())) {
+                    contact = (Contact)commonEvent.getActionObj();
+                } else if (CommonEvent.DELETE != commonEvent.getAction()) {
+                    contact = Contacts.getContactById(((Contact) commonEvent.getActionObj()).getObjectID(), commonEvent.getSession());
+                } else {
+                    contact = null;
+                }
 
                 if (commonEvent.getAction() == CommonEvent.INSERT) {
                     log.append("EVENT TYPE: INSERT; ");
@@ -186,12 +189,19 @@ public class AuditEventHandler implements EventHandler {
                 log.append("OBJECT TYPE: CONTACT; ");
                 appendUserInformation(commonEvent.getUserId(), contextId, log);
                 log.append("CONTEXT ID: ").append(contextId).append("; ");
-                log.append("OBJECT ID: ").append(contact.getObjectID()).append("; ");
-                log.append("CREATED BY: ").append(UserStorage.getInstance().getUser(contact.getCreatedBy(), context).getDisplayName()).append("; ");
-                log.append("MODIFIED BY: ").append(UserStorage.getInstance().getUser(contact.getModifiedBy(), context).getDisplayName()).append("; ");
-                log.append("CONTACT FULLNAME: ").append(contact.getDisplayName()).append(';');
-                log.append("FOLDER: ").append(getPathToRoot(contact.getParentFolderID(), commonEvent.getSession())).append(';');
-
+                if (null != contact) {
+                    log.append("OBJECT ID: ").append(contact.getObjectID()).append("; ");
+                    if (contact.containsCreatedBy()) {
+                        log.append("CREATED BY: ").append(
+                            UserStorage.getInstance().getUser(contact.getCreatedBy(), context).getDisplayName()).append("; ");
+                    }
+                    if (contact.containsModifiedBy()) {
+                        log.append("MODIFIED BY: ").append(
+                            UserStorage.getInstance().getUser(contact.getModifiedBy(), context).getDisplayName()).append("; ");
+                    }
+                    log.append("CONTACT FULLNAME: ").append(contact.getDisplayName()).append(';');
+                    log.append("FOLDER: ").append(getPathToRoot(contact.getParentFolderID(), commonEvent.getSession())).append(';');
+                }
                 break ModuleSwitch;
             case Types.TASK:
                 final Task task = (Task) commonEvent.getActionObj();
