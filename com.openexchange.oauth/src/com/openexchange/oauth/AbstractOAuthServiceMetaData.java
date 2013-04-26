@@ -52,11 +52,10 @@ package com.openexchange.oauth;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.oauth.services.Services;
 import com.openexchange.session.Session;
 
 /**
@@ -72,11 +71,9 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     protected String displayName;
     protected String apiKey;
     protected String apiSecret;
-    
+
     protected String apiKeyName;
     protected String apiSecretName;
-    
-    public static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
 
     /**
      * Initializes a new {@link AbstractOAuthServiceMetaData}.
@@ -99,15 +96,15 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     public String getAPIKey() {
         if (apiKey == null && apiKeyName != null) {
             try {
-                return SERVICES.get().getService(ConfigViewFactory.class).getView().get(apiKeyName, String.class);
+                return Services.getService(ConfigViewFactory.class).getView().get(apiKeyName, String.class);
             } catch (final OXException e) {
                 LOG.warn("Couldn't look-up API key name.", e);
             }
         }
         return apiKey;
     }
-    
-    
+
+
     /**
      * Used to look up the apiKey in the config cascade
      *
@@ -116,8 +113,8 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     public void setAPIKeyName(String apiKeyName) {
         this.apiKeyName = apiKeyName;
     }
-    
-    
+
+
     /**
      * Used to look up the apiSecret in the config cascade
      *
@@ -126,7 +123,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     public void setAPISecretName(String apiSecretName) {
         this.apiSecretName = apiSecretName;
     }
-    
+
     @Override
     public String getAPIKey(Session session) throws OXException {
         if (session == null || apiKeyName == null) {
@@ -135,21 +132,21 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
         int context = 0, user = 0;
         context = session.getContextId();
         user = session.getUserId();
-        return SERVICES.get().getService(ConfigViewFactory.class).getView(user, context).get(apiKeyName, String.class);
+        return Services.getService(ConfigViewFactory.class).getView(user, context).get(apiKeyName, String.class);
     }
 
     @Override
     public String getAPISecret() {
         if (apiSecret == null && apiSecretName != null) {
             try {
-                return SERVICES.get().getService(ConfigViewFactory.class).getView().get(apiSecretName, String.class);
+                return Services.getService(ConfigViewFactory.class).getView().get(apiSecretName, String.class);
             } catch (final OXException e) {
                 LOG.warn("Couldn't look-up API secret name.", e);
             }
         }
         return apiSecret;
     }
-    
+
 
     @Override
     public String getAPISecret(Session session) throws OXException {
@@ -159,7 +156,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
         int context = 0, user = 0;
         context = session.getContextId();
         user = session.getUserId();
-        return SERVICES.get().getService(ConfigViewFactory.class).getView(user, context).get(apiSecretName, String.class);
+        return Services.getService(ConfigViewFactory.class).getView(user, context).get(apiSecretName, String.class);
     }
 
     /**

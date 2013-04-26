@@ -57,10 +57,10 @@ import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.html.HtmlService;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 import com.openexchange.id.IDGeneratorService;
-import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthAccountInvalidationListener;
 import com.openexchange.oauth.OAuthHTTPClientFactory;
@@ -71,7 +71,7 @@ import com.openexchange.oauth.internal.CallbackRegistry;
 import com.openexchange.oauth.internal.DeleteListenerRegistry;
 import com.openexchange.oauth.internal.InvalidationListenerRegistry;
 import com.openexchange.oauth.internal.OAuthServiceImpl;
-import com.openexchange.oauth.services.ServiceRegistry;
+import com.openexchange.oauth.services.Services;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.secret.SecretEncryptionFactoryService;
@@ -111,7 +111,6 @@ public final class OAuthActivator extends HousekeepingActivator {
         if (logger.isInfoEnabled()) {
             logger.info("Re-available service: " + clazz.getName());
         }
-        ServiceRegistry.getInstance().addService(clazz, getService(clazz));
     }
 
     @Override
@@ -120,7 +119,6 @@ public final class OAuthActivator extends HousekeepingActivator {
         if (logger.isWarnEnabled()) {
             logger.warn("Absent service: " + clazz.getName());
         }
-        ServiceRegistry.getInstance().removeService(clazz);
     }
 
     @Override
@@ -130,21 +128,9 @@ public final class OAuthActivator extends HousekeepingActivator {
             if (log.isInfoEnabled()) {
                 log.info("starting bundle: com.openexchange.oauth");
             }
-            AbstractOAuthServiceMetaData.SERVICES.set(this);
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-            {
-                final ServiceRegistry registry = ServiceRegistry.getInstance();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (final Class<?> classe : classes) {
-                    final Object service = getService(classe);
-                    if (null != service) {
-                        registry.addService(classe, service);
-                    }
-                }
-            }
+
+            Services.setServiceLookup(this);
+
             DeleteListenerRegistry.initInstance();
             InvalidationListenerRegistry.initInstance();
             /*
@@ -159,6 +145,7 @@ public final class OAuthActivator extends HousekeepingActivator {
              */
             track(OAuthAccountDeleteListener.class, new DeleteListenerServiceTracker(context));
             track(OAuthAccountInvalidationListener.class, new InvalidationListenerServiceTracker(context));
+            trackService(HtmlService.class);
             openTrackers();
             /*
              * Register
@@ -227,7 +214,7 @@ public final class OAuthActivator extends HousekeepingActivator {
             }
             DeleteListenerRegistry.releaseInstance();
             OSGiMetaDataRegistry.releaseInstance();
-            AbstractOAuthServiceMetaData.SERVICES.set(null);
+            Services.setServiceLookup(null);
         } catch (final Exception e) {
             log.error("Stopping bundle \"com.openexchange.oauth\" failed.", e);
             throw e;

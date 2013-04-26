@@ -2,6 +2,7 @@
 
  - Fix for bug 26198: Consider "timezone" URL parameter for mail module's ALL and LIST request
  - Fix for bug 26188: Improved error message if a publication has been revoked in the meantime
+ - Fix for bug 26221: Convert HTML error message to plain text before logging it
 
 * 2013-04-26 - tobias.friedrich@open-xchange.com
 
