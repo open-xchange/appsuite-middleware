@@ -81,7 +81,7 @@ public class AtmosphereResourceReaper {
     private final ReentrantLock moribundRemoveLock;
 
     /* Define how long a moribund may linger 2 ping intervals before being reaped */
-    private static final int MORIBUND_MAX_LINGER = 40000;
+    private static final int MORIBUND_MAX_LINGER = 120000;
 
     private volatile ScheduledTimerTask scheduledReaper;
 
