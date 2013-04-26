@@ -59,6 +59,10 @@ import com.openexchange.drive.DriveVersion;
  */
 public interface DriveAction<T extends DriveVersion> extends Comparable<DriveAction<T>> {
 
+    static final String PARAMETER_PATH = "path";
+    static final String PARAMETER_TOTAL_LENGTH = "totalLength";
+    static final String PARAMETER_OFFSET = "offset";
+
     /**
      * Gets the action.
      *

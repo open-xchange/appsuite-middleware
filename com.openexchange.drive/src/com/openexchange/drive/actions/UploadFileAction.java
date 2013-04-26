@@ -63,8 +63,8 @@ public class UploadFileAction extends AbstractAction<FileVersion> {
 
     public UploadFileAction(FileVersion file, FileVersion newFile, String path, long offset) {
         super(file, newFile);
-        parameters.put("offset", Long.valueOf(offset));
-        parameters.put("path", path);
+        parameters.put(PARAMETER_OFFSET, Long.valueOf(offset));
+        parameters.put(PARAMETER_PATH, path);
     }
 
     @Override

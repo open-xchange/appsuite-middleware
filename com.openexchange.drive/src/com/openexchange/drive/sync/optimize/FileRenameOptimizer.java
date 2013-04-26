@@ -118,20 +118,23 @@ Actions for client:
                             break;
                         }
                     }
-                    /*
-                     * edit server file instead
-                     */
-                    optimizedActionsForClient.remove(clientAction);
-                    optimizedActionsForClient.remove(matchingClientAction);
-                    optimizedActionsForClient.add(new AcknowledgeFileAction(matchingClientAction.getVersion(), clientAction.getNewVersion(),
-                        (String)clientAction.getParameters().get("path")));
-                    optimizedActionsForServer.remove(matchingServerAction);
-                    EditFileAction editAction = new EditFileAction(matchingServerAction.getVersion(), clientAction.getNewVersion());
-                    if (null != clientAction.getVersion()) {
-                        // old version will be overwritten
-                        editAction.getParameters().put("targetVersion", clientAction.getVersion());
+                    if (null != matchingClientAction) {
+                        String path = (String)clientAction.getParameters().get(DriveAction.PARAMETER_PATH);
+                        /*
+                         * edit server file instead
+                         */
+                        optimizedActionsForClient.remove(clientAction);
+                        optimizedActionsForClient.remove(matchingClientAction);
+                        optimizedActionsForClient.add(
+                            new AcknowledgeFileAction(matchingClientAction.getVersion(), clientAction.getNewVersion(), path));
+                        optimizedActionsForServer.remove(matchingServerAction);
+                        EditFileAction editAction = new EditFileAction(matchingServerAction.getVersion(), clientAction.getNewVersion(), path);
+                        if (null != clientAction.getVersion()) {
+                            // old version will be overwritten
+                            editAction.getParameters().put("targetVersion", clientAction.getVersion());
+                        }
+                        optimizedActionsForServer.add(editAction);
                     }
-                    optimizedActionsForServer.add(editAction);
                 }
             }
             /*
@@ -160,6 +163,7 @@ Actions for client:
                     FileVersion matchingActionServerVersion = findByNameAndChecksum(
                         matchingAction.getVersion().getName(), matchingAction.getVersion().getChecksum(), mapper.getServerVersions());
                     if (null != clientActionServerVersion && null != matchingActionServerVersion) {
+                        String path = (String)clientAction.getParameters().get(DriveAction.PARAMETER_PATH);
                         /*
                          * remove both client UPLOAD actions
                          */
@@ -171,16 +175,14 @@ Actions for client:
                         String tempName = FileSynchronizer.findAlternativeName(clientAction.getVersion().getName(), usedFilenames);
                         usedFilenames.add(tempName);
                         SimpleFileVersion tempVersion = new SimpleFileVersion(tempName, clientAction.getVersion().getChecksum());
-                        optimizedActionsForServer.add(new EditFileAction(clientActionServerVersion, tempVersion, 1));
-                        optimizedActionsForServer.add(new EditFileAction(matchingActionServerVersion, clientActionServerVersion, 2));
-                        optimizedActionsForServer.add(new EditFileAction(tempVersion, matchingActionServerVersion, 3));
+                        optimizedActionsForServer.add(new EditFileAction(clientActionServerVersion, tempVersion, path, 1));
+                        optimizedActionsForServer.add(new EditFileAction(matchingActionServerVersion, clientActionServerVersion, path, 2));
+                        optimizedActionsForServer.add(new EditFileAction(tempVersion, matchingActionServerVersion, path, 3));
                         /*
                          * acknowledge client renames
                          */
-                        optimizedActionsForClient.add(new AcknowledgeFileAction(
-                            clientAction.getVersion(), clientAction.getNewVersion(), (String)clientAction.getParameters().get("path")));
-                        optimizedActionsForClient.add(new AcknowledgeFileAction(
-                            matchingAction.getVersion(), matchingAction.getNewVersion(), (String)matchingAction.getParameters().get("path")));
+                        optimizedActionsForClient.add(new AcknowledgeFileAction(clientAction.getVersion(), clientAction.getNewVersion(), path));
+                        optimizedActionsForClient.add(new AcknowledgeFileAction(matchingAction.getVersion(), matchingAction.getNewVersion(), path));
                     }
                 }
             }
@@ -198,7 +200,7 @@ Actions for client:
         List<DriveAction<FileVersion>> optimizedList = new ArrayList<DriveAction<FileVersion>>(actions);
         for (DriveAction<FileVersion> action : actions) {
             /*
-             * check for DELETE + STORE of identical file
+             * check for DELETE + DOWNLOAD of identical file
              */
             if (Action.REMOVE.equals(action.getAction())) {
                 DriveAction<FileVersion> matchingAction = null;
@@ -209,15 +211,16 @@ Actions for client:
                     }
                 }
                 if (null != matchingAction) {
+                    String path = (String)matchingAction.getParameters().get(DriveAction.PARAMETER_PATH);
                     /*
-                     * remove DELETE + STORE action
+                     * remove DELETE + DOWNLOAD action
                      */
                     optimizedList.remove(action);
                     optimizedList.remove(matchingAction);
                     /*
                      * merge into corresponding edit action
                      */
-                    optimizedList.add(new EditFileAction(action.getVersion(), matchingAction.getNewVersion()));
+                    optimizedList.add(new EditFileAction(action.getVersion(), matchingAction.getNewVersion(), path));
                 }
             }
         }

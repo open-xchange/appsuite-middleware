@@ -153,7 +153,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  * keep both client- and server versions, let client first rename it's file...
                  */
                 FileVersion renamedVersion = getRenamedVersion(clientVersion, usedFilenames);
-                result.addActionForClient(new EditFileAction(clientVersion, renamedVersion));
+                result.addActionForClient(new EditFileAction(clientVersion, renamedVersion, path));
                 /*
                  * ... then upload it, and download the server version afterwards
                  */

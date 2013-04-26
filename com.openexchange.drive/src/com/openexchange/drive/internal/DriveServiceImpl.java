@@ -207,7 +207,7 @@ public class DriveServiceImpl implements DriveService {
             if (newVersion.getName().equals(createdVersion.getName())) {
                 syncResult.addActionForClient(new AcknowledgeFileAction(originalVersion, createdVersion, path));
             } else {
-                syncResult.addActionForClient(new EditFileAction(newVersion, createdVersion));
+                syncResult.addActionForClient(new EditFileAction(newVersion, createdVersion, path));
             }
         }
         if (LOG.isDebugEnabled()) {

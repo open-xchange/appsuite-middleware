@@ -77,7 +77,7 @@ public class AcknowledgeFileAction extends AbstractAction<FileVersion> {
      */
     public AcknowledgeFileAction(FileVersion file, FileVersion newFile, String path) {
         super(file, newFile);
-        parameters.put("path", path);
+        parameters.put(PARAMETER_PATH, path);
     }
 
     @Override

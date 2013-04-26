@@ -70,7 +70,7 @@ public class RemoveFileAction extends AbstractAction<FileVersion> {
      */
     public RemoveFileAction(FileVersion file, String path) {
         super(file, null);
-        parameters.put("path", path);
+        parameters.put(PARAMETER_PATH, path);
     }
 
     @Override

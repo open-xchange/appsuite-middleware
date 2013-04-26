@@ -60,13 +60,14 @@ public class EditFileAction extends AbstractAction<FileVersion> {
 
     private int sortKey;
 
-    public EditFileAction(FileVersion file, FileVersion newFile) {
-        this(file, newFile, 0);
+    public EditFileAction(FileVersion file, FileVersion newFile, String path) {
+        this(file, newFile, path, 0);
     }
 
-    public EditFileAction(FileVersion file, FileVersion newFile, int sortKey) {
+    public EditFileAction(FileVersion file, FileVersion newFile, String path, int sortKey) {
         super(file, newFile);
         this.sortKey = sortKey;
+        parameters.put(PARAMETER_PATH, path);
     }
 
     @Override
