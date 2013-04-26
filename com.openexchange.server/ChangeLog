@@ -1,3 +1,7 @@
+* 2013-04-26 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 26185: Changed default values in contact-storage-ldap/cache.properties template
+
 * 2013-04-25 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 25799: Don't query contact image data for GET request   
