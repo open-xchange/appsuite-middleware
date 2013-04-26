@@ -1,3 +1,7 @@
+* 2013-04-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26198: Consider "timezone" URL parameter for mail module's ALL and LIST request
+
 * 2013-04-26 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 26185: Changed default values in contact-storage-ldap/cache.properties template

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,6 +73,7 @@ import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
@@ -114,6 +116,9 @@ public final class SearchAction extends AbstractMailAction {
                 throw MailExceptionCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_ORDER);
             }
             final boolean ignoreDeleted = !req.optBool("deleted", true);
+            String stz = req.getParameter(Mail.PARAMETER_TIMEZONE);
+            final TimeZone timeZone = isEmpty(stz) ? null : TimeZoneUtils.getTimeZone(stz.trim());
+            stz = null;
             final JSONValue searchValue = (JSONValue) req.getRequest().getData();
             /*
              * Get mail interface
@@ -177,7 +182,7 @@ public final class SearchAction extends AbstractMailAction {
                                 if (mail != null && (!ignoreDeleted || !mail.isDeleted())) {
                                     final JSONArray arr = new JSONArray();
                                     for (final MailFieldWriter writer : writers) {
-                                        writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                                        writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId, timeZone);
                                     }
                                     jsonWriter.value(arr);
                                 }
@@ -191,7 +196,7 @@ public final class SearchAction extends AbstractMailAction {
                                 if (mail != null && (!ignoreDeleted || !mail.isDeleted())) {
                                     final JSONArray arr = new JSONArray();
                                     for (final MailFieldWriter writer : writers) {
-                                        writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                                        writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId, timeZone);
                                     }
                                     jsonWriter.value(arr);
                                 }
@@ -239,7 +244,7 @@ public final class SearchAction extends AbstractMailAction {
                     if (mail != null && (!ignoreDeleted || !mail.isDeleted())) {
                         final JSONArray arr = new JSONArray();
                         for (final MailFieldWriter writer : writers) {
-                            writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                            writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId, timeZone);
                         }
                         jsonWriter.value(arr);
                     }
