@@ -113,6 +113,10 @@ public class UploadAction implements AJAXActionService {
         if (requestData.containsParameter("offset")) {
             offset = requestData.getParameter("offset", Long.class).longValue();
         }
+        String contentType = "application/octet-stream";
+        if (requestData.containsParameter("contentType")) {
+            contentType = requestData.getParameter("contentType");
+        }
         /*
          * construct referenced file versions from parameters
          */
