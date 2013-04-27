@@ -2,6 +2,7 @@
 
  - Fix for bug 26237: Fixed possible XSS vulnerability
  - Fix for bug 26202: Avoid too long log messages if debug is disabled
+ - Fix for bug 26186: Refactored config-cascade to not dynamically look-up services via ServiceTracker, using a queue for tracking instead
 
 * 2013-04-26 - thorben.betten@open-xchange.com
 
