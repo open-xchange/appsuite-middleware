@@ -1,3 +1,82 @@
+* 2013-04-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26237: Fixed possible XSS vulnerability
+
+* 2013-04-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26198: Consider "timezone" URL parameter for mail module's ALL and LIST request
+ - Fix for bug 26188: Improved error message if a publication has been revoked in the meantime
+ - Fix for bug 26221: Convert HTML error message to plain text before logging it
+
+* 2013-04-26 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 26185: Changed default values in contact-storage-ldap/cache.properties template
+ - Fix for bug 26209: Don't try to load contact in case of DELETE event
+
+* 2013-04-25 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25799: Don't query contact image data for GET request   
+
+* 2013-04-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26116: Invalidate cache entry on document change/deletion
+ - Fix for bug 26120: Adapted logging behavior to client actions
+ - Fix for bug 26170: Added template file to Debian packaging file "conffiles"
+
+* 2013-04-23 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 26076: Deserialize 'image1' field in user update action   
+
+* 2013-04-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25791: Reliably enter stop() routine through registering own shut-down hook for document converter
+ - Fix for bug 26075: Understandable error message if file name conns illegal characters
+ - Fix for bug 26073: Provide statement's string representation on log invocation
+ - Fix for bug 26082: Convert native null object to JSONObject.NULL
+ - Fix for bug 26100: Create a unique file name for each mail inside a ZIP archive
+
+* 2013-04-22 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 26046: Fixed conflict bahaviour for DST and Full time recurring appointments.
+
+* 2013-04-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26028: Indicate proper file name for single multipart-part
+ - Fix for bug 26065: Check if MP3 file provides proper ID2v2 tag
+ - Fix for bug 26032: Properly support media request through AppleCoreMedia user agent
+ - Fix for bug 26045: Maintain original OXException instance
+ - Fix for bug 26083: Consider all parameters when generating key for preview cache
+
+* 2013-04-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26057: Honor optional URL parameter "timezone"
+
+* 2013-04-19 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26036: Added required service to needed services list of RSS bundle activator.
+
+* 2013-04-18 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 26015: Added missing missing timezone for halo calls.
+
+* 2013-04-18 - marc.arens@open-xchange.com
+
+ - Fix for bug 25842: Use com.openexchange.servlet.maxBodySize for parameters transported via PUT/POST body
+
+* 2013-04-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26003: Deal with possibly unknown MIME type when determining file extension
+ - Fix for bug 25981: Added capability for RSS
+
+* 2013-04-17 - marcus.klein@open-xchange.com
+
+ - Fix for bug 25911: Package com.openexchange.audit component for tracking user actions.
+
+* 2013-04-17 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 25952: Added missing change and delete exception field to get request for appointments.
+
+>>>>>>> 6caef32... Fix for bug 26237: Fixed possible XSS vulnerability
 * 2013-04-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 25957: Deny "vbscript" URLs
