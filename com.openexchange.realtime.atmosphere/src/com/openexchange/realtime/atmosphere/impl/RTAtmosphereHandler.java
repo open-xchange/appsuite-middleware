@@ -538,6 +538,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             stanza.setSequenceNumber(com.openexchange.tools.Collections.opt(sequenceNumbers, recipient, Long.valueOf(0)));
             stanza.trace("Stamped outgoing stanza with sequence number " + stanza.getSequenceNumber());
             sequenceNumbers.put(recipient, stanza.getSequenceNumber()+1);
+            if (stanza.getSequenceNumber() == 0) {
+                new Exception().fillInStackTrace().printStackTrace();
+            }
         } finally {
             recipient.unlock("rt-atmosphere-sequence");
         }

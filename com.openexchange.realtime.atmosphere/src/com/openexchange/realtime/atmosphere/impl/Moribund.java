@@ -97,11 +97,12 @@ public abstract class Moribund implements Comparable<Moribund> {
 
     /**
      * Get the lingering time of this moribund in milliseconds.
+     * @param now 
      * 
      * @return the lingering time of this moribund in milliseconds
      */
-    public long getLinger() {
-        return System.currentTimeMillis() - lingeringStart;
+    public long getLinger(long now) {
+        return now - lingeringStart;
     }
     
     public ID getConcreteID() {
