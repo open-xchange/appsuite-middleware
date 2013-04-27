@@ -447,27 +447,23 @@ public class FileResponseRenderer implements ResponseRenderer {
     }
 
 
-    /*
-     * check if transformation is needed
-     *
-     */
-    private boolean isTransformationNeeded(final AJAXRequestData request, final IFileHolder file, final String delivery)
-        throws OXException, IOException {
+    /** Checks if transformation is needed */
+    private boolean isTransformationNeeded(final AJAXRequestData request, final IFileHolder file, final String delivery) throws OXException, IOException {
 
         boolean transformationNeeded = !file.getContentType().equalsIgnoreCase("image/jpeg");
-        if(!transformationNeeded) {
+        if (!transformationNeeded) {
             transformationNeeded = request.isSet("cropWidth") || request.isSet("cropHeight");
         }
-        if(!transformationNeeded && (DOWNLOAD.equalsIgnoreCase(delivery)==false)) {
-            if(request.isSet("rotate")) {
+        if (!transformationNeeded && (DOWNLOAD.equalsIgnoreCase(delivery) == false)) {
+            if (request.isSet("rotate")) {
                 final Boolean rotate = request.getParameter("rotate", Boolean.class);
-                if(rotate!=null) {
+                if (rotate != null) {
                     transformationNeeded = rotate.booleanValue();
                 }
             }
             // compress not needed to be checked, because we already have a jpeg
         }
-        if(!transformationNeeded) {
+        if (!transformationNeeded) {
 
             if (request.isSet("width") || request.isSet("height")) {
 
@@ -483,20 +479,19 @@ public class FileResponseRenderer implements ResponseRenderer {
                     return false;
                 }
                 BufferedInputStream inputStream = null;
-                if(file.repetitive()) {
+                if (file.repetitive()) {
                     inputStream = new BufferedInputStream(stream);
-                } else if(stream.markSupported()&&file.getLength()>0&&file.getLength()<0x20000) {
+                } else if (stream.markSupported() && file.getLength() > 0 && file.getLength() < 0x20000) {
                     // mark supported, but only allowing files < 128kb
-                    inputStream = new BufferedInputStream(stream, (int)file.getLength());
+                    inputStream = new BufferedInputStream(stream, (int) file.getLength());
                 }
-                if(inputStream==null) {
+                if (inputStream == null) {
                     transformationNeeded = true;
-                }
-                else {
+                } else {
 
                     try {
                         final com.drew.metadata.Metadata metadata = ImageMetadataReader.readMetadata(inputStream, false);
-                        if(metadata!=null) {
+                        if (metadata != null) {
                             int width = 0;
                             int height = 0;
                             final JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
@@ -504,15 +499,14 @@ public class FileResponseRenderer implements ResponseRenderer {
                                 width = jpegDirectory.getImageWidth();
                                 height = jpegDirectory.getImageHeight();
                             }
-                            transformationNeeded = (maxWidth>0&&width>maxWidth)||(maxHeight>0&&height>maxHeight);
+                            transformationNeeded = (maxWidth > 0 && width > maxWidth) || (maxHeight > 0 && height > maxHeight);
                         }
-                    }
-                    catch (final ImageProcessingException e) {
+                    } catch (final ImageProcessingException e) {
                         transformationNeeded = false;
                     } catch (final MetadataException e) {
                         transformationNeeded = false;
                     }
-                    if(!file.repetitive()&&stream.markSupported()) {
+                    if (!file.repetitive() && stream.markSupported()) {
                         stream.reset();
                     }
                 }
@@ -520,7 +514,6 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
         return transformationNeeded;
     }
-
 
     private IFileHolder transformIfImage(final AJAXRequestData request, final IFileHolder file, final String delivery) throws IOException, OXException {
         /*

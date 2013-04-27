@@ -1,6 +1,7 @@
 * 2013-04-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 26237: Fixed possible XSS vulnerability
+ - Fix for bug 26202: Avoid too long log messages if debug is disabled
 
 * 2013-04-26 - thorben.betten@open-xchange.com
 
