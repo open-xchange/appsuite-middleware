@@ -65,6 +65,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.encoding.Helper;
@@ -101,6 +102,8 @@ public final class DownloadUtility {
         return checkInlineDownload(inputStream, fileName, contentTypeStr, null, userAgent);
     }
 
+    private static final String MIME_APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
+
     /**
      * Checks specified input stream intended for inline display for harmful data if its Content-Type indicates image content.
      *
@@ -119,7 +122,7 @@ public final class DownloadUtility {
              * the client decide if it's able to display.
              */
             final ContentType contentType = new ContentType(sContentType);
-            if (contentType.startsWith("application/octet-stream")) {
+            if (contentType.startsWith(MIME_APPL_OCTET)) {
                 /*
                  * Try to determine MIME type
                  */
@@ -131,7 +134,7 @@ public final class DownloadUtility {
             String sContentDisposition = overridingDisposition;
             InputStream in = inputStream;
             String fn = fileName;
-            if (contentType.startsWith("text/htm")) {
+            if (contentType.startsWith("text/htm") || fileNameImpliesHtml(fileName)) {
                 /*
                  * HTML content requested for download...
                  */
@@ -149,7 +152,7 @@ public final class DownloadUtility {
                     htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
                     in = Streams.newByteArrayInputStream(htmlContent.getBytes(valid ? Charsets.forName(cs) : Charsets.ISO_8859_1));
                 }
-            } else if (contentType.startsWith("image/")) {
+            } else if (contentType.startsWith("image/") || fileNameImpliesImage(fileName)) {
                 /*
                  * Image content requested for download...
                  */
@@ -189,7 +192,7 @@ public final class DownloadUtility {
                              * Content type determined by file name extension is unknown
                              */
                             final String ct = MimeType2ExtMap.getContentType(fn);
-                            if ("application/octet-stream".equals(ct)) {
+                            if (MIME_APPL_OCTET.equals(ct)) {
                                 /*
                                  * No content type known
                                  */
@@ -209,7 +212,7 @@ public final class DownloadUtility {
                             preparedFileName = getSaveAsFileName(fn, msieOnWindows, contentType.getBaseType());
                         }
                         final String detectedCT = ImageTypeDetector.getMimeType(sequence);
-                        if ("application/octet-stream".equals(detectedCT)) {
+                        if (MIME_APPL_OCTET.equals(detectedCT)) {
                             /*
                              * Unknown magic bytes. Check for HTML.
                              */
@@ -249,6 +252,14 @@ public final class DownloadUtility {
         } catch (final IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static boolean fileNameImpliesHtml(final String fileName) {
+        return MimeType2ExtMap.getContentType(fileName).startsWith("text/htm");
+    }
+
+    private static boolean fileNameImpliesImage(final String fileName) {
+        return MimeType2ExtMap.getContentType(fileName).startsWith("image/");
     }
 
     /**
@@ -371,7 +382,7 @@ public final class DownloadUtility {
         /*
          * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.
          */
-        return new CheckedDownload("application/octet-stream", new com.openexchange.java.StringAllocator(64).append("attachment; filename=\"").append(
+        return new CheckedDownload(MIME_APPL_OCTET, new com.openexchange.java.StringAllocator(64).append("attachment; filename=\"").append(
             preparedFileName).append('"').toString(), inputStream);
     }
 

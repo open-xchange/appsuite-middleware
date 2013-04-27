@@ -1,6 +1,7 @@
 * 2013-04-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 25957: Deny "vbscript" URLs
+ - Fix for bug 26237: Fixed possible XSS vulnerability
 
 * 2013-03-04 - marcus.klein@open-xchange.com
 

@@ -60,13 +60,9 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 public final class ByteArrayFileHolder implements IFileHolder {
 
     private final byte[] bytes;
-
     private String name;
-
     private String contentType;
-
     private String disposition;
-
     private String delivery;
 
     /**
@@ -76,6 +72,11 @@ public final class ByteArrayFileHolder implements IFileHolder {
         super();
         this.bytes = bytes;
         contentType = "application/octet-stream";
+    }
+
+    @Override
+    public boolean repetitive() {
+        return true;
     }
 
     @Override

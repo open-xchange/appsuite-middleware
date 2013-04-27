@@ -50,8 +50,10 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import com.openexchange.ajax.container.FileHolder;
+import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
@@ -85,18 +87,24 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         request.require(Param.ID);
 
         final IDBasedFileAccess fileAccess = request.getFileAccess();
+        final String id = request.getId();
+        final String version = request.getVersion();
+        final File fileMetadata = fileAccess.getFileMetadata(id, version);
 
-        final File fileMetadata = fileAccess.getFileMetadata(request.getId(), request.getVersion());
+        final IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {
 
+            @Override
+            public InputStream newStream() throws OXException, IOException {
+                return new BufferedInputStream(fileAccess.getDocument(id, version));
+            }
+        };
 
-        final InputStream documentData = new BufferedInputStream(fileAccess.getDocument(request.getId(), request.getVersion()));
-
-        final FileHolder fileHolder = new FileHolder(documentData, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
+        final FileHolder fileHolder = new FileHolder(isClosure, fileMetadata.getFileSize(), fileMetadata.getFileMIMEType(), fileMetadata.getFileName());
 
         AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
         createAndSetETag(fileMetadata, request, result);
 
-		return result;
+        return result;
     }
 
 	private void createAndSetETag(File fileMetadata, InfostoreRequest request, AJAXRequestResult result) throws OXException {

@@ -206,7 +206,12 @@ public final class ImageUtility {
                  */
                 prefix = "";
                 final Props properties = LogProperties.optLogProperties();
-                route = null == properties ? null : properties.<String> get(LogProperties.Name.AJP_HTTP_SESSION);
+                if (null == properties) {
+                    route = null;
+                } else {
+                    final String ajpRoute = properties.<String> get(LogProperties.Name.AJP_HTTP_SESSION);
+                    route = null == ajpRoute ? properties.<String> get(LogProperties.Name.GRIZZLY_HTTP_SESSION) : ajpRoute;
+                }
             } else {
                 /*
                  * Compose absolute URL if a relative one is not preferred
