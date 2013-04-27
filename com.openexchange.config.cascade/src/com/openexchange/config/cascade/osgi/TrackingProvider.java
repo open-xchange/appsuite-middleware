@@ -51,11 +51,10 @@ package com.openexchange.config.cascade.osgi;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
@@ -89,30 +88,21 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
         return null;
     }
 
-    private final PriorityBlockingQueue<Element> queue;
+    private final Set<Element> set;
 
     /**
      * Initializes a new {@link TrackingProvider}.
      */
     public TrackingProvider(final String scope, final BundleContext context) {
         super(context, createFilter(scope, context), null);
-        // PriorityBlockingQueue
-        this.queue = new PriorityBlockingQueue<Element>(11, new Comparator<Element>() {
-
-            @Override
-            public int compare(final Element o1, final Element o2) {
-                final Comparable<Object> p1 = o1.comparable;
-                final Comparable<Object> p2 = o2.comparable;
-                return null == p1 ? (null == p2 ? 0 : -1) : (null == p2 ? 1 : p1.compareTo(p2));
-            }
-        });
+        set = new ConcurrentSkipListSet<Element>();
     }
 
     @Override
     public ConfigProviderService addingService(final ServiceReference<ConfigProviderService> reference) {
         final ConfigProviderService service = context.getService(reference);
         @SuppressWarnings("unchecked") final Comparable<Object> comparable = (Comparable<Object>) reference.getProperty("priority");
-        if (queue.offer(new Element(service, comparable))) {
+        if (set.add(new Element(service, comparable))) {
             return service;
         }
         context.ungetService(reference);
@@ -126,14 +116,14 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
 
     @Override
     public void removedService(final ServiceReference<ConfigProviderService> reference, final ConfigProviderService service) {
-        queue.remove(new Element(service, null));
+        set.remove(new Element(service, null));
         context.ungetService(reference);
     }
 
     @Override
     public BasicProperty get(final String property, final int contextId, final int userId) throws OXException {
         BasicProperty first = null;
-        for (final Element e : queue) {
+        for (final Element e : set) {
             final BasicProperty prop = e.configProviderService.get(property, contextId, userId);
             if (prop.isDefined()) {
                 return prop;
@@ -152,7 +142,7 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
     @Override
     public Collection<String> getAllPropertyNames(final int contextId, final int userId) throws OXException {
         final Set<String> allNames = new HashSet<String>();
-        for (final Element e : queue) {
+        for (final Element e : set) {
             allNames.addAll(e.configProviderService.getAllPropertyNames(contextId, userId));
         }
         return allNames;
