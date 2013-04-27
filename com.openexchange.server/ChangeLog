@@ -1,3 +1,7 @@
+* 2013-04-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26237: Fixed possible XSS vulnerability
+
 * 2013-04-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 26198: Consider "timezone" URL parameter for mail module's ALL and LIST request
