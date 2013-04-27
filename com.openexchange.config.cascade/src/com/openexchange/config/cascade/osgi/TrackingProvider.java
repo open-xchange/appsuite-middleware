@@ -49,13 +49,16 @@
 
 package com.openexchange.config.cascade.osgi;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.PriorityBlockingQueue;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.cascade.BasicProperty;
@@ -66,111 +69,184 @@ import com.openexchange.exception.OXException;
  * {@link TrackingProvider}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Refactored to use a <code>PriorityBlockingQueue</code>
  */
-public class TrackingProvider implements ConfigProviderService {
+public class TrackingProvider extends ServiceTracker<ConfigProviderService, ConfigProviderService> implements ConfigProviderService {
 
-    private final ServiceTracker<ConfigProviderService, ConfigProviderService> tracker;
+    /**
+     * Creates an appropriate filter expression for specified scope.
+     *
+     * @param scope The scope
+     * @param context The bundle context
+     * @return The filter expression
+     */
+    public static Filter createFilter(final String scope, final BundleContext context) {
+        try {
+            return context.createFilter("(& (objectclass="+ConfigProviderService.class.getName()+") (scope="+scope+"))");
+        } catch (final InvalidSyntaxException e) {
+            com.openexchange.log.Log.loggerFor(TrackingProvider.class).fatal(e.getMessage(), e);
+        }
+        return null;
+    }
+
+    private final PriorityBlockingQueue<Element> queue;
 
     /**
      * Initializes a new {@link TrackingProvider}.
      */
-    public TrackingProvider(ServiceTracker<ConfigProviderService, ConfigProviderService> providers) {
-        super();
-        this.tracker = providers;
+    public TrackingProvider(final String scope, final BundleContext context) {
+        super(context, createFilter(scope, context), null);
+        // PriorityBlockingQueue
+        this.queue = new PriorityBlockingQueue<Element>(11, new Comparator<Element>() {
+
+            @Override
+            public int compare(final Element o1, final Element o2) {
+                final Comparable<Object> p1 = o1.comparable;
+                final Comparable<Object> p2 = o2.comparable;
+                return null == p1 ? (null == p2 ? 0 : -1) : (null == p2 ? 1 : p1.compareTo(p2));
+            }
+        });
     }
 
     @Override
-    public BasicProperty get(final String property, int contextId, int userId) throws OXException {
-        ServiceReference<ConfigProviderService>[] serviceReferences = tracker.getServiceReferences();
-        if (serviceReferences == null) {
-            serviceReferences = new ServiceReference[0];
+    public ConfigProviderService addingService(final ServiceReference<ConfigProviderService> reference) {
+        final ConfigProviderService service = context.getService(reference);
+        @SuppressWarnings("unchecked") final Comparable<Object> comparable = (Comparable<Object>) reference.getProperty("priority");
+        if (queue.offer(new Element(service, comparable))) {
+            return service;
         }
-        Arrays.sort(serviceReferences, new Comparator<ServiceReference<ConfigProviderService>>() {
+        context.ungetService(reference);
+        return null;
+    }
 
-            @Override
-            public int compare(ServiceReference<ConfigProviderService> o1, ServiceReference<ConfigProviderService> o2) {
-                Comparable<Object> p1 = (Comparable<Object>) o1.getProperty("priority");
-                Comparable<Object> p2 = (Comparable<Object>) o2.getProperty("priority");
-                if (p1 == null && p2 == null) {
-                    return 0;
-                }
-                if (p1 == null) {
-                    return -1;
-                }
+    @Override
+    public void modifiedService(final ServiceReference<ConfigProviderService> reference, final ConfigProviderService service) {
+        // Ignore
+    }
 
-                if (p2 == null) {
-                    return 1;
-                }
-                return p1.compareTo(p2);
-            }
+    @Override
+    public void removedService(final ServiceReference<ConfigProviderService> reference, final ConfigProviderService service) {
+        queue.remove(new Element(service, null));
+        context.ungetService(reference);
+    }
 
-        });
-
+    @Override
+    public BasicProperty get(final String property, final int contextId, final int userId) throws OXException {
         BasicProperty first = null;
-        for (ServiceReference<ConfigProviderService> ref : serviceReferences) {
-            ConfigProviderService delegate = tracker.getService(ref);
-            BasicProperty prop = delegate.get(property, contextId, userId);
-            if (first == null) {
-                first = prop;
-            }
+        for (final Element e : queue) {
+            final BasicProperty prop = e.configProviderService.get(property, contextId, userId);
             if (prop.isDefined()) {
                 return prop;
             }
+            if (first == null) {
+                first = prop;
+            }
         }
-        if (first == null) {
-            first = new BasicProperty() {
-
-                @Override
-                public String get() throws OXException {
-                    return null;
-                }
-
-                @Override
-                public String get(String metadataName) throws OXException {
-                    return null;
-                }
-
-                @Override
-                public boolean isDefined() throws OXException {
-                    return false;
-                }
-
-                @Override
-                public void set(String value) throws OXException {
-                    throw new UnsupportedOperationException(
-                        "Can't save setting " + property + ". No ConfigProvider is specified for this value");
-                }
-
-                @Override
-                public void set(String metadataName, String value) throws OXException {
-                    throw new UnsupportedOperationException(
-                        "Can't save metadata " + metadataName + " on property " + property + ". No ConfigProvider is specified for this value");
-                }
-
-                @Override
-                public List<String> getMetadataNames() throws OXException {
-                    return Collections.emptyList();
-                }
-            };
+        if (first != null) {
+            return first;
         }
-        return first;
+        // Return empty property
+        return new EmptyBasicProperty(property);
     }
 
     @Override
-    public Collection<String> getAllPropertyNames(int contextId, int userId) throws OXException {
-        Object[] services = tracker.getServices();
-        if (services == null) {
-            return Collections.emptyList();
-        }
-        Set<String> allNames = new HashSet<String>();
-
-        for (Object object : services) {
-            ConfigProviderService configProvider = (ConfigProviderService) object;
-            Collection<String> names = configProvider.getAllPropertyNames(contextId, userId);
-            allNames.addAll(names);
-
+    public Collection<String> getAllPropertyNames(final int contextId, final int userId) throws OXException {
+        final Set<String> allNames = new HashSet<String>();
+        for (final Element e : queue) {
+            allNames.addAll(e.configProviderService.getAllPropertyNames(contextId, userId));
         }
         return allNames;
     }
 
+    // -------------------------------------------------------------------------------------------------------------- //
+
+    /**
+     * A comparable queue element providing look-up of {@link ConfigProviderService} through its {@link #equals(Object)} method.
+     */
+    private static final class Element implements Comparable<Element> {
+
+        final Comparable<Object> comparable;
+        final ConfigProviderService configProviderService;
+
+        Element(final ConfigProviderService configProviderService, final Comparable<Object> comparable) {
+            super();
+            this.configProviderService = configProviderService;
+            this.comparable = comparable;
+        }
+
+        @Override
+        public int compareTo(final Element o) {
+            final Comparable<Object> p1 = this.comparable;
+            final Comparable<Object> p2 = o.comparable;
+            return null == p1 ? (null == p2 ? 0 : -1) : (null == p2 ? 1 : p1.compareTo(p2));
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((configProviderService == null) ? 0 : configProviderService.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Element)) {
+                return false;
+            }
+            final Element other = (Element) obj;
+            if (configProviderService == null) {
+                if (other.configProviderService != null) {
+                    return false;
+                }
+            } else if (configProviderService != other.configProviderService) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    private static final class EmptyBasicProperty implements BasicProperty {
+
+        private final String property;
+
+        EmptyBasicProperty(final String property) {
+            super();
+            this.property = property;
+        }
+
+        @Override
+        public String get() throws OXException {
+            return null;
+        }
+
+        @Override
+        public String get(final String metadataName) throws OXException {
+            return null;
+        }
+
+        @Override
+        public boolean isDefined() throws OXException {
+            return false;
+        }
+
+        @Override
+        public void set(final String value) throws OXException {
+            throw new UnsupportedOperationException("Can't save setting " + property + ". No ConfigProvider is specified for this value");
+        }
+
+        @Override
+        public void set(final String metadataName, final String value) throws OXException {
+            throw new UnsupportedOperationException(
+                "Can't save metadata " + metadataName + " on property " + property + ". No ConfigProvider is specified for this value");
+        }
+
+        @Override
+        public List<String> getMetadataNames() throws OXException {
+            return Collections.emptyList();
+        }
+    }
 }
