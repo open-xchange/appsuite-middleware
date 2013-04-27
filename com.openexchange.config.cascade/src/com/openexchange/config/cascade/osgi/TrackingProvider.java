@@ -49,12 +49,13 @@
 
 package com.openexchange.config.cascade.osgi;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
@@ -88,25 +89,31 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
         return null;
     }
 
-    private final Set<Element> set;
+    private final AtomicReference<List<Element>> elementsRef;
 
     /**
      * Initializes a new {@link TrackingProvider}.
      */
     public TrackingProvider(final String scope, final BundleContext context) {
         super(context, createFilter(scope, context), null);
-        set = new ConcurrentSkipListSet<Element>();
+        elementsRef = new AtomicReference<List<Element>>(Collections.<Element> emptyList());
     }
 
     @Override
     public ConfigProviderService addingService(final ServiceReference<ConfigProviderService> reference) {
         final ConfigProviderService service = context.getService(reference);
         @SuppressWarnings("unchecked") final Comparable<Object> comparable = (Comparable<Object>) reference.getProperty("priority");
-        if (set.add(new Element(service, comparable))) {
-            return service;
-        }
-        context.ungetService(reference);
-        return null;
+
+        List<Element> expected;
+        List<Element> list;
+        do {
+            expected = elementsRef.get();
+            list = new ArrayList<Element>(expected);
+            list.add(new Element(service, comparable));
+            Collections.sort(list);
+        } while (!elementsRef.compareAndSet(expected, list));
+
+        return service;
     }
 
     @Override
@@ -116,14 +123,22 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
 
     @Override
     public void removedService(final ServiceReference<ConfigProviderService> reference, final ConfigProviderService service) {
-        set.remove(new Element(service, null));
+        List<Element> expected;
+        List<Element> list;
+        do {
+            expected = elementsRef.get();
+            list = new ArrayList<Element>(expected);
+            list.remove(new Element(service, null));
+            Collections.sort(list);
+        } while (!elementsRef.compareAndSet(expected, list));
+
         context.ungetService(reference);
     }
 
     @Override
     public BasicProperty get(final String property, final int contextId, final int userId) throws OXException {
         BasicProperty first = null;
-        for (final Element e : set) {
+        for (final Element e : elementsRef.get()) {
             final BasicProperty prop = e.configProviderService.get(property, contextId, userId);
             if (prop.isDefined()) {
                 return prop;
@@ -142,7 +157,7 @@ public class TrackingProvider extends ServiceTracker<ConfigProviderService, Conf
     @Override
     public Collection<String> getAllPropertyNames(final int contextId, final int userId) throws OXException {
         final Set<String> allNames = new HashSet<String>();
-        for (final Element e : set) {
+        for (final Element e : elementsRef.get()) {
             allNames.addAll(e.configProviderService.getAllPropertyNames(contextId, userId));
         }
         return allNames;
