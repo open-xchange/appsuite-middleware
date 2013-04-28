@@ -330,6 +330,7 @@ public final class GetAction extends AbstractMailAction {
                      */
                     req.getRequest().setFormat("file");
                     fileHolder.setContentType("application/octet-stream");
+                    fileHolder.setDelivery("download");
                     // Set file name
                     final String subject = mail.getSubject();
                     fileHolder.setName(new com.openexchange.java.StringAllocator(isEmpty(subject) ? "mail" : saneForFileName(subject)).append(".eml").toString());

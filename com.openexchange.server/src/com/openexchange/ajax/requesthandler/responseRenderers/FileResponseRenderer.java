@@ -186,14 +186,25 @@ public class FileResponseRenderer implements ResponseRenderer {
             file = transformIfImage(request, file, delivery);
             if (null == file) {
                 // Quit with 404
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found.");
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File not found.");
                 return;
             }
             final long length = file.getLength(); // Scaling image could have changed the size
-            documentData = null == file.getStream() ? null : new BufferedInputStream(file.getStream());
+            // Set binary input stream
+            {
+                final InputStream stream = file.getStream();
+                if (null != stream) {
+                    if ((stream instanceof ByteArrayInputStream) || (stream instanceof BufferedInputStream)) {
+                        documentData = stream;
+                    } else {
+                        documentData = new BufferedInputStream(stream);
+                    }
+                }
+            }
+            // Check for null
             if (null == documentData) {
                 // Quit with 404
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found.");
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File not found.");
                 return;
             }
             final String userAgent = req.getHeader("user-agent");
