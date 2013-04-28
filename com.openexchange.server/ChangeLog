@@ -4,6 +4,7 @@
                       "com.openexchange.mail.api.IMailMessageStorage.getMessage(String, String, boolean)"
  - Fix for bug 26174: Use proper property name for server route
  - Fix for bug 26164: Add capability "deniedPortal" if portal is disabled
+ - Fix for bug 25133: Fixed HTTP "Content-Type" header for requested message source content
 
 * 2013-04-27 - thorben.betten@open-xchange.com
 
