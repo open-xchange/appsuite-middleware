@@ -69,7 +69,7 @@ import com.openexchange.exception.OXException;
  * {@link TrackingProvider}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Refactored to use a <code>PriorityBlockingQueue</code>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Refactored to use a <code>AtomicReference&lt;List&lt;Element&gt;&gt;</code>
  */
 public class TrackingProvider extends ServiceTracker<ConfigProviderService, ConfigProviderService> implements ConfigProviderService {
 
