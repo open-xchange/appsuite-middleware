@@ -297,7 +297,7 @@ public class CapabilityServiceImpl implements CapabilityService {
      *
      * @return The checkers
      */
-    public List<CapabilityChecker> getCheckers() {
+    protected List<CapabilityChecker> getCheckers() {
         return Collections.emptyList();
     }
 
