@@ -868,7 +868,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 }
             } else if (DEBUG && MailAccount.DEFAULT_ID == accountId) {
                 LOG.debug(new com.openexchange.java.StringAllocator(256).append("\n\n\tPropagating client IP address disabled on Open-Xchange server \"").append(
-                    IMAPServiceRegistry.getService(ConfigurationService.class).getProperty("AJP_JVM_ROUTE")).append("\"\n").toString());
+                    IMAPServiceRegistry.getService(ConfigurationService.class).getProperty("com.openexchange.server.backendRoute")).append("\"\n").toString());
             }
             /*
              * Get connected store
