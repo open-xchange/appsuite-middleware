@@ -70,6 +70,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -156,8 +157,7 @@ public class CapabilityServiceImpl implements CapabilityService {
             }
         }
         // What about autologin?
-        boolean autologin = autologin();
-        if (autologin) {
+        if (autologin()) {
             capabilities.add(new Capability("autologin", true));
         }
         // Now the declared ones
@@ -167,40 +167,45 @@ public class CapabilityServiceImpl implements CapabilityService {
             }
         }
         // ------------- Combined capabilities/permissions ------------ //
-        // Portal
         if (!session.isAnonymous()) {
-            if (session.getUserConfiguration().hasPortal()) {
+            // Portal
+            final UserConfiguration userConfiguration = session.getUserConfiguration();
+            if (userConfiguration.hasPortal()) {
                 capabilities.add(getCapability("portal"));
+                capabilities.remove(getCapability("deniedPortal"));
+            } else {
+                capabilities.remove(getCapability("portal"));
+                capabilities.add(getCapability("deniedPortal"));
             }
-        }
-        // Free-Busy
-        if (!session.isAnonymous()) {
-            if (session.getUserConfiguration().hasFreeBusy()) {
+            // Free-Busy
+            if (userConfiguration.hasFreeBusy()) {
                 capabilities.add(getCapability("freebusy"));
+            } else {
+                capabilities.remove(getCapability("freebusy"));
             }
-        }
-        // Conflict-Handling
-        if (!session.isAnonymous()) {
-            if (session.getUserConfiguration().hasConflictHandling()) {
+            // Conflict-Handling
+            if (userConfiguration.hasConflictHandling()) {
                 capabilities.add(getCapability("conflict_handling"));
+            } else {
+                capabilities.remove(getCapability("conflict_handling"));
             }
-        }
-        // Participants-Dialog
-        if (!session.isAnonymous()) {
-            if (session.getUserConfiguration().hasParticipantsDialog()) {
+            // Participants-Dialog
+            if (userConfiguration.hasParticipantsDialog()) {
                 capabilities.add(getCapability("participants_dialog"));
+            } else {
+                capabilities.remove(getCapability("participants_dialog"));
             }
-        }
-        // Group-ware
-        if (!session.isAnonymous()) {
-            if (session.getUserConfiguration().hasGroupware()) {
+            // Group-ware
+            if (userConfiguration.hasGroupware()) {
                 capabilities.add(getCapability("groupware"));
+            } else {
+                capabilities.remove(getCapability("groupware"));
             }
-        }
-        // PIM
-        if (!session.isAnonymous()) {
-            if (session.getUserConfiguration().hasPIM()) {
+            // PIM
+            if (userConfiguration.hasPIM()) {
                 capabilities.add(getCapability("pim"));
+            } else {
+                capabilities.remove(getCapability("pim"));
             }
         }
         // ---------------- Now the ones from database ------------------ //
