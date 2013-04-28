@@ -1,3 +1,9 @@
+open-xchange-authentication-ucs (7.2.0-5) UNRELEASED; urgency=low
+
+  * Build for patch 2013-04-12
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 12 Apr 2013 15:27:20 +0200
+
 open-xchange-authentication-ucs (7.2.0-4) UNRELEASED; urgency=low
 
   * Fourth candidate for 7.2.0 release
