@@ -1134,7 +1134,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 mail.setMailId(Long.toString(msgUID));
                 mail.setUnreadMessages(IMAPCommandsCollection.getUnread(imapFolder));
             } catch (final OXException e) {
-                if (MimeMailExceptionCode.MESSAGE_REMOVED.getNumber() == e.getCode() && e.isPrefix("MSG")) {
+                if (MimeMailExceptionCode.MESSAGE_REMOVED.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.equals(e)) {
                     /*
                      * Obviously message was removed in the meantime
                      */
@@ -1143,7 +1143,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Check for generic messaging error
                  */
-                if (MimeMailExceptionCode.MESSAGING_ERROR.getNumber() == e.getCode() && e.isPrefix("MSG")) {
+                if (MimeMailExceptionCode.MESSAGING_ERROR.equals(e)) {
                     /*-
                      * Detected generic messaging error. This most likely hints to a severe JavaMail problem.
                      *
