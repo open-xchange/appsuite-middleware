@@ -2,6 +2,7 @@
 
  - Fix for bug 26166: Deal with possible null reference returned by
                       "com.openexchange.mail.api.IMailMessageStorage.getMessage(String, String, boolean)"
+ - Fix for bug 26174: Use proper property name for server route
 
 * 2013-04-27 - thorben.betten@open-xchange.com
 
