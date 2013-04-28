@@ -76,6 +76,7 @@ import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Header;
 import javax.mail.Message;
+import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
@@ -131,7 +132,7 @@ import com.sun.mail.pop3.POP3Folder;
  */
 public final class MimeMessageConverter {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(MimeMessageConverter.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(MimeMessageConverter.class);
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -1937,6 +1938,14 @@ public final class MimeMessageConverter {
             mail.setSubject(getSubject(mail));
             mail.setThreadLevel(0);
             return mail;
+        } catch (final MessageRemovedException e) {
+            final String[] sa = getFolderAndIdSafe(msg);
+            final String folder = null == sa ? null : sa[0];
+            final String mailId = null == sa ? null : sa[1];
+            if (null != folder && null != mailId) {
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(e, mailId, folder);
+            }
+            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, new Object[0]);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (final IOException e) {
@@ -1945,6 +1954,36 @@ public final class MimeMessageConverter {
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static String[] getFolderAndIdSafe(final MimeMessage msg) {
+        try {
+            final Folder f = msg.getFolder();
+            if (f != null) {
+                final String[] ret = new String[2];
+                ret[0] = f.getFullName();
+                final boolean openFolder = !f.isOpen();
+                if (openFolder) {
+                    f.open(Folder.READ_ONLY);
+                }
+                try {
+                    if (f instanceof UIDFolder) {
+                        ret[1] = Long.toString(((UIDFolder) f).getUID(msg));
+                    } else if (f instanceof FullnameFolder) {
+                        ret[1] = ((FullnameFolder) f).getUID(msg);
+                    } else if (f instanceof POP3Folder) {
+                        ret[1] = ((POP3Folder) f).getUID(msg);
+                    }
+                } finally {
+                    if (openFolder) {
+                        f.close(false);
+                    }
+                }
+            }
+        } catch (final Exception e) {
+            // Ignore
+        }
+        return null;
     }
 
     /**
@@ -2118,6 +2157,14 @@ public final class MimeMessageConverter {
             }
             mailPart.setSize(size);
             return mailPart;
+        } catch (final MessageRemovedException e) {
+            final String[] sa = part instanceof MimeMessage ? getFolderAndIdSafe((MimeMessage) part) : null;
+            final String folder = null == sa ? null : sa[0];
+            final String mailId = null == sa ? null : sa[1];
+            if (null != folder && null != mailId) {
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(e, mailId, folder);
+            }
+            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, new Object[0]);
         } catch (final MessagingException e) {
             throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
         }
@@ -2238,7 +2285,7 @@ public final class MimeMessageConverter {
         return tmp.booleanValue();
     }
 
-    private static void setHeaders(final Part part, final MailPart mailPart) {
+    private static void setHeaders(final Part part, final MailPart mailPart) throws OXException {
         /*
          * HEADERS
          */
@@ -2278,6 +2325,14 @@ public final class MimeMessageConverter {
                     }
                 }
             }
+        } catch (final MessageRemovedException e) {
+            final String[] sa = part instanceof MimeMessage ? getFolderAndIdSafe((MimeMessage) part) : null;
+            final String folder = null == sa ? null : sa[0];
+            final String mailId = null == sa ? null : sa[1];
+            if (null != folder && null != mailId) {
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(e, mailId, folder);
+            }
+            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, new Object[0]);
         } catch (final MessagingException e) {
             if (DEBUG) {
                 LOG.debug("JavaMail API failed to load part's headers. Using own routine.", e);
