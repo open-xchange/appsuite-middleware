@@ -147,9 +147,9 @@ public class AJPv13Exception extends OXException {
          */
         MESSAGING_ERROR("A messaging error occurred: %1$s", Category.CATEGORY_ERROR, 17),
         /**
-         * Missing property AJP_JVM_ROUTE in file "ajp.properties"
+         * Missing property "com.openexchange.server.backendRoute" in file "server.properties"
          */
-        MISSING_JVM_ROUTE("Missing property AJP_JVM_ROUTE in file \"ajp.properties\"", Category.CATEGORY_CONFIGURATION, 18),
+        MISSING_JVM_ROUTE("Missing property \"com.openexchange.server.backendRoute\" in file \"server.properties\"", Category.CATEGORY_CONFIGURATION, 18),
         /**
          * Cookie JSESSIONID contains non-matching JVM route: %1$s not equal to %2$s
          */
