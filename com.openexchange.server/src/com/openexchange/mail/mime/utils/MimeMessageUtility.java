@@ -406,7 +406,7 @@ public final class MimeMessageUtility {
     /**
      * Compares (case insensitive) the given values of message header "Content-ID". The leading/trailing characters '<code>&lt;</code>' and
      * ' <code>&gt;</code>' are ignored during comparison
-     * 
+     *
      * @param contentId1 The first content ID
      * @param contentId2 The second content ID
      * @return <code>true</code> if both are equal; otherwise <code>false</code>
@@ -587,10 +587,6 @@ public final class MimeMessageUtility {
             }
             return hasAttachments0(mp);
         }
-        // TODO: Think about special check for multipart/signed
-        /*
-         * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) { if (mp.getCount() > 2) { return true; } return hasAttachments0(mp); }
-         */
         if (mp.getCount() > 1) {
             return true;
         }
@@ -630,11 +626,6 @@ public final class MimeMessageUtility {
                 }
                 return hasAttachments0(bodystructure);
             }
-            // TODO: Think about special check for multipart/signed
-            /*
-             * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(bodystructure.subtype)) { if (bodystructure.bodies.length > 2) { return true; }
-             * return hasAttachments0(bodystructure); }
-             */
             if (bodystructure.bodies.length > 1) {
                 return true;
             }
@@ -645,7 +636,7 @@ public final class MimeMessageUtility {
 
     private static boolean hasAttachments0(final BODYSTRUCTURE bodystructure) {
         boolean found = false;
-        for (int i = 0; (i < bodystructure.bodies.length) && !found; i++) {
+        for (int i = 0; !found && (i < bodystructure.bodies.length); i++) {
             found |= hasAttachments(bodystructure.bodies[i]);
         }
         return found;
@@ -1770,6 +1761,50 @@ public final class MimeMessageUtility {
             }
             return bytes;
         }
+    }
+
+    /**
+     * Gets the denoted (single) header.
+     *
+     * @param name The header name
+     * @param defaultValue The default value to return if absent
+     * @param part The part to look-up
+     * @return The header value or <code>defaultValue</code>
+     * @throws MessagingException If returning header fails
+     */
+    public static String getHeader(final String name, final String defaultValue, final Part part) throws MessagingException {
+        if (null == name || null == part) {
+            return defaultValue;
+        }
+        final String[] header = part.getHeader(name);
+        if (null == header || 0 == header.length) {
+            return defaultValue;
+        }
+        return isEmpty(header[0]) ? defaultValue : header[0];
+    }
+
+    /**
+     * Checks if given part is considered as an inline part, that is if:<br>
+     * <ul>
+     * <li>Part's disposition is equal to <code>&quot;inline&quot;</code> OR </li>
+     * <li>Part has no (file) name</li>
+     * </ul>
+     *
+     * @param part The part to check
+     * @return <code>true</code> if inline; otherwise <code>false</code>
+     * @throws MessagingException If check fails
+     */
+    public static boolean isInline(final Part part) throws MessagingException {
+        if (null == part) {
+            return false;
+        }
+        final String disposition = toLowerCase(getHeader("Content-Disposition", null, part));
+        if (null != disposition) {
+            return disposition.startsWith("inline") || disposition.indexOf("filename=") < 0;
+        }
+        // Check name
+        final String type = toLowerCase(getHeader("Content-Type", "", part));
+        return type.indexOf("name=") < 0;
     }
 
     private static final String X_ORIGINAL_HEADERS = "x-original-headers";
