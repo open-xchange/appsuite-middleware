@@ -603,6 +603,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
                     document.setVersion(1);
                     document.setFilestoreLocation(saveFile.getId());
+                    document.setFileMD5Sum(saveFile.getMd5());
                     if (document.getFileSize() == 0) {
                         document.setFileSize(qfs.getFileSize(saveFile.getId()));
                     }

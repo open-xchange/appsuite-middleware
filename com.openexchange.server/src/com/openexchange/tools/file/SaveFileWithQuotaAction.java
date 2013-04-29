@@ -54,50 +54,19 @@ import com.openexchange.exception.OXException;
 
 public class SaveFileWithQuotaAction extends SaveFileAction {
 
-    private QuotaFileStorage storage;
-
     private long sizeHint;
 
-    private InputStream in;
-
-    private String id;
-
     @Override
-    protected void undoAction() throws OXException {
-        storage.deleteFile(id);
-    }
-
-    @Override
-    public void perform() throws OXException {
-        id = storage.saveNewFile(in, sizeHint);
-    }
-
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public void setIn(final InputStream in) {
-        this.in = in;
+    protected String saveFile(InputStream stream) throws OXException {
+        if (QuotaFileStorage.class.isInstance(storage)) {
+            return ((QuotaFileStorage)storage).saveNewFile(stream, sizeHint);
+        } else {
+            return super.saveFile(stream);
+        }
     }
 
     public void setSizeHint(final long sizeHint) {
         this.sizeHint = sizeHint;
-    }
-
-    public void setStorage(final QuotaFileStorage storage) {
-        this.storage = storage;
-    }
-
-    @Override
-    public void setStorage(final FileStorage storage) {
-        if (storage instanceof QuotaFileStorage) {
-            final QuotaFileStorage qfs = (QuotaFileStorage) storage;
-            this.storage = qfs;
-        } else {
-            super.setStorage(storage);
-        }
     }
 
 }

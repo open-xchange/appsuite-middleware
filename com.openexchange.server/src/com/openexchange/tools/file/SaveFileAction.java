@@ -50,17 +50,24 @@
 package com.openexchange.tools.file;
 
 import java.io.InputStream;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import jonelo.jacksum.util.Service;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.tx.AbstractUndoable;
 import com.openexchange.tx.UndoableAction;
 
 public class SaveFileAction extends AbstractUndoable implements UndoableAction {
 
-    private FileStorage storage;
+    protected FileStorage storage;
 
     private InputStream in;
 
     private String id;
+
+    private String md5;
 
     public SaveFileAction() {
         super();
@@ -73,11 +80,34 @@ public class SaveFileAction extends AbstractUndoable implements UndoableAction {
 
     @Override
     public void perform() throws OXException {
-        id = storage.saveNewFile(in);
+        DigestInputStream digestStream = null;
+        try {
+            digestStream = new DigestInputStream(in, MessageDigest.getInstance("MD5"));
+        } catch (NoSuchAlgorithmException e) {
+            // okay, save without checksum instead
+        }
+        if (null != digestStream) {
+            try {
+                id = saveFile(digestStream);
+                md5 = Service.format(digestStream.getMessageDigest().digest());
+            } finally {
+                Streams.close(digestStream);
+            }
+        } else {
+            id = saveFile(in);
+        }
+    }
+
+    protected String saveFile(InputStream stream) throws OXException {
+        return storage.saveNewFile(in);
     }
 
     public String getId() {
         return id;
+    }
+
+    public String getMd5() {
+        return md5;
     }
 
     public void setIn(final InputStream in) {

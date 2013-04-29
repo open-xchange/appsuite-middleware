@@ -65,6 +65,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 
 /**
  * {@link ChecksumProvider}
@@ -215,7 +216,7 @@ public class ChecksumProvider {
     }
 
     private static FileChecksum calculateFileChecksum(DriveSession session, File file) throws OXException {
-        String md5 = calculateMD5(session, file);
+        String md5 = Strings.isEmpty(file.getFileMD5Sum()) ? calculateMD5(session, file) : file.getFileMD5Sum();
         if (null == md5) {
             throw DriveExceptionCodes.NO_CHECKSUM_FOR_FILE.create(file);
         }
@@ -241,7 +242,7 @@ public class ChecksumProvider {
     }
 
     private static String calculateMD5(InputStream inputStream) throws IOException {
-        byte[] buffer = new byte[1024];
+        byte[] buffer = new byte[2048];
         try {
             MD md5 = new MD("MD5");
             int read;
