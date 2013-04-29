@@ -623,38 +623,11 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 }
 
                 if (!failed) {
-                    PrintWriter writer;
-                    try {
-                        writer = atmosphereResource.getResponse().getWriter();
-                        writer.print(array);
-                        if (LOG.isTraceEnabled()) {
-                            LOG.trace("Outgoing: " + array);
-                        }
-                        if (writer.checkError()) {
-                            outboxFor(id).addAll(outbox);
-                            failed = true;
-                        } else {
-                            sent = true;
-                        }
-
-                    } catch (IOException e) {
-                        // Enqueue again and try later
-                        outboxFor(id).addAll(outbox);
-                        failed = true;
-                        String stackTrace = null;
-                        for (Stanza s: stanzasToSend) {
-                            if (s.traceEnabled()) {
-                                s.trace("Got IOException: Enqueue again");
-                                if (stackTrace == null) {
-                                    StringWriter w = new StringWriter();
-                                    e.printStackTrace(new PrintWriter(w));
-                                    stackTrace = w.toString();
-                                }
-                                s.trace(stackTrace);
-                            }
-                        }
-
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Outgoing: " + array);
                     }
+                    sent = true;
+                    atmosphereResource.getResponse().write(array.toString());
                     outbox = null;
                 }
             }
