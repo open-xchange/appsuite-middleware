@@ -1,3 +1,7 @@
+* 2013-04-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26243: Fixed vulnerability of XSS injection by content-type header
+
 * 2013-04-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 25957: Deny "vbscript" URLs
