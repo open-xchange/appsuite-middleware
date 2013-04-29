@@ -133,7 +133,7 @@ public class UploadAction implements AJAXActionService {
             if (null == uploadStream) {
                 throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
             }
-            actions = driveService.upload(session, rootFolderID, path, uploadStream, originalFile, newFile, offset, totalLength);
+            actions = driveService.upload(session, rootFolderID, path, uploadStream, originalFile, newFile, contentType, offset, totalLength);
         } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {

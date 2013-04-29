@@ -76,56 +76,73 @@ public class DownloadAction implements AJAXActionService {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        /*
-         * get parameters
-         */
-        String rootFolderID = requestData.getParameter("root");
-        if (Strings.isEmpty(rootFolderID)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
-        }
-        String path = requestData.getParameter("path");
-        if (Strings.isEmpty(path)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("path");
-        }
-        String name = requestData.getParameter("name");
-        if (Strings.isEmpty(name)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("name");
-        }
-        String checksum = requestData.getParameter("checksum");
-        if (Strings.isEmpty(checksum)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("checksum");
-        }
-        long length = -1;
-        if (requestData.containsParameter("length")) {
-            length = requestData.getParameter("length", Long.class).longValue();
-        }
-        long offset = 0;
-        if (requestData.containsParameter("offset")) {
-            offset = requestData.getParameter("offset", Long.class).longValue();
-        }
-        /*
-         * get data
-         */
-        DriveService driveService = Services.getService(DriveService.class, true);
-        IFileHolder fileHolder = null;
         try {
-            fileHolder = driveService.download(session, rootFolderID, path, new JsonFileVersion(checksum, name), offset, length);
-        } catch (OXException e) {
-            if (DriveExceptionCodes.FILEVERSION_NOT_FOUND.equals(e) ||
-                DriveExceptionCodes.FILE_NOT_FOUND.equals(e) ||
-                DriveExceptionCodes.PATH_NOT_FOUND.equals(e)) {
-                throw AjaxExceptionCodes.HTTP_ERROR.create(e, Integer.valueOf(HttpServletResponse.SC_NOT_FOUND), e.getSoleMessage());
+            /*
+             * get parameters
+             */
+            String rootFolderID = requestData.getParameter("root");
+            if (Strings.isEmpty(rootFolderID)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
             }
+            String path = requestData.getParameter("path");
+            if (Strings.isEmpty(path)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("path");
+            }
+            String name = requestData.getParameter("name");
+            if (Strings.isEmpty(name)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("name");
+            }
+            String checksum = requestData.getParameter("checksum");
+            if (Strings.isEmpty(checksum)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("checksum");
+            }
+            long length = -1;
+            if (requestData.containsParameter("length")) {
+                length = requestData.getParameter("length", Long.class).longValue();
+            }
+            long offset = 0;
+            if (requestData.containsParameter("offset")) {
+                offset = requestData.getParameter("offset", Long.class).longValue();
+            }
+            /*
+             * get data
+             */
+            DriveService driveService = Services.getService(DriveService.class, true);
+            IFileHolder fileHolder = driveService.download(session, rootFolderID, path, new JsonFileVersion(checksum, name), offset, length);
+            if (null == fileHolder) {
+                throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(name, checksum, path);
+            }
+            /*
+             * return file result
+             */
+            AJAXRequestResult requestResult = new AJAXRequestResult(fileHolder, "file");
+            requestResult.setType(ResultType.DIRECT);
+            return requestResult;
+        } catch (OXException e) {
+            /*
+             * indicate error by setting HTTP status code
+             */
+            throw getHttpError(e);
         }
-        if (null == fileHolder) {
-            throw AjaxExceptionCodes.HTTP_ERROR.create(Integer.valueOf(HttpServletResponse.SC_NOT_FOUND));
+    }
+
+    private static OXException getHttpError(OXException e) throws OXException {
+        int status;
+        if (DriveExceptionCodes.FILEVERSION_NOT_FOUND.equals(e) || DriveExceptionCodes.FILE_NOT_FOUND.equals(e) ||
+            DriveExceptionCodes.PATH_NOT_FOUND.equals(e)) {
+            status = HttpServletResponse.SC_NOT_FOUND;
+        } else if (AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
+            status = HttpServletResponse.SC_BAD_REQUEST;
+        } else if (OXException.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
+            status = HttpServletResponse.SC_FORBIDDEN;
+        } else if (OXException.CATEGORY_CONFLICT.equals(e.getCategory())) {
+            status = HttpServletResponse.SC_CONFLICT;
+        } else if (OXException.CATEGORY_USER_INPUT.equals(e.getCategory())) {
+            status = HttpServletResponse.SC_BAD_REQUEST;
+        } else {
+            status = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
         }
-        /*
-         * return file result
-         */
-        AJAXRequestResult requestResult = new AJAXRequestResult(fileHolder, "file");
-        requestResult.setType(ResultType.DIRECT);
-        return requestResult;
+        throw AjaxExceptionCodes.HTTP_ERROR.create(e, Integer.valueOf(status), e.getSoleMessage());
     }
 
 }

@@ -93,11 +93,12 @@ public class UploadHelper {
         this.session = session;
     }
 
-    public File perform(String path, FileVersion originalVersion, FileVersion newVersion, InputStream uploadStream, long offset, long totalLength) throws OXException {
+    public File perform(String path, FileVersion originalVersion, FileVersion newVersion, InputStream uploadStream, String contentType,
+        long offset, long totalLength) throws OXException {
         /*
          * save data
          */
-        Entry<File, String> uploadEntry = upload(newVersion, uploadStream, offset);
+        Entry<File, String> uploadEntry = upload(newVersion, uploadStream, contentType, offset);
         String checksum = uploadEntry.getValue();
         File uploadFile = uploadEntry.getKey();
         /*
@@ -131,11 +132,12 @@ public class UploadHelper {
         }
     }
 
-    private Entry<File, String> upload(FileVersion newVersion, InputStream uploadStream, long offset) throws OXException {
+    private Entry<File, String> upload(FileVersion newVersion, InputStream uploadStream, String contentType, long offset) throws OXException {
         /*
          * get/create upload file
          */
         File uploadFile = getUploadFile(newVersion.getChecksum(), true);
+        uploadFile.setFileMIMEType(contentType);
         /*
          * check current offset
          */
@@ -147,7 +149,7 @@ public class UploadHelper {
          */
         String checksum = null;
         FileStorageFileAccess fileAccess = session.getStorage().getFileAccess();
-        List<Field> modifiedFields = Arrays.asList(File.Field.FILE_SIZE);
+        List<Field> modifiedFields = Arrays.asList(File.Field.FILE_SIZE, File.Field.FILE_MIMETYPE);
         if (0 == offset) {
             /*
              * write initial file data, setting the first version number

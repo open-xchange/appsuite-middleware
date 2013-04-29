@@ -99,6 +99,7 @@ public interface DriveService {
      * @param path The path to the target folder, relative to the root folder
      * @param uploadStream An input stream for the file data (not closed by the service)
      * @param originalVersion The original file version to be updated, or <code>null</code> for new file uploads
+     * @param contentType The file's content type
      * @param file The target file version
      * @param offset The start offset in bytes for the upload when resuming, or <code>0</code> when initially starting an upload
      * @param totalLength The total expected length of the file (required to support resume of uploads), or <code>-1</code> if unknown
@@ -106,7 +107,7 @@ public interface DriveService {
      * @throws OXException
      */
     List<DriveAction<FileVersion>> upload(ServerSession session, String rootFolderID, String path, InputStream uploadStream,
-        FileVersion originalVersion, FileVersion newVersion, long offset, long totalLength) throws OXException;
+        FileVersion originalVersion, FileVersion newVersion, String contentType, long offset, long totalLength) throws OXException;
 
     /**
      * Processes a file download from the server.

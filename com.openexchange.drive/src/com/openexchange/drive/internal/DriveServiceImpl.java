@@ -187,13 +187,13 @@ public class DriveServiceImpl implements DriveService {
 
     @Override
     public List<DriveAction<FileVersion>> upload(ServerSession session, String rootFolderID, String path, InputStream uploadStream,
-        FileVersion originalVersion, FileVersion newVersion, long offset, long totalLength) throws OXException {
+        FileVersion originalVersion, FileVersion newVersion, String contentType, long offset, long totalLength) throws OXException {
         DriveSession driveSession = createSession(session, rootFolderID);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Handling upload: " + newVersion);
         }
         SyncResult<FileVersion> syncResult = new SyncResult<FileVersion>();
-        File createdFile = new UploadHelper(driveSession).perform(path, originalVersion, newVersion, uploadStream, offset, totalLength);
+        File createdFile = new UploadHelper(driveSession).perform(path, originalVersion, newVersion, uploadStream, contentType, offset, totalLength);
         if (null != createdFile) {
             /*
              * store checksum
