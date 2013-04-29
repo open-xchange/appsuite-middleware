@@ -57,8 +57,8 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.net.URLDecoder;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -272,6 +272,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String ACTION_REFRESH_SECRET = "refreshSecret";
 
     public static final String ACTION_TERMSEARCH = "advancedSearch";
+
+    public static final String ACTION_GETCHANGEEXCEPTIONS = "getChangeExceptions";
 
     /**
      * The parameter 'from' specifies index of starting entry in list of objects dependent on given order criteria and folder id
@@ -737,7 +739,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return encodeUrl(s, forAnchor, false);
     }
 
-    private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n|(?:%0[aA])?%0[dD]");
+    private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n|\r|(?:%0[aA])?%0[dD]|%0[aA]");
     private static final Pattern PATTERN_DSLASH = Pattern.compile("(?:/|%2[fF]){2}");
 
     /**
