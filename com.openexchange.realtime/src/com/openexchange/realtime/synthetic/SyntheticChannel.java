@@ -198,7 +198,8 @@ public class SyntheticChannel implements Channel, Runnable {
         if (runLoop == null) {
             throw RealtimeExceptionCodes.INVALID_ID.create(stanza.getTo());
         }
-        runLoop.offer(new MessageDispatch(handle, stanza));
+        //runLoop.offer(new MessageDispatch(handle, stanza));
+        new MessageDispatch(handle, stanza).tick();
     }
     
     public void addComponent(Component component) {

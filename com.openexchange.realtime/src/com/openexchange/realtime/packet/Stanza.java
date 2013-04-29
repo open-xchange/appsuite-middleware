@@ -63,6 +63,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import com.google.common.base.Predicate;
 import com.openexchange.exception.OXException;
@@ -98,7 +100,7 @@ public abstract class Stanza implements Serializable {
 
     // Payloads carried by this Stanza as n-ary trees
     Map<ElementPath, List<PayloadTree>> payloads;
-
+    
     /**
      * Initializes a new {@link Stanza}.
      */
@@ -474,7 +476,4 @@ public abstract class Stanza implements Serializable {
 
         return "From: " + from + "\nTo: " + to + "\nPayloads:\n" + payloads;
     }
-
-    
-
 }
