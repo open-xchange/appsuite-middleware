@@ -207,6 +207,12 @@ public class CapabilityServiceImpl implements CapabilityService {
             } else {
                 capabilities.remove(getCapability("pim"));
             }
+            // Spam
+            if (session.getUserSettingMail().isSpamEnabled()) {
+                capabilities.add(getCapability("spam"));
+            } else {
+                capabilities.remove(getCapability("spam"));
+            }
         }
         // ---------------- Now the ones from database ------------------ //
         {
