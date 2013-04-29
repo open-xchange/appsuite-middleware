@@ -54,7 +54,6 @@ import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveService;
@@ -116,7 +115,7 @@ public class DownloadAction implements AJAXActionService {
              * return file result
              */
             AJAXRequestResult requestResult = new AJAXRequestResult(fileHolder, "file");
-            requestResult.setType(ResultType.DIRECT);
+//            requestResult.setType(ResultType.DIRECT);//TODO: this leads to 0 bytes?
             return requestResult;
         } catch (OXException e) {
             /*
