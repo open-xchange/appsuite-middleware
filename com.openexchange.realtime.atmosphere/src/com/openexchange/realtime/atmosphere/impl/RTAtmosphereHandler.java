@@ -221,6 +221,13 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                                 // ignore
                                 String type = json.optString("type");
                                 if (type.equals("ping")) {
+                                    if (json.optBoolean("commit")) {
+                                        Stanza s = new Message();
+                                        s.setFrom(constructedId);
+                                        s.setTo(constructedId);
+                                        s.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload("pong", "json", "atmosphere", "pong").build()));
+                                        send(s, constructedId);
+                                    }
                                     return;
                                 }
                                 
