@@ -1,3 +1,7 @@
+* 2013-04-30 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25783: Correctly unfold content lines in iCal files   
+
 * 2013-04-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 26243: Fixed vulnerability of XSS injection by content-type header
