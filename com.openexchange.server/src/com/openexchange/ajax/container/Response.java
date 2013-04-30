@@ -149,7 +149,7 @@ public final class Response {
      * @param session The server session providing user data; if <code>null</code> default locale {@link Locale#US} is used
      */
     public Response(final ServerSession session) {
-        this(null == session ? DEFAULT_LOCALE : session.getUser().getLocale());
+        this(null == session || session.isAnonymous() ? DEFAULT_LOCALE : session.getUser().getLocale());
     }
 
     /**
