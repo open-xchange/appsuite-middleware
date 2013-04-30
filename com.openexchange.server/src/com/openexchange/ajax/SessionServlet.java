@@ -588,7 +588,7 @@ public abstract class SessionServlet extends AJAXServlet {
             properties.put(LogProperties.Name.SESSION_USER_ID, Integer.valueOf(session.getUserId()));
             properties.put(LogProperties.Name.SESSION_CONTEXT_ID, Integer.valueOf(session.getContextId()));
             final String client  = session.getClient();
-            properties.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : client);
+            properties.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : ForceLog.valueOf(client));
             properties.put(LogProperties.Name.SESSION_SESSION, session);
         }
         /*
