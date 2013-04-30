@@ -1,3 +1,7 @@
+* 2013-04-15 - marc.arens@open-xchange.com
+
+ - Fix for bug 25863: Move ArrayList.clear() to beginning of runloop and add logging in case of error
+
 * 2013-04-12 - marcus.klein@open-xchange.com
 
  - Fix for bug 25819: Changing the IMAP server, IMAP login and SMTP server is now possible for user objects.
