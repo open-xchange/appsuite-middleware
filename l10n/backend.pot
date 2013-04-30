@@ -10768,6 +10768,11 @@ msgstr ""
 msgid "Unsupported format: %1$s"
 msgstr ""
 
+#. Missing cookie: %s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:146
+msgid "Missing cookie: %s"
+msgstr ""
+
 #. *
 #. * Exception while writing JSON.
 #.
