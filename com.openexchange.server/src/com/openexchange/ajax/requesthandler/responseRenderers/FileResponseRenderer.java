@@ -270,18 +270,12 @@ public class FileResponseRenderer implements ResponseRenderer {
                     contentType = preferredContentType;
                 } else {
                     if (SAVE_AS_TYPE.equals(preferredContentType)) {
-                        // We don't know better... At least try to sanitize specified value
-                        try {
-                            resp.setContentType(new ContentType(contentType).getBaseType());
-                        } catch (Exception e) {
-                            // Ignore
-                            resp.setContentType(contentType);
-                        }
+                        trySetSanitizedContentType(contentType, resp);
                     } else {
                         final String primaryType1 = getPrimaryType(preferredContentType);
                         final String primaryType2 = getPrimaryType(contentType);
                         if (toLowerCase(primaryType1).startsWith(toLowerCase(primaryType2))) {
-                            resp.setContentType(contentType);
+                            trySetSanitizedContentType(contentType, resp);
                         } else {
                             // Specified Content-Type does NOT match file's real MIME type
                             // Therefore ignore it due to security reasons (see bug #25343)
@@ -464,6 +458,15 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
     }
 
+    /** Attempts to set a sanitized <code>Content-Type</code> header value to given HTTP response. */
+    private void trySetSanitizedContentType(final String contentType, final HttpServletResponse resp) {
+        try {
+            resp.setContentType(new ContentType(contentType).getBaseType());
+        } catch (final Exception e) {
+            // Ignore
+            resp.setContentType(contentType);
+        }
+    }
 
     /** Checks if transformation is needed */
     private boolean isTransformationNeeded(final AJAXRequestData request, final IFileHolder file, final String delivery) throws OXException, IOException {

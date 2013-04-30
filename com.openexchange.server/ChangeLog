@@ -5,6 +5,7 @@
 * 2013-04-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 26022: Add capability to deal with an anonymous session in ServerSessionAdapter
+ - Fix for bug 26244: Fixed XSS injection using utf-16 content type
 
 * 2013-04-30 - tobias.friedrich@open-xchange.com
 
