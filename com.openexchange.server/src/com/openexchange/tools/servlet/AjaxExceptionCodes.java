@@ -160,6 +160,10 @@ public enum AjaxExceptionCodes implements OXExceptionCode {
      * Unsupported format: %1$s
      */
     UNSUPPORTED_FORMAT(AjaxExceptionMessages.UNSUPPORTED_FORMAT_MSG, Category.CATEGORY_ERROR, 25),
+    /**
+     * Missing cookie: %s
+     */
+    MISSING_COOKIE(AjaxExceptionMessages.MISSING_COOKIE_MSG, Category.CATEGORY_ERROR, 2), // Yapp, the same error code
 
     ;
 
