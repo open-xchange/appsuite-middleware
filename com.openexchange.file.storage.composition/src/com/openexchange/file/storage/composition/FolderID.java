@@ -61,9 +61,7 @@ import com.openexchange.tools.id.IDMangler;
 public class FolderID {
 
     private String service;
-
     private String accountId;
-
     private String folderId;
 
     /**
@@ -132,6 +130,49 @@ public class FolderID {
             return folderId;
         }
         return IDMangler.mangle(service, accountId, folderId);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((accountId == null) ? 0 : accountId.hashCode());
+        result = prime * result + ((folderId == null) ? 0 : folderId.hashCode());
+        result = prime * result + ((service == null) ? 0 : service.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof FolderID)) {
+            return false;
+        }
+        final FolderID other = (FolderID) obj;
+        if (accountId == null) {
+            if (other.accountId != null) {
+                return false;
+            }
+        } else if (!accountId.equals(other.accountId)) {
+            return false;
+        }
+        if (folderId == null) {
+            if (other.folderId != null) {
+                return false;
+            }
+        } else if (!folderId.equals(other.folderId)) {
+            return false;
+        }
+        if (service == null) {
+            if (other.service != null) {
+                return false;
+            }
+        } else if (!service.equals(other.service)) {
+            return false;
+        }
+        return true;
     }
 
 }

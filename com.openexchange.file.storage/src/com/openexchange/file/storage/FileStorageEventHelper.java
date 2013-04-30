@@ -87,7 +87,7 @@ public class FileStorageEventHelper {
     }
 
     private static Dictionary<String, Object> buildProperties(final Session session, final String service, final String accountId, final String folderId, final String objectId) {
-        final Dictionary<String, Object> ht = new Hashtable<String, Object>();
+        final Dictionary<String, Object> ht = new Hashtable<String, Object>(6);
         if (null != session) {
             ht.put(FileStorageEventConstants.SESSION, session);
         }
@@ -99,6 +99,7 @@ public class FileStorageEventHelper {
         }
         if (null != objectId) {
             ht.put(FileStorageEventConstants.OBJECT_ID, objectId);
+            ht.put(FileStorageEventConstants.E_TAG, FileStorageUtility.getETagFor(objectId, FileStorageFileAccess.CURRENT_VERSION));
         }
         if (null != folderId) {
             ht.put(FileStorageEventConstants.FOLDER_ID, folderId);

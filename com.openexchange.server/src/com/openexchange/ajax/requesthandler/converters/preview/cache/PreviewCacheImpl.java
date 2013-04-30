@@ -64,12 +64,14 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.preview.cache.CachedPreview;
 import com.openexchange.preview.cache.PreviewCache;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 
 /**
  * {@link PreviewCacheImpl} - The database-backed preview cache implementation for documents.
@@ -90,19 +92,21 @@ public final class PreviewCacheImpl implements PreviewCache, EventHandler {
     @Override
     public void handleEvent(final Event event) {
         final String topic = event.getTopic();
-        if ("com/openexchange/infostore/update".equals(topic)) {
+        if (FileStorageEventConstants.UPDATE_TOPIC.equals(topic)) {
             try {
-                final int userId = ((Integer) event.getProperty("userId")).intValue();
-                final int contextId = ((Integer) event.getProperty("contextId")).intValue();
-                removeAlikes(event.getProperty("eTag").toString(), userId, contextId);
+                final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
+                final int userId = session.getUserId();
+                final int contextId = session.getContextId();
+                removeAlikes(event.getProperty(FileStorageEventConstants.E_TAG).toString(), userId, contextId);
             } catch (final OXException e) {
                 LOG.warn("Couldn't remove cache enrty.", e);
             }
-        } else if ("com/openexchange/infostore/delete".equals(topic)) {
+        } else if (FileStorageEventConstants.DELETE_TOPIC.equals(topic)) {
             try {
-                final int userId = ((Integer) event.getProperty("userId")).intValue();
-                final int contextId = ((Integer) event.getProperty("contextId")).intValue();
-                removeAlikes(event.getProperty("eTag").toString(), userId, contextId);
+                final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
+                final int userId = session.getUserId();
+                final int contextId = session.getContextId();
+                removeAlikes(event.getProperty(FileStorageEventConstants.E_TAG).toString(), userId, contextId);
             } catch (final OXException e) {
                 LOG.warn("Couldn't remove cache enrty.", e);
             }
