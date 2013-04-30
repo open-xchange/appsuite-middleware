@@ -50,6 +50,7 @@
 package com.openexchange.drive.sync;
 
 import java.util.Map.Entry;
+import org.apache.commons.logging.Log;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.comparison.Change;
 import com.openexchange.drive.comparison.ThreeWayComparison;
@@ -64,6 +65,8 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class Synchronizer<T extends DriveVersion> {
+
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(Synchronizer.class);
 
     protected final DriveSession session;
     protected final VersionMapper<T> mapper;

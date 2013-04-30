@@ -58,6 +58,7 @@ import com.openexchange.drive.actions.AcknowledgeDirectoryAction;
 import com.openexchange.drive.actions.Action;
 import com.openexchange.drive.actions.DriveAction;
 import com.openexchange.drive.actions.EditDirectoryAction;
+import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.drive.storage.DriveConstants;
 import com.openexchange.drive.sync.SyncResult;
@@ -68,7 +69,11 @@ import com.openexchange.drive.sync.SyncResult;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DirectoryRenameOptimizer implements ActionOptimizer<DirectoryVersion> {
+public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
+
+    public DirectoryRenameOptimizer(VersionMapper<DirectoryVersion> mapper) {
+        super(mapper);
+    }
 
     @Override
     public SyncResult<DirectoryVersion> optimize(DriveSession session, SyncResult<DirectoryVersion> result) {
@@ -85,24 +90,11 @@ public class DirectoryRenameOptimizer implements ActionOptimizer<DirectoryVersio
              * Server: {"action":"remove","newVersion":null,"version":{"path":"/wf","checksum":"55bd0578618be81d9b4140212e0fae50"}}
              */
             if (Action.SYNC == clientAction.getAction() && false == DriveConstants.ROOT_PATH.equals(clientAction.getVersion().getPath())) {
-                DriveAction<DirectoryVersion> matchingServerAction = null;
-                for (DriveAction<DirectoryVersion> directoryAction : optimizedActionsForServer) {
-                    if (Action.REMOVE == directoryAction.getAction() && null == directoryAction.getNewVersion() &&
-                        clientAction.getVersion().getChecksum().equals(directoryAction.getVersion().getChecksum())) {
-                        matchingServerAction = directoryAction;
-                        break;
-                    }
-                }
+                DriveAction<DirectoryVersion> matchingServerAction = findMatchingRenameAction(
+                    Action.REMOVE, clientAction.getVersion(), optimizedActionsForServer);
                 if (null != matchingServerAction) {
-                    DriveAction<DirectoryVersion> matchingClientAction = null;
-                    for (DriveAction<DirectoryVersion> directoryAction : optimizedActionsForClient) {
-                        if (Action.ACKNOWLEDGE == directoryAction.getAction() && null == directoryAction.getNewVersion() &&
-                            clientAction.getVersion().getChecksum().equals(directoryAction.getVersion().getChecksum()) &&
-                            matchingServerAction.getVersion().getPath().equals(directoryAction.getVersion().getPath())) {
-                            matchingClientAction = directoryAction;
-                            break;
-                        }
-                    }
+                    DriveAction<DirectoryVersion> matchingClientAction = findMatchingRenameAction(
+                        Action.ACKNOWLEDGE, clientAction.getVersion(), optimizedActionsForClient);
                     if (null != matchingClientAction) {
                         /*
                          * edit server directory instead
@@ -159,6 +151,44 @@ public class DirectoryRenameOptimizer implements ActionOptimizer<DirectoryVersio
          * return new sync results
          */
         return new SyncResult<DirectoryVersion>(optimizedActionsForServer, optimizedActionsForClient);
+    }
+
+    private DriveAction<DirectoryVersion> findMatchingRenameAction(Action action, DirectoryVersion version, List<DriveAction<DirectoryVersion>> driveActions) {
+        DriveAction<DirectoryVersion> renameAction = null;
+        int similarityScore = 0;
+        for (DriveAction<DirectoryVersion> driveAction : driveActions) {
+            if (action.equals(driveAction.getAction()) && matchesByChecksum(version, driveAction.getVersion())) {
+                int similarity = calculateSimilarity(version.getPath(), driveAction.getVersion().getPath());
+                if (null == renameAction || similarity > similarityScore) {
+                    similarityScore = similarity;
+                    renameAction = driveAction;
+                }
+            }
+        }
+        return renameAction;
+    }
+
+    private static int calculateSimilarity(String path1, String path2) {
+        if (null == path1) {
+            return null == path2 ? Integer.MAX_VALUE : 0;
+        } else if (null == path2) {
+            return null == path1 ? Integer.MAX_VALUE : 0;
+        } else if (path1.equals(path2)) {
+            return Integer.MAX_VALUE;
+        }
+        String[] splitted1 = path1.split("/");
+        String[] splitted2 = path2.split("/");
+        int score = 0;
+        if (splitted1.length == splitted2.length) {
+            score++;
+        }
+        int minLength = Math.min(splitted1.length, splitted2.length);
+        for (int i = 0; i < minLength; i++) {
+            if (splitted1[i].equals(splitted2[i])) {
+                score++;
+            }
+        }
+        return score;
     }
 
     private static List<DriveAction<DirectoryVersion>> getRedundantRenames(List<DriveAction<DirectoryVersion>> renameActions) {

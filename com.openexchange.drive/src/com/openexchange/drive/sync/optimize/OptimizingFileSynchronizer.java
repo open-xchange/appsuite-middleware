@@ -71,9 +71,14 @@ public class OptimizingFileSynchronizer extends FileSynchronizer {
     @Override
     public SyncResult<FileVersion> sync() throws OXException {
         SyncResult<FileVersion> result = super.sync();
-        result = new FileRenameOptimizer(mapper).optimize(session, result);
-        result = new FileCopyOptimizer(mapper).optimize(session, result);
-        result = new FileOrderOptimizer(mapper).optimize(session, result);
+        if (false == result.isEmpty()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Sync results before optimizations:\n" + result);
+            }
+            result = new FileRenameOptimizer(mapper).optimize(session, result);
+            result = new FileCopyOptimizer(mapper).optimize(session, result);
+            result = new FileOrderOptimizer(mapper).optimize(session, result);
+        }
         return result;
     }
 

@@ -72,7 +72,10 @@ public class OptimizingDirectorySynchronizer extends DirectorySynchronizer {
     public SyncResult<DirectoryVersion> sync() throws OXException {
         SyncResult<DirectoryVersion> result = super.sync();
         if (false == result.isEmpty()) {
-            result = new DirectoryRenameOptimizer().optimize(session, result);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Sync results before optimizations:\n" + result);
+            }
+            result = new DirectoryRenameOptimizer(mapper).optimize(session, result);
             result = new DirectoryOrderOptimizer().optimize(session, result);
         }
         return result;

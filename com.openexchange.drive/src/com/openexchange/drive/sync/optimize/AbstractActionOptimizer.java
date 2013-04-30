@@ -49,65 +49,53 @@
 
 package com.openexchange.drive.sync.optimize;
 
-import com.openexchange.drive.FileVersion;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.commons.logging.Log;
+import com.openexchange.drive.DriveVersion;
+import com.openexchange.drive.actions.Action;
+import com.openexchange.drive.actions.DriveAction;
 import com.openexchange.drive.comparison.VersionMapper;
 
-
 /**
- * {@link FileActionOptimizer}
+ * {@link AbstractActionOptimizer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class FileActionOptimizer extends AbstractActionOptimizer<FileVersion> {
+public abstract class AbstractActionOptimizer<T extends DriveVersion> implements ActionOptimizer<T> {
+
+    protected static final Log LOG = com.openexchange.log.Log.loggerFor(AbstractActionOptimizer.class);
+
+    protected final VersionMapper<T> mapper;
 
     /**
-     * Initializes a new {@link FileActionOptimizer}.
+     * Initializes a new {@link AbstractActionOptimizer}.
      *
-     * @param mapper The file version mapper
+     * @param mapper The version mapper
      */
-    public FileActionOptimizer(VersionMapper<FileVersion> mapper) {
-        super(mapper);
+    public AbstractActionOptimizer(VersionMapper<T> mapper) {
+        super();
+        this.mapper = mapper;
     }
 
-    protected static boolean matchesByNameAndChecksum(FileVersion v1, FileVersion v2) {
-        return matchesByName(v1, v2) && matchesByChecksum(v1, v2);
-    }
-
-    protected static boolean matchesByName(FileVersion v1, FileVersion v2) {
+    protected static <T extends DriveVersion> boolean matchesByChecksum(T v1, T v2) {
         if (null == v1) {
             return null == v2;
         } else if (null == v2) {
             return null == v1;
         } else {
-            return null == v1.getName() ? null == v2.getName() : v1.getName().equals(v2.getName());
+            return null == v1.getChecksum() ? null == v2.getChecksum() : v1.getChecksum().equals(v2.getChecksum());
         }
     }
 
-    protected static class SimpleFileVersion implements FileVersion {
-
-        private final String name;
-        private final String checksum;
-
-        public SimpleFileVersion(String name, String checksum) {
-            super();
-            this.name = name;
-            this.checksum = checksum;
+    protected static <T extends DriveVersion> List<DriveAction<T>> filterByAction(List<DriveAction<T>> driveActions, Action action) {
+        List<DriveAction<T>> filteredActions = new ArrayList<DriveAction<T>>();
+        for (DriveAction<T> driveAction : driveActions) {
+            if (null != driveAction && action.equals(driveAction.getAction())) {
+                filteredActions.add(driveAction);
+            }
         }
-
-        @Override
-        public String getChecksum() {
-            return checksum;
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public String toString() {
-            return getName() + " | " + getChecksum();
-        }
+        return filteredActions;
     }
 
 }

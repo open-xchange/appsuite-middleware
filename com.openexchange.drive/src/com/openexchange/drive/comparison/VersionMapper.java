@@ -51,11 +51,12 @@ package com.openexchange.drive.comparison;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
@@ -72,7 +73,7 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
     private final Collection<? extends T> originalVersions;
     private final Collection<? extends T> clientVersions;
     private final Collection<? extends T> serverVersions;
-    private final Map<String, ThreeWayComparison<T>> map;
+    private final SortedMap<String, ThreeWayComparison<T>> map;
 
     /**
      * Initializes a new {@link VersionMapper} using collections of original-, client- and server versions.
@@ -83,7 +84,7 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
      */
     public VersionMapper(Collection<? extends T> originalVersions, Collection<? extends T> clientVersions, Collection<? extends T> serverVersions) {
         super();
-        this.map = new HashMap<String, ThreeWayComparison<T>>();
+        this.map = new TreeMap<String, ThreeWayComparison<T>>();
         if (null == originalVersions) {
             this.originalVersions = Collections.emptyList();
         } else {

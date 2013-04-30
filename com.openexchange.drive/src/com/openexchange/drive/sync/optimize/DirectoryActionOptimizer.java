@@ -49,64 +49,37 @@
 
 package com.openexchange.drive.sync.optimize;
 
-import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.comparison.VersionMapper;
 
 
 /**
- * {@link FileActionOptimizer}
+ * {@link DirectoryActionOptimizer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class FileActionOptimizer extends AbstractActionOptimizer<FileVersion> {
+public abstract class DirectoryActionOptimizer extends AbstractActionOptimizer<DirectoryVersion> {
 
     /**
-     * Initializes a new {@link FileActionOptimizer}.
+     * Initializes a new {@link DirectoryActionOptimizer}.
      *
      * @param mapper The file version mapper
      */
-    public FileActionOptimizer(VersionMapper<FileVersion> mapper) {
+    public DirectoryActionOptimizer(VersionMapper<DirectoryVersion> mapper) {
         super(mapper);
     }
 
-    protected static boolean matchesByNameAndChecksum(FileVersion v1, FileVersion v2) {
-        return matchesByName(v1, v2) && matchesByChecksum(v1, v2);
+    protected boolean matchesByPathAndChecksum(DirectoryVersion v1, DirectoryVersion v2) {
+        return matchesByPath(v1, v2) && matchesByChecksum(v1, v2);
     }
 
-    protected static boolean matchesByName(FileVersion v1, FileVersion v2) {
+    protected boolean matchesByPath(DirectoryVersion v1, DirectoryVersion v2) {
         if (null == v1) {
             return null == v2;
         } else if (null == v2) {
             return null == v1;
         } else {
-            return null == v1.getName() ? null == v2.getName() : v1.getName().equals(v2.getName());
-        }
-    }
-
-    protected static class SimpleFileVersion implements FileVersion {
-
-        private final String name;
-        private final String checksum;
-
-        public SimpleFileVersion(String name, String checksum) {
-            super();
-            this.name = name;
-            this.checksum = checksum;
-        }
-
-        @Override
-        public String getChecksum() {
-            return checksum;
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public String toString() {
-            return getName() + " | " + getChecksum();
+            return null == v1.getPath() ? null == v2.getPath() : v1.getPath().equals(v2.getPath());
         }
     }
 
