@@ -1,6 +1,7 @@
 * 2013-04-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 25903: Added null guard when reading settings
+ - Fix for bug 25909: Proper initialization of service trackers although registering contact-collect service is disabled
 
 * 2013-04-15 - martin.herfurth@open-xchange.com
 
