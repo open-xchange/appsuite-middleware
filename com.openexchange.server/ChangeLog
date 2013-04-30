@@ -1,3 +1,7 @@
+* 2013-04-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26022: Add capability to deal with an anonymous session in ServerSessionAdapter
+
 * 2013-04-30 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 25783: Correctly unfold content lines in iCal files   
