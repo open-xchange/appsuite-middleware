@@ -47,33 +47,89 @@
  *
  */
 
-package com.openexchange.ms;
+package com.openexchange.ms.internal;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
- * {@link Topic} - Represents a topic for the publish-subscribe messaging model.
- * <p>
- * A topic follows the Publish/Subscribe Messaging Domain:<br>
- * <ul>
- * <li>Each message may have multiple consumers.</li>
- * <li>Publishers and subscribers have a timing dependency. A client that subscribes to a topic can consume only messages published after
- * the client has created a subscription, and the subscriber must continue to be active in order for it to consume messages.</li>
- * </ul>
- * <img src="http://docs.oracle.com/javaee/1.3/jms/tutorial/1_3_1-fcs/doc/images/Fig2.3.gif" alt="pub-sub">
+ * {@link HzDataUtility} - A utility class for Hazelcast-based messaging.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Topic<E> extends MessageDispatcher<E> {
+public final class HzDataUtility {
 
     /**
-     * Publishes specified message to this topic.
+     * Initializes a new {@link HzDataUtility}.
+     */
+    private HzDataUtility() {
+        super();
+    }
+
+    // ------------------------------------- DELAY STUFF -------------------------------------------- //
+
+    /**
+     * The delay for pooled messages.
+     */
+    public static final long DELAY_MSEC = 5000L;
+
+    /**
+     * The frequency to check for delayed pooled messages.
+     */
+    public static final int DELAY_FREQUENCY = 3000;
+
+    // ------------------------------------- CHUNK STUFF -------------------------------------------- //
+
+    /**
+     * The chunk size of a multiple message.
+     */
+    public static final int CHUNK_SIZE = 10;
+
+    /**
+     * The threshold when to switch to a multiple message.
+     */
+    public static final int CHUNK_THRESHOLD = 2;
+
+    // ------------------------------------- MESSAGE DATA ------------------------------------------- //
+
+    /**
+     * The property name for the identifier of the sender that transmitted message data.
+     */
+    public static final String MESSAGE_DATA_SENDER_ID = "__senderId".intern();
+
+    /**
+     * The property name for transmitted message data object.
+     */
+    public static final String MESSAGE_DATA_OBJECT = "__object".intern();
+
+    /**
+     * The property to mark as a multiple transport.
+     */
+    public static final String MULTIPLE_MARKER = "__multiple".intern();
+
+    /**
+     * The property prefix on a multiple transport.
+     */
+    public static final String MULTIPLE_PREFIX = "__map".intern();
+
+    /**
+     * Generates message data for given arguments.
      *
-     * @param message The message; prefer POJOs
+     * @param e The message data object; POJOs preferred
+     * @param senderId The sender identifier
+     * @return The message data container
      */
-    void publish(E message);
+    public static <E> Map<String, Object> generateMapFor(final E e, final String senderId) {
+        final Map<String, Object> map = new LinkedHashMap<String, Object>(2);
+        if (null != e) {
+            map.put(MESSAGE_DATA_OBJECT, e);
+        }
+        if (null != senderId) {
+            map.put(MESSAGE_DATA_SENDER_ID, senderId);
+        }
+        return map;
+    }
 
-    /**
-     * Cancels this topic.
-     */
-    void cancel();
+    // ------------------------------------- OTHER STIFF ------------------------------------------- //
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,69 @@
  *
  */
 
-package com.openexchange.caching.events;
+package com.openexchange.ms;
+
+import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 /**
- * {@link CacheOperation}
- * 
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * {@link MessageInbox} - The message Inbox for direct messages.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum CacheOperation {
+public interface MessageInbox {
 
     /**
-     * Invalidation of a cache entry, due to update or removal
+     * Returns an iterator over the messages in this Inbox.
+     * <p>
+     * There are no guarantees concerning the order in which the elements are returned.
+     *
+     * @return An <tt>Iterator</tt> over the elements in this collection
      */
-    INVALIDATE("invalidate"),
+    Iterator<Message<?>> iterator();
 
     /**
-     * Invalidation of a cache group
+     * Checks if this Inbox is currently empty.
+     *
+     * @return <code>true</code> if empty; otherwise <code>false</code>
      */
-    INVALIDATE_GROUP("invalidate_group");
-
-    private final String id;
-
-    private CacheOperation(final String id) {
-        this.id = id;
-    }
+    boolean isEmpty();
 
     /**
-     * Gets the identifier
-     * 
-     * @return The identifier
+     * Retrieves and removes the first message in this Inbox, or returns <tt>null</tt> if empty.
+     *
+     * @return The first message, or <tt>null</tt> if this queue is empty
      */
-    public String getId() {
-        return id;
-    }
+    Message<?> poll();
 
     /**
-     * Gets the cache operation for given identifier.
-     * 
-     * @param id The identifier
-     * @return The cache operation or <code>null</code>
+     * Retrieves but does not remove the first message in this Inbox, or returns <tt>null</tt> if empty.
+     *
+     * @return The first message, or <tt>null</tt> if this queue is empty
      */
-    public static CacheOperation cacheOperationFor(final String id) {
-        if (null == id) {
-            return null;
-        }
-        for (final CacheOperation cacheOperation : CacheOperation.values()) {
-            if (id.equals(cacheOperation.getId())) {
-                return cacheOperation;
-            }
-        }
-        return null;
-    }
+    Message<?> peek();
+
+    /**
+     * Retrieves and removes the first message in this Inbox, waiting if necessary until a message arrives.
+     *
+     * @return The first (incoming) message
+     * @throws InterruptedException If interrupted while waiting
+     */
+    Message<?> take() throws InterruptedException;
+
+    /**
+     * Retrieves and removes the first message in this Inbox, waiting up to the specified wait time if necessary for a message to arrive.
+     *
+     * @param timeout how long to wait before giving up, in units of <tt>unit</tt>
+     * @param unit a <tt>TimeUnit</tt> determining how to interpret the <tt>timeout</tt> parameter
+     * @return The first (incoming) message, or <tt>null</tt> if the specified waiting time elapses before a message arrived
+     * @throws InterruptedException If interrupted while waiting
+     */
+    Message<?> poll(long timeout, TimeUnit unit) throws InterruptedException;
+
+    /**
+     * Removes all of the messages from this Inbox.
+     */
+    void clear();
+
 }

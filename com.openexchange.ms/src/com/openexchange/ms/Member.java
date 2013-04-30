@@ -47,55 +47,28 @@
  *
  */
 
-package com.openexchange.caching.events;
+package com.openexchange.ms;
+
+import java.net.InetSocketAddress;
 
 /**
- * {@link CacheOperation}
+ * {@link Member} - Represents a member.
  * 
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum CacheOperation {
+public interface Member {
 
     /**
-     * Invalidation of a cache entry, due to update or removal
-     */
-    INVALIDATE("invalidate"),
-
-    /**
-     * Invalidation of a cache group
-     */
-    INVALIDATE_GROUP("invalidate_group");
-
-    private final String id;
-
-    private CacheOperation(final String id) {
-        this.id = id;
-    }
-
-    /**
-     * Gets the identifier
+     * Returns the InetSocketAddress of this member.
      * 
-     * @return The identifier
+     * @return InetSocketAddress of this member
      */
-    public String getId() {
-        return id;
-    }
+    InetSocketAddress getInetSocketAddress();
 
     /**
-     * Gets the cache operation for given identifier.
+     * Returns UUID of this member.
      * 
-     * @param id The identifier
-     * @return The cache operation or <code>null</code>
+     * @return UUID of this member.
      */
-    public static CacheOperation cacheOperationFor(final String id) {
-        if (null == id) {
-            return null;
-        }
-        for (final CacheOperation cacheOperation : CacheOperation.values()) {
-            if (id.equals(cacheOperation.getId())) {
-                return cacheOperation;
-            }
-        }
-        return null;
-    }
+    public String getUuid();
 }

@@ -47,55 +47,86 @@
  *
  */
 
-package com.openexchange.caching.events;
+package com.openexchange.ms.internal;
+
+import java.util.Iterator;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import com.openexchange.ms.Message;
+import com.openexchange.ms.MessageInbox;
 
 /**
- * {@link CacheOperation}
+ * {@link MessageInboxImpl}
  * 
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum CacheOperation {
+public final class MessageInboxImpl implements MessageInbox {
+
+    private static final MessageInboxImpl INSTANCE = new MessageInboxImpl();
 
     /**
-     * Invalidation of a cache entry, due to update or removal
-     */
-    INVALIDATE("invalidate"),
-
-    /**
-     * Invalidation of a cache group
-     */
-    INVALIDATE_GROUP("invalidate_group");
-
-    private final String id;
-
-    private CacheOperation(final String id) {
-        this.id = id;
-    }
-
-    /**
-     * Gets the identifier
+     * Gets the Inbox instance.
      * 
-     * @return The identifier
+     * @return The instance
      */
-    public String getId() {
-        return id;
+    public static MessageInboxImpl getInstance() {
+        return INSTANCE;
+    }
+
+    private final BlockingQueue<Message<?>> blockingQueue;
+
+    /**
+     * Initializes a new {@link MessageInboxImpl}.
+     */
+    private MessageInboxImpl() {
+        super();
+        blockingQueue = new LinkedBlockingQueue<Message<?>>();
+    }
+
+    @Override
+    public Iterator<Message<?>> iterator() {
+        return blockingQueue.iterator();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return blockingQueue.isEmpty();
     }
 
     /**
-     * Gets the cache operation for given identifier.
+     * Inserts the specified message into this Inbox if it is possible to do so immediately. Returning <tt>true</tt> upon success.
      * 
-     * @param id The identifier
-     * @return The cache operation or <code>null</code>
+     * @param e The message to add
+     * @return <tt>true</tt> if the message was added to this Inbox, else <tt>false</tt>
      */
-    public static CacheOperation cacheOperationFor(final String id) {
-        if (null == id) {
-            return null;
-        }
-        for (final CacheOperation cacheOperation : CacheOperation.values()) {
-            if (id.equals(cacheOperation.getId())) {
-                return cacheOperation;
-            }
-        }
-        return null;
+    public boolean offer(final Message<?> e) {
+        return blockingQueue.offer(e);
     }
+
+    @Override
+    public Message<?> poll() {
+        return blockingQueue.poll();
+    }
+
+    @Override
+    public Message<?> peek() {
+        return blockingQueue.peek();
+    }
+
+    @Override
+    public Message<?> take() throws InterruptedException {
+        return blockingQueue.take();
+    }
+
+    @Override
+    public Message<?> poll(final long timeout, final TimeUnit unit) throws InterruptedException {
+        return blockingQueue.poll(timeout, unit);
+    }
+
+    @Override
+    public void clear() {
+        blockingQueue.clear();
+    }
+
 }

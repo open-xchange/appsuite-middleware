@@ -2,6 +2,10 @@
 
  - Fix for bug 25957: Deny "vbscript" URLs
 
+* 2013-04-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25837: Added several enhancements to avoid flooding of the distributed hazelcast topic for cache events
+
 * 2013-04-04 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 25673: Be aware of possibly removed MBeans during iteration in showruntimestats

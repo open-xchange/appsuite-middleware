@@ -47,55 +47,72 @@
  *
  */
 
-package com.openexchange.caching.events;
+package com.openexchange.ms.internal;
+
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link CacheOperation}
- * 
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * {@link Services} - The static service lookup.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum CacheOperation {
+public final class Services {
 
     /**
-     * Invalidation of a cache entry, due to update or removal
+     * Initializes a new {@link Services}.
      */
-    INVALIDATE("invalidate"),
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
 
     /**
-     * Invalidation of a cache group
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    INVALIDATE_GROUP("invalidate_group");
-
-    private final String id;
-
-    private CacheOperation(final String id) {
-        this.id = id;
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
     /**
-     * Gets the identifier
-     * 
-     * @return The identifier
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
      */
-    public String getId() {
-        return id;
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
     /**
-     * Gets the cache operation for given identifier.
-     * 
-     * @param id The identifier
-     * @return The cache operation or <code>null</code>
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    public static CacheOperation cacheOperationFor(final String id) {
-        if (null == id) {
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.caching.hazelcast\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
             return null;
         }
-        for (final CacheOperation cacheOperation : CacheOperation.values()) {
-            if (id.equals(cacheOperation.getId())) {
-                return cacheOperation;
-            }
-        }
-        return null;
     }
+
 }

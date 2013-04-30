@@ -96,7 +96,7 @@ public class CacheEvent implements Serializable {
      * @param groupName The cache group name
      * @param key The key of the affected cache entry
      */
-    private CacheEvent(CacheOperation operation, String region, Serializable key, String groupName) {
+    public CacheEvent(CacheOperation operation, String region, Serializable key, String groupName) {
         super();
         this.operation = operation;
         this.region = region;

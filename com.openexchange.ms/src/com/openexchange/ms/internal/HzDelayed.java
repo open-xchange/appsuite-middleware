@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,86 @@
  *
  */
 
-package com.openexchange.caching.events;
+package com.openexchange.ms.internal;
+
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
+
 
 /**
- * {@link CacheOperation}
- * 
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * {@link HzDelayed}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum CacheOperation {
+public final class HzDelayed<E> implements Delayed {
 
     /**
-     * Invalidation of a cache entry, due to update or removal
+     * The delay for pooled messages.
      */
-    INVALIDATE("invalidate"),
+    private static final long DELAY_MSEC = HzDataUtility.DELAY_MSEC;
+
+    private final long stamp;
+    private final boolean immediateDelivery;
+    private final E data;
+    private final int hash;
 
     /**
-     * Invalidation of a cache group
+     * Initializes a new {@link HzDelayed}.
      */
-    INVALIDATE_GROUP("invalidate_group");
-
-    private final String id;
-
-    private CacheOperation(final String id) {
-        this.id = id;
+    public HzDelayed(final E data, final boolean immediateDelivery) {
+        super();
+        stamp = System.currentTimeMillis();
+        this.immediateDelivery = immediateDelivery;
+        this.data = data;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((data == null) ? 0 : data.hashCode());
+        hash = result;
     }
 
     /**
-     * Gets the identifier
-     * 
-     * @return The identifier
+     * Gets the message data object.
+     *
+     * @return The message data object
      */
-    public String getId() {
-        return id;
+    public E getData() {
+        return data;
     }
 
-    /**
-     * Gets the cache operation for given identifier.
-     * 
-     * @param id The identifier
-     * @return The cache operation or <code>null</code>
-     */
-    public static CacheOperation cacheOperationFor(final String id) {
-        if (null == id) {
-            return null;
+    @Override
+    public int compareTo(final Delayed o) {
+        final long thisStamp = stamp;
+        final long otherStamp = ((HzDelayed<?>) o).stamp;
+        return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
+    }
+
+    @Override
+    public long getDelay(final TimeUnit unit) {
+        return immediateDelivery ? 0L : unit.convert(DELAY_MSEC - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
         }
-        for (final CacheOperation cacheOperation : CacheOperation.values()) {
-            if (id.equals(cacheOperation.getId())) {
-                return cacheOperation;
+        if (!(obj instanceof HzDelayed)) {
+            return false;
+        }
+        HzDelayed<?> other = (HzDelayed<?>) obj;
+        if (data == null) {
+            if (other.data != null) {
+                return false;
             }
+        } else if (!data.equals(other.data)) {
+            return false;
         }
-        return null;
+        return true;
     }
+
 }

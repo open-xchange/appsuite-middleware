@@ -49,6 +49,11 @@
 
 package com.openexchange.ms.internal;
 
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -59,6 +64,8 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.ms.Message;
 import com.openexchange.ms.MessageListener;
 import com.openexchange.ms.Topic;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link HzTopic}
@@ -69,10 +76,17 @@ public final class HzTopic<E> implements Topic<E> {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HzTopic.class);
 
-    private final ITopic<MessageData<E>> hzTopic;
+    static final String MESSAGE_DATA_OBJECT = HzDataUtility.MESSAGE_DATA_OBJECT;
+    static final String MESSAGE_DATA_SENDER_ID = HzDataUtility.MESSAGE_DATA_SENDER_ID;
+    static final String MULTIPLE_PREFIX = HzDataUtility.MULTIPLE_PREFIX;
+    static final String MULTIPLE_MARKER = HzDataUtility.MULTIPLE_MARKER;
+
+    private final ITopic<Map<String, Object>> hzTopic;
     private final String senderId;
     private final String name;
-    private final ConcurrentMap<MessageListener<E>, com.hazelcast.core.MessageListener<MessageData<E>>> registeredListeners;
+    private final ConcurrentMap<MessageListener<E>, com.hazelcast.core.MessageListener<Map<String, Object>>> registeredListeners;
+    private final HzDelayQueue<HzDelayed<E>> publishQueue;
+    private final ScheduledTimerTask timerTask;
 
     /**
      * Initializes a new {@link HzTopic}.
@@ -82,7 +96,32 @@ public final class HzTopic<E> implements Topic<E> {
         this.name = name;
         senderId = UUIDs.getUnformattedString(UUID.randomUUID());
         this.hzTopic = hz.getTopic(name);
-        registeredListeners = new ConcurrentHashMap<MessageListener<E>, com.hazelcast.core.MessageListener<MessageData<E>>>(8);
+        registeredListeners = new ConcurrentHashMap<MessageListener<E>, com.hazelcast.core.MessageListener<Map<String, Object>>>(8);
+        publishQueue = new HzDelayQueue<HzDelayed<E>>();
+        // Timer task
+        final TimerService timerService = Services.getService(TimerService.class);
+        final Log log = LOG;
+        final Runnable r = new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    triggerPublish();
+                } catch (final Exception e) {
+                    log.warn("Failed to trigger publishing messages.", e);
+                }
+            }
+        };
+        final int delay = HzDataUtility.DELAY_FREQUENCY;
+        timerTask = timerService.scheduleWithFixedDelay(r, delay, delay);
+    }
+
+    /**
+     * Cancels the timer.
+     */
+    @Override
+    public void cancel() {
+        timerTask.cancel();
     }
 
     @Override
@@ -104,7 +143,7 @@ public final class HzTopic<E> implements Topic<E> {
 
     @Override
     public void removeMessageListener(final MessageListener<E> listener) {
-        final com.hazelcast.core.MessageListener<MessageData<E>> hzListener = registeredListeners.remove(listener);
+        final com.hazelcast.core.MessageListener<Map<String, Object>> hzListener = registeredListeners.remove(listener);
         if (null != hzListener) {
             try {
                 hzTopic.removeMessageListener(hzListener);
@@ -121,17 +160,76 @@ public final class HzTopic<E> implements Topic<E> {
 
     @Override
     public void destroy() {
+        timerTask.cancel();
         hzTopic.destroy();
     }
 
     @Override
     public void publish(final E message) {
-        hzTopic.publish(new MessageData<E>(message, senderId));
+        publishQueue.offerIfAbsent(new HzDelayed<E>(message, false));
+        triggerPublish();
+    }
+
+    /**
+     * Triggers all due messages.
+     */
+    public void triggerPublish() {
+        HzDelayed<E> polled = publishQueue.poll();
+        if (null != polled) {
+            final List<E> messages = new LinkedList<E>();
+            do {
+                messages.add(polled.getData());
+                polled = publishQueue.poll();
+            } while (polled != null);
+            publishNow(messages);
+        }
+    }
+
+    private static final int CHUNK_SIZE = HzDataUtility.CHUNK_SIZE;
+    private static final int CHUNK_THRESHOLD = HzDataUtility.CHUNK_THRESHOLD;
+
+    /**
+     * (Immediately) Publishes specified message to queue.
+     *
+     * @param message The message to publish
+     */
+    private void publishNow(final List<E> messages) {
+        final int size = messages.size();
+        if (0 == size) {
+            return;
+        }
+        if (size <= CHUNK_THRESHOLD) {
+            for (int i = 0; i < size; i++) {
+                hzTopic.publish(HzDataUtility.generateMapFor(messages.get(i), senderId));
+            }
+        }
+        // Chunk-wise
+        final StringBuilder sb = new StringBuilder(MULTIPLE_PREFIX);
+        final int reset = MULTIPLE_PREFIX.length();
+        final int chunkSize = CHUNK_SIZE;
+        int off = 0;
+        while (off < size) {
+            // Determine end index
+            int end = off + chunkSize;
+            if (end > size) {
+                end = size;
+            }
+            // Create map carrying multiple messages
+            final Map<String, Object> multiple = new LinkedHashMap<String, Object>(chunkSize + 1);
+            multiple.put(MULTIPLE_MARKER, Boolean.TRUE);
+            for (int i = off; i < end; i++) {
+                sb.setLength(reset);
+                multiple.put(sb.append(i+1).toString(), HzDataUtility.generateMapFor(messages.get(i), senderId));
+            }
+            // Publish
+            hzTopic.publish(multiple);
+            off = end;
+        }
     }
 
     // ------------------------------------------------------------------------ //
 
-    private static final class HzMessageListener<E> implements com.hazelcast.core.MessageListener<MessageData<E>> {
+    private static final class HzMessageListener<E> implements com.hazelcast.core.MessageListener<Map<String, Object>> {
 
         private final MessageListener<E> listener;
         private final String senderId;
@@ -146,10 +244,27 @@ public final class HzTopic<E> implements Topic<E> {
         }
 
         @Override
-        public void onMessage(final com.hazelcast.core.Message<MessageData<E>> message) {
-            final MessageData<E> messageData = message.getMessageObject();
-            final String messageSender = messageData.getSenderId();
-            listener.onMessage(new Message<E>(message.getSource().toString(), messageSender, messageData.getObject(), !senderId.equals(messageSender)));
+        public void onMessage(final com.hazelcast.core.Message<Map<String, Object>> message) {
+            final Map<String, Object> messageData = message.getMessageObject();
+            if (messageData.containsKey(MULTIPLE_MARKER)) {
+                final String name = message.getSource().toString();
+                for (final Entry<String, Object> entry : messageData.entrySet()) {
+                    if (entry.getKey().startsWith(MULTIPLE_PREFIX)) {
+                        onMessageReceived(name, (Map<String, Object>) entry.getValue());
+                    }
+                }
+            } else {
+                onMessageReceived(message.getSource().toString(), messageData);
+            }
+        }
+
+        private void onMessageReceived(final String name, final Map<String, Object> messageData) {
+            final String messageSender = (String) messageData.get(MESSAGE_DATA_SENDER_ID);
+            listener.onMessage(new Message<E>(
+                name,
+                messageSender,
+                (E) messageData.get(MESSAGE_DATA_OBJECT),
+                !senderId.equals(messageSender)));
         }
     }
 }
