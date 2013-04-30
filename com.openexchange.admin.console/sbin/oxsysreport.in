@@ -83,7 +83,7 @@ LOGARC_LONG=log-archive
 KEEP_TMP=false
 KEEP_TMP_LONG=keep-tmp-files
 KEEP_TMP_VALUES="true false"
-EXCLUDES="--exclude groupware/osgi --exclude admindaemon/osgi --exclude apache2/ssl"
+EXCLUDES="--exclude groupware/osgi --exclude admindaemon/osgi --exclude apache2/ssl --exclude httpd/logs"
 
 FILES_DIRS="
 /opt/open-xchange/etc
