@@ -723,7 +723,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      */
     private ID constructId(AtmosphereResource atmosphereResource, ServerSession serverSession) {
         String userLogin = serverSession.getUserlogin();
-        String contextName = getContextName(serverSession.getLogin());
+        String contextName = serverSession.getContext().getName();
 
         AtmosphereRequest request = atmosphereResource.getRequest();
         String resource = request.getHeader("resource");
@@ -738,20 +738,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             resource = serverSession.getSessionID();
         }
         return new ID(RTAtmosphereChannel.PROTOCOL, null, userLogin, contextName, resource);
-    }
-
-    /**
-     * Get context string from login string
-     * 
-     * @param login the login string
-     * @return an empty string if no context can be found, the context oterwise
-     */
-    private String getContextName(String login) {
-        int index = login.indexOf('@');
-        if (index < 0) {
-            return "defaultcontext";
-        }
-        return login.substring(index + 1);
     }
 
     @Override
