@@ -69,6 +69,7 @@ import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.ForceLog;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
@@ -88,16 +89,16 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 /**
  * {@link SessionValidator} - Validate session information of incoming realtime requests like done in the
  * com.openexchange.ajax.SessionServlet
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class SessionValidator {
 
     private static final org.apache.commons.logging.Log LOG = Log.loggerFor(SessionValidator.class);
 
-    private AtmosphereConfig atmosphereConfig;
+    private final AtmosphereConfig atmosphereConfig;
 
-    private AtmosphereServiceRegistry atmosphereServiceRegistry;
+    private final AtmosphereServiceRegistry atmosphereServiceRegistry;
 
     private final AtmosphereRequest request;
 
@@ -113,7 +114,7 @@ public class SessionValidator {
 
     /**
      * Initializes a new {@link SessionValidator} from a GET Request.
-     * 
+     *
      * @param request The incoming {@link AtmosphereRequest}
      */
     public SessionValidator(AtmosphereResource resource) {
@@ -122,7 +123,7 @@ public class SessionValidator {
 
     /**
      * Initializes a new {@link SessionValidator} from a POST Request and the associated post data.
-     * 
+     *
      * @param request The incoming {@link AtmosphereRequest}
      * @param postData the post data of the request, can be null
      */
@@ -136,7 +137,7 @@ public class SessionValidator {
 
     /**
      * Returns the sessionId the client sent to the server.
-     * 
+     *
      * @return the sessionId the client sent to the server
      * @throws OXException if retrieval of the sessionId fails
      */
@@ -149,7 +150,7 @@ public class SessionValidator {
 
     /**
      * Returns the validated {@link ServerSession} that is associated with the client that sent the request.
-     * 
+     *
      * @return the validated {@link ServerSession} that is associated with the client that sent the request
      * @throws OXException if retrieval or validation of the serverSession fails
      */
@@ -162,7 +163,7 @@ public class SessionValidator {
 
     /**
      * Gets and validates the ServerSession associated with this Request.
-     * 
+     *
      * @return the validated ServerSession associated with this Request.
      * @throws OXException if the ServerSession can't be retrieved or fails to validate
      */
@@ -182,7 +183,7 @@ public class SessionValidator {
      * <li>is the current ip the same that created the session initially
      * <li>does the request provide the open-xchange-secret and does the provided secret matche the one stored in Sessiond for the Session
      * object looked up via the session identifier
-     * 
+     *
      * @param request The incoming HttpServletRequest
      * @param sessionId The sessionId sent with the incoming request
      * @param serverSession The ServerSession associated with the sessionId
@@ -206,11 +207,11 @@ public class SessionValidator {
             properties.put(LogProperties.Name.SESSION_USER_ID, Integer.valueOf(serverSession.getUserId()));
             properties.put(LogProperties.Name.SESSION_CONTEXT_ID, Integer.valueOf(serverSession.getContextId()));
             final String client = serverSession.getClient();
-            properties.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : client);
+            properties.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : ForceLog.valueOf(client));
             properties.put(LogProperties.Name.SESSION_SESSION, serverSession);
         } catch (OXException oxe) {
             /*
-             * If we got a SessionException during validation properly handle the server side consequences 
+             * If we got a SessionException during validation properly handle the server side consequences
              */
             if (SessionExceptionCodes.getErrorPrefix().equals(oxe.getPrefix())) {
                 LOG.debug(oxe.getMessage(), oxe);
@@ -223,7 +224,7 @@ public class SessionValidator {
 
     /**
      * Handle specified SessionD exception by removing the Session related cookies and removing the Session from the Sessiond.
-     * 
+     *
      * @param e The SessionD exception
      * @param req The HTTP request
      * @param resp The HTTP response
@@ -248,7 +249,7 @@ public class SessionValidator {
 
     /**
      * Checks if the client IP address of the current request matches the one through that the session has been created.
-     * 
+     *
      * @param doCheck <code>true</code> to deny request with an exception.
      * @param ranges The white-list ranges
      * @param session session object
@@ -296,7 +297,7 @@ public class SessionValidator {
 
     /**
      * White listed clients are necessary for the Mobile Web Interface. This clients often change their IP address in mobile data networks.
-     * 
+     *
      * @param session The looked up Session
      * @param clientWhitelist The ClientWhiteList allowing to whitelist clients based on Strings with optional regular expressions
      * @return true if the client contained in the Session is part if the clientWhitelist, else false
@@ -307,7 +308,7 @@ public class SessionValidator {
 
     /**
      * Clients can be whitelisted based on IP ranges. This way you can whitelist whole subnets.
-     * 
+     *
      * @param actual The actual remote IP of the client
      * @param ranges The whitelisted IP ranges
      * @return true if the remote IP of the client is contained in the whitelisted IP ranges, else false
@@ -323,7 +324,7 @@ public class SessionValidator {
 
     /**
      * Check if the sent sessionid matches the one saved in the ServerSession.
-     * 
+     *
      * @param sessionId The sent sessionid
      * @param session the SeverSession
      * @throws OXException If the sessionids differ
@@ -340,7 +341,7 @@ public class SessionValidator {
 
     /**
      * Check if the context associated with the ServerSession is locked.
-     * 
+     *
      * @param session The ServerSession containing the context
      * @throws OXException If the Context is locked
      */
@@ -351,10 +352,11 @@ public class SessionValidator {
             if (sessiondService != null) {
                 sessiondService.removeSession(sessionId);
             } else {
-                if (LOG.isWarnEnabled())
+                if (LOG.isWarnEnabled()) {
                     LOG.warn(
                         "Couldn't remove Session " + sessionId + " from SessionD",
                         RealtimeExceptionCodes.NEEDED_SERVICE_MISSING.create(SessiondService.class.getName()));
+                }
             }
             if (LOG.isInfoEnabled()) {
                 LOG.info("The context " + ctx.getContextId() + " associated with session is locked.");
@@ -365,7 +367,7 @@ public class SessionValidator {
 
     /**
      * Extracts the secret string from specified cookies using given hash string.
-     * 
+     *
      * @param req the HTTP servlet request object.
      * @param hash remembered hash from session.
      * @param client the remembered client from the session.
@@ -391,7 +393,7 @@ public class SessionValidator {
 
     /**
      * Gets the appropriate hash for specified request.
-     * 
+     *
      * @param cookieHash defines how the cookie should be found.
      * @param req The HTTP request
      * @param hash The previously remembered hash
@@ -408,7 +410,7 @@ public class SessionValidator {
 
     /**
      * Inspect the request headers for session information and return it.
-     * 
+     *
      * @param request the request to inspect
      * @return null if no session info can be found, the session info otherwise
      */
@@ -418,7 +420,7 @@ public class SessionValidator {
 
     /**
      * Inspect the request parameters for session information and return it.
-     * 
+     *
      * @param request the request to inspect
      * @return null if no session info can be found, the session info otherwise
      */
@@ -428,7 +430,7 @@ public class SessionValidator {
 
     /**
      * Inspect the request's post data for session information and return it.
-     * 
+     *
      * @param postData the JSON String to inspect
      * @return null if no session info can be found, the session info otherwise
      * @throws OXException if the postData isn't valid JSON
@@ -450,7 +452,7 @@ public class SessionValidator {
     /**
      * Get a sessionId from a list of possible sessionId sources contained in the request. Retrieves the first non-null, non-empty sessionId
      * that can befound.
-     * 
+     *
      * @param sessionIds a list of session infos, nulls are allowed
      * @return The first sessionId that is not null and not empty.
      * @throws OXException if no sessionId can be found
@@ -468,7 +470,7 @@ public class SessionValidator {
     /**
      * Get a ServerSession object from a list of session infos submitted in the request. Fails on the first non-null sessionInfo parameter
      * that is invalid.
-     * 
+     *
      * @param sessionInfo a list of session infos, nulls are allowed
      * @return The Serversession that matches the first given session info
      * @throws OXException if no matching ServerSession can be found
@@ -486,7 +488,7 @@ public class SessionValidator {
 
     /**
      * Convert the session info into a ServerSession Object.
-     * 
+     *
      * @param sessionInfo The sessionInfo to convert
      * @return The ServerSession objectmatching the session infos
      * @throws IllegalArgumentException if the sessionInfo is null or empty

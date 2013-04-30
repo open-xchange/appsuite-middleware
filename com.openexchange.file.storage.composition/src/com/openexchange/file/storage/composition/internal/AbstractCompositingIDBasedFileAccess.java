@@ -112,7 +112,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     /**
      * Sets the registry reference.
-     * 
+     *
      * @param streamHandlerRegistry The registry or <code>null</code>
      */
     public static void setHandlerRegistry(final FileStreamHandlerRegistry streamHandlerRegistry) {
@@ -121,13 +121,14 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
 
     /**
      * Gets the registry reference.
-     * 
+     *
      * @return The registry or <code>null</code>
      */
     public static FileStreamHandlerRegistry getStreamHandlerRegistry() {
         return HANDLER_REGISTRY.get();
     }
 
+    /** The associated session */
     protected Session session;
 
     private final ThreadLocal<Map<String, FileStorageAccountAccess>> connectedAccounts = new ThreadLocal<Map<String, FileStorageAccountAccess>>();
@@ -444,7 +445,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         document.setFolderId(new FolderID(folderID.getService(), folderID.getAccountId(), document.getFolderId()).toUniqueID());
         if (event == null) {
             event = FileStorageEventHelper.buildCreateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID());
-        } else if (modifiedColumns != null && modifiedColumns.contains(Field.FOLDER_ID)) {
+        } else if (modifiedColumns != null && modifiedColumns.contains(Field.FOLDER_ID) && !folderID.equals(srcFolder)) {
             event = FileStorageEventHelper.buildCreateEvent(session, fileID.getService(), fileID.getAccountId(), folderID.toUniqueID(), fileID.toUniqueID());
             postEvent(FileStorageEventHelper.buildDeleteEvent(session, fileID.getService(), fileID.getAccountId(), srcFolder.toUniqueID(), fileID.toUniqueID(), null));
         }
@@ -894,4 +895,5 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         accessesToClose.get().clear();
         super.finish();
     }
+
 }

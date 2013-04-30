@@ -68,6 +68,7 @@ import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.MetadataException;
 import com.drew.metadata.jpeg.JpegDirectory;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
@@ -80,6 +81,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.ImageTransformations;
@@ -168,15 +170,15 @@ public class FileResponseRenderer implements ResponseRenderer {
              *
              */
             // Check certain parameters
-            String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
+            String contentType = AJAXServlet.encodeUrl(req.getParameter(PARAMETER_CONTENT_TYPE), true);
             if (null == contentType) {
                 contentType = fileContentType;
             }
-            String delivery = req.getParameter(DELIVERY);
+            String delivery = AJAXServlet.sanitizeParam(req.getParameter(DELIVERY));
             if (delivery == null) {
                 delivery = file.getDelivery();
             }
-            String contentDisposition = req.getParameter(PARAMETER_CONTENT_DISPOSITION);
+            String contentDisposition = AJAXServlet.encodeUrl(req.getParameter(PARAMETER_CONTENT_DISPOSITION));
             if (null == contentDisposition) {
                 contentDisposition = file.getDisposition();
             } else {
@@ -207,7 +209,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File not found.");
                 return;
             }
-            final String userAgent = req.getHeader("user-agent");
+            final String userAgent = AJAXServlet.sanitizeParam(req.getHeader("user-agent"));
             if (SAVE_AS_TYPE.equals(contentType) || DOWNLOAD.equalsIgnoreCase(delivery)) {
                 final StringBuilder sb = new StringBuilder(32);
                 sb.append(isEmpty(contentDisposition) ? "attachment" : checkedContentDisposition(contentDisposition.trim(), file));
@@ -268,8 +270,13 @@ public class FileResponseRenderer implements ResponseRenderer {
                     contentType = preferredContentType;
                 } else {
                     if (SAVE_AS_TYPE.equals(preferredContentType)) {
-                        // We don't know better...
-                        resp.setContentType(contentType);
+                        // We don't know better... At least try to sanitize specified value
+                        try {
+                            resp.setContentType(new ContentType(contentType).getBaseType());
+                        } catch (Exception e) {
+                            // Ignore
+                            resp.setContentType(contentType);
+                        }
                     } else {
                         final String primaryType1 = getPrimaryType(preferredContentType);
                         final String primaryType2 = getPrimaryType(contentType);

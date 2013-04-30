@@ -62,6 +62,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.internal.AbstractCompositingIDBasedFileAccess;
 import com.openexchange.file.storage.composition.internal.FileStreamHandlerRegistryImpl;
+import com.openexchange.file.storage.composition.internal.Services;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
@@ -127,6 +128,7 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
         registerService(IDBasedFileAccessFactory.class, new IDBasedFileAccessFactory() {
 
             @Override
@@ -147,6 +149,7 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         super.stopBundle();
         AbstractCompositingIDBasedFileAccess.setHandlerRegistry(null);
+        Services.setServiceLookup(null);
     }
 
 }

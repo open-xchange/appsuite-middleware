@@ -425,7 +425,7 @@ public class DispatcherServlet extends SessionServlet {
         ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action));
         if (session == null) {
             if (!dispatcher.mayOmitSession(module, action)) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+                throw dispatcher.mayUseFallbackSession(module, action) ? AjaxExceptionCodes.MISSING_COOKIE.create(Login.PUBLIC_SESSION_NAME) : AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
             }
             session = fakeSession();
         }

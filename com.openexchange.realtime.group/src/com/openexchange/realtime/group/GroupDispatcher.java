@@ -64,6 +64,7 @@ import com.openexchange.realtime.Component;
 import com.openexchange.realtime.ComponentHandle;
 import com.openexchange.realtime.Component.EvictionPolicy;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.group.commands.LeaveCommand;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.IDEventHandler;
 import com.openexchange.realtime.packet.Stanza;
@@ -194,8 +195,8 @@ public class GroupDispatcher implements ComponentHandle {
 
         return false;
     }
-    
-    public void relayToAll(Stanza stanza, ID...excluded) throws OXException {
+
+    public void relayToAll(Stanza stanza, ID... excluded) throws OXException {
         relayToAll(stanza, null, excluded);
     }
 
@@ -216,7 +217,7 @@ public class GroupDispatcher implements ComponentHandle {
                         copy.addLogMessages(inResponseTo.getLogEntries());
                         copy.trace("---- Response ---");
                     }
-                    
+
                 }
                 dispatcher.send(copy);
             }
@@ -229,11 +230,10 @@ public class GroupDispatcher implements ComponentHandle {
     public void relayToAllExceptSender(Stanza stanza) throws OXException {
         relayToAll(stanza, stanza.getFrom());
     }
-    
+
     public void relayToAllExceptSender(Stanza stanza, Stanza inResponseTo) throws OXException {
         relayToAll(stanza, inResponseTo, stanza.getFrom());
     }
-
 
     /**
      * Deliver this stanza to its recipient. Delegates to the {@link MessageDispatcher}
@@ -437,5 +437,17 @@ public class GroupDispatcher implements ComponentHandle {
             }
         }
     };
+
+    @Override
+    public boolean shouldBeDoneInGlobalThread(Stanza stanza) {
+        PayloadElement payload = stanza.getPayload();
+
+        Object data = payload.getData();
+        if (LeaveCommand.class.isInstance(data)) {
+            return true;
+        }
+        
+        return false;
+    }
 
 }

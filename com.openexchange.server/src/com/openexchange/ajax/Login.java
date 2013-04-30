@@ -119,6 +119,7 @@ import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
@@ -1055,7 +1056,7 @@ public class Login extends AJAXServlet {
                     props.put(LogProperties.Name.SESSION_USER_ID, Integer.valueOf(session.getUserId()));
                     props.put(LogProperties.Name.SESSION_CONTEXT_ID, Integer.valueOf(session.getContextId()));
                     final String client  = session.getClient();
-                    props.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : client);
+                    props.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : ForceLog.valueOf(client));
                     props.put(LogProperties.Name.SESSION_SESSION, session);
                 }
             }
