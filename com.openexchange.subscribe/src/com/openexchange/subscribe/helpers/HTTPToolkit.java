@@ -61,6 +61,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpContentTooLargeException;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
@@ -89,6 +90,9 @@ public class HTTPToolkit {
         client.getParams().setIntParameter("http.connection.timeout", timeout);
 
         client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
+
+        client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
+        client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
 
         final java.net.URL javaURL = new java.net.URL(site);
 
@@ -131,6 +135,8 @@ public class HTTPToolkit {
         client.getParams().setIntParameter("http.connection.timeout", timeout);
 
         client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
+        client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
+        client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
 
         final java.net.URL javaURL = new java.net.URL(site);
 
