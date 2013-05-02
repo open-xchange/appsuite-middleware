@@ -244,6 +244,10 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              * update delete exceptions
              */
             for (CalendarDataObject deleteExceptionToSave : deleteExceptionsToSave) {
+                if (containsDeleteException(originalAppointment, deleteExceptionToSave.getRecurrenceDatePosition())) {
+                    LOG.debug("Delete exception " + deleteExceptionToSave + " already exists, skipping update.");
+                    continue;
+                }
                 Appointment originalException = getMatchingException(originalExceptions, deleteExceptionToSave.getRecurrenceDatePosition());
                 if (null != originalException) {
                     /*
@@ -675,6 +679,17 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             }
         }
         return null;
+    }
+
+    private static boolean containsDeleteException(Appointment appointment, Date recurrenceDatePosition) {
+        if (null != appointment.getDeleteException() && 0 < appointment.getDeleteException().length) {
+            for (Date exception : appointment.getDeleteException()) {
+                if (recurrenceDatePosition.equals(exception)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }
