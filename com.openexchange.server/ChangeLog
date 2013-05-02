@@ -8,6 +8,7 @@
  - Fix for bug 26267: Use lenient Cookie parsing policy
  - Fix for bug 26305: Use safe hash calculation to avoid hash collisions
  - Fix for bug 26054: Adapted logging to output USR-0010 error code as DEBUG only
+ - Fix for bug 26306: Fixed access of attachments within a nested message
 
 * 2013-04-30 - marc.arens@open-xchange.com
 

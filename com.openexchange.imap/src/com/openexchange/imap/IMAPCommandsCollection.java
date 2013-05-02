@@ -2797,25 +2797,43 @@ public final class IMAPCommandsCollection {
             }
             candidate = true;
         }
-        /*
-         * A multipart or message/rfc822
-         */
-        final BODYSTRUCTURE[] bodies = bodystructure.bodies;
-        if (null != bodies) {
-            final int count = bodies.length;
-            if (count > 0) {
-                final String mpId = null == prefix && !mpDetected[0] ? "" : getSequenceId(prefix, partCount);
-                final String mpPrefix;
-                if (mpDetected[0]) {
-                    mpPrefix = mpId;
-                } else {
-                    mpPrefix = prefix;
-                    mpDetected[0] = true;
+        if (bodystructure.isNested()) {
+            /*
+             * A message/rfc822
+             */
+            final BODYSTRUCTURE[] bodies = bodystructure.bodies;
+            if (null != bodies) {
+                final int count = bodies.length;
+                if (count > 0) {
+                    for (int i = 0; i < count; i++) {
+                        final BodyAndId bid = getBODYSTRUCTURE(sectionId, bodies[i], sequenceId, i + 1, new boolean[] { false });
+                        if (bid != null) {
+                            return bid;
+                        }
+                    }
                 }
-                for (int i = 0; i < count; i++) {
-                    final BodyAndId bid = getBODYSTRUCTURE(sectionId, bodies[i], mpPrefix, i + 1, mpDetected);
-                    if (bid != null) {
-                        return bid;
+            }
+        } else {
+            /*
+             * A multipart
+             */
+            final BODYSTRUCTURE[] bodies = bodystructure.bodies;
+            if (null != bodies) {
+                final int count = bodies.length;
+                if (count > 0) {
+                    final String mpId = null == prefix && !mpDetected[0] ? "" : getSequenceId(prefix, partCount);
+                    final String mpPrefix;
+                    if (mpDetected[0]) {
+                        mpPrefix = mpId;
+                    } else {
+                        mpPrefix = prefix;
+                        mpDetected[0] = true;
+                    }
+                    for (int i = 0; i < count; i++) {
+                        final BodyAndId bid = getBODYSTRUCTURE(sectionId, bodies[i], mpPrefix, i + 1, mpDetected);
+                        if (bid != null) {
+                            return bid;
+                        }
                     }
                 }
             }
@@ -2927,29 +2945,47 @@ public final class IMAPCommandsCollection {
     private static final String SUFFIX = "@" + Version.NAME;
 
     protected static BodyAndId getBODYSTRUCTUREByContentId(final String contentId, final BODYSTRUCTURE bodystructure, final String prefix, final int partCount, final boolean[] mpDetected) throws MessagingException {
+        final String sequenceId = getSequenceId(prefix, partCount);
         if (MimeMessageUtility.equalsCID(contentId, bodystructure.id, SUFFIX)) {
-            final String sequenceId = getSequenceId(prefix, partCount);
             return new BodyAndId(bodystructure, sequenceId);
         }
-        /*
-         * A multipart or message/rfc822
-         */
-        final BODYSTRUCTURE[] bodies = bodystructure.bodies;
-        if (null != bodies) {
-            final int count = bodies.length;
-            if (count > 0) {
-                final String mpId = null == prefix && !mpDetected[0] ? "" : getSequenceId(prefix, partCount);
-                final String mpPrefix;
-                if (mpDetected[0]) {
-                    mpPrefix = mpId;
-                } else {
-                    mpPrefix = prefix;
-                    mpDetected[0] = true;
+        if (bodystructure.isNested()) {
+            /*
+             * A message/rfc822
+             */
+            final BODYSTRUCTURE[] bodies = bodystructure.bodies;
+            if (null != bodies) {
+                final int count = bodies.length;
+                if (count > 0) {
+                    for (int i = 0; i < count; i++) {
+                        final BodyAndId bid = getBODYSTRUCTUREByContentId(contentId, bodies[i], sequenceId, i + 1, new boolean[] { false });
+                        if (bid != null) {
+                            return bid;
+                        }
+                    }
                 }
-                for (int i = 0; i < count; i++) {
-                    final BodyAndId bid = getBODYSTRUCTUREByContentId(contentId, bodies[i], mpPrefix, i + 1, mpDetected);
-                    if (bid != null) {
-                        return bid;
+            }
+        } else {
+            /*
+             * A multipart
+             */
+            final BODYSTRUCTURE[] bodies = bodystructure.bodies;
+            if (null != bodies) {
+                final int count = bodies.length;
+                if (count > 0) {
+                    final String mpId = null == prefix && !mpDetected[0] ? "" : getSequenceId(prefix, partCount);
+                    final String mpPrefix;
+                    if (mpDetected[0]) {
+                        mpPrefix = mpId;
+                    } else {
+                        mpPrefix = prefix;
+                        mpDetected[0] = true;
+                    }
+                    for (int i = 0; i < count; i++) {
+                        final BodyAndId bid = getBODYSTRUCTUREByContentId(contentId, bodies[i], mpPrefix, i + 1, mpDetected);
+                        if (bid != null) {
+                            return bid;
+                        }
                     }
                 }
             }
