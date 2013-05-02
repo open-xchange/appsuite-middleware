@@ -115,6 +115,15 @@ public class SimpleICal {
             return this.getPropertyValue("DESCRIPTION");
         }
 
+        public List<Date> getExDates() throws ParseException {
+            List<Date> exDates = new ArrayList<Date>();
+            List<Property> properties = this.getProperties("EXDATE");
+            for (Property property : properties) {
+                exDates.add(ICalUtils.parseDate(property));
+            }
+            return exDates;
+        }
+
 	    public void setSummary(String summary) throws ParseException {
 	        this.setProperty("SUMMARY", summary);
 	    }
