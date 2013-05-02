@@ -80,7 +80,6 @@ import com.openexchange.ajax.requesthandler.Utils;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.images.ImageTransformationService;
@@ -95,7 +94,7 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class FileResponseRenderer implements ResponseRenderer {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(FileResponseRenderer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FileResponseRenderer.class);
 
     private static final int BUFLEN = 2048;
 
