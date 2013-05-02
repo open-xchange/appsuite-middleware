@@ -49,8 +49,14 @@
 
 package com.openexchange.drive.comparison;
 
+import java.util.Arrays;
+import java.util.List;
 import com.openexchange.drive.DirectoryVersion;
+import com.openexchange.drive.DriveExceptionCodes;
+import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.checksum.DirectoryChecksum;
+import com.openexchange.drive.internal.DriveSession;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -89,6 +95,27 @@ public class ServerDirectoryVersion implements DirectoryVersion {
      */
     public DirectoryChecksum getDirectoryChecksum() {
         return checksum;
+    }
+
+    /**
+     * Gets the matching server directory version to the supplied directory version, throwing an exception if it not exists.
+     *
+     * @param directoryVersion The directory version to match
+     * @param path The path to the directory
+     * @param session The drive session
+     * @return The matching server directory version, never <code>null</code>
+     * @throws OXException If the directory version not exists
+     */
+    public static ServerDirectoryVersion valueOf(DirectoryVersion directoryVersion, DriveSession session) throws OXException {
+        if (ServerDirectoryVersion.class.isInstance(directoryVersion)) {
+            return (ServerDirectoryVersion)directoryVersion;
+        }
+        String folderID = session.getStorage().getFolderID(directoryVersion.getPath());
+        List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(session, Arrays.asList(new String[] { folderID }));
+        if (null == checksums || 0 == checksums.size() || false == directoryVersion.getChecksum().equals(checksums.get(0).getChecksum())) {
+            throw DriveExceptionCodes.DIRECTORYVERSION_NOT_FOUND.create(directoryVersion.getPath(), directoryVersion.getChecksum());
+        }
+        return new ServerDirectoryVersion(directoryVersion.getPath(), checksums.get(0));
     }
 
     @Override

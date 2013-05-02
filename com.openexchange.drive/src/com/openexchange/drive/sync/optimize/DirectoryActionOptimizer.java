@@ -83,4 +83,31 @@ public abstract class DirectoryActionOptimizer extends AbstractActionOptimizer<D
         }
     }
 
+    protected static class SimpleDirectoryVersion implements DirectoryVersion {
+
+        private final String path;
+        private final String checksum;
+
+        public SimpleDirectoryVersion(String path, String checksum) {
+            super();
+            this.path = path;
+            this.checksum = checksum;
+        }
+
+        @Override
+        public String getChecksum() {
+            return checksum;
+        }
+
+        @Override
+        public String getPath() {
+            return path;
+        }
+
+        @Override
+        public String toString() {
+            return getPath() + " | " + getChecksum();
+        }
+    }
+
 }

@@ -88,6 +88,9 @@ public enum DriveExceptionCodes implements OXExceptionCode {
     /** "Checksum \"%1$s\" for uploaded file \"%2$s\" different from \"%3$s\"" */
     UPLOADED_FILE_CHECKSUM_ERROR(DriveExceptionMessages.UPLOADED_FILE_CHECKSUM_ERROR_MSG, Category.CATEGORY_ERROR, 9),
 
+    /** The directory \"%1$s\" with checksum \"%2$s\" was not found" */
+    DIRECTORYVERSION_NOT_FOUND(DriveExceptionMessages.DIRECTORYVERSION_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 10),
+
     ;
 
     private static final String PREFIX = "DRV";

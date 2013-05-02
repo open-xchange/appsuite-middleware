@@ -67,4 +67,22 @@ public class RemoveDirectoryAction extends AbstractAction<DirectoryVersion> {
         return Action.REMOVE;
     }
 
+    @Override
+    public int compareTo(DriveAction<DirectoryVersion> other) {
+        /*
+         * compare actions
+         */
+        int result = super.compareTo(other);
+        if (0 == result && RemoveDirectoryAction.class.isInstance(other)) {
+            /*
+             * compare paths (inner paths before their parents)
+             */
+            RemoveDirectoryAction otherRemoveDirectoryAction = (RemoveDirectoryAction)other;
+            if (null != this.getVersion() && null != otherRemoveDirectoryAction.getVersion()) {
+                result = -1 * this.getVersion().getPath().compareTo(otherRemoveDirectoryAction.getVersion().getPath());
+            }
+        }
+        return result;
+    }
+
 }

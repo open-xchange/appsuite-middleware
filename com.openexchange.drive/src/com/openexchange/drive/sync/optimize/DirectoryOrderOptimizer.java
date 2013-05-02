@@ -49,17 +49,13 @@
 
 package com.openexchange.drive.sync.optimize;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.actions.Action;
 import com.openexchange.drive.actions.DriveAction;
 import com.openexchange.drive.actions.EditDirectoryAction;
-import com.openexchange.drive.comparison.ServerDirectoryVersion;
+import com.openexchange.drive.comparison.VersionMapper;
 import com.openexchange.drive.internal.DriveSession;
 import com.openexchange.drive.sync.SyncResult;
 
@@ -69,68 +65,41 @@ import com.openexchange.drive.sync.SyncResult;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DirectoryOrderOptimizer extends OrderOptimizer<DirectoryVersion> {
+public class DirectoryOrderOptimizer extends DirectoryActionOptimizer {
+
+    public DirectoryOrderOptimizer(VersionMapper<DirectoryVersion> mapper) {
+        super(mapper);
+    }
 
     @Override
     public SyncResult<DirectoryVersion> optimize(DriveSession session, SyncResult<DirectoryVersion> result) {
         List<DriveAction<DirectoryVersion>> actionsForClient = result.getActionsForClient();
         List<DriveAction<DirectoryVersion>> actionsForServer = result.getActionsForServer();
-        actionsForClient = layoutRemoves(actionsForClient);
-        actionsForServer = layoutRemoves(actionsForServer);
+        Collections.sort(actionsForClient);
+        Collections.sort(actionsForServer);
         actionsForClient = propagateRenames(actionsForClient);
         actionsForServer = propagateRenames(actionsForServer);
         return new SyncResult<DirectoryVersion>(actionsForServer, actionsForClient);
     }
 
-    private static List<DriveAction<DirectoryVersion>> layoutRemoves(List<DriveAction<DirectoryVersion>> actions) {
-        /*
-         * for removes, ensure that the inner directories are processed before their parents
-         */
-        return sortByPath(actions, true, Action.REMOVE);
-    }
-
     private static List<DriveAction<DirectoryVersion>> propagateRenames(List<DriveAction<DirectoryVersion>> actions) {
-        /*
-         * ensure hierarchical tree order
-         */
-        actions = sortByPath(actions, false, Action.EDIT);
         /*
          * propagate previous rename operations
          */
-        List<DriveAction<DirectoryVersion>> modifiedActions = new ArrayList<DriveAction<DirectoryVersion>>();
-        Map<String, String> renamedPaths = new HashMap<String, String>();
-        for (DriveAction<DirectoryVersion> action : actions) {
-            if (Action.EDIT.equals(action.getAction())) {
-                for (Entry<String, String> renamedPath : renamedPaths.entrySet()) {
-                    if (action.getVersion().getPath().startsWith(renamedPath.getKey())) {
-                        String newOldPath = renamedPath.getValue() + action.getVersion().getPath().substring(renamedPath.getKey().length());
-                        DirectoryVersion modifiedOldVersion = new ServerDirectoryVersion(
-                            newOldPath, ((ServerDirectoryVersion)action.getVersion()).getDirectoryChecksum());
-                        action = new EditDirectoryAction(modifiedOldVersion, action.getNewVersion());
-                        break;
+        for (int i = 0; i < actions.size(); i++) {
+            if (Action.EDIT.equals(actions.get(i).getAction())) {
+                String oldPath = actions.get(i).getVersion().getPath();
+                String newPath = actions.get(i).getNewVersion().getPath();
+                for (int j = i + 1; j < actions.size(); j++) {
+                    if (Action.EDIT.equals(actions.get(j).getAction()) && actions.get(j).getVersion().getPath().startsWith(oldPath)) {
+                        String newOldPath = newPath + actions.get(j).getVersion().getPath().substring(oldPath.length());
+                        DirectoryVersion modifiedOldVersion = new SimpleDirectoryVersion(newOldPath, actions.get(j).getVersion().getChecksum());
+                        actions.set(j, new EditDirectoryAction(modifiedOldVersion, actions.get(j).getNewVersion()));
                     }
                 }
-                renamedPaths.put(action.getVersion().getPath(), action.getNewVersion().getPath());
             }
-            modifiedActions.add(action);
         }
-        return modifiedActions;
-    }
-
-    private static List<DriveAction<DirectoryVersion>> sortByPath(List<DriveAction<DirectoryVersion>> directoryActions, final boolean reverse, final Action action) {
-        Collections.sort(directoryActions, new ActionComparator<DirectoryVersion>() {
-
-            @Override
-            public int compare(DriveAction<DirectoryVersion> action1, DriveAction<DirectoryVersion> action2) {
-                int result = super.compare(action1, action2);
-                if (0 == result && null != action && action.equals(action1.getAction()) && action.equals(action2.getAction()) &&
-                    null != action1.getVersion() && null != action2.getVersion()) {
-                    result = action1.getVersion().getPath().compareTo(action2.getVersion().getPath());
-                }
-                return reverse ? -1 * result : result;
-            }
-        });
-        return directoryActions;
+        return actions;
     }
 
 }

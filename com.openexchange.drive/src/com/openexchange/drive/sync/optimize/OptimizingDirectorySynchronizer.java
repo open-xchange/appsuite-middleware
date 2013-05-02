@@ -76,7 +76,7 @@ public class OptimizingDirectorySynchronizer extends DirectorySynchronizer {
                 LOG.debug("Sync results before optimizations:\n" + result);
             }
             result = new DirectoryRenameOptimizer(mapper).optimize(session, result);
-            result = new DirectoryOrderOptimizer().optimize(session, result);
+            result = new DirectoryOrderOptimizer(mapper).optimize(session, result);
         }
         return result;
     }

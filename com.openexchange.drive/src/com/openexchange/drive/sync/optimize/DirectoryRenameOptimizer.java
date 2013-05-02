@@ -179,12 +179,14 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
         String[] splitted1 = path1.split("/");
         String[] splitted2 = path2.split("/");
         int score = 0;
-        if (splitted1.length == splitted2.length) {
-            score++;
-        }
         int minLength = Math.min(splitted1.length, splitted2.length);
         for (int i = 0; i < minLength; i++) {
             if (splitted1[i].equals(splitted2[i])) {
+                score++;
+            }
+        }
+        for (int i = 1; i <= minLength; i++) {
+            if (splitted1[splitted1.length - i].equals(splitted2[splitted2.length - i])) {
                 score++;
             }
         }

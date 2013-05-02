@@ -83,6 +83,9 @@ public enum Action {
      */
     ACKNOWLEDGE,
 
+    /**
+     * Synchronizes the files in a directory.
+     */
     SYNC
 
 }

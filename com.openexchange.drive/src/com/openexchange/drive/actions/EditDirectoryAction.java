@@ -67,5 +67,23 @@ public class EditDirectoryAction extends AbstractAction<DirectoryVersion> {
         return Action.EDIT;
     }
 
+    @Override
+    public int compareTo(DriveAction<DirectoryVersion> other) {
+        /*
+         * compare actions
+         */
+        int result = super.compareTo(other);
+        if (0 == result && EditDirectoryAction.class.isInstance(other)) {
+            /*
+             * compare paths (hierarchical tree order)
+             */
+            EditDirectoryAction otherEditDirectoryAction = (EditDirectoryAction)other;
+            if (null != this.getVersion() && null != otherEditDirectoryAction.getVersion()) {
+                result = this.getVersion().getPath().compareTo(otherEditDirectoryAction.getVersion().getPath());
+            }
+        }
+        return result;
+    }
+
 }
 
