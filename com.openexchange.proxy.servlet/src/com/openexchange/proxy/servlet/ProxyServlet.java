@@ -63,6 +63,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.URI;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
@@ -125,6 +126,8 @@ public class ProxyServlet extends SessionServlet {
         client.getParams().setSoTimeout(TIMEOUT);
         client.getParams().setIntParameter("http.connection.timeout", TIMEOUT);
         client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
+        client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
+        client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
         /*
          * Create host configuration or URI
          */

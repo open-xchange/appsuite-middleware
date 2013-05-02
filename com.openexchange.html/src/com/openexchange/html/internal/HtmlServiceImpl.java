@@ -66,10 +66,13 @@ import java.util.regex.Pattern;
 import net.htmlparser.jericho.Renderer;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
+import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.io.IOUtils;
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
@@ -1130,6 +1133,11 @@ public final class HtmlServiceImpl implements HtmlService {
         while (mStyleFile.find()) {
             final String cssFile = mStyleFile.group(2);
             final HttpClient client = new HttpClient();
+            client.getParams().setSoTimeout(3000);
+            client.getParams().setIntParameter("http.connection.timeout", 3000);
+            client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
+            client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
+            client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
             final GetMethod get = new GetMethod(cssFile);
             try {
                 final int statusCode = client.executeMethod(get);

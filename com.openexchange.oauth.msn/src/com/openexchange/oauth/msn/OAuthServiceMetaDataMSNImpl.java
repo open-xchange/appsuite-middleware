@@ -54,6 +54,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.logging.Log;
@@ -70,7 +71,6 @@ import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthToken;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -93,12 +93,12 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
 
     private final DeferringURLService deferrer;
 
-    
+
     public OAuthServiceMetaDataMSNImpl(DeferringURLService deferrer) {
         setId("com.openexchange.oauth.msn");
         setDisplayName("WindowsLive / MSN");
         this.deferrer = deferrer;
-        
+
         setAPIKeyName(API_KEY);
         setAPISecretName(API_SECRET);
     }
@@ -167,6 +167,11 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
             params.append("&grant_type=authorization_code");
 
             HttpClient httpClient = new HttpClient();
+            final int timeout = 10000;
+            httpClient.getParams().setSoTimeout(timeout);
+            httpClient.getParams().setIntParameter("http.connection.timeout", timeout);
+            httpClient.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
+            httpClient.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
             Protocol protocol = new Protocol("https", new TrustAllAdapter(), 443);
             httpClient.getHostConfiguration().setHost("login.live.com", 443, protocol);
             String urlString = accessTokenGrabber;
