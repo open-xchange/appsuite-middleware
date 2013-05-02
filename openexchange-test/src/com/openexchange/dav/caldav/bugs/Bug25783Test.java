@@ -72,7 +72,7 @@ public class Bug25783Test extends CalDAVTest {
 		 * create appointment
 		 */
 	    String expectedDescription =
-	        "- Gesamtaufwände\n- Kosten eines Manntags (inklusive allem, von Travel üver Hotel bis Kopierkosten)\n- Sonstiges";
+	        "- Gesamtaufw\u00c3\u00a4nde\n- Kosten eines Manntags (inklusive allem, von Travel \u00c3\u00bcver Hotel bis Kopierkosten)\n- Sonstiges";
 		String uid = randomUID();
     	Date start = TimeTools.D("next monday at 12:00");
     	Date end = TimeTools.D("next monday at 13:00");
@@ -103,8 +103,8 @@ public class Bug25783Test extends CalDAVTest {
             "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Amsterdam") + "\r\n" +
             "UID:" + uid + "\r\n" +
             "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
-		    "DESCRIPTION:- Gesamtaufwände\\n- Kosten eines Manntags (inklusive allem\\," + "\r\n" +
-		    "  von Travel üver Hotel bis Kopierkosten)\\n- Sonstiges" + "\r\n" +
+		    "DESCRIPTION:- Gesamtaufw\u00c3\u00a4nde\\n- Kosten eines Manntags (inklusive allem\\," + "\r\n" +
+		    "  von Travel \u00c3\u00bcver Hotel bis Kopierkosten)\\n- Sonstiges" + "\r\n" +
 		    "SEQUENCE:3" + "\r\n" +
 		    "CLASS:PUBLIC" + "\r\n" +
 		    "SUMMARY:dsvgds" + "\r\n" +
