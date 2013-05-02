@@ -309,23 +309,25 @@ public abstract class SessionServlet extends AJAXServlet {
         try {
             initializeSession(req);
             session = getSessionObject(req, true);
-            /*
-             * Check max. concurrent AJAX requests
-             */
-            final int maxConcurrentRequests = getMaxConcurrentRequests(session);
-            if (maxConcurrentRequests > 0) {
-                counter = (AtomicInteger) session.getParameter(Session.PARAM_COUNTER);
-                if (null != counter && counter.incrementAndGet() > maxConcurrentRequests) {
-                    if (INFO) {
-                        LOG.info("User " + session.getUserId() + " in context " + session.getContextId() + " exceeded max. concurrent requests (" + maxConcurrentRequests + ").");
+            if (null != session) {
+                /*
+                 * Check max. concurrent AJAX requests
+                 */
+                final int maxConcurrentRequests = getMaxConcurrentRequests(session);
+                if (maxConcurrentRequests > 0) {
+                    counter = (AtomicInteger) session.getParameter(Session.PARAM_COUNTER);
+                    if (null != counter && counter.incrementAndGet() > maxConcurrentRequests) {
+                        if (INFO) {
+                            LOG.info("User " + session.getUserId() + " in context " + session.getContextId() + " exceeded max. concurrent requests (" + maxConcurrentRequests + ").");
+                        }
+                        throw AjaxExceptionCodes.TOO_MANY_REQUESTS.create();
                     }
-                    throw AjaxExceptionCodes.TOO_MANY_REQUESTS.create();
                 }
-            }
-            ThreadLocalSessionHolder.getInstance().setSession(session);
-            if (null != threadCounter && null != session) {
-                sessionId = session.getSessionID();
-                threadCounter.increment(sessionId);
+                ThreadLocalSessionHolder.getInstance().setSession(session);
+                if (null != threadCounter) {
+                    sessionId = session.getSessionID();
+                    threadCounter.increment(sessionId);
+                }
             }
             super.service(new CountingHttpServletRequest(req), resp);
         } catch (final OXException e) {
