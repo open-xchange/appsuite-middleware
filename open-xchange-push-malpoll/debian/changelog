@@ -1,9 +1,3 @@
-open-xchange-push-malpoll (6.22.0-11) unstable; urgency=low
-
-  * Build for patch 2013-05-09
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 18 Apr 2013 14:11:07 +0200
-
 open-xchange-push-malpoll (6.22.0-10) unstable; urgency=low
 
   * Build for patch 2013-04-04
