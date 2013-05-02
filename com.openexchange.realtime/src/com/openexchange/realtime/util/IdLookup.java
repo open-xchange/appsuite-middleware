@@ -52,7 +52,7 @@ package com.openexchange.realtime.util;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.realtime.RealtimeExceptionCodes;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.osgi.RealtimeServiceRegistry;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.server.ServiceLookup;
