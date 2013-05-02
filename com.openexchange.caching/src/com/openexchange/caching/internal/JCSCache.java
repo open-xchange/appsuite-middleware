@@ -273,7 +273,9 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public void putInGroup(final Serializable key, final String groupName, final Serializable value) throws OXException {
         try {
-            groupNames.put(groupName, PRESENT);
+            synchronized (groupNames) {
+                groupNames.put(groupName, PRESENT);
+            }
             cache.putInGroup(key, groupName, value);
         } catch (final org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
@@ -291,7 +293,9 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public void putInGroup(final Serializable key, final String groupName, final Object value, final ElementAttributes attr) throws OXException {
         try {
-            groupNames.put(groupName, PRESENT);
+            synchronized (groupNames) {
+                groupNames.put(groupName, PRESENT);
+            }
             cache.putInGroup(key, groupName, value, new JCSElementAttributesDelegator(attr));
         } catch (final org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
@@ -348,7 +352,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     @Override
     public void removeFromGroup(final Serializable key, final String group) {
-        if (groupNames.containsKey(group)) {
+        synchronized (groupNames) {
             groupNames.remove(group);
         }
         cache.remove(key, group);
@@ -356,7 +360,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     @Override
     public void localRemoveFromGroup(final Serializable key, final String group) {
-        if (groupNames.containsKey(group)) {
+        synchronized (groupNames) {
             groupNames.remove(group);
         }
         final GroupAttrName groupAttrName = getGroupAttrName(group, key);
@@ -398,7 +402,11 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     @Override
     public Set<String> getGroupNames() {
-        return groupNames.keySet();
+        final Set<String> ret;
+        synchronized (groupNames) {
+            ret = new HashSet<String>(groupNames.keySet());
+        }
+        return ret;
     }
 
     @Override
