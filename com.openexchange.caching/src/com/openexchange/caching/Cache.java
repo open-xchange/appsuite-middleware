@@ -394,7 +394,7 @@ public interface Cache {
     public Set<?> getGroupKeys(String group) throws OXException;
 
     /**
-     *  Gets the set of group names in the cache
+     * Gets the set of group names in the cache
      * @return a set of group names
      */
     public Set<String> getGroupNames() throws OXException;

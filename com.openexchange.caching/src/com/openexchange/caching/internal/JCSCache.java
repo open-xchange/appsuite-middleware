@@ -273,10 +273,10 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public void putInGroup(final Serializable key, final String groupName, final Serializable value) throws OXException {
         try {
+            cache.putInGroup(key, groupName, value);
             synchronized (groupNames) {
                 groupNames.put(groupName, PRESENT);
             }
-            cache.putInGroup(key, groupName, value);
         } catch (final org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
         }
@@ -293,10 +293,10 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public void putInGroup(final Serializable key, final String groupName, final Object value, final ElementAttributes attr) throws OXException {
         try {
+            cache.putInGroup(key, groupName, value, new JCSElementAttributesDelegator(attr));
             synchronized (groupNames) {
                 groupNames.put(groupName, PRESENT);
             }
-            cache.putInGroup(key, groupName, value, new JCSElementAttributesDelegator(attr));
         } catch (final org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
         }
