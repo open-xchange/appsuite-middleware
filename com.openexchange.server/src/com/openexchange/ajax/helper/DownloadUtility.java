@@ -150,11 +150,16 @@ public final class DownloadUtility {
                      */
                     final ByteArrayOutputStream bytes = Streams.stream2ByteArrayOutputStream(in);
                     final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                    final String cs = contentType.getCharsetParameter();
-                    final boolean valid = CharsetDetector.isValid(cs);
-                    String htmlContent = bytes.toString(valid ? cs : null);
+                    String cs = contentType.getCharsetParameter();
+                    if (!CharsetDetector.isValid(cs)) {
+                        cs = CharsetDetector.detectCharset(Streams.asInputStream(bytes));
+                        if ("US-ASCII".equalsIgnoreCase(cs)) {
+                            cs = "ISO-8859-1";
+                        }
+                    }
+                    String htmlContent = bytes.toString(cs);
                     htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
-                    in = Streams.newByteArrayInputStream(htmlContent.getBytes(valid ? Charsets.forName(cs) : Charsets.ISO_8859_1));
+                    in = Streams.newByteArrayInputStream(htmlContent.getBytes(Charsets.forName(cs)));
                 }
             } else if (contentType.startsWith("image/") || fileNameImpliesImage(fileName)) {
                 /*
