@@ -53,6 +53,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.realtime.exception.RealtimeExceptionMessages;
 
 /**
  * {@link RealtimeStreamExceptionCodes} - Error codes for realtime framework.

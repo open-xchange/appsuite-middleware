@@ -47,29 +47,32 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.exception;
 
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link RealtimeStanzaExceptionMessages} - Translatable error messages.
+ * {@link RealtimeExceptionMessages} - Translatable error messages.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
-public class RealtimeStanzaExceptionMessages implements LocalizableStrings {
+public class RealtimeExceptionMessages implements LocalizableStrings {
 
     /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
     public static final String NO_APPROPRIATE_CHANNEL = "No appropriate channel found for recipient %1$s with payload namespace %2$s";
 
-    /** The following needed service is missing: %1$s */
-    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: %1$s";
+    /** The following needed service is missing: \"%1$s\" */
+    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
 
     // Unexpected error: %1$s
     public static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
 
     /** Invalid ID. Resource identifier is missing. */
     public static final String INVALID_ID = "Invalid ID. Resource identifier is missing.";
+
+    /** Resource not available. */
+    public static final String RESOURCE_NOT_AVAILABLE_MSG = "Resource not available.";
     
     public static final String STANZA_BAD_REQUEST_MSG = "";
     public static final String STANZA_CONFILCT_MSG = "";
@@ -94,5 +97,5 @@ public class RealtimeStanzaExceptionMessages implements LocalizableStrings {
     public static final String STANZA_SUBSCRIPTION_REQUIRED_MSG = "";
     public static final String STANZA_UNDEFINED_CONDITION_MSG = "";
     public static final String STANZA_UNEXPECTED_REQUEST_MSG = "";
-    
+
 }
