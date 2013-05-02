@@ -51,10 +51,12 @@ package com.openexchange.caching.internal;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.CacheAccess;
@@ -77,6 +79,9 @@ import com.openexchange.caching.internal.cache2jcs.CacheStatistics2JCS;
 import com.openexchange.caching.internal.cache2jcs.ElementAttributes2JCS;
 import com.openexchange.caching.internal.jcs2cache.JCSElementAttributesDelegator;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.DefaultHashKeyGenerator;
+import com.openexchange.java.HashKeyGenerator;
+import com.openexchange.java.HashKeyMap;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 
@@ -89,13 +94,16 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(JCSCache.class));
 
+    private static final SecureRandom RANDOM = new SecureRandom();
+    private static final Object PRESENT = new Object();
+
     private final JCS cache;
 
     private final CompositeCache cacheControl;
 
     private volatile Boolean localOnly;
 
-    private final Set<String> groupNames;
+    private final Map<String, Object> groupNames;
 
     /**
      * Initializes a new {@link JCSCache}
@@ -113,7 +121,9 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
             tmp = null;
         }
         cacheControl = tmp;
-        groupNames = new HashSet<String>();
+        final String salt = Integer.toString(RANDOM.nextInt(), 10); // cache-specific salt
+        final HashKeyGenerator hashKeyGenerator = new DefaultHashKeyGenerator(salt);
+        groupNames = new HashKeyMap<Object>(8192).setGenerator(hashKeyGenerator);
     }
 
     @Override
@@ -263,7 +273,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public void putInGroup(final Serializable key, final String groupName, final Serializable value) throws OXException {
         try {
-            groupNames.add(groupName);
+            groupNames.put(groupName, PRESENT);
             cache.putInGroup(key, groupName, value);
         } catch (final org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
@@ -281,7 +291,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public void putInGroup(final Serializable key, final String groupName, final Object value, final ElementAttributes attr) throws OXException {
         try {
-            groupNames.add(groupName);
+            groupNames.put(groupName, PRESENT);
             cache.putInGroup(key, groupName, value, new JCSElementAttributesDelegator(attr));
         } catch (final org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
@@ -338,7 +348,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     @Override
     public void removeFromGroup(final Serializable key, final String group) {
-        if (groupNames.contains(group)) {
+        if (groupNames.containsKey(group)) {
             groupNames.remove(group);
         }
         cache.remove(key, group);
@@ -346,7 +356,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     @Override
     public void localRemoveFromGroup(final Serializable key, final String group) {
-        if (groupNames.contains(group)) {
+        if (groupNames.containsKey(group)) {
             groupNames.remove(group);
         }
         final GroupAttrName groupAttrName = getGroupAttrName(group, key);
@@ -388,7 +398,7 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     @Override
     public Set<String> getGroupNames() {
-        return groupNames;
+        return groupNames.keySet();
     }
 
     @Override
