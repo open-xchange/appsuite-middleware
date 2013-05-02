@@ -28,6 +28,7 @@ Import-Package: com.google.common.base,
  org.osgi.service.event,
  sun.misc
 Export-Package: com.openexchange.realtime,
+ com.openexchange.realtime.exception,
  com.openexchange.realtime.packet,
  com.openexchange.realtime.payload,
  com.openexchange.realtime.payload.converter,

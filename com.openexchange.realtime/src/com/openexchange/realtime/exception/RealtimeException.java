@@ -47,31 +47,31 @@
  *
  */
 
-package com.openexchange.realtime;
+package com.openexchange.realtime.exception;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link RealtimeExceptionMessages} - Translatable error messages.
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * {@link RealtimeException}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class RealtimeExceptionMessages implements LocalizableStrings {
+public class RealtimeException extends OXException {
 
-    /** No appropriate channel found for recipient %1$s with payload namespace %2$s */
-    public static final String NO_APPROPRIATE_CHANNEL = "No appropriate channel found for recipient %1$s with payload namespace %2$s";
+    private static final long serialVersionUID = -3650839506266250736L;
+    
+    private OXException delegate;
+    
+    public RealtimeException(OXException origin) {
+        this.delegate = origin;
+    }
 
-    /** The following needed service is missing: \"%1$s\" */
-    public static final String NEEDED_SERVICE_MISSING_MSG = "The following needed service is missing: \"%1$s\"";
+    public RealtimeException toXMPPException() {
+        return this;
+    }
 
-    // Unexpected error: %1$s
-    public static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s";
-
-    /** Invalid ID. Resource identifier is missing. */
-    public static final String INVALID_ID = "Invalid ID. Resource identifier is missing.";
-
-    /** Resource not available. */
-    public static final String RESOURCE_NOT_AVAILABLE_MSG = "Resource not available.";
+    public RealtimeException toAtmosphereException() {
+        return this;
+    }
 
 }

@@ -56,6 +56,7 @@ import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import com.openexchange.exception.OXException;
@@ -83,6 +84,8 @@ public class ConfigServer extends AbstractConfigSource {
         client.getParams().setSoTimeout(timeout);
         client.getParams().setIntParameter("http.connection.timeout", timeout);
         client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
+        client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
+        client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
 
         GetMethod getMethod = new GetMethod(url);
 

@@ -57,17 +57,18 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.log.LogFactory;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.msn.osgi.MSNOAuthActivator;
@@ -121,6 +122,8 @@ public class MSNServiceImpl implements MSNService {
 
             final HttpClient client = new HttpClient();
             client.getParams().setParameter("http.protocol.content-charset", "UTF-8");
+            client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
+            client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
             final int responseCode = client.executeMethod(getMethod);
             String response = getMethod.getResponseBodyAsString();
             wholeResponse = new JSONObject(response);
@@ -235,7 +238,7 @@ public class MSNServiceImpl implements MSNService {
     }
 
     /**
-     * @param session 
+     * @param session
      * @param secret
      * @param token
      * @throws OXException
@@ -252,6 +255,8 @@ public class MSNServiceImpl implements MSNService {
 
     	try {
     		final HttpClient client = new HttpClient();
+    		client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
+            client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
     		final PostMethod postMethod = new PostMethod("https://login.live.com/oauth20_token.srf?client_id=" + account.getMetaData().getAPIKey(session) + "&redirect_uri=" + URLEncoder.encode(callback, "UTF-8") + "&client_secret=" + URLEncoder.encode(account.getMetaData().getAPISecret(session), "UTF-8")+"&refresh_token=" + account.getToken() + "&grant_type=refresh_token");
 
     		RequestEntity requestEntity;
