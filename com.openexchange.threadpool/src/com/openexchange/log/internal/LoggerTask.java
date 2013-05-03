@@ -195,7 +195,7 @@ final class LoggerTask extends AbstractTask<Object> {
                 final boolean quit = loggables.remove(POISON);
                 for (final Loggable loggable : loggables) {
                     final LogCallback callback = callbacks.get(loggable.getLevel());
-                    if (null != callback) {
+                    if (null != callback && callback.isLoggable(loggable.getLog())) {
                         invokeCallback(loggable, callback);
                     }
                 }

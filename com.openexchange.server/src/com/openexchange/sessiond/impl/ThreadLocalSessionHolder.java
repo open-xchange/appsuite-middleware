@@ -52,9 +52,7 @@ package com.openexchange.sessiond.impl;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -97,13 +95,7 @@ public class ThreadLocalSessionHolder implements SessionHolderExtended {
     public void setSession(final ServerSession serverSession) {
         session.set(serverSession);
         if (LogProperties.isEnabled() && serverSession != null) {
-            final Props properties = LogProperties.getLogProperties();
-            properties.put(LogProperties.Name.SESSION_SESSION_ID, serverSession.getSessionID());
-            properties.put(LogProperties.Name.SESSION_USER_ID, Integer.valueOf(serverSession.getUserId()));
-            properties.put(LogProperties.Name.SESSION_CONTEXT_ID, Integer.valueOf(serverSession.getContextId()));
-            final String client = serverSession.getClient();
-            properties.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : ForceLog.valueOf(client));
-            properties.put(LogProperties.Name.SESSION_SESSION, serverSession);
+            LogProperties.putSessionProperties(serverSession);
         }
     }
 

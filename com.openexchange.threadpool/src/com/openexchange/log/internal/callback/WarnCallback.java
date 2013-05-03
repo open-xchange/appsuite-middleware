@@ -66,4 +66,10 @@ public final class WarnCallback implements LogCallback {
             log.warn(message, t);
         }
     }
+
+    @Override
+    public boolean isLoggable(Log log) {
+        return log.isWarnEnabled();
+    }
+
 }

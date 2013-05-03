@@ -119,10 +119,8 @@ import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
@@ -172,7 +170,11 @@ public class Login extends AJAXServlet {
         set.add(LogProperties.Name.LOGIN_LOGIN);
         set.add(LogProperties.Name.LOGIN_USER_AGENT);
         set.add(LogProperties.Name.LOGIN_VERSION);
-        set.addAll(SessionServlet.LOG_PROPERTIES);
+        set.add(LogProperties.Name.SESSION_SESSION_ID);
+        set.add(LogProperties.Name.SESSION_USER_ID);
+        set.add(LogProperties.Name.SESSION_CONTEXT_ID);
+        set.add(LogProperties.Name.SESSION_CLIENT_ID);
+        set.add(LogProperties.Name.SESSION_SESSION);
         LOG_PROPERTIES = Collections.unmodifiableSet(set);
     }
 
@@ -828,16 +830,7 @@ public class Login extends AJAXServlet {
             response.setData("1");
             ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
         } finally {
-            if (LogProperties.isEnabled()) {
-                final Props properties = LogProperties.optLogProperties();
-                if (null != properties) {
-                    properties.remove(LogProperties.Name.SESSION_SESSION_ID);
-                    properties.remove(LogProperties.Name.SESSION_USER_ID);
-                    properties.remove(LogProperties.Name.SESSION_CONTEXT_ID);
-                    properties.remove(LogProperties.Name.SESSION_CLIENT_ID);
-                    properties.remove(LogProperties.Name.SESSION_SESSION);
-                }
-            }
+            LogProperties.removeSessionProperties();
         }
     }
 
@@ -1049,16 +1042,7 @@ public class Login extends AJAXServlet {
                 return true;
             }
             {
-                final Props props = LogProperties.optLogProperties();
-                if (null != props) {
-                    final Session session = result.getSession();
-                    props.put(LogProperties.Name.SESSION_SESSION_ID, session.getSessionID());
-                    props.put(LogProperties.Name.SESSION_USER_ID, Integer.valueOf(session.getUserId()));
-                    props.put(LogProperties.Name.SESSION_CONTEXT_ID, Integer.valueOf(session.getContextId()));
-                    final String client  = session.getClient();
-                    props.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : ForceLog.valueOf(client));
-                    props.put(LogProperties.Name.SESSION_SESSION, session);
-                }
+                LogProperties.putSessionProperties(result.getSession());
             }
             addHeadersAndCookies(result, resp);
             {

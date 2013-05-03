@@ -64,7 +64,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -115,6 +114,7 @@ import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.ThreadPools.TrackableCallable;
 import com.openexchange.threadpool.behavior.AbortBehavior;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
@@ -1326,7 +1326,7 @@ public final class CacheFolderStorage implements FolderStorage {
                          * Get all visible subfolders from each storage
                          */
                         for (final FolderStorage neededStorage : neededStorages) {
-                            completionService.submit(new Callable<java.util.List<SortableId>>() {
+                            completionService.submit(new TrackableCallable<java.util.List<SortableId>>() {
 
                                 @Override
                                 public java.util.List<SortableId> call() throws Exception {
@@ -1769,7 +1769,7 @@ public final class CacheFolderStorage implements FolderStorage {
             /*
              * Submit task
              */
-            completionService.submit(new Callable<Object>() {
+            completionService.submit(new TrackableCallable<Object>() {
 
                 @Override
                 public Object call() throws Exception {

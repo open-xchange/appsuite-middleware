@@ -52,7 +52,6 @@ package com.openexchange.threadpool;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
@@ -539,15 +538,14 @@ public final class ThreadPools {
     }
 
     private static class TrackableTaskAdapter<V> extends TaskAdapter<V> implements Trackable {
-        private final Map<String, Object> props;
+        private final Props props;
         TrackableTaskAdapter(final Callable<V> callable) {
             super(callable);
-            final Props props = LogProperties.optLogProperties(Thread.currentThread());
-            this.props = null == props ? null : Collections.unmodifiableMap(props.asMap());
+            this.props = LogProperties.optLogProperties(Thread.currentThread());
         }
 
         @Override
-        public Map<String, Object> optLogProperties() {
+        public Props optLogProperties() {
             return props;
         }
     }
@@ -591,15 +589,14 @@ public final class ThreadPools {
 
     private static class TrackableRenamingTaskAdapter<V> extends RenamingTaskAdapter<V> implements Trackable {
 
-        private final Map<String, Object> props;
+        private final Props props;
         TrackableRenamingTaskAdapter(final Callable<V> callable, final String prefix) {
             super(callable, prefix);
-            final Props props = LogProperties.optLogProperties(Thread.currentThread());
-            this.props = null == props ? null : Collections.unmodifiableMap(props.asMap());
+            this.props = LogProperties.optLogProperties(Thread.currentThread());
         }
 
         @Override
-        public Map<String, Object> optLogProperties() {
+        public Props optLogProperties() {
             return props;
         }
     }
@@ -638,6 +635,37 @@ public final class ThreadPools {
         @Override
         public void execute(final Runnable command) {
             command.run();
+        }
+    }
+
+    /**
+     * Combines Callable and Trackable.
+     */
+    public static abstract class TrackableCallable<V> implements Callable<V>, Trackable {
+
+        /** The properties */
+        protected final Props props;
+
+        /**
+         * Initializes a new {@link TrackableCallable}.
+         */
+        protected TrackableCallable() {
+            this(LogProperties.optLogProperties(Thread.currentThread()));
+        }
+
+        /**
+         * Initializes a new {@link TrackableCallable}.
+         *
+         * @param props The properties
+         */
+        protected TrackableCallable(final Props props) {
+            super();
+            this.props = props;
+        }
+
+        @Override
+        public Props optLogProperties() {
+            return props;
         }
     }
 

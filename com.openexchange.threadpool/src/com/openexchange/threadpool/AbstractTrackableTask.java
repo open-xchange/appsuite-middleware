@@ -49,7 +49,7 @@
 
 package com.openexchange.threadpool;
 
-import java.util.Map;
+import com.openexchange.log.Props;
 
 /**
  * {@link AbstractTrackableTask} - An abstract {@code TrackableTask} which leaves {@code #afterExecute(Throwable)},
@@ -67,7 +67,7 @@ public abstract class AbstractTrackableTask<V> extends AbstractTask<V> implement
     }
 
     @Override
-    public Map<String, Object> optLogProperties() {
+    public Props optLogProperties() {
         return null;
     }
 

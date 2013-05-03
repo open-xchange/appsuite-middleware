@@ -2400,12 +2400,11 @@ public final class OutlookFolderStorage implements FolderStorage {
         private final int contextId;
         private final int tree;
         private final StorageParameters parameters;
-        private final Map<String, Object> props;
+        private final Props props;
 
         public MailFolderCallable(final FolderNameComparator comparator, final Locale locale, final User user, final int contextId, final int tree, final StorageParameters parameters) {
             super();
-            final Props props = LogProperties.optLogProperties(Thread.currentThread());
-            this.props = null == props ? null : Collections.unmodifiableMap(props.asMap());
+            this.props = LogProperties.optLogProperties(Thread.currentThread());
             this.comparator = comparator;
             this.locale = locale == null ? Locale.US : locale;
             this.user = user;
@@ -2415,7 +2414,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         }
 
         @Override
-        public Map<String, Object> optLogProperties() {
+        public Props optLogProperties() {
             return props;
         }
 
@@ -2805,15 +2804,14 @@ public final class OutlookFolderStorage implements FolderStorage {
      */
     private static abstract class TrackableCallable<V> implements Callable<V>, Trackable {
 
-        private final Map<String, Object> props;
+        private final Props props;
         TrackableCallable() {
             super();
-            final Props props = LogProperties.optLogProperties(Thread.currentThread());
-            this.props = null == props ? null : Collections.unmodifiableMap(props.asMap());
+            this.props = LogProperties.optLogProperties(Thread.currentThread());
         }
 
         @Override
-        public Map<String, Object> optLogProperties() {
+        public Props optLogProperties() {
             return props;
         }
     }

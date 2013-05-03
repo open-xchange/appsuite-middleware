@@ -66,4 +66,10 @@ public final class FatalCallback implements LogCallback {
             log.fatal(message, t);
         }
     }
+
+    @Override
+    public boolean isLoggable(Log log) {
+        return log.isFatalEnabled();
+    }
+
 }

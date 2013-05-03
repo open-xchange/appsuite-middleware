@@ -69,10 +69,8 @@ import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.log.ForceLog;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.Props;
 import com.openexchange.realtime.atmosphere.AtmosphereConfig;
 import com.openexchange.realtime.atmosphere.AtmosphereExceptionCode;
 import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
@@ -202,13 +200,7 @@ public class SessionValidator {
             checkSecret(atmosphereConfig.getCookieHashSource(), request, serverSession);
 
             // set LogProperties after validation
-            final Props properties = LogProperties.getLogProperties();
-            properties.put(LogProperties.Name.SESSION_SESSION_ID, sessionId);
-            properties.put(LogProperties.Name.SESSION_USER_ID, Integer.valueOf(serverSession.getUserId()));
-            properties.put(LogProperties.Name.SESSION_CONTEXT_ID, Integer.valueOf(serverSession.getContextId()));
-            final String client = serverSession.getClient();
-            properties.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : ForceLog.valueOf(client));
-            properties.put(LogProperties.Name.SESSION_SESSION, serverSession);
+            LogProperties.putSessionProperties(serverSession);
         } catch (OXException oxe) {
             /*
              * If we got a SessionException during validation properly handle the server side consequences

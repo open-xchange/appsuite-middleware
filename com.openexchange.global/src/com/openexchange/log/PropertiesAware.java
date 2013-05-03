@@ -49,33 +49,13 @@
 
 package com.openexchange.log;
 
-import java.util.Set;
-import com.openexchange.log.LogPropertyName.LogLevel;
 
 
 /**
- * {@link PropertiesAppender} - Appends properties to a log message.
+ * {@link PropertiesAware} - Aware of properties for a log message.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface PropertiesAppender {
-
-    /**
-     * Append properties to specified message (if available).
-     *
-     * @param message The message to append to
-     * @param logLevel The log level
-     * @return The message with properties appended
-     */
-    Object appendProperties(Object message, LogLevel logLevel);
-
-    /**
-     * Gets the properties to log for given log level.
-     * <p>
-     * The returned set includes the {@link LogProperties#optLogProperties() configured property names} and the ones marked with {@link com.openexchange.log.ForceLog} as well.
-     * 
-     * @param logLevel The log level
-     * @return The properties to log
-     */
-    Set<LogProperties.Name> getPropertiesFor(LogLevel logLevel);
+public interface PropertiesAware {
+    // Marker interface
 }

@@ -56,8 +56,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -148,19 +146,6 @@ public abstract class SessionServlet extends AJAXServlet {
     private static final Lock RANGE_LOCK = new ReentrantLock();
 
     private static volatile SubnetMask allowedSubnet;
-
-    /** The log properties for session-related information. */
-    protected static final Set<LogProperties.Name> LOG_PROPERTIES;
-
-    static {
-        final Set<LogProperties.Name> set = EnumSet.noneOf(LogProperties.Name.class);
-        set.add(LogProperties.Name.SESSION_SESSION_ID);
-        set.add(LogProperties.Name.SESSION_USER_ID);
-        set.add(LogProperties.Name.SESSION_CONTEXT_ID);
-        set.add(LogProperties.Name.SESSION_CLIENT_ID);
-        set.add(LogProperties.Name.SESSION_SESSION);
-        LOG_PROPERTIES = Collections.unmodifiableSet(set);
-    }
 
     /**
      * Initializes a new {@link SessionServlet}.
@@ -367,7 +352,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 threadCounter.decrement(sessionId);
             }
             ThreadLocalSessionHolder.getInstance().setSession(null);
-            LogProperties.removeLogProperties(LOG_PROPERTIES);
+            LogProperties.removeSessionProperties();
             if (null != counter) {
                 counter.getAndDecrement();
             }
@@ -444,7 +429,7 @@ public abstract class SessionServlet extends AJAXServlet {
             } catch (final Exception e2) {
                 LOG.error("Cookies could not be removed.", e2);
             } finally {
-                LogProperties.removeLogProperties(LOG_PROPERTIES);
+                LogProperties.removeSessionProperties();
             }
         }
     }
@@ -584,15 +569,7 @@ public abstract class SessionServlet extends AJAXServlet {
             }
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
-        {
-            final Props properties = LogProperties.getLogProperties();
-            properties.put(LogProperties.Name.SESSION_SESSION_ID, sessionId);
-            properties.put(LogProperties.Name.SESSION_USER_ID, Integer.valueOf(session.getUserId()));
-            properties.put(LogProperties.Name.SESSION_CONTEXT_ID, Integer.valueOf(session.getContextId()));
-            final String client  = session.getClient();
-            properties.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : ForceLog.valueOf(client));
-            properties.put(LogProperties.Name.SESSION_SESSION, session);
-        }
+        LogProperties.putSessionProperties(session);
         /*
          * Get session secret
          */
