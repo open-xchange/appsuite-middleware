@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import com.openexchange.ajax.container.FileHolder;
@@ -95,7 +96,11 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
 
             @Override
             public InputStream newStream() throws OXException, IOException {
-                return new BufferedInputStream(fileAccess.getDocument(id, version));
+                final InputStream inputStream = fileAccess.getDocument(id, version);
+                if ((inputStream instanceof BufferedInputStream) || (inputStream instanceof ByteArrayInputStream)) {
+                    return inputStream;
+                }
+                return new BufferedInputStream(inputStream);
             }
         };
 
