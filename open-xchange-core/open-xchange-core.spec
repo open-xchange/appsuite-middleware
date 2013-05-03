@@ -379,8 +379,8 @@ if [ $permval -lt 256 ]; then
 fi
 # -----------------------------------------------------------------------
 for opt in "-XX:+DisableExplicitGC" "-server" "-Djava.awt.headless=true" \
-        "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=75" \
-        "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=3" "-XX:+UseTLAB"; do
+        "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=" \
+        "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB"; do
     if ! echo $nopts | grep -- $opt > /dev/null; then
         nopts="$nopts $opt"
     fi

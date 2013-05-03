@@ -54,7 +54,8 @@ import com.openexchange.log.Log;
 import com.openexchange.realtime.packet.ID;
 
 /**
- * {@link Moribund}
+ * {@link Moribund} - Represents an ID/client/resources that can be added to the {@link AtmosphereResourceReaper} which in turn can sort the
+ * Moribunds and instruct them to free used resources and remove themselfes from the system by callying {@link Moribund#die()}.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
@@ -67,17 +68,10 @@ public abstract class Moribund implements Comparable<Moribund> {
 
     private ID id;
 
-
     /**
      * Initializes a new {@link Moribund}.
      * 
-     * @param concreteId
-     * @param atmosphereResource
-     * @param generalToFullIDMap
-     * @param fullIDToResourceMap
-     * @param outboxes
-     * @param resendBuffers 
-     * @param sequenceNumbers 
+     * @param concreteId The concrete client ID
      */
     public Moribund(ID concreteID) {
         this.lingeringStart = System.currentTimeMillis();
@@ -97,14 +91,14 @@ public abstract class Moribund implements Comparable<Moribund> {
 
     /**
      * Get the lingering time of this moribund in milliseconds.
-     * @param now 
      * 
+     * @param now
      * @return the lingering time of this moribund in milliseconds
      */
     public long getLinger(long now) {
         return now - lingeringStart;
     }
-    
+
     public ID getConcreteID() {
         return id;
     }
@@ -139,7 +133,7 @@ public abstract class Moribund implements Comparable<Moribund> {
         if (!(obj instanceof Moribund))
             return false;
         Moribund other = (Moribund) obj;
-    
+
         if (id == null) {
             if (other.id != null)
                 return false;
