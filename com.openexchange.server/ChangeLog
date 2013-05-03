@@ -9,6 +9,12 @@
  - Fix for bug 26305: Use safe hash calculation to avoid hash collisions
  - Fix for bug 26054: Adapted logging to output USR-0010 error code as DEBUG only
 
+* 2013-04-30 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24724: Revoked version of org.apache.log4j OSGi bundle to 1.2.13. This version does not split log messages when using
+   SyslogAppender. Log messages are truncated by the underlying UDP network traffic. Newer version splits too long log messages which makes
+   the log output more unreadable.
+
 * 2013-04-30 - marc.arens@open-xchange.com
 
  - Fix for bug 26022: Don't assume defaultcontext

@@ -109,7 +109,7 @@ public final class SmalMailAccessCache implements IMailAccessCache {
     }
 
     @Override
-    public int numberOfMailAccesses(final Session session, final int accountId) throws OXException {
+    public int numberOfMailAccesses(Session session, int accountId) throws OXException {
         return delegate.numberOfMailAccesses(session, accountId);
     }
 
