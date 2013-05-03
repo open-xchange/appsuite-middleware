@@ -9,6 +9,7 @@
  - Fix for bug 26266: Ensure user/context information is prepended to log message whenever available
  - Fix for bug 26370: Handle unexpected UnknownHostException gracefully
  - Fix for bug 26373: Sanitize on "delivery=view", too
+ - Fix for bug 26362: Honor new "delivery" parameter
 
 * 2013-05-02 - tobias.friedrich@open-xchange.com
 
