@@ -47,58 +47,86 @@
  *
  */
 
-package com.openexchange.ms;
+package com.openexchange.ms.internal;
 
-import java.util.Set;
-import com.openexchange.exception.OXException;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
+
 
 /**
- * {@link MsService} - The messaging service.
- * <p>
- * To avoid class loading problems, please use <a href="http://en.wikipedia.org/wiki/Plain_Old_Java_Object">POJO</a>s if possible.
+ * {@link HzDelayed}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MsService {
+public final class HzDelayed<E> implements Delayed {
 
     /**
-     * Gets the distributed queue with the specified name.
-     * 
-     * @param name The name of the distributed queue
-     * @return The distributed queue with the specified name
+     * The delay for pooled messages.
      */
-    <E> Queue<E> getQueue(String name);
+    private static final long DELAY_MSEC = HzDataUtility.DELAY_MSEC;
+
+    private final long stamp;
+    private final boolean immediateDelivery;
+    private final E data;
+    private final int hash;
 
     /**
-     * Returns the distributed topic with the specified name.
-     * 
-     * @param name The name of the distributed topic
-     * @return The distributed topic with the specified name
+     * Initializes a new {@link HzDelayed}.
      */
-    <E> Topic<E> getTopic(String name);
+    public HzDelayed(final E data, final boolean immediateDelivery) {
+        super();
+        stamp = System.currentTimeMillis();
+        this.immediateDelivery = immediateDelivery;
+        this.data = data;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((data == null) ? 0 : data.hashCode());
+        hash = result;
+    }
 
     /**
-     * Gets the (local) message Inbox.
+     * Gets the message data object.
      *
-     * @return The message Inbox
+     * @return The message data object
      */
-    MessageInbox getMessageInbox();
+    public E getData() {
+        return data;
+    }
 
-    /**
-     * Set of current members of the cluster. Returning set instance is not modifiable. Every member in the cluster has the same member list
-     * in the same order. First member is the oldest member.
-     *
-     * @return The members
-     */
-    Set<Member> getMembers();
+    @Override
+    public int compareTo(final Delayed o) {
+        final long thisStamp = stamp;
+        final long otherStamp = ((HzDelayed<?>) o).stamp;
+        return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
+    }
 
-    /**
-     * Transports a message to given member only.
-     *
-     * @param message The message
-     * @param member The member to transfer to
-     * @throws OXException If transport attempt fails
-     */
-    void directMessage(final Message<?> message, final Member member) throws OXException;
+    @Override
+    public long getDelay(final TimeUnit unit) {
+        return immediateDelivery ? 0L : unit.convert(DELAY_MSEC - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof HzDelayed)) {
+            return false;
+        }
+        HzDelayed<?> other = (HzDelayed<?>) obj;
+        if (data == null) {
+            if (other.data != null) {
+                return false;
+            }
+        } else if (!data.equals(other.data)) {
+            return false;
+        }
+        return true;
+    }
 
 }

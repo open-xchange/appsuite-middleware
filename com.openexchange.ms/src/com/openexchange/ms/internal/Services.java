@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,58 +47,72 @@
  *
  */
 
-package com.openexchange.ms;
+package com.openexchange.ms.internal;
 
-import java.util.Set;
-import com.openexchange.exception.OXException;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link MsService} - The messaging service.
- * <p>
- * To avoid class loading problems, please use <a href="http://en.wikipedia.org/wiki/Plain_Old_Java_Object">POJO</a>s if possible.
+ * {@link Services} - The static service lookup.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MsService {
+public final class Services {
 
     /**
-     * Gets the distributed queue with the specified name.
-     * 
-     * @param name The name of the distributed queue
-     * @return The distributed queue with the specified name
+     * Initializes a new {@link Services}.
      */
-    <E> Queue<E> getQueue(String name);
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
 
     /**
-     * Returns the distributed topic with the specified name.
-     * 
-     * @param name The name of the distributed topic
-     * @return The distributed topic with the specified name
-     */
-    <E> Topic<E> getTopic(String name);
-
-    /**
-     * Gets the (local) message Inbox.
+     * Sets the service lookup.
      *
-     * @return The message Inbox
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    MessageInbox getMessageInbox();
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
 
     /**
-     * Set of current members of the cluster. Returning set instance is not modifiable. Every member in the cluster has the same member list
-     * in the same order. First member is the oldest member.
+     * Gets the service lookup.
      *
-     * @return The members
+     * @return The service lookup or <code>null</code>
      */
-    Set<Member> getMembers();
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
 
     /**
-     * Transports a message to given member only.
+     * Gets the service of specified type
      *
-     * @param message The message
-     * @param member The member to transfer to
-     * @throws OXException If transport attempt fails
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    void directMessage(final Message<?> message, final Member member) throws OXException;
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.caching.hazelcast\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
+    }
 
 }

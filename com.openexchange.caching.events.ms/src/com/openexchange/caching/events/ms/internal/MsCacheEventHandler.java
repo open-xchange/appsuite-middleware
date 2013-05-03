@@ -49,6 +49,7 @@
 
 package com.openexchange.caching.events.ms.internal;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
@@ -69,10 +70,10 @@ import com.openexchange.server.ServiceExceptionCode;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class MsCacheEventHandler implements CacheListener, MessageListener<Map<String, Object>>, EventHandler {
+public final class MsCacheEventHandler implements CacheListener, MessageListener<Map<String, Serializable>>, EventHandler {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(MsCacheEventHandler.class);
-    private static final String TOPIC_NAME = "cacheEvents";
+    private static final String TOPIC_NAME = "cacheEvents-0";
     private static final AtomicReference<MsService> MS_REFERENCE = new AtomicReference<MsService>();
 
     private final CacheEventService cacheEvents;
@@ -96,7 +97,7 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
         super();
         this.cacheEvents = cacheEvents;
         cacheEvents.addListener(this);
-        Topic<Map<String, Object>> topic = getTopic();
+        Topic<Map<String, Serializable>> topic = getTopic();
         this.senderId = topic.getSenderId();
         topic.addMessageListener(this);
     }
@@ -125,13 +126,13 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
             LOG.debug("publish: " + cacheEvent + " [" + senderId + "]");
         }
         try {
-            getTopic().publish(cacheEvent.writePojo());
+            getTopic().publish(CacheEventWrapper.wrap(cacheEvent));
         } catch (OXException e) {
             LOG.warn("Error publishing cache event", e);
         }
     }
 
-    private Topic<Map<String, Object>> getTopic() throws OXException {
+    private Topic<Map<String, Serializable>> getTopic() throws OXException {
         MsService msService = MS_REFERENCE.get();
         if (null == msService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MsService.class.getName());
@@ -140,14 +141,14 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
     }
 
     @Override
-    public void onMessage(Message<Map<String, Object>> message) {
+    public void onMessage(Message<Map<String, Serializable>> message) {
         if (null != message && message.isRemote()) {
-            Map<String, Object> cacheEvent = message.getMessageObject();
+            Map<String, Serializable> cacheEvent = message.getMessageObject();
             if (null != cacheEvent) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("onMessage: " + message.getMessageObject() + " [" + message.getSenderId() + "]");
                 }
-                cacheEvents.notify(this, CacheEvent.fromPojo(cacheEvent));
+                cacheEvents.notify(this, CacheEventWrapper.unwrap(cacheEvent));
             } else {
                 LOG.warn("Discarding empty cache event message.");
             }

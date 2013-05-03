@@ -145,9 +145,12 @@ public class GrizzlyConfig implements Initialization {
 
     /** The port used for https communication */
     private int httpsProtoPort = 443;
-    
+
     /** The name of the echo header whose value is echoed for each request providing that header, see mod_id for apache */
     private String echoHeader = "X-Echo-Header";
+
+    /** The maximum allowed size for PUT and POST bodies */
+    private  int maxBodySize = 104857600; 
 
     // sessiond properties
 
@@ -185,7 +188,7 @@ public class GrizzlyConfig implements Initialization {
         this.isAJPEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasAJPEnabled", false);
 
         // server properties
-        this.cookieMaxAge = Integer.valueOf(ConfigTools.parseTimespanSecs(configService.getProperty("com.openexchange.cookie.ttl", "1W")));
+        this.cookieMaxAge = Integer.valueOf(ConfigTools.parseTimespanSecs(configService.getProperty("com.openexchange.cookie.ttl", "1W"))).intValue();
         this.cookieMaxInactivityInterval = configService.getIntProperty("com.openexchange.servlet.maxInactiveInterval", 1800);
         this.isForceHttps = configService.getBoolProperty("com.openexchange.forceHTTPS", false);
         this.isCookieHttpOnly = configService.getBoolProperty("com.openexchange.cookie.httpOnly", true);
@@ -198,6 +201,8 @@ public class GrizzlyConfig implements Initialization {
         this.httpsProtoValue = configService.getProperty("com.openexchange.server.httpsProtoValue", "https");
         this.httpProtoPort = configService.getIntProperty("com.openexchange.server.httpProtoPort", 80);
         this.httpsProtoPort = configService.getIntProperty("com.openexchange.server.httpsProtoPort", 443);
+        final int configuredMaxBodySize = configService.getIntProperty("com.openexchange.servlet.maxBodySize", 104857600);
+        this.maxBodySize = configuredMaxBodySize <= 0 ? Integer.MAX_VALUE : configuredMaxBodySize;
 
         this.httpHost = configService.getProperty("com.openexchange.connector.networkListenerHost", "127.0.0.1");
         // keep backwards compatibility with ajp config
@@ -439,13 +444,18 @@ public class GrizzlyConfig implements Initialization {
     public boolean isConsiderXForwards() {
         return isConsiderXForwards;
     }
-    
+
     /**
      * Get the name of the echo header whose value is echoed for each request providing that header when using KippDta's mod_id. 
      * @return The name of the echo header whose value is echoed for each request providing that header.
      */
     public String getEchoHeader() {
         return this.echoHeader;
+    }
+    
+    /** Get the maximum allowed size for PUT and POST bodies */
+    public int getMaxBodySize() {
+        return maxBodySize;
     }
 
 }

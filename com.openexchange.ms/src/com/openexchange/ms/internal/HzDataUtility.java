@@ -52,7 +52,6 @@ package com.openexchange.ms.internal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-
 /**
  * {@link HzDataUtility} - A utility class for Hazelcast-based messaging.
  *
@@ -67,6 +66,30 @@ public final class HzDataUtility {
         super();
     }
 
+    // ------------------------------------- DELAY STUFF -------------------------------------------- //
+
+    /**
+     * The delay for pooled messages.
+     */
+    public static final long DELAY_MSEC = 5000L;
+
+    /**
+     * The frequency to check for delayed pooled messages.
+     */
+    public static final int DELAY_FREQUENCY = 3000;
+
+    // ------------------------------------- CHUNK STUFF -------------------------------------------- //
+
+    /**
+     * The chunk size of a multiple message.
+     */
+    public static final int CHUNK_SIZE = 10;
+
+    /**
+     * The threshold when to switch to a multiple message.
+     */
+    public static final int CHUNK_THRESHOLD = 2;
+
     // ------------------------------------- MESSAGE DATA ------------------------------------------- //
 
     /**
@@ -78,6 +101,16 @@ public final class HzDataUtility {
      * The property name for transmitted message data object.
      */
     public static final String MESSAGE_DATA_OBJECT = "__object".intern();
+
+    /**
+     * The property to mark as a multiple transport.
+     */
+    public static final String MULTIPLE_MARKER = "__multiple".intern();
+
+    /**
+     * The property prefix on a multiple transport.
+     */
+    public static final String MULTIPLE_PREFIX = "__map".intern();
 
     /**
      * Generates message data for given arguments.
@@ -97,7 +130,6 @@ public final class HzDataUtility {
         return map;
     }
 
-    
     // ------------------------------------- OTHER STIFF ------------------------------------------- //
 
 }

@@ -84,6 +84,8 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Tue Apr 30 2013 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2013-04-17
 * Fri Apr 12 2013 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2013-04-12
 * Wed Apr 10 2013 Steffen Templin <marcus.klein@open-xchange.com>

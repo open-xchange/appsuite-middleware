@@ -1,6 +1,16 @@
+* 2013-04-30 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24724: Revoked version of org.apache.log4j OSGi bundle to 1.2.13. This version does not split log messages when using
+   SyslogAppender. Log messages are truncated by the underlying UDP network traffic. Newer version splits too long log messages which makes
+   the log output more unreadable.
+
 * 2013-04-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 25957: Deny "vbscript" URLs
+
+* 2013-04-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25837: Added several enhancements to avoid flooding of the distributed hazelcast topic for cache events
 
 * 2013-04-12 - marcus.klein@open-xchange.com
 

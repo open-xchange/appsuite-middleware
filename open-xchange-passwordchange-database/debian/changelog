@@ -40,6 +40,12 @@ open-xchange-passwordchange-database (7.2.0-0) UNRELEASED; urgency=low
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 15 Mar 2013 13:33:29 +0100
 
+open-xchange-passwordchange-database (7.0.2-8) unstable; urgency=low
+
+  * Build for patch 2013-04-17
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 30 Apr 2013 12:39:49 +0200
+
 open-xchange-passwordchange-database (7.0.2-7) unstable; urgency=low
 
   * Build for patch 2013-04-04

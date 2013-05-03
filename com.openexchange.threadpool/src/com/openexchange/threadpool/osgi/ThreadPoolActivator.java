@@ -116,16 +116,17 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
              */
             final ConfigurationService confService = getService(ConfigurationService.class);
             final ThreadPoolProperties init = new ThreadPoolProperties().init(confService);
-            final ThreadPoolServiceImpl threadPool = ThreadPoolServiceImpl.newInstance(init);
-            this.threadPool = threadPool;
+            threadPool = ThreadPoolServiceImpl.newInstance(init);
             if (init.isPrestartAllCoreThreads()) {
                 threadPool.prestartAllCoreThreads();
             }
-            // Log configuration
+            // Log configuration       Fix for bug 24724: Pass stack trace as separate argument to log routine, rather than appending it into log message
+            
             final int queueCapacity = confService.getIntProperty("com.openexchange.log.queueCapacity", -1);
             final boolean appendTraceToMessage = confService.getBoolProperty("com.openexchange.log.appendTraceToMessage", false);
             Log.setAppendTraceToMessage(appendTraceToMessage);
-            final LogServiceImpl logService = new LogServiceImpl(threadPool, queueCapacity);
+            final int maxMessageLength = confService.getIntProperty("com.openexchange.log.maxMessageLength", -1);
+            final LogServiceImpl logService = new LogServiceImpl(threadPool, queueCapacity, maxMessageLength);
             this.logService = logService;
             Log.set(logService);
             /*
