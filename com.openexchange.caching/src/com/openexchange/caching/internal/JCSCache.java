@@ -451,18 +451,26 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public Set<?> getKeysInRange(int start, int end) throws OXException {
         if (start < 0 || end < 0 || start <= end) {
-            Set<Object> set = new HashSet<Object>();
-
-            Object[] keys = cacheControl.getMemoryCache().getKeyArray();
-            int i = start;
-            while (i < end) {
-                set.add(keys[i++]);
-            }
-
-            return set;
+            throw new OXException(666, "Illegal start,end range (" + start + ", " + end + ")");
         }
 
-        throw new OXException(666, "Illegal start,end range (" + start + ", " + end + ")");
+        final MemoryCache memCache = this.memCache;
+        if (null == memCache) {
+            return Collections.emptySet();
+        }
+
+        Object[] keys = memCache.getKeyArray();
+        if (null == keys || 0 >= keys.length) {
+            return Collections.emptySet();
+        }
+
+        final int length = keys.length;
+        Set<Object> set = new HashSet<Object>(length);
+        for (int i = start; i < end; i++) {
+            set.add(keys[i]);
+        }
+
+        return set;
     }
 
 }
