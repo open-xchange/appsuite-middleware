@@ -63,6 +63,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
@@ -158,7 +159,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             final boolean saveToDisk;
             {
                 final String saveParam = req.getParameter(Mail.PARAMETER_SAVE);
-                saveToDisk = ((saveParam == null || saveParam.length() == 0) ? false : ((Integer.parseInt(saveParam)) > 0));
+                saveToDisk = AJAXRequestDataTools.parseBoolParameter(saveParam) || "download".equals(toLowerCase(req.getParameter("delivery")));
             }
             final boolean filter;
             {
@@ -221,13 +222,13 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             }
             /*-
              * Try direct output if non-image data
-             * 
+             *
              * Ignore in case of image data since subsequent transformation might be supposed to be applied
              */
             if (!isImage) {
                 final OutputStream directOutputStream = requestData.optOutputStream();
                 if (null != directOutputStream) {
-                    requestData.setResponseHeader("Content-Type", saveToDisk ? "application/octet-stream" : mailPart.getContentType().toString());                    
+                    requestData.setResponseHeader("Content-Type", saveToDisk ? "application/octet-stream" : mailPart.getContentType().toString());
                     final StringAllocator sb = new StringAllocator(saveToDisk ? "attachment" : "inline");
                     appendFilenameParameter(mailPart.getFileName(), null, requestData.getUserAgent(), sb);
                     requestData.setResponseHeader("Content-Disposition", sb.toString());
@@ -248,7 +249,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             }
             /*-
              * The regular way...
-             * 
+             *
              * Read from stream
              */
             final ThresholdFileHolder fileHolder = new ThresholdFileHolder();
@@ -367,6 +368,20 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
 
     private String getHash(final String folderPath, final String uid, final String sequenceId) {
         return HashUtility.getHash(new com.openexchange.java.StringAllocator(32).append(folderPath).append('/').append(uid).append('/').append(sequenceId).toString(), "md5", "hex");
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

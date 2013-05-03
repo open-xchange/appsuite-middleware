@@ -68,6 +68,7 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -170,8 +171,11 @@ public final class GetAction extends AbstractMailAction {
             final boolean showMessageSource = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
             tmp = req.getParameter(Mail.PARAMETER_SHOW_HEADER);
             final boolean showMessageHeaders = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
-            tmp = req.getParameter(Mail.PARAMETER_SAVE);
-            final boolean saveToDisk = (tmp != null && tmp.length() > 0 && Integer.parseInt(tmp) > 0);
+            final boolean saveToDisk;
+            {
+                final String saveParam = req.getParameter(Mail.PARAMETER_SAVE);
+                saveToDisk = AJAXRequestDataTools.parseBoolParameter(saveParam) || "download".equals(toLowerCase(req.getParameter("delivery")));
+            }
             tmp = req.getParameter(Mail.PARAMETER_UNSEEN);
             final boolean unseen = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
             tmp = req.getParameter("ignorable");
@@ -482,6 +486,20 @@ public final class GetAction extends AbstractMailAction {
             }
         }
         return sb.toString();
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }
