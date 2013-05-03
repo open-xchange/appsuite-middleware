@@ -450,10 +450,9 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     @Override
     public Set<?> getKeysInRange(int start, int end) throws OXException {
-        if (start < 0 || end < 0 || start <= end) {
+        if (start >= 0 && end >= 0 && start > end) {
             throw new OXException(666, "Illegal start,end range (" + start + ", " + end + ")");
         }
-
         final MemoryCache memCache = this.memCache;
         if (null == memCache) {
             return Collections.emptySet();
