@@ -418,12 +418,20 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     @Override
     public Set<?> getAllKeys() throws OXException {
-        Set<Object> set = new HashSet<Object>();
+        final MemoryCache memCache = this.memCache;
+        if (null == memCache) {
+            return Collections.emptySet();
+        }
 
-        Object[] keys = cacheControl.getMemoryCache().getKeyArray();
-        int i = 0;
-        while (i < keys.length) {
-            set.add(keys[i++]);
+        Object[] keys = memCache.getKeyArray();
+        if (null == keys || 0 >= keys.length) {
+            return Collections.emptySet();
+        }
+
+        final int length = keys.length;
+        Set<Object> set = new HashSet<Object>(length);
+        for (int i = 0; i < length; i++) {
+            set.add(keys[i]);
         }
 
         return set;
