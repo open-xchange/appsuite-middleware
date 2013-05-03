@@ -199,11 +199,22 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     @Override
     public Collection<Serializable> values() {
-        final Object[] keys = cacheControl.getMemoryCache().getKeyArray();
-        final List<Serializable> list = new ArrayList<Serializable>(keys.length);
-        for (final Object key : keys) {
-            list.add(cacheControl.get((Serializable) key).getVal());
+        final MemoryCache memCache = this.memCache;
+        if (null == memCache) {
+            return Collections.emptySet();
         }
+
+        final Object[] keys = memCache.getKeyArray();
+        if (null == keys || 0 >= keys.length) {
+            return Collections.emptySet();
+        }
+
+        final int length = keys.length;
+        final List<Serializable> list = new ArrayList<Serializable>(length);
+        for (int i = 0; i < length; i++) {
+            list.add(cacheControl.get((Serializable) keys[i]).getVal());
+        }
+
         return list;
     }
 
