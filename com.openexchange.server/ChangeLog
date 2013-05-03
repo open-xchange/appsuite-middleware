@@ -1,3 +1,7 @@
+* 2013-05-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26341: Don't stick to certain values, but only check existence of associated option
+
 * 2013-05-02 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 25672: Don't delete already existing delete exceptions   
