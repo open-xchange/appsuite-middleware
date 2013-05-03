@@ -221,15 +221,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                                         Stanza s = new Message();
                                         s.setFrom(constructedId);
                                         s.setTo(constructedId);
-<<<<<<< HEAD
-                                        s.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
-                                            "pong",
-                                            "json",
-                                            "atmosphere",
-                                            "pong").build()));
-=======
                                         s.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(json.optInt("id"), "json", "atmosphere", "pong").build()));
->>>>>>> 8ebfe5d... b25998: answer pings with an individual pong to allow disconnect status to be traced
                                         send(s, constructedId);
                                     }
                                     return;
