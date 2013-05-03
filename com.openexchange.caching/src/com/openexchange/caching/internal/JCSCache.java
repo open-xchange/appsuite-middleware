@@ -51,12 +51,11 @@ package com.openexchange.caching.internal;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.apache.jcs.JCS;
 import org.apache.jcs.access.CacheAccess;
@@ -67,6 +66,7 @@ import org.apache.jcs.engine.behavior.ICacheElement;
 import org.apache.jcs.engine.control.CompositeCache;
 import org.apache.jcs.engine.control.group.GroupAttrName;
 import org.apache.jcs.engine.control.group.GroupId;
+import org.apache.jcs.engine.memory.MemoryCache;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheExceptionCode;
@@ -79,9 +79,6 @@ import com.openexchange.caching.internal.cache2jcs.CacheStatistics2JCS;
 import com.openexchange.caching.internal.cache2jcs.ElementAttributes2JCS;
 import com.openexchange.caching.internal.jcs2cache.JCSElementAttributesDelegator;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.DefaultHashKeyGenerator;
-import com.openexchange.java.HashKeyGenerator;
-import com.openexchange.java.HashKeyMap;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 
@@ -94,16 +91,32 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(JCSCache.class));
 
-    private static final SecureRandom RANDOM = new SecureRandom();
-    private static final Object PRESENT = new Object();
+    private static volatile Field cacheControlField;
+    private static Field cacheControlField() {
+        Field field = cacheControlField;
+        if (null == field) {
+            synchronized (JCSCache.class) {
+                field = cacheControlField;
+                if (null == field) {
+                    try {
+                        field = CacheAccess.class.getDeclaredField("cacheControl");
+                        field.setAccessible(true);
+                        cacheControlField = field;
+                    } catch (final Exception e) {
+                        return null;
+                    }
+                }
+            }
+        }
+        return field;
+    }
+
+    // -------------------------------------------------------------------------------------------------------- //
 
     private final JCS cache;
-
     private final CompositeCache cacheControl;
-
     private volatile Boolean localOnly;
-
-    private final Map<String, Object> groupNames;
+    private final MemoryCache memCache;
 
     /**
      * Initializes a new {@link JCSCache}
@@ -114,16 +127,12 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
         // Init CompositeCache reference
         CompositeCache tmp;
         try {
-            final Field cacheControlField = CacheAccess.class.getDeclaredField("cacheControl");
-            cacheControlField.setAccessible(true);
-            tmp = (CompositeCache) cacheControlField.get(cache);
+            tmp = (CompositeCache) cacheControlField().get(cache);
         } catch (final Exception e) {
             tmp = null;
         }
         cacheControl = tmp;
-        final String salt = Integer.toString(RANDOM.nextInt(), 10); // cache-specific salt
-        final HashKeyGenerator hashKeyGenerator = new DefaultHashKeyGenerator(salt);
-        groupNames = new HashKeyMap<Object>(8192).setGenerator(hashKeyGenerator);
+        memCache = null == tmp ? null : tmp.getMemoryCache();
     }
 
     @Override
@@ -274,9 +283,6 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     public void putInGroup(final Serializable key, final String groupName, final Serializable value) throws OXException {
         try {
             cache.putInGroup(key, groupName, value);
-            synchronized (groupNames) {
-                groupNames.put(groupName, PRESENT);
-            }
         } catch (final org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
         }
@@ -294,9 +300,6 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     public void putInGroup(final Serializable key, final String groupName, final Object value, final ElementAttributes attr) throws OXException {
         try {
             cache.putInGroup(key, groupName, value, new JCSElementAttributesDelegator(attr));
-            synchronized (groupNames) {
-                groupNames.put(groupName, PRESENT);
-            }
         } catch (final org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
         }
@@ -352,17 +355,11 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     @Override
     public void removeFromGroup(final Serializable key, final String group) {
-        synchronized (groupNames) {
-            groupNames.remove(group);
-        }
         cache.remove(key, group);
     }
 
     @Override
     public void localRemoveFromGroup(final Serializable key, final String group) {
-        synchronized (groupNames) {
-            groupNames.remove(group);
-        }
         final GroupAttrName groupAttrName = getGroupAttrName(group, key);
         this.cacheControl.localRemove(groupAttrName);
     }
@@ -402,9 +399,19 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     @Override
     public Set<String> getGroupNames() {
-        final Set<String> ret;
-        synchronized (groupNames) {
-            ret = new HashSet<String>(groupNames.keySet());
+        final MemoryCache memCache = this.memCache;
+        if (null == memCache) {
+            return Collections.emptySet();
+        }
+        final Object[] keyArray = memCache.getKeyArray();
+        if (null == keyArray || 0 >= keyArray.length) {
+            return Collections.emptySet();
+        }
+        final Set<String> ret = new HashSet<String>(keyArray.length);
+        for (final Object key : keyArray) {
+            if (key instanceof GroupAttrName) {
+                ret.add(((GroupAttrName) key).groupId.groupName);
+            }
         }
         return ret;
     }
