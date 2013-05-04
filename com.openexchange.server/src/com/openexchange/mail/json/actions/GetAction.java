@@ -174,7 +174,7 @@ public final class GetAction extends AbstractMailAction {
             final boolean saveToDisk;
             {
                 final String saveParam = req.getParameter(Mail.PARAMETER_SAVE);
-                saveToDisk = AJAXRequestDataTools.parseBoolParameter(saveParam) || "download".equals(toLowerCase(req.getParameter("delivery")));
+                saveToDisk = AJAXRequestDataTools.parseBoolParameter(saveParam) || "download".equals(toLowerCase(req.getParameter(AJAXServlet.PARAMETER_DELIVERY)));
             }
             tmp = req.getParameter(Mail.PARAMETER_UNSEEN);
             final boolean unseen = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));

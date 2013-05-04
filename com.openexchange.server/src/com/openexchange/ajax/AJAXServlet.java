@@ -394,6 +394,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR = "includeStackTraceOnError";
 
     /**
+     * The <code><b>&quot;delivery&quot;</b></code> parameter specifies how to deliver binary data; e.g. <code>&quot;view&quot;</code> for
+     * inlined display or <code>&quot;download&quot;</code>.
+     */
+    public static final String PARAMETER_DELIVERY = "delivery".intern();
+
+    /**
      * The content type if the response body contains javascript data. Set it with
      * <code>resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT)</code> .
      */

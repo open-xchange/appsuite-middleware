@@ -104,7 +104,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private volatile ImageTransformationService scaler;
 
-    private static final String DELIVERY = "delivery";
+    private static final String DELIVERY = AJAXServlet.PARAMETER_DELIVERY;
 
     private static final String DOWNLOAD = "download";
     private static final String VIEW = "view";
