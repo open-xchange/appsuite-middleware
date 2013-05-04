@@ -1,6 +1,7 @@
 * 2013-05-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 26359: Deal with possibly absent CommonEvent instance
+ - Fix for bug 26360: Moved source bundles from 'lib' to its own 'source' directory and changed MANIFEST.MF + .classpath files accordingly
 
 * 2013-05-03 - marcus.klein@open-xchange.com
 
