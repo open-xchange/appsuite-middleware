@@ -1,3 +1,7 @@
+* 2013-05-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26359: Deal with possibly absent CommonEvent instance
+
 * 2013-05-03 - marcus.klein@open-xchange.com
 
  - Fix for bug 26323: Deal with multi-threading problem if OSGi cache service gets unavailable.
