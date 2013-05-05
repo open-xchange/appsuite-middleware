@@ -190,6 +190,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                         final String htmlContent = MessageUtility.readMailPart(mailPart, cs);
                         final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                         bytes = sanitizeHtml(htmlContent, htmlService).getBytes(Charsets.forName(cs));
+                        contentType.setCharsetParameter(cs);
                     }
                     isClosure = new IFileHolder.InputStreamClosure() {
 
