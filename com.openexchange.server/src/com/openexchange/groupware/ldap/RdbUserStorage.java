@@ -67,8 +67,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLRecoverableException;
-import java.sql.SQLTransactionRollbackException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -478,64 +476,43 @@ public class RdbUserStorage extends UserStorage {
             throw UserExceptionCode.LOCKING_NOT_ALLOWED.create(I(users.size()));
         }
         final Map<Integer, Map<String, Set<String>>> usersAttrs = new HashMap<Integer, Map<String, Set<String>>>();
-        {
-            final int maxRetry = 3;
-            int retry = 0;
-            while (retry++ < maxRetry) {
+        try {
+            final Iterator<Integer> iter = users.keySet().iterator();
+            for (int i = 0; i < users.size(); i += IN_LIMIT) {
+                PreparedStatement stmt = null;
+                ResultSet result = null;
                 try {
-                    usersAttrs.clear();
-                    final Iterator<Integer> iter = users.keySet().iterator();
-                    for (int i = 0; i < users.size(); i += IN_LIMIT) {
-                        PreparedStatement stmt = null;
-                        ResultSet result = null;
-                        try {
-                            final int length = Arrays.determineRealSize(users.size(), i, IN_LIMIT);
-                            String sql = getIN(SELECT_ATTRS, length);
-                            if (lockRows) {
-                                sql += " FOR UPDATE";
-                            }
-                            stmt = con.prepareStatement(sql);
-                            int pos = 1;
-                            stmt.setInt(pos++, context.getContextId());
-                            for (int j = 0; j < length; j++) {
-                                final int userId = i(iter.next());
-                                stmt.setInt(pos++, userId);
-                                usersAttrs.put(I(userId), new HashMap<String, Set<String>>());
-                            }
-                            result = stmt.executeQuery();
-                            // Gather attributes
-                            while (result.next()) {
-                                final Map<String, Set<String>> attrs = usersAttrs.get(I(result.getInt(1)));
-                                final String name = result.getString(2);
-                                Set<String> set = attrs.get(name);
-                                if (null == set) {
-                                    set = new HashSet<String>();
-                                    attrs.put(name, set);
-                                }
-                                set.add(result.getString(3));
-                            }
-                        } finally {
-                            closeSQLStuff(result, stmt);
+                    final int length = Arrays.determineRealSize(users.size(), i, IN_LIMIT);
+                    String sql = getIN(SELECT_ATTRS, length);
+                    if (lockRows) {
+                        sql += " FOR UPDATE";
+                    }
+                    stmt = con.prepareStatement(sql);
+                    int pos = 1;
+                    stmt.setInt(pos++, context.getContextId());
+                    for (int j = 0; j < length; j++) {
+                        final int userId = i(iter.next());
+                        stmt.setInt(pos++, userId);
+                        usersAttrs.put(I(userId), new HashMap<String, Set<String>>());
+                    }
+                    result = stmt.executeQuery();
+                    // Gather attributes
+                    while (result.next()) {
+                        final Map<String, Set<String>> attrs = usersAttrs.get(I(result.getInt(1)));
+                        final String name = result.getString(2);
+                        Set<String> set = attrs.get(name);
+                        if (null == set) {
+                            set = new HashSet<String>();
+                            attrs.put(name, set);
                         }
+                        set.add(result.getString(3));
                     }
-                    // Exit loop
-                    retry = maxRetry;
-                } catch (final SQLTransactionRollbackException e) {
-                    if (retry >= maxRetry) {
-                        // Couldn't recover through try-again
-                        throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
-                    }
-                    LOG.debug("SQL transaction failed. Retry...", e);
-                } catch (final SQLRecoverableException e) {
-                    if (retry >= maxRetry) {
-                        // Couldn't recover through try-again
-                        throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
-                    }
-                    LOG.debug("SQL transaction failed. Retry...", e);
-                } catch (final SQLException e) {
-                    throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
+                } finally {
+                    closeSQLStuff(result, stmt);
                 }
             }
+        } catch (final SQLException e) {
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
         // Proceed iterating users
         for (final UserImpl user : users.values()) {
