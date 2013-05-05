@@ -372,7 +372,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
                             // Check if Range is syntactically valid. If not, then return 416.
                             if (start > end) {
-                                resp.setHeader("Content-Range", "bytes */" + length); // Required in 416.
+                                resp.setHeader("Content-Range", new StringAllocator("bytes */").append(length).toString()); // Required in 416.
                                 resp.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
                                 return;
                             }
@@ -401,29 +401,24 @@ public class FileResponseRenderer implements ResponseRenderer {
                     } else {
                         // Return multiple parts of file.
                         final String boundary = MULTIPART_BOUNDARY;
-                        resp.setContentType("multipart/byteranges; boundary=" + boundary);
+                        resp.setContentType(new StringAllocator("multipart/byteranges; boundary=").append(boundary).toString());
                         resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 206.
 
-                        {
-                            // Cast back to ServletOutputStream to get the easy println methods.
-                            final ServletOutputStream sos = outputStream;
+                        // Copy multi part range.
+                        for (final Range r : ranges) {
+                            // Add multipart boundary and header fields for every range.
+                            outputStream.println();
+                            outputStream.println(new StringAllocator("--").append(boundary).toString());
+                            outputStream.println(new StringAllocator("Content-Type: ").append(contentType).toString());
+                            outputStream.println(new StringAllocator("Content-Range: bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
 
-                            // Copy multi part range.
-                            for (final Range r : ranges) {
-                                // Add multipart boundary and header fields for every range.
-                                sos.println();
-                                sos.println("--" + boundary);
-                                sos.println("Content-Type: " + contentType);
-                                sos.println("Content-Range: bytes " + r.start + "-" + r.end + "/" + r.total);
-
-                                // Copy single part range of multi part range.
-                                copy(documentData, outputStream, r.start, r.length);
-                            }
-
-                            // End with multipart boundary.
-                            sos.println();
-                            sos.println("--" + boundary + "--");
+                            // Copy single part range of multi part range.
+                            copy(documentData, outputStream, r.start, r.length);
                         }
+
+                        // End with multipart boundary.
+                        outputStream.println();
+                        outputStream.println(new StringAllocator("--").append(boundary).append("--").toString());
                     }
                 } else {
                     final int len = BUFLEN;
@@ -441,6 +436,8 @@ public class FileResponseRenderer implements ResponseRenderer {
                 } else {
                     LOG.warn("Lost connection to client while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
                 }
+            } catch (final com.sun.mail.util.MessageRemovedIOException e) {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Message not found.");
             } catch (final IOException e) {
                 if ("connection reset by peer".equals(toLowerCase(e.getMessage()))) {
                     /*-
