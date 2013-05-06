@@ -1,3 +1,9 @@
+open-xchange-spamhandler-default (7.2.1-2) UNRELEASED; urgency=low
+
+  * Second candidate for 7.2.1 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 06 May 2013 12:20:45 +0200
+
 open-xchange-spamhandler-default (7.2.1-1) UNRELEASED; urgency=low
 
   * First candidate for 7.2.1 release
