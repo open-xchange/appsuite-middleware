@@ -694,7 +694,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
             }
             if (INFO) {
-                LOG.info("Didn't found an appropriate Cookie for name \"" + cookieName + "\" (CookieHashSource=" + cookieHash.toString() + ") which provides the session secret.");
+                LOG.info("Didn't find an appropriate Cookie for name \"" + cookieName + "\" (CookieHashSource=" + cookieHash.toString() + ") which provides the session secret.");
             }
         } else if (INFO) {
             LOG.info("Missing Cookies in HTTP request. No session secret can be looked up.");

@@ -831,7 +831,7 @@ public class OXFolderTools {
         try {
             readCon = DBPool.pickup(ctx);
             /*
-             * Following statement is not very performant, but at least it works as it should. I didn't found a working one using joins.
+             * Following statement is not very performant, but at least it works as it should. I didn't find a working one using joins.
              */
             final StringBuilder sql = new StringBuilder(1000);
             sql.append("SELECT ").append(FolderObjectIterator.getFieldsForSQL("ot"));
