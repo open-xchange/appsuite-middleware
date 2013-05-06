@@ -33,3 +33,6 @@ com.openexchange.soap.cxf.logger.level=WARNING
 
 # Set org.jaudiotagger to WARNING
 org.jaudiotagger.level=WARNING
+
+# Set global documentconverter logging level to WARNING
+com.openexchange.documentconverter.impl.IManager.level=WARNING
