@@ -63,13 +63,11 @@ import gnu.trove.map.hash.TObjectLongHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -79,33 +77,27 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
-import javax.activation.DataHandler;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Part;
 import javax.mail.Quota;
 import javax.mail.Store;
 import javax.mail.StoreClosedException;
 import javax.mail.event.FolderEvent;
-import javax.mail.internet.MimeUtility;
-import javax.mail.internet.ParameterList;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.IMAPNumArgSplitter;
 import com.openexchange.imap.command.MessageFetchIMAPCommand;
 import com.openexchange.imap.dataobjects.ExtendedIMAPFolder;
+import com.openexchange.imap.dataobjects.IMAPMailPart;
 import com.openexchange.imap.sort.IMAPSort;
 import com.openexchange.imap.util.IMAPUpdateableData;
 import com.openexchange.imap.util.ImapUtility;
-import com.openexchange.imap.util.InputStreamProvider;
-import com.openexchange.imap.util.ThresholdInputStreamProvider;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
@@ -113,13 +105,8 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.mime.ContentDisposition;
-import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mail.mime.dataobjects.MimeRawSource;
-import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.version.Version;
@@ -133,7 +120,6 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.IMAPInputStream;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights;
@@ -2995,8 +2981,8 @@ public final class IMAPCommandsCollection {
 
     protected static MailPart toMailPart(final IMAPMessage msg, final String sectionId, final boolean peek, final BODYSTRUCTURE bodystructure) throws ProtocolException {
         try {
-            final MailPart ret = new MailPartImpl(msg, sectionId, peek, bodystructure);
-            applyBodyStructure(bodystructure, ret);
+            final IMAPMailPart ret = new IMAPMailPart(msg, sectionId, peek, bodystructure);
+            ret.applyBodyStructure(bodystructure);
             return ret;
         } catch (final RuntimeException e) {
             throw new ProtocolException(e.getMessage(), e);
@@ -3005,70 +2991,13 @@ public final class IMAPCommandsCollection {
 
     protected static MailPart toMailPart(final ByteArray byteArray, final BODYSTRUCTURE bodystructure) throws ProtocolException {
         try {
-            final MailPart ret = new MailPartImpl(byteArray, bodystructure);
-            applyBodyStructure(bodystructure, ret);
+            final IMAPMailPart ret = new IMAPMailPart(byteArray, bodystructure);
+            ret.applyBodyStructure(bodystructure);
             return ret;
         } catch (final IOException e) {
             throw new ProtocolException(e.getMessage(), e);
         } catch (final RuntimeException e) {
             throw new ProtocolException(e.getMessage(), e);
-        }
-    }
-
-    private static void applyBodyStructure(final BODYSTRUCTURE bodystructure, final MailPart ret) {
-        {
-            final String disposition = bodystructure.disposition;
-            final ParameterList dParams = bodystructure.dParams;
-            if (null != disposition || null != dParams) {
-                final ContentDisposition contentDisposition = new ContentDisposition();
-                if (null != disposition) {
-                    contentDisposition.setDisposition(disposition);
-                }
-                if (null != dParams) {
-                    for (final Enumeration<?> names = dParams.getNames(); names.hasMoreElements();) {
-                        final String name = names.nextElement().toString();
-                        contentDisposition.setParameter(name, dParams.get(name));
-                    }
-                }
-                ret.setContentDisposition(contentDisposition);
-            }
-        }
-        {
-            final ParameterList cParams = bodystructure.cParams;
-            if (null != bodystructure.type || null != bodystructure.subtype || null != cParams) {
-                final ContentType contentType = new ContentType();
-                if (null != bodystructure.type) {
-                    contentType.setPrimaryType(bodystructure.type);
-                }
-                if (null != bodystructure.subtype) {
-                    contentType.setSubType(bodystructure.subtype);
-                }
-                if (null != cParams) {
-                    for (final Enumeration<?> names = cParams.getNames(); names.hasMoreElements();) {
-                        final String name = names.nextElement().toString();
-                        contentType.setParameter(name, cParams.get(name));
-                    }
-                }
-                ret.setContentType(contentType);
-            }
-        }
-        {
-            final String encoding = bodystructure.encoding;
-            if (null != encoding) {
-                ret.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, encoding);
-            }
-        }
-        {
-            final String fileName = bodystructure.attachment;
-            if (null != fileName) {
-                ret.getContentDisposition().setFilenameParameter(fileName);
-            }
-        }
-        {
-            final int size = bodystructure.size;
-            if (size > 0) {
-                ret.setSize(size);
-            }
         }
     }
 
@@ -3578,95 +3507,6 @@ public final class IMAPCommandsCollection {
             this.sectionId = sectionId;
         }
 
-    }
-
-    static final class MailPartImpl extends MailPart implements MimeRawSource {
-
-        private static final long serialVersionUID = 6469037985453175593L;
-
-        private final InputStreamProvider inProvider;
-        private final BODYSTRUCTURE body;
-
-        MailPartImpl(final ByteArray byteArray, final BODYSTRUCTURE body) throws IOException {
-            super();
-            final ThresholdInputStreamProvider inProvider = new ThresholdInputStreamProvider();
-            inProvider.write(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount());
-            this.inProvider = inProvider;
-            this.body = body;
-        }
-
-        MailPartImpl(final IMAPMessage msg, final String sectionId, final boolean peek, final BODYSTRUCTURE body) {
-            super();
-            inProvider = new InputStreamProvider() {
-
-                @Override
-                public InputStream getInputStream() throws OXException {
-                    return new IMAPInputStream(msg, sectionId, body.size, peek);
-                }
-            };
-            this.body = body;
-        }
-
-        @Override
-        public void prepareForCaching() {
-            // Nope
-        }
-
-        @Override
-        public void loadContent() throws OXException {
-            // Nope
-        }
-
-        @Override
-        public InputStream getInputStream() throws OXException {
-            final String encoding = getFirstHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC);
-            if (null != encoding) {
-                try {
-                    return MimeUtility.decode(inProvider.getInputStream(), encoding);
-                } catch (final MessagingException e) {
-                    throw MimeMailException.handleMessagingException(e);
-                }
-            }
-            return inProvider.getInputStream();
-        }
-
-        @Override
-        public InputStream getRawInputStream() throws OXException {
-            return inProvider.getInputStream();
-        }
-
-        @Override
-        public Part getPart() {
-            return null;
-        }
-
-        @Override
-        public MailPart getEnclosedMailPart(final int index) throws OXException {
-            return null;
-        }
-
-        @Override
-        public int getEnclosedCount() throws OXException {
-            return MailPart.NO_ENCLOSED_PARTS;
-        }
-
-        @Override
-        public DataHandler getDataHandler() throws OXException {
-            try {
-                return new DataHandler(new MessageDataSource(getInputStream(), body.type + "/" + body.subtype));
-            } catch (final IOException e) {
-                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-            }
-        }
-
-        @Override
-        public Object getContent() throws OXException {
-            try {
-                return getDataHandler().getContent();
-            } catch (final IOException e) {
-                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-            }
-        }
     }
 
 }

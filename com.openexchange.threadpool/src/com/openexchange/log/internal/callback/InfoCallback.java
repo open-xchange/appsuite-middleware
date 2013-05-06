@@ -66,4 +66,10 @@ public final class InfoCallback implements LogCallback {
             log.info(message, t);
         }
     }
+
+    @Override
+    public boolean isLoggable(Log log) {
+        return log.isInfoEnabled();
+    }
+
 }

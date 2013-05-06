@@ -66,4 +66,10 @@ public final class DebugCallback implements LogCallback {
             log.debug(message, t);
         }
     }
+
+    @Override
+    public boolean isLoggable(Log log) {
+        return log.isDebugEnabled();
+    }
+
 }

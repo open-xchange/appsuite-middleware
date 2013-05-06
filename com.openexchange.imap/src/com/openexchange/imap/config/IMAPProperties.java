@@ -339,7 +339,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                             IMAPProtocol.getInstance().setOverallExternalMaxCount(-1);
                             logBuilder.append("\tMax. Number of External Connections: Invalid value \"").append(tmp).append(
                                 "\". Setting to fallback: No restrictions").append('\n');
-                        } catch (final OXException e) {
+                        } catch (final RuntimeException e) {
                             IMAPProtocol.getInstance().setOverallExternalMaxCount(-1);
                             logBuilder.append("\tMax. Number of External Connections: Invalid value \"").append(tmp).append(
                                 "\". Setting to fallback: No restrictions").append('\n');

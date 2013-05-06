@@ -49,10 +49,8 @@
 
 package com.openexchange.mail.json.actions;
 
-import static com.openexchange.ajax.helper.DownloadUtility.appendFilenameParameter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -61,8 +59,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
-import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.container.FileHolder;
+import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
@@ -85,7 +85,6 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.ServiceLookup;
@@ -158,7 +157,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             final boolean saveToDisk;
             {
                 final String saveParam = req.getParameter(Mail.PARAMETER_SAVE);
-                saveToDisk = ((saveParam == null || saveParam.length() == 0) ? false : ((Integer.parseInt(saveParam)) > 0));
+                saveToDisk = AJAXRequestDataTools.parseBoolParameter(saveParam) || "download".equals(toLowerCase(req.getParameter(Mail.PARAMETER_DELIVERY)));
             }
             final boolean filter;
             {
@@ -174,7 +173,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     Mail.PARAMETER_MAILCID).toString());
             }
             final MailPart mailPart;
-            InputStream attachmentInputStream;
+            final IFileHolder.InputStreamClosure isClosure;
             if (imageContentId == null) {
                 mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, !saveToDisk);
                 if (mailPart == null) {
@@ -184,77 +183,53 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     /*
                      * Apply filter
                      */
-                    final ContentType contentType = mailPart.getContentType();
-                    final String cs =
-                        contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
-                    final String htmlContent = MessageUtility.readMailPart(mailPart, cs);
-                    final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                    attachmentInputStream = Streams.newByteArrayInputStream(sanitizeHtml(htmlContent, htmlService).getBytes(Charsets.forName(cs)));
+                    final byte[] bytes;
+                    {
+                        final ContentType contentType = mailPart.getContentType();
+                        final String cs = contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
+                        final String htmlContent = MessageUtility.readMailPart(mailPart, cs);
+                        final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                        bytes = sanitizeHtml(htmlContent, htmlService).getBytes(Charsets.forName(cs));
+                        contentType.setCharsetParameter(cs);
+                    }
+                    isClosure = new IFileHolder.InputStreamClosure() {
+
+                        @Override
+                        public InputStream newStream() throws OXException, IOException {
+                            return Streams.newByteArrayInputStream(bytes);
+                        }
+                    };
                 } else {
-                    attachmentInputStream = mailPart.getInputStream();
+                    isClosure = new IFileHolder.InputStreamClosure() {
+
+                        @Override
+                        public InputStream newStream() throws OXException, IOException {
+                            return mailPart.getInputStream();
+                        }
+                    };
                 }
             } else {
                 mailPart = mailInterface.getMessageImage(folderPath, uid, imageContentId);
                 if (mailPart == null) {
                     throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
                 }
-                attachmentInputStream = mailPart.getInputStream();
+                isClosure = new IFileHolder.InputStreamClosure() {
+
+                    @Override
+                    public InputStream newStream() throws OXException, IOException {
+                        return mailPart.getInputStream();
+                    }
+                };
             }
             /*
              * Check for image data
              */
             final AJAXRequestData requestData = req.getRequest();
             final boolean isPreviewImage = "preview_image".equals(requestData.getFormat());
-            boolean isImage = false;
-            if (isPreviewImage) {
-                isImage = true;
-            } else {
-                final ContentType contentType = mailPart.getContentType();
-                if (contentType.startsWith("image/")) {
-                    isImage = true;
-                } else if (contentType.startsWith("application/octet-stream")) {
-                    final String fileName = mailPart.getFileName();
-                    if (null != fileName && MimeType2ExtMap.getContentType(fileName).startsWith("image/")) {
-                        isImage = true;
-                    }
-                }
-            }
-            /*-
-             * Try direct output if non-image data
-             * 
-             * Ignore in case of image data since subsequent transformation might be supposed to be applied
-             */
-            if (!isImage) {
-                final OutputStream directOutputStream = requestData.optOutputStream();
-                if (null != directOutputStream) {
-                    requestData.setResponseHeader("Content-Type", saveToDisk ? "application/octet-stream" : mailPart.getContentType().toString());                    
-                    final StringAllocator sb = new StringAllocator(saveToDisk ? "attachment" : "inline");
-                    appendFilenameParameter(mailPart.getFileName(), null, requestData.getUserAgent(), sb);
-                    requestData.setResponseHeader("Content-Disposition", sb.toString());
-                    requestData.removeCachingHeader();
-                    requestData.setResponseETag(getHash(folderPath, uid, imageContentId == null ? sequenceId : imageContentId), AJAXRequestResult.YEAR_IN_MILLIS * 50);
-                    try {
-                        final int buflen = 0xFFFF; // 64KB
-                        final byte[] buffer = new byte[buflen];
-                        for (int len; (len = attachmentInputStream.read(buffer, 0, buflen)) > 0;) {
-                            directOutputStream.write(buffer, 0, len);
-                        }
-                        directOutputStream.flush();
-                    } finally {
-                        Streams.close(attachmentInputStream);
-                    }
-                    return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
-                }
-            }
-            /*-
-             * The regular way...
-             * 
+            /*
              * Read from stream
              */
-            final ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-            fileHolder.write(attachmentInputStream);
-            fileHolder.setName(mailPart.getFileName());
-            fileHolder.setContentType(saveToDisk ? "application/octet-stream" : mailPart.getContentType().toString());
+            final FileHolder fileHolder = new FileHolder(isClosure, mailPart.getSize(), mailPart.getContentType().toString(), mailPart.getFileName());
             final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             /*
              * Set format
@@ -361,12 +336,26 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
         }
     }
 
-    private static String sanitizeHtml(final String htmlContent, final HtmlService htmlService) {
+    static String sanitizeHtml(final String htmlContent, final HtmlService htmlService) {
         return htmlService.sanitize(htmlContent, null, false, null, null);
     }
 
     private String getHash(final String folderPath, final String uid, final String sequenceId) {
         return HashUtility.getHash(new com.openexchange.java.StringAllocator(32).append(folderPath).append('/').append(uid).append('/').append(sequenceId).toString(), "md5", "hex");
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

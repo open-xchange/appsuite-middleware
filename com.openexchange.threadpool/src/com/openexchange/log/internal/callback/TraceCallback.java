@@ -66,4 +66,10 @@ public final class TraceCallback implements LogCallback {
             log.trace(message, t);
         }
     }
+
+    @Override
+    public boolean isLoggable(Log log) {
+        return log.isTraceEnabled();
+    }
+
 }

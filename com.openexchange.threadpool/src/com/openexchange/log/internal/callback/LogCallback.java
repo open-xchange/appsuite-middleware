@@ -59,4 +59,6 @@ import org.apache.commons.logging.Log;
 public interface LogCallback {
 
     void log(Object message, Throwable t, Log log);
+
+    boolean isLoggable(Log log);
 }

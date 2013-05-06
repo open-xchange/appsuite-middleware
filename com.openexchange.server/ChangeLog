@@ -1,3 +1,25 @@
+* 2013-05-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26105: Add proper context identifier to distributed event
+
+* 2013-05-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26359: Deal with possibly absent CommonEvent instance
+ - Fix for bug 26360: Moved source bundles from 'lib' to its own 'source' directory and changed MANIFEST.MF + .classpath files accordingly
+
+* 2013-05-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26323: Deal with multi-threading problem if OSGi cache service gets unavailable.
+
+* 2013-05-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26341: Don't stick to certain values, but only check existence of associated option
+ - Fix for bug 26305: Obtain group names directly from JCS cache
+ - Fix for bug 26266: Ensure user/context information is prepended to log message whenever available
+ - Fix for bug 26370: Handle unexpected UnknownHostException gracefully
+ - Fix for bug 26373: Sanitize on "delivery=view", too
+ - Fix for bug 26362: Honor new "delivery" parameter
+
 * 2013-05-02 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 25672: Don't delete already existing delete exceptions   
@@ -9,6 +31,12 @@
  - Fix for bug 26305: Use safe hash calculation to avoid hash collisions
  - Fix for bug 26054: Adapted logging to output USR-0010 error code as DEBUG only
  - Fix for bug 26306: Fixed access of attachments within a nested message
+
+* 2013-04-30 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24724: Revoked version of org.apache.log4j OSGi bundle to 1.2.13. This version does not split log messages when using
+   SyslogAppender. Log messages are truncated by the underlying UDP network traffic. Newer version splits too long log messages which makes
+   the log output more unreadable.
 
 * 2013-04-30 - marc.arens@open-xchange.com
 

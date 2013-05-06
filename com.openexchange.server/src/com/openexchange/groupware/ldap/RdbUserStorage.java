@@ -514,6 +514,7 @@ public class RdbUserStorage extends UserStorage {
         } catch (final SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
+        // Proceed iterating users
         for (final UserImpl user : users.values()) {
             final Map<String, Set<String>> attrs = usersAttrs.get(I(user.getId()));
             // Check for aliases
@@ -1015,10 +1016,11 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
+    @Override
     public User searchUser(final String email, final Context context) throws OXException {
         return searchUser(email, context, true);
     }
-    
+
     @Override
     public User searchUser(final String email, final Context context, boolean considerAliases) throws OXException {
         String sql = "SELECT id FROM user WHERE cid=? AND mail LIKE ?";

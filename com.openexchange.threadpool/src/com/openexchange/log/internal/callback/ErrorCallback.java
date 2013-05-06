@@ -66,4 +66,10 @@ public final class ErrorCallback implements LogCallback {
             log.error(message, t);
         }
     }
+
+    @Override
+    public boolean isLoggable(Log log) {
+        return log.isErrorEnabled();
+    }
+
 }

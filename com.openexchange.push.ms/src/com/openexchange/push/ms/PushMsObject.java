@@ -214,16 +214,20 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
      * @return The POJO view
      */
     public Map<String, Object> writePojo() {
-        final Map<String, Object> m = new LinkedHashMap<String, Object>(8);
+        final Map<String, Object> m = new LinkedHashMap<String, Object>(10);
         if (folderId > 0) {
             m.put("__folderId", Integer.valueOf(folderId));
         }
         if (module > 0) {
             m.put("__module", Integer.valueOf(module));
         }
+        if (contextId > 0) {
+            m.put("__contextId", Integer.valueOf(contextId));
+        }
         if (null != users) {
             m.put("__users", users);
         }
+        m.put("__remote", Boolean.valueOf(remote));
         if (null != creationDate) {
             m.put("__creationDate", Long.valueOf(creationDate.getTime()));
         }

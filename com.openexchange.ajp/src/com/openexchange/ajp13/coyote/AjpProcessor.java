@@ -2233,6 +2233,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         request.recycle();
         response.recycle();
         certificates.recycle();
+        LogProperties.removeLogProperties();
     }
 
     // ------------------------------------- InputStreamInputBuffer Inner Class

@@ -52,9 +52,9 @@ package com.openexchange.imap;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.ConcurrentMap;
+import org.apache.commons.logging.Log;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
 
 /**
@@ -63,6 +63,8 @@ import com.openexchange.mail.Protocol;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPProtocol extends Protocol {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(IMAPProtocol.class);
 
     private static final long serialVersionUID = 7946276250330261425L;
 
@@ -125,9 +127,8 @@ public final class IMAPProtocol extends Protocol {
      * @param host The mail system's host name
      * @param maxCount The max-count
      * @return <code>true</code> for successful insertion; otherwise <code>false</code>
-     * @throws OXException If insert fails
      */
-    public boolean putIfAbsent(final String host, final int maxCount) throws OXException {
+    public boolean putIfAbsent(final String host, final int maxCount) {
         final ConcurrentMap<InetAddress, Integer> concurrentMap = map;
         if (null == concurrentMap) {
             return false;
@@ -135,7 +136,8 @@ public final class IMAPProtocol extends Protocol {
         try {
             return (null == concurrentMap.putIfAbsent(InetAddress.getByName(host), Integer.valueOf(maxCount)));
         } catch (final UnknownHostException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+            LOG.warn("Couldn't resolve host name: " + host + ". Assume default max-count setting instead.", e);
+            return false;
         }
     }
 
@@ -152,7 +154,7 @@ public final class IMAPProtocol extends Protocol {
         try {
             concurrentMap.remove(InetAddress.getByName(host));
         } catch (final UnknownHostException e) {
-            com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(IMAPProtocol.class)).warn("Couldn't remove max-count setting for: " + host, e);
+            LOG.warn("Couldn't remove max-count setting for: " + host, e);
         }
     }
 
@@ -174,7 +176,8 @@ public final class IMAPProtocol extends Protocol {
             final Integer mc = concurrentMap.get(InetAddress.getByName(host));
             return mc == null ? (null == thisMaxCount ? -1 : thisMaxCount.intValue()) : minOf(mc.intValue(), thisMaxCount);
         } catch (final UnknownHostException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+            LOG.warn("Couldn't resolve host name: " + host + ". Return default max-count setting instead.", e);
+            return (null == thisMaxCount ? -1 : thisMaxCount.intValue());
         }
     }
 

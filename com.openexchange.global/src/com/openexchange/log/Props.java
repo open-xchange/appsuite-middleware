@@ -191,6 +191,18 @@ public final class Props {
     }
 
     /**
+     * Puts specified mappings. Any existing mappings are replaced.
+     *
+     * @param props The properties to put
+     */
+    public <V> void putAll(final Props props) {
+        if (null == props) {
+            return;
+        }
+        this.map.putAll(props.map);
+    }
+
+    /**
      * Removes the property associated with given name.
      *
      * @param name The property name

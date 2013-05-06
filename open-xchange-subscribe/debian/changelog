@@ -46,6 +46,12 @@ open-xchange-subscribe (7.2.0-0) UNRELEASED; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 15 Mar 2013 13:33:55 +0100
 
+open-xchange-subscribe (7.0.2-8) unstable; urgency=low
+
+  * Build for patch 2013-04-17
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 30 Apr 2013 12:40:07 +0200
+
 open-xchange-subscribe (7.0.2-7) unstable; urgency=low
 
   * Build for patch 2013-04-04
