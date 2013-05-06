@@ -134,7 +134,8 @@ public final class DownloadUtility {
             String sContentDisposition = overridingDisposition;
             InputStream in = inputStream;
             String fn = fileName;
-            if (contentType.startsWith("text/htm") || fileNameImpliesHtml(fileName)) {
+            byte[] bytes = null;
+            if (contentType.startsWith("text/htm")) {
                 /*
                  * HTML content requested for download...
                  */
@@ -144,16 +145,38 @@ public final class DownloadUtility {
                     /*
                      * Sanitizing of HTML content needed
                      */
-                    final ByteArrayOutputStream bytes = Streams.stream2ByteArrayOutputStream(in);
+                    final ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(in);
                     final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                     String cs = contentType.getCharsetParameter();
                     if (!CharsetDetector.isValid(cs)) {
-                        cs = CharsetDetector.detectCharset(Streams.asInputStream(bytes));
+                        cs = CharsetDetector.detectCharset(Streams.asInputStream(baos));
                         if ("US-ASCII".equalsIgnoreCase(cs)) {
                             cs = "ISO-8859-1";
                         }
                     }
-                    String htmlContent = bytes.toString(cs);
+                    String htmlContent = baos.toString(cs);
+                    htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
+                    in = Streams.newByteArrayInputStream(htmlContent.getBytes(Charsets.forName(cs)));
+                }
+            } else if (fileNameImpliesHtml(fileName) && HTMLDetector.containsHTMLTags((bytes = Streams.stream2bytes(in)))) {
+                /*
+                 * HTML content requested for download...
+                 */
+                if (null == sContentDisposition) {
+                    sContentDisposition = "attachment";
+                } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
+                    /*
+                     * Sanitizing of HTML content needed
+                     */
+                    final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                    String cs = contentType.getCharsetParameter();
+                    if (!CharsetDetector.isValid(cs)) {
+                        cs = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
+                        if ("US-ASCII".equalsIgnoreCase(cs)) {
+                            cs = "ISO-8859-1";
+                        }
+                    }
+                    String htmlContent = new String(bytes, Charsets.forName(cs));
                     htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
                     in = Streams.newByteArrayInputStream(htmlContent.getBytes(Charsets.forName(cs)));
                 }
