@@ -16,35 +16,38 @@
  */
 package org.apache.tika.parser;
 
-import junit.framework.TestCase;
-
-import org.apache.tika.detect.Detector;
-import org.apache.tika.exception.TikaException;
-import org.apache.tika.metadata.HttpHeaders;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.metadata.TikaMetadataKeys;
-import org.apache.tika.mime.MediaType;
-import org.apache.tika.sax.BodyContentHandler;
-import org.xml.sax.ContentHandler;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import junit.framework.TestCase;
+
+import org.apache.tika.config.TikaConfig;
+import org.apache.tika.detect.Detector;
+import org.apache.tika.exception.TikaException;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.XMPDM;
+import org.apache.tika.mime.MediaType;
+import org.apache.tika.sax.BodyContentHandler;
+import org.xml.sax.ContentHandler;
+
 public class AutoDetectParserTest extends TestCase {
+    private TikaConfig tika = TikaConfig.getDefaultConfig();
 
     // Easy to read constants for the MIME types:
     private static final String RAW        = "application/octet-stream";
     private static final String EXCEL      = "application/vnd.ms-excel";
-    private static final String HTML       = "text/html";
+    private static final String HTML       = "text/html; charset=ISO-8859-1";
     private static final String PDF        = "application/pdf";
     private static final String POWERPOINT = "application/vnd.ms-powerpoint";
     private static final String KEYNOTE    = "application/vnd.apple.keynote";
     private static final String PAGES      = "application/vnd.apple.pages";
     private static final String NUMBERS    = "application/vnd.apple.numbers";
     private static final String RTF        = "application/rtf";
-    private static final String PLAINTEXT  = "text/plain";
+    private static final String PLAINTEXT  = "text/plain; charset=ISO-8859-1";
+    private static final String UTF8TEXT   = "text/plain; charset=UTF-8";
     private static final String WORD       = "application/msword";
     private static final String XML        = "application/xml";
     private static final String RSS        = "application/rss+xml";
@@ -52,6 +55,9 @@ public class AutoDetectParserTest extends TestCase {
     private static final String GIF        = "image/gif";
     private static final String JPEG       = "image/jpeg";
     private static final String PNG        = "image/png";
+    private static final String OGG_VORBIS = "audio/vorbis";
+    private static final String OGG_FLAC   = "audio/x-flac";
+    private static final String FLAC_NATIVE= "audio/x-flac";
     private static final String OPENOFFICE
             = "application/vnd.oasis.opendocument.text";
 
@@ -73,13 +79,13 @@ public class AutoDetectParserTest extends TestCase {
 
         try {
             Metadata metadata = new Metadata();
-            metadata.set(TikaMetadataKeys.RESOURCE_NAME_KEY, tp.resourceStatedName);
-            metadata.set(HttpHeaders.CONTENT_TYPE, tp.statedType);
+            metadata.set(Metadata.RESOURCE_NAME_KEY, tp.resourceStatedName);
+            metadata.set(Metadata.CONTENT_TYPE, tp.statedType);
             ContentHandler handler = new BodyContentHandler();
-            new AutoDetectParser().parse(input, handler, metadata);
+            new AutoDetectParser(tika).parse(input, handler, metadata);
 
             assertEquals("Bad content type: " + tp,
-                    tp.realType, metadata.get(HttpHeaders.CONTENT_TYPE));
+                    tp.realType, metadata.get(Metadata.CONTENT_TYPE));
 
             if (tp.expectedContentFragment != null) {
                assertTrue("Expected content not found: " + tp,
@@ -140,15 +146,15 @@ public class AutoDetectParserTest extends TestCase {
     }
 
     public void testKeynote() throws Exception {
-        // assertAutoDetect("testKeynote.key", KEYNOTE, "A sample presentation");
+        assertAutoDetect("testKeynote.key", KEYNOTE, "A sample presentation");
     }
 
     public void testPages() throws Exception {
-        // assertAutoDetect("testPages.pages", PAGES, "Sample pages document");
+        assertAutoDetect("testPages.pages", PAGES, "Sample pages document");
     }
 
     public void testNumbers() throws Exception {
-        // assertAutoDetect("testNumbers.numbers", NUMBERS, "Checking Account: 300545668");
+        assertAutoDetect("testNumbers.numbers", NUMBERS, "Checking Account: 300545668");
     }
 
     public void testEpub() throws Exception {
@@ -190,6 +196,10 @@ public class AutoDetectParserTest extends TestCase {
     public void testText() throws Exception {
         assertAutoDetect("testTXT.txt", PLAINTEXT, "indexation de Txt");
     }
+    
+    public void testTextNonASCIIUTF8() throws Exception {
+        assertAutoDetect("testTXTNonASCIIUTF8.txt", UTF8TEXT, "The quick brown fox jumps over the lazy dog");
+    }
 
     public void testWord() throws Exception {
         assertAutoDetect("testWORD.doc", WORD, "Sample Word Document");
@@ -202,7 +212,7 @@ public class AutoDetectParserTest extends TestCase {
     public void testRss() throws Exception {
         assertAutoDetect("/test-documents/rsstest.rss", "feed", RSS, "application/rss+xml", "Sample RSS File for Junit test");
     }
-
+    
     public void testImages() throws Exception {
        assertAutoDetect("testBMP.bmp", BMP, null);
        assertAutoDetect("testGIF.gif", GIF, null);
@@ -221,16 +231,77 @@ public class AutoDetectParserTest extends TestCase {
         try {
             Metadata metadata = new Metadata();
             ContentHandler handler = new BodyContentHandler(-1);
-            new AutoDetectParser().parse(tgz, handler, metadata);
+            new AutoDetectParser(tika).parse(tgz, handler, metadata);
             fail("Zip bomb was not detected");
         } catch (TikaException e) {
             // expected
         } finally {
             tgz.close();
         }
-
+    
     }
 
+    /**
+     * Test to ensure that the Vorbis and FLAC parsers have been correctly
+     *  included, and are available
+     */
+    @SuppressWarnings("deprecation")
+    public void testVorbisFlac() throws Exception {
+       // The three test files should all have similar test data
+       String[] testFiles = new String[] {
+             "testVORBIS.ogg", "testFLAC.oga", "testFLAC.flac"
+       };
+       String[] mimetypes = new String[] {
+             OGG_VORBIS, OGG_FLAC, FLAC_NATIVE
+       };
+       
+       // Check we found the parser
+       CompositeParser parser = (CompositeParser)tika.getParser();
+       for (String type : mimetypes) {
+          MediaType mt = MediaType.parse(type);
+          assertNotNull("Parser not found for " + type, parser.getParsers().get(mt) );
+       }
+       
+       // Have each file parsed, and check
+       for (int i=0; i<testFiles.length; i++) {
+          String file = testFiles[i];
+          InputStream input = AutoDetectParserTest.class.getResourceAsStream(
+                "/test-documents/"+file);
+
+          if (input == null) {
+             fail("Could not find test file " + file);
+          }
+          
+          try {
+             Metadata metadata = new Metadata();
+             ContentHandler handler = new BodyContentHandler();
+             new AutoDetectParser(tika).parse(input, handler, metadata);
+
+             assertEquals("Incorrect content type for " + file,
+                   mimetypes[i], metadata.get(Metadata.CONTENT_TYPE));
+
+             // Check some of the common metadata
+             assertEquals("Test Artist", metadata.get(Metadata.AUTHOR));
+             assertEquals("Test Title", metadata.get(Metadata.TITLE));
+//             assertEquals("Test Artist", metadata.get(TikaCoreProperties.AUTHOR));
+//             assertEquals("Test Title", metadata.get(TikaCoreProperties.TITLE));
+             
+             // Check some of the XMPDM metadata
+             assertEquals("Test Album", metadata.get(XMPDM.ALBUM));
+             assertEquals("Test Artist", metadata.get(XMPDM.ARTIST));
+             assertEquals("Stereo", metadata.get(XMPDM.AUDIO_CHANNEL_TYPE));
+             assertEquals("44100", metadata.get(XMPDM.AUDIO_SAMPLE_RATE));
+             
+             // Check some of the text
+             String content = handler.toString();
+             assertTrue(content.contains("Test Title"));
+             assertTrue(content.contains("Test Artist"));
+          } finally {
+             input.close();
+          }
+       }
+    }
+    
     /**
      * Test case for TIKA-514. Provide constructor for AutoDetectParser that has explicit
      * list of supported parsers.
@@ -238,44 +309,41 @@ public class AutoDetectParserTest extends TestCase {
      */
     public void testSpecificParserList() throws Exception {
         AutoDetectParser parser = new AutoDetectParser(new MyDetector(), new MyParser());
-
+        
         InputStream is = new ByteArrayInputStream("test".getBytes());
         Metadata metadata = new Metadata();
         parser.parse(is, new BodyContentHandler(), metadata, new ParseContext());
-
+        
         assertEquals("value", metadata.get("MyParser"));
     }
 
     private static final MediaType MY_MEDIA_TYPE = new MediaType("application", "x-myparser");
-
+    
     /**
      * A test detector which always returns the type supported
      *  by the test parser
      */
     @SuppressWarnings("serial")
     private static class MyDetector implements Detector {
-        @Override
         public MediaType detect(InputStream input, Metadata metadata) throws IOException {
             return MY_MEDIA_TYPE;
         }
     }
-
+    
     @SuppressWarnings("serial")
     private static class MyParser extends AbstractParser {
-        @Override
         public Set<MediaType> getSupportedTypes(ParseContext context) {
             Set<MediaType> supportedTypes = new HashSet<MediaType>();
             supportedTypes.add(MY_MEDIA_TYPE);
             return supportedTypes;
         }
 
-        @Override
         public void parse(InputStream stream, ContentHandler handler, Metadata metadata, ParseContext context) {
             metadata.add("MyParser", "value");
         }
 
     }
-
+    
     /**
      * Minimal class to encapsulate all parameters -- the main reason for
      * its existence is to aid in debugging via its toString() method.
@@ -316,7 +384,6 @@ public class AutoDetectParserTest extends TestCase {
          *   expectedContentFragment = Sample Excel Worksheet
          * </pre>
          */
-        @Override
         public String toString() {
             return "Test parameters:\n"
                 + "  resourceRealName        = " + resourceRealName + "\n"

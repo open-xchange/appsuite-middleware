@@ -26,10 +26,8 @@ import java.io.InputStream;
 
 import junit.framework.TestCase;
 
-import org.apache.tika.metadata.DublinCore;
-import org.apache.tika.metadata.MSOffice;
-import org.apache.tika.metadata.Message;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.XHTMLContentHandler;
@@ -72,14 +70,14 @@ public class MboxParserTest extends TestCase {
             verify(handler).characters(new String("Test content").toCharArray(), 0, 12);
             verify(handler).endDocument();
 
-            assertEquals("subject", metadata.get(DublinCore.TITLE));
-            assertEquals("subject", metadata.get(DublinCore.SUBJECT));
-            assertEquals("<author@domain.com>", metadata.get(MSOffice.AUTHOR));
-            assertEquals("<author@domain.com>", metadata.get(DublinCore.CREATOR));
-            assertEquals(null, metadata.get(Message.MESSAGE_RECIPIENT_ADDRESS));
+            assertEquals("subject", metadata.get(TikaCoreProperties.TITLE));
+            assertEquals("subject", metadata.get(Metadata.SUBJECT));
+            assertEquals("<author@domain.com>", metadata.get(Metadata.AUTHOR));
+            assertEquals("<author@domain.com>", metadata.get(TikaCoreProperties.CREATOR));
+            assertEquals(null, metadata.get(Metadata.MESSAGE_RECIPIENT_ADDRESS));
             assertEquals("<name@domain.com>", metadata.get("MboxParser-return-path"));
             assertEquals("Should be ISO date in UTC, converted from 'Tue, 9 Jun 2009 23:58:45 -0400'", 
-                    "2009-06-10T03:58:45Z", metadata.get(DublinCore.DATE));
+                    "2009-06-10T03:58:45Z", metadata.get(TikaCoreProperties.CREATED));
         } catch (Exception e) {
             fail("Exception thrown: " + e.getMessage());
         }
@@ -136,11 +134,12 @@ public class MboxParserTest extends TestCase {
         try {
             parser.parse(stream, handler, metadata, new ParseContext());
 
-            assertEquals("Re: question about when shuffle/sort start working", metadata.get(DublinCore.TITLE));
-            assertEquals("Re: question about when shuffle/sort start working", metadata.get(DublinCore.SUBJECT));
-            assertEquals("Jothi Padmanabhan <jothipn@yahoo-inc.com>", metadata.get(MSOffice.AUTHOR));
-            assertEquals("Jothi Padmanabhan <jothipn@yahoo-inc.com>", metadata.get(DublinCore.CREATOR));
-            assertEquals("core-user@hadoop.apache.org", metadata.get(Message.MESSAGE_RECIPIENT_ADDRESS));
+            // TODO: Remove subject and author in Tika 2.0
+            assertEquals("Re: question about when shuffle/sort start working", metadata.get(Metadata.SUBJECT));
+            assertEquals("Re: question about when shuffle/sort start working", metadata.get(TikaCoreProperties.TITLE));
+            assertEquals("Jothi Padmanabhan <jothipn@yahoo-inc.com>", metadata.get(Metadata.AUTHOR));
+            assertEquals("Jothi Padmanabhan <jothipn@yahoo-inc.com>", metadata.get(TikaCoreProperties.CREATOR));
+            assertEquals("core-user@hadoop.apache.org", metadata.get(Metadata.MESSAGE_RECIPIENT_ADDRESS));
             
             verify(handler).startDocument();
             verify(handler, times(3)).startElement(eq(XHTMLContentHandler.XHTML), eq("p"), eq("p"), any(Attributes.class));

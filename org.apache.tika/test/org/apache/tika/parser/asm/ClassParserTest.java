@@ -19,9 +19,8 @@ package org.apache.tika.parser.asm;
 import junit.framework.TestCase;
 
 import org.apache.tika.Tika;
-import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
-import org.apache.tika.metadata.TikaMetadataKeys;
+import org.apache.tika.metadata.TikaCoreProperties;
 
 /**
  * Test case for parsing Java class files.
@@ -34,10 +33,10 @@ public class ClassParserTest extends TestCase {
         String content = new Tika().parseToString(
                 ClassParserTest.class.getResourceAsStream(path), metadata);
 
-        assertEquals("AutoDetectParser", metadata.get(DublinCore.TITLE));
+        assertEquals("AutoDetectParser", metadata.get(TikaCoreProperties.TITLE));
         assertEquals(
                 "AutoDetectParser.class",
-                metadata.get(TikaMetadataKeys.RESOURCE_NAME_KEY));
+                metadata.get(Metadata.RESOURCE_NAME_KEY));
 
         assertTrue(content.contains("package org.apache.tika.parser;"));
         assertTrue(content.contains(

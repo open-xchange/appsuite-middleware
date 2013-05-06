@@ -18,10 +18,8 @@ package org.apache.tika.parser.font;
 
 import junit.framework.TestCase;
 
-import org.apache.tika.metadata.DublinCore;
-import org.apache.tika.metadata.HttpHeaders;
-import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
@@ -48,9 +46,9 @@ public class AdobeFontMetricParserTest extends TestCase {
             stream.close();
         }
 
-        assertEquals("application/x-font-adobe-metric", metadata.get(HttpHeaders.CONTENT_TYPE));
-        assertEquals("TestFullName", metadata.get(DublinCore.TITLE));
-        assertEquals("Fri Jul 15 17:50:51 2011", metadata.get(MSOffice.CREATION_DATE));
+        assertEquals("application/x-font-adobe-metric", metadata.get(Metadata.CONTENT_TYPE));
+        assertEquals("TestFullName", metadata.get(TikaCoreProperties.TITLE));
+        assertEquals("Fri Jul 15 17:50:51 2011", metadata.get(Metadata.CREATION_DATE));
         
         assertEquals("TestFontName", metadata.get("FontName"));
         assertEquals("TestFullName", metadata.get("FontFullName"));

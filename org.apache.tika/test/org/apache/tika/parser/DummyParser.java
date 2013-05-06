@@ -32,9 +32,9 @@ import org.xml.sax.SAXException;
  * A Dummy Parser for use with unit tests.
  */
 public class DummyParser extends AbstractParser {
-   private final Set<MediaType> types;
-   private final Map<String,String> metadata;
-   private final String xmlText;
+   private Set<MediaType> types;
+   private Map<String,String> metadata;
+   private String xmlText;
 
    public DummyParser(Set<MediaType> types, Map<String, String> metadata,
          String xmlText) {
@@ -43,19 +43,17 @@ public class DummyParser extends AbstractParser {
       this.xmlText = xmlText;
    }
 
-   @Override
-public Set<MediaType> getSupportedTypes(ParseContext context) {
+   public Set<MediaType> getSupportedTypes(ParseContext context) {
       return types;
    }
 
-   @Override
-public void parse(InputStream stream, ContentHandler handler,
+   public void parse(InputStream stream, ContentHandler handler,
          Metadata metadata, ParseContext context) throws IOException,
          SAXException, TikaException {
       for (Entry<String,String> m : this.metadata.entrySet()) {
          metadata.add(m.getKey(), m.getValue());
       }
-
+      
       handler.startDocument();
       if (xmlText != null) {
          handler.characters(xmlText.toCharArray(), 0, xmlText.length());

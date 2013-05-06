@@ -42,7 +42,6 @@ public class TestChmBlockInfo extends TestCase {
     private ChmLzxcResetTable clrt = null;
     private ChmLzxcControlData chmLzxcControlData = null;
 
-    @Override
     public void setUp() throws Exception {
         data = TestParameters.chmData;
         /* Creates and parses itsf header */
@@ -97,9 +96,8 @@ public class TestChmBlockInfo extends TestCase {
     }
 
     public void testToString() {
-        if (chmBlockInfo == null) {
+        if (chmBlockInfo == null)
             testGetChmBlockInfo();
-        }
         Assert.assertTrue(chmBlockInfo.toString().length() > 0);
     }
 
@@ -117,7 +115,6 @@ public class TestChmBlockInfo extends TestCase {
         }
     }
 
-    @Override
     public void tearDown() throws Exception {
         data = null;
         chmBlockInfo = null;

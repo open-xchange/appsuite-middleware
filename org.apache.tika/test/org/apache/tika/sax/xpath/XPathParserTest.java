@@ -24,7 +24,6 @@ public class XPathParserTest extends TestCase {
 
     private XPathParser parser;
 
-    @Override
     protected void setUp() {
         parser = new XPathParser();
         parser.addPrefix(null, null);

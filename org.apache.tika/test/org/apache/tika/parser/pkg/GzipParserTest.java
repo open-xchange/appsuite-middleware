@@ -18,7 +18,6 @@ package org.apache.tika.parser.pkg;
 
 import java.io.InputStream;
 
-import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.Parser;
@@ -43,7 +42,7 @@ public class GzipParserTest extends AbstractPkgTest {
             stream.close();
         }
 
-        assertEquals("application/x-gzip", metadata.get(HttpHeaders.CONTENT_TYPE));
+        assertEquals("application/x-gzip", metadata.get(Metadata.CONTENT_TYPE));
         String content = handler.toString();
         assertTrue(content.contains("test-documents/testEXCEL.xls"));
         assertTrue(content.contains("Sample Excel Worksheet"));
@@ -106,7 +105,7 @@ public class GzipParserTest extends AbstractPkgTest {
             stream.close();
         }
 
-        assertEquals("application/x-gzip", metadata.get(HttpHeaders.CONTENT_TYPE));
+        assertEquals("application/x-gzip", metadata.get(Metadata.CONTENT_TYPE));
         String content = handler.toString();
         assertTrue(content.contains("Test SVG image"));
     }

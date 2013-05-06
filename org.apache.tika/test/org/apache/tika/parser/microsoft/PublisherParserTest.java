@@ -18,10 +18,8 @@ package org.apache.tika.parser.microsoft;
 
 import java.io.InputStream;
 
-import org.apache.tika.metadata.DublinCore;
-import org.apache.tika.metadata.HttpHeaders;
-import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.ContentHandler;
@@ -40,9 +38,10 @@ public class PublisherParserTest extends TestCase {
 
             assertEquals(
                     "application/x-mspublisher",
-                    metadata.get(HttpHeaders.CONTENT_TYPE));
-            assertEquals(null, metadata.get(DublinCore.TITLE));
-            assertEquals("Nick Burch", metadata.get(MSOffice.AUTHOR));
+                    metadata.get(Metadata.CONTENT_TYPE));
+            assertEquals(null, metadata.get(TikaCoreProperties.TITLE));
+            assertEquals("Nick Burch", metadata.get(TikaCoreProperties.CREATOR));
+            assertEquals("Nick Burch", metadata.get(Metadata.AUTHOR));
             String content = handler.toString();
             assertTrue(content.contains("0123456789"));
             assertTrue(content.contains("abcdef"));

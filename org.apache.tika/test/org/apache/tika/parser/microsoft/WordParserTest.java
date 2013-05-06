@@ -17,22 +17,15 @@
 package org.apache.tika.parser.microsoft;
 
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.util.Locale;
 
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.sax.SAXTransformerFactory;
-import javax.xml.transform.sax.TransformerHandler;
-import javax.xml.transform.stream.StreamResult;
-
 import org.apache.tika.TikaTest;
-import org.apache.tika.metadata.DublinCore;
-import org.apache.tika.metadata.HttpHeaders;
-import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.Office;
+import org.apache.tika.metadata.OfficeOpenXMLCore;
+import org.apache.tika.metadata.OfficeOpenXMLExtended;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
-import org.apache.tika.parser.microsoft.ooxml.OOXMLParserTest;
 import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.ContentHandler;
 
@@ -48,9 +41,10 @@ public class WordParserTest extends TikaTest {
 
             assertEquals(
                     "application/msword",
-                    metadata.get(HttpHeaders.CONTENT_TYPE));
-            assertEquals("Sample Word Document", metadata.get(DublinCore.TITLE));
-            assertEquals("Keith Bennett", metadata.get(MSOffice.AUTHOR));
+                    metadata.get(Metadata.CONTENT_TYPE));
+            assertEquals("Sample Word Document", metadata.get(TikaCoreProperties.TITLE));
+            assertEquals("Keith Bennett", metadata.get(TikaCoreProperties.CREATOR));
+            assertEquals("Keith Bennett", metadata.get(Metadata.AUTHOR));
             assertTrue(handler.toString().contains("Sample Word Document"));
         } finally {
             input.close();
@@ -71,38 +65,6 @@ public class WordParserTest extends TikaTest {
         }
     }
 
-    private static class XMLResult {
-        public final String xml;
-        public final Metadata metadata;
-
-        public XMLResult(String xml, Metadata metadata) {
-            this.xml = xml;
-            this.metadata = metadata;
-      }
-    }
-
-    private XMLResult getXML(String filePath) throws Exception {
-        InputStream input = null;
-        Metadata metadata = new Metadata();
-        
-        StringWriter sw = new StringWriter();
-        SAXTransformerFactory factory = (SAXTransformerFactory)
-                 TransformerFactory.newInstance();
-        TransformerHandler handler = factory.newTransformerHandler();
-        handler.getTransformer().setOutputProperty(OutputKeys.METHOD, "xml");
-        handler.getTransformer().setOutputProperty(OutputKeys.INDENT, "no");
-        handler.setResult(new StreamResult(sw));
-
-        // Try with a document containing various tables and formattings
-        input = OOXMLParserTest.class.getResourceAsStream(filePath);
-        try {
-            new OfficeParser().parse(input, handler, metadata, new ParseContext());
-            return new XMLResult(sw.toString(), metadata);
-        } finally {
-            input.close();
-        }
-    }
-
     /**
      * Test that the word converter is able to generate the
      *  correct HTML for the document
@@ -111,15 +73,16 @@ public class WordParserTest extends TikaTest {
 
         // Try with a document containing various tables and
         // formattings
-        XMLResult result = getXML("/test-documents/testWORD.doc");
+        XMLResult result = getXML("testWORD.doc");
         String xml = result.xml;
         Metadata metadata = result.metadata;
 
         assertEquals(
                      "application/msword",
-                     metadata.get(HttpHeaders.CONTENT_TYPE));
-        assertEquals("Sample Word Document", metadata.get(DublinCore.TITLE));
-        assertEquals("Keith Bennett", metadata.get(MSOffice.AUTHOR));
+                     metadata.get(Metadata.CONTENT_TYPE));
+        assertEquals("Sample Word Document", metadata.get(TikaCoreProperties.TITLE));
+        assertEquals("Keith Bennett", metadata.get(TikaCoreProperties.CREATOR));
+        assertEquals("Keith Bennett", metadata.get(Metadata.AUTHOR));
         assertTrue(xml.contains("Sample Word Document"));
 
         // Check that custom headings came through
@@ -140,7 +103,7 @@ public class WordParserTest extends TikaTest {
         assertTrue(xml.contains("<p class=\"signature\">This one"));
         
         // Try with a document that contains images
-        xml = getXML("/test-documents/testWORD_3imgs.doc").xml;
+        xml = getXML("testWORD_3imgs.doc").xml;
 
         // Images 1-3
         assertTrue("Image not found in:\n"+xml, xml.contains("src=\"embedded:image1.png\""));
@@ -152,7 +115,7 @@ public class WordParserTest extends TikaTest {
 
         // TIKA-692: test document containing multiple
         // character runs within a bold tag:
-        xml = getXML("/test-documents/testWORD_bold_character_runs.doc").xml;
+        xml = getXML("testWORD_bold_character_runs.doc").xml;
 
         // Make sure bold text arrived as single
         // contiguous string even though Word parser
@@ -161,12 +124,42 @@ public class WordParserTest extends TikaTest {
 
         // TIKA-692: test document containing multiple
         // character runs within a bold tag:
-        xml = getXML("/test-documents/testWORD_bold_character_runs2.doc").xml;
+        xml = getXML("testWORD_bold_character_runs2.doc").xml;
             
         // Make sure bold text arrived as single
         // contiguous string even though Word parser
         // handled this as 3 character runs
         assertTrue("Bold text wasn't contiguous: "+xml, xml.contains("F<b>oob</b>a<b>r</b>"));
+    }
+
+    public void testEmbeddedNames() throws Exception {
+        String result = getXML("testWORD_embedded_pdf.doc").xml;
+
+        // Make sure the embedded div comes out after "Here
+        // is the pdf file" and before "Bye Bye":
+        int i = result.indexOf("Here is the pdf file:");
+        assertTrue(i != -1);
+        int j = result.indexOf("<div class=\"embedded\" id=\"_1402837031\"/>");
+        assertTrue(j != -1);
+        int k = result.indexOf("Bye Bye");
+        assertTrue(k != -1);
+
+        assertTrue(i < j);
+        assertTrue(j < k);
+    }
+
+    // TIKA-982
+    public void testEmbeddedRTF() throws Exception {
+        String result = getXML("testWORD_embedded_rtf.doc").xml;
+        assertTrue(result.indexOf("<div class=\"embedded\" id=\"_1404039792\"/>") != -1);
+        assertTrue(result.indexOf("_1404039792.rtf") != -1);
+    }
+
+    // TIKA-1019
+    public void testDocumentLink() throws Exception {
+        String result = getXML("testDocumentLink.doc").xml;
+        assertTrue(result.indexOf("<div class=\"embedded\" id=\"_1327495610\"/>") != -1);
+        assertTrue(result.indexOf("_1327495610.unknown") != -1);
     }
 
     public void testWord6Parser() throws Exception {
@@ -179,10 +172,12 @@ public class WordParserTest extends TikaTest {
 
             assertEquals(
                     "application/msword",
-                    metadata.get(HttpHeaders.CONTENT_TYPE));
-            assertEquals("The quick brown fox jumps over the lazy dog", metadata.get(DublinCore.TITLE));
-            assertEquals("Gym class featuring a brown fox and lazy dog", metadata.get(DublinCore.SUBJECT));
-            assertEquals("Nevin Nollop", metadata.get(MSOffice.AUTHOR));
+                    metadata.get(Metadata.CONTENT_TYPE));
+            assertEquals("The quick brown fox jumps over the lazy dog", metadata.get(TikaCoreProperties.TITLE));
+            assertEquals("Gym class featuring a brown fox and lazy dog", metadata.get(OfficeOpenXMLCore.SUBJECT));
+            assertEquals("Gym class featuring a brown fox and lazy dog", metadata.get(Metadata.SUBJECT));
+            assertEquals("Nevin Nollop", metadata.get(TikaCoreProperties.CREATOR));
+            assertEquals("Nevin Nollop", metadata.get(Metadata.AUTHOR));
             assertTrue(handler.toString().contains("The quick brown fox jumps over the lazy dog"));
         } finally {
             input.close();
@@ -241,11 +236,14 @@ public class WordParserTest extends TikaTest {
 
         assertContains("Keyword1 Keyword2", content);
         assertEquals("Keyword1 Keyword2",
-                     metadata.get(MSOffice.KEYWORDS));
+                     metadata.get(TikaCoreProperties.KEYWORDS));
 
         assertContains("Subject is here", content);
+        // TODO: Move to OO subject in Tika 2.0
         assertEquals("Subject is here",
-                     metadata.get(DublinCore.SUBJECT));
+                     metadata.get(Metadata.SUBJECT));
+        assertEquals("Subject is here",
+                     metadata.get(OfficeOpenXMLCore.SUBJECT));
 
         assertContains("Suddenly some Japanese text:", content);
         // Special version of (GHQ)
@@ -255,6 +253,26 @@ public class WordParserTest extends TikaTest {
 
         assertContains("And then some Gothic text:", content);
         assertContains("\uD800\uDF32\uD800\uDF3f\uD800\uDF44\uD800\uDF39\uD800\uDF43\uD800\uDF3A", content);
+    }
+    
+    /**
+     * TIKA-1044 - Handle documents where parts of the
+     *  text have no formatting or styles applied to them
+     */
+    public void testNoFormat() throws Exception {
+       ContentHandler handler = new BodyContentHandler();
+       Metadata metadata = new Metadata();
+
+       InputStream stream = WordParserTest.class.getResourceAsStream(
+               "/test-documents/testWORD_no_format.doc");
+       try {
+           new OfficeParser().parse(stream, handler, metadata, new ParseContext());
+       } finally {
+           stream.close();
+       }
+
+       String content = handler.toString();
+       assertContains("Will generate an exception", content);
     }
     
     /**
@@ -274,20 +292,25 @@ public class WordParserTest extends TikaTest {
           input.close();
        }
        
-       assertEquals("application/msword",   metadata.get(HttpHeaders.CONTENT_TYPE));
-       assertEquals("EJ04325S",             metadata.get(MSOffice.AUTHOR));
-       assertEquals("Etienne Jouvin",       metadata.get(MSOffice.LAST_AUTHOR));
-       assertEquals("2012-01-03T22:14:00Z", metadata.get(MSOffice.LAST_SAVED));
-       assertEquals("2010-10-05T09:03:00Z", metadata.get(MSOffice.CREATION_DATE));
-       assertEquals("Microsoft Office Word",metadata.get(MSOffice.APPLICATION_NAME));
-       assertEquals("1",                    metadata.get(MSOffice.PAGE_COUNT));
-       assertEquals("2",                    metadata.get(MSOffice.WORD_COUNT));
-       assertEquals("My Title",             metadata.get(DublinCore.TITLE));
-       assertEquals("My Keyword",           metadata.get(MSOffice.KEYWORDS));
-       assertEquals("Normal.dotm",          metadata.get(MSOffice.TEMPLATE));
-       assertEquals("My Comments",          metadata.get(MSOffice.COMMENTS));
-       assertEquals("My subject",           metadata.get(DublinCore.SUBJECT));
-       assertEquals("EDF-DIT",              metadata.get(MSOffice.COMPANY));
+       assertEquals("application/msword",   metadata.get(Metadata.CONTENT_TYPE));
+       assertEquals("EJ04325S",             metadata.get(TikaCoreProperties.CREATOR));
+       assertEquals("Etienne Jouvin",       metadata.get(TikaCoreProperties.MODIFIER));
+       assertEquals("Etienne Jouvin",       metadata.get(Metadata.LAST_AUTHOR));
+       assertEquals("2012-01-03T22:14:00Z", metadata.get(TikaCoreProperties.MODIFIED));
+       assertEquals("2012-01-03T22:14:00Z", metadata.get(Metadata.DATE));
+       assertEquals("2010-10-05T09:03:00Z", metadata.get(TikaCoreProperties.CREATED));
+       assertEquals("2010-10-05T09:03:00Z", metadata.get(Metadata.CREATION_DATE));
+       assertEquals("Microsoft Office Word",metadata.get(OfficeOpenXMLExtended.APPLICATION));
+       assertEquals("1",                    metadata.get(Office.PAGE_COUNT));
+       assertEquals("2",                    metadata.get(Office.WORD_COUNT));
+       assertEquals("My Title",             metadata.get(TikaCoreProperties.TITLE));
+       assertEquals("My Keyword",           metadata.get(TikaCoreProperties.KEYWORDS));
+       assertEquals("Normal.dotm",          metadata.get(OfficeOpenXMLExtended.TEMPLATE));
+       assertEquals("My Comments",          metadata.get(TikaCoreProperties.COMMENTS));
+       // TODO: Move to OO subject in Tika 2.0
+       assertEquals("My subject",           metadata.get(Metadata.SUBJECT));
+       assertEquals("My subject",           metadata.get(OfficeOpenXMLCore.SUBJECT));
+       assertEquals("EDF-DIT",              metadata.get(OfficeOpenXMLExtended.COMPANY));
        assertEquals("MyStringValue",        metadata.get("custom:MyCustomString"));
        assertEquals("2010-12-30T23:00:00Z", metadata.get("custom:MyCustomDate"));
     }
