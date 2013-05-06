@@ -276,18 +276,25 @@ public class FileResponseRenderer implements ResponseRenderer {
                     contentType = preferredContentType;
                 } else {
                     if (SAVE_AS_TYPE.equals(preferredContentType)) {
-                        trySetSanitizedContentType(contentType, resp);
+                        // Set if sanitize-able
+                        if (!trySetSanitizedContentType(contentType, preferredContentType, resp)) {
+                            contentType = preferredContentType;
+                        }
                     } else {
                         final String primaryType1 = getPrimaryType(preferredContentType);
                         final String primaryType2 = getPrimaryType(contentType);
                         if (toLowerCase(primaryType1).startsWith(toLowerCase(primaryType2))) {
-                            trySetSanitizedContentType(contentType, resp);
+                            // Set if sanitize-able
+                            if (!trySetSanitizedContentType(contentType, preferredContentType, resp)) {
+                                contentType = preferredContentType;
+                            }
                         } else {
                             // Specified Content-Type does NOT match file's real MIME type
                             // Therefore ignore it due to security reasons (see bug #25343)
                             final StringAllocator sb = new StringAllocator(128);
-                            sb.append("Denied parameter \"").append(PARAMETER_CONTENT_TYPE).append("\" due to security constraints (");
-                            sb.append(contentType).append(" vs. ").append(preferredContentType).append(").");
+                            sb.append("Denied parameter \"").append(PARAMETER_CONTENT_TYPE);
+                            sb.append("\" due to security constraints (requested \"");
+                            sb.append(contentType).append("\" , but is \"").append(preferredContentType).append("\").");
                             LOG.warn(sb.toString());
                             resp.setContentType(preferredContentType);
                             contentType = preferredContentType;
@@ -462,13 +469,15 @@ public class FileResponseRenderer implements ResponseRenderer {
     }
 
     /** Attempts to set a sanitized <code>Content-Type</code> header value to given HTTP response. */
-    private void trySetSanitizedContentType(final String contentType, final HttpServletResponse resp) {
+    private boolean trySetSanitizedContentType(final String contentType, final String fallbackContentType, final HttpServletResponse resp) {
         try {
             resp.setContentType(new ContentType(contentType).getBaseType());
+            return true;
         } catch (final Exception e) {
             // Ignore
-            resp.setContentType(contentType);
+            resp.setContentType(fallbackContentType);
         }
+        return false;
     }
 
     /** Checks if transformation is needed */
