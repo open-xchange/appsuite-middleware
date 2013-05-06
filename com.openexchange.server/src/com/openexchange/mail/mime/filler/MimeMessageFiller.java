@@ -108,6 +108,7 @@ import com.openexchange.image.ImageUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.HTMLDetector;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
@@ -590,7 +591,7 @@ public class MimeMessageFiller {
         for (final Iterator<Map.Entry<String, String>> iter = mail.getNonMatchingHeaders(SUPPRESS_HEADERS); iter.hasNext();) {
             final Map.Entry<String, String> entry = iter.next();
             final String name = entry.getKey();
-            if (name.toLowerCase(Locale.ENGLISH).startsWith("x-")) {
+            if (isCustomOrReplyHeader(name)) {
                 mimeMessage.addHeader(name, entry.getValue());
             }
         }
@@ -651,6 +652,24 @@ public class MimeMessageFiller {
     }
 
     /**
+     * Checks if specified header name is a custom header (starts ignore-case with <code>"X-"</code>) or refers to a reply-relevant header.
+     *
+     * @param headerName The header name to check
+     * @return <code>true</code> if specified header name is a custom OR reply-relevant header; otherwise <code>false</code>
+     */
+    public static boolean isCustomOrReplyHeader(final String headerName) {
+        if (isEmpty(headerName)) {
+            return false;
+        }
+        final char first = headerName.charAt(0);
+        if ((('X' == first) || ('x' == first)) && ('-' == headerName.charAt(1))) {
+            return true;
+        }
+        final String lc = toLowerCase(headerName);
+        return "references".equals(lc) || "in-reply-to".equals(lc);
+    }
+
+    /**
      * Sets the appropriate headers <code>In-Reply-To</code> and <code>References</code> in specified MIME message.
      * <p>
      * Moreover the <code>Reply-To</code> header is set.
@@ -666,6 +685,21 @@ public class MimeMessageFiller {
              */
             return;
         }
+        /*
+         * Check if referencedMail already provides References and In-Reply-To headers
+         */
+        {
+            final String sReferences = referencedMail.getFirstHeader(MessageHeaders.HDR_REFERENCES);
+            if (!isEmpty(sReferences)) {
+                final String sInReplyTo = referencedMail.getFirstHeader(MessageHeaders.HDR_IN_REPLY_TO);
+                if (!isEmpty(sInReplyTo)) {
+                    mimeMessage.setHeader(MessageHeaders.HDR_IN_REPLY_TO, sInReplyTo);
+                    mimeMessage.setHeader(MessageHeaders.HDR_REFERENCES, sReferences);
+                    return;
+                }
+            }
+        }
+
         final String pMsgId = referencedMail.getFirstHeader(MessageHeaders.HDR_MESSAGE_ID);
         if (pMsgId != null) {
             mimeMessage.setHeader(MessageHeaders.HDR_IN_REPLY_TO, pMsgId);
@@ -2023,6 +2057,20 @@ public class MimeMessageFiller {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }
