@@ -112,11 +112,11 @@ public class UploadException extends OXException {
         /**
          * Upload file with id %1$s could not be found
          */
-        FILE_NOT_FOUND(UploadExceptionMessage.FILE_NOT_FOUND_MSG, CATEGORY_ERROR, 10),
+        FILE_NOT_FOUND(UploadExceptionMessage.FILE_NOT_FOUND_MSG, CATEGORY_USER_INPUT, 10),
         /**
          * Upload file's content type "%1$s" does not fit to given file filter "%2$s"
          */
-        INVALID_FILE_TYPE(UploadExceptionMessage.INVALID_FILE_TYPE_MSG, CATEGORY_ERROR, 11),
+        INVALID_FILE_TYPE(UploadExceptionMessage.INVALID_FILE_TYPE_MSG, CATEGORY_USER_INPUT, 11),
         /**
          * An error occurred: %1$s
          */

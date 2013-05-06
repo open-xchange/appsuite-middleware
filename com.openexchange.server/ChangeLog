@@ -1,3 +1,7 @@
+* 2013-05-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24786: Set appropriate error category to display more meaningful error message
+
 * 2013-05-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 26105: Add proper context identifier to distributed event
