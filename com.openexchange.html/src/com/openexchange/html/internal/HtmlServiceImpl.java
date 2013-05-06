@@ -488,7 +488,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 }
                 // Handle HTML content
                 final FilterJerichoHandler handler = null == definition ? new FilterJerichoHandler(html.length()) : new FilterJerichoHandler(html.length(), definition);
-                JerichoParser.parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix));
+                JerichoParser.getInstance().parse(html, handler.setDropExternalImages(dropExternalImages).setCssPrefix(cssPrefix));
                 if (dropExternalImages && null != modified) {
                     modified[0] |= handler.isImageURLFound();
                 }

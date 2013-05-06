@@ -115,6 +115,19 @@ public final class JerichoParser {
 
     } // End of ParsingDeniedException
 
+    private static final JerichoParser INSTANCE = new JerichoParser();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static JerichoParser getInstance() {
+        return INSTANCE;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------- //
+
     /**
      * Initializes a new {@link JerichoParser}.
      */
@@ -122,10 +135,10 @@ public final class JerichoParser {
         super();
     }
 
-    private static final Pattern BODY_START = Pattern.compile("<body.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private final Pattern BODY_START = Pattern.compile("<body.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
-    private static volatile Integer maxLength;
-    private static int maxLength() {
+    private volatile Integer maxLength;
+    private int maxLength() {
         Integer i = maxLength;
         if (null == maxLength) {
             synchronized (JerichoParser.class) {
@@ -134,7 +147,9 @@ public final class JerichoParser {
                     // Default is 512KB
                     final ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
                     final int defaultMaxLength = 1048576 >> 1;
-                    i = Integer.valueOf(null == service ? defaultMaxLength : service.getIntProperty("com.openexchange.html.maxLength", defaultMaxLength));
+                    i = Integer.valueOf(null == service ? defaultMaxLength : service.getIntProperty(
+                        "com.openexchange.html.maxLength",
+                        defaultMaxLength));
                     maxLength = i;
                 }
             }
@@ -149,7 +164,7 @@ public final class JerichoParser {
      * @return The checked HTML content possibly with surrounded with a <code>&lt;body&gt;</code> tag
      * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
      */
-    private static StreamedSource checkBody(final String html) {
+    private StreamedSource checkBody(final String html) {
         if (null == html) {
             return null;
         }
@@ -160,7 +175,7 @@ public final class JerichoParser {
         }
         if (BODY_START.matcher(html).find()) {
             return new StreamedSource(html);
-        }ss
+        }
         // <body> tag missing
         String sep = System.getProperty("line.separator");
         if (null == sep) {
@@ -169,9 +184,9 @@ public final class JerichoParser {
         return new StreamedSource(new com.openexchange.java.StringAllocator(html.length() + 16).append("<body>").append(sep).append(html).append(sep).append("</body>"));
     }
 
-    private static final Pattern NESTED_TAG = Pattern.compile("^(?:\r?\n *)?(<[^>]+>)");
-    private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
-    private static final Pattern FIX_START_TAG = Pattern.compile("(<[a-zA-Z_0-9-]+)/([a-zA-Z][^>]+>)");
+    private final Pattern NESTED_TAG = Pattern.compile("^(?:\r?\n *)?(<[^>]+>)");
+    private final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
+    private final Pattern FIX_START_TAG = Pattern.compile("(<[a-zA-Z_0-9-]+)/([a-zA-Z][^>]+>)");
 
     /**
      * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
@@ -180,7 +195,7 @@ public final class JerichoParser {
      * @param handler The HTML handler
      * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
      */
-    public static void parse(final String html, final JerichoHandler handler) {
+    public void parse(final String html, final JerichoHandler handler) {
         final long st = DEBUG ? System.currentTimeMillis() : 0L;
         StreamedSource streamedSource = null;
         try {
@@ -231,7 +246,7 @@ public final class JerichoParser {
         }
     }
 
-    private static void handleSegment(final JerichoHandler handler, final Segment segment, final boolean reparseSegment) {
+    private void handleSegment(final JerichoHandler handler, final Segment segment, final boolean reparseSegment) {
         if (segment instanceof Tag) {
             final Tag tag = (Tag) segment;
             final TagType tagType = tag.getTagType();
@@ -334,14 +349,14 @@ public final class JerichoParser {
         }
     }
 
-    private static String fixStyleAttribute(final String startTag) {
+    private String fixStyleAttribute(final String startTag) {
         if (startTag.indexOf("style=") <= 0) {
             return startTag;
         }
         return INVALID_DELIM.matcher(startTag).replaceAll("; ");
     }
 
-    private static boolean startsWith(final char startingChar, final CharSequence toCheck) {
+    private boolean startsWith(final char startingChar, final CharSequence toCheck) {
         if (null == toCheck) {
             return false;
         }
