@@ -4193,6 +4193,11 @@ msgstr ""
 msgid "The associated OAuth provider denied the request: %1$s."
 msgstr ""
 
+#. The OAuth authentication process has been canceled.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:150
+msgid "The OAuth authentication process has been canceled."
+msgstr ""
+
 #. *
 #. * Cannot change password for any reason.
 #.
