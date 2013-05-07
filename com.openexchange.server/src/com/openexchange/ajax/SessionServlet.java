@@ -674,18 +674,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 LOG.info("Didn't find an appropriate Cookie for name \"" + cookieName + "\" (CookieHashSource=" + cookieHash.toString() + ") which provides the session secret.");
             }
         } else if (INFO) {
-            boolean doLog = true;
-            // Don't log for USM-EAS or USM-JSON
-            if (null != client) {
-                final String tmp = toUpperCase(client);
-                if (tmp.startsWith("USM-EAS") || tmp.startsWith("USM-JSON")) {
-                    doLog = false;
-                }
-            }
-            // Log if allowed
-            if (doLog) {
-                LOG.info("Missing Cookies in HTTP request. No session secret can be looked up.");
-            }
+            LOG.info("Missing Cookies in HTTP request. No session secret can be looked up.");
         }
         return null;
     }
@@ -844,20 +833,6 @@ public abstract class SessionServlet extends AJAXServlet {
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
-    /** ASCII-wise to upper-case */
-    private static String toUpperCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
         }
         return builder.toString();
     }
