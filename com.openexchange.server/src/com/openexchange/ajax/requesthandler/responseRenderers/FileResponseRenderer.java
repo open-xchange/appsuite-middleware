@@ -180,6 +180,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     contentType = fileContentType;
                 }
             }
+            contentType = unquote(contentType);
             String contentDisposition = AJAXServlet.encodeUrl(req.getParameter(PARAMETER_CONTENT_DISPOSITION));
             if (null == contentDisposition) {
                 if (VIEW.equalsIgnoreCase(delivery)) {
@@ -190,6 +191,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     contentDisposition = file.getDisposition();
                 }
             }
+            contentDisposition = unquote(contentDisposition);
             // Write to Servlet's output stream
             file = transformIfImage(request, file, delivery);
             if (null == file) {
@@ -671,6 +673,19 @@ public class FileResponseRenderer implements ResponseRenderer {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    /**
+     * Removes single or double quotes from a string if its quoted.
+     *
+     * @param s The value to be unquoted
+     * @return The unquoted value or <code>null</code>
+     */
+    private String unquote(final String s) {
+        if (!isEmpty(s) && ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")))) {
+            return s.substring(1, s.length() - 1);
+        }
+        return s;
     }
 
     private String getPrimaryType(final String contentType) {
