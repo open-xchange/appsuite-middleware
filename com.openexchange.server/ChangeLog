@@ -1,6 +1,7 @@
 * 2013-05-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 26382: Listen to file storage events, too
+ - Fix for bug 26346: Detect a canceled OAuth authentication process
 
 * 2013-05-06 - thorben.betten@open-xchange.com
 
