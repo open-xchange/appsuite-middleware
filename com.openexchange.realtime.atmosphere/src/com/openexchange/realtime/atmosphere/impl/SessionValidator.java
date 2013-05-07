@@ -378,7 +378,18 @@ public class SessionValidator {
                 LOG.info("Didn't find an appropriate Cookie for name \"" + cookieName + "\" (CookieHashSource=" + cookieHash.toString() + ") which provides the session secret.");
             }
         } else if (LOG.isInfoEnabled()) {
-            LOG.info("Missing Cookies in HTTP request. No session secret can be looked up.");
+            boolean doLog = true;
+            // Don't log for USM-EAS or USM-JSON
+            if (null != client) {
+                final String tmp = toUpperCase(client);
+                if (tmp.startsWith("USM-EAS") || tmp.startsWith("USM-JSON")) {
+                    doLog = false;
+                }
+            }
+            // Log if allowed
+            if (doLog) {
+                LOG.info("Missing Cookies in HTTP request. No session secret can be looked up.");
+            }
         }
         return null;
     }
@@ -501,4 +512,19 @@ public class SessionValidator {
         }
         return ServerSessionAdapter.valueOf(session);
     }
+
+    /** ASCII-wise to upper-case */
+    private static String toUpperCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+        }
+        return builder.toString();
+    }
+
 }
