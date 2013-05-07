@@ -123,6 +123,10 @@ public enum OAuthExceptionCodes implements LogLevelAwareOXExceptionCode {
      * The associated OAuth provider denied the request: %1$s.
      */
     DENIED_BY_PROVIDER(OAuthExceptionMessages.DENIED_BY_PROVIDER_MSG, CATEGORY_USER_INPUT, 15, LogLevel.ERROR),
+    /**
+     * The OAuth authentication process has been canceled.
+     */
+    CANCELED_BY_USER(OAuthExceptionMessages.CANCELED_BY_USER_MSG, CATEGORY_USER_INPUT, 16, LogLevel.ERROR),
     ;
 
     private final Category category;

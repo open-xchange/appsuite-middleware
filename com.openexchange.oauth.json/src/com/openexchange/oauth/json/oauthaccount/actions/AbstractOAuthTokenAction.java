@@ -53,11 +53,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
@@ -100,6 +100,9 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
          */
         @SuppressWarnings("unchecked")
         final Map<String, Object> state = (Map<String, Object>) session.getParameter(uuid); //request.getParameter("oauth_token_secret");
+        if (null == state) {
+            throw OAuthExceptionCodes.CANCELED_BY_USER.create();
+        }
         String oauthTokenSecret = (String) state.get(OAuthConstants.ARGUMENT_SECRET);
         oauthTokenSecret = stripExpireParam(oauthTokenSecret);
         session.setParameter(uuid, null);
