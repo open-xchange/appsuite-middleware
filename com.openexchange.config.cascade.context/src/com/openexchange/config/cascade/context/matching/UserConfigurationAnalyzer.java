@@ -49,6 +49,7 @@
 
 package com.openexchange.config.cascade.context.matching;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -62,16 +63,23 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration.Permission
  */
 public class UserConfigurationAnalyzer {
 
+	/**
+	 * Gets the tags for given user configuration.
+	 *
+	 * @param configuration The user configuration
+	 * @return The tags
+	 */
 	public Set<String> getTags(UserConfiguration configuration) {
-        Set<String> retval = new HashSet<String>(64);
+	    if (null == configuration) {
+            return Collections.emptySet();
+        }
 
-        int permissionBits = configuration.getPermissionBits();
+        final Set<String> retval = new HashSet<String>(64);
 
-        for (final Permission p : Permission.values()) {
-        	final int bit = p.getBit();
-            if (((permissionBits & bit) == bit) && p.isAvailable()) {
-        		retval.add("uc" + p.getTagName());
-        	}
+        final StringBuilder sb = new StringBuilder("uc");
+        for (final Permission p : Permission.byBits(configuration.getPermissionBits())) {
+            sb.setLength(2);
+            retval.add(sb.append(p.getTagName()).toString());
         }
 
         return retval;

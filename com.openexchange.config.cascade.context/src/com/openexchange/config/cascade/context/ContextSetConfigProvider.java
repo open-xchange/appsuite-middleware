@@ -69,6 +69,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.Strings;
 import com.openexchange.userconf.UserConfigurationService;
 
 
@@ -85,8 +86,8 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
 
     private static final String TYPE_PROPERTY = "com.openexchange.config.cascade.types";
 
-    private List<ContextSetConfig> contextSetConfigs;
-    private List<AdditionalPredicates> additionalPredicates;
+    private final List<ContextSetConfig> contextSetConfigs;
+    private final List<AdditionalPredicates> additionalPredicates;
 
     private final UserConfigurationService userConfigs;
     private final UserConfigurationAnalyzer userConfigAnalyzer = new UserConfigurationAnalyzer();
@@ -97,11 +98,13 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
         super(contexts);
 
         final Map<String, Object> yamlInFolder = config.getYamlInFolder("contextSets");
-        if(yamlInFolder != null) {
-            prepare(yamlInFolder);
-        } else {
+        if (yamlInFolder == null) {
             contextSetConfigs = Collections.emptyList();
             additionalPredicates = Collections.emptyList();
+        } else {
+            contextSetConfigs = new LinkedList<ContextSetConfig>();
+            additionalPredicates = new LinkedList<AdditionalPredicates>();
+            prepare(yamlInFolder);
         }
 
         this.userConfigs = userConfigs;
@@ -110,37 +113,42 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
 
     protected Set<String> getSpecification(final Context context, final UserConfiguration userConfig) throws OXException {
         Set<String> typeValues = context.getAttributes().get(TAXONOMY_TYPES);
-        if(typeValues == null) {
+        if (typeValues == null) {
             typeValues = Collections.emptySet();
         }
+        // Gather available tags
+        final Set<String> tags = new HashSet<String>(64);
 
-        final Set<String> tags = new HashSet<String>();
+        // Special tag that applies to the context
+        tags.add(context.getName());
+        tags.add(Integer.toString(context.getContextId()));
+
+        // The ones from context attributes
         for (final String string : typeValues) {
-            tags.addAll(Arrays.asList(string.split("\\s*,\\s*")));
+            tags.addAll(Arrays.asList(Strings.splitByComma(string)));
         }
 
+        // The ones from user configuration
         tags.addAll(userConfigAnalyzer.getTags(userConfig));
 
-        final int user = userConfig.getUserId();
-
         // Now let's try modifications by cascade, first those below the contextSet level
-        final ConfigView view = configViews.getView(user, context.getContextId());
+        final ConfigView view = configViews.getView(userConfig.getUserId(), context.getContextId());
 
         final String[] searchPath = configViews.getSearchPath();
         for (final String scope : searchPath) {
-            if(!scope.equals(SCOPE)) {
+            if (!scope.equals(SCOPE)) {
                 final String types = view.property(TYPE_PROPERTY, String.class).precedence(scope).get();
-                if(types != null) {
-                    tags.addAll(Arrays.asList(types.split("\\s*,\\s*")));
+                if (types != null) {
+                    tags.addAll(Arrays.asList(Strings.splitByComma(types)));
                 }
             }
         }
 
         // Add additional predicates. Do so until no modification has been done
         boolean goOn = true;
-        while(goOn) {
+        while (goOn) {
             goOn = false;
-            for(final AdditionalPredicates additional : additionalPredicates) {
+            for (final AdditionalPredicates additional : additionalPredicates) {
                 goOn = goOn || additional.apply(tags);
             }
         }
@@ -223,21 +231,19 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
 
     protected void prepare(final Map<String, Object> yamlFiles) {
         final ContextSetTermParser parser = new ContextSetTermParser();
-        contextSetConfigs = new LinkedList<ContextSetConfig>();
-        additionalPredicates = new LinkedList<AdditionalPredicates>();
         for(final Map.Entry<String, Object> file : yamlFiles.entrySet()) {
             final String filename = file.getKey();
-            final Map<String, Map<String, Object>> content = (Map<String, Map<String, Object>>) file.getValue();
-            for(final Map.Entry<String, Map<String, Object>> configData : content.entrySet()) {
-                final String configName = configData.getKey();
+            final Map<Object, Map<String, Object>> content = (Map<Object, Map<String, Object>>) file.getValue();
+            for(final Map.Entry<Object, Map<String, Object>> configData : content.entrySet()) {
+                final Object configName = configData.getKey();
                 final Map<String, Object> configuration = configData.getValue();
 
-                final String withTags = (String) configuration.get("withTags");
+                final Object withTags = configuration.get("withTags");
                 if(withTags == null) {
                     throw new IllegalArgumentException("Missing withTags specification in configuration "+configName+" in file "+filename);
                 }
                 try {
-                    final ContextSetTerm term = parser.parse(withTags);
+                    final ContextSetTerm term = parser.parse(withTags.toString());
                     contextSetConfigs.add(new ContextSetConfig(term, configuration));
                     final Object addTags = configuration.get("addTags");
                     if(addTags != null) {

@@ -72,8 +72,6 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.notify.hostname.HostData;
-import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
@@ -308,16 +306,11 @@ public class PublicationMultipleHandler implements MultipleHandler {
         final String target = request.optString("target");
         final Context context = session.getContext();
         final Publication publication = loadPublication(id, context, target);
-        return createResponse(publication, getURLPrefix(request, publication, (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA)));
+        return createResponse(publication, getURLPrefix(request, publication));
     }
 
-    private String getURLPrefix(final JSONObject request, final Publication publication, final HostData hostData) {
-        String hostname;
-        if (null == hostData) {
-            hostname = Hostname.getInstance().getHostname(publication);
-        } else {
-            hostname = hostData.getHost();
-        }
+    private String getURLPrefix(final JSONObject request, final Publication publication) {
+        String hostname = Hostname.getInstance().getHostname(publication);
         final String serverURL = request.optString("__serverURL");
         String protocol = "https://";
         if(hostname != null) {
