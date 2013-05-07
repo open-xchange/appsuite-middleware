@@ -197,7 +197,7 @@
 * 2013-04-12 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 25837: Added several enhancements to avoid flooding of the distributed hazelcast topic for cache events
- 
+
 * 2013-04-12 - marcus.klein@open-xchange.com
 
  - Fix for bug 25819: Changing the IMAP server, IMAP login and SMTP server is now possible for user objects.
