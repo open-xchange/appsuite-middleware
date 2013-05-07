@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -75,10 +76,12 @@ public final class HzQueue<E> implements Queue<E> {
 
     private static final Log LOG = com.openexchange.log.Log.loggerFor(HzQueue.class);
 
-    private final IQueue<MessageData<E>> hzQueue;
+    private static final String MESSAGE_DATA_OBJECT = HzDataUtility.MESSAGE_DATA_OBJECT;
+
+    private final IQueue<Map<String, Object>> hzQueue;
     private final String senderId;
     private final String name;
-    private final ConcurrentMap<MessageListener<E>, com.hazelcast.core.ItemListener<MessageData<E>>> registeredListeners;
+    private final ConcurrentMap<MessageListener<E>, com.hazelcast.core.ItemListener<Map<String, Object>>> registeredListeners;
 
     /**
      * Initializes a new {@link HzQueue}.
@@ -88,7 +91,7 @@ public final class HzQueue<E> implements Queue<E> {
         this.name = name;
         senderId = UUIDs.getUnformattedString(UUID.randomUUID());
         this.hzQueue = hz.getQueue(name);
-        registeredListeners = new ConcurrentHashMap<MessageListener<E>, com.hazelcast.core.ItemListener<MessageData<E>>>(8);
+        registeredListeners = new ConcurrentHashMap<MessageListener<E>, com.hazelcast.core.ItemListener<Map<String, Object>>>(8);
     }
 
     @Override
@@ -110,7 +113,7 @@ public final class HzQueue<E> implements Queue<E> {
 
     @Override
     public void removeMessageListener(final MessageListener<E> listener) {
-        final com.hazelcast.core.ItemListener<MessageData<E>> hzListener = registeredListeners.remove(listener);
+        final com.hazelcast.core.ItemListener<Map<String, Object>> hzListener = registeredListeners.remove(listener);
         if (null != hzListener) {
             try {
                 hzQueue.removeItemListener(hzListener);
@@ -142,12 +145,12 @@ public final class HzQueue<E> implements Queue<E> {
 
     @Override
     public boolean add(final E e) {
-        return hzQueue.add(new MessageData<E>(e, senderId));
+        return hzQueue.add(HzDataUtility.generateMapFor(e, senderId));
     }
 
     @Override
     public Iterator<E> iterator() {
-        final Iterator<MessageData<E>> iterator = hzQueue.iterator();
+        final Iterator<Map<String, Object>> iterator = hzQueue.iterator();
         return new Iterator<E>() {
 
             @Override
@@ -157,8 +160,8 @@ public final class HzQueue<E> implements Queue<E> {
 
             @Override
             public E next() {
-                final MessageData<E> next = iterator.next();
-                return null == next ? null : next.getObject();
+                final Map<String, Object> next = iterator.next();
+                return null == next ? null : (E) next.get(MESSAGE_DATA_OBJECT);
             }
 
             @Override
@@ -170,13 +173,13 @@ public final class HzQueue<E> implements Queue<E> {
 
     @Override
     public E remove() {
-        final MessageData<E> data = hzQueue.remove();
-        return null == data ? null : data.getObject();
+        final Map<String, Object> data = hzQueue.remove();
+        return null == data ? null : (E) data.get(MESSAGE_DATA_OBJECT);
     }
 
     @Override
     public boolean offer(final E e) {
-        return hzQueue.offer(new MessageData<E>(e, senderId));
+        return hzQueue.offer(HzDataUtility.generateMapFor(e, senderId));
     }
 
     @Override
@@ -185,59 +188,60 @@ public final class HzQueue<E> implements Queue<E> {
         final int length = array.length;
         final Object[] ret = new Object[length];
         for (int i = 0; i < length; i++) {
-            ret[i] = ((MessageData<E>) array[i]).getObject();
+            final Map<String, Object> data = (Map<String, Object>) array[i];
+            ret[i] = data.get(MESSAGE_DATA_OBJECT);
         }
         return ret;
     }
 
     @Override
     public E poll() {
-        MessageData<E> data = hzQueue.poll();
-        return null == data ? null : data.getObject();
+        final Map<String, Object> data = hzQueue.poll();
+        return null == data ? null : (E) data.get(MESSAGE_DATA_OBJECT);
     }
 
     @Override
     public E element() {
-        MessageData<E> data = hzQueue.element();
-        return null == data ? null : data.getObject();
+        final Map<String, Object> data = hzQueue.element();
+        return null == data ? null : (E) data.get(MESSAGE_DATA_OBJECT);
     }
 
     @Override
     public E peek() {
-        MessageData<E> data = hzQueue.peek();
-        return null == data ? null : data.getObject();
+        final Map<String, Object> data = hzQueue.peek();
+        return null == data ? null : (E) data.get(MESSAGE_DATA_OBJECT);
     }
 
     @Override
     public <T> T[] toArray(final T[] a) {
-        final MessageData<E>[] array = hzQueue.toArray(new MessageData[0]);
+        final Map<String, Object>[] array = hzQueue.toArray(new Map[0]);
         final List<T> list = new ArrayList<T>(array.length);
         for (int i = 0; i < array.length; i++) {
-            list.add((T) array[i].getObject());
+            list.add((T) array[i].get(MESSAGE_DATA_OBJECT));
         }
         return list.toArray(a);
     }
 
     @Override
     public void put(final E e) throws InterruptedException {
-        hzQueue.put(new MessageData<E>(e, senderId));
+        hzQueue.put(HzDataUtility.generateMapFor(e, senderId));
     }
 
     @Override
     public boolean offer(final E e, final long timeout, final TimeUnit unit) throws InterruptedException {
-        return hzQueue.offer(new MessageData<E>(e, senderId), timeout, unit);
+        return hzQueue.offer(HzDataUtility.generateMapFor(e, senderId), timeout, unit);
     }
 
     @Override
     public E take() throws InterruptedException {
-        MessageData<E> data = hzQueue.take();
-        return null == data ? null : data.getObject();
+        final Map<String, Object> data = hzQueue.take();
+        return null == data ? null : (E) data.get(MESSAGE_DATA_OBJECT);
     }
 
     @Override
     public E poll(final long timeout, final TimeUnit unit) throws InterruptedException {
-        MessageData<E> data = hzQueue.poll(timeout, unit);
-        return null == data ? null : data.getObject();
+        final Map<String, Object> data = hzQueue.poll(timeout, unit);
+        return null == data ? null : (E) data.get(MESSAGE_DATA_OBJECT);
     }
 
     @Override
@@ -257,29 +261,29 @@ public final class HzQueue<E> implements Queue<E> {
 
     @Override
     public int drainTo(final Collection<? super E> c) {
-        final List<MessageData<E>> list = new ArrayList<MessageData<E>>(c.size());
+        final List<Map<String, Object>> list = new ArrayList<Map<String, Object>>(c.size());
         final int drained = hzQueue.drainTo(list);
         for (int i = 0; i < drained; i++) {
-            c.add(list.get(i).getObject());
+            c.add((E) list.get(i).get(MESSAGE_DATA_OBJECT));
         }
         return drained;
     }
 
     @Override
     public boolean containsAll(final Collection<?> c) {
-        final List<MessageData<E>> list = new ArrayList<MessageData<E>>(c.size());
-        for (Object object : c) {
-            list.add(new MessageData<E>((E) object, senderId));
+        final List<Map<String, Object>> list = new ArrayList<Map<String, Object>>(c.size());
+        for (final Object object : c) {
+            list.add(HzDataUtility.generateMapFor((E) object, senderId));
         }
         return hzQueue.containsAll(list);
     }
 
     @Override
     public int drainTo(final Collection<? super E> c, final int maxElements) {
-        final List<MessageData<E>> list = new ArrayList<MessageData<E>>(c.size());
+        final List<Map<String, Object>> list = new ArrayList<Map<String, Object>>(c.size());
         final int drained = hzQueue.drainTo(list, maxElements);
         for (int i = 0; i < drained; i++) {
-            c.add(list.get(i).getObject());
+            c.add((E) list.get(i).get(MESSAGE_DATA_OBJECT));
         }
         return drained;
     }
@@ -287,26 +291,26 @@ public final class HzQueue<E> implements Queue<E> {
     @Override
     public boolean addAll(final Collection<? extends E> c) {
         boolean retval = false;
-        for (E e : c) {
-            retval = hzQueue.add(new MessageData<E>(e, senderId));
+        for (final E e : c) {
+            retval = hzQueue.add(HzDataUtility.generateMapFor(e, senderId));
         }
         return retval;
     }
 
     @Override
     public boolean removeAll(final Collection<?> c) {
-        final List<MessageData<E>> list = new ArrayList<MessageData<E>>(c.size());
-        for (Object object : c) {
-            list.add(new MessageData<E>((E) object, senderId));
+        final List<Map<String, Object>> list = new ArrayList<Map<String, Object>>(c.size());
+        for (final Object object : c) {
+            list.add(HzDataUtility.generateMapFor((E) object, senderId));
         }
         return hzQueue.removeAll(list);
     }
 
     @Override
     public boolean retainAll(final Collection<?> c) {
-        final List<MessageData<E>> list = new ArrayList<MessageData<E>>(c.size());
-        for (Object object : c) {
-            list.add(new MessageData<E>((E) object, senderId));
+        final List<Map<String, Object>> list = new ArrayList<Map<String, Object>>(c.size());
+        for (final Object object : c) {
+            list.add(HzDataUtility.generateMapFor((E) object, senderId));
         }
         return hzQueue.retainAll(list);
     }
@@ -318,7 +322,7 @@ public final class HzQueue<E> implements Queue<E> {
 
     // ------------------------------------------------------------------------ //
 
-    private static final class HzMessageListener<E> implements com.hazelcast.core.ItemListener<MessageData<E>> {
+    private static final class HzMessageListener<E> implements com.hazelcast.core.ItemListener<Map<String, Object>> {
 
         private final MessageListener<E> listener;
         private final String senderId;
@@ -333,14 +337,14 @@ public final class HzQueue<E> implements Queue<E> {
         }
 
         @Override
-        public void itemAdded(final ItemEvent<MessageData<E>> item) {
-            final MessageData<E> messageData = item.getItem();
-            final String messageSender = messageData.getSenderId();
-            listener.onMessage(new Message<E>(item.getSource().toString(), messageSender, messageData.getObject(), !senderId.equals(messageSender)));
+        public void itemAdded(final ItemEvent<Map<String, Object>> item) {
+            final Map<String, Object> messageData = item.getItem();
+            final String messageSender = (String) messageData.get(HzDataUtility.MESSAGE_DATA_SENDER_ID);
+            listener.onMessage(new Message<E>(item.getSource().toString(), messageSender, (E) messageData.get(MESSAGE_DATA_OBJECT), !senderId.equals(messageSender)));
         }
 
         @Override
-        public void itemRemoved(final ItemEvent<MessageData<E>> item) {
+        public void itemRemoved(final ItemEvent<Map<String, Object>> item) {
             // Ignore
         }
 

@@ -66,6 +66,7 @@ import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
+import javax.management.Query;
 import javax.management.ReflectionException;
 import javax.management.RuntimeMBeanException;
 import javax.management.openmbean.CompositeDataSupport;
@@ -125,10 +126,16 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
         final Iterator<ObjectInstance> itr = mbc.queryMBeans(null, null).iterator();
         while (itr.hasNext()) {
             final ObjectInstance oin = itr.next();
-
             final ObjectName obj = oin.getObjectName();
-            final MBeanInfo info = mbc.getMBeanInfo(obj);
-            if (info.getClassName().equals(class_name)) {
+            MBeanInfo info = null;
+            if (null != obj) {
+                try {
+                    info = mbc.getMBeanInfo(obj);
+                } catch (InstanceNotFoundException e) {
+                    // skip
+                }
+            }
+            if (null != info && info.getClassName().equals(class_name)) {
                 final String ocname = obj.getCanonicalName();
                 final MBeanAttributeInfo[] attrs = info.getAttributes();
                 if (attrs.length > 0) {

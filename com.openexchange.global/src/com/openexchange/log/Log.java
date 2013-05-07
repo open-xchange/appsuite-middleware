@@ -49,6 +49,7 @@
 
 package com.openexchange.log;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.log.Loggable.Level;
 
@@ -58,6 +59,26 @@ import com.openexchange.log.Loggable.Level;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Log implements org.apache.commons.logging.Log {
+
+    private static final AtomicBoolean APPEND_TRACE_TO_MESSAGE = new AtomicBoolean();
+
+    /**
+     * Sets whether to prefer to append stack traces to message itself or pass them as separate argument.
+     *
+     * @param appendTraceToMessage <code>true</code> to append stack traces to message; otherwise <code>false</code>
+     */
+    public static void setAppendTraceToMessage(final boolean appendTraceToMessage) {
+        APPEND_TRACE_TO_MESSAGE.set(appendTraceToMessage);
+    }
+
+    /**
+     * Checks whether to prefer to append stack traces to message itself or pass them as separate argument.
+     *
+     * @return <code>true</code> to append stack traces to message; otherwise <code>false</code>
+     */
+    public static boolean appendTraceToMessage() {
+        return APPEND_TRACE_TO_MESSAGE.get();
+    }
 
     private static final AtomicReference<LogService> LOGSERVICE_REFERENCE = new AtomicReference<LogService>();
 

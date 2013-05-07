@@ -49,8 +49,9 @@
 
 package com.openexchange.http.grizzly.servletfilter;
 
+import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTPS_SCHEME;
+import static com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper.HTTP_SCHEME;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.List;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -63,8 +64,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper;
 import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
-import com.openexchange.http.grizzly.osgi.GrizzlyActivator;
 import com.openexchange.http.grizzly.util.IPTools;
+import com.openexchange.log.ForceLog;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
@@ -72,8 +73,8 @@ import com.openexchange.log.Props;
 
 /**
  * {@link WrappingFilter} - Wrap the Request in {@link HttpServletResponseWrapper} and the Response in {@link HttpServletResponseWrapper}
- * and creates a new HttpSession if needed to achieve feature parity with the ajp based implementation.
- * 
+ * and creates a new HttpSession and do various tasks to achieve feature parity with the ajp based implementation.
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class WrappingFilter implements Filter {
@@ -96,6 +97,8 @@ public class WrappingFilter implements Filter {
 
     private boolean isConsiderXForwards = false;
 
+    private String echoHeader;
+
     @Override
     public void init(FilterConfig filterConfig) {
         GrizzlyConfig config = GrizzlyConfig.getInstance();
@@ -106,6 +109,7 @@ public class WrappingFilter implements Filter {
         this.httpPort = config.getHttpProtoPort();
         this.httpsPort = config.getHttpsProtoPort();
         this.isConsiderXForwards = config.isConsiderXForwards();
+        this.echoHeader = config.getEchoHeader();
     }
 
     @Override
@@ -115,34 +119,35 @@ public class WrappingFilter implements Filter {
         HttpServletRequestWrapper httpServletRequestWrapper = null;
         HttpServletResponseWrapper httpServletResponseWrapper = null;
 
+        // Inspect echoHeader and when present copy it to Response
+        String echoHeaderValue = httpServletRequest.getHeader(echoHeader);
+        if (echoHeaderValue != null) {
+            httpServletResponse.setHeader(echoHeader, echoHeaderValue);
+        }
+
         // Inspect X-Forwarded headers and create HttpServletRequestWrapper accordingly
         if (isConsiderXForwards) {
             String forHeaderValue = httpServletRequest.getHeader(forHeader);
             String remoteIP = IPTools.getRemoteIP(forHeaderValue, knownProxies);
+            String protocol = httpServletRequest.getHeader(protocolHeader);
+
+            if(!isValidProtocol(protocol)) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Could not detect a valid protocol header value in " + protocol + ", falling back to default");
+                }
+                 protocol = httpServletRequest.getScheme();
+            }
 
             if (remoteIP.isEmpty()) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Could not detect a valid remote ip in [" + forHeaderValue + "], falling back to default");
+                    forHeaderValue = forHeaderValue == null ? "" : forHeaderValue;
+                    LOG.debug("Could not detect a valid remote ip in " + forHeader + ": [" + forHeaderValue + "], falling back to default");
                 }
-                httpServletRequestWrapper = new HttpServletRequestWrapper(httpServletRequest.getRemoteAddr(), httpServletRequest);
-            } else {
-                httpServletRequestWrapper = new HttpServletRequestWrapper(remoteIP, httpServletRequest);
+                remoteIP = httpServletRequest.getRemoteAddr();
             }
 
-            // String protocolHeaderValue = httpServletRequest.getHeader(protocolHeader);
-            // if (protocolHeader == null) {
-            // httpServletRequestWrapper = new HttpServletRequestWrapper(httpServletRequest);
-            // } else if (httpsProtoValue.equalsIgnoreCase(protocolHeaderValue)) {
-            // httpServletRequestWrapper = new HttpServletRequestWrapper(
-            // httpServletRequest,
-            // HttpServletRequestWrapper.HTTPS_SCHEME,
-            // httpsPort);
-            // } else {
-            // httpServletRequestWrapper = new HttpServletRequestWrapper(
-            // httpServletRequest,
-            // HttpServletRequestWrapper.HTTP_SCHEME,
-            // httpPort);
-            // }
+            httpServletRequestWrapper = new HttpServletRequestWrapper(protocol, remoteIP, httpServletRequest.getServerPort(), httpServletRequest);
+
         } else {
             httpServletRequestWrapper = new HttpServletRequestWrapper(httpServletRequest);
         }
@@ -162,14 +167,25 @@ public class WrappingFilter implements Filter {
 
             // Remote infos
             logProperties.put(LogProperties.Name.GRIZZLY_REMOTE_PORT, httpServletRequestWrapper.getRemotePort());
+            logProperties.put(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS, ForceLog.valueOf(httpServletRequestWrapper.getRemoteAddr()));
             logProperties.put(LogProperties.Name.GRIZZLY_REQUEST_IP, httpServletRequestWrapper.getRemoteAddr());
 
             // Names, addresses
             logProperties.put(LogProperties.Name.GRIZZLY_THREAD_NAME, Thread.currentThread().getName());
             logProperties.put(LogProperties.Name.GRIZZLY_SERVER_NAME, httpServletRequest.getServerName());
+
+            // AJAX action
+            final String action = request.getParameter("action");
+            if (null != action) {
+                logProperties.put(LogProperties.Name.AJAX_ACTION, action);
+            }
         }
 
         chain.doFilter(httpServletRequestWrapper, httpServletResponseWrapper);
+    }
+
+    private boolean isValidProtocol(String protocolHeaderValue) {
+        return HTTP_SCHEME.equals(protocolHeaderValue) || HTTPS_SCHEME.equals(protocolHeaderValue);
     }
 
     @Override

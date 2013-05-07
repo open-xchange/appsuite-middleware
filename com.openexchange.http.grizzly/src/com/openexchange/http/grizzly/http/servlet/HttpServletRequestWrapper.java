@@ -34,54 +34,39 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
 
     private final String remoteAddress;
 
-//    /**
-//     * Initializes a new {@link HttpServletRequestWrapper}.
-//     * 
-//     * @param httpServletRequest The incoming request
-//     * @param requestScheme The scheme of the incoming request: http or https
-//     * @param serverPort The serverPort of the incoming request
-//     * @throws IllegalArgumentException If the port is smaller than 1
-//     */
-//    public HttpServletRequestWrapper(HttpServletRequest httpServletRequest, String requestScheme, int serverPort) {
-//        super();
-//        if (serverPort < 1) {
-//            throw new IllegalArgumentException("Port is out of valid range: " + serverPort);
-//        }
-//        this.delegate = httpServletRequest;
-//        this.requestScheme = requestScheme;
-//        if (requestScheme.equalsIgnoreCase(HTTPS_SCHEME)) {
-//            this.isSecure = true;
-//        } else {
-//            this.isSecure = false;
-//        }
-//        this.serverPort = serverPort;
-//
-//        OXRequest internalRequest = (OXRequest) ServletUtils.getInternalRequest(delegate);
-//        internalRequest.setXForwardPort(serverPort);
-//        internalRequest.setxForwardProto(requestScheme);
-//    }
-
-    /**
-     * Initializes a new {@link HttpServletRequestWrapper}.
-     * @param remoteIP the detected remoteIP
-     * @param httpServletRequest the delegate to use with this wrapper
-     */
-    public HttpServletRequestWrapper(String remoteIP, HttpServletRequest httpServletRequest) {
-        this.delegate = httpServletRequest;
-        if (HTTPS_SCHEME.equals(httpServletRequest.getScheme())) {
-            this.requestScheme = HTTPS_SCHEME;
-            this.isSecure = true;
-        } else {
-            this.requestScheme = HTTP_SCHEME;
-            this.isSecure = false;
+        /**
+         * Initializes a new {@link HttpServletRequestWrapper}.
+         *
+         * @param requestScheme The scheme of the incoming request: http or https
+         * @param remoteAddress
+         * @param serverPort The serverPort of the incoming request
+         * @param httpServletRequest The incoming request
+         * @throws IllegalArgumentException If the port is smaller than 1
+         */
+        public HttpServletRequestWrapper(String requestScheme, String remoteAddress, int serverPort, HttpServletRequest httpServletRequest) {
+            if (serverPort < 1) {
+                throw new IllegalArgumentException("Port is out of valid range: " + serverPort);
+            }
+            if (requestScheme.equalsIgnoreCase(HTTPS_SCHEME)) {
+                this.requestScheme = HTTPS_SCHEME;
+                this.isSecure = true;
+            } else {
+                this.requestScheme = HTTP_SCHEME;
+                this.isSecure = false;
+            }
+            this.remoteAddress = remoteAddress;
+            this.serverPort = serverPort;
+            this.delegate = httpServletRequest;
+    
+            OXRequest internalRequest = (OXRequest) ServletUtils.getInternalRequest(delegate);
+            internalRequest.setXForwardPort(serverPort);
+            internalRequest.setxForwardProto(requestScheme);
         }
-        this.serverPort = httpServletRequest.getServerPort();
-        this.remoteAddress = remoteIP;
-    }
-
+    
     /**
      * Initializes a new {@link HttpServletRequestWrapper}.
-     * @param httpServletRequest the delegate to use with this wrapper 
+     * 
+     * @param httpServletRequest the delegate to use with this wrapper
      */
     public HttpServletRequestWrapper(HttpServletRequest httpServletRequest) {
         this.delegate = httpServletRequest;
@@ -242,6 +227,7 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
     }
 
     @Override
+    @Deprecated
     public String getRealPath(String arg0) {
         return delegate.getRealPath(arg0);
     }
@@ -332,6 +318,7 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
     }
 
     @Override
+    @Deprecated
     public boolean isRequestedSessionIdFromUrl() {
         return delegate.isRequestedSessionIdFromUrl();
     }
@@ -343,7 +330,7 @@ public class HttpServletRequestWrapper implements HttpServletRequest, Parameteri
 
     @Override
     public boolean isSecure() {
-        return delegate.isSecure();
+        return isSecure;
     }
 
     @Override

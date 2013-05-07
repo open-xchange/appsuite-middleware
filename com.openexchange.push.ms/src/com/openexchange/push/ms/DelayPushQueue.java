@@ -49,7 +49,7 @@
 
 package com.openexchange.push.ms;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.TimeUnit;
@@ -73,15 +73,15 @@ public class DelayPushQueue implements Runnable {
 
     private final int maxDelayDuration;
 
-    private ConcurrentHashMap<PushMsObject,DelayedPushMsObject> existingPushObjects = new ConcurrentHashMap<PushMsObject, DelayedPushMsObject>();
+    private final ConcurrentHashMap<PushMsObject,DelayedPushMsObject> existingPushObjects = new ConcurrentHashMap<PushMsObject, DelayedPushMsObject>();
 
-    private DelayQueue<DelayedPushMsObject> delayQueue;
+    private final DelayQueue<DelayedPushMsObject> delayQueue;
 
     private final Thread pollThread;
 
     private boolean isRunning = false;
 
-    private final Topic<PushMsObject> publisher;
+    private final Topic<Map<String, Object>> publisher;
 
     /**
      * Initializes a new {@link DelayPushQueue}.
@@ -91,7 +91,7 @@ public class DelayPushQueue implements Runnable {
      *            updated within the delayDuration
      * @param maxDelayDuration the maximum time an object can be in this DelayQueue before being finally published.
      */
-    public DelayPushQueue(Topic<PushMsObject> publisher, int delayDuration, int maxDelayDuration) {
+    public DelayPushQueue(Topic<Map<String, Object>> publisher, int delayDuration, int maxDelayDuration) {
         delayQueue = new DelayQueue<DelayedPushMsObject>();
         this.publisher = publisher;
         this.delayDuration = delayDuration;
@@ -138,7 +138,7 @@ public class DelayPushQueue implements Runnable {
                     // remove from mapping
                     existingPushObjects.remove(pushObject);
                     // and publish
-                    publisher.publish(delayedPushMsObject.getPushObject());
+                    publisher.publish(delayedPushMsObject.getPushObject().writePojo());
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Published delayed PushMsObject: " + delayedPushMsObject.getPushObject());
                     }

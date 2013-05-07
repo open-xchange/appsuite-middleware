@@ -178,6 +178,18 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
         timerTask = service.scheduleWithFixedDelay(new PurgeExpiredRunnable(map), shrinkerMillis, shrinkerMillis);
     }
 
+    @Override
+    public int numberOfMailAccesses(Session session, int accountId) throws OXException {
+        final Key key = keyFor(accountId, session);
+        final MailAccessQueue accessQueue = map.get(key);
+        if (null == accessQueue) {
+            return 0;
+        }
+        synchronized (accessQueue) {
+            return accessQueue.size();
+        }
+    }
+
     /**
      * Removes and returns a mail access from cache.
      *
