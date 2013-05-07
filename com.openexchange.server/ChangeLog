@@ -1,3 +1,7 @@
+* 2013-05-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26431: Properly accepting not existing value or a JSON null value when setting a user attribute.
+
 * 2013-04-30 - marcus.klein@open-xchange.com
 
  - Fix for bug 24724: Revoked version of org.apache.log4j OSGi bundle to 1.2.13. This version does not split log messages when using
