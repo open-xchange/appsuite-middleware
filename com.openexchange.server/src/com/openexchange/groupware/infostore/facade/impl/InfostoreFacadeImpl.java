@@ -286,7 +286,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         if (timeout == -1) {
             timeout = LockManager.INFINITE;
         } else {
-            timeout = System.currentTimeMillis() + diff;
+            timeout = diff;
         }
         lockManager.lock(
             id,
