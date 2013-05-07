@@ -1,3 +1,7 @@
+* 2013-05-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26382: Listen to file storage events, too
+
 * 2013-05-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 24786: Set appropriate error category to display more meaningful error message
