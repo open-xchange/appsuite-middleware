@@ -64,15 +64,11 @@ import com.openexchange.session.Session;
 public class FileStorageEventHelper {
 
     public static Event buildUpdateEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId) {
-        final Event event =
-            new Event(FileStorageEventConstants.UPDATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId));
-        return event;
+        return new Event(FileStorageEventConstants.UPDATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId));
     }
 
     public static Event buildCreateEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId) {
-        final Event event =
-            new Event(FileStorageEventConstants.CREATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId));
-        return event;
+        return new Event(FileStorageEventConstants.CREATE_TOPIC, buildProperties(session, service, accountId, folderId, objectId));
     }
 
     public static Event buildDeleteEvent(final Session session, final String service, final String accountId, final String folderId, final String objectId, final Set<String> versions) {

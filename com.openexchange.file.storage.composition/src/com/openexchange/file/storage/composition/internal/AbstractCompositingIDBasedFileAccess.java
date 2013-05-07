@@ -732,9 +732,13 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         postEvent(event);
     }
 
-    protected void postEvent(Event event) {
-        EventAdmin eventAdmin = getEventAdmin();
-        eventAdmin.postEvent(event);
+    /**
+     * Posts specified event
+     *
+     * @param event The event
+     */
+    protected void postEvent(final Event event) {
+        getEventAdmin().postEvent(event);
     }
 
     @Override
