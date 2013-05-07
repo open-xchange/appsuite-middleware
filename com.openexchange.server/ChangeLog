@@ -2,6 +2,7 @@
 
  - Fix for bug 26382: Listen to file storage events, too
  - Fix for bug 26346: Detect a canceled OAuth authentication process
+ - Fix for bug 26265: Add more logging properties when trying to output a message
 
 * 2013-05-06 - thorben.betten@open-xchange.com
 

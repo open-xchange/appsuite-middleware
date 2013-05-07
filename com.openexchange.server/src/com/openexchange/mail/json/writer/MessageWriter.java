@@ -67,6 +67,7 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
@@ -223,8 +224,9 @@ public final class MessageWriter {
     public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail settings, final Collection<OXException> warnings, final boolean token, final int tokenTimeout, final MimeFilter mimeFilter, final TimeZone optTimeZone) throws OXException {
         final MailPath mailPath;
         final String fullName = mail.getFolder();
-        if (fullName != null && mail.getMailId() != null) {
-            mailPath = new MailPath(accountId, fullName, mail.getMailId());
+        final String mailId = mail.getMailId();
+        if (fullName != null && mailId != null) {
+            mailPath = new MailPath(accountId, fullName, mailId);
         } else if (mail.getMsgref() != null) {
             mailPath = mail.getMsgref();
         } else {
@@ -235,21 +237,20 @@ public final class MessageWriter {
          * Add log properties
          */
         final Set<LogProperties.Name> removees = EnumSet.noneOf(LogProperties.Name.class);
-        final Props props = LogProperties.getLogProperties();
-        {
-            if (!props.put(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.valueOf(accountId))) {
+        final Props props = LogProperties.optLogProperties();
+        if (null != props) {
+            if (!props.put(LogProperties.Name.MAIL_ACCOUNT_ID, ForceLog.valueOf(Integer.valueOf(accountId)))) {
                 removees.add(LogProperties.Name.MAIL_ACCOUNT_ID);
             }
-            if (!props.put(LogProperties.Name.MAIL_FULL_NAME, fullName)) {
+            if (null != fullName && !props.put(LogProperties.Name.MAIL_FULL_NAME, ForceLog.valueOf(fullName))) {
                 removees.add(LogProperties.Name.MAIL_FULL_NAME);
             }
-            if (!props.put(LogProperties.Name.MAIL_MAIL_ID, mail.getMailId())) {
+            if (null != mailId && !props.put(LogProperties.Name.MAIL_MAIL_ID, ForceLog.valueOf(mailId))) {
                 removees.add(LogProperties.Name.MAIL_MAIL_ID);
             }
         }
         try {
-            final JsonMessageHandler handler =
-                new JsonMessageHandler(accountId, mailPath, mail, displayMode, embedded, session, usm, token, tokenTimeout);
+            final JsonMessageHandler handler = new JsonMessageHandler(accountId, mailPath, mail, displayMode, embedded, session, usm, token, tokenTimeout);
             if (null != optTimeZone) {
                 handler.setTimeZone(optTimeZone);
             }
@@ -290,7 +291,7 @@ public final class MessageWriter {
         } catch (final OXException e) {
             final Throwable cause = e.getCause();
             if (null != cause && cause.getClass().getName().startsWith("MessageRemoved")) {
-                throw MailExceptionCode.MAIL_NOT_FOUND.create(cause, mail.getMailId(), mail.getFolder());
+                throw MailExceptionCode.MAIL_NOT_FOUND.create(cause, mailId, mail.getFolder());
             }
             throw e;
         } finally {
