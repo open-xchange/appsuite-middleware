@@ -158,28 +158,6 @@ public final class DownloadUtility {
                     htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
                     in = Streams.newByteArrayInputStream(htmlContent.getBytes(Charsets.forName(cs)));
                 }
-            } else if (fileNameImpliesHtml(fileName) && HTMLDetector.containsHTMLTags((bytes = Streams.stream2bytes(in)))) {
-                /*
-                 * HTML content requested for download...
-                 */
-                if (null == sContentDisposition) {
-                    sContentDisposition = "attachment";
-                } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
-                    /*
-                     * Sanitizing of HTML content needed
-                     */
-                    final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                    String cs = contentType.getCharsetParameter();
-                    if (!CharsetDetector.isValid(cs)) {
-                        cs = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
-                        if ("US-ASCII".equalsIgnoreCase(cs)) {
-                            cs = "ISO-8859-1";
-                        }
-                    }
-                    String htmlContent = new String(bytes, Charsets.forName(cs));
-                    htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
-                    in = Streams.newByteArrayInputStream(htmlContent.getBytes(Charsets.forName(cs)));
-                }
             } else if (contentType.startsWith("image/") || fileNameImpliesImage(fileName)) {
                 /*
                  * Image content requested for download...
@@ -258,6 +236,28 @@ public final class DownloadUtility {
                      * New combined input stream
                      */
                     in = new CombinedInputStream(sequence, in);
+                }
+            } else if (fileNameImpliesHtml(fileName) && HTMLDetector.containsHTMLTags((bytes = Streams.stream2bytes(in)))) {
+                /*
+                 * HTML content requested for download...
+                 */
+                if (null == sContentDisposition) {
+                    sContentDisposition = "attachment";
+                } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
+                    /*
+                     * Sanitizing of HTML content needed
+                     */
+                    final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                    String cs = contentType.getCharsetParameter();
+                    if (!CharsetDetector.isValid(cs)) {
+                        cs = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
+                        if ("US-ASCII".equalsIgnoreCase(cs)) {
+                            cs = "ISO-8859-1";
+                        }
+                    }
+                    String htmlContent = new String(bytes, Charsets.forName(cs));
+                    htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
+                    in = Streams.newByteArrayInputStream(htmlContent.getBytes(Charsets.forName(cs)));
                 }
             }
             final CheckedDownload retval;
