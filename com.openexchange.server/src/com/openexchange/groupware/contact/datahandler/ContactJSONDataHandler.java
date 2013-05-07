@@ -54,9 +54,11 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
@@ -64,6 +66,7 @@ import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -108,6 +111,8 @@ public final class ContactJSONDataHandler implements DataHandler {
         return TYPES;
     }
 
+    private static final ContactField[] CONTACT_FIELDS_FOLDER_ID = new ContactField[] { ContactField.FOLDER_ID };
+
     @Override
     public Object processData(final Data<?> data, final DataArguments dataArguments, final Session session) throws OXException {
         final Context ctx = ContextStorage.getStorageContext(session);
@@ -148,11 +153,41 @@ public final class ContactJSONDataHandler implements DataHandler {
                      */
                     converter.setAddDisplayName4DList(true);
                     final Contact contact = converter.convertContact(versitObject);
+                    /*
+                     * Check folder/object identifier
+                     */
+                    {
+                        final String folderId = dataProperties.get(DataProperties.PROPERTY_FOLDER_ID);
+                        if (null != folderId) {
+                            try {
+                                contact.setParentFolderID(Integer.parseInt(folderId));
+                            } catch (final NumberFormatException e) {
+                                // Ignore
+                            }
+                        }
+                        final String contactId = dataProperties.get(DataProperties.PROPERTY_ID);
+                        if (null != contactId) {
+                            try {
+                                contact.setObjectID(Integer.parseInt(contactId));
+                            } catch (final NumberFormatException e) {
+                                // Ignore
+                            }
+                        }
+                    }
 					/*
 					 * Store contact object in JSON array
 					 */
-					final JSONObject jsonContact = new JSONObject();
+					final JSONObject jsonContact = new JSONObject(32);
 					writer.writeContact(contact, jsonContact, session);
+					/*
+					 * Check for image
+					 */
+					{
+					    final byte[] image = contact.getImage1();
+					    if (null != image) {
+					        jsonContact.put(ContactFields.IMAGE1, Base64.encodeBase64String(image));
+                        }
+					}
 					jsonArray.put(jsonContact);
                 }
             }
