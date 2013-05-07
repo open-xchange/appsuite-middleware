@@ -50,6 +50,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc datare
 %config(noreplace) /opt/open-xchange/etc/dataretention.properties
 
 %changelog
+* Fri May 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-04-23
 * Tue Apr 30 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-17
 * Fri Apr 12 2013 Marcus Klein <marcus.klein@open-xchange.com>

@@ -4,6 +4,12 @@ open-xchange-sso (7.4.0-0) UNRELEASED; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Apr 2013 10:30:18 +0200
 
+open-xchange-sso (7.2.0-6) UNRELEASED; urgency=low
+
+  * Build for patch 2013-04-23
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 03 May 2013 09:54:25 +0200
+
 open-xchange-sso (7.2.0-5) UNRELEASED; urgency=low
 
   * Build for patch 2013-04-12

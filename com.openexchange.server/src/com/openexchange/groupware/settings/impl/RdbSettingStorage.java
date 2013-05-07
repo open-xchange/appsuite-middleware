@@ -55,7 +55,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -63,6 +62,7 @@ import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -377,13 +377,19 @@ public class RdbSettingStorage extends SettingStorage {
                 try {
                     reader.getValue(session, ctx, user, userConfig, setting);
                     if (setting.getSingleValue() != null && setting.getSingleValue().equals(IValueHandler.UNDEFINED)) {
-                        setting.getParent().removeElement(setting);
+                        final Setting parent = setting.getParent();
+                        if (null != parent) {
+                            parent.removeElement(setting);
+                        }
                     }
                 } catch (final OXException e) {
                     LOG.error("Problem while reading setting value.", e);
                 }
             } else {
-                setting.getParent().removeElement(setting);
+                final Setting parent = setting.getParent();
+                if (null != parent) {
+                    parent.removeElement(setting);
+                }
             }
         }
     }

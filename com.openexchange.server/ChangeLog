@@ -2,6 +2,10 @@
 
  - Fix for bug 26431: Properly accepting not existing value or a JSON null value when setting a user attribute.
 
+* 2013-05-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26305: Use safe hash calculation to avoid hash collisions
+
 * 2013-04-30 - marcus.klein@open-xchange.com
 
  - Fix for bug 24724: Revoked version of org.apache.log4j OSGi bundle to 1.2.13. This version does not split log messages when using
@@ -11,6 +15,19 @@
 * 2013-04-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 25957: Deny "vbscript" URLs
+
+* 2013-04-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25903: Added null guard when reading settings
+ - Fix for bug 25909: Proper initialization of service trackers although registering contact-collect service is disabled
+
+* 2013-04-15 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 25895: Cropped files at 500kb fixed.
+
+* 2013-04-15 - marc.arens@open-xchange.com
+
+ - Fix for bug 25863: Move ArrayList.clear() to beginning of runloop and add logging in case of error
 
 * 2013-04-12 - tobias.friedrich@open-xchange.com
 
