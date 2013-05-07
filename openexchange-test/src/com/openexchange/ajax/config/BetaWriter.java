@@ -47,22 +47,58 @@
  *
  */
 
-package com.openexchange.ajax.user;
+package com.openexchange.ajax.config;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import static com.openexchange.java.Autoboxing.B;
+import java.util.Random;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.ajax.config.actions.SetRequest;
+import com.openexchange.ajax.config.actions.Tree;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXClient.User;
 
 /**
- * Test suite for all user interface tests.
+ * {@link Runnable} that constantly writes 
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({ GetTest.class, AllTest.class, ListTest.class, Bug13911Test.class, Bug17539Test.class, Bug26354Test.class, Bug26431Test.class })
-public final class UserAJAXSuite {
+public final class BetaWriter implements Runnable {
 
-    private UserAJAXSuite() {
+    private static final Log LOG = LogFactory.getLog(BetaWriter.class);
+
+    private final User user;
+    private boolean run = true;
+
+    private Throwable t;
+
+    public BetaWriter(User user) {
         super();
+        this.user = user;
+    }
+
+    public void stop() {
+        run = false;
+    }
+
+    public Throwable getThrowable() {
+        return t;
+    }
+
+    @Override
+    public void run() {
+        Random rand = new Random(System.currentTimeMillis());
+        try {
+            // This does a login which also touches the user attributes for the last login time stamp.
+            AJAXClient client = new AJAXClient(user);
+            while (run) {
+                // Touches the user attributes a second time.
+                client.execute(new SetRequest(Tree.Beta, B(rand.nextBoolean())));
+            }
+            client.logout();
+        } catch (Throwable t2) {
+            LOG.error(t2.getMessage(), t2);
+            t = t2;
+        }
     }
 }

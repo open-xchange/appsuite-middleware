@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,22 +47,46 @@
  *
  */
 
-package com.openexchange.ajax.user;
+package com.openexchange.ajax.user.actions;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * Test suite for all user interface tests.
+ * {@link GetAttributeParser}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({ GetTest.class, AllTest.class, ListTest.class, Bug13911Test.class, Bug17539Test.class, Bug26354Test.class, Bug26431Test.class })
-public final class UserAJAXSuite {
+public final class GetAttributeParser extends AbstractAJAXParser<GetAttributeResponse> {
 
-    private UserAJAXSuite() {
-        super();
+    private final String name;
+
+    protected GetAttributeParser(String name, boolean failOnError) {
+        super(failOnError);
+        this.name = name;
+    }
+
+    @Override
+    protected GetAttributeResponse createResponse(Response response) throws JSONException {
+        GetAttributeResponse retval = new GetAttributeResponse(response);
+        Object tmp = response.getData();
+        if (tmp instanceof JSONObject) {
+            JSONObject json = (JSONObject) tmp;
+            String testName = json.getString("name");
+            if (isFailOnError()) {
+                assertEquals("Server returned a different attribute than requested.", name, testName);
+            }
+            tmp = json.opt("value");
+            if (null == tmp) {
+                retval.setValue(null);
+            } else {
+                retval.setValue(tmp.toString());
+            }
+        } else if (isFailOnError()) {
+            fail("Data in response is not a JSON object: " + tmp);
+        }
+        return retval;
     }
 }

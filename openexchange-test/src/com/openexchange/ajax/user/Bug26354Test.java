@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,52 @@
  *
  */
 
-package com.openexchange.ajax.config;
+package com.openexchange.ajax.user;
 
 import static com.openexchange.java.Autoboxing.B;
-import java.util.Arrays;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.ajax.config.BetaWriter;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.user.actions.SetAttributeRequest;
+import com.openexchange.ajax.user.actions.SetAttributeResponse;
+import com.openexchange.tools.RandomString;
 
 /**
- * Verifies that bug 15354 does not appear again.
+ * {@link Bug26354Test}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Bug15354Test extends AbstractAJAXSession {
+public final class Bug26354Test extends AbstractAJAXSession {
 
-    private static final int ITERATIONS = 10000;
+    private static final String ATTRIBUTE_NAME = "testForBug26354";
 
-    private final BetaWriter[] writer = new BetaWriter[5];
+    private static final int ITERATIONS = 100;
+
+    private final BetaWriter[] writer = new BetaWriter[2];
     private final Thread[] thread = new Thread[writer.length];
 
     private AJAXClient client;
+    private int userId;
     private boolean origValue;
-    private Object[] origAliases;
 
-    public Bug15354Test(String name) {
+    public Bug26354Test(String name) {
         super(name);
     }
 
     @Override
+    @Before
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
+        userId = client.getValues().getUserId();
         origValue = client.execute(new GetRequest(Tree.Beta)).getBoolean();
-        origAliases = client.execute(new GetRequest(Tree.MailAddresses)).getArray();
-        assertNotNull("Aliases are null.", origAliases);
-        Arrays.sort(origAliases);
         for (int i = 0; i < writer.length; i++) {
             writer[i] = new BetaWriter(User.User1);
             thread[i] = new Thread(writer[i]);
@@ -96,6 +103,7 @@ public class Bug15354Test extends AbstractAJAXSession {
     }
 
     @Override
+    @After
     public void tearDown() throws Exception {
         for (int i = 0; i < writer.length; i++) {
             writer[i].stop();
@@ -108,40 +116,20 @@ public class Bug15354Test extends AbstractAJAXSession {
             assertNull("Expected no Throwable, but there is one: " + throwable, throwable);
         }
         client.execute(new SetRequest(Tree.Beta, B(origValue)));
+//        assertTrue("Deleting the test attribute failed.", client.execute(new SetAttributeRequest(userId, ATTRIBUTE_NAME, null, false)).isSuccess());
         super.tearDown();
     }
 
-    public void testAliases() throws Throwable {
+    @Test
+    public void testSetAttribute() throws Throwable {
         boolean stop = false;
         for (int i = 0; i < ITERATIONS && !stop; i++) {
-            Object[] testAliases = client.execute(new GetRequest(Tree.MailAddresses)).getArray();
-            if (null == testAliases) {
-                stop = true;
-            } else if (origAliases.length != testAliases.length) {
-                stop = true;
-            } else {
-                Arrays.sort(testAliases);
-                boolean match = true;
-                for (int j = 0; j < origAliases.length && match; j++) {
-                    if (!origAliases[j].equals(testAliases[j])) {
-                        match = false;
-                    }
-                }
-                stop = stop || !match;
-            }
+            String value = RandomString.generateChars(64);
+            SetAttributeResponse response = client.execute(new SetAttributeRequest(userId, ATTRIBUTE_NAME, value, false));
+            assertTrue("Setting the attribute was not successful.", response.isSuccess());
             for (int j = 0; j < writer.length; j++) {
                 stop = stop || null != writer[j].getThrowable();
             }
-        }
-        // Final test.
-        Object[] testAliases = client.execute(new GetRequest(Tree.MailAddresses)).getArray();
-        assertNotNull("Aliases are null.", origAliases);
-        assertNotNull("Aliases are null.", testAliases);
-        assertEquals("Number of aliases are not equal.", origAliases.length, testAliases.length);
-        Arrays.sort(origAliases);
-        Arrays.sort(testAliases);
-        for (int i = 0; i < origAliases.length; i++) {
-            assertEquals("Aliases are not the same.", origAliases[i], testAliases[i]);
         }
     }
 }

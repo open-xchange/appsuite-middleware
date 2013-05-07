@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,22 +47,47 @@
  *
  */
 
-package com.openexchange.ajax.user;
+package com.openexchange.ajax.user.actions;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.user.json.actions.GetAttributeAction;
 
 /**
- * Test suite for all user interface tests.
+ * {@link GetAttributeRequest}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({ GetTest.class, AllTest.class, ListTest.class, Bug13911Test.class, Bug17539Test.class, Bug26354Test.class, Bug26431Test.class })
-public final class UserAJAXSuite {
+public final class GetAttributeRequest extends AbstractUserRequest<GetAttributeResponse> {
 
-    private UserAJAXSuite() {
+    private final int userId;
+    private final String name;
+
+    public GetAttributeRequest(int userId, String name) {
         super();
+        this.userId = userId;
+        this.name = name;
+    }
+
+    @Override
+    public Method getMethod() {
+        return Method.GET;
+    }
+    @Override
+    public Parameter[] getParameters() {
+        return new Parameter[] {
+            new URLParameter(AJAXServlet.PARAMETER_ACTION, GetAttributeAction.ACTION),
+            new URLParameter(AJAXServlet.PARAMETER_ID, userId),
+            new URLParameter("name", name)
+        };
+    }
+
+    @Override
+    public GetAttributeParser getParser() {
+        return new GetAttributeParser(name, true);
+    }
+
+    @Override
+    public Object getBody() {
+        return null;
     }
 }

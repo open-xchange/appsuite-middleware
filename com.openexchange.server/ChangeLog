@@ -1,3 +1,7 @@
+* 2013-05-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26354: Using the same row locks for all methods modifying the user attributes to avoid deadlocks.
+
 * 2013-05-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 26382: Listen to file storage events, too
