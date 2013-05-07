@@ -317,10 +317,14 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     final String region = (String) event.getProperty("region");
                     if ("GlobalFolderCache".equals(region)) {
                         final int contextId = Tools.getUnsignedInteger((String) event.getProperty("group"));
-                        final Serializable[] keys = ((CacheKey) event.getProperty("key")).getKeys();
-                        final String id = keys[1].toString();
-                        final String treeId = keys[0].toString();
-                        removeFromUserCache(id, treeId, contextId);
+                        if (null == event.getProperty("key")) {
+                            FolderMapManagement.getInstance().dropFor(contextId);
+                        } else {
+                            final Serializable[] keys = ((CacheKey) event.getProperty("key")).getKeys();
+                            final String id = keys[1].toString();
+                            final String treeId = keys[0].toString();
+                            removeFromUserCache(id, treeId, contextId);
+                        }
                     } else if ("OXFolderCache".equals(region)) {
                         CacheKey cacheKey = (CacheKey) event.getProperty("key");
                         final String id = cacheKey.getKeys()[0].toString();
@@ -330,7 +334,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                 }
 
                 private void removeFromUserCache(final String id, final String treeId, final int contextId) {
-                    CacheFolderStorage.getInstance().removeSingleFromCache(id, treeId, -1, contextId, false, true, null);
+                    FolderMapManagement.getInstance().dropFor(id, treeId, -1, contextId);
                 }
             };
             final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);

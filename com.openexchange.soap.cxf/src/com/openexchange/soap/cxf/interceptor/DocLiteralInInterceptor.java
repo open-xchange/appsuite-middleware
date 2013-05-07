@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,6 +52,7 @@ import org.apache.cxf.staxutils.StaxUtils;
 import org.apache.ws.commons.schema.XmlSchemaElement;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.CommonsLoggingLogger;
+import com.openexchange.log.Log;
 
 /**
  * {@link DocLiteralInInterceptor} - A rewrite of {@code org.apache.cxf.interceptor.DocLiteralInInterceptor} class for less strict parsing
@@ -134,9 +136,14 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
                                 if (linkedException != null && linkedException.getClass().getName().indexOf("SAXParseException") >= 0) {
                                     {
                                         final StringAllocator sb = new StringAllocator(fault.getMessage());
-                                        sb.append('\n');
-                                        appendStackTrace(fault.getStackTrace(), sb);
-                                        LOG.severe(sb.toString());
+                                        if (Log.appendTraceToMessage()) {
+                                            final String lineSeparator = System.getProperty("line.separator");
+                                            sb.append(lineSeparator);
+                                            appendStackTrace(fault.getStackTrace(), sb, lineSeparator);
+                                            LOG.severe(sb.toString());
+                                        } else {
+                                            LOG.log(Level.SEVERE, sb.toString(), fault);
+                                        }
                                     }
                                     final String[] info = extractUnexpectedElement(linkedException.getMessage());
                                     if (null != info) {
@@ -373,11 +380,10 @@ public class DocLiteralInInterceptor extends AbstractInDatabindingInterceptor {
         }
     }
 
-    private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb) {
+    private static void appendStackTrace(final StackTraceElement[] trace, final com.openexchange.java.StringAllocator sb, final String lineSeparator) {
         if (null == trace) {
             return;
         }
-        final String lineSeparator = System.getProperty("line.separator");
         for (final StackTraceElement ste : trace) {
             final String className = ste.getClassName();
             if (null != className) {

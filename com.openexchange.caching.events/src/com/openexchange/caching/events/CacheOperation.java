@@ -49,10 +49,9 @@
 
 package com.openexchange.caching.events;
 
-
 /**
  * {@link CacheOperation}
- *
+ * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public enum CacheOperation {
@@ -60,11 +59,43 @@ public enum CacheOperation {
     /**
      * Invalidation of a cache entry, due to update or removal
      */
-    INVALIDATE,
+    INVALIDATE("invalidate"),
 
     /**
      * Invalidation of a cache group
      */
-    INVALIDATE_GROUP
-    ;
+    INVALIDATE_GROUP("invalidate_group");
+
+    private final String id;
+
+    private CacheOperation(final String id) {
+        this.id = id;
+    }
+
+    /**
+     * Gets the identifier
+     * 
+     * @return The identifier
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Gets the cache operation for given identifier.
+     * 
+     * @param id The identifier
+     * @return The cache operation or <code>null</code>
+     */
+    public static CacheOperation cacheOperationFor(final String id) {
+        if (null == id) {
+            return null;
+        }
+        for (final CacheOperation cacheOperation : CacheOperation.values()) {
+            if (id.equals(cacheOperation.getId())) {
+                return cacheOperation;
+            }
+        }
+        return null;
+    }
 }

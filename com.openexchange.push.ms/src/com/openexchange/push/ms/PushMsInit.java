@@ -49,7 +49,7 @@
 
 package com.openexchange.push.ms;
 
-import java.util.concurrent.DelayQueue;
+import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.ms.MessageListener;
@@ -64,9 +64,9 @@ import com.openexchange.ms.Topic;
  */
 public class PushMsInit {
 
-    private volatile Topic<PushMsObject> publisher;
+    private volatile Topic<Map<String, Object>> publisher;
 
-    private volatile MessageListener<PushMsObject> subscriber;
+    private volatile MessageListener<Map<String, Object>> subscriber;
 
     private volatile DelayPushQueue delayPushQueue;
 
@@ -82,7 +82,7 @@ public class PushMsInit {
      * 
      * @return The topic
      */
-    public Topic<PushMsObject> getPublisher() {
+    public Topic<Map<String, Object>> getPublisher() {
         return publisher;
     }
 
@@ -91,7 +91,7 @@ public class PushMsInit {
      * 
      * @return The message listener
      */
-    public MessageListener<PushMsObject> getSubscriber() {
+    public MessageListener<Map<String, Object>> getSubscriber() {
         return subscriber;
     }
 
@@ -110,7 +110,7 @@ public class PushMsInit {
      * @throws OXException If initialization fails
      */
     public void init() throws OXException {
-        Topic<PushMsObject> publisher = this.publisher;
+        Topic<Map<String, Object>> publisher = this.publisher;
         if (null == publisher) {
             synchronized (this) {
                 publisher = this.publisher;
@@ -151,12 +151,12 @@ public class PushMsInit {
      * Shuts-down the messaging-based push bundle.
      */
     public void close() {
-        Topic<PushMsObject> publisher = this.publisher;
+        Topic<Map<String, Object>> publisher = this.publisher;
         if (null != publisher) {
             synchronized (this) {
                 publisher = this.publisher;
                 if (null != publisher) {
-                    final MessageListener<PushMsObject> listener = subscriber;
+                    final MessageListener<Map<String, Object>> listener = subscriber;
                     if (null != listener) {
                         publisher.removeMessageListener(subscriber);
                         subscriber = null;

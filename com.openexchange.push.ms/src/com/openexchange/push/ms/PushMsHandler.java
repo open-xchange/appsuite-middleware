@@ -80,16 +80,16 @@ public class PushMsHandler implements EventHandler {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushMsHandler.class));
     
-    private DelayPushQueue delayPushQueue;
+    private final DelayPushQueue delayPushQueue;
     
-    private final Topic<PushMsObject> publisher;
+    private final Topic<Map<String, Object>> publisher;
     
     /**
      * Initializes a new {@link PushMsHandler}.
      * @param publisher
      * @param delayPushQueue the delayQueue that is used for pushin PIM objects except E-Mails
      */
-    public PushMsHandler(final Topic<PushMsObject> publisher, DelayPushQueue delayPushQueue) {
+    public PushMsHandler(final Topic<Map<String, Object>> publisher, DelayPushQueue delayPushQueue) {
         super();
         this.publisher = publisher;
         this.delayPushQueue = delayPushQueue;
@@ -167,7 +167,7 @@ public class PushMsHandler implements EventHandler {
             return;
         }
         try {
-            publisher.publish(new PushMsObject(folderId, module, ctx.getContextId(), users, false, timestamp, e.getTopic()));
+            publisher.publish(new PushMsObject(folderId, module, ctx.getContextId(), users, false, timestamp, e.getTopic()).writePojo());
         } catch (final RuntimeException ex) {
             LOG.error(ex.getMessage(), ex);
         }

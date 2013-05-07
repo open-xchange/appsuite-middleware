@@ -71,22 +71,25 @@ import com.openexchange.threadpool.behavior.AbortBehavior;
  */
 public final class LogServiceImpl implements LogService {
 
-    private static final int CAPACITY = 1048576;
+    /**
+     * The default queue capacity.
+     */
+    private static final int DEFAULT_CAPACITY = 8192;
 
     private final BlockingQueue<Loggable> queue;
-
     private final Future<Object> future;
-
     private final LoggerTask loggerTask;
+    private final boolean enabled;
 
     /**
      * Initializes a new {@link LogServiceImpl}.
      */
-    public LogServiceImpl(final ThreadPoolService threadPool) {
+    public LogServiceImpl(final ThreadPoolService threadPool, final int queueCapacity, final int maxMessageLength) {
         super();
-        queue = new LinkedBlockingQueue<Loggable>(CAPACITY);
-        loggerTask = new LoggerTask(queue);
+        queue = new LinkedBlockingQueue<Loggable>(queueCapacity > 0 ? queueCapacity : DEFAULT_CAPACITY);
+        loggerTask = new LoggerTask(queue, maxMessageLength);
         future = threadPool.submit(loggerTask, AbortBehavior.getInstance());
+        enabled = LogProperties.isEnabled();
     }
 
     /**

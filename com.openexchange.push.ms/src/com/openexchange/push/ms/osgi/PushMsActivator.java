@@ -49,7 +49,6 @@
 
 package com.openexchange.push.ms.osgi;
 
-import java.io.PushbackInputStream;
 import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;

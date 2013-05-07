@@ -61,6 +61,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.threadpool.internal.CustomThreadFactory;
@@ -112,9 +113,17 @@ public final class ThreadPools {
         if (t instanceof InterruptorAware) {
             final StackTraceElement[] interruptorStack = ((InterruptorAware) t).getInterruptorStack();
             if (null != interruptorStack) {
-                final StringBuilder sb = new StringBuilder(256).append("Thread interrupted unexpectedly at:\n");
-                appendStackTrace(interruptorStack, sb);
-                LOG.error(sb.toString());
+                final StringBuilder sb = new StringBuilder(256).append("Thread interrupted unexpectedly at:");
+                if (Log.appendTraceToMessage()) {
+                    final String lineSeparator = System.getProperty("line.separator");
+                    sb.append(lineSeparator);
+                    appendStackTrace(interruptorStack, sb, lineSeparator);
+                    LOG.error(sb.toString());
+                } else {
+                    final Throwable th = new Throwable();
+                    th.setStackTrace(interruptorStack);
+                    LOG.error(sb.toString(), th);
+                }
             }
         }
     }
@@ -125,12 +134,11 @@ public final class ThreadPools {
      * @param trace The stack trace
      * @param sb The string builder to write to
      */
-    public static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+    public static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb, final String lineSeparator) {
         if (null == trace) {
             sb.append("<missing stack trace>\n");
             return;
         }
-        final String lineSeparator = System.getProperty("line.separator");
         for (final StackTraceElement ste : trace) {
             final String className = ste.getClassName();
             if (null != className) {
@@ -160,8 +168,8 @@ public final class ThreadPools {
      *
      * @param sb The string builder to write to
      */
-    public static void appendCurrentStackTrace(final StringBuilder sb) {
-        appendStackTrace(new Throwable().getStackTrace(), sb);
+    public static void appendCurrentStackTrace(final StringBuilder sb, final String lineSeparator) {
+        appendStackTrace(new Throwable().getStackTrace(), sb, lineSeparator);
     }
 
     public interface ExpectedExceptionFactory<E extends Exception> {

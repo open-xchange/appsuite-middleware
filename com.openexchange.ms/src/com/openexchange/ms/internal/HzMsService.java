@@ -49,16 +49,24 @@
 
 package com.openexchange.ms.internal;
 
+import java.net.InetSocketAddress;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import com.hazelcast.core.DistributedTask;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.ms.Member;
+import com.openexchange.ms.Message;
+import com.openexchange.ms.MessageInbox;
 import com.openexchange.ms.MsService;
 import com.openexchange.ms.Queue;
 import com.openexchange.ms.Topic;
 
 /**
  * {@link HzMsService}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HzMsService implements MsService {
@@ -66,15 +74,52 @@ public final class HzMsService implements MsService {
     private final HazelcastInstance hz;
     private final ConcurrentMap<String, Queue<?>> queues;
     private final ConcurrentMap<String, Topic<?>> topics;
+    private final MessageInboxImpl messageInbox;
 
     /**
      * Initializes a new {@link HzMsService}.
      */
     public HzMsService(final HazelcastInstance hz) {
         super();
+        messageInbox = MessageInboxImpl.getInstance();
         this.hz = hz;
         queues = new NonBlockingHashMap<String, Queue<?>>(8);
         topics = new NonBlockingHashMap<String, Topic<?>>(16);
+    }
+
+    @Override
+    public Set<Member> getMembers() {
+        final Set<com.hazelcast.core.Member> hzMembers = hz.getCluster().getMembers();
+        final Set<Member> set = new HashSet<Member>(hzMembers.size());
+        for (final com.hazelcast.core.Member hzMember : hzMembers) {
+            set.add(new HzMember(hzMember));
+        }
+        return set;
+    }
+
+    @Override
+    public MessageInbox getMessageInbox() {
+        return messageInbox;
+    }
+
+    @Override
+    public void directMessage(final Message<?> message, final Member member) {
+        com.hazelcast.core.Member hzMember = null;
+        // Look-up by UUID
+        {
+            final String uuid = member.getUuid();
+            for (final com.hazelcast.core.Member cur : hz.getCluster().getMembers()) {
+                if (uuid.equals(cur.getUuid())) {
+                    hzMember = cur;
+                    break;
+                }
+            }
+        }
+        if (null == hzMember) {
+            // No such member
+            return;
+        }
+        hz.getExecutorService().submit(new DistributedTask<Void>(new MessageAppender(message), hzMember));
     }
 
     @SuppressWarnings("unchecked")
@@ -103,6 +148,44 @@ public final class HzMsService implements MsService {
             }
         }
         return topic;
+    }
+
+    // ---------------------------------------------------------------------------------------- //
+
+    private static final class MessageAppender implements Callable<Void> {
+
+        private final Message<?> message;
+
+        MessageAppender(final Message<?> message) {
+            super();
+            this.message = message;
+        }
+
+        @Override
+        public Void call() throws Exception {
+            MessageInboxImpl.getInstance().offer(message);
+            return null;
+        }
+    }
+
+    private static final class HzMember implements Member {
+
+        private final com.hazelcast.core.Member hzMember;
+
+        HzMember(final com.hazelcast.core.Member hzMember) {
+            super();
+            this.hzMember = hzMember;
+        }
+
+        @Override
+        public String getUuid() {
+            return hzMember.getUuid();
+        }
+
+        @Override
+        public InetSocketAddress getInetSocketAddress() {
+            return hzMember.getInetSocketAddress();
+        }
     }
 
 }
