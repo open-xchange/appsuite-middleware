@@ -1,3 +1,9 @@
+open-xchange-grizzly (7.2.0-6) UNRELEASED; urgency=low
+
+  * Build for patch 2013-04-23
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Fri, 03 May 2013 09:53:54 +0200
+
 open-xchange-grizzly (7.2.0-5) UNRELEASED; urgency=low
 
   * Build for patch 2013-04-12

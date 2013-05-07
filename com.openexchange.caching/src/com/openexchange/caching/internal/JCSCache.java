@@ -53,6 +53,7 @@ import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -65,6 +66,7 @@ import org.apache.jcs.engine.behavior.ICacheElement;
 import org.apache.jcs.engine.control.CompositeCache;
 import org.apache.jcs.engine.control.group.GroupAttrName;
 import org.apache.jcs.engine.control.group.GroupId;
+import org.apache.jcs.engine.memory.MemoryCache;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheExceptionCode;
@@ -89,13 +91,32 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(JCSCache.class));
 
+    private static volatile Field cacheControlField;
+    private static Field cacheControlField() {
+        Field field = cacheControlField;
+        if (null == field) {
+            synchronized (JCSCache.class) {
+                field = cacheControlField;
+                if (null == field) {
+                    try {
+                        field = CacheAccess.class.getDeclaredField("cacheControl");
+                        field.setAccessible(true);
+                        cacheControlField = field;
+                    } catch (final Exception e) {
+                        return null;
+                    }
+                }
+            }
+        }
+        return field;
+    }
+
+    // -------------------------------------------------------------------------------------------------------- //
+
     private final JCS cache;
-
     private final CompositeCache cacheControl;
-
     private volatile Boolean localOnly;
-
-    private final Set<String> groupNames;
+    private final MemoryCache memCache;
 
     /**
      * Initializes a new {@link JCSCache}
@@ -106,14 +127,12 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
         // Init CompositeCache reference
         CompositeCache tmp;
         try {
-            final Field cacheControlField = CacheAccess.class.getDeclaredField("cacheControl");
-            cacheControlField.setAccessible(true);
-            tmp = (CompositeCache) cacheControlField.get(cache);
+            tmp = (CompositeCache) cacheControlField().get(cache);
         } catch (final Exception e) {
             tmp = null;
         }
         cacheControl = tmp;
-        groupNames = new HashSet<String>();
+        memCache = null == tmp ? null : tmp.getMemoryCache();
     }
 
     @Override
@@ -180,11 +199,22 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     @Override
     public Collection<Serializable> values() {
-        final Object[] keys = cacheControl.getMemoryCache().getKeyArray();
-        final List<Serializable> list = new ArrayList<Serializable>(keys.length);
-        for (final Object key : keys) {
-            list.add(cacheControl.get((Serializable) key).getVal());
+        final MemoryCache memCache = this.memCache;
+        if (null == memCache) {
+            return Collections.emptySet();
         }
+
+        final Object[] keys = memCache.getKeyArray();
+        if (null == keys || 0 >= keys.length) {
+            return Collections.emptySet();
+        }
+
+        final int length = keys.length;
+        final List<Serializable> list = new ArrayList<Serializable>(length);
+        for (int i = 0; i < length; i++) {
+            list.add(cacheControl.get((Serializable) keys[i]).getVal());
+        }
+
         return list;
     }
 
@@ -263,7 +293,6 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public void putInGroup(final Serializable key, final String groupName, final Serializable value) throws OXException {
         try {
-            groupNames.add(groupName);
             cache.putInGroup(key, groupName, value);
         } catch (final org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
@@ -281,7 +310,6 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
     @Override
     public void putInGroup(final Serializable key, final String groupName, final Object value, final ElementAttributes attr) throws OXException {
         try {
-            groupNames.add(groupName);
             cache.putInGroup(key, groupName, value, new JCSElementAttributesDelegator(attr));
         } catch (final org.apache.jcs.access.exception.CacheException e) {
             throw CacheExceptionCode.FAILED_PUT.create(e, e.getMessage());
@@ -338,17 +366,11 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     @Override
     public void removeFromGroup(final Serializable key, final String group) {
-        if (groupNames.contains(group)) {
-            groupNames.remove(group);
-        }
         cache.remove(key, group);
     }
 
     @Override
     public void localRemoveFromGroup(final Serializable key, final String group) {
-        if (groupNames.contains(group)) {
-            groupNames.remove(group);
-        }
         final GroupAttrName groupAttrName = getGroupAttrName(group, key);
         this.cacheControl.localRemove(groupAttrName);
     }
@@ -388,17 +410,39 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     @Override
     public Set<String> getGroupNames() {
-        return groupNames;
+        final MemoryCache memCache = this.memCache;
+        if (null == memCache) {
+            return Collections.emptySet();
+        }
+        final Object[] keyArray = memCache.getKeyArray();
+        if (null == keyArray || 0 >= keyArray.length) {
+            return Collections.emptySet();
+        }
+        final Set<String> ret = new HashSet<String>(keyArray.length);
+        for (final Object key : keyArray) {
+            if (key instanceof GroupAttrName) {
+                ret.add(((GroupAttrName) key).groupId.groupName);
+            }
+        }
+        return ret;
     }
 
     @Override
     public Set<?> getAllKeys() throws OXException {
-        Set<Object> set = new HashSet<Object>();
+        final MemoryCache memCache = this.memCache;
+        if (null == memCache) {
+            return Collections.emptySet();
+        }
 
-        Object[] keys = cacheControl.getMemoryCache().getKeyArray();
-        int i = 0;
-        while (i < keys.length) {
-            set.add(keys[i++]);
+        Object[] keys = memCache.getKeyArray();
+        if (null == keys || 0 >= keys.length) {
+            return Collections.emptySet();
+        }
+
+        final int length = keys.length;
+        Set<Object> set = new HashSet<Object>(length);
+        for (int i = 0; i < length; i++) {
+            set.add(keys[i]);
         }
 
         return set;
@@ -406,19 +450,33 @@ public final class JCSCache implements Cache, SupportsLocalOperations {
 
     @Override
     public Set<?> getKeysInRange(int start, int end) throws OXException {
-        if (start < 0 || end < 0 || start <= end) {
-            Set<Object> set = new HashSet<Object>();
-
-            Object[] keys = cacheControl.getMemoryCache().getKeyArray();
-            int i = start;
-            while (i < end) {
-                set.add(keys[i++]);
-            }
-
-            return set;
+        if (start < 0) {
+            throw new OXException(666, "start = " + start);
+        }
+        if (end < 0) {
+            throw new OXException(666, "end = " + end);
+        }
+        if (start > end) {
+            throw new OXException(666, "start(" + start + ") > end(" + end + ")");
         }
 
-        throw new OXException(666, "Illegal start,end range (" + start + ", " + end + ")");
+        final MemoryCache memCache = this.memCache;
+        if (null == memCache) {
+            return Collections.emptySet();
+        }
+
+        Object[] keys = memCache.getKeyArray();
+        if (null == keys || 0 >= keys.length) {
+            return Collections.emptySet();
+        }
+
+        final int length = Math.min(end, keys.length);
+        Set<Object> set = new HashSet<Object>(length - start);
+        for (int i = start; i < length; i++) {
+            set.add(keys[i]);
+        }
+
+        return set;
     }
 
 }
