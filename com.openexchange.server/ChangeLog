@@ -1,6 +1,7 @@
 * 2013-05-07 - martin.herfurth@open-xchange.com
 
  - Fix for bug 26400: TimeZone Parameter for ITIP analyze call had impact on the object itself.
+ - Fix for bug 26418: Shared folder id in notification mail headers.
 
 * 2013-05-07 - marcus.klein@open-xchange.com
 
