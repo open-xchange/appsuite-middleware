@@ -775,6 +775,8 @@ public class MimeMessageFiller {
         }
     }
 
+    private static final Pattern BODY_START = Pattern.compile("<body.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
     /**
      * Fills the body of given instance of {@link MimeMessage} with the contents specified through given instance of
      * {@link ComposedMailMessage}.
@@ -1092,8 +1094,22 @@ public class MimeMessageFiller {
                              */
                             if (HTMLDetector.containsHTMLTags(content.getBytes(Charsets.ISO_8859_1))) {
                                 isHtml = true;
-                                final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
-                                text = wellFormedHTMLContent;
+                                if (BODY_START.matcher(content).find()) {
+                                    final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
+                                    text = wellFormedHTMLContent;
+                                } else {
+                                    final StringAllocator sb = new StringAllocator(content.length() + 512);
+                                    sb.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n");
+                                    sb.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">\n");
+                                    sb.append("<head>\n");
+                                    sb.append("    <meta content=\"text/html; charset=").append(charset).append("\" http-equiv=\"Content-Type\"/>\n");
+                                    sb.append("</head>\n");
+                                    sb.append("<body>\n");
+                                    sb.append(content);
+                                    sb.append("</body>\n");
+                                    sb.append("</html>");
+                                    text = sb.toString();
+                                }
                             } else {
                                 isHtml = false;
                                 text = content;

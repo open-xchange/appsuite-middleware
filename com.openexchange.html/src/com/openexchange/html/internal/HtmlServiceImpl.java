@@ -561,7 +561,7 @@ public final class HtmlServiceImpl implements HtmlService {
             prepared = prepareHrTag(prepared);
             prepared = insertBlockquoteMarker(prepared);
             prepared = insertSpaceMarker(prepared);
-            String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref).toString());
+            String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).setConvertNonBreakingSpaces(true).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref).toString());
             // Drop heading whitespaces
             text = PATTERN_HEADING_WS.matcher(text).replaceAll("$1");
             // ... but keep enforced ones
@@ -635,7 +635,7 @@ public final class HtmlServiceImpl implements HtmlService {
         return PATTERN_SPACE_MARKER.matcher(text).replaceAll(" ");
     }
 
-    private static final Pattern PATTERN_HTML_MANDATORY_SPACE = Pattern.compile("(?:&nbsp;|&#160;)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_HTML_MANDATORY_SPACE = Pattern.compile("&#160;");
 
     private static String insertSpaceMarker(final String html) {
         return PATTERN_HTML_MANDATORY_SPACE.matcher(html).replaceAll(SPACE_MARKER);
