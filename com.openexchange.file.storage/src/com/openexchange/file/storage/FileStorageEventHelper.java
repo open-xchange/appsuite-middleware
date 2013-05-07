@@ -108,15 +108,15 @@ public class FileStorageEventHelper {
     }
 
     public static boolean isCreateEvent(final Event event) {
-        return event.getTopic().equals(FileStorageEventConstants.CREATE_TOPIC);
+        return FileStorageEventConstants.CREATE_TOPIC.equals(event.getTopic());
     }
 
     public static boolean isUpdateEvent(final Event event) {
-        return event.getTopic().equals(FileStorageEventConstants.UPDATE_TOPIC);
+        return FileStorageEventConstants.UPDATE_TOPIC.equals(event.getTopic());
     }
 
     public static boolean isDeleteEvent(final Event event) {
-        return event.getTopic().equals(FileStorageEventConstants.DELETE_TOPIC);
+        return FileStorageEventConstants.DELETE_TOPIC.equals(event.getTopic());
     }
 
     public static boolean isInfostoreEvent(final Event event) {
