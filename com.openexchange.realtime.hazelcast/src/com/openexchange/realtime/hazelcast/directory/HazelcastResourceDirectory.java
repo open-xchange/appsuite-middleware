@@ -259,7 +259,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
     }
 
     @Override
-    protected Resource doSet(ID id, Resource resource) throws OXException {
+    protected Resource doSet(ID id, Resource resource, boolean overwrite) throws OXException {
         resource.setRoutingInfo(getLocalMember());
         resource.setTimestamp(new Date());
 
@@ -283,10 +283,18 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
                     resource.setPresence(previousResource.getPresence());
                     allResources.set(id, resource, 0, TimeUnit.SECONDS);
                 } else {
-                    previousResource = allResources.put(id, resource);
+                    if (overwrite) {
+                        previousResource = allResources.put(id, resource);                        
+                    } else {
+                        previousResource = allResources.putIfAbsent(id, resource);                        
+                    }
                 }
             } else { // a Resource with Presence data
-                previousResource = allResources.put(id, resource);
+                if (overwrite) {
+                    previousResource = allResources.put(id, resource);
+                } else {
+                    previousResource = allResources.putIfAbsent(id, resource);
+                }
             }
 
             if (LOG.isDebugEnabled()) {
@@ -339,9 +347,9 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
     private Resource conjureResource(ID id) throws OXException {
         if (conjure(id)) {
             Resource res = new DefaultResource();
-            set(id, res);
+            Resource meantime = setIfAbsent(id, res);
             id.on("dispose", CLEAN_UP);
-            return res;
+            return (meantime == null) ? res : meantime;
         } else {
             return null;
         }
