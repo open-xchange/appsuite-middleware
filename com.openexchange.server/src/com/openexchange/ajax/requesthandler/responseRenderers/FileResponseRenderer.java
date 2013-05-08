@@ -386,8 +386,8 @@ public class FileResponseRenderer implements ResponseRenderer {
              */
             try {
                 final ServletOutputStream outputStream = resp.getOutputStream();
-                final String sRange = req.getHeader("Range");
-                if (null != sRange && length > 0) {
+                final String sRange;
+                if (length > 0 && null != (sRange = req.getHeader("Range"))) {
                     // Taken from http://balusc.blogspot.co.uk/2009/02/fileservlet-supporting-resume-and.html
                     // Range header should match format "bytes=n-n,n-n,n-n...". If not, then return 416.
                     if (!PATTERN_BYTE_RANGES.matcher(sRange).matches()) {
