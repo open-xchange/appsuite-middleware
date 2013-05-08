@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AJAXRequestDataTools} - Tools for parsing AJAX requests.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJAXRequestDataTools {
@@ -83,7 +83,7 @@ public class AJAXRequestDataTools {
 
     /**
      * Gets the default instance
-     *
+     * 
      * @return The default instance
      */
     public static AJAXRequestDataTools getInstance() {
@@ -108,7 +108,7 @@ public class AJAXRequestDataTools {
 
     /**
      * Parses an appropriate {@link AJAXRequestData} instance from specified arguments.
-     *
+     * 
      * @param req The HTTP Servlet request
      * @param preferStream Whether to prefer request's stream instead of parsing its body data to an appropriate (JSON) object
      * @param isFileUpload Whether passed request is considered as a file upload
@@ -124,7 +124,7 @@ public class AJAXRequestDataTools {
 
     /**
      * Parses an appropriate {@link AJAXRequestData} instance from specified arguments.
-     *
+     * 
      * @param req The HTTP Servlet request
      * @param preferStream Whether to prefer request's stream instead of parsing its body data to an appropriate (JSON) object
      * @param isFileUpload Whether passed request is considered as a file upload
@@ -198,45 +198,63 @@ public class AJAXRequestDataTools {
             retval.setUploadStreamProvider(new HTTPRequestInputStreamProvider(req));
         } else {
             /*
-             * Guess an appropriate body object
+             * Guess an appropriate body object (if the request indicates a body object)
              */
-            UnsynchronizedPushbackReader reader = null;
-            try {
-                reader = new UnsynchronizedPushbackReader(AJAXServlet.getReaderFor(req));
-                final int read = reader.read();
-                if (read < 0) {
-                    retval.setData(null);
-                    String data = req.getParameter("data");
-                    if (data != null && data.length() > 0) {
-                        try {
-                            char c = data.charAt(0);
-                            if ('[' == c || '{' == c) {
-                                retval.setData(JSONObject.parse(new StringReader(data)));
-                            } else {
+            if (hasBody(req)) {
+                UnsynchronizedPushbackReader reader = null;
+                try {
+                    reader = new UnsynchronizedPushbackReader(AJAXServlet.getReaderFor(req));
+                    final int read = reader.read();
+                    if (read < 0) {
+                        retval.setData(null);
+                        String data = req.getParameter("data");
+                        if (data != null && data.length() > 0) {
+                            try {
+                                char c = data.charAt(0);
+                                if ('[' == c || '{' == c) {
+                                    retval.setData(JSONObject.parse(new StringReader(data)));
+                                } else {
+                                    retval.setData(data);
+                                }
+                            } catch (JSONException e) {
                                 retval.setData(data);
                             }
-                        } catch (JSONException e) {
-                            retval.setData(data);
-                        }
-                    }
-                } else {
-                    final char c = (char) read;
-                    reader.unread(c);
-                    if ('[' == c || '{' == c) {
-                        try {
-                            retval.setData(JSONObject.parse(reader));
-                        } catch (JSONException e) {
-                            retval.setData(AJAXServlet.readFrom(reader));
                         }
                     } else {
-                        retval.setData(AJAXServlet.readFrom(reader));
+                        final char c = (char) read;
+                        reader.unread(c);
+                        if ('[' == c || '{' == c) {
+                            try {
+                                retval.setData(JSONObject.parse(reader));
+                            } catch (JSONException e) {
+                                retval.setData(AJAXServlet.readFrom(reader));
+                            }
+                        } else {
+                            retval.setData(AJAXServlet.readFrom(reader));
+                        }
                     }
+                } finally {
+                    Streams.close(reader);
                 }
-            } finally {
-                Streams.close(reader);
             }
         }
         return retval;
+    }
+
+    /**
+     * Check if the incoming request has a body. From RFC 2616: An entity-body is only present when a message-body is present (section 7.2),
+     * the presence of a message-body is signaled by the inclusion of a Content-Length or Transfer-Encoding header (section 4.3)
+     * 
+     * @param httpServletRequest the incoming request
+     * @return true if the incoming request uses chunked Transfer-Encoding, false otherwise
+     */
+    private boolean hasBody(final HttpServletRequest httpServletRequest) {
+        final int contentLength = httpServletRequest.getContentLength();
+        String transferEncoding = httpServletRequest.getHeader("Transfer-Encoding");
+        if (contentLength > 0 || transferEncoding != null) {
+            return true;
+        }
+        return false;
     }
 
     private static boolean parseBoolParameter(final String name, final HttpServletRequest req) {
@@ -248,7 +266,7 @@ public class AJAXRequestDataTools {
      * <p>
      * <code>true</code> if given value is not <code>null</code> and equals ignore-case to one of the values "true", "yes", "y", "on", or
      * "1".
-     *
+     * 
      * @param name The parameter's name
      * @param requestData The request data to parse from
      * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
@@ -269,7 +287,7 @@ public class AJAXRequestDataTools {
      * <p>
      * <code>true</code> if given value is not <code>null</code> and equals ignore-case to one of the values "true", "yes", "y", "on", or
      * "1".
-     *
+     * 
      * @param parameter The parameter
      * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
      */
@@ -279,7 +297,7 @@ public class AJAXRequestDataTools {
 
     /**
      * Parses host name, secure and AJP route.
-     *
+     * 
      * @param request The AJAX request data
      * @param req The HTTP Servlet request
      * @param session The associated session
@@ -321,7 +339,7 @@ public class AJAXRequestDataTools {
 
     /**
      * Gets the module from specified HTTP request.
-     *
+     * 
      * @param prefix The dispatcher's default prefix to strip from request's {@link HttpServletRequest#getPathInfo() path info}.
      * @param req The HTTP request
      * @return The determined module
@@ -333,7 +351,7 @@ public class AJAXRequestDataTools {
             pathInfo = pathInfo.substring(0, lastIndex);
         }
         String module = pathInfo.substring(prefix.length());
-        final int mlen = module.length()-1;
+        final int mlen = module.length() - 1;
         if ('/' == module.charAt(mlen)) {
             module = module.substring(0, mlen);
         }
@@ -342,7 +360,7 @@ public class AJAXRequestDataTools {
 
     /**
      * Gets the action from specified HTTP request.
-     *
+     * 
      * @param req The HTTP request
      * @return The determined action
      */
