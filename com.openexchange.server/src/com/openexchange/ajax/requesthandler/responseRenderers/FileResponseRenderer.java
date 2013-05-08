@@ -53,12 +53,14 @@ import static com.openexchange.java.Streams.close;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 import javax.servlet.ServletOutputStream;
@@ -74,6 +76,7 @@ import com.drew.metadata.jpeg.JpegDirectory;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.helper.HTMLDetector;
@@ -162,6 +165,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             return;
         }
         final String fileName = file.getName();
+        final List<Closeable> closeables = new LinkedList<Closeable>();
         InputStream documentData = null;
         try {
             final String fileContentType = file.getContentType();
@@ -259,11 +263,14 @@ public class FileResponseRenderer implements ResponseRenderer {
                     } else {
                         if ((null != contentTypeByFileName) && !equalPrimaryTypes(fileContentType, contentTypeByFileName)) {
                             // Differing Content-Types sources
-                            final ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(documentData);
-                            documentData = Streams.asInputStream(baos);
-                            cts = tika.detect(Streams.asInputStream(baos));
+                            final ThresholdFileHolder temp = new ThresholdFileHolder();
+                            closeables.add(temp);
+                            temp.write(documentData);
+                            documentData = temp.getStream();
+                            cts = detectMimeType(temp.getStream());
                             if ("text/plain".equals(cts)) {
-                                cts = HTMLDetector.containsHTMLTags(baos.toByteArray()) ? "text/html" : cts;
+                                final byte[] bytes = Streams.stream2bytes(temp.getStream());
+                                cts = HTMLDetector.containsHTMLTags(bytes) ? "text/html" : cts;
                             }
                         } else {
                             cts = fileContentType;
@@ -327,18 +334,21 @@ public class FileResponseRenderer implements ResponseRenderer {
                     resp.setContentType(preferredContentType);
                     contentType = preferredContentType;
                 } else {
-                    if (equalPrimaryTypes(preferredContentType, contentType)) {
+                    if (SAVE_AS_TYPE.equals(preferredContentType) || equalPrimaryTypes(preferredContentType, contentType)) {
                         // Set if sanitize-able
                         if (!trySetSanitizedContentType(contentType, preferredContentType, resp)) {
                             contentType = preferredContentType;
                         }
                     } else {
                         // Specified Content-Type does NOT match file's real MIME type
-                        final ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(documentData);
-                        documentData = Streams.asInputStream(baos);
-                        preferredContentType = tika.detect(Streams.asInputStream(baos));
+                        final ThresholdFileHolder temp = new ThresholdFileHolder();
+                        closeables.add(temp);
+                        temp.write(documentData);
+                        documentData = temp.getStream();
+                        preferredContentType = detectMimeType(temp.getStream());
                         if ("text/plain".equals(preferredContentType)) {
-                            preferredContentType = HTMLDetector.containsHTMLTags(baos.toByteArray()) ? "text/html" : preferredContentType;
+                            final byte[] bytes = Streams.stream2bytes(temp.getStream());
+                            preferredContentType = HTMLDetector.containsHTMLTags(bytes) ? "text/html" : preferredContentType;
                         }
                         // One more time...
                         if (equalPrimaryTypes(preferredContentType, contentType)) {
@@ -519,8 +529,8 @@ public class FileResponseRenderer implements ResponseRenderer {
         } catch (final Exception e) {
             LOG.error("Exception while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
         } finally {
-            close(file);
-            close(documentData);
+            close(file, documentData);
+            close(closeables);
         }
     }
 
@@ -755,6 +765,17 @@ public class FileResponseRenderer implements ResponseRenderer {
             return false;
         }
         return toLowerCase(getPrimaryType(contentType1)).startsWith(toLowerCase(getPrimaryType(contentType2)));
+    }
+
+    private String detectMimeType(final InputStream in) throws IOException {
+        if (null == in) {
+            return null;
+        }
+        try {
+            return tika.detect(in);
+        } finally {
+            close(in);
+        }
     }
 
     /**
