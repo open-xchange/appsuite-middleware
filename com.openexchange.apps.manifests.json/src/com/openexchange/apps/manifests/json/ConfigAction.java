@@ -53,11 +53,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -88,9 +86,7 @@ public class ConfigAction implements AJAXActionService {
 
 	private final ServiceLookup services;
 	private final ServerConfigServicesLookup registry;
-
-	private ComputedServerConfigValueService[] computedValues = new ComputedServerConfigValueService[0];
-
+	private final ComputedServerConfigValueService[] computedValues;
 
 	public ConfigAction(ServiceLookup services, JSONArray manifests, ServerConfigServicesLookup registry) {
 		super();
@@ -179,17 +175,15 @@ public class ConfigAction implements AJAXActionService {
 		}
 
 		return false;
-	}
+    }
 
-
-	private void addComputedValues(JSONObject serverconfig,
-			AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-		for (ComputedServerConfigValueService computed : computedValues) {
-			computed.addValue(serverconfig, requestData, session);
-		}
-		for (ComputedServerConfigValueService computed : registry.getComputed()) {
-			computed.addValue(serverconfig, requestData, session);
-		}
-	}
+    private void addComputedValues(JSONObject serverconfig, AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
+        for (ComputedServerConfigValueService computed : computedValues) {
+            computed.addValue(serverconfig, requestData, session);
+        }
+        for (ComputedServerConfigValueService computed : registry.getComputed()) {
+            computed.addValue(serverconfig, requestData, session);
+        }
+    }
 
 }
