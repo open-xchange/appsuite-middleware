@@ -52,6 +52,7 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 import static com.openexchange.java.Streams.close;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -64,6 +65,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
+import org.apache.tika.Tika;
+import org.apache.tika.config.TikaConfig;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.MetadataException;
@@ -73,10 +76,12 @@ import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
+import com.openexchange.ajax.helper.HTMLDetector;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
@@ -113,11 +118,14 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private static final Pattern PATTERN_BYTE_RANGES = Pattern.compile("^bytes=\\d*-\\d*(,\\d*-\\d*)*$");
 
+    private final Tika tika;
+
     /**
      * Initializes a new {@link FileResponseRenderer}.
      */
     public FileResponseRenderer() {
         super();
+        tika = new Tika(TikaConfig.getDefaultConfig());
     }
 
     @Override
@@ -225,9 +233,41 @@ public class FileResponseRenderer implements ResponseRenderer {
                 resp.setHeader("Content-Disposition", sb.toString());
                 resp.setContentType(null == contentType ? SAVE_AS_TYPE : contentType);
             } else {
-                final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
-                final String cts = null == fileContentType ? contentTypeByFileName : fileContentType;
-                final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileName, cts, contentDisposition, userAgent);
+                String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
+                if (SAVE_AS_TYPE.equals(contentTypeByFileName)) {
+                    // Not known
+                    contentTypeByFileName = null;
+                }
+                // Generate checked download
+                final CheckedDownload checkedDownload;
+                {
+                    String cts;
+                    if (null == fileContentType || SAVE_AS_TYPE.equals(fileContentType)) {
+                        if (null == contentTypeByFileName) {
+                            final ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(documentData);
+                            documentData = Streams.asInputStream(baos);
+                            cts = tika.detect(Streams.asInputStream(baos));
+                            if ("text/plain".equals(cts)) {
+                                cts = HTMLDetector.containsHTMLTags(baos.toByteArray()) ? "text/html" : cts;
+                            }
+                        } else {
+                            cts = contentTypeByFileName;
+                        }
+                    } else {
+                        if ((null != contentTypeByFileName) && !toLowerCase(fileContentType).startsWith(toLowerCase(contentTypeByFileName))) {
+                            // Differing Content-Types sources
+                            final ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(documentData);
+                            documentData = Streams.asInputStream(baos);
+                            cts = tika.detect(Streams.asInputStream(baos));
+                            if ("text/plain".equals(cts)) {
+                                cts = HTMLDetector.containsHTMLTags(baos.toByteArray()) ? "text/html" : cts;
+                            }
+                        } else {
+                            cts = fileContentType;
+                        }
+                    }
+                    checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileName, cts, contentDisposition, userAgent);
+                }
                 if (delivery == null || !delivery.equalsIgnoreCase(VIEW)) {
                     if (isEmpty(contentDisposition)) {
                         resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
@@ -262,37 +302,40 @@ public class FileResponseRenderer implements ResponseRenderer {
                  *   - it's primary type is not equal to contentTypeByFileName's primary type; e.g. both start with "text/"
                  */
                 String preferredContentType = checkedDownload.getContentType();
-                if (!SAVE_AS_TYPE.equals(contentTypeByFileName)) {
+                if (null != contentTypeByFileName) {
                     if (SAVE_AS_TYPE.equals(preferredContentType)) {
                         preferredContentType = contentTypeByFileName;
                     } else {
-                        final String primaryType1 = getPrimaryType(preferredContentType);
-                        final String primaryType2 = getPrimaryType(contentTypeByFileName);
-                        if (!toLowerCase(primaryType1).startsWith(toLowerCase(primaryType2))) {
+                        if (equalPrimaryTypes(preferredContentType, contentTypeByFileName)) {
                             preferredContentType = contentTypeByFileName;
                         }
                     }
                 }
-                if (contentType == null) {
+                if (contentType == null || SAVE_AS_TYPE.equals(contentType)) {
                     resp.setContentType(preferredContentType);
                     contentType = preferredContentType;
                 } else {
-                    if (SAVE_AS_TYPE.equals(preferredContentType)) {
+                    if (equalPrimaryTypes(preferredContentType, contentType)) {
                         // Set if sanitize-able
                         if (!trySetSanitizedContentType(contentType, preferredContentType, resp)) {
                             contentType = preferredContentType;
                         }
                     } else {
-                        final String primaryType1 = getPrimaryType(preferredContentType);
-                        final String primaryType2 = getPrimaryType(contentType);
-                        if (toLowerCase(primaryType1).startsWith(toLowerCase(primaryType2))) {
+                        // Specified Content-Type does NOT match file's real MIME type
+                        final ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(documentData);
+                        documentData = Streams.asInputStream(baos);
+                        preferredContentType = tika.detect(Streams.asInputStream(baos));
+                        if ("text/plain".equals(preferredContentType)) {
+                            preferredContentType = HTMLDetector.containsHTMLTags(baos.toByteArray()) ? "text/html" : preferredContentType;
+                        }
+                        // One more time...
+                        if (equalPrimaryTypes(preferredContentType, contentType)) {
                             // Set if sanitize-able
                             if (!trySetSanitizedContentType(contentType, preferredContentType, resp)) {
                                 contentType = preferredContentType;
                             }
                         } else {
-                            // Specified Content-Type does NOT match file's real MIME type
-                            // Therefore ignore it due to security reasons (see bug #25343)
+                            // Ignore it due to security reasons (see bug #25343)
                             final StringAllocator sb = new StringAllocator(128);
                             sb.append("Denied parameter \"").append(PARAMETER_CONTENT_TYPE);
                             sb.append("\" due to security constraints (requested \"");
@@ -694,6 +737,13 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
         final int pos = contentType.indexOf('/');
         return pos > 0 ? contentType.substring(0, pos) : contentType;
+    }
+
+    private boolean equalPrimaryTypes(final String contentType1, final String contentType2) {
+        if (null == contentType1 || null == contentType2) {
+            return false;
+        }
+        return toLowerCase(getPrimaryType(contentType1)).startsWith(toLowerCase(getPrimaryType(contentType2)));
     }
 
     /**
