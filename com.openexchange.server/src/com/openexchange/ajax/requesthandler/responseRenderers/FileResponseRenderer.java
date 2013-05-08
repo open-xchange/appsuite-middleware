@@ -58,6 +58,10 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.MetadataException;
+import com.drew.metadata.jpeg.JpegDirectory;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
@@ -153,6 +157,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Image not found.");
                 return;
             }
+            final long length = file.getLength(); // Scaling image could have changed the size
             documentData = null == file.getStream() ? null : new BufferedInputStream(file.getStream());
             if (null == documentData) {
                 // Quit with 404
@@ -250,7 +255,82 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
     }
 
-    private IFileHolder transformIfImage(AJAXRequestData request, IFileHolder file, String delivery) throws IOException, OXException {
+    /*
+     * check if transformation is needed
+     *
+     */
+    private boolean isTransformationNeeded(final AJAXRequestData request, final IFileHolder file, final String delivery)
+        throws OXException, IOException {
+
+        boolean transformationNeeded = !file.getContentType().equalsIgnoreCase("image/jpeg");
+        if(!transformationNeeded) {
+            transformationNeeded = request.isSet("cropWidth") || request.isSet("cropHeight");
+        }
+        if(!transformationNeeded && (DOWNLOAD.equalsIgnoreCase(delivery)==false)) {
+            if(request.isSet("rotate")) {
+                final Boolean rotate = request.getParameter("rotate", Boolean.class);
+                if(rotate!=null) {
+                    transformationNeeded = rotate.booleanValue();
+                }
+            }
+            // compress not needed to be checked, because we already have a jpeg
+        }
+        if(!transformationNeeded) {
+
+            if (request.isSet("width") || request.isSet("height")) {
+
+                final int maxWidth = request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0;
+                final int maxHeight = request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0;
+
+                // we will check for the size if our stream is repeatable or can be resetted,
+                // so we are able to retrieve the jpeg metadata without changing the stream.
+
+                final InputStream stream = file.getStream();
+                if (null == stream) {
+                    LOG.warn("(Possible) Image file misses stream data");
+                    return false;
+                }
+                BufferedInputStream inputStream = null;
+                if(file.repetitive()) {
+                    inputStream = new BufferedInputStream(stream);
+                } else if(stream.markSupported()&&file.getLength()>0&&file.getLength()<0x20000) {
+                    // mark supported, but only allowing files < 128kb
+                    inputStream = new BufferedInputStream(stream, (int)file.getLength());
+                }
+                if(inputStream==null) {
+                    transformationNeeded = true;
+                }
+                else {
+
+                    try {
+                        final com.drew.metadata.Metadata metadata = ImageMetadataReader.readMetadata(inputStream, false);
+                        if(metadata!=null) {
+                            int width = 0;
+                            int height = 0;
+                            final JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
+                            if (null != jpegDirectory) {
+                                width = jpegDirectory.getImageWidth();
+                                height = jpegDirectory.getImageHeight();
+                            }
+                            transformationNeeded = (maxWidth>0&&width>maxWidth)||(maxHeight>0&&height>maxHeight);
+                        }
+                    }
+                    catch (final ImageProcessingException e) {
+                        transformationNeeded = false;
+                    } catch (final MetadataException e) {
+                        transformationNeeded = false;
+                    }
+                    if(!file.repetitive()&&stream.markSupported()) {
+                        stream.reset();
+                    }
+                }
+            }
+        }
+        return transformationNeeded;
+    }
+
+
+    private IFileHolder transformIfImage(final AJAXRequestData request, final IFileHolder file, final String delivery) throws IOException, OXException {
         /*
          * check input
          */
@@ -258,6 +338,11 @@ public class FileResponseRenderer implements ResponseRenderer {
         if (null == scaler || false == isImage(file)) {
             return file;
         }
+
+        if(!isTransformationNeeded(request, file, delivery)) {
+            return file;
+        }
+
         /*
          * build transformations
          */
