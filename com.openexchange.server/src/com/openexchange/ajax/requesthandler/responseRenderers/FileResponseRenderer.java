@@ -271,6 +271,13 @@ public class FileResponseRenderer implements ResponseRenderer {
                     }
                     checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileName, cts, contentDisposition, userAgent);
                 }
+                /*
+                 * Set stream
+                 */
+                documentData = checkedDownload.getInputStream();
+                /*
+                 * Set headers...
+                 */
                 if (delivery == null || !delivery.equalsIgnoreCase(VIEW)) {
                     if (isEmpty(contentDisposition)) {
                         resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
@@ -351,7 +358,6 @@ public class FileResponseRenderer implements ResponseRenderer {
                         }
                     }
                 }
-                documentData = checkedDownload.getInputStream();
             }
             /*
              * Browsers don't like the Pragma header the way we usually set this. Especially if files are sent to the browser. So removing
