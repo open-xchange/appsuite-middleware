@@ -1,3 +1,9 @@
+open-xchange-munin-scripts (7.2.0-7) UNRELEASED; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 08 May 2013 14:37:42 +0200
+
 open-xchange-munin-scripts (7.2.0-6) UNRELEASED; urgency=low
 
   * Build for patch 2013-04-23
