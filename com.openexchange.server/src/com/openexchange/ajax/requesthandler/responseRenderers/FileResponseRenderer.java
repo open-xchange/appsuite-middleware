@@ -270,13 +270,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     contentType = preferredContentType;
                 } else {
                     if (SAVE_AS_TYPE.equals(preferredContentType)) {
-                        // We don't know better... At least try to sanitize specified value
-                        try {
-                            resp.setContentType(new ContentType(contentType).getBaseType());
-                        } catch (Exception e) {
-                            // Ignore
-                            resp.setContentType(contentType);
-                        }
+                        trySetSanitizedContentType(contentType, resp);
                     } else {
                         final String primaryType1 = getPrimaryType(preferredContentType);
                         final String primaryType2 = getPrimaryType(contentType);
