@@ -13,7 +13,6 @@ Import-Package: com.openexchange.osgi,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.w3c.dom
-Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/junit-4.6.jar
 Export-Package: com.openexchange.test.osgi,
