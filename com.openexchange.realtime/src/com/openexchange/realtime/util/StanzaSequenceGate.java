@@ -75,9 +75,9 @@ public abstract class StanzaSequenceGate {
     private static org.apache.commons.logging.Log LOG = Log.loggerFor(StanzaSequenceGate.class);
 
     /* Keep track of SequencePrincalpal(ID) to thresholds(sequence number of last seen stanza) */
-    private ConcurrentHashMap<ID, AtomicLong> sequenceNumbers = new ConcurrentHashMap<ID, AtomicLong>();
+    protected ConcurrentHashMap<ID, AtomicLong> sequenceNumbers = new ConcurrentHashMap<ID, AtomicLong>();
 
-    private ConcurrentHashMap<ID, List<Stanza>> inboxes = new ConcurrentHashMap<ID, List<Stanza>>();
+    protected ConcurrentHashMap<ID, List<Stanza>> inboxes = new ConcurrentHashMap<ID, List<Stanza>>();
 
     private String name;
     
@@ -143,8 +143,13 @@ public abstract class StanzaSequenceGate {
                     }
 
                 });
+
+                /*
+                 * There still might be some gaps in the list of accumulated stanzas.
+                 * Therefore the recursive calling of handle will assure that affected stanzas are cached again.
+                 */
                 for (Stanza s : stanzas) {
-                    s.trace("Passing gate " + name);
+                    s.trace("Handle preserved (" + name + ")");
                     handle(s, s.getTo());
                 }
 

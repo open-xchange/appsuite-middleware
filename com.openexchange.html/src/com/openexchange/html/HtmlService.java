@@ -182,6 +182,16 @@ public interface HtmlService {
     String htmlFormat(String plainText);
 
     /**
+     * Surrounds given HTML content with a valid HTML document provided that &lt;body&gt; tag is missing. Otherwise content is returned
+     * as-is.
+     *
+     * @param htmlContent The HTML content
+     * @param charset The charset parameter
+     * @return The HTML document or the content as-is
+     */
+    String documentizeContent(String htmlContent, String charset);
+
+    /**
      * Creates valid HTML from specified HTML content conform to W3C standards. Non-ascii-URLs will be replaced with puny-code-encoded URLs.
      *
      * @param htmlContent The HTML content

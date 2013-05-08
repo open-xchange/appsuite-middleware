@@ -58,7 +58,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.writer.ContactWriter;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
@@ -185,7 +184,12 @@ public final class ContactJSONDataHandler implements DataHandler {
 					{
 					    final byte[] image = contact.getImage1();
 					    if (null != image) {
-					        jsonContact.put(ContactFields.IMAGE1, Base64.encodeBase64String(image));
+					        jsonContact.put(ContactField.IMAGE1.getAjaxName(), Base64.encodeBase64String(image));
+					        String mimeType = contact.getImageContentType();
+					        if (null == mimeType) {
+                                mimeType = "image/jpeg";
+                            }
+					        jsonContact.put(ContactField.IMAGE1_CONTENT_TYPE.getAjaxName(), mimeType);
                         }
 					}
 					jsonArray.put(jsonContact);

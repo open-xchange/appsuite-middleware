@@ -72,8 +72,7 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.notify.hostname.HostData;
-import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationErrorMessage;
@@ -308,43 +307,39 @@ public class PublicationMultipleHandler implements MultipleHandler {
         final String target = request.optString("target");
         final Context context = session.getContext();
         final Publication publication = loadPublication(id, context, target);
-        return createResponse(publication, getURLPrefix(request, publication, (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA)));
+        return createResponse(publication, getURLPrefix(request, publication));
     }
 
-    private String getURLPrefix(final JSONObject request, final Publication publication, final HostData hostData) {
-        String hostname;
-        if (null == hostData) {
-            hostname = Hostname.getInstance().getHostname(publication);
-        } else {
-            hostname = hostData.getHost();
-        }
-        final String serverURL = request.optString("__serverURL");
+    private String getURLPrefix(final JSONObject request, final Publication publication) {
+        String hostname = Hostname.getInstance().getHostname(publication);
+        String serverURL = request.optString("__serverURL");
         String protocol = "https://";
-        if(hostname != null) {
-            if(serverURL == null || serverURL.startsWith("https")) {
+
+        if (hostname != null) {
+            if (serverURL == null || serverURL.startsWith("https")) {
                 protocol = "https://";
             } else {
                 protocol = "http://";
             }
-        } else if (serverURL != null ){
-            hostname = serverURL.substring(serverURL.indexOf("://")+3);
-            if(serverURL.startsWith("https")) {
+            serverURL = new StringAllocator(protocol).append(hostname).toString();
+        } else if (serverURL != null) {
+            hostname = serverURL.substring(serverURL.indexOf("://") + 3);
+            if (serverURL.startsWith("https")) {
                 protocol = "https://";
             } else {
                 protocol = "http://";
             }
         }
-
 
         final String otherDomain = config.getProperty(PROPERTY_USE_OTHER_DOMAIN);
         final String separateSubdomain = config.getProperty(PROPERTY_USE_OTHER_SUBDOMAIN);
 
-        if(otherDomain != null){
+        if (otherDomain != null) {
             return protocol + otherDomain;
         }
 
-        if(separateSubdomain != null){
-            return protocol + separateSubdomain + "." + hostname;
+        if (separateSubdomain != null) {
+            return new StringAllocator(protocol).append(separateSubdomain).append('.').append(hostname).toString();
         }
 
         return serverURL;

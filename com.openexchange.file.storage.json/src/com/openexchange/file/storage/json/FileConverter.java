@@ -67,7 +67,12 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class FileConverter implements ResultConverter {
 
-    private static final FileMetadataWriter writer = new FileMetadataWriter();
+    private final FileMetadataWriter writer;
+
+    public FileConverter() {
+        super();
+        writer = new FileMetadataWriter();
+    }
 
     @Override
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {

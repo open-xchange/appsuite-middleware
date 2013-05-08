@@ -1,9 +1,23 @@
+* 2013-05-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26464: Avoid buffer overflow through interpreting infinite locking as locked for 10 years
+
+* 2013-05-07 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 26400: TimeZone Parameter for ITIP analyze call had impact on the object itself.
+ - Fix for bug 26418: Shared folder id in notification mail headers.
+
+* 2013-05-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26354: Using the same row locks for all methods modifying the user attributes to avoid deadlocks.
+
 * 2013-05-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 26382: Listen to file storage events, too
  - Fix for bug 26346: Detect a canceled OAuth authentication process
  - Fix for bug 26265: Add more logging properties when trying to output a message
  - Preparation to fix bug 26392: Maintain contact's image data on convert request
+ - Fix for bug 25982: Accept context name/identifier as a valid tag name that applies only to associated context
 
 * 2013-05-06 - thorben.betten@open-xchange.com
 
@@ -193,7 +207,7 @@
 * 2013-04-12 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 25837: Added several enhancements to avoid flooding of the distributed hazelcast topic for cache events
- 
+
 * 2013-04-12 - marcus.klein@open-xchange.com
 
  - Fix for bug 25819: Changing the IMAP server, IMAP login and SMTP server is now possible for user objects.

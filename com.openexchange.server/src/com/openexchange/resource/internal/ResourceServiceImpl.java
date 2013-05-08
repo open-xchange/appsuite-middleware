@@ -80,9 +80,6 @@ public final class ResourceServiceImpl implements ResourceService {
         return instance;
     }
 
-    /**
-     * Initializes a new {@link ResourceServiceImpl}
-     */
     private ResourceServiceImpl() {
         super();
     }

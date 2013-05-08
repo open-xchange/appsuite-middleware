@@ -92,7 +92,7 @@ public final class InterfaceTests {
         tests.addTest(com.openexchange.ajax.task.TaskTestSuite.suite());
         tests.addTest(com.openexchange.ajax.publish.PublishTestSuite.suite());
         tests.addTest(com.openexchange.ajax.subscribe.SubscribeTestSuite.suite());
-        tests.addTest(com.openexchange.ajax.user.UserAJAXSuite.suite());
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.user.UserAJAXSuite.class));
         tests.addTest(com.openexchange.ajax.updater.UpdaterTestSuite.suite());
 
         tests.addTest(com.openexchange.dav.caldav.tests.CalDAVTestSuite.suite());

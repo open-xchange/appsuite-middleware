@@ -52,6 +52,10 @@ package com.openexchange.resource.internal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -59,10 +63,12 @@ import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.resource.Resource;
+import com.openexchange.resource.ResourceEventConstants;
 import com.openexchange.resource.ResourceExceptionCode;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.resource.storage.ResourceStorage.StorageType;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -124,6 +130,7 @@ public final class ResourceDelete {
         check();
         delete();
         propagate();
+        sentEvent();
     }
 
     /**
@@ -254,4 +261,15 @@ public final class ResourceDelete {
         storage.insertResource(ctx, con, resource, StorageType.DELETED);
     }
 
+    private void sentEvent() {
+        final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
+        if (null != eventAdmin) {
+            final Dictionary<String, Object> dict = new Hashtable<String, Object>(4);
+            dict.put(ResourceEventConstants.PROPERTY_CONTEXT_ID, Integer.valueOf(ctx.getContextId()));
+            dict.put(ResourceEventConstants.PROPERTY_USER_ID, Integer.valueOf(user.getId()));
+            dict.put(ResourceEventConstants.PROPERTY_RESOURCE_ID, Integer.valueOf(resource.getIdentifier()));
+            eventAdmin.postEvent(new Event(ResourceEventConstants.TOPIC_DELETE, dict));
+        }
+
+    }
 }

@@ -84,26 +84,24 @@ public interface UserService {
     String getUserAttribute(String name, int userId, Context context) throws OXException;
 
     /**
-     * Sets specified user attribute.
-     *
-     * @param name The attribute name
-     * @param value The attribute value
-     * @param userId The user identifier
-     * @param context The context
-     * @throws OXException If user attribute cannot be set
-     * @see #getContext(int)
+     * Stores a public user attribute. This attribute is prepended with "attr_". This prefix is used to separate public user attributes from
+     * internal user attributes. Public user attributes prefixed with "attr_" can be read and written by every client through the HTTP/JSON
+     * API.
+     * @param name Name of the attribute.
+     * @param value Value of the attribute. If the value is <code>null</code>, the attribute is removed.
+     * @param userId Identifier of the user that attribute should be set.
+     * @param context Context the user resides in.
+     * @throws OXException if writing the attribute fails.
      */
     void setUserAttribute(String name, String value, int userId, Context context) throws OXException;
 
     /**
-     * Sets specified unscoped user attribute.
-     *
-     * @param name The attribute name
-     * @param value The attribute value
-     * @param userId The user identifier
-     * @param context The context
-     * @throws OXException If user attribute cannot be set
-     * @see #getContext(int)
+     * Stores a internal user attribute. Internal user attributes must not be exposed to clients through the HTTP/JSON API.
+     * @param name Name of the attribute.
+     * @param value Value of the attribute. If the value is <code>null</code>, the attribute is removed.
+     * @param userId Identifier of the user that attribute should be set.
+     * @param context Context the user resides in.
+     * @throws OXException if writing the attribute fails.
      */
     void setAttribute(String name, String value, int userId, Context context) throws OXException;
 
