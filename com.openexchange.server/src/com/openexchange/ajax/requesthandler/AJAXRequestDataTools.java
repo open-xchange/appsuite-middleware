@@ -246,7 +246,7 @@ public class AJAXRequestDataTools {
      * the presence of a message-body is signaled by the inclusion of a Content-Length or Transfer-Encoding header (section 4.3)
      * 
      * @param httpServletRequest the incoming request
-     * @return true if the incoming request uses chunked Transfer-Encoding, false otherwise
+     * @return true if the incoming request includes a body, false otherwise
      */
     private boolean hasBody(final HttpServletRequest httpServletRequest) {
         final int contentLength = httpServletRequest.getContentLength();
