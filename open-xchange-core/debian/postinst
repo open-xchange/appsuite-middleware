@@ -285,7 +285,13 @@ for opt in "-XX:+DisableExplicitGC" "-server" "-Djava.awt.headless=true" \
 	"-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=" \
 	"-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB"; do
     if ! echo $nopts | grep -- $opt > /dev/null; then
-	nopts="$nopts $opt"
+    	if [ "$opt" == "-XX:CMSInitiatingOccupancyFraction=" ]; then
+  			nopts="$nopts -XX:CMSInitiatingOccupancyFraction=75"
+  		elif [ "$opt" == "-XX:NewRatio=" ]; then
+  			nopts="$nopts -XX:NewRatio=3"
+  		else
+  			nopts="$nopts $opt"
+		fi
     fi
 done
 # -----------------------------------------------------------------------
