@@ -281,7 +281,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         if (!infoPerm.canWriteObject()) {
             throw InfostoreExceptionCodes.WRITE_PERMS_FOR_LOCK_MISSING.create();
         }
-        checkWriteLock(id, session);
+        final DocumentMetadata document = checkWriteLock(id, session);
+        if (lockManager.isLocked(document.getId(), session.getContext(), getUser(session), getUserConfiguration(session))) {
+            // Already locked by this user
+            return;
+        }
+
         long timeout = 0;
         if (timeout == -1) {
             timeout = LockManager.INFINITE;
@@ -462,29 +467,28 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         return new SearchIteratorAdapter<DocumentMetadata>(list.iterator());
     }
 
-    private DocumentMetadata checkWriteLock(final int id, final ServerSession sessionObj) throws OXException {
-        final DocumentMetadata document = load(id, CURRENT_VERSION, sessionObj.getContext());
-        checkWriteLock(document, sessionObj);
+    private DocumentMetadata checkWriteLock(final int id, final ServerSession session) throws OXException {
+        final DocumentMetadata document = load(id, CURRENT_VERSION, session.getContext());
+        checkWriteLock(document, session);
         return document;
     }
 
-    private void checkWriteLock(final DocumentMetadata document, final ServerSession sessionObj) throws OXException {
-        if (document.getModifiedBy() == sessionObj.getUserId()) {
+    private void checkWriteLock(final DocumentMetadata document, final ServerSession session) throws OXException {
+        if (document.getModifiedBy() == session.getUserId()) {
             return;
         }
 
-        if (lockManager.isLocked(document.getId(), sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj))) {
+        if (lockManager.isLocked(document.getId(), session.getContext(), getUser(session), getUserConfiguration(session))) {
             throw InfostoreExceptionCodes.ALREADY_LOCKED.create();
         }
-
     }
 
-    private void checkMayUnlock(final int id, final ServerSession sessionObj) throws OXException {
-        final DocumentMetadata document = load(id, CURRENT_VERSION, sessionObj.getContext());
-        if (document.getCreatedBy() == sessionObj.getUserId() || document.getModifiedBy() == sessionObj.getUserId()) {
+    private void checkMayUnlock(final int id, final ServerSession session) throws OXException {
+        final DocumentMetadata document = load(id, CURRENT_VERSION, session.getContext());
+        if (document.getCreatedBy() == session.getUserId() || document.getModifiedBy() == session.getUserId()) {
             return;
         }
-        final List<Lock> locks = lockManager.findLocks(id, sessionObj.getContext(), getUser(sessionObj), getUserConfiguration(sessionObj));
+        final List<Lock> locks = lockManager.findLocks(id, session.getContext(), getUser(session), getUserConfiguration(session));
         if (locks.size() > 0) {
             throw InfostoreExceptionCodes.LOCKED_BY_ANOTHER.create();
         }

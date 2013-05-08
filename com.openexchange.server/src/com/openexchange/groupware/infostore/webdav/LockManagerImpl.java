@@ -72,6 +72,10 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
 
     private static final String PAT_TABLENAME = "%%tablename%%";
 
+    private static final long MILLIS_WEEK = 604800000L;
+    private static final long MILLIS_YEAR = 52 * MILLIS_WEEK;
+    private static final long MILLIS_10_YEARS = 10 * MILLIS_YEAR;
+
     private String INSERT = "INSERT INTO %%tablename%% (entity, timeout, scope, type, ownerDesc, cid, userid, id %%additional_fields%% ) VALUES (?, ?, ?, ?, ?, ?, ?, ? %%additional_question_marks%%)";
     private String DELETE = "DELETE FROM %%tablename%% WHERE cid = ? AND id = ? ";
     private String REASSIGN = "UPDATE %%tablename%% SET userid = ? WHERE userid = ? and cid = ?";
@@ -153,14 +157,14 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             con = getWriteConnection(ctx);
             stmt = con.prepareStatement(INSERT);
             long tm = 0;
-            if(timeout != INFINITE) {
-                tm = System.currentTimeMillis()+timeout;
-                // Previously Infinite Locks exceed long range if ms counter increased by 1 since loading
-                if(tm<0) {
-                    tm = Long.MAX_VALUE;
-                }
+            if (timeout == INFINITE) {
+                tm = System.currentTimeMillis() + MILLIS_10_YEARS;
             } else {
-                tm = Long.MAX_VALUE;
+                tm = System.currentTimeMillis() + timeout;
+                // Previously Infinite Locks exceed long range if ms counter increased by 1 since loading
+                if (tm < 0) {
+                    tm = System.currentTimeMillis() + MILLIS_10_YEARS;
+                }
             }
             set(1, stmt, additional, Integer.valueOf(entity), Long.valueOf(tm), Integer.valueOf(scope.ordinal()), Integer.valueOf(type.ordinal()), ownerDesc, Integer.valueOf(ctx.getContextId()), Integer.valueOf(user.getId()), Integer.valueOf(id));
             stmt.executeUpdate();
@@ -191,10 +195,10 @@ public abstract class LockManagerImpl<T extends Lock> extends DBService implemen
             con = getWriteConnection(ctx);
             stmt = con.prepareStatement(UPDATE_BY_ID);
             long tm = 0;
-            if(timeout != INFINITE) {
-                tm = System.currentTimeMillis()+timeout;
+            if (timeout == INFINITE) {
+                tm = System.currentTimeMillis() + MILLIS_10_YEARS;
             } else {
-                tm = Long.MAX_VALUE;
+                tm = System.currentTimeMillis() + timeout;
             }
             final int index = set(1, stmt, additional, Long.valueOf(tm), Integer.valueOf(scope.ordinal()), Integer.valueOf(type.ordinal()), ownerDesc);
             set(index, stmt, null, Integer.valueOf(lockId), Integer.valueOf(ctx.getContextId()));
