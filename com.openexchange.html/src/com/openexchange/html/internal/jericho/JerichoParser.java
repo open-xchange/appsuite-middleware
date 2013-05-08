@@ -170,8 +170,8 @@ public final class JerichoParser {
     }
 
     private static final Pattern NESTED_TAG = Pattern.compile("^(?:\r?\n *)?(<[^>]+>)");
-
     private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
+    private static final Pattern FIX_START_TAG = Pattern.compile("(<[a-zA-Z_0-9-]+)/([a-zA-Z][^>]+>)");
 
     /**
      * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
@@ -288,7 +288,25 @@ public final class JerichoParser {
             /*
              * Safety re-parse
              */
-            if (reparseSegment && (segment.toString().indexOf('<') >= 0) && !segment.isWhiteSpace()) {
+            if (startsWith('<', segment)) {
+                final Matcher m = FIX_START_TAG.matcher(segment);
+                if (m.find()) {
+                    final StringBuffer sb = new StringBuffer(segment.length());
+                    do {
+                        m.appendReplacement(sb, "$1 $2");
+                    } while (m.find());
+                    m.appendTail(sb);
+                    /*
+                     * Re-parse start tag
+                     */
+                    final StreamedSource nestedSource = new StreamedSource(sb.toString());
+                    for (final Segment nestedSegment : nestedSource) {
+                        handleSegment(handler, nestedSegment, false);
+                    }
+                } else {
+                    handler.handleSegment(segment);
+                }
+            } else if (reparseSegment && (segment.toString().indexOf('<') >= 0) && !segment.isWhiteSpace()) {
                 final Matcher m = NESTED_TAG.matcher(segment);
                 if (m.matches()) {
                     final int startTagPos = m.start(1);
@@ -321,6 +339,26 @@ public final class JerichoParser {
             return startTag;
         }
         return INVALID_DELIM.matcher(startTag).replaceAll("; ");
+    }
+
+    private static boolean startsWith(final char startingChar, final CharSequence toCheck) {
+        if (null == toCheck) {
+            return false;
+        }
+        final int len = toCheck.length();
+        if (len <= 0) {
+            return false;
+        }
+        int i = 0;
+        if (Character.isWhitespace(toCheck.charAt(i))) {
+            do {
+                i++;
+            } while (i < len && Character.isWhitespace(toCheck.charAt(i)));
+        }
+        if (i >= len) {
+            return false;
+        }
+        return startingChar == toCheck.charAt(i);
     }
 
 }
