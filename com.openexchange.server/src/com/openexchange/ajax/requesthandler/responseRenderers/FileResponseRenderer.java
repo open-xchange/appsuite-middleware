@@ -80,6 +80,7 @@ import com.openexchange.ajax.requesthandler.Utils;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.images.ImageTransformationService;
@@ -269,7 +270,13 @@ public class FileResponseRenderer implements ResponseRenderer {
                     contentType = preferredContentType;
                 } else {
                     if (SAVE_AS_TYPE.equals(preferredContentType)) {
-                        trySetSanitizedContentType(contentType, resp);
+                        // We don't know better... At least try to sanitize specified value
+                        try {
+                            resp.setContentType(new ContentType(contentType).getBaseType());
+                        } catch (Exception e) {
+                            // Ignore
+                            resp.setContentType(contentType);
+                        }
                     } else {
                         final String primaryType1 = getPrimaryType(preferredContentType);
                         final String primaryType2 = getPrimaryType(contentType);
