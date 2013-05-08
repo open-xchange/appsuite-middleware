@@ -288,9 +288,15 @@ public final class GetAction extends AbstractMailAction {
                 }
                 // Filter
                 if (null != mimeFilter) {
-                    final InputStream is = fileHolder.getStream();
+                    InputStream is = fileHolder.getStream();
                     try {
+                        // Store to MIME message
                         MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), is);
+                        // Clean-up
+                        Streams.close(is);
+                        is = null;
+                        fileHolder.close();
+                        // Filter MIME message
                         mimeMessage = mimeFilter.filter(mimeMessage);
                         fileHolder = new ThresholdFileHolder();
                         mimeMessage.writeTo(fileHolder.asOutputStream());
@@ -332,7 +338,34 @@ public final class GetAction extends AbstractMailAction {
                     /*
                      * Create appropriate file holder
                      */
-                    req.getRequest().setFormat("file");
+                    final AJAXRequestData requestData = req.getRequest();
+                    requestData.setResponseHeader("Content-Type", "application/octet-stream");
+                    final OutputStream directOutputStream = requestData.optOutputStream();
+                    if (null != directOutputStream) {
+                        // Direct output
+                        final StringAllocator sb = new StringAllocator(64).append("attachment");
+                        {
+                            final String subject = mail.getSubject();
+                            final String fileName = isEmpty(subject) ? "mail.eml" : saneForFileName(subject) + ".eml";
+                            DownloadUtility.appendFilenameParameter(fileName, requestData.getUserAgent(), sb);
+                        }
+                        requestData.setResponseHeader("Content-Disposition",  sb.toString());
+                        requestData.removeCachingHeader();
+                        final InputStream is = fileHolder.getStream();
+                        try {
+                            final int len = 2048;
+                            final byte[] buf = new byte[len];
+                            for (int read; (read = is.read(buf, 0, len)) > 0;) {
+                                directOutputStream.write(buf, 0, read);
+                            }
+                        } finally {
+                            Streams.close(is);
+                        }
+                        directOutputStream.flush();
+                        return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
+                    }
+                    // As file holder
+                    requestData.setFormat("file");
                     fileHolder.setContentType("application/octet-stream");
                     fileHolder.setDelivery("download");
                     // Set file name
