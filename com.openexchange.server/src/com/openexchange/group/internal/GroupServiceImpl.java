@@ -50,18 +50,12 @@
 package com.openexchange.group.internal;
 
 import java.util.Date;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.GroupEventConstants;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  *
@@ -69,49 +63,22 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class GroupServiceImpl implements GroupService {
 
-    /**
-     * Default constructor.
-     */
     public GroupServiceImpl() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void create(final Context ctx, final User user, final Group group)
         throws OXException {
         final Create create = new Create(ctx, user, group);
         create.perform();
-
-        final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
-        if (null != eventAdmin) {
-            final Dictionary<String, Object> dict = new Hashtable<String, Object>(4);
-            dict.put(GroupEventConstants.PROPERTY_CONTEXT_ID, Integer.valueOf(ctx.getContextId()));
-            dict.put(GroupEventConstants.PROPERTY_USER_ID, Integer.valueOf(user.getId()));
-            dict.put(GroupEventConstants.PROPERTY_GROUP_ID, Integer.valueOf(group.getIdentifier()));
-            eventAdmin.postEvent(new Event(GroupEventConstants.TOPIC_CREATE, dict));
-        }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void update(final Context ctx, final User user, final Group group,
         final Date lastRead) throws OXException {
         final Update update = new Update(ctx, user, group, lastRead);
         update.perform();
-
-        final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
-        if (null != eventAdmin) {
-            final Dictionary<String, Object> dict = new Hashtable<String, Object>(4);
-            dict.put(GroupEventConstants.PROPERTY_CONTEXT_ID, Integer.valueOf(ctx.getContextId()));
-            dict.put(GroupEventConstants.PROPERTY_USER_ID, Integer.valueOf(user.getId()));
-            dict.put(GroupEventConstants.PROPERTY_GROUP_ID, Integer.valueOf(group.getIdentifier()));
-            eventAdmin.postEvent(new Event(GroupEventConstants.TOPIC_UPDATE, dict));
-        }
     }
 
     @Override
@@ -119,15 +86,6 @@ public final class GroupServiceImpl implements GroupService {
         final Date lastRead) throws OXException {
         final Delete delete = new Delete(ctx, user, groupId, lastRead);
         delete.perform();
-
-        final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
-        if (null != eventAdmin) {
-            final Dictionary<String, Object> dict = new Hashtable<String, Object>(4);
-            dict.put(GroupEventConstants.PROPERTY_CONTEXT_ID, Integer.valueOf(ctx.getContextId()));
-            dict.put(GroupEventConstants.PROPERTY_USER_ID, Integer.valueOf(user.getId()));
-            dict.put(GroupEventConstants.PROPERTY_GROUP_ID, Integer.valueOf(groupId));
-            eventAdmin.postEvent(new Event(GroupEventConstants.TOPIC_DELETE, dict));
-        }
     }
 
     @Override
