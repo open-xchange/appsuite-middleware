@@ -50,7 +50,6 @@
 package com.openexchange.ajax.requesthandler;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -66,13 +65,14 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Streams;
 import com.openexchange.java.UnsynchronizedPushbackReader;
+import com.openexchange.java.UnsynchronizedStringReader;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AJAXRequestDataTools} - Tools for parsing AJAX requests.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJAXRequestDataTools {
@@ -83,7 +83,7 @@ public class AJAXRequestDataTools {
 
     /**
      * Gets the default instance
-     * 
+     *
      * @return The default instance
      */
     public static AJAXRequestDataTools getInstance() {
@@ -108,7 +108,7 @@ public class AJAXRequestDataTools {
 
     /**
      * Parses an appropriate {@link AJAXRequestData} instance from specified arguments.
-     * 
+     *
      * @param req The HTTP Servlet request
      * @param preferStream Whether to prefer request's stream instead of parsing its body data to an appropriate (JSON) object
      * @param isFileUpload Whether passed request is considered as a file upload
@@ -124,7 +124,7 @@ public class AJAXRequestDataTools {
 
     /**
      * Parses an appropriate {@link AJAXRequestData} instance from specified arguments.
-     * 
+     *
      * @param req The HTTP Servlet request
      * @param preferStream Whether to prefer request's stream instead of parsing its body data to an appropriate (JSON) object
      * @param isFileUpload Whether passed request is considered as a file upload
@@ -207,16 +207,16 @@ public class AJAXRequestDataTools {
                     final int read = reader.read();
                     if (read < 0) {
                         retval.setData(null);
-                        String data = req.getParameter("data");
+                        final String data = req.getParameter("data");
                         if (data != null && data.length() > 0) {
                             try {
-                                char c = data.charAt(0);
+                                final char c = data.charAt(0);
                                 if ('[' == c || '{' == c) {
-                                    retval.setData(JSONObject.parse(new StringReader(data)));
+                                    retval.setData(JSONObject.parse(new UnsynchronizedStringReader(data)));
                                 } else {
                                     retval.setData(data);
                                 }
-                            } catch (JSONException e) {
+                            } catch (final JSONException e) {
                                 retval.setData(data);
                             }
                         }
@@ -244,17 +244,12 @@ public class AJAXRequestDataTools {
     /**
      * Check if the incoming request has a body. From RFC 2616: An entity-body is only present when a message-body is present (section 7.2),
      * the presence of a message-body is signaled by the inclusion of a Content-Length or Transfer-Encoding header (section 4.3)
-     * 
-     * @param httpServletRequest the incoming request
-     * @return true if the incoming request includes a body, false otherwise
+     *
+     * @param httpServletRequest The incoming request
+     * @return <code>true</code> if the incoming request includes a body, <code>false</code> otherwise
      */
-    private boolean hasBody(final HttpServletRequest httpServletRequest) {
-        final int contentLength = httpServletRequest.getContentLength();
-        String transferEncoding = httpServletRequest.getHeader("Transfer-Encoding");
-        if (contentLength > 0 || transferEncoding != null) {
-            return true;
-        }
-        return false;
+    public static boolean hasBody(final HttpServletRequest httpServletRequest) {
+        return (httpServletRequest.getContentLength() > 0) || (httpServletRequest.getHeader("Transfer-Encoding") != null);
     }
 
     private static boolean parseBoolParameter(final String name, final HttpServletRequest req) {
@@ -266,7 +261,7 @@ public class AJAXRequestDataTools {
      * <p>
      * <code>true</code> if given value is not <code>null</code> and equals ignore-case to one of the values "true", "yes", "y", "on", or
      * "1".
-     * 
+     *
      * @param name The parameter's name
      * @param requestData The request data to parse from
      * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
@@ -287,7 +282,7 @@ public class AJAXRequestDataTools {
      * <p>
      * <code>true</code> if given value is not <code>null</code> and equals ignore-case to one of the values "true", "yes", "y", "on", or
      * "1".
-     * 
+     *
      * @param parameter The parameter
      * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
      */
@@ -297,7 +292,7 @@ public class AJAXRequestDataTools {
 
     /**
      * Parses host name, secure and AJP route.
-     * 
+     *
      * @param request The AJAX request data
      * @param req The HTTP Servlet request
      * @param session The associated session
@@ -339,7 +334,7 @@ public class AJAXRequestDataTools {
 
     /**
      * Gets the module from specified HTTP request.
-     * 
+     *
      * @param prefix The dispatcher's default prefix to strip from request's {@link HttpServletRequest#getPathInfo() path info}.
      * @param req The HTTP request
      * @return The determined module
@@ -360,7 +355,7 @@ public class AJAXRequestDataTools {
 
     /**
      * Gets the action from specified HTTP request.
-     * 
+     *
      * @param req The HTTP request
      * @return The determined action
      */
