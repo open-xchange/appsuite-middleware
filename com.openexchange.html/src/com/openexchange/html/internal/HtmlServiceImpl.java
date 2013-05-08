@@ -95,6 +95,7 @@ import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.proxy.ImageContentTypeRestriction;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
@@ -125,6 +126,7 @@ public final class HtmlServiceImpl implements HtmlService {
     private final Map<Character, String> htmlCharMap;
     private final Map<String, Character> htmlEntityMap;
     private final Tika tika;
+    private final String lineSeparator;
 
     /**
      * Initializes a new {@link HtmlServiceImpl}.
@@ -135,6 +137,7 @@ public final class HtmlServiceImpl implements HtmlService {
      */
     public HtmlServiceImpl(final Map<Character, String> htmlCharMap, final Map<String, Character> htmlEntityMap) {
         super();
+        lineSeparator = System.getProperty("line.separator");
         this.htmlCharMap = htmlCharMap;
         this.htmlEntityMap = htmlEntityMap;
         tika = new Tika();
@@ -1161,6 +1164,58 @@ public final class HtmlServiceImpl implements HtmlService {
             }
         }
         return css.toString();
+    }
+
+    private static final Pattern HTML_START = Pattern.compile("<html.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern HEAD_START = Pattern.compile("<head.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern BODY_START = Pattern.compile("<body.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
+    @Override
+    public String documentizeContent(String htmlContent, String charset) {
+        if (null == htmlContent) {
+            return htmlContent;
+        }
+        final String lineSeparator = this.lineSeparator;
+        final StringAllocator sb = new StringAllocator(htmlContent.length() + 512);
+        if (isEmpty(htmlContent)) {
+            sb.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">").append(lineSeparator);
+            sb.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">").append(lineSeparator);
+            sb.append("<head>").append(lineSeparator);
+            sb.append("    <meta content=\"text/html; charset=").append(charset).append("\" http-equiv=\"Content-Type\"/>").append(lineSeparator);
+            sb.append("</head>").append(lineSeparator);
+            sb.append("<body>").append(lineSeparator);
+            sb.append(htmlContent);
+            sb.append("</body>").append(lineSeparator);
+            sb.append("</html>");
+            return sb.toString();
+        }
+        // Check for <html> tag
+        boolean closeHtml = false;
+        if (!HTML_START.matcher(htmlContent).find()) {
+            sb.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">").append(lineSeparator);
+            sb.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">").append(lineSeparator);
+            closeHtml = true;
+        }
+        // Check for <head> tag
+        if (!HEAD_START.matcher(htmlContent).find()) {
+            sb.append("<head>").append(lineSeparator);
+            sb.append("    <meta content=\"text/html; charset=").append(charset).append("\" http-equiv=\"Content-Type\"/>").append(lineSeparator);
+            sb.append("</head>").append(lineSeparator);
+        }
+        // Check for <body> tag
+        boolean closeBody = false;
+        if (!BODY_START.matcher(htmlContent).find()) {
+            sb.append("<body>").append(lineSeparator);
+            closeBody = true;
+        }
+        sb.append(htmlContent);
+        if (closeBody) {
+            sb.append("</body>").append(lineSeparator);
+        }
+        if (closeHtml) {
+            sb.append("</html>").append(lineSeparator);
+        }
+        return sb.toString();
     }
 
     @Override

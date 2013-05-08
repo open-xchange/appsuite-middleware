@@ -84,6 +84,15 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
     }
 
     /**
+     * Gets the byte buffer.
+     *
+     * @return The buffer
+     */
+    protected byte[] getBuf() {
+        return buf;
+    }
+
+    /**
      * Reads the next byte of data from this input stream. The value byte is returned as an <code>int</code> in the range <code>0</code> to
      * <code>255</code>. If no byte is available because the end of the stream has been reached, the value <code>-1</code> is returned.
      * <p>

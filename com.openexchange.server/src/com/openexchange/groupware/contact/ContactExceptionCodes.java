@@ -51,9 +51,10 @@ package com.openexchange.groupware.contact;
 
 import static com.openexchange.groupware.contact.ContactExceptionMessages.*;
 import com.openexchange.exception.Category;
+import com.openexchange.exception.LogLevel;
+import com.openexchange.exception.LogLevelAwareOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
-import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
@@ -61,15 +62,17 @@ import com.openexchange.exception.OXExceptionFactory;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public enum ContactExceptionCodes implements OXExceptionCode {
+public enum ContactExceptionCodes implements LogLevelAwareOXExceptionCode {
 
     /**
      * Found a user contact outside global address book in folder %1$d in
      * context %2$d.
      */
     USER_OUTSIDE_GLOBAL(USER_OUTSIDE_GLOBAL_MSG, Category.CATEGORY_ERROR, 1),
-    /** Invalid E-Mail address: '%s'. Please correct the E-Mail address. */
-    INVALID_EMAIL(INVALID_EMAIL_MSG, Category.CATEGORY_USER_INPUT, 100),
+    /**
+     * Invalid E-Mail address: '%s'. Please correct the E-Mail address.
+     */
+    INVALID_EMAIL(INVALID_EMAIL_MSG, Category.CATEGORY_USER_INPUT, 100, LogLevel.ERROR),
     /**
      * Unable to import this contact picture. Either the type is not part of the
      * supported type (JPG, GIF, BMP or PNG) or the size exceed %3$d. Your file
@@ -243,12 +246,19 @@ public enum ContactExceptionCodes implements OXExceptionCode {
     private String message;
     private Category category;
     private int number;
+    private LogLevel logLevel;
 
     private ContactExceptionCodes(final String message,
-            final Category category, final int number) {
+        final Category category, final int number) {
+        this(message, category, number, null);
+    }
+
+    private ContactExceptionCodes(final String message,
+            final Category category, final int number, final LogLevel logLevel) {
         this.message = message;
         this.category = category;
         this.number = number;
+        this.logLevel = logLevel;
     }
 
     @Override
@@ -269,6 +279,11 @@ public enum ContactExceptionCodes implements OXExceptionCode {
     @Override
     public Category getCategory() {
         return category;
+    }
+
+    @Override
+    public LogLevel getLogLevel() {
+        return logLevel;
     }
 
     @Override

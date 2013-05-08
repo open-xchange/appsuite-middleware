@@ -50,12 +50,18 @@
 package com.openexchange.resource.internal;
 
 import java.util.Date;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.resource.Resource;
+import com.openexchange.resource.ResourceEventConstants;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.storage.ResourceStorage;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link ResourceServiceImpl}
@@ -90,16 +96,43 @@ public final class ResourceServiceImpl implements ResourceService {
     @Override
     public void create(final User user, final Context ctx, final Resource resource) throws OXException {
         new ResourceCreate(user, ctx, resource).perform();
+
+        final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
+        if (null != eventAdmin) {
+            final Dictionary<String, Object> dict = new Hashtable<String, Object>(4);
+            dict.put(ResourceEventConstants.PROPERTY_CONTEXT_ID, Integer.valueOf(ctx.getContextId()));
+            dict.put(ResourceEventConstants.PROPERTY_USER_ID, Integer.valueOf(user.getId()));
+            dict.put(ResourceEventConstants.PROPERTY_RESOURCE_ID, Integer.valueOf(resource.getIdentifier()));
+            eventAdmin.postEvent(new Event(ResourceEventConstants.TOPIC_CREATE, dict));
+        }
     }
 
     @Override
     public void update(final User user, final Context ctx, final Resource resource, final Date clientLastModified) throws OXException {
         new ResourceUpdate(user, ctx, resource, clientLastModified).perform();
+
+        final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
+        if (null != eventAdmin) {
+            final Dictionary<String, Object> dict = new Hashtable<String, Object>(4);
+            dict.put(ResourceEventConstants.PROPERTY_CONTEXT_ID, Integer.valueOf(ctx.getContextId()));
+            dict.put(ResourceEventConstants.PROPERTY_USER_ID, Integer.valueOf(user.getId()));
+            dict.put(ResourceEventConstants.PROPERTY_RESOURCE_ID, Integer.valueOf(resource.getIdentifier()));
+            eventAdmin.postEvent(new Event(ResourceEventConstants.TOPIC_UPDATE, dict));
+        }
     }
 
     @Override
     public void delete(final User user, final Context ctx, final Resource resource, final Date clientLastModified) throws OXException {
         new ResourceDelete(user, ctx, resource, clientLastModified).perform();
+
+        final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
+        if (null != eventAdmin) {
+            final Dictionary<String, Object> dict = new Hashtable<String, Object>(4);
+            dict.put(ResourceEventConstants.PROPERTY_CONTEXT_ID, Integer.valueOf(ctx.getContextId()));
+            dict.put(ResourceEventConstants.PROPERTY_USER_ID, Integer.valueOf(user.getId()));
+            dict.put(ResourceEventConstants.PROPERTY_RESOURCE_ID, Integer.valueOf(resource.getIdentifier()));
+            eventAdmin.postEvent(new Event(ResourceEventConstants.TOPIC_DELETE, dict));
+        }
     }
 
     @Override

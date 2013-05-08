@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,58 +49,56 @@
 
 package com.openexchange.group;
 
-import java.util.Date;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 
 /**
- * This service defines the API to the groups component.
+ * {@link GroupEventConstants} - Constants for group events.
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface GroupService {
+public final class GroupEventConstants {
 
     /**
-     * Creates a group.
-     *
-     * @param ctx Context.
-     * @param user User for permission checks.
-     * @param group group to create.
-     * @throws OXException if some problem occurs.
+     * Initializes a new {@link GroupEventConstants}.
      */
-    void create(Context ctx, User user, Group group) throws OXException;
+    private GroupEventConstants() {
+        super();
+    }
 
     /**
-     * Updates a group.
-     *
-     * @param ctx Context.
-     * @param user User for permission checks.
-     * @param group group to update.
-     * @param lastRead timestamp when the group to update has last been read.
-     * @throws OXException if some problem occurs.
+     * The topic for update.
      */
-    void update(Context ctx, User user, Group group, Date lastRead) throws OXException;
+    public static final String TOPIC_UPDATE = "com/openexchange/groupware/group/update";
 
     /**
-     * Deletes a group.
-     *
-     * @param ctx Context.
-     * @param user User for permission checks.
-     * @param groupId unique identifier of the group to delete.
-     * @param lastModified timestamp when the group to delete has last been read.
-     * @throws OXException if some problem occurs.
+     * The topic for create.
      */
-    void delete(Context ctx, User user, int groupId, Date lastModified) throws OXException;
+    public static final String TOPIC_CREATE = "com/openexchange/groupware/group/insert";
 
     /**
-     * Returns the denoted group.
-     *
-     * @param ctx The context
-     * @param groupId The group identifier
-     * @return The group
-     * @throws OXException If group cannot be returned
+     * The topic for delete.
      */
-    Group getGroup(Context ctx, int groupId) throws OXException;
+    public static final String TOPIC_DELETE = "com/openexchange/groupware/group/delete";
+
+    /**
+     * All topics.
+     */
+    public static final String ALL_TOPICS = "com/openexchange/groupware/group/*";
+
+    // ----------------------------------------------------------------------------------------------------- //
+
+    /**
+     * The user identifier.
+     */
+    public static final String PROPERTY_USER_ID = "userId";
+
+    /**
+     * The context identifier.
+     */
+    public static final String PROPERTY_CONTEXT_ID = "contextId";
+
+    /**
+     * The group identifier.
+     */
+    public static final String PROPERTY_GROUP_ID = "groupId";
 
 }
