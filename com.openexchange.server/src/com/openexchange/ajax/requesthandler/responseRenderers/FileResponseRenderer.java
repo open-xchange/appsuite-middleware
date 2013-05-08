@@ -181,12 +181,15 @@ public class FileResponseRenderer implements ResponseRenderer {
                 delivery = file.getDelivery();
             }
             String contentType = AJAXServlet.encodeUrl(req.getParameter(PARAMETER_CONTENT_TYPE), true);
+            boolean contentTypeByParameter = false;
             if (null == contentType) {
                 if (DOWNLOAD.equalsIgnoreCase(delivery)) {
                     contentType = SAVE_AS_TYPE;
                 } else {
                     contentType = fileContentType;
                 }
+            } else {
+                contentTypeByParameter = true;
             }
             contentType = unquote(contentType);
             String contentDisposition = AJAXServlet.encodeUrl(req.getParameter(PARAMETER_CONTENT_DISPOSITION));
@@ -231,7 +234,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 sb.append(isEmpty(contentDisposition) ? "attachment" : checkedContentDisposition(contentDisposition.trim(), file));
                 DownloadUtility.appendFilenameParameter(file.getName(), null, userAgent, sb);
                 resp.setHeader("Content-Disposition", sb.toString());
-                resp.setContentType(null == contentType ? SAVE_AS_TYPE : contentType);
+                resp.setContentType(SAVE_AS_TYPE);
             } else {
                 String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
                 if (SAVE_AS_TYPE.equals(contentTypeByFileName)) {
@@ -303,15 +306,17 @@ public class FileResponseRenderer implements ResponseRenderer {
                  */
                 String preferredContentType = checkedDownload.getContentType();
                 if (null != contentTypeByFileName) {
-                    if (SAVE_AS_TYPE.equals(preferredContentType)) {
-                        preferredContentType = contentTypeByFileName;
-                    } else {
-                        if (equalPrimaryTypes(preferredContentType, contentTypeByFileName)) {
+                    if (preferredContentType.startsWith(SAVE_AS_TYPE) || !equalPrimaryTypes(preferredContentType, contentTypeByFileName)) {
+                        try {
+                            final ContentType tmp = new ContentType(preferredContentType);
+                            tmp.setBaseType(contentTypeByFileName);
+                            preferredContentType = tmp.toString();
+                        } catch (final Exception e) {
                             preferredContentType = contentTypeByFileName;
                         }
                     }
                 }
-                if (contentType == null || SAVE_AS_TYPE.equals(contentType)) {
+                if (!contentTypeByParameter || contentType == null || SAVE_AS_TYPE.equals(contentType)) {
                     resp.setContentType(preferredContentType);
                     contentType = preferredContentType;
                 } else {

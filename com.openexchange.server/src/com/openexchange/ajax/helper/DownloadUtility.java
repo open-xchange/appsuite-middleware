@@ -265,14 +265,17 @@ public final class DownloadUtility {
                 final String baseType = contentType.getBaseType();
                 final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append("attachment");
                 appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : baseType, userAgent, builder);
-                retval = new CheckedDownload(baseType, builder.toString(), in);
+                contentType.removeParameter("name");
+                retval = new CheckedDownload(contentType.toString(), builder.toString(), in);
             } else if (sContentDisposition.indexOf(';') < 0) {
                 final String baseType = contentType.getBaseType();
                 final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append(sContentDisposition);
                 appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : baseType, userAgent, builder);
-                retval = new CheckedDownload(baseType, builder.toString(), in);
+                contentType.removeParameter("name");
+                retval = new CheckedDownload(contentType.toString(), builder.toString(), in);
             } else {
-                retval =  new CheckedDownload(contentType.getBaseType(), sContentDisposition, in);
+                contentType.removeParameter("name");
+                retval = new CheckedDownload(contentType.toString(), sContentDisposition, in);
             }
             return retval;
         } catch (final UnsupportedEncodingException e) {
