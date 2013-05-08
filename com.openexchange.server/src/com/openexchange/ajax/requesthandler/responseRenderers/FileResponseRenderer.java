@@ -254,7 +254,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                             cts = contentTypeByFileName;
                         }
                     } else {
-                        if ((null != contentTypeByFileName) && !toLowerCase(fileContentType).startsWith(toLowerCase(contentTypeByFileName))) {
+                        if ((null != contentTypeByFileName) && !equalPrimaryTypes(fileContentType, contentTypeByFileName)) {
                             // Differing Content-Types sources
                             final ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(documentData);
                             documentData = Streams.asInputStream(baos);
