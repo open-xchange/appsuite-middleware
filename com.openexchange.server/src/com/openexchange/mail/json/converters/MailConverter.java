@@ -210,7 +210,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final int[] columns = requestData.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
         final String[] headers = requestData.getParameterValues(Mail.PARAMETER_HEADERS);
         String tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
-        final TimeZone timeZone = isEmpty(tmp) ? null : TimeZoneUtils.getTimeZone(tmp.trim());
+        final TimeZone timeZone = isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
         tmp = null;
         /*
          * Pre-Select field writers
@@ -365,7 +365,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final int[] columns = requestData.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
         final String[] headers = requestData.getParameterValues(Mail.PARAMETER_HEADERS);
         String tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
-        final TimeZone timeZone = isEmpty(tmp) ? null : TimeZoneUtils.getTimeZone(tmp.trim());
+        final TimeZone timeZone = isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
         tmp = null;
         /*
          * Pre-Select field writers
@@ -408,7 +408,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final int[] columns = requestData.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
         final String sort = requestData.getParameter(AJAXServlet.PARAMETER_SORT);
         String tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
-        final TimeZone timeZone = isEmpty(tmp) ? null : TimeZoneUtils.getTimeZone(tmp.trim());
+        final TimeZone timeZone = isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
         tmp = null;
         /*
          * Get mail interface
@@ -495,7 +495,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         tmp = requestData.getParameter(Mail.PARAMETER_UNSEEN);
         final boolean unseen = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
         tmp = requestData.getParameter(Mail.PARAMETER_TIMEZONE);
-        final TimeZone timeZone = isEmpty(tmp) ? null : TimeZoneUtils.getTimeZone(tmp.trim());
+        final TimeZone timeZone = isEmpty(tmp) ? TimeZoneUtils.getTimeZone(session.getUser().getTimeZone()) : TimeZoneUtils.getTimeZone(tmp.trim());
         tmp = requestData.getParameter("token");
         final boolean token = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
         tmp = requestData.getParameter("ttlMillis");
