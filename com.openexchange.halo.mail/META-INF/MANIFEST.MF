@@ -19,4 +19,5 @@ Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.session,
  com.openexchange.tools.session,
  org.osgi.framework
+Bundle-ActivationPolicy: lazy
 Require-Bundle: com.openexchange.server

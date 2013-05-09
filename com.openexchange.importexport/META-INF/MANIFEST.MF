@@ -62,3 +62,4 @@ Import-Package: com.openexchange.ajax,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework
+Bundle-ActivationPolicy: lazy

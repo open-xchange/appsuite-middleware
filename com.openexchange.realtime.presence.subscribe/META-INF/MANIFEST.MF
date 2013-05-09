@@ -31,6 +31,7 @@ Import-Package: com.openexchange.context,
  com.openexchange.user,
  org.apache.commons.logging,
  org.osgi.framework
+Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/org.apache.felix.ipojo.junit4osgi-1.0.0.jar
 Export-Package: com.openexchange.realtime.presence.subscribe

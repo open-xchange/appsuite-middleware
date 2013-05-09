@@ -21,3 +21,4 @@ Import-Package: com.openexchange.context,
  org.apache.commons.logging,
  org.apache.commons.logging.impl,
  org.osgi.framework
+Bundle-ActivationPolicy: lazy

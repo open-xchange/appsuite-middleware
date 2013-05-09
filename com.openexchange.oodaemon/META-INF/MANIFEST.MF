@@ -13,6 +13,7 @@ Import-Package: com.openexchange.log,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
+Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
  lib/juh.jar,
  lib/jurt.jar,

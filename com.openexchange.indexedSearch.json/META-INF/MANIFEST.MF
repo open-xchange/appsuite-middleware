@@ -56,3 +56,4 @@ Import-Package: com.openexchange.ajax,
  org.osgi.framework,
  org.osgi.service.http,
  org.osgi.util.tracker
+Bundle-ActivationPolicy: lazy

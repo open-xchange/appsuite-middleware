@@ -38,5 +38,6 @@ Import-Package: com.openexchange.config.cascade,
  org.kxml2.wap.wv,
  org.osgi.framework,
  org.xmlpull.v1
+Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .
 Export-Package: com.openexchange.mail.autoconfig

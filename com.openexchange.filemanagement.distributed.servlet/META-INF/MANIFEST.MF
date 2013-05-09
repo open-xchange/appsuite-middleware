@@ -16,3 +16,4 @@ Import-Package: com.openexchange.config,
  javax.servlet.http;version="2.5.0",
  org.osgi.framework,
  org.osgi.service.http
+Bundle-ActivationPolicy: lazy

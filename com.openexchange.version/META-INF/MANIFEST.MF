@@ -9,6 +9,7 @@ OXBuildDate: release-7.2.1
 Bundle-Activator: com.openexchange.version.osgi.VersionActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
 Import-Package: com.openexchange.log,
  org.apache.commons.logging,
  org.osgi.framework

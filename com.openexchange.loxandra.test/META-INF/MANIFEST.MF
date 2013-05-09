@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Loxandra Test Bundle
 Bundle-SymbolicName: com.openexchange.loxandra.test
 Bundle-Version: 6.21.0.0
-Bundle-Activator: com.openexchange.loxandra.test.TestActivator
+Bundle-Activator: com.openexchange.loxandra.test.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.groupware.contact,
@@ -24,3 +24,4 @@ Import-Package: com.openexchange.groupware.contact,
  me.prettyprint.hector.testutils,
  org.apache.commons.logging,
  org.osgi.framework
+Bundle-ActivationPolicy: lazy
