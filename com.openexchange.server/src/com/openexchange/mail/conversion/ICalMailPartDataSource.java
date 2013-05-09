@@ -58,11 +58,13 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.permission.MailPermission;
 import com.openexchange.session.Session;
@@ -96,24 +98,40 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
             final String sequenceId = dataArguments.get(ARGS[2]);
             final DataProperties properties = new DataProperties();
             mailPart = getMailPart(arg.getAccountId(), fullname, mailId, sequenceId, session, properties);
-            final ContentType contentType = mailPart.getContentType();
-            if (contentType == null) {
-                throw DataExceptionCodes.ERROR.create("Missing header 'Content-Type' in requested mail part");
-            }
-            if (!contentType.isMimeType(MimeTypes.MIME_TEXT_ALL_CALENDAR)) {
-                throw DataExceptionCodes.ERROR.create("Requested mail part is not an ICal: " + contentType.getBaseType());
+            ContentType contentType = mailPart.getContentType();
+            if ((contentType == null) || !contentType.isMimeType(MimeTypes.MIME_TEXT_ALL_CALENDAR)) {
+                final String fileName = mailPart.getFileName();
+                if (isEmpty(fileName)) {
+                    throwException(contentType);
+                }
+                final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
+                if (MimeTypes.MIME_APPL_OCTET.equalsIgnoreCase(contentTypeByFileName)) {
+                    throwException(contentType);
+                }
+                final ContentType tmp = new ContentType(contentTypeByFileName);
+                if (!tmp.isMimeType(MimeTypes.MIME_TEXT_ALL_CALENDAR)) {
+                    throwException(contentType);
+                }
+                if (null == contentType) {
+                    contentType = tmp;
+                } else {
+                    contentType.setBaseType(tmp.getBaseType());
+                }
             }
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contentType.getBaseType());
-            final String charset = contentType.getCharsetParameter();
-            if (charset == null) {
-                properties.put(DataProperties.PROPERTY_CHARSET, MailProperties.getInstance().getDefaultMimeCharset());
-            } else {
-                properties.put(DataProperties.PROPERTY_CHARSET, charset);
-            }
+            final String cs = contentType.getCharsetParameter();
+            properties.put(DataProperties.PROPERTY_CHARSET, isEmpty(cs) ? MailProperties.getInstance().getDefaultMimeCharset() : cs);
             properties.put(DataProperties.PROPERTY_SIZE, Long.toString(mailPart.getSize()));
             properties.put(DataProperties.PROPERTY_NAME, mailPart.getFileName());
             return new SimpleData<D>((D) mailPart.getInputStream(), properties);
         }
+    }
+
+    private void throwException(ContentType contentType) throws OXException {
+        if (null == contentType) {
+            throw DataExceptionCodes.ERROR.create("Missing header 'Content-Type' in requested mail part");
+        }
+        throw DataExceptionCodes.ERROR.create("Requested mail part is not an ICal: " + contentType.getBaseType());
     }
 
     private MailPart getMailPart(final int accountId, final String fullname, final String mailId, final String sequenceId, final Session session, DataProperties properties) throws OXException {
@@ -141,6 +159,9 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
                 }
             }
             final MailPart mailPart = mailAccess.getMessageStorage().getAttachment(fullname, mailId, sequenceId);
+            if (null == mailPart) {
+                throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(sequenceId, mailId, fullname);
+            }
             mailPart.loadContent();
             return mailPart;
         } finally {
@@ -148,6 +169,18 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
                 mailAccess.close(true);
             }
         }
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

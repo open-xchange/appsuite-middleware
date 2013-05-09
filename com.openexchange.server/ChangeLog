@@ -1,6 +1,7 @@
 * 2013-05-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 26456: Accept flag parameters (without a parameter value)
+ - Fix for bug 26385: Try to determine ICal part's MIME type by file name if not appropriate
 
 * 2013-05-08 - marc.arens@open-xchange.com
 
