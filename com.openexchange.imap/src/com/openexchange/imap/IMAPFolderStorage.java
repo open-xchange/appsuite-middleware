@@ -100,7 +100,7 @@ import com.openexchange.imap.entity2acl.Entity2ACLArgs;
 import com.openexchange.imap.entity2acl.Entity2ACLExceptionCode;
 import com.openexchange.imap.entity2acl.UserGroupID;
 import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.services.Services;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
@@ -109,7 +109,6 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
-import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.permission.DefaultMailPermission;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -147,7 +146,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             synchronized (IMAPFolderStorage.class) {
                 tmp = maxMailboxNameLength;
                 if (null == tmp) {
-                    final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
                     tmp = Integer.valueOf(null == service ? 60 : service.getIntProperty("com.openexchange.imap.maxMailboxNameLength", 60));
                     maxMailboxNameLength = tmp;
                 }
@@ -389,7 +388,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -422,7 +421,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -455,7 +454,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -488,7 +487,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -505,7 +504,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
             return (checkForNamespaceFolder(fullName) != null);
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -649,7 +648,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
             return EMPTY_PATH;
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", parentFullName));
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -1009,7 +1008,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                 LOG.info("IMAP folder created with fallback type HOLDS_MESSAGES");
                             }
                         } else {
-                            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+                            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", createMe.getFullName()));
                         }
                     }
                     /*
@@ -1096,7 +1095,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         e2);
                 }
             }
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, null);
         } catch (final OXException e) {
             /*
              * No folder deletion on IMAP error "NO_ADMINISTER_ACCESS_ON_INITIAL"
@@ -1180,7 +1179,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (accountId == MailAccount.DEFAULT_ID) {
                 name = MailFolder.DEFAULT_FOLDER_NAME;
             } else {
-                final MailAccountStorageService mass = IMAPServiceRegistry.getService(MailAccountStorageService.class);
+                final MailAccountStorageService mass = Services.getService(MailAccountStorageService.class);
                 if (null == mass) {
                     name = MailFolder.DEFAULT_FOLDER_NAME;
                 } else {
@@ -1342,7 +1341,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 return renameMe.getFullName();
             }
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
         } catch (final IMAPException e) {
             throw e;
         } catch (final OXException e) {
@@ -1660,7 +1659,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 return moveMe.getFullName();
             }
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
         } catch (final IMAPException e) {
             throw e;
         } catch (final OXException e) {
@@ -1818,7 +1817,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 return updateMe.getFullName();
             }
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
         } catch (final IMAPException e) {
             throw e;
         } catch (final RuntimeException e) {
@@ -1913,7 +1912,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 return fullName;
             }
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         } finally {
@@ -1999,7 +1998,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         } finally {
@@ -2210,7 +2209,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         } finally {
@@ -2256,7 +2255,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
             return list.toArray(new MailFolder[list.size()]);
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", fullName));
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -2310,7 +2309,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
             return new com.openexchange.java.StringAllocator(isEmpty ? STR_INBOX : prefix).append(NamespaceFoldersCache.getPersonalSeparator()).toString();
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, null);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -2324,7 +2323,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
             return "";
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, null);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -2457,7 +2456,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 return quotas;
             }
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+            throw IMAPException.handleMessagingException(e, imapConfig, session, accountId, mapFor("fullName", folder));
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
@@ -3081,6 +3080,21 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
         }
         return false;
+    }
+
+    private static Map<String, Object> mapFor(final String... pairs) {
+        if (null == pairs) {
+            return null;
+        }
+        final int length = pairs.length;
+        if (0 == length || (length % 2) != 0) {
+            return null;
+        }
+        final Map<String, Object> map = new HashMap<String, Object>(length >> 1);
+        for (int i = 0; i < length; i+=2) {
+            map.put(pairs[i], pairs[i+1]);
+        }
+        return map;
     }
 
 }

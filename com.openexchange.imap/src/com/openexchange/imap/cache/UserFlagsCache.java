@@ -55,7 +55,7 @@ import javax.mail.Folder;
 import javax.mail.MessagingException;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.services.Services;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.session.Session;
@@ -147,7 +147,7 @@ public final class UserFlagsCache {
         private CacheKey getKeyInternal() {
             CacheKey tmp = key;
             if (null == tmp) {
-                key = tmp = IMAPServiceRegistry.getService(CacheService.class).newCacheKey(MailCacheCode.USER_FLAGS.getCode(), fullname);
+                key = tmp = Services.getService(CacheService.class).newCacheKey(MailCacheCode.USER_FLAGS.getCode(), fullname);
             }
             return tmp;
         }

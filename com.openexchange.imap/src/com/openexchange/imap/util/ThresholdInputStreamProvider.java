@@ -59,7 +59,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.services.Services;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 
@@ -371,7 +371,7 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
             synchronized (ThresholdInputStreamProvider.class) {
                 tmp = uploadDirectory;
                 if (null == tmp) {
-                    final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
                     tmp = new File(null == service ? "/tmp" : service.getProperty("UPLOAD_DIRECTORY", "/tmp"));
                     uploadDirectory = tmp;
                 }
