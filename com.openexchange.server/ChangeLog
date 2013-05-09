@@ -1,3 +1,7 @@
+* 2013-05-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26456: Accept flag parameters (without a parameter value)
+
 * 2013-05-08 - marc.arens@open-xchange.com
 
  - Fix for bug 26335: Only wait for a request body if headers indicate a body
