@@ -1,3 +1,7 @@
+* 2013-05-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26373: Sanitize on "delivery=view", too
+
 * 2013-04-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 25957: Deny "vbscript" URLs
