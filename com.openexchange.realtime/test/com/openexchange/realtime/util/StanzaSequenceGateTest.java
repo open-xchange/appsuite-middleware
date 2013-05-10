@@ -2,8 +2,10 @@
 package com.openexchange.realtime.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -164,27 +166,50 @@ public class StanzaSequenceGateTest extends StanzaSequenceGate {
         assertNull("Inbox has not been removed", inbox);
         assertEquals("Handled stanzas in wrong order", 5L, lastInternallyHandledSeqNum);
     }
-    
+
+    @Test
+    public void testBufferSize() throws Exception {
+        Stanza stanza = createStanza(0L);
+        for (int i = 1; i <= BUFFER_SIZE; i++) {
+            Stanza tmp = createStanza(i);
+            assertTrue("ACK would not be sent.", handle(tmp, tmp.getTo()));
+        }
+
+        AtomicLong threshold = sequenceNumbers.get(stanza.getSequencePrincipal());
+        List<Stanza> inbox = inboxes.get(stanza.getSequencePrincipal());
+        assertEquals("Wrong threshold", 0L, threshold.get());
+        assertNotNull("Inbox has not been created", inbox);
+        assertEquals("Wrong inbox size", BUFFER_SIZE, inbox.size());
+
+        Stanza last = createStanza(BUFFER_SIZE + 1);
+        assertFalse("Stanza was stored although buffer was full.", handle(last, last.getTo()));
+        inbox = inboxes.get(stanza.getSequencePrincipal());
+        assertEquals("Wrong threshold", 0L, threshold.get());
+        assertNotNull("Inbox has not been created", inbox);
+        assertEquals("Wrong inbox size", BUFFER_SIZE, inbox.size());
+
+        assertTrue("ACK would not be sent.", handle(stanza, stanza.getTo()));
+        inbox = inboxes.get(stanza.getSequencePrincipal());
+        assertEquals("Wrong threshold", BUFFER_SIZE + 1, threshold.get());
+        assertNull("Inbox has not been removed", inbox);
+        assertEquals("Handled stanzas in wrong order", BUFFER_SIZE, lastInternallyHandledSeqNum);
+    }
+
     @Test
     public void testArbitraryStanzaLoss() throws Exception {
-        Random random = new Random(System.currentTimeMillis());
-        int messages;
-        do {
-            messages = random.nextInt(1000);
-        } while (messages < 10);
-        
+        int messages = BUFFER_SIZE;
         int div;
+        Random random = new Random(System.currentTimeMillis());
         do {
             div = random.nextInt(messages / 2);
         } while (div == 0);
-        
+
         int modul = messages / div;
-        
         List<Stanza> stanzas = new ArrayList<Stanza>(messages);
         for (int i = 0; i < messages; i++) {
             stanzas.add(i, createStanza(i));
         }
-        
+
         List<Stanza> lost = new ArrayList<Stanza>();
         for (Stanza stanza : stanzas) {
             if (stanza.getSequenceNumber() == 0) {
@@ -195,7 +220,7 @@ public class StanzaSequenceGateTest extends StanzaSequenceGate {
                 handle(stanza, stanza.getTo());
             }
         }
-        
+
         Iterator<Stanza> it = lost.iterator();
         while (it.hasNext()) {
             Stanza stanza = it.next();
@@ -206,7 +231,7 @@ public class StanzaSequenceGateTest extends StanzaSequenceGate {
             handle(stanza, stanza.getTo());
             it.remove();
         }
-        
+
         AtomicLong threshold = sequenceNumbers.get(stanzas.get(0).getSequencePrincipal());
         List<Stanza> inbox = inboxes.get(stanzas.get(0).getSequencePrincipal());
         assertEquals("Wrong threshold", messages, threshold.get());
