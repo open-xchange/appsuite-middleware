@@ -117,7 +117,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     /*
      * Map full client IDs to the AtmosphereResource that represents their connection to the server, this is used for sending
      */
-    private final IDMap<AtmosphereResource> concreteIDToResourceMap;
+    private final ConcurrentHashMap<ID, AtmosphereResource> concreteIDToResourceMap;
 
     /*
      * Map for holding outboxes
@@ -152,7 +152,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     public RTAtmosphereHandler() {
         super();
         generalToConcreteIDMap = new IDMap<Set<ID>>();
-        concreteIDToResourceMap = new IDMap<AtmosphereResource>();
+        concreteIDToResourceMap = new ConcurrentHashMap<ID, AtmosphereResource>();
         outboxes = new ConcurrentHashMap<ID, List<EnqueuedStanza>>();
         this.atmosphereServiceRegistry = AtmosphereServiceRegistry.getInstance();
         atmosphereResourceReaper = new AtmosphereResourceReaper();
@@ -311,7 +311,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     Set<ID> ids = idsPerSession.remove(sessionValidator.getSessionId());
                     if (ids != null) {
                         for (ID id : ids) {
-                            AtmosphereResource atmosphereResource = concreteIDToResourceMap.get(id);
+                            AtmosphereResource atmosphereResource = concreteIDToResourceMap.remove(id);
                             try {
                                 writeExceptionToResource(e, atmosphereResource);
                                 atmosphereResource.resume();
@@ -491,10 +491,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         if (fullClientIDs == null || fullClientIDs.isEmpty()) {
             return false;
         }
-        if (!fullClientIDs.contains(id)) {
-            return false;
-        }
-        if (concreteIDToResourceMap.containsKey(id)) {
+        if (fullClientIDs.contains(id)) {
             return true;
         }
         return false;
@@ -577,7 +574,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         List<Stanza> stanzasToSend = new LinkedList<Stanza>();
         try {
             id.lock("rt-atmosphere-outbox");
-            AtmosphereResource atmosphereResource = concreteIDToResourceMap.get(id);
+            AtmosphereResource atmosphereResource = concreteIDToResourceMap.remove(id);
             boolean failed = false;
             boolean sent = false;
 
@@ -655,6 +652,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 case AJAX:
                 case LONG_POLLING:
                     if (!atmosphereResource.getResponse().isCommitted()) {
+                        concreteIDToResourceMap.putIfAbsent(id, atmosphereResource);
                         atmosphereResource.suspend();
                     }
                     break;
