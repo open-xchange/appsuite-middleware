@@ -1,3 +1,9 @@
+open-xchange-oauth (7.0.1-7) unstable; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Fri, 10 May 2013 08:48:47 +0200
+
 open-xchange-oauth (7.0.1-6) unstable; urgency=low
 
   * Build for patch 2013-04-04
