@@ -1,9 +1,3 @@
-open-xchange-authentication-ucs (7.0.1-7) unstable; urgency=low
-
-  * Build for patch 2013-05-09
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 10 May 2013 08:48:21 +0200
-
 open-xchange-authentication-ucs (7.0.1-6) unstable; urgency=low
 
   * Build for patch 2013-04-04
