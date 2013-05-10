@@ -94,11 +94,11 @@ public abstract class StanzaSequenceGate {
         }
         try {
             stanza.getSequencePrincipal().lock("gate");
-            AtomicLong threshhold = sequenceNumbers.get(stanza.getSequencePrincipal());
+            AtomicLong threshold = sequenceNumbers.get(stanza.getSequencePrincipal());
             /* We haven't recorded a threshold for this principal, yet */
-            if (threshhold == null) {
-                threshhold = new AtomicLong(stanza.getSequenceNumber());
-                AtomicLong meantime = sequenceNumbers.putIfAbsent(stanza.getSequencePrincipal(), threshhold);
+            if (threshold == null) {
+                threshold = new AtomicLong(0);
+                AtomicLong meantime = sequenceNumbers.putIfAbsent(stanza.getSequencePrincipal(), threshold);
                 /*
                  * Add eventhandler to clean up the traces we left in the gate when the the principal receives the dispose event, e.g when
                  * all members left the GroupDispatcher(SequencePrincipal)
@@ -113,20 +113,17 @@ public abstract class StanzaSequenceGate {
                         }
                     });
                 } else {
-                    threshhold = meantime;
+                    threshold = meantime;
                 }
             }
-            /* Best case, we found the follow up Stanza */
-            if (stanza.getSequenceNumber() == 0) {
-                threshhold.set(0);
-            }
-            stanza.trace("Stanza Gate ("+ name + ") : " + stanza.getSequencePrincipal()+":"+stanza.getSequenceNumber() + ":" + threshhold);
+
+            stanza.trace("Stanza Gate ("+ name + ") : " + stanza.getSequencePrincipal()+":"+stanza.getSequenceNumber() + ":" + threshold);
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Stanza Gate ("+ name + ") : " + stanza.getSequencePrincipal()+":"+stanza.getSequenceNumber() + ":" + threshhold);
+                LOG.debug("Stanza Gate ("+ name + ") : " + stanza.getSequencePrincipal()+":"+stanza.getSequenceNumber() + ":" + threshold);
             }
-            if (threshhold.compareAndSet(stanza.getSequenceNumber(), stanza.getSequenceNumber() + 1)) {
+            if (threshold.compareAndSet(stanza.getSequenceNumber(), stanza.getSequenceNumber() + 1)) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Best case, Threshold: " + threshhold.get());
+                    LOG.debug("Best case, Threshold: " + threshold.get());
                 }
                 stanza.trace("Passing gate " + name);
                 handleInternal(stanza, recipient);
@@ -155,7 +152,7 @@ public abstract class StanzaSequenceGate {
 
                 /* Stanzas got out of sync, enqueue until we receive the Stanza matching threshold */
             } else {
-                if (threshhold.get() > stanza.getSequenceNumber()) {
+                if (threshold.get() > stanza.getSequenceNumber()) {
                     // Discard as this stanza already passed the gate once
                     stanza.trace("Discarded as this sequence number has already successfully passed this gate: " + stanza.getSequenceNumber());
                     LOG.debug("Discarded as this sequence number has already successfully passed this gate: " + stanza.getSequenceNumber());
@@ -163,7 +160,7 @@ public abstract class StanzaSequenceGate {
                 }
                 stanza.trace("Not in sequence, enqueing");
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Stanzas not in sequence, Threshold: " + threshhold.get() + " SequenceNumber: " + stanza.getSequenceNumber());
+                    LOG.debug("Stanzas not in sequence, Threshold: " + threshold.get() + " SequenceNumber: " + stanza.getSequenceNumber());
                 }
                 List<Stanza> inbox = inboxes.get(stanza.getSequencePrincipal());
                 if (inbox == null) {
