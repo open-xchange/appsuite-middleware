@@ -77,7 +77,6 @@ import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
-import com.openexchange.ajax.requesthandler.Utils;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
@@ -169,19 +168,27 @@ public class FileResponseRenderer implements ResponseRenderer {
              *
              */
             // Check certain parameters
-            String contentType = AJAXServlet.encodeUrl(req.getParameter(PARAMETER_CONTENT_TYPE), true);
-            if (null == contentType) {
-                contentType = fileContentType;
-            }
             String delivery = AJAXServlet.sanitizeParam(req.getParameter(DELIVERY));
             if (delivery == null) {
                 delivery = file.getDelivery();
             }
+            String contentType = AJAXServlet.encodeUrl(req.getParameter(PARAMETER_CONTENT_TYPE), true);
+            if (null == contentType) {
+                if (DOWNLOAD.equalsIgnoreCase(delivery)) {
+                    contentType = SAVE_AS_TYPE;
+                } else {
+                    contentType = fileContentType;
+                }
+            }
             String contentDisposition = AJAXServlet.encodeUrl(req.getParameter(PARAMETER_CONTENT_DISPOSITION));
             if (null == contentDisposition) {
-                contentDisposition = file.getDisposition();
-            } else {
-                contentDisposition = Utils.encodeUrl(contentDisposition);
+                if (VIEW.equalsIgnoreCase(delivery)) {
+                    contentDisposition = "inline";
+                } else if (DOWNLOAD.equalsIgnoreCase(delivery)) {
+                    contentDisposition = "attachment";
+                } else {
+                    contentDisposition = file.getDisposition();
+                }
             }
             // Write to Servlet's output stream
             file = transformIfImage(request, file, delivery);
