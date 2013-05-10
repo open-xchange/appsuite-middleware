@@ -4,7 +4,10 @@ package com.openexchange.realtime.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,12 +50,14 @@ public class StanzaSequenceGateTest extends StanzaSequenceGate {
         assertEquals("Wrong number of stored stanzas", 1, inbox.size());
 
         handle(stanza0, stanza0.getTo());
+        inbox = inboxes.get(stanza0.getSequencePrincipal());
         assertEquals("Wrong threshold", 2L, threshold.get());
-        assertEquals("Wrong number of stored stanzas", 0, inbox.size());
+        assertNull("Inbox has not been removed", inbox);
 
         handle(stanza2, stanza2.getTo());
+        inbox = inboxes.get(stanza0.getSequencePrincipal());
         assertEquals("Wrong threshold", 3L, threshold.get());
-        assertEquals("Wrong number of stored stanzas", 0, inbox.size());
+        assertNull("Inbox has not been removed", inbox);
     }
 
     @Test
@@ -159,13 +164,60 @@ public class StanzaSequenceGateTest extends StanzaSequenceGate {
         assertNull("Inbox has not been removed", inbox);
         assertEquals("Handled stanzas in wrong order", 5L, lastInternallyHandledSeqNum);
     }
+    
+    @Test
+    public void testArbitraryStanzaLoss() throws Exception {
+        Random random = new Random(System.currentTimeMillis());
+        int messages;
+        do {
+            messages = random.nextInt(1000);
+        } while (messages < 10);
+        
+        int div;
+        do {
+            div = random.nextInt(messages / 2);
+        } while (div == 0);
+        
+        int modul = messages / div;
+        
+        List<Stanza> stanzas = new ArrayList<Stanza>(messages);
+        for (int i = 0; i < messages; i++) {
+            stanzas.add(i, createStanza(i));
+        }
+        
+        List<Stanza> lost = new ArrayList<Stanza>();
+        for (Stanza stanza : stanzas) {
+            if (stanza.getSequenceNumber() == 0) {
+                handle(stanza, stanza.getTo());
+            } else if (stanza.getSequenceNumber() % modul == 0) {
+                lost.add(stanza);
+            } else {
+                handle(stanza, stanza.getTo());
+            }
+        }
+        
+        Iterator<Stanza> it = lost.iterator();
+        while (it.hasNext()) {
+            Stanza stanza = it.next();
+            AtomicLong threshold = sequenceNumbers.get(stanza.getSequencePrincipal());
+            List<Stanza> inbox = inboxes.get(stanza.getSequencePrincipal());
+            assertEquals("Wrong threshold", stanza.getSequenceNumber(), threshold.get());
+            assertEquals("Wrong inbox size", messages - stanza.getSequenceNumber() - lost.size(), inbox.size());
+            handle(stanza, stanza.getTo());
+            it.remove();
+        }
+        
+        AtomicLong threshold = sequenceNumbers.get(stanzas.get(0).getSequencePrincipal());
+        List<Stanza> inbox = inboxes.get(stanzas.get(0).getSequencePrincipal());
+        assertEquals("Wrong threshold", messages, threshold.get());
+        assertNull("Inbox has not been removed", inbox);
+    }
 
     private Stanza createStanza(long seqNum) {
         Stanza stanza = new Message();
         stanza.setFrom(new ID("ox", "testuser", "testcontext", "resource"));
         stanza.setTo(new ID("synthetic", "testcomponent", "", "", "resource"));
         stanza.setSequenceNumber(seqNum);
-        stanza.setSequencePrincipal(stanza.getTo());
         stanza.setTracer("#Stanza " + seqNum);
         return stanza;
     }
