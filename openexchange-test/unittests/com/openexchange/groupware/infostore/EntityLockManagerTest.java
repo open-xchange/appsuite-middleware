@@ -27,7 +27,10 @@ public class EntityLockManagerTest extends TestCase {
 
 	private final int entity = 23;
 
-
+    private static final long MILLIS_WEEK = 604800000L;
+    private static final long MILLIS_YEAR = 52 * MILLIS_WEEK;
+    private static final long MILLIS_10_YEARS = 10 * MILLIS_YEAR;
+    
 	private Context ctx = new ContextImpl(1);
 	private User user = null;
 	private final UserConfiguration userConfig = null;
@@ -82,7 +85,7 @@ public class EntityLockManagerTest extends TestCase {
 		final Lock lock = locks.get(0);
 		assertEquals(lockId, lock.getId());
 		assertEquals(user.getId(), lock.getOwner());
-		assertTrue(Long.MAX_VALUE-lock.getTimeout()-System.currentTimeMillis()<1000);
+		assertTrue(MILLIS_10_YEARS-lock.getTimeout()-System.currentTimeMillis()<1000);
 		assertEquals(LockManager.Scope.EXCLUSIVE, lock.getScope());
 		assertEquals(LockManager.Type.WRITE, lock.getType());
 	}
