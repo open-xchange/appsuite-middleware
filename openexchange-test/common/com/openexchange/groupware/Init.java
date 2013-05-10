@@ -141,7 +141,8 @@ import com.openexchange.i18n.parsing.Translations;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.IMAPStoreCache;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.osgi.IMAPActivator;
+import com.openexchange.imap.services.Services;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
@@ -682,16 +683,17 @@ public final class Init {
          */
         MailProperties.getInstance().loadProperties();
 
-        final com.openexchange.osgi.ServiceRegistry imapServiceRegistry = IMAPServiceRegistry.getServiceRegistry();
         if (null == MailProviderRegistry.getMailProvider("imap_imaps")) {
-            imapServiceRegistry.addService(ConfigurationService.class, services.get(ConfigurationService.class));
-            imapServiceRegistry.addService(CacheService.class, services.get(CacheService.class));
-            imapServiceRegistry.addService(UserService.class, services.get(UserService.class));
-            imapServiceRegistry.addService(MailAccountStorageService.class, services.get(MailAccountStorageService.class));
-            imapServiceRegistry.addService(UnifiedInboxManagement.class, services.get(UnifiedInboxManagement.class));
-            imapServiceRegistry.addService(ThreadPoolService.class, services.get(ThreadPoolService.class));
-            imapServiceRegistry.addService(TimerService.class, services.get(TimerService.class));
-            imapServiceRegistry.addService(DatabaseService.class, services.get(DatabaseService.class));
+            Services.setServiceLookup(new ServiceLookup() {
+                @Override
+                public <S> S getService(Class<? extends S> clazz) {
+                    return (S) services.get(clazz);
+                }
+                @Override
+                public <S> S getOptionalService(Class<? extends S> clazz) {
+                    return (S) services.get(clazz);
+                }
+            });
             IMAPStoreCache.initInstance();
             /*
              * Register IMAP bundle
@@ -915,7 +917,7 @@ public final class Init {
     }
 
     public static void stopMailBundle() {
-        IMAPServiceRegistry.getServiceRegistry().removeService(TimerService.class);
+        Services.setServiceLookup(null);
         IMAPStoreCache.shutDownInstance();
     }
 
