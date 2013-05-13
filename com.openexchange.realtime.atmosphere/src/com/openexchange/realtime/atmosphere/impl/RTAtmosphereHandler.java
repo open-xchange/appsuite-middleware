@@ -601,6 +601,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         try {
             id.lock("rt-atmosphere-outbox");
             AtmosphereResource atmosphereResource = concreteIDToResourceMap.remove(id);
+            if (atmosphereResource == null) {
+                return;
+            }
             boolean failed = false;
             boolean sent = false;
 
