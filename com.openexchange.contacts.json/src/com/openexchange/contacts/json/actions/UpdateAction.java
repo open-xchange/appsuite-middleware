@@ -50,6 +50,7 @@
 package com.openexchange.contacts.json.actions;
 
 import java.util.Date;
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -62,6 +63,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 
@@ -100,6 +102,16 @@ public class UpdateAction extends ContactAction {
 		}
         if (containsImage) {
         	RequestTools.setImageData(request, contact);
+        } else if (json.hasAndNotNull("image1")) {
+            try {
+                final byte[] image1 = Base64.decodeBase64(json.optString("image1", ""));
+                if (null != image1 && image1.length > 0) {
+                    final String mimeType = json.optString("image1_content_type", "image/jpeg");
+                    RequestTools.setImageData(contact, image1, mimeType);
+                }
+            } catch (final RuntimeException e) {
+                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
         }
         getContactService().updateContact(request.getSession(), request.getFolderID(), request.getObjectID(), contact,
         		new Date(request.getTimestamp()));
