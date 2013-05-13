@@ -201,7 +201,11 @@ public class SyntheticChannel implements Channel, Runnable {
         if (handle.shouldBeDoneInGlobalThread(stanza)) {
             new MessageDispatch(handle, stanza).tick();
         } else {
-            runLoop.offer(new MessageDispatch(handle, stanza));
+            final boolean taken = runLoop.offer(new MessageDispatch(handle, stanza));
+            if (!taken) {
+                LOG.error("Queue refused offered Stanza");
+                RealtimeExceptionCodes.UNEXPECTED_ERROR.create("Queue refused offered Stanza");
+            }
         }
     }
     
