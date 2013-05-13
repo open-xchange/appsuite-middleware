@@ -1,3 +1,9 @@
+open-xchange-munin-scripts (0.1-15) unstable; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 13 May 2013 14:26:45 +0200
+
 open-xchange-munin-scripts (0.1-14) unstable; urgency=low
 
   * Build for patch 2013-04-04
