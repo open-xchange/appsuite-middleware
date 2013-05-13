@@ -180,6 +180,13 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
                 }
             }
         }
+        /*-
+         * Maximum operation timeout in milliseconds if no timeout is specified for an operation. (default 300 seconds)
+         *
+         * hazelcast.max.operation.timeout
+         */
+        String maxOperationTimeout = configService.getProperty("com.openexchange.hazelcast.maxOperationTimeout", "300000");
+        config.setProperty(GroupProperties.PROP_MAX_OPERATION_TIMEOUT, maxOperationTimeout);
         /*
          * data structure configs
          */
