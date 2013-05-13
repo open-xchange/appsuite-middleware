@@ -49,6 +49,7 @@
 package com.openexchange.oauth.linkedin;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -56,7 +57,9 @@ import java.util.Properties;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
+import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.PropertyListener;
+import com.openexchange.exception.OXException;
 
 public class MockConfigurationService implements ConfigurationService {
 
@@ -67,6 +70,11 @@ public class MockConfigurationService implements ConfigurationService {
 		props.put("com.openexchange.socialplugin.linkedin.apisecret", apiSecret);
 		props.put("com.openexchange.socialplugin.linkedin.apikey", apiKey);
 	}
+
+	@Override
+    public Map<String, String> getProperties(final PropertyFilter filter) throws OXException {
+        return Collections.emptyMap();
+    }
 
 	@Override
 	public String getProperty(String name) {
