@@ -90,6 +90,16 @@ public class NewAction extends ContactAction {
     protected AJAXRequestResult perform(ContactRequest request) throws OXException {
         boolean containsImage = request.containsImage();
         JSONObject json = request.getContactJSON(containsImage);
+
+        String imageBase64 = null;
+        {
+            Object imageObject = json.opt("image1");
+            if (imageObject instanceof String) {
+                json.remove("image1");
+                imageBase64 = (String) imageObject;
+            }
+        }
+
         String folderID = json.optString("folder_id", null);
         if (null == folderID) {
 			throw OXJSONExceptionCodes.MISSING_FIELD.create("folder_id");
@@ -102,9 +112,9 @@ public class NewAction extends ContactAction {
 		}
         if (containsImage) {
         	RequestTools.setImageData(request, contact);
-        } else if (json.hasAndNotNull("image1")) {
+        } else if (null != imageBase64) {
             try {
-                final byte[] image1 = Base64.decodeBase64(json.optString("image1", ""));
+                final byte[] image1 = Base64.decodeBase64(imageBase64);
                 if (null != image1 && image1.length > 0) {
                     final String mimeType = json.optString("image1_content_type", "image/jpeg");
                     RequestTools.setImageData(contact, image1, mimeType);
