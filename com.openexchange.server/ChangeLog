@@ -1,3 +1,7 @@
+* 2013-05-13 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 26545: Changed from getJSONArray to optJSONArray to avoid exception
+
 * 2013-05-13 - martin.herfurth@open-xchange.com
 
  - Fix for bug 26207: Full DateTime for Due Date of Tasks on ical creation.
