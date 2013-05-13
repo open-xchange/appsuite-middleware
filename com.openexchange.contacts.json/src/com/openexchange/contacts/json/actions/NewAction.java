@@ -125,8 +125,7 @@ public class NewAction extends ContactAction {
         }
         getContactService().createContact(request.getSession(), folderID, contact);
         try {
-            JSONObject object = new JSONObject("{\"id\":" + contact.getObjectID() + "}");
-            return new AJAXRequestResult(object, contact.getLastModified(), "json");
+            return new AJAXRequestResult(new JSONObject(1).put("id", contact.getObjectID()), contact.getLastModified(), "json");
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
