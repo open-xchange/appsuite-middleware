@@ -200,7 +200,21 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     }
 
                     // finally suspend the resource until data is available for the clients and resource gets resumed after send
-                    drainOutbox(constructedId, msg);
+                    if (!drainOutbox(constructedId, msg)) {
+                        switch (resource.transport()) {
+                            case JSONP:
+                            case AJAX:
+                            case LONG_POLLING:
+                                if (!resource.getResponse().isCommitted()) {
+                                    resource.suspend();
+                                } else {
+                                    LOG.warn("Resource is already committed.");
+                                }
+                                break;
+                            default:
+                                break;
+                            }
+                    }
                 } else {
                     response.getWriter().write("OK");
                 }
@@ -591,7 +605,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         drainOutbox(id, null);
     }
 
-    private void drainOutbox(ID id, Stanza msg) throws OXException {
+    private boolean drainOutbox(ID id, Stanza msg) throws OXException {
         List<EnqueuedStanza> outbox = null;
         List<Stanza> stanzasToSend = new LinkedList<Stanza>();
         if (msg != null) {
@@ -677,24 +691,14 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 case AJAX:
                 case LONG_POLLING:
                     atmosphereResource.resume();
-                    break;
-                default:
-                    break;
-                }
-            } else {
-                switch (atmosphereResource.transport()) {
-                case JSONP:
-                case AJAX:
-                case LONG_POLLING:
-                    if (!atmosphereResource.getResponse().isCommitted()) {
-                        concreteIDToResourceMap.putIfAbsent(id, atmosphereResource);
-                        atmosphereResource.suspend();
-                    }
+                    concreteIDToResourceMap.remove(id);
                     break;
                 default:
                     break;
                 }
             }
+
+           return sent;
         } catch (OXException x) {
             throw x;
         } catch (Throwable t) {
@@ -716,10 +720,11 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     s.trace(stackTrace);
                 }
             }
+            
+            return false;
         } finally {
             id.unlock("rt-atmosphere-outbox");
         }
-
     }
 
     private void handleResourceNotAvailable() throws OXException {
