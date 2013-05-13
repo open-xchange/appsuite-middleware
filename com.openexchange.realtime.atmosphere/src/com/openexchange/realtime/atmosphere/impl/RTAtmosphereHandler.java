@@ -668,6 +668,12 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         atmosphereResource.getResponse().write(array.toString());
                         outbox = null;
                     }
+                    sent = true;
+                    atmosphereResource.getResponse().write(array.toString());
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Successfully wrote: " + array.toString());
+                    }
+                    outbox = null;
                 }
             }
 

@@ -424,7 +424,9 @@ public class GroupDispatcher implements ComponentHandle {
      * Called for a stanza if no other handler is found.
      */
     protected void defaultAction(Stanza stanza) {
-
+        if (LOG.isErrorEnabled()) {
+            LOG.error("Couldn't find matching handler for " + stanza.toString() + ". \nUse default");
+        }
     }
 
     private final IDEventHandler LEAVE = new IDEventHandler() {

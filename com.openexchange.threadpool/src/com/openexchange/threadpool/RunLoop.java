@@ -87,8 +87,8 @@ public abstract class RunLoop<E> implements Runnable {
         }
     }
     
-    public void offer(E element) {
-        queue.offer(element);
+    public boolean offer(final E element) {
+        return this.queue.offer(element);
     }
 
     protected abstract void handle(E element) throws OXException;
