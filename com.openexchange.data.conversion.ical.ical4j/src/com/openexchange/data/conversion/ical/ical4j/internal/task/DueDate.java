@@ -49,7 +49,7 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal.task;
 
-import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDate;
+import static com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools.toDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -81,7 +81,7 @@ public class DueDate extends AbstractVerifyingAttributeConverter<VToDo, Task> {
     @Override
     public void emit(final Mode mode, final int index, final Task task, final VToDo vToDo, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
         String tz = EmitterTools.extractTimezoneIfPossible(task);
-        net.fortuna.ical4j.model.Date date = toDate(task.getEndDate(), tz);
+        net.fortuna.ical4j.model.Date date = toDateTime(mode.getZoneInfo(), task.getEndDate(), tz);
         vToDo.getProperties().add(new Due(date));
     }
 
