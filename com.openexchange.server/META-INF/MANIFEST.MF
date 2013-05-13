@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange Server
 Bundle-SymbolicName: com.openexchange.server
 Bundle-Version: 6.22.0
 OXVersion: 6.22.0
-OXRevision: 16
+OXRevision: 15
 Bundle-Activator: com.openexchange.server.osgi.ServerCompositeActivator
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.damienmiller,
