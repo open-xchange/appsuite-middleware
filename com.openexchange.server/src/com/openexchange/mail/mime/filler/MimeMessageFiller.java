@@ -128,6 +128,7 @@ import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -1797,7 +1798,7 @@ public class MimeMessageFiller {
                         try {
                             imageProvider = new ImageDataImageProvider(dataSource, imageLocation, session);
                         } catch (final OXException e) {
-                            if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
+                            if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e) || isFolderNotFound(e)) {
                                 tmp.setLength(0);
                                 m.appendLiteralReplacement(sb, imageTag);
                                 continue;
@@ -2089,4 +2090,10 @@ public class MimeMessageFiller {
         return builder.toString();
     }
 
+    private static boolean isFolderNotFound(final OXException e) {
+        if (null == e) {
+            return false;
+        }
+        return ((MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) || ("IMAP".equals(e.getPrefix()) && (MimeMailExceptionCode.FOLDER_NOT_FOUND.getNumber() == e.getCode())));
+    }
 }

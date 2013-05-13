@@ -1,3 +1,7 @@
+* 2013-05-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26473: Orderly detect "Folder not found" error message when trying to resolve a "local" image by a URL
+
 * 2013-05-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 26456: Accept flag parameters (without a parameter value)
