@@ -1800,7 +1800,7 @@ public class MimeMessageFiller {
                         } catch (final OXException e) {
                             if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e) || isFolderNotFound(e)) {
                                 tmp.setLength(0);
-                                m.appendLiteralReplacement(sb, imageTag);
+                                m.appendLiteralReplacement(sb, blankSrc(imageTag));
                                 continue;
                             }
                             throw e;
