@@ -1,3 +1,9 @@
+open-xchange-file-storage-cifs (7.2.0-7) UNRELEASED; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 13 May 2013 15:25:04 +0200
+
 open-xchange-file-storage-cifs (7.2.0-6) UNRELEASED; urgency=low
 
   * Build for patch 2013-04-23
