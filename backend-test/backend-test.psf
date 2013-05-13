@@ -18,6 +18,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.file.storage.composition"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.file.storage.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.global"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.html"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.http.deferrer"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.i18n"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.mail.filter"/>
