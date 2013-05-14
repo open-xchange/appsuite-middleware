@@ -49,6 +49,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.spamhandler.cloudmark/ChangeLog
 
 %changelog
+* Mon May 13 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Build for patch 2013-05-09
 * Fri May 03 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 Build for patch 2013-04-23
 * Tue Apr 30 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
