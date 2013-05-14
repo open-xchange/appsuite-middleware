@@ -116,7 +116,7 @@ public class JoinAction extends AbstractChatConversationAction {
                 }
             }
         }
-        return new AJAXRequestResult(new JSONObject(), "json");
+        return new AJAXRequestResult(new JSONObject(0), "json");
     }
 
 }

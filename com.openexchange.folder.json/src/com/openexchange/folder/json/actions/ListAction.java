@@ -152,7 +152,7 @@ public final class ListAction extends AbstractFolderAction {
              * Return appropriate result
              */
             final Date dNull = null;
-            return new AJAXRequestResult(new JSONArray(), dNull).addWarnings(subfoldersResponse.getWarnings());
+            return new AJAXRequestResult(new JSONArray(0), dNull).addWarnings(subfoldersResponse.getWarnings());
         }
         /*
          * length > 0

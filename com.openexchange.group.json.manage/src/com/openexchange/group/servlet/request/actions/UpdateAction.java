@@ -99,7 +99,7 @@ public final class UpdateAction extends AbstractGroupAction {
         final GroupService groupService = getService(GroupService.class);
         final ServerSession session = req.getSession();
         groupService.update(session.getContext(), session.getUser(), group, timestamp);
-        return new AJAXRequestResult(new JSONObject(), group.getLastModified(), "json");
+        return new AJAXRequestResult(new JSONObject(0), group.getLastModified(), "json");
     }
 
 }

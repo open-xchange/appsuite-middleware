@@ -210,7 +210,7 @@ public final class SearchAction extends AbstractMailAction {
                     jsonWriter.endArray();
                     result = new AJAXRequestResult(jsonWriter.getObject(), "json");
                 } else {
-                    result = new AJAXRequestResult(new JSONArray(), "json");
+                    result = new AJAXRequestResult(new JSONArray(0), "json");
                 }
             } else {
                 final JSONArray searchArray = searchValue.toObject().getJSONArray(Mail.PARAMETER_FILTER);

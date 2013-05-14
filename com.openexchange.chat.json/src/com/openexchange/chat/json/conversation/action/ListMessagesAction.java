@@ -111,7 +111,7 @@ public final class ListMessagesAction extends AbstractChatConversationAction {
             }
             final List<Message> messages = access.getChat(conversationID.getChatId()).getMessages(messageIds, Integer.parseInt(access.getUser().getId()));
             if (messages.isEmpty()) {
-                return new AJAXRequestResult(new JSONArray(), "json");
+                return new AJAXRequestResult(new JSONArray(0), "json");
             }
             Date timestamp = messages.get(0).getTimeStamp();
             for (int i = 1, size = messages.size(); i < size; i++) {
