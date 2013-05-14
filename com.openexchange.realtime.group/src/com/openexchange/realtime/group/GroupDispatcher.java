@@ -55,8 +55,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
-import javax.annotation.concurrent.NotThreadSafe;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.realtime.Component;
@@ -80,17 +82,21 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
+public class GroupDispatcher implements ComponentHandle {
 
     private static final org.apache.commons.logging.Log LOG = Log.loggerFor(GroupDispatcher.class);
 
-    public static ServiceLookup services = null;
+    /**
+     * The <code>ServiceLookup</code> reference.
+     */
+    private static final AtomicReference<ServiceLookup> SERVICE_REF = new AtomicReference<ServiceLookup>();
 
-    private final List<ID> ids = new ArrayList<ID>();
+    /** The collection of IDs that might be concurrently accessed */
+    private final Queue<ID> ids = new LinkedBlockingQueue<ID>();
 
     private final Map<ID, String> stamps = new HashMap<ID, String>();
 
-    /* ID of the group */
+    /** ID of the group */
     private final ID id;
 
     private long sequenceNumber = 0;
@@ -115,6 +121,7 @@ public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
     public GroupDispatcher(ID id, ActionHandler handler) {
         this.id = id;
         this.handler = handler;
+        final Queue<ID> ids = this.ids;
         id.on("dispose", new IDEventHandler() {
 
             @Override
@@ -124,12 +131,14 @@ public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
                     if (properties != null) {
                         memberId = (ID) properties.get("id");
                     }
+                    // ???
                     if (ids.size() > 0) {
-                        memberId = ids.get(0);
+                        memberId = ids.peek();
                     }
                     if (memberId == null) {
                         memberId = id;
                     }
+                    // ???
                     onDispose(memberId != null ? memberId : id);
                 } catch (OXException e) {
                     LOG.error(e.getMessage(), e);
@@ -203,7 +212,7 @@ public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
      * Send a copy of the stanza to all members of this group, excluding the ones provided as the rest of the arguments.
      */
     public void relayToAll(Stanza stanza, Stanza inResponseTo, ID... excluded) throws OXException {
-        MessageDispatcher dispatcher = services.getService(MessageDispatcher.class);
+        MessageDispatcher dispatcher = SERVICE_REF.get().getService(MessageDispatcher.class);
         Set<ID> ex = new HashSet<ID>(Arrays.asList(excluded));
         // Iterate over snapshot
         for (ID id : new ArrayList<ID>(ids)) {
@@ -240,7 +249,7 @@ public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
      */
     public void send(Stanza stanza) throws OXException {
         stamp(stanza);
-        MessageDispatcher dispatcher = services.getService(MessageDispatcher.class);
+        MessageDispatcher dispatcher = SERVICE_REF.get().getService(MessageDispatcher.class);
 
         dispatcher.send(stanza);
     }
@@ -266,7 +275,7 @@ public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
         }
         boolean first = ids.isEmpty();
 
-        ids.add(id);
+        ids.offer(id);
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("joining:" + id.toString());
@@ -378,14 +387,14 @@ public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
      * Callback that is called before an ID joins the group. Override this to be notified of a member about to join the group.
      */
     protected void beforeJoin(ID id) {
-
+        // Empty method
     }
 
     /**
      * Callback that is called after a new member has joined the group.
      */
     protected void onJoin(ID id) {
-
+        // Empty method
     }
 
     /**
@@ -399,14 +408,14 @@ public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
      * Callback that is called before a member leaves the group
      */
     protected void beforeLeave(ID id) {
-
+        // Empty method
     }
 
     /**
      * Callback that is called after a member left the group
      */
     protected void onLeave(ID id) {
-
+        // Empty method
     }
 
     /**
@@ -417,7 +426,7 @@ public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
      * @throws OXException
      */
     protected void onDispose(ID id) throws OXException {
-
+        // Empty method
     }
 
     /**
@@ -436,6 +445,7 @@ public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
             try {
                 leave(id);
             } catch (OXException e) {
+                // Ignore
             }
         }
     };
