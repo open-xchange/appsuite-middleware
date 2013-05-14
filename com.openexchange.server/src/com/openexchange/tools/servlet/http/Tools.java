@@ -323,19 +323,20 @@ public final class Tools {
      */
     public static String logHeaderForError(final HttpServletRequest req) {
         final StringBuilder message = new StringBuilder();
-        message.append("|\n");
+        final String sep = System.getProperty("line.separator");
+        message.append("|").append(sep);
         message.append(HEADER_AGENT);
         message.append(": ");
         message.append(req.getHeader(HEADER_AGENT));
-        message.append('\n');
+        message.append(sep);
         message.append(HEADER_TYPE);
         message.append(": ");
         message.append(req.getHeader(HEADER_TYPE));
-        message.append('\n');
+        message.append(sep);
         message.append(HEADER_REFERER);
         message.append(": ");
         message.append(req.getHeader(HEADER_REFERER));
-        message.append('\n');
+        message.append(sep);
         message.append(HEADER_LENGTH);
         message.append(": ");
         message.append(req.getHeader(HEADER_LENGTH));
