@@ -83,7 +83,7 @@ public final class HttpSessionManagement {
             if (null == sessions) {
                 sessions = new NonBlockingHashMap<String, HttpSessionWrapper>();
                 final ConfigurationService service = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
-                maxActiveSessions = null == service ? -1 : service.getIntProperty("com.openexchange.servlet.maxActiveSessions", -1);
+                maxActiveSessions = null == service ? -1 : service.getIntProperty("com.openexchange.servlet.maxActiveSessions", 250000);
                 final TimerService timer = AJPv13ServiceRegistry.getInstance().getService(TimerService.class);
                 if (null != timer) {
                     sessionRemover = timer.scheduleWithFixedDelay(new SessionRemover(sessions), 300000, 300000); // Every 5 minutes

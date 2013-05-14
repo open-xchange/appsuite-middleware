@@ -540,6 +540,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return (req.getParameter(name) != null);
     }
 
+    @Deprecated
     private static int getMaxBodySize() {
         try {
             return ServerConfig.getInt(ServerConfig.Property.MAX_BODY_SIZE);

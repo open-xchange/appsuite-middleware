@@ -67,11 +67,11 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     private static final long SHORT_CONTAINER_LIFE_TIME = 6L * 60L * 1000L;
     private static final long LONG_CONTAINER_LIFE_TIME = 60L * 60L * 1000L;
 
-    private int maxSession = 5000;
+    private int maxSession = 50000;
     private int maxSessionsPerUser = 100;
     private int maxSessionsPerClient = 0;
     private long sessionShortLifeTime = 60L * 60L * 1000L;
-    private long randomTokenTimeout = 60L * 1000L;
+    private long randomTokenTimeout = 30000L;
     private long longLifeTime = 7L * 24L * 60L * 60L * 1000L;
     private boolean autoLogin = false;
     private String obfuscationKey = "auw948cz,spdfgibcsp9e8ri+<#qawcghgifzign7c6gnrns9oysoeivn";
@@ -111,7 +111,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
             LOG.debug("Sessiond property: com.openexchange.sessiond.sessionLongLifeTime=" + longLifeTime);
         }
 
-        tmp = conf.getProperty("com.openexchange.sessiond.randomTokenTimeout", "1M");
+        tmp = conf.getProperty("com.openexchange.sessiond.randomTokenTimeout", "30000");
         randomTokenTimeout = ConfigTools.parseTimespan(tmp);
         if (DEBUG) {
             LOG.debug("Sessiond property: com.openexchange.sessiond.randomTokenTimeout=" + randomTokenTimeout);
