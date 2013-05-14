@@ -1,3 +1,7 @@
+* 2013-05-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26162: Check for intermediately removed file prior to opening a FileInputStream to it
+
 * 2013-05-14 - marcus.klein@open-xchange.com
 
  - Fix for bug 26170: Renamed App Suite calendar printing templates again according to the required naming scheme.
