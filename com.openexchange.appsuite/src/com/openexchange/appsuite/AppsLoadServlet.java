@@ -90,7 +90,7 @@ public class AppsLoadServlet extends HttpServlet {
         tzCache = new FileCache(zoneinfo);
     }
 
-    private static Pattern moduleRE = Pattern.compile("(?:/(text|raw);)?([\\w/-]+(?:\\.[\\w/-]+)*)");
+    private static Pattern moduleRE = Pattern.compile("(?:/(text|raw);)?([\\w/+-]+(?:\\.[\\w/+-]+)*)");
 
     private static Pattern escapeRE = Pattern.compile("[\\x00-\\x1f'\\\\\\u2028\\u2029]");
 
