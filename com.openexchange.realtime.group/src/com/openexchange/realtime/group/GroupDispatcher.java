@@ -87,9 +87,9 @@ public class GroupDispatcher implements ComponentHandle {
 
     public static ServiceLookup services = null;
 
-    private final List<ID> ids = new CopyOnWriteArrayList<ID>();
+    private final List<ID> ids = new ArrayList<ID>();
 
-    private final Map<ID, String> stamps = new ConcurrentHashMap<ID, String>();
+    private final Map<ID, String> stamps = new HashMap<ID, String>();
 
     /* ID of the group */
     private final ID id;
