@@ -215,6 +215,12 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1445
+pfile=/opt/open-xchange/etc/hazelcast.properties
+if ! ox_exists_property com.openexchange.hazelcast.maxOperationTimeout $pfile; then
+    ox_set_property com.openexchange.hazelcast.maxOperationTimeout 300000 $pfile
+fi
+
 # SoftwareChange_Request-1426
 pfile=/opt/open-xchange/etc/server.properties
 if ! ox_exists_property com.openexchange.log.maxMessageLength $pfile; then
@@ -632,6 +638,8 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Mon May 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-05-09
 * Tue May 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-05-08
 * Fri May 03 2013 Marcus Klein <marcus.klein@open-xchange.com>

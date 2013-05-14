@@ -70,13 +70,19 @@ public class RTGroupActivator extends HousekeepingActivator implements BundleAct
 
     @Override
     protected void startBundle() throws Exception {
-        GroupDispatcher.services = this;
-    
+        GroupDispatcher.SERVICE_REF.set(this);
+
         getService(PayloadTreeConverter.class).declarePreferredFormat(new ElementPath("group", "command"), GroupCommand.class.getName());
-        
+
         registerService(SimplePayloadConverter.class, new GroupCommand2JSON());
         registerService(SimplePayloadConverter.class, new JSON2GroupCommand());
-    
+
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        GroupDispatcher.SERVICE_REF.set(null);
     }
 
 }

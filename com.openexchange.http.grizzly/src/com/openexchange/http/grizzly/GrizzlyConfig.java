@@ -152,6 +152,9 @@ public class GrizzlyConfig implements Initialization {
     /** The maximum allowed size for PUT and POST bodies */
     private int maxBodySize = 104857600;
 
+    /** The max. number of HTTP sessions */
+    private int maxNumberOfHttpSessions = 250000;
+
     // sessiond properties
 
     /** Is autologin enabled in the session.d properties? */
@@ -203,6 +206,8 @@ public class GrizzlyConfig implements Initialization {
         this.httpsProtoPort = configService.getIntProperty("com.openexchange.server.httpsProtoPort", 443);
         final int configuredMaxBodySize = configService.getIntProperty("com.openexchange.servlet.maxBodySize", 104857600);
         this.maxBodySize = configuredMaxBodySize <= 0 ? Integer.MAX_VALUE : configuredMaxBodySize;
+        final int configuredMaxNumberOfHttpSessions = configService.getIntProperty("com.openexchange.servlet.maxActiveSessions", 250000);
+        this.maxNumberOfHttpSessions = configuredMaxNumberOfHttpSessions <= 0 ? 0 : configuredMaxNumberOfHttpSessions;
 
         this.httpHost = configService.getProperty("com.openexchange.connector.networkListenerHost", "127.0.0.1");
         // keep backwards compatibility with ajp config
@@ -456,6 +461,15 @@ public class GrizzlyConfig implements Initialization {
     /** Get the maximum allowed size for PUT and POST bodies */
     public int getMaxBodySize() {
         return maxBodySize;
+    }
+
+    /**
+     * Gets the maximum number of active sessions
+     *
+     * @return The maximum number of active sessions
+     */
+    public int getMaxNumberOfHttpSessions() {
+        return maxNumberOfHttpSessions;
     }
 
 }

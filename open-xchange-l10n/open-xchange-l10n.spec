@@ -685,6 +685,8 @@ done
 /opt/open-xchange/i18n/*zh_TW*
 
 %changelog
+* Mon May 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-05-09
 * Fri May 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-23
 * Tue Apr 30 2013 Marcus Klein <marcus.klein@open-xchange.com>

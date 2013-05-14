@@ -1,6 +1,12 @@
+* 2013-05-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26170: Renamed App Suite calendar printing templates again according to the required naming scheme.
+
 * 2013-05-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 26501: Return an empty JSON object to indicate successful delete operation
+ - Fix for bug 26565: Check for possible null message while logging
+ - Fix for bug 26577: Iterate over a snapshot, not the (possibly concurrently modified) collection itself
 
 * 2013-05-13 - dennis.sieben@open-xchange.com
 
@@ -198,6 +204,18 @@
 
  - Fix for bug 25939: Moved snippet bundles to core package
  - Fix for bug 25942: Check object's type before casting to Multipart
+ - Fix for bug 25957: Deny "vbscript" URLs
+
+* 2013-04-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26243: Fixed vulnerability of XSS injection by content-type header
+
+* 2013-04-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26237: Fixed possible XSS vulnerability
+
+* 2013-04-17 - thorben.betten@open-xchange.com
+
  - Fix for bug 25957: Deny "vbscript" URLs
 
 * 2013-04-16 - thorben.betten@open-xchange.com

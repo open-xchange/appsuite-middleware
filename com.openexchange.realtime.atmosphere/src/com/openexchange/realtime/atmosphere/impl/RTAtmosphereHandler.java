@@ -107,22 +107,22 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(RTAtmosphereHandler.class));
 
-    private final AtmosphereServiceRegistry atmosphereServiceRegistry;
+    protected AtmosphereServiceRegistry atmosphereServiceRegistry;
 
     /*
      * Map general ids (user@context) to full ids (ox://user@context/resource.browserx.taby, this is used for lookups via isConnected
      */
-    private final IDMap<Set<ID>> generalToConcreteIDMap;
+    protected IDMap<Set<ID>> generalToConcreteIDMap;
 
     /*
      * Map full client IDs to the AtmosphereResource that represents their connection to the server, this is used for sending
      */
-    private final ConcurrentHashMap<ID, AtmosphereResource> concreteIDToResourceMap;
+    protected ConcurrentHashMap<ID, AtmosphereResource> concreteIDToResourceMap;
 
     /*
      * Map for holding outboxes
      */
-    private final ConcurrentHashMap<ID, List<EnqueuedStanza>> outboxes;
+    protected ConcurrentHashMap<ID, List<EnqueuedStanza>> outboxes;
 
     /*
      * Give resources time to linger before finally cleaning up
@@ -132,13 +132,13 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     /*
      * Maintain a mapping of all IDs that use a certain session
      */
-    private ConcurrentHashMap<String, Set<ID>> idsPerSession = new ConcurrentHashMap<String, Set<ID>>();
+    protected ConcurrentHashMap<String, Set<ID>> idsPerSession;
 
-    private ConcurrentHashMap<ID, Long> sequenceNumbers = new ConcurrentHashMap<ID, Long>();
+    protected ConcurrentHashMap<ID, Long> sequenceNumbers;
 
-    private ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>> resendBuffers = new ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>>();
+    protected ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>> resendBuffers;
 
-    private StanzaSequenceGate gate = new StanzaSequenceGate("RTAtmosphereHandler") {
+    protected StanzaSequenceGate gate = new StanzaSequenceGate("RTAtmosphereHandler") {
 
         @Override
         public void handleInternal(Stanza stanza, ID recipient) throws OXException {
@@ -148,13 +148,21 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     /**
      * Initializes a new {@link RTAtmosphereHandler}.
+     * You must always call {@link RTAtmosphereHandler#init()} after calling this constructor!
      */
     public RTAtmosphereHandler() {
         super();
+    }
+    
+    public void init() {
+        atmosphereServiceRegistry = AtmosphereServiceRegistry.getInstance();
         generalToConcreteIDMap = new IDMap<Set<ID>>();
         concreteIDToResourceMap = new ConcurrentHashMap<ID, AtmosphereResource>();
         outboxes = new ConcurrentHashMap<ID, List<EnqueuedStanza>>();
-        this.atmosphereServiceRegistry = AtmosphereServiceRegistry.getInstance();
+        idsPerSession = new ConcurrentHashMap<String, Set<ID>>();
+        sequenceNumbers = new ConcurrentHashMap<ID, Long>();
+        resendBuffers = new ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>>();
+        
         atmosphereResourceReaper = new AtmosphereResourceReaper();
     }
 
@@ -216,124 +224,12 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     response.getWriter().write("OK");
                 }
             } else if (method.equalsIgnoreCase("POST")) {
-                /*
-                 * Use a POST request to synchronously send data over the server. No need to track state, as we answer over suspended get
-                 * requests
-                 */
                 String postData = request.getReader().readLine();
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Incoming: " + postData);
                 }
-                if (postData != null) {
-                    List<JSONObject> stanzas = new LinkedList<JSONObject>();
-                    if (postData.startsWith("[")) {
-                        JSONArray arr = new JSONArray(postData);
-                        for (int i = 0, size = arr.length(); i < size; i++) {
-                            stanzas.add(arr.getJSONObject(i));
-                        }
-                    } else {
-                        stanzas.add(new JSONObject(postData));
-                    }
-                    Exception exception = null;
-                    for (JSONObject json : stanzas) {
-                        try {
-                            if (json.has("type")) {
-                                // ignore
-                                String type = json.optString("type");
-                                if (type.equals("ping")) {
-                                    if (json.optBoolean("commit")) {
-                                        Stanza s = new Message();
-                                        s.setFrom(constructedId);
-                                        s.setTo(constructedId);
-                                        s.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
-                                            json.optInt("id"),
-                                            "json",
-                                            "atmosphere",
-                                            "pong").build()));
-                                        send(s, constructedId);
-                                    }
-                                    return;
-                                }
 
-                                if (type.equals("ack")) {
-                                    /*
-                                     * TODO: optimize this (e.g. client sends only the highest sequence number of a fully received
-                                     * sequence).
-                                     */
-                                    SortedSet<EnqueuedStanza> resendBuffer = resendBufferFor(constructedId);
-                                    EnqueuedStanza found = null;
-                                    long seq = json.optLong("seq");
-
-                                    for (EnqueuedStanza enqueuedStanza : new LinkedList<EnqueuedStanza>(resendBuffer)) {
-                                        if (enqueuedStanza.sequenceNumber == seq) {
-                                            found = enqueuedStanza;
-                                            break;
-                                        }
-                                    }
-                                    if (found != null) {
-                                        resendBuffer.remove(found);
-                                        found.stanza.trace("Got ack from client");
-                                    }
-                                }
-                                return;
-                            }
-                            StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(
-                                constructedId,
-                                sessionValidator.getServerSession(),
-                                json);
-                            Stanza stanza = stanzaBuilder.build();
-                            if (stanza.traceEnabled()) {
-                                stanza.trace("received in atmosphere handler");
-                            }
-
-                            if (gate.handle(stanza, stanza.getTo())) {
-                                // Return receipt
-                                stanza.trace("Send return receipt for sequence number: " + stanza.getSequenceNumber());
-                                final Message msg = new Message();
-                                msg.setTo(stanza.getFrom());
-                                msg.setFrom(stanza.getFrom());
-                                msg.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
-                                    stanza.getSequenceNumber(),
-                                    "json",
-                                    "atmosphere",
-                                    "received").build()));
-                                atmosphereServiceRegistry.getService(ThreadPoolService.class).submit(new Task<Object>() {
-
-                                    @Override
-                                    public void setThreadName(ThreadRenamer threadRenamer) {
-                                        threadRenamer.rename("Acknowledgement Sender");
-                                    }
-
-                                    @Override
-                                    public void beforeExecute(Thread t) {
-
-                                    }
-
-                                    @Override
-                                    public void afterExecute(Throwable t) {
-
-                                    }
-
-                                    @Override
-                                    public Object call() throws Exception {
-                                        send(msg, msg.getTo());
-                                        return null;
-                                    }
-
-                                });
-                            }
-                        } catch (Exception t) {
-                            if (exception == null) {
-                                exception = t;
-                            }
-                            LOG.error(t.getMessage(), t);
-                        }
-
-                    }
-                    if (exception != null) {
-                        throw exception;
-                    }
-                }
+                handlePost(postData, constructedId, serverSession);
             }
         } catch (OXException e) {
             writeExceptionToResource(e, resource);
@@ -360,6 +256,123 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             // TODO:ExceptionHandling to connected clients
             LOG.error(e.getMessage(), e);
             writeExceptionToResource(e, resource);
+        }
+    }
+    
+    protected void handlePost(String postData, ID constructedId, ServerSession serverSession) throws Exception {
+        /*
+         * Use a POST request to synchronously send data over the server. No need to track state, as we answer over suspended get
+         * requests
+         */
+        if (postData != null) {
+            List<JSONObject> stanzas = new LinkedList<JSONObject>();
+            if (postData.startsWith("[")) {
+                JSONArray arr = new JSONArray(postData);
+                for (int i = 0, size = arr.length(); i < size; i++) {
+                    stanzas.add(arr.getJSONObject(i));
+                }
+            } else {
+                stanzas.add(new JSONObject(postData));
+            }
+            Exception exception = null;
+            for (JSONObject json : stanzas) {
+                try {
+                    if (json.has("type")) {
+                        // ignore
+                        String type = json.optString("type");
+                        if (type.equals("ping")) {
+                            if (json.optBoolean("commit")) {
+                                Stanza s = new Message();
+                                s.setFrom(constructedId);
+                                s.setTo(constructedId);
+                                s.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
+                                    json.optInt("id"),
+                                    "json",
+                                    "atmosphere",
+                                    "pong").build()));
+                                send(s, constructedId);
+                            }
+                            return;
+                        }
+
+                        if (type.equals("ack")) {
+                            /*
+                             * TODO: optimize this (e.g. client sends only the highest sequence number of a fully received
+                             * sequence).
+                             */
+                            SortedSet<EnqueuedStanza> resendBuffer = resendBufferFor(constructedId);
+                            EnqueuedStanza found = null;
+                            long seq = json.optLong("seq");
+
+                            for (EnqueuedStanza enqueuedStanza : new LinkedList<EnqueuedStanza>(resendBuffer)) {
+                                if (enqueuedStanza.sequenceNumber == seq) {
+                                    found = enqueuedStanza;
+                                    break;
+                                }
+                            }
+                            if (found != null) {
+                                resendBuffer.remove(found);
+                                found.stanza.trace("Got ack from client");
+                            }
+                        }
+                        return;
+                    }
+                    StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(
+                        constructedId,
+                        serverSession,
+                        json);
+                    Stanza stanza = stanzaBuilder.build();
+                    if (stanza.traceEnabled()) {
+                        stanza.trace("received in atmosphere handler");
+                    }
+
+                    if (gate.handle(stanza, stanza.getTo())) {
+                        // Return receipt
+                        stanza.trace("Send return receipt for sequence number: " + stanza.getSequenceNumber());
+                        final Message msg = new Message();
+                        msg.setTo(stanza.getFrom());
+                        msg.setFrom(stanza.getFrom());
+                        msg.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
+                            stanza.getSequenceNumber(),
+                            "json",
+                            "atmosphere",
+                            "received").build()));
+                        atmosphereServiceRegistry.getService(ThreadPoolService.class).submit(new Task<Object>() {
+
+                            @Override
+                            public void setThreadName(ThreadRenamer threadRenamer) {
+                                threadRenamer.rename("Acknowledgement Sender");
+                            }
+
+                            @Override
+                            public void beforeExecute(Thread t) {
+
+                            }
+
+                            @Override
+                            public void afterExecute(Throwable t) {
+
+                            }
+
+                            @Override
+                            public Object call() throws Exception {
+                                send(msg, msg.getTo());
+                                return null;
+                            }
+
+                        });
+                    }
+                } catch (Exception t) {
+                    if (exception == null) {
+                        exception = t;
+                    }
+                    LOG.error(t.getMessage(), t);
+                }
+
+            }
+            if (exception != null) {
+                throw exception;
+            }
         }
     }
 
@@ -585,7 +598,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     }
 
-    private SortedSet<EnqueuedStanza> resendBufferFor(ID id) {
+    protected SortedSet<EnqueuedStanza> resendBufferFor(ID id) {
         SortedSet<EnqueuedStanza> resendBuffer = resendBuffers.get(id);
         if (resendBuffer == null) {
             resendBuffer = new TreeSet<EnqueuedStanza>();
@@ -595,7 +608,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         return resendBuffer;
     }
 
-    private List<EnqueuedStanza> outboxFor(ID id) {
+    protected List<EnqueuedStanza> outboxFor(ID id) {
         List<EnqueuedStanza> outbox = outboxes.get(id);
         if (outbox == null) {
             outbox = Collections.synchronizedList(new LinkedList<EnqueuedStanza>());
@@ -605,11 +618,11 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         return outbox;
     }
 
-    private void drainOutbox(ID id) throws OXException {
-        drainOutbox(id, null);
+    protected boolean drainOutbox(ID id) throws OXException {
+        return drainOutbox(id, null);
     }
 
-    private boolean drainOutbox(ID id, Stanza msg) throws OXException {
+    protected boolean drainOutbox(ID id, Stanza msg) throws OXException {
         List<EnqueuedStanza> outbox = null;
         List<Stanza> stanzasToSend = new LinkedList<Stanza>();
         if (msg != null) {
@@ -642,7 +655,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     for (EnqueuedStanza stanza : new LinkedList<EnqueuedStanza>(resendBuffer)) {
                         if (stanza.incCounter()) {
                             stanza.stanza.trace("Drained from resendBuffer");
-                            stanzasToSend.add(stanza.stanza);
+                            if (stanzasToSend.size() < 10) {
+                                stanzasToSend.add(stanza.stanza);
+                            }
                         } else {
                             toRemove.add(stanza);
                             stanza.stanza.trace("Counted to infinity. Stanza will be lost");
@@ -655,7 +670,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     Stanza stanza = enqueued.stanza;
                     if (enqueued.incCounter()) {
                         stanza.trace("Drained from outbox");
-                        stanzasToSend.add(stanza);
+                        if (stanzasToSend.size() < 10) {
+                            stanzasToSend.add(stanza);
+                        }
                         cleanedOutbox.add(enqueued);
                     }
                 }
@@ -706,7 +723,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     break;
                 }
             } else {
-                concreteIDToResourceMap.put(id, atmosphereResource);
+                if (!failed) {
+                    concreteIDToResourceMap.put(id, atmosphereResource);
+                }
             }
             return sent;
         } catch (OXException x) {

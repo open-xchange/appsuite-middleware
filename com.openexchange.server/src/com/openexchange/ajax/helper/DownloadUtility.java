@@ -135,7 +135,7 @@ public final class DownloadUtility {
             InputStream in = inputStream;
             String fn = fileName;
             byte[] bytes = null;
-            if (contentType.startsWith("text/htm")) {
+            if (contentType.startsWith("text/htm") || fileNameImpliesHtml(fileName)) {
                 /*
                  * HTML content requested for download...
                  */

@@ -445,7 +445,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
                             // Check if Range is syntactically valid. If not, then return 416.
                             if (start > end) {
-                                resp.setHeader("Content-Range", new StringAllocator("bytes */").append(length).toString()); // Required in 416.
+                                resp.setHeader("Content-Range", "bytes */" + length); // Required in 416.
                                 resp.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
                                 return;
                             }

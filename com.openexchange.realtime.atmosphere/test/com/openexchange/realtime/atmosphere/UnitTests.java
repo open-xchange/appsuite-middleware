@@ -46,31 +46,26 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.realtime.atmosphere;
 
-package com.openexchange.realtime;
-
-import javax.annotation.concurrent.NotThreadSafe;
-import com.openexchange.exception.OXException;
-import com.openexchange.realtime.packet.Stanza;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandlerTest;
+import com.openexchange.realtime.atmosphere.impl.stanza.PresenceBuilderTest;
+import com.openexchange.realtime.atmosphere.presence.converter.JSONToPresenceStateTest;
 
 /**
- * A {@link ComponentHandle} is a recipient and handler of messages directed at a certain component. Component Handles need not be thread-safe.
+ * {@link UnitTests}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * 
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public @NotThreadSafe interface ComponentHandle {
-    
-    /**
-     * Process the stanza that was received for this handle.
-     */
-    void process(Stanza stanza) throws OXException;
-
-    /**
-     * Should this stanza be handled in the global thread. This should generally return false. Have this return
-     * true if the resource directory state might be changed by this method call
-     */
-    boolean shouldBeDoneInGlobalThread(Stanza stanza);
+@RunWith(Suite.class)
+@SuiteClasses({
+    RTAtmosphereHandlerTest.class,
+    PresenceBuilderTest.class,
+    JSONToPresenceStateTest.class
+})
+public class UnitTests {
 
 }

@@ -184,8 +184,8 @@ public final class JerichoParser {
         return new StreamedSource(new com.openexchange.java.StringAllocator(html.length() + 16).append("<body>").append(sep).append(html).append(sep).append("</body>"));
     }
 
-    private final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
-    private final Pattern FIX_START_TAG = Pattern.compile("^([^<]*)(<[a-zA-Z_0-9-]+)/([a-zA-Z][^>]+>)");
+    private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
+    private static final Pattern FIX_START_TAG = Pattern.compile("^([^<]*)(<[a-zA-Z_0-9-]+)/([a-zA-Z][^>]+>)");
 
     /**
      * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
@@ -245,7 +245,7 @@ public final class JerichoParser {
         }
     }
 
-    private void handleSegment(final JerichoHandler handler, final Segment segment) {
+    private static void handleSegment(final JerichoHandler handler, final Segment segment) {
         if (segment instanceof Tag) {
             final Tag tag = (Tag) segment;
             final TagType tagType = tag.getTagType();
@@ -333,7 +333,7 @@ public final class JerichoParser {
         return INVALID_DELIM.matcher(startTag).replaceAll("; ");
     }
 
-    private boolean startsWith(final char startingChar, final CharSequence toCheck) {
+    private static boolean startsWith(final char startingChar, final CharSequence toCheck) {
         if (null == toCheck) {
             return false;
         }
@@ -353,7 +353,7 @@ public final class JerichoParser {
         return startingChar == toCheck.charAt(i);
     }
 
-    private boolean contains(final char c, final CharSequence toCheck) {
+    private static boolean contains(final char c, final CharSequence toCheck) {
         if (null == toCheck) {
             return false;
         }

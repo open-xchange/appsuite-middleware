@@ -3,12 +3,8 @@ opt/open-xchange/etc/as-config.yml
 opt/open-xchange/etc/manifests.properties
 opt/open-xchange/etc/meta/appsuite.yaml
 opt/open-xchange/etc/settings/appsuite.properties
-opt/open-xchange/templates/cp_appsuite_dayview_table.tmpl
-opt/open-xchange/templates/cp_appsuite_monthview_list.tmpl
-opt/open-xchange/templates/cp_appsuite_monthview_table.tmpl
-opt/open-xchange/templates/cp_appsuite_weekview_table.tmpl
-opt/open-xchange/templates/cp_appsuite_workweekview_table.tmpl
-opt/open-xchange/templates/print_dayview_table.tmpl
-opt/open-xchange/templates/print_monthview_list.tmpl
-opt/open-xchange/templates/print_weekview_table.tmpl
-opt/open-xchange/templates/print_workweekview_table.tmpl
+opt/open-xchange/templates/cp_dayview_table_appsuite.tmpl
+opt/open-xchange/templates/cp_monthview_list_appsuite.tmpl
+opt/open-xchange/templates/cp_monthview_table_appsuite.tmpl
+opt/open-xchange/templates/cp_weekview_table_appsuite.tmpl
+opt/open-xchange/templates/cp_workweekview_table_appsuite.tmpl

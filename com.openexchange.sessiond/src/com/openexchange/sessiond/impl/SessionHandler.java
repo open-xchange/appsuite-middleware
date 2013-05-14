@@ -112,22 +112,28 @@ public final class SessionHandler {
         }
     };
 
+    /** The session identifier generator */
     private static volatile SessionIdGenerator sessionIdGenerator;
 
+    /** The applied configuration */
     static volatile SessiondConfigInterface config;
 
+    /** The {@link SessionData} reference */
     protected static final AtomicReference<SessionData> sessionDataRef = new AtomicReference<SessionData>();
 
+    /** Whether there is no limit when adding a new session */
     private static volatile boolean noLimit;
 
     /** The obfuscator */
     protected static Obfuscator obfuscator;
 
+    /** The initialized flag */
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
     /** Logger */
     protected static final Log LOG = com.openexchange.log.Log.loggerFor(SessionHandler.class);
 
+    /** If INFO logging is enabled for this class */
     private static final boolean INFO = LOG.isInfoEnabled();
 
     /** Whether debug log level is enabled */

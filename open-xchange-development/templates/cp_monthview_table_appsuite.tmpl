@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <style type="text/css">
+* { 
+  text-decoration:none; 
+  outline: none; 
+  padding: 0; 
+  margin: 0; 
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+html { 
+  color: black; 
+  line-height: 1.4em; 
+  font-family: arial, 
+  sans-serif;
+  font-size: 12px;
+}
+
+body { 
+  background-color: transparent;
+}
+
+html, body, .calendar, #contentArea, #layout {
+  height: 100%;
+}
+
+th, td { 
+  font-weight: normal; 
+  background-color: transparent; 
+  text-align: left; 
+  position: relative;
+  border-bottom: 1px solid #C0C0C0; 
+  min-height: 16%;
+}
+
+ul { 
+  list-style: none;
+  margin: 1px;
+}
+
+.calendar { 
+  border-spacing: 0px;
+  width: 100%;
+}
+
+.calendar td { 
+  vertical-align: top; 
+  width: 14%; 
+  border-right: 1px solid #C0C0C0; 
+}
+
+.calendar tr td:first-child {
+  border-left: 1px solid #C0C0C0; 
+}
+
+.calendar td div.number {
+  position: absolute;
+  bottom: 0px;
+  right: 2px;
+}
+
+.calendar td li {
+  padding: 0px 1px; 
+} 
+
+.calendar td li span { 
+  padding: 0; 
+  background: none; 
+  border: 0; 
+  display: inline; 
+  color: black; 
+  text-align: right; 
+}
+
+.calendar td li .time { 
+  font-weight: bold; 
+}
+
+.outDate { 
+  filter:alpha(opacity=30); 
+  opacity: 0.3; 
+  background-color: #E0E0EF; 
+}
+
+#currentDate { 
+  background-color: #DAEFFF; 
+}
+
+.weekEndDay { 
+  background-color: #EEE; 
+}
+
+.appointmentDayStartEnd { 
+  background-color: #6CB8E1; 
+  overflow: hidden; 
+  margin: 0px 0px 1px 0px; 
+  border: 1px solid #6CB8E1; 
+}
+    </style>
+    <#assign middleDay = days[days?size / 2]>
+    <title>${documentTitle} - ${i18n.tr("Calendar")} - ${middleDay.format("MMMM", middleDay.time)}</title>
+  </head>
+  <body onload="window.print()">
+    <div id="layout" class="flexChilds">
+      <div id="headArea">
+      </div>
+      <div id="contentArea">
+        <table border="0" id="calendarMonth" class="calendar">
+          <thead>
+            <tr>
+              <#list days as day>
+              <th>${day.format("EEEE", day.time)}</th>
+              <#if day.lastDayOfWeek><#break></#if>
+              </#list>
+            </tr>
+          </thead>
+          <tbody>
+            <#list days as day>
+            <#if day.firstDayOfWeek>
+            <tr>
+            </#if>
+              <#if day.today>
+                <td id="currentDate">
+              <#elseif day.outOfRange>
+                <td class="outDate">
+              <#elseif day.weekEnd>
+                <td class="weekEndDay">
+              <#else>
+                <td class="normalDay">
+              </#if>
+                <div>
+                    <ul>
+                      <#list day.wholeDayAppointments as appointment>
+                      <li class="appointmentDayStartEnd">
+                        <span class="text">${appointment.title}</span>
+                      </li>
+                      </#list>
+                      <#list day.appointments as appointment>
+                      <li>
+                        <span class="time">${appointment.format("HH:mm", appointment.startDate)}</span>
+                        <span class="text">${appointment.title}</span>
+                      </li>
+                      </#list>
+                    </ul>
+                </div>
+                <div class="number">${day.format("dd", day.time)}</div>
+              </td>
+            <#if day.lastDayOfWeek>
+            </tr>
+            </#if>
+            </#list>
+          </tbody>
+        </table>
+      </div>
+      <div id="footerArea">
+      </div>
+    </div>
+  </body>
+</html>

@@ -53,10 +53,10 @@ import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 
 /**
  * This class handles the configuration parameters read from the configuration property file server.properties.
@@ -447,9 +447,9 @@ public final class ServerConfig {
          */
         DefaultEncoding("DefaultEncoding", "UTF-8"),
         /**
-         * The maximum size of accepted uploads. Max be overridden in specialized module configs and user settings.
+         * The maximum size of accepted uploads. May be overridden in specialized module configs and user settings.
          */
-        MAX_UPLOAD_SIZE("MAX_UPLOAD_SIZE", "0"),
+        MAX_UPLOAD_SIZE("MAX_UPLOAD_SIZE", "104857600"),
         /**
          * JMXPort
          */
@@ -519,12 +519,15 @@ public final class ServerConfig {
         FORCE_HTTPS("com.openexchange.forceHTTPS", Boolean.FALSE.toString()),
         /**
          * The max. allowed size of a HTTP request
+         *
+         * @deprecated Use "com.openexchange.servlet.maxBodySize" instead
          */
-        MAX_BODY_SIZE("MAX_BODY_SIZE", "0"),
+        @Deprecated
+        MAX_BODY_SIZE("MAX_BODY_SIZE", "104857600"),
         /**
          * The default value for max. concurrent AJAX requests.
          */
-        DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS("com.openexchange.defaultMaxConcurrentAJAXRequests", "-1"),
+        DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS("com.openexchange.defaultMaxConcurrentAJAXRequests", "100"),
 
         ;
 

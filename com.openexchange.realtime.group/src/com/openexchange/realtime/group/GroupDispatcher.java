@@ -55,14 +55,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.realtime.Component;
-import com.openexchange.realtime.ComponentHandle;
 import com.openexchange.realtime.Component.EvictionPolicy;
+import com.openexchange.realtime.ComponentHandle;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.commands.LeaveCommand;
 import com.openexchange.realtime.packet.ID;
@@ -78,20 +79,24 @@ import com.openexchange.server.ServiceLookup;
  * when the last user has left, the room closes itself and calls {@link #onDispose()} for cleanup Subclasses can send messages to
  * participants in the room via the handy {@link #relayToAll(Stanza, ID...)} method. Subclasses may pass in an ActionHandler to make use of
  * the introspection magic.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class GroupDispatcher implements ComponentHandle {
 
     private static final org.apache.commons.logging.Log LOG = Log.loggerFor(GroupDispatcher.class);
 
-    public static ServiceLookup services = null;
+    /**
+     * The <code>ServiceLookup</code> reference.
+     */
+    public static final AtomicReference<ServiceLookup> SERVICE_REF = new AtomicReference<ServiceLookup>();
 
-    private final List<ID> ids = new CopyOnWriteArrayList<ID>();
+    /** The collection of IDs that might be concurrently accessed */
+    private final Queue<ID> ids = new LinkedBlockingQueue<ID>();
 
-    private final Map<ID, String> stamps = new ConcurrentHashMap<ID, String>();
+    private final Map<ID, String> stamps = new HashMap<ID, String>();
 
-    /* ID of the group */
+    /** ID of the group */
     private final ID id;
 
     private long sequenceNumber = 0;
@@ -100,7 +105,7 @@ public class GroupDispatcher implements ComponentHandle {
 
     /**
      * Initializes a new {@link GroupDispatcher}.
-     * 
+     *
      * @param id the ID of this group.
      */
     public GroupDispatcher(ID id) {
@@ -109,24 +114,26 @@ public class GroupDispatcher implements ComponentHandle {
 
     /**
      * Initializes a new {@link GroupDispatcher}.
-     * 
+     *
      * @param id The id of the group
      * @param handler An action handler for introspection
      */
     public GroupDispatcher(ID id, ActionHandler handler) {
         this.id = id;
         this.handler = handler;
+        final Queue<ID> ids = this.ids;
         id.on("dispose", new IDEventHandler() {
 
             @Override
             public void handle(String event, ID id, Object source, Map<String, Object> properties) {
                 try {
+                    // Find any valid member identifier
                     ID memberId = null;
                     if (properties != null) {
                         memberId = (ID) properties.get("id");
                     }
-                    if (ids.size() > 0) {
-                        memberId = ids.get(0);
+                    if (null == memberId) {
+                        memberId = ids.peek();
                     }
                     if (memberId == null) {
                         memberId = id;
@@ -142,7 +149,7 @@ public class GroupDispatcher implements ComponentHandle {
     /**
      * Implements the {@link ComponentHandle} standard method. If it receives a group command (like join or leave) it is handled internally
      * otherwise processing is delegated to {@link #processStanza(Stanza)}
-     * 
+     *
      * @param stanza
      * @throws OXException
      */
@@ -167,7 +174,7 @@ public class GroupDispatcher implements ComponentHandle {
     /**
      * Can be overidden by subclasses to implement a custom handling of non group commands. Defaults to using the ActionHandler to call
      * methods or calls {@link #defaultAction(Stanza)} if no suitable method
-     * 
+     *
      * @param stanza
      * @throws OXException
      */
@@ -204,9 +211,10 @@ public class GroupDispatcher implements ComponentHandle {
      * Send a copy of the stanza to all members of this group, excluding the ones provided as the rest of the arguments.
      */
     public void relayToAll(Stanza stanza, Stanza inResponseTo, ID... excluded) throws OXException {
-        MessageDispatcher dispatcher = services.getService(MessageDispatcher.class);
+        MessageDispatcher dispatcher = SERVICE_REF.get().getService(MessageDispatcher.class);
         Set<ID> ex = new HashSet<ID>(Arrays.asList(excluded));
-        for (ID id : ids) {
+        // Iterate over snapshot
+        for (ID id : new ArrayList<ID>(ids)) {
             if (!ex.contains(id)) {
                 // Send a copy of the stanza
                 Stanza copy = copyFor(stanza, id);
@@ -240,7 +248,7 @@ public class GroupDispatcher implements ComponentHandle {
      */
     public void send(Stanza stanza) throws OXException {
         stamp(stanza);
-        MessageDispatcher dispatcher = services.getService(MessageDispatcher.class);
+        MessageDispatcher dispatcher = SERVICE_REF.get().getService(MessageDispatcher.class);
 
         dispatcher.send(stanza);
     }
@@ -250,7 +258,7 @@ public class GroupDispatcher implements ComponentHandle {
      * "mygroupSelector", to: "synthetic.componentName://roomID", session: "da86ae8fc93340d389c51a1d92d6e997" payloads: [ { namespace:
      * 'group', element: 'command', data: 'join' } ], } A selector provided in this stanza will be added to all stanzas sent by this group,
      * so clients can know the message was part of a given group.
-     * 
+     *
      * @param id The id of the client joining the the Group
      * @param stamp The selector used in the Stanza to join the group
      */
@@ -266,7 +274,7 @@ public class GroupDispatcher implements ComponentHandle {
         }
         boolean first = ids.isEmpty();
 
-        ids.add(id);
+        ids.offer(id);
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("joining:" + id.toString());
@@ -320,10 +328,10 @@ public class GroupDispatcher implements ComponentHandle {
     }
 
     /**
-     * Get a list of all members of this group
+     * Get a (snapshot) list of all members of this group
      */
     public List<ID> getIds() {
-        return ids;
+        return new ArrayList<ID>(ids);
     }
 
     /**
@@ -365,7 +373,7 @@ public class GroupDispatcher implements ComponentHandle {
 
     /**
      * Subclasses can override this method to determine whether a potential participant is allowed to join this group.
-     * 
+     *
      * @param id The id to check the permission for.
      * @return true, if the participant may join this group, false otherwise
      * @see ID#toSession()
@@ -378,14 +386,14 @@ public class GroupDispatcher implements ComponentHandle {
      * Callback that is called before an ID joins the group. Override this to be notified of a member about to join the group.
      */
     protected void beforeJoin(ID id) {
-
+        // Empty method
     }
 
     /**
      * Callback that is called after a new member has joined the group.
      */
     protected void onJoin(ID id) {
-
+        // Empty method
     }
 
     /**
@@ -399,25 +407,25 @@ public class GroupDispatcher implements ComponentHandle {
      * Callback that is called before a member leaves the group
      */
     protected void beforeLeave(ID id) {
-
+        // Empty method
     }
 
     /**
      * Callback that is called after a member left the group
      */
     protected void onLeave(ID id) {
-
+        // Empty method
     }
 
     /**
      * Called when the group is closed. This happens when the last member left the group, or the {@link EvictionPolicy} of the
      * {@link Component} that created this group decides it is time to close the group
-     * 
+     *
      * @param id
      * @throws OXException
      */
     protected void onDispose(ID id) throws OXException {
-
+        // Empty method
     }
 
     /**
@@ -436,6 +444,7 @@ public class GroupDispatcher implements ComponentHandle {
             try {
                 leave(id);
             } catch (OXException e) {
+                // Ignore
             }
         }
     };
@@ -448,7 +457,7 @@ public class GroupDispatcher implements ComponentHandle {
         if (LeaveCommand.class.isInstance(data)) {
             return true;
         }
-        
+
         return false;
     }
 

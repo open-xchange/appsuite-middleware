@@ -19,11 +19,15 @@ html {
   line-height: 1.4em; 
   font-family: arial, 
   sans-serif;
-  font-size: 12px; 
+  font-size: 12px;
 }
 
 body { 
-  background-color: transparent; 
+  background-color: transparent;
+}
+
+html, body, .calendar, #contentArea, #layout {
+  height: 100%;
 }
 
 th, td { 
@@ -32,6 +36,7 @@ th, td {
   text-align: left; 
   position: relative;
   border-bottom: 1px solid #C0C0C0; 
+  min-height: 16%;
 }
 
 ul { 
@@ -41,7 +46,7 @@ ul {
 
 .calendar { 
   border-spacing: 0px;
-  width: 100% 
+  width: 100%;
 }
 
 .calendar td { 
@@ -75,7 +80,7 @@ ul {
 
 .calendar td li .time { 
   font-weight: bold; 
-}                         
+}
 
 .outDate { 
   filter:alpha(opacity=30); 
