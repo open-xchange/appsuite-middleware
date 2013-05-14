@@ -2,6 +2,10 @@
 
  - Fix for bug 26431: Properly accepting not existing value or a JSON null value when setting a user attribute.
 
+* 2013-05-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26373: Sanitize on "delivery=view", too
+
 * 2013-05-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 26305: Use safe hash calculation to avoid hash collisions
@@ -11,6 +15,14 @@
  - Fix for bug 24724: Revoked version of org.apache.log4j OSGi bundle to 1.2.13. This version does not split log messages when using
    SyslogAppender. Log messages are truncated by the underlying UDP network traffic. Newer version splits too long log messages which makes
    the log output more unreadable.
+
+* 2013-04-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26243: Fixed vulnerability of XSS injection by content-type header
+
+* 2013-04-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26237: Fixed possible XSS vulnerability
 
 * 2013-04-17 - thorben.betten@open-xchange.com
 
