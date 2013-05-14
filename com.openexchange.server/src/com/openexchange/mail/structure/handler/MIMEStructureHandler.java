@@ -695,13 +695,20 @@ public final class MIMEStructureHandler implements StructureHandler {
                 bodyObject.put(DATA, JSONObject.NULL);
             } else {
                 if (contentType.startsWith(PRIMARY_TEXT)) {
-                    // Set UTF-8 text
-                    bodyObject.put(DATA, readContent(isp, contentType));
-                    // Set header according to utf-8 content without transfer-encoding
-                    headerObject.remove(CONTENT_TRANSFER_ENCODING);
-                    contentType.setCharsetParameter("UTF-8");
-                    headerObject.put(CONTENT_TYPE, generateParameterizedHeader(contentType, contentType.getBaseType().toLowerCase(
-                        Locale.ENGLISH)));
+                    // Check for special "text/comma-separated-values" Content-Type
+                    if (contentType.startsWith("text/comma-separated-values")) {
+                        fillBase64JSONString(isp.getInputStream(), bodyObject, true);
+                        // Set Transfer-Encoding to base64
+                        headerObject.put(CONTENT_TRANSFER_ENCODING, "base64");
+                    } else { // Regular text part
+                        // Set UTF-8 text
+                        bodyObject.put(DATA, readContent(isp, contentType));
+                        // Set header according to utf-8 content without transfer-encoding
+                        headerObject.remove(CONTENT_TRANSFER_ENCODING);
+                        contentType.setCharsetParameter("UTF-8");
+                        headerObject.put(CONTENT_TYPE, generateParameterizedHeader(contentType, contentType.getBaseType().toLowerCase(
+                            Locale.ENGLISH)));
+                    }
                 } else {
                     fillBase64JSONString(isp.getInputStream(), bodyObject, true);
                     // Set Transfer-Encoding to base64
