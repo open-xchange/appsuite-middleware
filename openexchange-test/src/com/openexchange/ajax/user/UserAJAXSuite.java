@@ -59,7 +59,8 @@ import org.junit.runners.Suite.SuiteClasses;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 @RunWith(Suite.class)
-@SuiteClasses({ GetTest.class, AllTest.class, ListTest.class, Bug13911Test.class, Bug17539Test.class, Bug26354Test.class, Bug26431Test.class })
+@SuiteClasses({ GetTest.class, AllTest.class, ListTest.class, Bug13911Test.class, Bug17539Test.class, Bug26354Test.class })
+// TODO Enable tests 26431 on branch develop.
 public final class UserAJAXSuite {
 
     private UserAJAXSuite() {
