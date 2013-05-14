@@ -51,13 +51,13 @@ package com.openexchange.realtime.group;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
@@ -92,7 +92,7 @@ public class GroupDispatcher implements ComponentHandle {
     public static final AtomicReference<ServiceLookup> SERVICE_REF = new AtomicReference<ServiceLookup>();
 
     /** The collection of IDs that might be concurrently accessed */
-    private final Queue<ID> ids = new LinkedBlockingQueue<ID>();
+    private final AtomicReference<Set<ID>> idsRef = new AtomicReference<Set<ID>>(Collections.<ID> emptySet());
 
     private final Map<ID, String> stamps = new HashMap<ID, String>();
 
@@ -121,7 +121,7 @@ public class GroupDispatcher implements ComponentHandle {
     public GroupDispatcher(ID id, ActionHandler handler) {
         this.id = id;
         this.handler = handler;
-        final Queue<ID> ids = this.ids;
+        final AtomicReference<Set<ID>> idsRef = this.idsRef;
         id.on("dispose", new IDEventHandler() {
 
             @Override
@@ -133,7 +133,8 @@ public class GroupDispatcher implements ComponentHandle {
                         memberId = (ID) properties.get("id");
                     }
                     if (null == memberId) {
-                        memberId = ids.peek();
+                        final Set<ID> ids = idsRef.get();
+                        memberId = ids.isEmpty() ? null : ids.iterator().next();
                     }
                     if (memberId == null) {
                         memberId = id;
@@ -214,7 +215,7 @@ public class GroupDispatcher implements ComponentHandle {
         MessageDispatcher dispatcher = SERVICE_REF.get().getService(MessageDispatcher.class);
         Set<ID> ex = new HashSet<ID>(Arrays.asList(excluded));
         // Iterate over snapshot
-        for (ID id : new ArrayList<ID>(ids)) {
+        for (ID id : idsRef.get()) {
             if (!ex.contains(id)) {
                 // Send a copy of the stanza
                 Stanza copy = copyFor(stanza, id);
@@ -263,7 +264,7 @@ public class GroupDispatcher implements ComponentHandle {
      * @param stamp The selector used in the Stanza to join the group
      */
     public void join(ID id, String stamp) {
-        if (ids.contains(id)) {
+        if (idsRef.get().contains(id)) {
             return;
         }
 
@@ -272,9 +273,20 @@ public class GroupDispatcher implements ComponentHandle {
         if (!mayJoin(id)) {
             return;
         }
-        boolean first = ids.isEmpty();
 
-        ids.offer(id);
+        // Perform a compare-and-set to atomically add
+        boolean added = false;
+        boolean first = false;
+        Set<ID> expected;
+        Set<ID> ids;
+        do {
+            expected = idsRef.get();
+            ids = new LinkedHashSet<ID>(expected);
+
+            first = ids.isEmpty();
+
+            added = ids.add(id);
+        } while (!idsRef.compareAndSet(expected, ids));
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("joining:" + id.toString());
@@ -285,7 +297,9 @@ public class GroupDispatcher implements ComponentHandle {
         if (first) {
             firstJoined(id);
         }
-        onJoin(id);
+        if (added) {
+            onJoin(id);
+        }
     }
 
     /**
@@ -300,10 +314,27 @@ public class GroupDispatcher implements ComponentHandle {
         }
 
         id.off("dispose", LEAVE);
-        ids.remove(id);
+
+        // Perform a compare-and-set to atomically remove
+        boolean removed = false;
+        boolean empty = false;
+        Set<ID> expected;
+        Set<ID> ids;
+        do {
+            expected = idsRef.get();
+            ids = new LinkedHashSet<ID>(expected);
+
+            removed = ids.remove(id);
+            empty = ids.isEmpty();
+        } while (!idsRef.compareAndSet(expected, ids));
+
         stamps.remove(id);
-        onLeave(id);
-        if (ids.isEmpty()) {
+
+        if (removed) {
+            onLeave(id);
+        }
+
+        if (empty) {
             Map<String, Object> properties = new HashMap<String, Object>();
             properties.put("id", id);
             this.id.trigger("dispose", this, properties);
@@ -331,7 +362,7 @@ public class GroupDispatcher implements ComponentHandle {
      * Get a (snapshot) list of all members of this group
      */
     public List<ID> getIds() {
-        return new ArrayList<ID>(ids);
+        return new ArrayList<ID>(idsRef.get());
     }
 
     /**
@@ -345,7 +376,7 @@ public class GroupDispatcher implements ComponentHandle {
      * Determine whether an ID is a member of this group. Useful if you want to only accept messages for IDs that are members.
      */
     protected boolean isMember(ID id) {
-        return ids.contains(id);
+        return idsRef.get().contains(id);
     }
 
     /**
