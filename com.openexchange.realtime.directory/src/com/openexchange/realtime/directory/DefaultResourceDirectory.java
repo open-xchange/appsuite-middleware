@@ -125,7 +125,7 @@ public abstract class DefaultResourceDirectory implements ResourceDirectory {
         return notifyRemoved(doRemove(ids), true);
     }
 
-    private void notifyAdded(ID id, Resource addedResource) {
+    protected void notifyAdded(ID id, Resource addedResource) {
         id.trigger("add", this);
         for (ChangeListener listener : listeners) {
             listener.added(id, addedResource);
@@ -182,5 +182,5 @@ public abstract class DefaultResourceDirectory implements ResourceDirectory {
     protected abstract IDMap<Resource> doRemove(ID id) throws OXException;
 
     protected abstract Resource doSet(ID id, Resource data, boolean overwrite) throws OXException;
-    
+
 }

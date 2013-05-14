@@ -121,20 +121,24 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
     
     @Test
     public void testUpdateResource() throws Exception {
+        //Generate and ad Presence in ResourceDirectory
         ID concreteId = generateId();
         ID generalId = concreteId.toGeneralForm();
         Resource resource = generateResource(concreteId);
-        
         set(concreteId, resource);
-        Resource reloadedResource = get(generalId).entrySet().iterator().next().getValue();
-        Assert.assertEquals("Wrong presence state", resource.getPresence().getState(), reloadedResource.getPresence().getState());
         
+        //Reload Resource from directory and assert that presence state hasn't changed
+        Resource reloadedResource = get(generalId).entrySet().iterator().next().getValue();
+        Assert.assertEquals("Wrong presence", resource.getPresence(), reloadedResource.getPresence());
+        Assert.assertEquals("Wrong Timestamp in reloaded Resource", resource.getTimestamp(), reloadedResource.getTimestamp());
+        
+        //Change state by adding a new resource with PresenceState offline
         DefaultResource changedResource = new DefaultResource(Presence.builder().from(concreteId).state(PresenceState.OFFLINE).build());
         Resource previous = set(concreteId, changedResource);
-        Assert.assertEquals("Wrong resource", resource, previous);
-        
+        Assert.assertNotNull(previous);
         reloadedResource = get(generalId).entrySet().iterator().next().getValue();
-        Assert.assertEquals("Wrong resource", changedResource, reloadedResource);
+        Assert.assertEquals("Wrong Presence in reloaded Resource", changedResource.getPresence(), reloadedResource.getPresence());
+        Assert.assertEquals("Wrong Timestamp in reloaded Resource", changedResource.getTimestamp(), reloadedResource.getTimestamp());
     }
     
     @Test
@@ -152,15 +156,24 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         
         IDMap<Resource> idMap1 = get(id1);
         Assert.assertEquals("Wrong size", 1, idMap1.size());
-        Assert.assertEquals("Wrong resource", r1, idMap1.entrySet().iterator().next().getValue());
+        Resource reloadedResource1 = idMap1.entrySet().iterator().next().getValue();
+        Assert.assertEquals("Wrong Presence in reloaded Resource", r1.getPresence(), reloadedResource1.getPresence());
+        Assert.assertEquals("Wrong Timestamp in reloaded Resource", r1.getTimestamp(), reloadedResource1.getTimestamp());
+
         
         IDMap<Resource> idMap2 = get(id2);
         Assert.assertEquals("Wrong size", 1, idMap2.size());
-        Assert.assertEquals("Wrong resource", r2, idMap2.entrySet().iterator().next().getValue());
+        Resource reloadedResource2 = idMap2.entrySet().iterator().next().getValue();
+        Assert.assertEquals("Wrong Presence in reloaded Resource", r2.getPresence(), reloadedResource2.getPresence());
+        Assert.assertEquals("Wrong Timestamp in reloaded Resource", r2.getTimestamp(), reloadedResource2.getTimestamp());
+
         
         IDMap<Resource> idMap3 = get(id3);
         Assert.assertEquals("Wrong size", 1, idMap3.size());
-        Assert.assertEquals("Wrong resource", r3, idMap3.entrySet().iterator().next().getValue());
+        Resource reloadedResource3 = idMap3.entrySet().iterator().next().getValue();
+        Assert.assertEquals("Wrong Presence in reloaded Resource", r3.getPresence(), reloadedResource3.getPresence());
+        Assert.assertEquals("Wrong Timestamp in reloaded Resource", r3.getTimestamp(), reloadedResource3.getTimestamp());
+
         
         IDMap<Resource> all = get(id1.toGeneralForm());
         Assert.assertEquals("Wrong size", 3, all.size());
@@ -170,7 +183,9 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         
         IDMap<Resource> remove1 = remove(id1);
         Assert.assertEquals("Wrong size", 1, remove1.size());
-        Assert.assertEquals("Wrong resource", r1, remove1.entrySet().iterator().next().getValue());
+        Resource removedResource1 = remove1.entrySet().iterator().next().getValue();
+        Assert.assertEquals("Wrong Presence in reloaded Resource", r1.getPresence(), removedResource1.getPresence());
+        Assert.assertEquals("Wrong Timestamp in reloaded Resource", r1.getTimestamp(), removedResource1.getTimestamp());
         
         Set<ID> toRemove = new HashSet<ID>();
         toRemove.add(id2);
@@ -180,7 +195,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         Assert.assertEquals("Wrong size", 2, remove2.size());
         
         MultiMap<ID,ID> idMapping = getIDMapping();
-        IMap<ID, Resource> resources = getResourceMap();
+        IMap<ID, HazelcastResource> resources = getResourceMap();
         Assert.assertEquals("Id mapping not empty", 0, idMapping.size());
         Assert.assertEquals("Resources not empty", 0, resources.size());
     }
@@ -228,7 +243,7 @@ public class HazelcastResourceDirectoryTest extends HazelcastResourceDirectory {
         Assert.assertEquals("Wrong size", 1, removed2.size());
         
         MultiMap<ID,ID> idMapping = getIDMapping();
-        IMap<ID, Resource> resources = getResourceMap();
+        IMap<ID, HazelcastResource> resources = getResourceMap();
         Assert.assertEquals("Id mapping not empty", 0, idMapping.size());
         Assert.assertEquals("Resources not empty", 0, resources.size());
     }
