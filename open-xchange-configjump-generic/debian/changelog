@@ -1,3 +1,9 @@
+open-xchange-configjump-generic (7.2.0-7) UNRELEASED; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 13 May 2013 15:24:55 +0200
+
 open-xchange-configjump-generic (7.2.0-6) UNRELEASED; urgency=low
 
   * Build for patch 2013-04-23
