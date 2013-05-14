@@ -1,3 +1,7 @@
+* 2013-05-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26170: Renamed App Suite calendar printing templates again according to the required naming scheme.
+
 * 2013-05-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 26501: Return an empty JSON object to indicate successful delete operation
