@@ -192,28 +192,25 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         msg = new Message();
                         msg.setTo(constructedId);
                         msg.setFrom(constructedId);
-                        msg.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
-                            0,
-                            "json",
-                            "atmosphere",
-                            "nextSequence").build()));
+                        msg.addPayload(new PayloadTree(
+                            PayloadTreeNode.builder().withPayload(0, "json", "atmosphere", "nextSequence").build()));
                     }
 
                     // finally suspend the resource until data is available for the clients and resource gets resumed after send
                     if (!drainOutbox(constructedId, msg)) {
                         switch (resource.transport()) {
-                            case JSONP:
-                            case AJAX:
-                            case LONG_POLLING:
-                                if (!resource.getResponse().isCommitted()) {
-                                    resource.suspend();
-                                } else {
-                                    LOG.warn("Resource is already committed.");
-                                }
-                                break;
-                            default:
-                                break;
+                        case JSONP:
+                        case AJAX:
+                        case LONG_POLLING:
+                            if (!resource.getResponse().isCommitted()) {
+                                resource.suspend();
+                            } else {
+                                LOG.warn("Resource is already committed.");
                             }
+                            break;
+                        default:
+                            break;
+                        }
                     }
                 } else {
                     response.getWriter().write("OK");
@@ -248,14 +245,21 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                                         Stanza s = new Message();
                                         s.setFrom(constructedId);
                                         s.setTo(constructedId);
-                                        s.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(json.optInt("id"), "json", "atmosphere", "pong").build()));
+                                        s.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
+                                            json.optInt("id"),
+                                            "json",
+                                            "atmosphere",
+                                            "pong").build()));
                                         send(s, constructedId);
                                     }
                                     return;
                                 }
 
                                 if (type.equals("ack")) {
-                                    /* TODO: optimize this (e.g. client sends only the highest sequence number of a fully received sequence). */
+                                    /*
+                                     * TODO: optimize this (e.g. client sends only the highest sequence number of a fully received
+                                     * sequence).
+                                     */
                                     SortedSet<EnqueuedStanza> resendBuffer = resendBufferFor(constructedId);
                                     EnqueuedStanza found = null;
                                     long seq = json.optLong("seq");
@@ -429,7 +433,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     /**
      * Inform the {@link AtmosphereResourceReaper} about the re/appearing of this specific client so that already allocated resources and
      * saved messages aren't deleted after the specified lingerin time.
-     *
+     * 
      * @return <code>true</code> if the reaper already hold a {@link Moribund} for the given ID. Otherwise <code>false</code>.
      * @param concreteID The concrete id of the re/appearing client
      */
@@ -474,12 +478,12 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 } catch (OXException e) {
                     LOG.error("Could not unregister resource with ID: " + concreteID, e);
                 }
-                
+
                 // clean up stanza buffer in sequence gate
                 gate.freeRessourcesFor(concreteID);
             }
         });
-        
+
         return removed != null;
     }
 
@@ -600,7 +604,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         }
         return outbox;
     }
-    
+
     private void drainOutbox(ID id) throws OXException {
         drainOutbox(id, null);
     }
@@ -616,14 +620,14 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             id.lock("rt-atmosphere-outbox");
             AtmosphereResource atmosphereResource = concreteIDToResourceMap.remove(id);
             if (atmosphereResource == null) {
-                return;
+                return false;
             }
             boolean failed = false;
             boolean sent = false;
 
-            /* 
-             * The outbox contains stanzas without sequence numbers and does not guarantee delivery.
-             * The resendBuffer is used for stanzas that expect a delivery guarantee and therefore retries failing sends.
+            /*
+             * The outbox contains stanzas without sequence numbers and does not guarantee delivery. The resendBuffer is used for stanzas
+             * that expect a delivery guarantee and therefore retries failing sends.
              */
             outbox = outboxes.remove(id);
             SortedSet<EnqueuedStanza> resendBuffer = resendBuffers.get(id);
@@ -676,7 +680,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         outbox = null;
                         failed = true;
                     }
-    
+
                     if (!failed) {
                         if (LOG.isTraceEnabled()) {
                             LOG.trace("Outgoing: " + array);
@@ -697,14 +701,14 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 case AJAX:
                 case LONG_POLLING:
                     atmosphereResource.resume();
-                    concreteIDToResourceMap.remove(id);
                     break;
                 default:
                     break;
                 }
+            } else {
+                concreteIDToResourceMap.put(id, atmosphereResource);
             }
-
-           return sent;
+            return sent;
         } catch (OXException x) {
             throw x;
         } catch (Throwable t) {
@@ -726,15 +730,10 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     s.trace(stackTrace);
                 }
             }
-            
             return false;
         } finally {
             id.unlock("rt-atmosphere-outbox");
         }
-    }
-
-    private void handleResourceNotAvailable() throws OXException {
-        throw RealtimeExceptionCodes.RESOURCE_NOT_AVAILABLE.create();
     }
 
     /**
@@ -745,7 +744,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @param serverSession the associated serverSession
      * @return the constructed unique ID
      */
-    private ID constructId(AtmosphereResource atmosphereResource, ServerSession serverSession) {
+    private ID constructId(AtmosphereResource atmosphereResource, ServerSession serverSession) throws OXException {
         String userLogin = serverSession.getUserlogin();
         String contextName = serverSession.getContext().getName();
 
@@ -754,12 +753,8 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         if (resource == null) {
             resource = request.getParameter("resource");
         }
-        /*
-         * TODO: think about proper unique resources later. Maybe add sessionID to ID for now we use the resource+sessionID or only
-         * sessionID if no resource is given
-         */
         if (resource == null) {
-            resource = serverSession.getSessionID();
+            throw RealtimeExceptionCodes.INVALID_ID.create();
         }
         return new ID(RTAtmosphereChannel.PROTOCOL, null, userLogin, contextName, resource);
     }
