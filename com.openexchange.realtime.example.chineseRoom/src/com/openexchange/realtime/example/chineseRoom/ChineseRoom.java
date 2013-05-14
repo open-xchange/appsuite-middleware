@@ -49,7 +49,9 @@
 
 package com.openexchange.realtime.example.chineseRoom;
 
+import java.util.ArrayList;
 import java.util.concurrent.CopyOnWriteArrayList;
+import javax.annotation.concurrent.NotThreadSafe;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.ComponentHandle;
 import com.openexchange.realtime.group.GroupDispatcher;
@@ -65,16 +67,16 @@ import com.openexchange.realtime.util.ElementPath;
 
 /**
  * This is the nitty gritty. A {@link ChineseRoom} has members, keeps a log of messages (shared state of all members), allows members to speak {@link #handleSay(Stanza)} and
- * thereby modify the shared state and allows members to retrieve the state {@link #handleGetLog(Stanza)}
+ * thereby modify the shared state and allows members to retrieve the state {@link #handleGetLog(Stanza)}. These classes need not be thread-safe
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ChineseRoom extends GroupDispatcher implements ComponentHandle {
+public @NotThreadSafe class ChineseRoom extends GroupDispatcher implements ComponentHandle {
     // An introspecting handler that allows clients to formulate stanzas that call all handle* methods
     private static final ActionHandler handler = new ActionHandler(ChineseRoom.class);
     
     // Our simple minded shared state
-    private final CopyOnWriteArrayList<LoggedMessage> messages = new CopyOnWriteArrayList<LoggedMessage>();
+    private final ArrayList<LoggedMessage> messages = new ArrayList<LoggedMessage>();
     
     // Create a new chinese room instance
     public ChineseRoom(ID id) {

@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import javax.annotation.concurrent.NotThreadSafe;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.realtime.Component;
@@ -81,7 +82,7 @@ import com.openexchange.server.ServiceLookup;
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class GroupDispatcher implements ComponentHandle {
+public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
 
     private static final org.apache.commons.logging.Log LOG = Log.loggerFor(GroupDispatcher.class);
 

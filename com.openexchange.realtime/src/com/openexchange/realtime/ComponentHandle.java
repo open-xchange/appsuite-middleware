@@ -49,16 +49,18 @@
 
 package com.openexchange.realtime;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.Stanza;
 
 
 /**
- * A {@link ComponentHandle} is a recipient and handler of messages directed at a certain component.
+ * A {@link ComponentHandle} is a recipient and handler of messages directed at a certain component. Component Handles need not be thread-safe.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * 
  */
-public interface ComponentHandle {
+public @NotThreadSafe interface ComponentHandle {
     
     /**
      * Process the stanza that was received for this handle.
