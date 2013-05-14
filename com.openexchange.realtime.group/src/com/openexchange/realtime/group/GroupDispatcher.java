@@ -89,7 +89,7 @@ public class GroupDispatcher implements ComponentHandle {
     /**
      * The <code>ServiceLookup</code> reference.
      */
-    private static final AtomicReference<ServiceLookup> SERVICE_REF = new AtomicReference<ServiceLookup>();
+    public static final AtomicReference<ServiceLookup> SERVICE_REF = new AtomicReference<ServiceLookup>();
 
     /** The collection of IDs that might be concurrently accessed */
     private final Queue<ID> ids = new LinkedBlockingQueue<ID>();
