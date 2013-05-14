@@ -724,7 +724,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 }
             } else {
                 if (!failed) {
-                    concreteIDToResourceMap.put(id, atmosphereResource);
+                    concreteIDToResourceMap.putIfAbsent(id, atmosphereResource);
                 }
             }
             return sent;
