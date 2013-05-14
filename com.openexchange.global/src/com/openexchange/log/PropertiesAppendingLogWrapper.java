@@ -216,9 +216,9 @@ public class PropertiesAppendingLogWrapper implements Log, PropertiesAware {
         }
         final Props props = LogProperties.optLogProperties(thread);
         if (delegateAppending) {
-            return new PropertiesAwareMessage(message, logLevel, props, this);
+            return new PropertiesAwareMessage(null == message ? "null" : message, logLevel, props, this);
         }
-        return innerAppendProperties(message, getPropertiesFor(logLevel, props), props);
+        return innerAppendProperties(null == message ? "null" : message, getPropertiesFor(logLevel, props), props);
     }
 
     /**
@@ -226,12 +226,12 @@ public class PropertiesAppendingLogWrapper implements Log, PropertiesAware {
      *
      * @return The message with properties appended
      */
-    protected Object innerAppendProperties(final Object message, final Set<LogProperties.Name> propertiesToLog, final Props logProps) {
+    protected Object innerAppendProperties(final Object notNullMessage, final Set<LogProperties.Name> propertiesToLog, final Props logProps) {
         /*
          * Prepend properties
          */
         if (null == propertiesToLog || propertiesToLog.isEmpty()) {
-            return message;
+            return notNullMessage;
         }
         /*
          * Check available properties
@@ -239,11 +239,11 @@ public class PropertiesAppendingLogWrapper implements Log, PropertiesAware {
         final Map<LogProperties.Name, Object> properties;
         {
             if (logProps == null) {
-                return message;
+                return notNullMessage;
             }
             properties = logProps.getMap();
             if (properties == null) {
-                return message;
+                return notNullMessage;
             }
         }
         /*
@@ -272,7 +272,7 @@ public class PropertiesAppendingLogWrapper implements Log, PropertiesAware {
             }
             sb.append(lineSeparator).append(lineSeparator);
         }
-        sb.append(message);
+        sb.append(notNullMessage);
         return sb.toString();
     }
 
@@ -324,14 +324,14 @@ public class PropertiesAppendingLogWrapper implements Log, PropertiesAware {
 
     private static final class PropertiesAwareMessage implements PropertiesAware {
 
-        final Object message;
+        final Object notNullMessage;
         final PropertiesAppendingLogWrapper appender;
         final Props props;
         final LogLevel logLevel;
 
-        PropertiesAwareMessage(final Object message, final LogLevel logLevel, final Props props, final PropertiesAppendingLogWrapper appender) {
+        PropertiesAwareMessage(final Object notNullMessage, final LogLevel logLevel, final Props props, final PropertiesAppendingLogWrapper appender) {
             super();
-            this.message = message;
+            this.notNullMessage = notNullMessage;
             this.appender = appender;
             this.props = props;
             this.logLevel = logLevel;
@@ -339,7 +339,11 @@ public class PropertiesAppendingLogWrapper implements Log, PropertiesAware {
 
         @Override
         public String toString() {
-            return appender.innerAppendProperties(message, appender.getPropertiesFor(logLevel, props), props).toString();
+            try {
+                return appender.innerAppendProperties(notNullMessage, appender.getPropertiesFor(logLevel, props), props).toString();
+            } catch (final Exception e) {
+                return null == notNullMessage ? "null" : notNullMessage.toString();
+            }
         }
 
     } // End of PropertiesAppendingMessage
