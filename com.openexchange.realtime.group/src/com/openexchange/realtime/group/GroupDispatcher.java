@@ -56,14 +56,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import javax.annotation.concurrent.NotThreadSafe;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.realtime.Component;
-import com.openexchange.realtime.ComponentHandle;
 import com.openexchange.realtime.Component.EvictionPolicy;
+import com.openexchange.realtime.ComponentHandle;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.commands.LeaveCommand;
 import com.openexchange.realtime.packet.ID;
@@ -79,7 +77,7 @@ import com.openexchange.server.ServiceLookup;
  * when the last user has left, the room closes itself and calls {@link #onDispose()} for cleanup Subclasses can send messages to
  * participants in the room via the handy {@link #relayToAll(Stanza, ID...)} method. Subclasses may pass in an ActionHandler to make use of
  * the introspection magic.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
@@ -101,7 +99,7 @@ public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
 
     /**
      * Initializes a new {@link GroupDispatcher}.
-     * 
+     *
      * @param id the ID of this group.
      */
     public GroupDispatcher(ID id) {
@@ -110,7 +108,7 @@ public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
 
     /**
      * Initializes a new {@link GroupDispatcher}.
-     * 
+     *
      * @param id The id of the group
      * @param handler An action handler for introspection
      */
@@ -143,7 +141,7 @@ public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
     /**
      * Implements the {@link ComponentHandle} standard method. If it receives a group command (like join or leave) it is handled internally
      * otherwise processing is delegated to {@link #processStanza(Stanza)}
-     * 
+     *
      * @param stanza
      * @throws OXException
      */
@@ -168,7 +166,7 @@ public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
     /**
      * Can be overidden by subclasses to implement a custom handling of non group commands. Defaults to using the ActionHandler to call
      * methods or calls {@link #defaultAction(Stanza)} if no suitable method
-     * 
+     *
      * @param stanza
      * @throws OXException
      */
@@ -207,7 +205,8 @@ public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
     public void relayToAll(Stanza stanza, Stanza inResponseTo, ID... excluded) throws OXException {
         MessageDispatcher dispatcher = services.getService(MessageDispatcher.class);
         Set<ID> ex = new HashSet<ID>(Arrays.asList(excluded));
-        for (ID id : ids) {
+        // Iterate over snapshot
+        for (ID id : new ArrayList<ID>(ids)) {
             if (!ex.contains(id)) {
                 // Send a copy of the stanza
                 Stanza copy = copyFor(stanza, id);
@@ -251,7 +250,7 @@ public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
      * "mygroupSelector", to: "synthetic.componentName://roomID", session: "da86ae8fc93340d389c51a1d92d6e997" payloads: [ { namespace:
      * 'group', element: 'command', data: 'join' } ], } A selector provided in this stanza will be added to all stanzas sent by this group,
      * so clients can know the message was part of a given group.
-     * 
+     *
      * @param id The id of the client joining the the Group
      * @param stamp The selector used in the Stanza to join the group
      */
@@ -321,10 +320,10 @@ public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
     }
 
     /**
-     * Get a list of all members of this group
+     * Get a (snapshot) list of all members of this group
      */
     public List<ID> getIds() {
-        return ids;
+        return new ArrayList<ID>(ids);
     }
 
     /**
@@ -366,7 +365,7 @@ public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
 
     /**
      * Subclasses can override this method to determine whether a potential participant is allowed to join this group.
-     * 
+     *
      * @param id The id to check the permission for.
      * @return true, if the participant may join this group, false otherwise
      * @see ID#toSession()
@@ -413,7 +412,7 @@ public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
     /**
      * Called when the group is closed. This happens when the last member left the group, or the {@link EvictionPolicy} of the
      * {@link Component} that created this group decides it is time to close the group
-     * 
+     *
      * @param id
      * @throws OXException
      */
@@ -449,7 +448,7 @@ public @NotThreadSafe class GroupDispatcher implements ComponentHandle {
         if (LeaveCommand.class.isInstance(data)) {
             return true;
         }
-        
+
         return false;
     }
 

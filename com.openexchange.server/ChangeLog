@@ -6,6 +6,7 @@
 
  - Fix for bug 26501: Return an empty JSON object to indicate successful delete operation
  - Fix for bug 26565: Check for possible null message while logging
+ - Fix for bug 26577: Iterate over a snapshot, not the (possibly concurrently modified) collection itself
 
 * 2013-05-13 - dennis.sieben@open-xchange.com
 
