@@ -965,7 +965,7 @@ public class JSONArray extends AbstractJSONValue {
             {
                 final JsonToken token = jParser.nextToken();
                 if (token != JsonToken.START_ARRAY) {
-                    final String content = readFrom(reader);
+                    final String content = readFrom(reader, 0x2000);
                     final String sep = System.getProperty("line.separator");
                     throw new JSONException("A JSONArray text must begin with '[', but got \"" + (null == token ? "null" : token.toString()) + "\" parse event." + sep + "Rest:" + sep + content);
                 }

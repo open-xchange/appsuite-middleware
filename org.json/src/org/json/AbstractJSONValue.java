@@ -107,17 +107,25 @@ abstract class AbstractJSONValue implements JSONValue {
      * Reads the content from given reader.
      *
      * @param reader The reader
+     * @param maxRead The max. number of characters to read
      * @return The reader's content
      * @throws IOException If an I/O error occurs
      */
-    protected static String readFrom(final Reader reader) throws IOException {
+    protected static String readFrom(final Reader reader, final long maxRead) throws IOException {
         if (null == reader) {
             return null;
         }
         final int buflen = BUF_SIZE;
         final char[] cbuf = new char[buflen];
         final org.json.helpers.StringAllocator sa = new org.json.helpers.StringAllocator(SB_SIZE);
+        long count = 0;
         for (int read = reader.read(cbuf, 0, buflen); read > 0; read = reader.read(cbuf, 0, buflen)) {
+            if (maxRead > 0) {
+                count += read;
+                if (count >= maxRead) {
+                    break;
+                }
+            }
             sa.append(cbuf, 0, read);
         }
         if (0 == sa.length()) {
