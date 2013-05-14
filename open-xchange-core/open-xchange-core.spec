@@ -215,6 +215,12 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1445
+pfile=/opt/open-xchange/etc/hazelcast.properties
+if ! ox_exists_property com.openexchange.hazelcast.maxOperationTimeout $pfile; then
+    ox_set_property com.openexchange.hazelcast.maxOperationTimeout 300000 $pfile
+fi
+
 # SoftwareChange_Request-1426
 pfile=/opt/open-xchange/etc/server.properties
 if ! ox_exists_property com.openexchange.log.maxMessageLength $pfile; then
@@ -379,9 +385,14 @@ if [ $permval -lt 256 ]; then
 fi
 # -----------------------------------------------------------------------
 for opt in "-XX:+DisableExplicitGC" "-server" "-Djava.awt.headless=true" \
-        "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=" \
-        "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB"; do
+    "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=" \
+    "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB"; do
     if ! echo $nopts | grep -- $opt > /dev/null; then
+        if [ "$opt" = "-XX:CMSInitiatingOccupancyFraction=" ]; then
+            opt="-XX:CMSInitiatingOccupancyFraction=75"
+        elif [ "$opt" = "-XX:NewRatio=" ]; then
+            opt="-XX:NewRatio=3"
+        fi
         nopts="$nopts $opt"
     fi
 done
@@ -627,6 +638,8 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Tue May 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-05-08
 * Fri May 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-23
 * Tue Apr 30 2013 Marcus Klein <marcus.klein@open-xchange.com>

@@ -140,7 +140,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     /*
                      * Return empty array immediately
                      */
-                    result = new AJAXRequestResult(new JSONArray(), "json");
+                    result = new AJAXRequestResult(new JSONArray(0), "json");
                     result.setResponseProperty("cached", Boolean.TRUE);
                 } else {
                     result = new AJAXRequestResult(jsonValue, "json");

@@ -47,54 +47,71 @@
  *
  */
 
-package com.openexchange.group.servlet.request.actions;
+package com.openexchange.config;
 
-import java.util.Date;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
+import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
-import com.openexchange.group.GroupService;
-import com.openexchange.group.servlet.request.GroupAJAXRequest;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link DeleteAction}
+ * {@link WildcardNamePropertyFilter} - A filter for a wild-card property name.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "delete", description = "Delete a group", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "timestamp", description = "Timestamp of the last update of the group to delete.")
-}, requestBody = "An object with the field \"id\" containing the unique identifier of the group.",
-responseDescription = "An empty json array if the group was deleted successfully.")
-public final class DeleteAction extends AbstractGroupAction {
+public class WildcardNamePropertyFilter implements PropertyFilter {
+
+    private final Pattern pattern;
 
     /**
-     * Initializes a new {@link DeleteAction}.
-     *
-     * @param services
+     * Initializes a new {@link WildcardNamePropertyFilter}.
      */
-    public DeleteAction(final ServiceLookup services) {
-        super(services);
+    public WildcardNamePropertyFilter(final String wildcard) {
+        super();
+        pattern = isEmpty(wildcard) ? null : Pattern.compile(wildcardToRegex(wildcard));
     }
 
     @Override
-    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
-        final JSONObject jsonobject = req.getData();
-        final int groupId = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_ID);
-        final Date timestamp = req.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
-        final GroupService groupService = getService(GroupService.class);
-        final ServerSession session = req.getSession();
-        groupService.delete(session.getContext(), session.getUser(), groupId, timestamp);
-        return new AJAXRequestResult(new JSONArray(0), timestamp, "json");
+    public boolean accept(String name, String value) throws OXException {
+        return null == pattern ? true : pattern.matcher(name).matches();
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    /**
+     * Converts specified wildcard string to a regular expression
+     *
+     * @param wildcard The wildcard string to convert
+     * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
+     */
+    private static String wildcardToRegex(final String wildcard) {
+        final com.openexchange.java.StringAllocator s = new com.openexchange.java.StringAllocator(wildcard.length());
+        s.append('^');
+        final int len = wildcard.length();
+        for (int i = 0; i < len; i++) {
+            final char c = wildcard.charAt(i);
+            if (c == '*') {
+                s.append(".*");
+            } else if (c == '?') {
+                s.append('.');
+            } else if (c == '(' || c == ')' || c == '[' || c == ']' || c == '$' || c == '^' || c == '.' || c == '{' || c == '}' || c == '|' || c == '\\') {
+                s.append('\\');
+                s.append(c);
+            } else {
+                s.append(c);
+            }
+        }
+        s.append('$');
+        return (s.toString());
     }
 
 }

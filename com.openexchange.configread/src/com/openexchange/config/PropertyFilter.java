@@ -47,54 +47,25 @@
  *
  */
 
-package com.openexchange.group.servlet.request.actions;
+package com.openexchange.config;
 
-import java.util.Date;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.group.GroupService;
-import com.openexchange.group.servlet.request.GroupAJAXRequest;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link DeleteAction}
+ * {@link PropertyFilter} - A filter for properties.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "delete", description = "Delete a group", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "timestamp", description = "Timestamp of the last update of the group to delete.")
-}, requestBody = "An object with the field \"id\" containing the unique identifier of the group.",
-responseDescription = "An empty json array if the group was deleted successfully.")
-public final class DeleteAction extends AbstractGroupAction {
+public interface PropertyFilter {
 
     /**
-     * Initializes a new {@link DeleteAction}.
+     * Checks if specified property is accepted by this filter.
      *
-     * @param services
+     * @param name The property name
+     * @param value The property value
+     * @return <code>true</code> if accepted; otherwise <code>false</code>
+     * @throws OXException If check for acceptance fails
      */
-    public DeleteAction(final ServiceLookup services) {
-        super(services);
-    }
-
-    @Override
-    protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
-        final JSONObject jsonobject = req.getData();
-        final int groupId = DataParser.checkInt(jsonobject, AJAXServlet.PARAMETER_ID);
-        final Date timestamp = req.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
-        final GroupService groupService = getService(GroupService.class);
-        final ServerSession session = req.getSession();
-        groupService.delete(session.getContext(), session.getUser(), groupId, timestamp);
-        return new AJAXRequestResult(new JSONArray(0), timestamp, "json");
-    }
+    boolean accept(String name, String value) throws OXException;
 
 }

@@ -57,6 +57,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
 import com.hazelcast.config.Config;
@@ -68,6 +70,8 @@ import com.hazelcast.config.SemaphoreConfig;
 import com.hazelcast.config.TopicConfig;
 import com.hazelcast.impl.GroupProperties;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.PropertyFilter;
+import com.openexchange.config.WildcardNamePropertyFilter;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
@@ -177,6 +181,28 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             for (String portDefintion : outboundPortDefinitions) {
                 if (false == isEmpty(portDefintion)) {
                     config.getNetworkConfig().addOutboundPortDefinition(portDefintion);
+                }
+            }
+        }
+        /*-
+         * Maximum operation timeout in milliseconds if no timeout is specified for an operation. (default 300 seconds)
+         *
+         * hazelcast.max.operation.timeout
+         */
+        String maxOperationTimeout = configService.getProperty("com.openexchange.hazelcast.maxOperationTimeout", "300000");
+        config.setProperty(GroupProperties.PROP_MAX_OPERATION_TIMEOUT, maxOperationTimeout);
+        /*-
+         * Arbitrary Hazelcast properties
+         *
+         * http://www.hazelcast.com/docs/2.3/manual/multi_html/ch12s06.html
+         */
+        final PropertyFilter filter = new WildcardNamePropertyFilter("hazelcast.*");
+        final Map<String, String> properties = configService.getProperties(filter);
+        if (null != properties && !properties.isEmpty()) {
+            for (final Entry<String, String> entry : properties.entrySet()) {
+                final String value = entry.getValue();
+                if (!isEmpty(value)) {
+                    config.setProperty(entry.getKey(), value.trim());
                 }
             }
         }

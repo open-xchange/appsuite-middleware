@@ -149,7 +149,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
                 arrayList.add(Rule2JSON2Rule.createTagArg(VacationActionFields.DAYS));
                 arrayList.add(Rule2JSON2Rule.createNumberArg(days));
             }
-            final JSONArray addresses = object.getJSONArray(VacationActionFields.ADDRESSES.getFieldname());
+            final JSONArray addresses = object.optJSONArray(VacationActionFields.ADDRESSES.getFieldname());
             if (null != addresses) {
                 arrayList.add(Rule2JSON2Rule.createTagArg(VacationActionFields.ADDRESSES));
                 arrayList.add(Rule2JSON2Rule.JSONArrayToStringList(addresses));

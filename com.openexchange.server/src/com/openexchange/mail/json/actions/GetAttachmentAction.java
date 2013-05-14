@@ -324,7 +324,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     fileAccess.finish();
                 }
             }
-            return new AJAXRequestResult(new JSONArray(), "json");
+            return new AJAXRequestResult(new JSONArray(0), "json");
         } catch (final OXException e) {
             throw e;
         } catch (final JSONException e) {

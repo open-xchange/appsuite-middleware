@@ -139,7 +139,7 @@ public final class UpdatesAction extends AppointmentAction {
         if (bIgnoreModified && bIgnoreDelete) {
             // nothing requested
 
-            return new AJAXRequestResult(new JSONArray(), timestamp, "json");
+            return new AJAXRequestResult(new JSONArray(0), timestamp, "json");
         }
 
         final ServerSession session = req.getSession();

@@ -18,6 +18,7 @@ Import-Package: com.openexchange.conversion.simple,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.tools.session,
+ javax.annotation.concurrent,
  org.json,
  org.osgi.framework
 Bundle-Activator: com.openexchange.realtime.example.chineseRoom.osgi.ChineseRoomActivator
