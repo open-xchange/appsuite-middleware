@@ -46,52 +46,26 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.realtime.atmosphere;
 
-package com.openexchange.realtime.atmosphere.impl;
-
-import com.openexchange.realtime.packet.Stanza;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandlerTest;
+import com.openexchange.realtime.atmosphere.impl.stanza.PresenceBuilderTest;
+import com.openexchange.realtime.atmosphere.presence.converter.JSONToPresenceStateTest;
 
 /**
- * {@link EnqueuedStanza}
+ * {@link UnitTests}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class EnqueuedStanza implements Comparable<EnqueuedStanza>{
-    
-    static final int INFINITY = 100;
-    
-    public Stanza stanza;
-    public long sequenceNumber;
-    public int count;
-    
-    public EnqueuedStanza(Stanza stanza) {
-        this.stanza = stanza;
-        this.sequenceNumber = stanza.getSequenceNumber();
-        this.count = 0;
-    }
-    
-    public EnqueuedStanza(long sequenceNumber) {
-        this.sequenceNumber = sequenceNumber;
-    }
-    
-    public boolean incCounter() {
-        synchronized(stanza) {
-            count++;
-            if (count > INFINITY) {
-                return false;
-            }
-            return true;
-        }
-    }
+@RunWith(Suite.class)
+@SuiteClasses({
+    RTAtmosphereHandlerTest.class,
+    PresenceBuilderTest.class,
+    JSONToPresenceStateTest.class
+})
+public class UnitTests {
 
-    @Override
-    public int compareTo(EnqueuedStanza o) {
-        return (int) (sequenceNumber - o.sequenceNumber);
-    }
-    
-    @Override
-    public boolean equals(Object obj) {
-        return ((EnqueuedStanza)obj).sequenceNumber == sequenceNumber;
-    }
 }

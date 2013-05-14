@@ -33,6 +33,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.publish.online.infostore"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.quartz"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.realtime"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.realtime.atmosphere"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.server"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.sessiond"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.subscribe"/>
