@@ -1418,8 +1418,14 @@ public class JSONObject extends AbstractJSONValue {
         JsonParser jParser = null;
         try {
             jParser = createParser(reader);
-            if (jParser.nextToken() != JsonToken.START_OBJECT) {
-                throw new JSONException("A JSONObject text must begin with '{'");
+            // Check start
+            {
+                final JsonToken token = jParser.nextToken();
+                if (token != JsonToken.START_OBJECT) {
+                    final String content = readFrom(reader);
+                    final String sep = System.getProperty("line.separator");
+                    throw new JSONException("A JSONObject text must begin with '{', but got \"" + (null == token ? "null" : token.toString()) + "\" parse event." + sep + "Rest:" + sep + content);
+                }
             }
             return parse(jParser, optObject);
         } catch (final IOException e) {
