@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
@@ -107,7 +108,7 @@ public final class DeleteAction extends SnippetAction {
             getSnippetService().getManagement(snippetRequest.getSession()).deleteSnippet(id);
         }
 
-        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+        return new AJAXRequestResult(new JSONObject(0), "json");
     }
 
     @Override

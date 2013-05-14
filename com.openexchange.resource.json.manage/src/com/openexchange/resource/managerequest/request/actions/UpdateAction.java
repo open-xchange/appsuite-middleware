@@ -108,7 +108,7 @@ public final class UpdateAction extends AbstractResourceAction {
         /*
          * Write empty JSON object
          */
-        return new AJAXRequestResult(new JSONObject(), resource.getLastModified(), "json");
+        return new AJAXRequestResult(new JSONObject(0), resource.getLastModified(), "json");
     }
 
 }

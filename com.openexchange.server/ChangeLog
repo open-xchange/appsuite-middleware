@@ -1,3 +1,7 @@
+* 2013-05-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26501: Return an empty JSON object to indicate successful delete operation
+
 * 2013-05-13 - dennis.sieben@open-xchange.com
 
  - Fix for bug 26545: Changed from getJSONArray to optJSONArray to avoid exception

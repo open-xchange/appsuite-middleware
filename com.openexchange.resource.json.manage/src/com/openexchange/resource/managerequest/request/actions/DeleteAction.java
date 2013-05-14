@@ -122,7 +122,7 @@ public final class DeleteAction extends AbstractResourceAction {
         /*
          * Write empty JSON array
          */
-        return new AJAXRequestResult(new JSONArray(), clientLastModified);
+        return new AJAXRequestResult(new JSONArray(0), clientLastModified);
     }
 
 }

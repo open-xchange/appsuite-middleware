@@ -108,7 +108,7 @@ public class DeleteAction extends TaskAction {
                 sqlinterface.deleteTaskObject(id, inFolder, timestamp);
             }
         }
-        return new AJAXRequestResult(new JSONArray(), timestamp, "json");
+        return new AJAXRequestResult(new JSONArray(0), timestamp, "json");
     }
 
 }

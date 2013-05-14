@@ -104,12 +104,13 @@ public class UpdateAction extends ContactAction {
             }
         }
 
-        Contact contact = null;
+        Contact contact;
 		try {
 			contact = ContactMapper.getInstance().deserialize(json, ContactMapper.getInstance().getAllFields(ContactAction.VIRTUAL_FIELDS));
 		} catch (JSONException e) {
 			throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, json);
 		}
+
         if (containsImage) {
         	RequestTools.setImageData(request, contact);
         } else if (null != imageBase64) {
@@ -123,9 +124,10 @@ public class UpdateAction extends ContactAction {
                 throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
+
         getContactService().updateContact(request.getSession(), request.getFolderID(), request.getObjectID(), contact,
         		new Date(request.getTimestamp()));
-        return new AJAXRequestResult(new JSONObject(), contact.getLastModified(), "json");
+        return new AJAXRequestResult(new JSONObject(0), contact.getLastModified(), "json");
     }
 
 }
