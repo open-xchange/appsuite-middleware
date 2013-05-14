@@ -179,6 +179,11 @@ public final class MimeTypes {
     public static final String MIME_TEXT_ALL_CALENDAR = "text/*calendar";
 
     /**
+     * application/ics
+     */
+    public static final String MIME_APPLICATION_ICS = "application/ics";
+
+    /**
      * image/&#42;
      */
     public static final String MIME_IMAGE_ALL = "image/*";
