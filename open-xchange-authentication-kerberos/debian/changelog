@@ -118,6 +118,18 @@ open-xchange-authentication-kerberos (7.0.2-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 19 Feb 2013 08:54:19 +0100
 
+open-xchange-authentication-kerberos (7.0.1-7) unstable; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 13 May 2013 14:25:51 +0200
+
+open-xchange-authentication-kerberos (7.0.1-6) unstable; urgency=low
+
+  * Build for patch 2013-04-04
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 02 Apr 2013 09:53:07 +0200
+
 open-xchange-authentication-kerberos (7.0.1-5) unstable; urgency=low
 
   * Build for patch 2013-03-07
