@@ -56,26 +56,46 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link IFileHolder} - The container for binary content.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added {@link #close()} method
  */
 public interface IFileHolder extends Closeable {
 
+    /** Creates a new input stream to read from */
+    interface InputStreamClosure {
+
+        /**
+         * Creates a new input stream to read from.
+         * 
+         * @return The input stream
+         * @throws OXException If input stream cannot be returned
+         * @throws IOException If input stream cannot be returned
+         */
+        InputStream newStream() throws OXException, IOException;
+    }
+
+    /**
+     * Signals if this file holder is repetitive; meaning {@link #getStream()} yields a new {@link InputStream}.
+     * 
+     * @return <code>true</code> if this file holder is repetitive; otherwise <code>false</code>
+     */
+    boolean repetitive();
+
     /**
      * Closes this file holder and releases any system resources associated with it. If the file holder is already closed then invoking this
      * method has no effect.
-     *
-     * @throws IOException if an I/O error occurs
+     * 
+     * @throws IOException If an I/O error occurs
      */
     @Override
-    public void close() throws IOException;
+    void close() throws IOException;
 
     /**
      * Gets the content's input stream.
      * <p>
      * <b>Note</b>: The {@link #close()} method is supposed being invoked in a wrapping <code>try-finally</code> block.
-     *
+     * 
      * @return The input stream
      * @throws OXException If input stream cannot be returned
      */
@@ -83,36 +103,36 @@ public interface IFileHolder extends Closeable {
 
     /**
      * Gets the content's length.
-     *
-     * @return The content length
+     * 
+     * @return The content length or <code>-1</code> if unknown
      */
     long getLength();
 
     /**
      * Gets the content type.
-     *
-     * @return The content type
+     * 
+     * @return The content type or <code>null</code> if unknown
      */
     String getContentType();
 
     /**
      * Gets the name
-     *
-     * @return The name
+     * 
+     * @return The name or <code>null</code> if unknown
      */
     String getName();
 
     /**
      * Gets the (optional) disposition.
-     *
+     * 
      * @return The disposition or <code>null</code>
      */
     String getDisposition();
 
     /**
      * Gets the delivery
-     *
-     * @return the delivery.
+     * 
+     * @return The delivery or <code>null</code>
      */
     String getDelivery();
 

@@ -62,13 +62,9 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 public final class StringFileHolder implements IFileHolder {
 
     private final byte[] bytes;
-
     private String name;
-
     private String contentType;
-
     private String disposition;
-
     private String delivery;
 
     /**
@@ -95,6 +91,11 @@ public final class StringFileHolder implements IFileHolder {
         } catch (final UnsupportedCharsetException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    @Override
+    public boolean repetitive() {
+        return true;
     }
 
     @Override

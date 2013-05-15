@@ -1,3 +1,24 @@
+* 2013-05-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26373: Sanitize on "delivery=view", too
+
+* 2013-04-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26244: Fixed XSS injection using utf-16 content type
+
+* 2013-04-30 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25783: Correctly unfold content lines in iCal files   
+
+* 2013-04-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26243: Fixed vulnerability of XSS injection by content-type header
+
+* 2013-04-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25957: Deny "vbscript" URLs
+ - Fix for bug 26237: Fixed possible XSS vulnerability
+
 * 2013-03-04 - marcus.klein@open-xchange.com
 
  - Fix for bug 25168: Fix for bug 25168: Do not encode uiWebPath parameter provided in request. This breaks absolute Location headers

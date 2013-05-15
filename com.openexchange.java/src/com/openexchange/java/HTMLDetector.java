@@ -99,6 +99,12 @@ public final class HTMLDetector {
         if (containsIgnoreCase(sequence, "<p>")) {
             return true;
         }
+        if (containsIgnoreCase(sequence, "<object")) {
+            return true;
+        }
+        if (containsIgnoreCase(sequence, "<embed")) {
+            return true;
+        }
         return false;
     }
 
@@ -146,6 +152,12 @@ public final class HTMLDetector {
             return true;
         }
         if (containsIgnoreCase(b, "<p>")) {
+            return true;
+        }
+        if (containsIgnoreCase(b, "<object")) {
+            return true;
+        }
+        if (containsIgnoreCase(b, "<embed")) {
             return true;
         }
         return false;
