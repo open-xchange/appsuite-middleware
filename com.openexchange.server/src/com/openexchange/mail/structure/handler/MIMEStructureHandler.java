@@ -647,28 +647,37 @@ public final class MIMEStructureHandler implements StructureHandler {
             } else {
                 final ContentType contentType = part.getContentType();
                 if (contentType.startsWith(PRIMARY_TEXT)) {
-                    // Set UTF-8 text
-                    if (contentType.startsWith(TEXT_HTML)) {
-                        final String html = readContent(part, contentType);
-                        final Matcher m = PAT_META_CT.matcher(html);
-                        final MatcherReplacer mr = new MatcherReplacer(m, html);
-                        final StringBuilder replaceBuffer = new StringBuilder(html.length());
-                        if (m.find()) {
-                            replaceBuffer.append("<meta content=\"").append(toLowerCase(contentType.getBaseType()));
-                            replaceBuffer.append("; charset=UTF-8\" http-equiv=\"Content-Type\" />");
-                            final String replacement = replaceBuffer.toString();
-                            replaceBuffer.setLength(0);
-                            mr.appendLiteralReplacement(replaceBuffer, replacement);
-                        }
-                        mr.appendTail(replaceBuffer);
-                        bodyObject.put(DATA, replaceBuffer.toString());
+                    // Check for special "text/comma-separated-values" Content-Type
+                    if (contentType.startsWith("text/comma-separated-values")) {
+                        fillBase64JSONString(part.getInputStream(), bodyObject, true);
+                        // Set Transfer-Encoding to base64
+                        headerObject.put(CONTENT_TRANSFER_ENCODING, "base64");
+                        contentType.setPrimaryType("application").setSubType("vnd.ms-excel");
+                        headerObject.put(CONTENT_TYPE, generateParameterizedHeader(contentType, toLowerCase(contentType.getBaseType())));
                     } else {
-                        bodyObject.put(DATA, readContent(part, contentType));
+                        // Set UTF-8 text
+                        if (contentType.startsWith(TEXT_HTML)) {
+                            final String html = readContent(part, contentType);
+                            final Matcher m = PAT_META_CT.matcher(html);
+                            final MatcherReplacer mr = new MatcherReplacer(m, html);
+                            final StringBuilder replaceBuffer = new StringBuilder(html.length());
+                            if (m.find()) {
+                                replaceBuffer.append("<meta content=\"").append(toLowerCase(contentType.getBaseType()));
+                                replaceBuffer.append("; charset=UTF-8\" http-equiv=\"Content-Type\" />");
+                                final String replacement = replaceBuffer.toString();
+                                replaceBuffer.setLength(0);
+                                mr.appendLiteralReplacement(replaceBuffer, replacement);
+                            }
+                            mr.appendTail(replaceBuffer);
+                            bodyObject.put(DATA, replaceBuffer.toString());
+                        } else {
+                            bodyObject.put(DATA, readContent(part, contentType));
+                        }
+                        // Set header according to UTF-8 content without transfer-encoding
+                        headerObject.remove(CONTENT_TRANSFER_ENCODING);
+                        contentType.setCharsetParameter("UTF-8");
+                        headerObject.put(CONTENT_TYPE, generateParameterizedHeader(contentType, toLowerCase(contentType.getBaseType())));
                     }
-                    // Set header according to UTF-8 content without transfer-encoding
-                    headerObject.remove(CONTENT_TRANSFER_ENCODING);
-                    contentType.setCharsetParameter("UTF-8");
-                    headerObject.put(CONTENT_TYPE, generateParameterizedHeader(contentType, toLowerCase(contentType.getBaseType())));
                 } else {
                     fillBase64JSONString(part.getInputStream(), bodyObject, true);
                     // Set Transfer-Encoding to base64
