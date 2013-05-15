@@ -245,7 +245,7 @@ public class LinkedInXMLParser {
                     for (int i = 0; i < length; i++) {
                         final JSONObject position = ja.optJSONObject(i);
                         if (position.optBoolean("isCurrent", false)) {
-                            contact.setTitle(position.optString("title", null));
+                            contact.setPosition(position.optString("title", null));
                             final JSONObject company = position.optJSONObject("company");
                             if (null != company) {
                                 contact.setCompany(company.optString("name", null));
@@ -257,7 +257,7 @@ public class LinkedInXMLParser {
                         }
                     }
                     if (null != candidate) {
-                        contact.setTitle(candidate.optString("title", null));
+                        contact.setPosition(candidate.optString("title", null));
                         final JSONObject company = candidate.optJSONObject("company");
                         if (null != company) {
                             contact.setCompany(company.optString("name", null));
