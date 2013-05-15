@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.apps.manifests.json.osgi;
+package com.openexchange.osgi;
 
 import java.util.List;
 import org.osgi.framework.BundleContext;

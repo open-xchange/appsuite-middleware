@@ -67,6 +67,7 @@ import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
+import com.openexchange.osgi.NearRegistryServiceTracker;
 
 /**
  * {@link ManifestJSONActivator}
