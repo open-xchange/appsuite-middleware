@@ -50,12 +50,9 @@
 package com.openexchange.messaging.generic.osgi;
 
 import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
@@ -73,6 +70,7 @@ import com.openexchange.messaging.generic.secret.MessagingSecretHandling;
 import com.openexchange.messaging.generic.services.MessagingGenericServiceRegistry;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
@@ -129,7 +127,7 @@ public class MessagingGenericActivator extends HousekeepingActivator {
                 getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
             }
 
-            final ServiceTracker<MessagingService,MessagingService> messagingServiceTracker = new ServiceTracker<MessagingService,MessagingService>(context, MessagingService.class, null);
+            final NearRegistryServiceTracker<MessagingService> messagingServiceTracker = new NearRegistryServiceTracker<MessagingService>(context, MessagingService.class);
             rememberTracker(messagingServiceTracker);
             openTrackers();
 
@@ -150,16 +148,7 @@ public class MessagingGenericActivator extends HousekeepingActivator {
                 final MessagingSecretHandling secretHandling = new MessagingSecretHandling() {
                     @Override
                     protected Collection<MessagingService> getMessagingServices() {
-                        final Object[] objects = messagingServiceTracker.getServices();
-                        if(objects == null){
-                            return Collections.emptyList();
-                        }
-                        final List<MessagingService> list = new ArrayList<MessagingService>(objects.length);
-                        for (final Object o : objects) {
-                            list.add((MessagingService) o);
-                        }
-
-                        return list;
+                        return Collections.unmodifiableList(messagingServiceTracker.getServiceList());
                     }
                 };
 

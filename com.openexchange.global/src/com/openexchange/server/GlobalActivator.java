@@ -58,11 +58,14 @@ import org.apache.commons.logging.Log;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.classloader.osgi.DynamicClassLoaderActivator;
 import com.openexchange.exception.internal.I18nCustomizer;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.java.ConcurrentList;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogWrapperFactory;
 import com.openexchange.tools.strings.BasicTypesStringParser;
@@ -137,50 +140,76 @@ public final class GlobalActivator implements BundleActivator {
     }
 
     private void initStringParsers(final BundleContext context) {
-        final ServiceTracker<StringParser,StringParser> parserTracker = new ServiceTracker<StringParser,StringParser>(context, StringParser.class, null);
-        this.parserTracker = parserTracker;
+        final ServiceTracker<StringParser,StringParser> parserTracker;
+        final ConcurrentList<StringParser> trackedParsers = new ConcurrentList<StringParser>();
+        {
+            final ServiceTrackerCustomizer<StringParser,StringParser> customizer = new ServiceTrackerCustomizer<StringParser, StringParser>() {
+
+                @Override
+                public void removedService(final ServiceReference<StringParser> reference, final StringParser service) {
+                    trackedParsers.remove(service);
+                    context.ungetService(reference);
+                }
+
+                @Override
+                public void modifiedService(final ServiceReference<StringParser> reference, final StringParser service) {
+                    // Ignore
+                }
+
+                @Override
+                public StringParser addingService(final ServiceReference<StringParser> reference) {
+                    final StringParser service = context.getService(reference);
+                    if (trackedParsers.add(service)) {
+                        return service;
+                    }
+                    context.ungetService(reference);
+                    return null;
+                }
+            };
+            parserTracker = new ServiceTracker<StringParser,StringParser>(context, StringParser.class, customizer);
+            this.parserTracker = parserTracker;
+        }
+
         final List<StringParser> standardParsers = new ArrayList<StringParser>(3);
+
         final StringParser standardParsersComposite = new CompositeParser() {
 
             @Override
             protected Collection<StringParser> getParsers() {
                 return standardParsers;
             }
-
         };
 
         final StringParser allParsers = new CompositeParser() {
 
             @Override
             protected Collection<StringParser> getParsers() {
-                final Object[] services = parserTracker.getServices();
-                if(services == null) {
+                final int size = trackedParsers.size();
+                if (size <= 0) {
                     return Arrays.asList(standardParsersComposite);
                 }
-                final List<StringParser> parsers = new ArrayList<StringParser>(services.length);
 
-                for (final Object object : services) {
+                final List<StringParser> parsers = new ArrayList<StringParser>(size);
+                for (final StringParser object : trackedParsers) {
                     if (object != this) {
-                        parsers.add((StringParser) object);
+                        parsers.add(object);
                     }
                 }
                 parsers.add(standardParsersComposite);
                 return parsers;
             }
-
         };
 
         standardParsers.add(new BasicTypesStringParser());
         standardParsers.add(new DateStringParser(allParsers));
         standardParsers.add(new TimeSpanParser());
 
-        final Hashtable<String, Object> properties = new Hashtable<String, Object>();
+        final Hashtable<String, Object> properties = new Hashtable<String, Object>(1);
         properties.put(Constants.SERVICE_RANKING, Integer.valueOf(100));
 
         parserTracker.open();
 
         parserRegistration = context.registerService(StringParser.class, allParsers, properties);
-
     }
 
     @Override
