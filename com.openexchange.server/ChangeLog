@@ -1,3 +1,7 @@
+* 2013-05-15 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26179: Removed configuration file for audit extension and placed it as example in the packages documentation.
+
 * 2013-05-15 - martin.herfurth@open-xchange.com
 
  - Fix for bug 25985: Task config mapping for jslob interface.
