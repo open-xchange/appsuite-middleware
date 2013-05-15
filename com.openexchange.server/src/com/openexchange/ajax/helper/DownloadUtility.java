@@ -122,7 +122,7 @@ public final class DownloadUtility {
              * the client decide if it's able to display.
              */
             final ContentType contentType = new ContentType(sContentType);
-            if (contentType.startsWith(MIME_APPL_OCTET)) {
+            if ((null != fileName) && contentType.startsWith(MIME_APPL_OCTET)) {
                 /*
                  * Try to determine MIME type
                  */
@@ -133,9 +133,11 @@ public final class DownloadUtility {
             }
             String sContentDisposition = overridingDisposition;
             InputStream in = inputStream;
+            // Some variables
             String fn = fileName;
-            byte[] bytes = null;
-            if (contentType.startsWith("text/htm") || fileNameImpliesHtml(fileName)) {
+            byte[] bytes;
+            // Check by Content-Type nad file name
+            if (contentType.startsWith("text/htm")) {
                 /*
                  * HTML content requested for download...
                  */
@@ -260,6 +262,9 @@ public final class DownloadUtility {
                     in = Streams.newByteArrayInputStream(htmlContent.getBytes(Charsets.forName(cs)));
                 }
             }
+            /*
+             * Create return value
+             */
             final CheckedDownload retval;
             if (sContentDisposition == null) {
                 final String baseType = contentType.getBaseType();
@@ -286,11 +291,11 @@ public final class DownloadUtility {
     }
 
     private static boolean fileNameImpliesHtml(final String fileName) {
-        return MimeType2ExtMap.getContentType(fileName).startsWith("text/htm");
+        return null != fileName && MimeType2ExtMap.getContentType(fileName).startsWith("text/htm");
     }
 
     private static boolean fileNameImpliesImage(final String fileName) {
-        return MimeType2ExtMap.getContentType(fileName).startsWith("image/");
+        return null != fileName && MimeType2ExtMap.getContentType(fileName).startsWith("image/");
     }
 
     /**
