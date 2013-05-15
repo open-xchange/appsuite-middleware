@@ -164,7 +164,22 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             return;
         }
+        writeFileHolder(file, request, result, req, resp);
+    }
+
+    /**
+     * Writes specified file holder.
+     *
+     * @param fileHolder The file holder
+     * @param requestData The AJAX request data
+     * @param result The AJAX response
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     */
+    public void writeFileHolder(final IFileHolder fileHolder, final AJAXRequestData requestData, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
+        IFileHolder file = fileHolder;
         final String fileName = file.getName();
+        final long length;
         final List<Closeable> closeables = new LinkedList<Closeable>();
         InputStream documentData = null;
         try {
@@ -208,13 +223,12 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             contentDisposition = unquote(contentDisposition);
             // Write to Servlet's output stream
-            file = transformIfImage(request, file, delivery);
+            file = transformIfImage(requestData, file, delivery);
             if (null == file) {
                 // Quit with 404
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File not found.");
                 return;
             }
-            final long length = file.getLength(); // Scaling image could have changed the size
             // Set binary input stream
             {
                 final InputStream stream = file.getStream();
@@ -234,11 +248,13 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             final String userAgent = AJAXServlet.sanitizeParam(req.getHeader("user-agent"));
             if (SAVE_AS_TYPE.equals(contentType) || DOWNLOAD.equalsIgnoreCase(delivery)) {
+                // Write as a common file download: application/octet-stream
                 final StringAllocator sb = new StringAllocator(32);
                 sb.append(isEmpty(contentDisposition) ? "attachment" : checkedContentDisposition(contentDisposition.trim(), file));
                 DownloadUtility.appendFilenameParameter(fileName, null, userAgent, sb);
                 resp.setHeader("Content-Disposition", sb.toString());
                 resp.setContentType(SAVE_AS_TYPE);
+                length = file.getLength();
             } else {
                 // Determine what Content-Type is indicated by file name
                 String contentTypeByFileName;
@@ -255,11 +271,14 @@ public class FileResponseRenderer implements ResponseRenderer {
                 // Generate checked download
                 final CheckedDownload checkedDownload;
                 {
+                    long fileLength = file.getLength();
                     String cts;
                     if (null == fileContentType || SAVE_AS_TYPE.equals(fileContentType)) {
                         if (null == contentTypeByFileName) {
                             // Let Tika detect the Content-Type
                             final ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(documentData);
+                            // We know for sure
+                            fileLength = baos.size();
                             documentData = Streams.asInputStream(baos);
                             cts = tika.detect(Streams.asInputStream(baos));
                             if ("text/plain".equals(cts)) {
@@ -274,6 +293,8 @@ public class FileResponseRenderer implements ResponseRenderer {
                             final ThresholdFileHolder temp = new ThresholdFileHolder();
                             closeables.add(temp);
                             temp.write(documentData);
+                            // We know for sure
+                            fileLength = temp.getLength();
                             documentData = temp.getStream();
                             cts = detectMimeType(temp.getStream());
                             if ("text/plain".equals(cts)) {
@@ -284,7 +305,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                             cts = fileContentType;
                         }
                     }
-                    checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileName, cts, contentDisposition, userAgent);
+                    checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileLength, fileName, cts, contentDisposition, userAgent);
                 }
                 /*
                  * Set stream
@@ -318,6 +339,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 /*
                  * Set Content-Length if possible
                  */
+                length = checkedDownload.getSize();
                 if (length > 0) {
                     resp.setHeader("Accept-Ranges", "bytes");
                     resp.setHeader("Content-Length", Long.toString(length));
@@ -422,7 +444,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     // then return full file.
                     boolean full = false;
                     {
-                        final String ifRange = request.getHeader("If-Range");
+                        final String ifRange = requestData.getHeader("If-Range");
                         final String eTag = result.getHeader("ETag");
                         if (ifRange != null && !ifRange.equals(eTag)) {
                             try {
@@ -479,7 +501,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                         // Return single part of file.
                         final Range r = ranges.get(0);
                         resp.setHeader("Content-Range", new StringAllocator("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
-                        resp.setHeader("Content-Length", String.valueOf(r.length));
+                        resp.setHeader("Content-Length", Long.toString(r.length));
                         resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 206.
 
                         // Copy single part range.

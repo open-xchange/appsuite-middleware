@@ -102,8 +102,6 @@ public final class DownloadUtility {
         return checkInlineDownload(inputStream, fileName, contentTypeStr, null, userAgent);
     }
 
-    private static final String MIME_APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
-
     /**
      * Checks specified input stream intended for inline display for harmful data if its Content-Type indicates image content.
      *
@@ -116,6 +114,25 @@ public final class DownloadUtility {
      * @throws OXException If checking download fails
      */
     public static CheckedDownload checkInlineDownload(final InputStream inputStream, final String fileName, final String sContentType, final String overridingDisposition, final String userAgent) throws OXException {
+        return checkInlineDownload(inputStream, -1L, fileName, sContentType, overridingDisposition, userAgent);
+    }
+
+
+    private static final String MIME_APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
+
+    /**
+     * Checks specified input stream intended for inline display for harmful data if its Content-Type indicates image content.
+     *
+     * @param inputStream The input stream
+     * @param size The size of the passed stream
+     * @param fileName The file name
+     * @param sContentType The <i>Content-Type</i> string
+     * @param overridingDisposition Optionally overrides the <i>Content-Disposition</i> header
+     * @param userAgent The <i>User-Agent</i>
+     * @return The checked download providing input stream, content type, and content disposition to use
+     * @throws OXException If checking download fails
+     */
+    public static CheckedDownload checkInlineDownload(final InputStream inputStream, final long sizer, final String fileName, final String sContentType, final String overridingDisposition, final String userAgent) throws OXException {
         try {
             /*
              * We are supposed to let the client display the attachment. Therefore set attachment's Content-Type and inline disposition to let
@@ -132,11 +149,12 @@ public final class DownloadUtility {
                 contentType.setSubType(ct.substring(pos + 1));
             }
             String sContentDisposition = overridingDisposition;
+            long sz = sizer;
             InputStream in = inputStream;
             // Some variables
             String fn = fileName;
             byte[] bytes;
-            // Check by Content-Type nad file name
+            // Check by Content-Type and file name
             if (contentType.startsWith("text/htm")) {
                 /*
                  * HTML content requested for download...
@@ -158,7 +176,9 @@ public final class DownloadUtility {
                     }
                     String htmlContent = baos.toString(cs);
                     htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
-                    in = Streams.newByteArrayInputStream(htmlContent.getBytes(Charsets.forName(cs)));
+                    final byte[] tmp = htmlContent.getBytes(Charsets.forName(cs));
+                    sz = tmp.length;
+                    in = Streams.newByteArrayInputStream(tmp);
                 }
             } else if (contentType.startsWith("image/") || fileNameImpliesImage(fileName)) {
                 /*
@@ -191,7 +211,7 @@ public final class DownloadUtility {
                          * Check for HTML since no corresponding file extension is known
                          */
                         if (HTMLDetector.containsHTMLTags(sequence)) {
-                            return asAttachment(inputStream, preparedFileName);
+                            return asAttachment(inputStream, preparedFileName, sz);
                         }
                     } else {
                         final Set<String> extensions = new HashSet<String>(MimeType2ExtMap.getFileExtensions(contentType.getBaseType()));
@@ -205,7 +225,7 @@ public final class DownloadUtility {
                                  * No content type known
                                  */
                                 if (HTMLDetector.containsHTMLTags(sequence)) {
-                                    return asAttachment(inputStream, preparedFileName);
+                                    return asAttachment(inputStream, preparedFileName, sz);
                                 }
                             } else {
                                 final int pos = ct.indexOf('/');
@@ -225,7 +245,7 @@ public final class DownloadUtility {
                              * Unknown magic bytes. Check for HTML.
                              */
                             if (HTMLDetector.containsHTMLTags(sequence)) {
-                                return asAttachment(inputStream, preparedFileName);
+                                return asAttachment(inputStream, preparedFileName, sz);
                             }
                         } else if (!contentType.isMimeType(detectedCT)) {
                             /*
@@ -235,7 +255,7 @@ public final class DownloadUtility {
                         }
                     }
                     /*
-                     * New combined input stream
+                     * New combined input stream (with original size)
                      */
                     in = new CombinedInputStream(sequence, in);
                 }
@@ -259,7 +279,9 @@ public final class DownloadUtility {
                     }
                     String htmlContent = new String(bytes, Charsets.forName(cs));
                     htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
-                    in = Streams.newByteArrayInputStream(htmlContent.getBytes(Charsets.forName(cs)));
+                    final byte[] tmp = htmlContent.getBytes(Charsets.forName(cs));
+                    sz = tmp.length;
+                    in = Streams.newByteArrayInputStream(tmp);
                 }
             }
             /*
@@ -270,15 +292,15 @@ public final class DownloadUtility {
                 final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append("attachment");
                 appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : contentType.toString(), userAgent, builder);
                 contentType.removeParameter("name");
-                retval = new CheckedDownload(contentType.toString(), builder.toString(), in);
+                retval = new CheckedDownload(contentType.toString(), builder.toString(), in, sz);
             } else if (sContentDisposition.indexOf(';') < 0) {
                 final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append(sContentDisposition);
                 appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : contentType.toString(), userAgent, builder);
                 contentType.removeParameter("name");
-                retval = new CheckedDownload(contentType.toString(), builder.toString(), in);
+                retval = new CheckedDownload(contentType.toString(), builder.toString(), in, sz);
             } else {
                 contentType.removeParameter("name");
-                retval = new CheckedDownload(contentType.toString(), sContentDisposition, in);
+                retval = new CheckedDownload(contentType.toString(), sContentDisposition, in, sz);
             }
             return retval;
         } catch (final UnsupportedEncodingException e) {
@@ -444,12 +466,12 @@ public final class DownloadUtility {
         return PAT_QUOTE.matcher(PAT_BSLASH.matcher(str).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"");
     }
 
-    private static CheckedDownload asAttachment(final InputStream inputStream, final String preparedFileName) {
+    private static CheckedDownload asAttachment(final InputStream inputStream, final String preparedFileName, final long size) {
         /*
          * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.
          */
         return new CheckedDownload(MIME_APPL_OCTET, new com.openexchange.java.StringAllocator(64).append("attachment; filename=\"").append(
-            preparedFileName).append('"').toString(), inputStream);
+            preparedFileName).append('"').toString(), inputStream, size);
     }
 
     // private static final Pattern P = Pattern.compile("^[\\w\\d\\:\\/\\.]+(\\.\\w{3,4})$");
@@ -531,16 +553,25 @@ public final class DownloadUtility {
     public static final class CheckedDownload {
 
         private final String contentType;
-
         private final String contentDisposition;
-
         private final InputStream inputStream;
+        private final long size;
 
-        CheckedDownload(final String contentType, final String contentDisposition, final InputStream inputStream) {
+        CheckedDownload(final String contentType, final String contentDisposition, final InputStream inputStream, final long size) {
             super();
             this.contentType = contentType;
             this.contentDisposition = contentDisposition;
             this.inputStream = inputStream;
+            this.size = size;
+        }
+
+        /**
+         * Gets the size
+         *
+         * @return The size
+         */
+        public long getSize() {
+            return size;
         }
 
         /**
