@@ -1,3 +1,9 @@
+open-xchange-recaptcha (7.2.0-8) UNRELEASED; urgency=low
+
+  * Build for patch 2013-05-10
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 15 May 2013 08:54:55 +0200
+
 open-xchange-recaptcha (7.2.0-7) UNRELEASED; urgency=low
 
   * Build for patch 2013-05-09
