@@ -49,17 +49,20 @@
 
 package com.openexchange.mail.structure;
 
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import org.apache.commons.codec.binary.Base64;
-import org.json.JSONObject;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import org.apache.commons.codec.binary.Base64OutputStream;
+import org.apache.commons.logging.Log;
 import org.json.JSONString;
+import org.json.JSONStringOutputStream;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link Base64JSONString} - A {@link JSONString JSON string} for one-time-retrieval of an input stream's base64-encoded bytes.
@@ -68,9 +71,9 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  */
 public final class Base64JSONString implements JSONString {
 
-    private static final int BUFLEN = 8192;
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(Base64JSONString.class);
 
-    private final String value;
+    private final ThresholdFileHolder tfh;
 
     /**
      * Initializes a new {@link Base64JSONString}.
@@ -83,31 +86,58 @@ public final class Base64JSONString implements JSONString {
             final NullPointerException e = new NullPointerException("Input stream is null.");
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        /*
-         * Suck input stream
-         */
-        final ByteArrayOutputStream out;
+        OutputStream out = null;
         try {
-            final byte[] buf = new byte[BUFLEN];
-            out = new UnsynchronizedByteArrayOutputStream(BUFLEN << 2);
-            int read;
-            while ((read = in.read(buf, 0, BUFLEN)) > 0) {
+            /*
+             * Suck input stream
+             */
+            final ThresholdFileHolder tfh = new ThresholdFileHolder();
+            this.tfh = tfh;
+            /*
+             * Write encoded to threshold file holder
+             */
+            out = new Base64OutputStream(new JSONStringOutputStream(tfh.asOutputStream()), true, -1, null);
+            final int buflen = 2048;
+            final byte[] buf = new byte[buflen];
+            for (int read; (read = in.read(buf, 0, buflen)) > 0;) {
                 out.write(buf, 0, read);
             }
+            out.flush();
         } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName())) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-            }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            Streams.close(in);
+            Streams.close(in, out);
         }
-        value = JSONObject.quote(Charsets.toAsciiString(Base64.encodeBase64(out.toByteArray(), false)));
     }
 
     @Override
     public String toJSONString() {
-        return value;
+        final StringAllocator sb = new StringAllocator(2048);
+
+        final int cbuflen = 2048;
+        final char[] cbuf = new char[cbuflen];
+
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(tfh.getStream(), com.openexchange.java.Charsets.UTF_8));
+            for (int read = 0; (read = reader.read(cbuf, 0, cbuflen)) > 0;) {
+                sb.append(cbuf, 0, read);
+            }
+            return sb.toString();
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+            return "";
+        } catch (final IOException e) {
+            LOG.error(e.getMessage(), e);
+            return "";
+        } catch (final RuntimeException e) {
+            LOG.error(e.getMessage(), e);
+            return "";
+        } finally {
+            Streams.close(reader);
+        }
     }
 
 }
