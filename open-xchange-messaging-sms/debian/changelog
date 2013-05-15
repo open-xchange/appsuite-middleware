@@ -10,6 +10,12 @@ open-xchange-messaging-sms (7.2.1-0) UNRELEASED; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Apr 2013 10:22:44 +0200
 
+open-xchange-messaging-sms (7.2.0-8) UNRELEASED; urgency=low
+
+  * Build for patch 2013-05-10
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 15 May 2013 08:54:42 +0200
+
 open-xchange-messaging-sms (7.2.0-7) UNRELEASED; urgency=low
 
   * Build for patch 2013-05-09

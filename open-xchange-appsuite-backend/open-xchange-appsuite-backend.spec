@@ -73,6 +73,8 @@ ox_move_config_file /opt/open-xchange/templates /opt/open-xchange/templates prin
 %config(noreplace) /opt/open-xchange/templates/*
 
 %changelog
+* Wed May 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-05-10
 * Mon May 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-05-09
 * Fri May 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
