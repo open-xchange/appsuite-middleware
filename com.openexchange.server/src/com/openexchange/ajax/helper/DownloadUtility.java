@@ -267,15 +267,13 @@ public final class DownloadUtility {
              */
             final CheckedDownload retval;
             if (sContentDisposition == null) {
-                final String baseType = contentType.getBaseType();
                 final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append("attachment");
-                appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : baseType, userAgent, builder);
+                appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : contentType.toString(), userAgent, builder);
                 contentType.removeParameter("name");
                 retval = new CheckedDownload(contentType.toString(), builder.toString(), in);
             } else if (sContentDisposition.indexOf(';') < 0) {
-                final String baseType = contentType.getBaseType();
                 final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append(sContentDisposition);
-                appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : baseType, userAgent, builder);
+                appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : contentType.toString(), userAgent, builder);
                 contentType.removeParameter("name");
                 retval = new CheckedDownload(contentType.toString(), builder.toString(), in);
             } else {

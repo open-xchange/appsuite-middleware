@@ -234,9 +234,9 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             final String userAgent = AJAXServlet.sanitizeParam(req.getHeader("user-agent"));
             if (SAVE_AS_TYPE.equals(contentType) || DOWNLOAD.equalsIgnoreCase(delivery)) {
-                final StringBuilder sb = new StringBuilder(32);
+                final StringAllocator sb = new StringAllocator(32);
                 sb.append(isEmpty(contentDisposition) ? "attachment" : checkedContentDisposition(contentDisposition.trim(), file));
-                DownloadUtility.appendFilenameParameter(file.getName(), null, userAgent, sb);
+                DownloadUtility.appendFilenameParameter(fileName, null, userAgent, sb);
                 resp.setHeader("Content-Disposition", sb.toString());
                 resp.setContentType(SAVE_AS_TYPE);
             } else {
@@ -309,6 +309,11 @@ public class FileResponseRenderer implements ResponseRenderer {
                             }
                         }
                     }
+                } else if (delivery.equalsIgnoreCase(VIEW) && null != fileName) {
+                    final StringAllocator sb = new StringAllocator(32);
+                    sb.append("inline");
+                    DownloadUtility.appendFilenameParameter(fileName, null, userAgent, sb);
+                    resp.setHeader("Content-Disposition", sb.toString());
                 }
                 /*
                  * Set Content-Length if possible
