@@ -192,7 +192,8 @@ public final class GlobalActivator implements BundleActivator {
                 final List<StringParser> parsers = new ArrayList<StringParser>(size);
                 for (final StringParser parser : trackedParsers) {
                     if (parser == this) {
-                        // Yapp, it is safe to do while iterating because it is a ConcurrentList
+                        // Yapp, it is safe to remove while iterating because it is a ConcurrentList
+                        // and will therefore not throw a ConcurrentModificationException
                         trackedParsers.remove(parser);
                     } else {
                         parsers.add(parser);
