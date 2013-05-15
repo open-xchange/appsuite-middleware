@@ -4,6 +4,12 @@ open-xchange-l10n (7.4.0-0) UNRELEASED; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Apr 2013 10:29:41 +0200
 
+open-xchange-l10n (7.2.0-8) UNRELEASED; urgency=low
+
+  * Build for patch 2013-05-10
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 15 May 2013 08:54:38 +0200
+
 open-xchange-l10n (7.2.0-7) UNRELEASED; urgency=low
 
   * Build for patch 2013-05-09

@@ -1,6 +1,7 @@
 * 2013-05-07 - marcus.klein@open-xchange.com
 
  - Fix for bug 26431: Properly accepting not existing value or a JSON null value when setting a user attribute.
+ - Fix for bug 25982: Accept context name/identifier as a valid tag name that applies only to associated context
 
 * 2013-05-03 - thorben.betten@open-xchange.com
 
