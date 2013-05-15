@@ -60,8 +60,28 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * {@link ConcurrentList} - A {@link List} backed by an {@link AtomicReference} holding a delegate list.
  * <p>
- * Beware that this list is concurrently accessed. Therefore avoid index-based access. E.g. use iterator for traversing the list.
- * Use {@link #getSnapshot()} for index-based access patterns.
+ * Beware that this list is concurrently accessed. Therefore avoid index-based access.<br>
+ * Use iterator for traversing the list. Use {@link #getSnapshot()} for index-based access patterns.
+ *
+ * <pre>
+ * Don't:
+ *
+ *   ConcurrentList&lt;String&gt; list = new ConcurrentList&lt;String&gt;(Arrays.asList(&quot;foo&quot;, &quot;bar&quot;, &quot;peter&quot;, &quot;pan&quot;, &quot;hero&quot;));
+ *   for (int i = 0; i &lt; list.size(); i++) {
+ *       String next = list.get(i);
+ *       // continue...
+ *   }
+ *
+ * Do:
+ *
+ *   ConcurrentList<String> list = new ConcurrentList<String>(Arrays.asList("foo", "bar", "peter", "pan", "hero"));
+ *   List<String> snapshot = list.getSnapshot();
+ *   for (int i = 0; i < snapshot.size(); i++) {
+ *       String next = snapshot.get(i);
+ *       // continue...
+ *   }
+ *
+ * </pre>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
