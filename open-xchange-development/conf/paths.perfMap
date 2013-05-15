@@ -48,3 +48,8 @@ modules/calendar/notifyNewModifiedDeleted > io.ox/calendar//notifyNewModifiedDel
 
 # Calendar FreeBusy
 modules/calendar/calendar_freebusy > io.ox/calendar//freeBusy
+
+# Task notifications
+modules/tasks/notifyAcceptedDeclinedAsCreator > io.ox/tasks//notifyAcceptedDeclinedAsCreator
+modules/tasks/notifyAcceptedDeclinedAsParticipant > io.ox/tasks//notifyAcceptedDeclinedAsParticipant
+modules/tasks/notifyNewModifiedDeleted > io.ox/tasks//notifyNewModifiedDeleted
