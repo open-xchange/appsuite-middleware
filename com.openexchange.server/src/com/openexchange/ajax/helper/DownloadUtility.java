@@ -419,8 +419,7 @@ public final class DownloadUtility {
         /*
          * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.
          */
-        return new CheckedDownload(MIME_APPL_OCTET, new com.openexchange.java.StringAllocator(64).append("attachment; filename=\"").append(
-            preparedFileName).append('"').toString(), inputStream);
+        return new CheckedDownload(MIME_APPL_OCTET, new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString(), inputStream);
     }
 
     // private static final Pattern P = Pattern.compile("^[\\w\\d\\:\\/\\.]+(\\.\\w{3,4})$");

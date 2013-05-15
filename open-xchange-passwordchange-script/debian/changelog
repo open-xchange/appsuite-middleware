@@ -232,6 +232,12 @@ open-xchange-passwordchange-script (6.23.0-0) unstable; urgency=low
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 03 Sep 2012 13:46:48 +0200
 
+open-xchange-passwordchange-script (6.22.1-15) unstable; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 13 May 2013 11:47:15 +0200
+
 open-xchange-passwordchange-script (6.22.1-14) unstable; urgency=low
 
   * Build for patch 2013-04-04

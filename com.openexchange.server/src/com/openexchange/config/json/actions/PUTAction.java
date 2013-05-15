@@ -196,6 +196,9 @@ public final class PUTAction extends AbstractConfigAction {
                     } else if ('{' == value.charAt(0)) {
                         sanitizeJsonSetting(setting);
                     }
+                    setting.setSingleValue(null);
+                } else if ('{' == value.charAt(0)) {
+                    sanitizeJsonSetting(setting);
                 }
                 storage.save(setting);
             }
