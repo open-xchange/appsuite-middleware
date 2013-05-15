@@ -112,6 +112,12 @@ open-xchange-authentication-database (7.0.2-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 19 Feb 2013 08:54:16 +0100
 
+open-xchange-authentication-database (7.0.1-7) unstable; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 13 May 2013 14:25:49 +0200
+
 open-xchange-authentication-database (7.0.1-6) unstable; urgency=low
 
   * Build for patch 2013-04-04
