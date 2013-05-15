@@ -77,7 +77,8 @@ import com.openexchange.realtime.payload.PayloadTree;
  */
 public class PresenceBuilderTest {
 
-    private String presenceRequest = null;
+    private static final String presenceRequest = "{\n\t\"element\":\"presence\",\n\t\"type\":\"subscribe\",\n\t\"to\":\"ox://marc.arens@premium\",\n\t\"session\":\"1234\",\n\t\"payloads\":\n\t\t[\n\t            {\"element\":\"show\", \"data\":\"Hello marens, please let me subscribe to your presence, WBR., Mr. X\"},\n\t            {\"element\":\"priority\", \"data\":\"7\"},\n\t            \n\t            {\"element\":\"flatObject\", \"data\":\n\t            \t{\n\t            \t\t\t\"string\":\"hello0\",\n\t            \t\t\t\"number\":\"0\",\n\t            \t\t\t\"boolean\":\"false\",\n\t            \t\t\t\"null\":\"null\"\n\t            \t}\n\t            },\n\t            \n\t            {\"element\":\"arrayOfFlatObjects\", \"data\":\n            \t\t[\n\t\t\t\t\t\t{\"element\":\"flatObject1\", \"data\":\n\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\t\"string\":\"hello1\",\n\t\t\t\t\t\t\t\t\"number\":\"1\",\n\t\t\t\t\t\t\t\t\"boolean\":\"false\",\n\t\t\t\t\t\t\t\t\"null\":\"null\"\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\"element\":\"flatObject2\", \"data\":\n\t\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\t\"string\":\"hello2\",\n\t\t\t\t\t\t\t\t\"number\":\"2\",\n\t\t\t\t\t\t\t\t\"boolean\":\"false\",\n\t\t\t\t\t\t\t\t\"null\":\"null\"\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t}\n\t\t\t\t\t]\n\t\t\t\t}\n\t            \n\t    ]\n}\n";
+        
     private JSONObject presenceJSON = null;
 
     private final static String readFile(String file) throws IOException, URISyntaxException {
@@ -100,7 +101,6 @@ public class PresenceBuilderTest {
      */
     @Before
     public void setUp() throws Exception {
-        presenceRequest = readFile("presence.json");
         presenceJSON = new JSONObject(presenceRequest);
     }
 
@@ -114,10 +114,10 @@ public class PresenceBuilderTest {
         Stanza stanza = builder.build();
         assertEquals(4, stanza.getPayloads().size());
         ArrayList<PayloadTree> payloads = new ArrayList<PayloadTree>(stanza.getPayloads());
-        for (PayloadTree tree : payloads) {
-            System.out.println(tree);
-            System.out.println("\n");
-        }
+//        for (PayloadTree tree : payloads) {
+//            System.out.println(tree);
+//            System.out.println("\n");
+//        }
     }
 
 }
