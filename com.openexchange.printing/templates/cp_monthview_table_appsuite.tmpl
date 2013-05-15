@@ -26,8 +26,11 @@ body {
   background-color: transparent;
 }
 
-html, body, .calendar, #contentArea, #layout {
+html, body, .calendar, #contentArea, #layout, .date-cell {
   height: 100%;
+}
+.date-cell {
+	position: relative;
 }
 
 th, td { 
@@ -36,7 +39,6 @@ th, td {
   text-align: left; 
   position: relative;
   border-bottom: 1px solid #C0C0C0; 
-  min-height: 16%;
 }
 
 ul { 
@@ -49,10 +51,17 @@ ul {
   width: 100%;
 }
 
+.calendar th {
+  height: 20px;
+  vertical-align: bottom;
+}
+
 .calendar td { 
   vertical-align: top; 
   width: 14%; 
   border-right: 1px solid #C0C0C0; 
+  min-height: 16%;
+  height: 16%;
 }
 
 .calendar tr td:first-child {
@@ -134,22 +143,24 @@ ul {
               <#else>
                 <td class="normalDay">
               </#if>
-                <div>
-                    <ul>
-                      <#list day.wholeDayAppointments as appointment>
-                      <li class="appointmentDayStartEnd">
-                        <span class="text">${appointment.title}</span>
-                      </li>
-                      </#list>
-                      <#list day.appointments as appointment>
-                      <li>
-                        <span class="time">${appointment.format("HH:mm", appointment.startDate)}</span>
-                        <span class="text">${appointment.title}</span>
-                      </li>
-                      </#list>
-                    </ul>
+                <div class="date-cell">
+                  <div>
+                      <ul>
+                        <#list day.wholeDayAppointments as appointment>
+                        <li class="appointmentDayStartEnd">
+                          <span class="text">${appointment.title}</span>
+                        </li>
+                        </#list>
+                        <#list day.appointments as appointment>
+                        <li>
+                          <span class="time">${appointment.format("HH:mm", appointment.startDate)}</span>
+                          <span class="text">${appointment.title}</span>
+                        </li>
+                        </#list>
+                      </ul>
+                  </div>
+                  <div class="number">${day.format("dd", day.time)}</div>
                 </div>
-                <div class="number">${day.format("dd", day.time)}</div>
               </td>
             <#if day.lastDayOfWeek>
             </tr>

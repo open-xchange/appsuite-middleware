@@ -240,10 +240,17 @@ public class FileResponseRenderer implements ResponseRenderer {
                 resp.setHeader("Content-Disposition", sb.toString());
                 resp.setContentType(SAVE_AS_TYPE);
             } else {
-                String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
-                if (SAVE_AS_TYPE.equals(contentTypeByFileName)) {
+                // Determine what Content-Type is indicated by file name
+                String contentTypeByFileName;
+                if (null == fileName) {
                     // Not known
                     contentTypeByFileName = null;
+                } else {
+                    contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
+                    if (SAVE_AS_TYPE.equals(contentTypeByFileName)) {
+                        // Not known
+                        contentTypeByFileName = null;
+                    }
                 }
                 // Generate checked download
                 final CheckedDownload checkedDownload;
@@ -251,6 +258,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     String cts;
                     if (null == fileContentType || SAVE_AS_TYPE.equals(fileContentType)) {
                         if (null == contentTypeByFileName) {
+                            // Let Tika detect the Content-Type
                             final ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(documentData);
                             documentData = Streams.asInputStream(baos);
                             cts = tika.detect(Streams.asInputStream(baos));

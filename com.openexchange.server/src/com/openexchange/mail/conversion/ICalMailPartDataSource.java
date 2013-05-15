@@ -99,7 +99,7 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
             final DataProperties properties = new DataProperties();
             mailPart = getMailPart(arg.getAccountId(), fullname, mailId, sequenceId, session, properties);
             ContentType contentType = mailPart.getContentType();
-            if ((contentType == null) || !contentType.isMimeType(MimeTypes.MIME_TEXT_ALL_CALENDAR)) {
+            if (!isCalendar(contentType)) {
                 final String fileName = mailPart.getFileName();
                 if (isEmpty(fileName)) {
                     throwException(contentType);
@@ -109,7 +109,7 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
                     throwException(contentType);
                 }
                 final ContentType tmp = new ContentType(contentTypeByFileName);
-                if (!tmp.isMimeType(MimeTypes.MIME_TEXT_ALL_CALENDAR)) {
+                if (!isCalendar(tmp)) {
                     throwException(contentType);
                 }
                 if (null == contentType) {
@@ -127,7 +127,11 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
         }
     }
 
-    private void throwException(ContentType contentType) throws OXException {
+    private boolean isCalendar(final ContentType contentType) {
+        return null != contentType && (contentType.isMimeType(MimeTypes.MIME_TEXT_ALL_CALENDAR) || contentType.startsWith(MimeTypes.MIME_APPLICATION_ICS));
+    }
+
+    private void throwException(final ContentType contentType) throws OXException {
         if (null == contentType) {
             throw DataExceptionCodes.ERROR.create("Missing header 'Content-Type' in requested mail part");
         }

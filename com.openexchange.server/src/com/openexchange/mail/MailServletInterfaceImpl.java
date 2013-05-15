@@ -1224,8 +1224,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     final Set<String> names = new HashSet<String>(files.length);
                     for (int i = 0; i < files.length; i++) {
                         final ManagedFile file = files[i];
-                        if (null != file) {
-                            final FileInputStream in = new FileInputStream(file.getFile());
+                        final File tmpFile = null == file ? null : file.getFile();
+                        if (null != tmpFile) {
+                            final FileInputStream in = new FileInputStream(tmpFile);
                             try {
                                 /*
                                  * Add ZIP entry to output stream
@@ -1392,8 +1393,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     final byte[] buf = new byte[8192];
                     for (int i = 0; i < files.length; i++) {
                         final ManagedFile file = files[i];
-                        if (null != file) {
-                            final FileInputStream in = new FileInputStream(file.getFile());
+                        final File tmpFile = null == file ? null : file.getFile();
+                        if (null != tmpFile) {
+                            final FileInputStream in = new FileInputStream(tmpFile);
                             try {
                                 /*
                                  * Add ZIP entry to output stream

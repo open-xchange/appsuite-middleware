@@ -655,9 +655,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     for (EnqueuedStanza stanza : new LinkedList<EnqueuedStanza>(resendBuffer)) {
                         if (stanza.incCounter()) {
                             stanza.stanza.trace("Drained from resendBuffer");
-                            if (stanzasToSend.size() < 10) {
-                                stanzasToSend.add(stanza.stanza);
-                            }
+                            stanzasToSend.add(stanza.stanza);
                         } else {
                             toRemove.add(stanza);
                             stanza.stanza.trace("Counted to infinity. Stanza will be lost");
@@ -670,9 +668,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                     Stanza stanza = enqueued.stanza;
                     if (enqueued.incCounter()) {
                         stanza.trace("Drained from outbox");
-                        if (stanzasToSend.size() < 10) {
-                            stanzasToSend.add(stanza);
-                        }
+                        stanzasToSend.add(stanza);
                         cleanedOutbox.add(enqueued);
                     }
                 }

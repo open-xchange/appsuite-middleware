@@ -312,7 +312,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory {
             throw new OXException(t);
         }
         return previousResource;
-        // Resourcen zurückgeben
+        // return resource
 
     }
 
