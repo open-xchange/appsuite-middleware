@@ -60,6 +60,7 @@ import javax.mail.internet.ParameterList;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.util.InputStreamProvider;
 import com.openexchange.imap.util.ThresholdInputStreamProvider;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -212,10 +213,10 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource {
             if (null != bodystructure.type || null != bodystructure.subtype || null != cParams) {
                 final ContentType contentType = new ContentType();
                 if (null != bodystructure.type) {
-                    contentType.setPrimaryType(bodystructure.type);
+                    contentType.setPrimaryType(toLowerCase(bodystructure.type));
                 }
                 if (null != bodystructure.subtype) {
-                    contentType.setSubType(bodystructure.subtype);
+                    contentType.setSubType(toLowerCase(bodystructure.subtype));
                 }
                 if (null != cParams) {
                     for (final Enumeration<?> names = cParams.getNames(); names.hasMoreElements();) {
@@ -244,6 +245,20 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource {
                 setSize(size);
             }
         }
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }
