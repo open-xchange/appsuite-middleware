@@ -215,10 +215,6 @@
  - Fix for bug 25942: Check object's type before casting to Multipart
  - Fix for bug 25957: Deny "vbscript" URLs
 
-* 2013-04-17 - thorben.betten@open-xchange.com
-
- - Fix for bug 25957: Deny "vbscript" URLs
-
 * 2013-04-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 25909: Proper initialization of service trackers although registering contact-collect service is disabled

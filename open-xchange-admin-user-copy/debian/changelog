@@ -238,6 +238,12 @@ open-xchange-admin-user-copy (6.23.0-0) unstable; urgency=low
 
  -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Mon, 03 Sep 2012 13:46:26 +0200
 
+open-xchange-admin-user-copy (6.22.1-15) unstable; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Mon, 13 May 2013 11:46:57 +0200
+
 open-xchange-admin-user-copy (6.22.1-14) unstable; urgency=low
 
   * Build for patch 2013-04-04
