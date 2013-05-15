@@ -1,3 +1,9 @@
+open-xchange-contact-storage-ldap (7.2.1-2) UNRELEASED; urgency=low
+
+  * Second candidate for 7.2.1 release
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Wed, 15 May 2013 16:48:27 +0200
+
 open-xchange-contact-storage-ldap (7.2.1-1) UNRELEASED; urgency=low
 
   * First candidate for 7.2.1 release
