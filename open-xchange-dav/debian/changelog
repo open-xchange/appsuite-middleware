@@ -334,6 +334,18 @@ open-xchange-dav (6.22.1-0) unstable; urgency=low
 
  -- Steffen Templin <marcus.klein@open-xchange.com>  Fri, 26 Oct 2012 10:03:23 +0200
 
+open-xchange-dav (6.22.0-11) unstable; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Mon, 13 May 2013 14:05:35 +0200
+
+open-xchange-dav (6.22.0-10) unstable; urgency=low
+
+  * Build for patch 2013-04-04
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Tue, 02 Apr 2013 11:06:59 +0200
+
 open-xchange-dav (6.22.0-9) unstable; urgency=low
 
   * Build for patch 2013-03-08

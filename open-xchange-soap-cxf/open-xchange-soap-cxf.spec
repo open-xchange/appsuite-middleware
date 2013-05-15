@@ -48,6 +48,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %changelog
 * Mon May 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-05-09
+* Mon May 13 2013 Marcus Klein <marcus.kleni@open-xchange.com>
+Build for patch 2013-05-09
 * Fri May 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-23
 * Tue Apr 30 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -69,6 +71,8 @@ Build for patch 2013-04-04
 * Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-04
 * Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-04-04
+* Tue Apr 02 2013 Marcus Klein <marcus.kleni@open-xchange.com>
 Build for patch 2013-04-04
 * Tue Mar 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.2.0
