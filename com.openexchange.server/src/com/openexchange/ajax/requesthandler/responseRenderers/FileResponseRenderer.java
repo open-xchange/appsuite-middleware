@@ -58,6 +58,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
@@ -65,10 +66,10 @@ import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
-import com.openexchange.ajax.requesthandler.Utils;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.log.LogFactory;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.images.ImageScalingService;
 import com.openexchange.tools.images.ScaleType;
@@ -131,19 +132,27 @@ public class FileResponseRenderer implements ResponseRenderer {
         final String fileContentType = file.getContentType();
         final String fileName = file.getName();
         // Check certain parameters
-        String contentType = req.getParameter(PARAMETER_CONTENT_TYPE);
-        if (null == contentType) {
-            contentType = fileContentType;
-        }
-        String delivery = req.getParameter(DELIVERY);
+        String delivery = AJAXServlet.sanitizeParam(req.getParameter(DELIVERY));
         if (delivery == null) {
             delivery = file.getDelivery();
         }
-        String contentDisposition = req.getParameter(PARAMETER_CONTENT_DISPOSITION);
+        String contentType = AJAXServlet.encodeUrl(req.getParameter(PARAMETER_CONTENT_TYPE), true);
+        if (null == contentType) {
+            if (DOWNLOAD.equalsIgnoreCase(delivery)) {
+                contentType = SAVE_AS_TYPE;
+            } else {
+                contentType = fileContentType;
+            }
+        }
+        String contentDisposition = AJAXServlet.encodeUrl(req.getParameter(PARAMETER_CONTENT_DISPOSITION));
         if (null == contentDisposition) {
-            contentDisposition = file.getDisposition();
-        } else {
-            contentDisposition = Utils.encodeUrl(contentDisposition);
+            if (VIEW.equalsIgnoreCase(delivery)) {
+                contentDisposition = "inline";
+            } else if (DOWNLOAD.equalsIgnoreCase(delivery)) {
+                contentDisposition = "attachment";
+            } else {
+                contentDisposition = file.getDisposition();
+            }
         }
         // Write to Servlet's output stream
         InputStream documentData = null;
@@ -158,7 +167,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 return;
             }
             documentData = new BufferedInputStream(stream);
-            final String userAgent = req.getHeader("user-agent");
+            final String userAgent = AJAXServlet.sanitizeParam(req.getHeader("user-agent"));
             if (SAVE_AS_TYPE.equals(contentType) || DOWNLOAD.equalsIgnoreCase(delivery)) {
                 final StringBuilder sb = new StringBuilder(32);
                 sb.append(isEmpty(contentDisposition) ? "attachment" : checkedContentDisposition(contentDisposition.trim(), file));
@@ -166,7 +175,9 @@ public class FileResponseRenderer implements ResponseRenderer {
                 resp.setHeader("Content-Disposition", sb.toString());
                 resp.setContentType(contentType);
             } else {
-                final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileName, fileContentType, contentDisposition, userAgent);
+                final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
+                final String cts = null == fileContentType ? contentTypeByFileName : fileContentType;
+                final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileName, cts, contentDisposition, userAgent);
                 if (delivery == null || !delivery.equalsIgnoreCase(VIEW)) {
                     if (isEmpty(contentDisposition)) {
                         resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
@@ -184,19 +195,39 @@ public class FileResponseRenderer implements ResponseRenderer {
                         }
                     }
                 }
+                String preferredContentType = checkedDownload.getContentType();
+                if (!SAVE_AS_TYPE.equals(contentTypeByFileName)) {
+                    if (SAVE_AS_TYPE.equals(preferredContentType)) {
+                        preferredContentType = contentTypeByFileName;
+                    } else {
+                        final String primaryType1 = getPrimaryType(preferredContentType);
+                        final String primaryType2 = getPrimaryType(contentTypeByFileName);
+                        if (!toLowerCase(primaryType1).startsWith(toLowerCase(primaryType2))) {
+                            preferredContentType = contentTypeByFileName;
+                        }
+                    }
+                }
                 if (contentType == null) {
                     resp.setContentType(checkedDownload.getContentType());
+                    contentType = preferredContentType;
                 } else {
                     final String checkedContentType = checkedDownload.getContentType();
                     if (SAVE_AS_TYPE.equals(checkedContentType)) {
-                        resp.setContentType(contentType);
+                        trySetSanitizedContentType(contentType, resp);
                     } else {
-                        if (toLowerCase(checkedContentType).startsWith(toLowerCase(contentType))) {
-                            resp.setContentType(contentType);
+                        final String primaryType1 = getPrimaryType(preferredContentType);
+                        final String primaryType2 = getPrimaryType(contentType);
+                        if (toLowerCase(primaryType1).startsWith(toLowerCase(primaryType2))) {
+                            trySetSanitizedContentType(contentType, resp);
                         } else {
                             // Specified Content-Type does NOT match file's real MIME type
                             // Therefore ignore it due to security reasons (see bug #25343)
-                            resp.setContentType(checkedContentType);
+                            final StringBuilder sb = new StringBuilder(128);
+                            sb.append("Denied parameter \"").append(PARAMETER_CONTENT_TYPE).append("\" due to security constraints (");
+                            sb.append(contentType).append(" vs. ").append(preferredContentType).append(").");
+                            LOG.warn(sb.toString());
+                            resp.setContentType(preferredContentType);
+                            contentType = preferredContentType;
                         }
                     }
                 }
@@ -241,6 +272,16 @@ public class FileResponseRenderer implements ResponseRenderer {
         } finally {
             close(file);
             close(documentData);
+        }
+    }
+
+    /** Attempts to set a sanitized <code>Content-Type</code> header value to given HTTP response. */
+    private void trySetSanitizedContentType(final String contentType, final HttpServletResponse resp) {
+        try {
+            resp.setContentType(new ContentType(contentType).getBaseType());
+        } catch (final Exception e) {
+            // Ignore
+            resp.setContentType(contentType);
         }
     }
 
@@ -379,6 +420,14 @@ public class FileResponseRenderer implements ResponseRenderer {
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    private String getPrimaryType(final String contentType) {
+        if (isEmpty(contentType)) {
+            return contentType;
+        }
+        final int pos = contentType.indexOf('/');
+        return pos > 0 ? contentType.substring(0, pos) : contentType;
     }
 
 }
