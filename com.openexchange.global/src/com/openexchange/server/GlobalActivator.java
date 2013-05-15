@@ -50,8 +50,8 @@
 package com.openexchange.server;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import org.apache.commons.logging.Log;
@@ -105,7 +105,7 @@ public final class GlobalActivator implements BundleActivator {
             ServiceHolderInit.getInstance().start();
             initStringParsers(context);
 
-            final List<ServiceTracker<?,?>> trackers = new ArrayList<ServiceTracker<?,?>>(4);
+            final List<ServiceTracker<?, ?>> trackers = new ArrayList<ServiceTracker<?, ?>>(4);
             this.trackers = trackers;
             trackers.add(new ServiceTracker<I18nService, I18nService>(context, I18nService.class, new I18nCustomizer(context)));
 
@@ -140,10 +140,10 @@ public final class GlobalActivator implements BundleActivator {
     }
 
     private void initStringParsers(final BundleContext context) {
-        final ServiceTracker<StringParser,StringParser> parserTracker;
+        final ServiceTracker<StringParser, StringParser> parserTracker;
         final ConcurrentList<StringParser> trackedParsers = new ConcurrentList<StringParser>();
         {
-            final ServiceTrackerCustomizer<StringParser,StringParser> customizer = new ServiceTrackerCustomizer<StringParser, StringParser>() {
+            final ServiceTrackerCustomizer<StringParser, StringParser> customizer = new ServiceTrackerCustomizer<StringParser, StringParser>() {
 
                 @Override
                 public void removedService(final ServiceReference<StringParser> reference, final StringParser service) {
@@ -166,7 +166,7 @@ public final class GlobalActivator implements BundleActivator {
                     return null;
                 }
             };
-            parserTracker = new ServiceTracker<StringParser,StringParser>(context, StringParser.class, customizer);
+            parserTracker = new ServiceTracker<StringParser, StringParser>(context, StringParser.class, customizer);
             this.parserTracker = parserTracker;
         }
 
@@ -186,15 +186,19 @@ public final class GlobalActivator implements BundleActivator {
             protected Collection<StringParser> getParsers() {
                 final int size = trackedParsers.size();
                 if (size <= 0) {
-                    return Arrays.asList(standardParsersComposite);
+                    return Collections.singletonList(standardParsersComposite);
                 }
 
                 final List<StringParser> parsers = new ArrayList<StringParser>(size);
-                for (final StringParser object : trackedParsers) {
-                    if (object != this) {
-                        parsers.add(object);
+                for (final StringParser parser : trackedParsers) {
+                    if (parser == this) {
+                        // Yapp, it is safe to do while iterating because it is a ConcurrentList
+                        trackedParsers.remove(parser);
+                    } else {
+                        parsers.add(parser);
                     }
                 }
+
                 parsers.add(standardParsersComposite);
                 return parsers;
             }
