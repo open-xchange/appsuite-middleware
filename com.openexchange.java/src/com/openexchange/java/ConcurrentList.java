@@ -75,6 +75,11 @@ import java.util.concurrent.atomic.AtomicReference;
  * Do:
  *
  *   ConcurrentList&lt;String&gt; list = new ConcurrentList&lt;String&gt;(Arrays.asList(&quot;foo&quot;, &quot;bar&quot;, &quot;peter&quot;, &quot;pan&quot;, &quot;hero&quot;));
+ *   for (String next : list) {
+ *       // continue...
+ *   }
+ *
+ *   ConcurrentList&lt;String&gt; list = new ConcurrentList&lt;String&gt;(Arrays.asList(&quot;foo&quot;, &quot;bar&quot;, &quot;peter&quot;, &quot;pan&quot;, &quot;hero&quot;));
  *   List&lt;String&gt; snapshot = list.getSnapshot();
  *   for (int i = 0; i < snapshot.size(); i++) {
  *       String next = snapshot.get(i);
