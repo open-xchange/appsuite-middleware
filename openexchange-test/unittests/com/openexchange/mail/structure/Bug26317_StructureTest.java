@@ -240,7 +240,7 @@ public class Bug26317_StructureTest extends AbstractMailTest {
 
             assertEquals("Unexpected Content-Type for Excel CSV sheet.", "application/vnd.ms-excel", jsonHeaderObject.getString("type"));
 
-            System.out.println(jsonMailObject.toString(2));
+            // System.out.println(jsonMailObject.toString(2));
 
         } catch (final Exception e) {
             e.printStackTrace();
