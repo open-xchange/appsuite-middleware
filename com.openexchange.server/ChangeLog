@@ -1,3 +1,7 @@
+* 2013-05-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25982: Accept context name/identifier as a valid tag name that applies only to associated context
+
 * 2013-05-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 26373: Sanitize on "delivery=view", too
