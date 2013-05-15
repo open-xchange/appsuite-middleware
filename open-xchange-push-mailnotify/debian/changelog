@@ -118,6 +118,18 @@ open-xchange-push-mailnotify (7.0.2-0) unstable; urgency=low
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 19 Feb 2013 08:55:06 +0100
 
+open-xchange-push-mailnotify (7.0.1-7) unstable; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 13 May 2013 14:26:28 +0200
+
+open-xchange-push-mailnotify (7.0.1-6) unstable; urgency=low
+
+  * Build for patch 2013-04-04
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 02 Apr 2013 09:53:41 +0200
+
 open-xchange-push-mailnotify (7.0.1-5) unstable; urgency=low
 
   * Build for patch 2013-03-07
@@ -225,6 +237,12 @@ open-xchange-push-mailnotify (6.23.0-0) unstable; urgency=low
   * prepare for next EDP drop
 
  -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 03 Sep 2012 13:46:51 +0200
+
+open-xchange-push-mailnotify (6.22.1-15) unstable; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 13 May 2013 11:47:19 +0200
 
 open-xchange-push-mailnotify (6.22.1-14) unstable; urgency=low
 

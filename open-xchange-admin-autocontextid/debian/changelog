@@ -118,6 +118,18 @@ open-xchange-admin-autocontextid (7.0.2-0) unstable; urgency=low
 
  -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 19 Feb 2013 08:54:04 +0100
 
+open-xchange-admin-autocontextid (7.0.1-7) unstable; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Mon, 13 May 2013 14:25:39 +0200
+
+open-xchange-admin-autocontextid (7.0.1-6) unstable; urgency=low
+
+  * Build for patch 2013-04-04
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 02 Apr 2013 09:52:56 +0200
+
 open-xchange-admin-autocontextid (7.0.1-5) unstable; urgency=low
 
   * Build for patch 2013-03-07
@@ -225,6 +237,12 @@ open-xchange-admin-autocontextid (6.23.0-0) unstable; urgency=low
   * prepare for next EDP drop
 
  -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Mon, 03 Sep 2012 13:46:24 +0200
+
+open-xchange-admin-autocontextid (6.22.1-15) unstable; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Mon, 13 May 2013 11:46:55 +0200
 
 open-xchange-admin-autocontextid (6.22.1-14) unstable; urgency=low
 

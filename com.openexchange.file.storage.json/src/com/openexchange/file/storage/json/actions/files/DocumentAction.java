@@ -109,7 +109,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
         createAndSetETag(fileMetadata, request, result);
 
-		return result;
+        return result;
     }
 
 	private void createAndSetETag(File fileMetadata, InfostoreRequest request, AJAXRequestResult result) throws OXException {
