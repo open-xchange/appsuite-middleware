@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 10
+%define        ox_release 11
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -584,6 +584,8 @@ exit 0
 %config(noreplace) /opt/open-xchange/etc/requestwatcher.properties
 
 %changelog
+* Mon May 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-05-09
 * Tue May 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-05-08
 * Tue Apr 30 2013 Marcus Klein <marcus.klein@open-xchange.com>

@@ -169,9 +169,8 @@ public final class JerichoParser {
         return new StreamedSource(new com.openexchange.java.StringAllocator(html.length() + 16).append("<body>").append(sep).append(html).append(sep).append("</body>"));
     }
 
-    private static final Pattern NESTED_TAG = Pattern.compile("^(?:\r?\n *)?(<[^>]+>)");
-
     private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
+    private static final Pattern FIX_START_TAG = Pattern.compile("^([^<]*)(<[a-zA-Z_0-9-]+)/([a-zA-Z][^>]+>)");
 
     /**
      * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
@@ -199,7 +198,7 @@ public final class JerichoParser {
                 /*
                  * Handle current segment
                  */
-                handleSegment(handler, segment, false);
+                handleSegment(handler, segment);
             }
             if (DEBUG) {
                 final long dur = System.currentTimeMillis() - st;
@@ -231,7 +230,7 @@ public final class JerichoParser {
         }
     }
 
-    private static void handleSegment(final JerichoHandler handler, final Segment segment, final boolean reparseSegment) {
+    private static void handleSegment(final JerichoHandler handler, final Segment segment) {
         if (segment instanceof Tag) {
             final Tag tag = (Tag) segment;
             final TagType tagType = tag.getTagType();
@@ -288,24 +287,20 @@ public final class JerichoParser {
             /*
              * Safety re-parse
              */
-            if (reparseSegment && (segment.toString().indexOf('<') >= 0) && !segment.isWhiteSpace()) {
-                final Matcher m = NESTED_TAG.matcher(segment);
-                if (m.matches()) {
-                    final int startTagPos = m.start(1);
-                    /*
-                     * Handle extracted whitespace segment
-                     */
-                    StreamedSource nestedSource = new StreamedSource(segment.subSequence(0, startTagPos));
-                    for (final Segment nestedSegment : nestedSource) {
-                        handler.handleSegment(nestedSegment);
-                    }
+            if (contains('<', segment)) {
+                final Matcher m = FIX_START_TAG.matcher(segment);
+                if (m.find()) {
+                    final StringBuffer sb = new StringBuffer(segment.length());
+                    do {
+                        m.appendReplacement(sb, "$1$2 $3");
+                    } while (m.find());
+                    m.appendTail(sb);
                     /*
                      * Re-parse start tag
                      */
-                    final String startTag = fixStyleAttribute(segment.subSequence(startTagPos, segment.length()).toString());
-                    nestedSource = new StreamedSource(startTag);
+                    final StreamedSource nestedSource = new StreamedSource(sb.toString());
                     for (final Segment nestedSegment : nestedSource) {
-                        handleSegment(handler, nestedSegment, false);
+                        handleSegment(handler, nestedSegment);
                     }
                 } else {
                     handler.handleSegment(segment);
@@ -321,6 +316,42 @@ public final class JerichoParser {
             return startTag;
         }
         return INVALID_DELIM.matcher(startTag).replaceAll("; ");
+    }
+
+    private static boolean startsWith(final char startingChar, final CharSequence toCheck) {
+        if (null == toCheck) {
+            return false;
+        }
+        final int len = toCheck.length();
+        if (len <= 0) {
+            return false;
+        }
+        int i = 0;
+        if (Character.isWhitespace(toCheck.charAt(i))) {
+            do {
+                i++;
+            } while (i < len && Character.isWhitespace(toCheck.charAt(i)));
+        }
+        if (i >= len) {
+            return false;
+        }
+        return startingChar == toCheck.charAt(i);
+    }
+
+    private static boolean contains(final char c, final CharSequence toCheck) {
+        if (null == toCheck) {
+            return false;
+        }
+        final int len = toCheck.length();
+        if (len <= 0) {
+            return false;
+        }
+        for (int i = 0; i < len; i++) {
+            if (c == toCheck.charAt(i)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
