@@ -94,7 +94,7 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class FileResponseRenderer implements ResponseRenderer {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(FileResponseRenderer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FileResponseRenderer.class);
 
     private static final int BUFLEN = 2048;
 
@@ -492,7 +492,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             // compress not needed to be checked, because we already have a jpeg
         }
-        if(!transformationNeeded) {
+        if (!transformationNeeded) {
 
             if (request.isSet("width") || request.isSet("height")) {
 
@@ -537,7 +537,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     } catch (final MetadataException e) {
                         transformationNeeded = false;
                     }
-                    if(!file.repetitive()&&stream.markSupported()) {
+                    if (!file.repetitive() && stream.markSupported()) {
                         stream.reset();
                     }
                 }
@@ -545,7 +545,6 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
         return transformationNeeded;
     }
-
 
     private IFileHolder transformIfImage(final AJAXRequestData request, final IFileHolder file, final String delivery) throws IOException, OXException {
         /*
@@ -574,41 +573,41 @@ public class FileResponseRenderer implements ResponseRenderer {
             stream.mark(131072); // 128KB
         }
         // start transformations: scale, rotate, ...
-        ImageTransformations transformations = scaler.transfom(stream);
+        final ImageTransformations transformations = scaler.transfom(stream);
         // rotate by default when not delivering as download
-        Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
+        final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
         if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
             transformations.rotate();
         }
         if (request.isSet("cropWidth") || request.isSet("cropHeight")) {
-            int cropX = request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0;
-            int cropY = request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0;
-            int cropWidth = request.getParameter("cropWidth", int.class).intValue();
-            int cropHeight = request.getParameter("cropHeight", int.class).intValue();
+            final int cropX = request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0;
+            final int cropY = request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0;
+            final int cropWidth = request.getParameter("cropWidth", int.class).intValue();
+            final int cropHeight = request.getParameter("cropHeight", int.class).intValue();
             transformations.crop(cropX, cropY, cropWidth, cropHeight);
         }
         if (request.isSet("width") || request.isSet("height")) {
-            int maxWidth = request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0;
-            int maxHeight = request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0;
-            ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
+            final int maxWidth = request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0;
+            final int maxHeight = request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0;
+            final ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
             transformations.scale(maxWidth, maxHeight, scaleType);
         }
         // compress by default when not delivering as download
-        Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
+        final Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
         if ((null == compress && false == DOWNLOAD.equalsIgnoreCase(delivery)) || (null != compress && compress.booleanValue())) {
             transformations.compress();
         }
         /*
          * transform
          */
-        InputStream transformed = transformations.getInputStream(file.getContentType());
+        final InputStream transformed = transformations.getInputStream(file.getContentType());
         if (null == transformed) {
             LOG.warn("Got no resulting input stream from transformation, trying to recover original input");
             if (markSupported) {
                 try {
                     stream.reset();
                     return file;
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     LOG.warn("Error resetting input stream", e);
                 }
             }
