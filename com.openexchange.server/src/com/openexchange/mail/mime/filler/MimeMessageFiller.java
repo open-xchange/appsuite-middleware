@@ -686,21 +686,6 @@ public class MimeMessageFiller {
              */
             return;
         }
-        /*
-         * Check if referencedMail already provides References and In-Reply-To headers
-         */
-        {
-            final String sReferences = referencedMail.getFirstHeader(MessageHeaders.HDR_REFERENCES);
-            if (!isEmpty(sReferences)) {
-                final String sInReplyTo = referencedMail.getFirstHeader(MessageHeaders.HDR_IN_REPLY_TO);
-                if (!isEmpty(sInReplyTo)) {
-                    mimeMessage.setHeader(MessageHeaders.HDR_IN_REPLY_TO, sInReplyTo);
-                    mimeMessage.setHeader(MessageHeaders.HDR_REFERENCES, sReferences);
-                    return;
-                }
-            }
-        }
-
         final String pMsgId = referencedMail.getFirstHeader(MessageHeaders.HDR_MESSAGE_ID);
         if (pMsgId != null) {
             mimeMessage.setHeader(MessageHeaders.HDR_IN_REPLY_TO, pMsgId);
