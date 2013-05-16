@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,20 +49,54 @@
 
 package com.openexchange.html;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import java.util.Map;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.html.internal.HtmlServiceImpl;
+import com.openexchange.html.osgi.HTMLServiceActivator;
 
 /**
- * Test suite for all integrated unit tests of the HTMLService implementation.
+ * {@link Bug26611Test}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({ Bug26237Test.class, Bug26611Test.class })
-public class UnitTests {
+public class Bug26611Test {
 
-    private UnitTests() {
+    private HtmlService service;
+
+    public Bug26611Test() {
         super();
+    }
+
+    @Before
+    public void setUp() {
+        Object[] maps = HTMLServiceActivator.getDefaultHTMLEntityMaps();
+
+        @SuppressWarnings("unchecked")
+        final Map<String, Character> htmlEntityMap = (Map<String, Character>) maps[1];
+        @SuppressWarnings("unchecked")
+        final Map<Character, String> htmlCharMap = (Map<Character, String>) maps[0];
+
+        htmlEntityMap.put("apos", Character.valueOf('\''));
+
+        service = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
+    }
+
+    @After
+    public void tearDown() {
+        service = null;
+    }
+
+    @Test
+    public void testSanitize() {
+        String content = "foo <object/data=\"data:text/html;base64,PHNjcmlwdD5hbGVydCgiWFNTIFNjaHdhY2hzdGVsbGUiKTwvc2NyaXB0Pg==\"<!-- --></object//-->> bar";
+        String test = service.sanitize(content, null, false, null, null);
+        Assert.assertFalse("Sanitized content still contains object tag.", test.contains("<object"));
+        Assert.assertFalse("Sanitized content still contains object tag.", test.contains("</object>"));
+        Assert.assertFalse("Sanitized content still contains base64 string.", test.contains("PHNjcmlwdD5hbGVydCgiWFNTIFNjaHdhY2hzdGVsbGUiKTwvc2NyaXB0Pg=="));
+        Assert.assertFalse("Sanitized content still contains data type.", test.contains("text/html"));
+        Assert.assertFalse("Sanitized content still contains base64 encoding description.", test.contains("base64"));
     }
 }

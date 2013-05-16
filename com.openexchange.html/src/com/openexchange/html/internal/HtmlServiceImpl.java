@@ -478,6 +478,7 @@ public final class HtmlServiceImpl implements HtmlService {
             html = replaceHexEntities(html);
             html = processDownlevelRevealedConditionalComments(html);
             html = dropDoubleAccents(html);
+            html = dropSlashedTags(html);
             // CSS- and tag-wise sanitizing
             {
                 // Determine the definition to use
@@ -513,6 +514,27 @@ public final class HtmlServiceImpl implements HtmlService {
             LOG.warn("HTML content will be returned un-sanitized. Reason: "+e.getMessage(), e);
             return htmlContent;
         }
+    }
+
+    private static final Pattern PATTERN_FIX_START_TAG = Pattern.compile("(<[a-zA-Z_0-9-]+)/+([a-zA-Z_0-9-][^>]+)");
+
+    private static String dropSlashedTags(final String html) {
+        if (null == html) {
+            return html;
+        }
+        final Matcher m = PATTERN_FIX_START_TAG.matcher(html);
+        if (!m.find()) {
+            /*
+             * No slashed tags found
+             */
+            return html;
+        }
+        final StringBuffer sb = new StringBuffer(html.length());
+        do {
+            m.appendReplacement(sb, "$1 $2");
+        } while (m.find());
+        m.appendTail(sb);
+        return sb.toString();
     }
 
     private static final Pattern PATTERN_TAG = Pattern.compile("<\\w+?[^>]*>");

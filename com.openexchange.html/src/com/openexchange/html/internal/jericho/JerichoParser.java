@@ -68,6 +68,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.parser.HtmlHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -185,7 +186,7 @@ public final class JerichoParser {
     }
 
     private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
-    private static final Pattern FIX_START_TAG = Pattern.compile("^([^<]*)(<[a-zA-Z_0-9-]+)/([a-zA-Z][^>]+>)");
+    private static final Pattern FIX_START_TAG = Pattern.compile("(<[^>]+)(>?)");
 
     /**
      * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
@@ -304,12 +305,8 @@ public final class JerichoParser {
              */
             if (contains('<', segment)) {
                 final Matcher m = FIX_START_TAG.matcher(segment);
-                if (m.find()) {
-                    final StringBuffer sb = new StringBuffer(segment.length());
-                    do {
-                        m.appendReplacement(sb, "$1$2 $3");
-                    } while (m.find());
-                    m.appendTail(sb);
+                if (m.find() && isEmpty(m.group(2))) {
+                    final StringAllocator sb = new StringAllocator(m.group(1)).append('>');
                     /*
                      * Re-parse start tag
                      */
@@ -367,6 +364,19 @@ public final class JerichoParser {
             }
         }
         return false;
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }
