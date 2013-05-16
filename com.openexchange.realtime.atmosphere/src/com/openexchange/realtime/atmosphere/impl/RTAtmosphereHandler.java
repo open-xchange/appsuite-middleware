@@ -129,7 +129,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     /*
      * Give resources time to linger before finally cleaning up
      */
-    AtmosphereResourceReaper atmosphereResourceReaper = null;
+    volatile AtmosphereResourceReaper atmosphereResourceReaper = null;
 
     /*
      * Maintain a mapping of all IDs that use a certain session
@@ -452,6 +452,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * @param concreteID The concrete id of the re/appearing client
      */
     private boolean refreshReaper(final ID concreteID) {
+        final AtmosphereResourceReaper atmosphereResourceReaper = this.atmosphereResourceReaper;
         Moribund removed = atmosphereResourceReaper.remove(concreteID);
         atmosphereResourceReaper.add(new Moribund(concreteID) {
 
