@@ -206,20 +206,7 @@ public class AJAXRequestDataTools {
                     reader = new UnsynchronizedPushbackReader(AJAXServlet.getReaderFor(req));
                     final int read = reader.read();
                     if (read < 0) {
-                        retval.setData(null);
-                        final String data = req.getParameter("data");
-                        if (data != null && data.length() > 0) {
-                            try {
-                                final char c = data.charAt(0);
-                                if ('[' == c || '{' == c) {
-                                    retval.setData(JSONObject.parse(new UnsynchronizedStringReader(data)));
-                                } else {
-                                    retval.setData(data);
-                                }
-                            } catch (final JSONException e) {
-                                retval.setData(data);
-                            }
-                        }
+                        trySetDataByParameter(req, retval);
                     } else {
                         final char c = (char) read;
                         reader.unread(c);
@@ -236,9 +223,28 @@ public class AJAXRequestDataTools {
                 } finally {
                     Streams.close(reader);
                 }
+            } else {
+                trySetDataByParameter(req, retval);
             }
         }
         return retval;
+    }
+
+    private void trySetDataByParameter(final HttpServletRequest req, final AJAXRequestData retval) {
+        retval.setData(null);
+        final String data = req.getParameter("data");
+        if (data != null && data.length() > 0) {
+            try {
+                final char c = data.charAt(0);
+                if ('[' == c || '{' == c) {
+                    retval.setData(JSONObject.parse(new UnsynchronizedStringReader(data)));
+                } else {
+                    retval.setData(data);
+                }
+            } catch (final JSONException e) {
+                retval.setData(data);
+            }
+        }
     }
 
     /**
