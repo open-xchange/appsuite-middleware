@@ -171,15 +171,15 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
         for (final String name : parameters) {
             if (!name.equalsIgnoreCase("session") && !name.equalsIgnoreCase("action")) {
-                sb.append(name).append('=');
+                sb.append('-').append(name);
                 final String parameter = requestData.getParameter(name);
                 if (!isEmpty(parameter)) {
-                    sb.append('-').append(parameter);
+                    sb.append('=').append(parameter);
                 }
             }
         }
         try {
-            return eTag + asHex(MessageDigest.getInstance("MD5").digest(sb.toString().getBytes("UTF-8")));
+            return new StringAllocator(eTag).append('-').append(asHex(MessageDigest.getInstance("MD5").digest(sb.toString().getBytes("UTF-8")))).toString();
         } catch (UnsupportedEncodingException e) {
             // Shouldn't happen
             LOG.error(e.getMessage(),e);
