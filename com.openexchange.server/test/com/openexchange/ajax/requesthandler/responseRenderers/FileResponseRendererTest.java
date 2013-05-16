@@ -53,7 +53,9 @@ import junit.framework.TestCase;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-
+import com.openexchange.html.HtmlService;
+import com.openexchange.html.SimHtmlService;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link FileResponseRendererTest}
@@ -69,32 +71,46 @@ public class FileResponseRendererTest extends TestCase {
         super();
     }
 
-    public void no_testProperContentLength() {
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        ServerServiceRegistry.getInstance().addService(HtmlService.class, new SimHtmlService());
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        ServerServiceRegistry.getInstance().removeService(HtmlService.class);
+        super.tearDown();
+    }
+
+    public void testProperContentLength() {
         try {
-            final String html = "foo\n" +
-                "<object/data=\"data:text/html;base64,PHNjcmlwdD5hbGVydCgiWFNTIFNjaHdhY2hzdGVsbGUiKTwvc2NyaXB0Pg==\"></object>\n" +
-                "bar";
-            byte[] bytes = html.getBytes("ISO-8859-1");
+            final String html = "foo\n" + "<object/data=\"data:text/html;base64,PHNjcmlwdD5hbGVydCgiWFNTIFNjaHdhY2hzdGVsbGUiKTwvc2NyaXB0Pg==\"></object>\n" + "bar";
+            final byte[] bytes = html.getBytes("ISO-8859-1");
             final int length = bytes.length;
 
-            ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
+            final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
             fileHolder.setContentType("text/html; charset=ISO-8859-1");
             fileHolder.setDelivery("view");
             fileHolder.setDisposition("inline");
             fileHolder.setName("document.html");
 
-            FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+            final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
 
-            AJAXRequestData requestData = new AJAXRequestData();
-            AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
-            SimHttpServletRequest req = new SimHttpServletRequest();
-            SimHttpServletResponse resp = new SimHttpServletResponse();
+            final AJAXRequestData requestData = new AJAXRequestData();
+            final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+            final SimHttpServletRequest req = new SimHttpServletRequest();
+            final SimHttpServletResponse resp = new SimHttpServletResponse();
+            final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+            resp.setOutputStream(servletOutputStream);
             fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
 
-            int contentLength = resp.getContentLength();
+            final int contentLength = resp.getContentLength();
             assertTrue("Unexpected Content-Length: " + contentLength, contentLength > 0);
             assertTrue("Unexpected Content-Length: " + contentLength + ", but should be less than " + length, length > contentLength);
-        } catch (Exception e) {
+            final int size = servletOutputStream.size();
+            assertEquals("Unexpected Content-Length.", size, contentLength);
+        } catch (final Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
