@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.responseRenderers;
+package javax.servlet.http;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -65,7 +65,6 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import com.openexchange.java.StringAllocator;
 
 
 /**
@@ -759,7 +758,7 @@ public class SimHttpServletRequest implements HttpServletRequest {
             return null;
         }
         final int length = chars.length();
-        final StringAllocator builder = new StringAllocator(length);
+        final StringBuilder builder = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);

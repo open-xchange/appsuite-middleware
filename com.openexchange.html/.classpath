@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="sim"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry exported="true" kind="lib" path="lib/jTidy.jar" sourcepath="lib/jTidy.jar"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>

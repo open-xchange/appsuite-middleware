@@ -47,13 +47,12 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.responseRenderers;
+package javax.servlet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import javax.servlet.ServletOutputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link ByteArrayServletOutputStream} - A {@code ServletOutputStream} backed by a {@code ByteArrayOutputStream}.
@@ -69,7 +68,7 @@ public class ByteArrayServletOutputStream extends ServletOutputStream {
      */
     public ByteArrayServletOutputStream() {
         super();
-        out = new UnsynchronizedByteArrayOutputStream(2048);
+        out = new ByteArrayOutputStream(2048);
     }
 
     @Override

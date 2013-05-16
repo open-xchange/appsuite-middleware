@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
+import javax.servlet.ByteArrayServletOutputStream;
+import javax.servlet.http.SimHttpServletRequest;
+import javax.servlet.http.SimHttpServletResponse;
 import junit.framework.TestCase;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
