@@ -525,7 +525,7 @@ public final class MessageParser {
             for (int i = 0; i < size; i++) {
                 final String key = iter.next();
                 if (isCustomOrReplyHeader(key) && !key.equalsIgnoreCase("x-original-headers")) {
-                    headers.addHeader(key, obj.getString(key));
+                    headers.setHeader(key, obj.getString(key));
                 }
             }
             mail.addHeaders(headers);

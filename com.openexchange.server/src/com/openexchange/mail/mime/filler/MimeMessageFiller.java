@@ -593,7 +593,7 @@ public class MimeMessageFiller {
             final Map.Entry<String, String> entry = iter.next();
             final String name = entry.getKey();
             if (isCustomOrReplyHeader(name)) {
-                mimeMessage.addHeader(name, entry.getValue());
+                mimeMessage.setHeader(name, entry.getValue());
             }
         }
     }
