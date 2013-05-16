@@ -47,7 +47,7 @@
  *
  */
 
-package javax.servlet;
+package javax.servlet.sim;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

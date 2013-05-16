@@ -47,7 +47,7 @@
  *
  */
 
-package javax.servlet.http;
+package javax.servlet.http.sim;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;

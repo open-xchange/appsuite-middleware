@@ -47,7 +47,7 @@
  *
  */
 
-package javax.servlet.http;
+package javax.servlet.http.sim;
 
 import java.io.BufferedReader;
 import java.io.IOException;
