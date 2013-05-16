@@ -71,6 +71,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ConcurrentList;
+import com.openexchange.java.ConcurrentSet;
 import com.openexchange.java.ConcurrentSortedSet;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
@@ -422,7 +423,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         final Set<ID> idSet = com.openexchange.tools.Collections.opt(
             idsPerSession,
             session.getSessionID(),
-            Collections.synchronizedSet(new HashSet<ID>()));
+            new ConcurrentSet<ID>());
         if (idSet.add(concreteID)) {
             concreteID.on("dispose", new IDEventHandler() {
 
