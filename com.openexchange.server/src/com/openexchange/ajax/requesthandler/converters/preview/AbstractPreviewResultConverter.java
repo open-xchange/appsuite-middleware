@@ -179,7 +179,9 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             }
         }
         try {
-            return new StringAllocator(eTag).append('-').append(asHex(MessageDigest.getInstance("MD5").digest(sb.toString().getBytes("UTF-8")))).toString();
+            final byte[] md5Bytes = sb.toString().getBytes("UTF-8");
+            sb.setNewLength(0);
+            return sb.append(eTag).append('-').append(asHex(MessageDigest.getInstance("MD5").digest(md5Bytes))).toString();
         } catch (UnsupportedEncodingException e) {
             // Shouldn't happen
             LOG.error(e.getMessage(),e);
