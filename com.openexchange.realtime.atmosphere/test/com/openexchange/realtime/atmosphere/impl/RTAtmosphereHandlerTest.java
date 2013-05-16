@@ -58,9 +58,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.util.List;
-import java.util.Set;
 import java.util.SortedSet;
-import java.util.concurrent.ConcurrentHashMap;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.atmosphere.cpr.AtmosphereResource.TRANSPORT;
 import org.atmosphere.cpr.AtmosphereResponse;
@@ -69,13 +67,11 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
-import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.realtime.payload.PayloadTree;
 import com.openexchange.realtime.payload.PayloadTreeNode;
-import com.openexchange.realtime.util.IDMap;
 
 /**
  * {@link RTAtmosphereHandlerTest}
@@ -246,13 +242,6 @@ public class RTAtmosphereHandlerTest extends RTAtmosphereHandler {
     @Override
     public void init() {
         // Don't init resource reaper
-        atmosphereServiceRegistry = AtmosphereServiceRegistry.getInstance();
-        generalToConcreteIDMap = new IDMap<Set<ID>>();
-        concreteIDToResourceMap = new ConcurrentHashMap<ID, AtmosphereResource>();
-        outboxes = new ConcurrentHashMap<ID, List<EnqueuedStanza>>();
-        idsPerSession = new ConcurrentHashMap<String, Set<ID>>();
-        sequenceNumbers = new ConcurrentHashMap<ID, Long>();
-        resendBuffers = new ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>>();
     }
 
     private Stanza createStanza(ID id, String key, Object value) {

@@ -109,22 +109,22 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(RTAtmosphereHandler.class));
 
-    protected AtmosphereServiceRegistry atmosphereServiceRegistry;
+    protected final AtmosphereServiceRegistry atmosphereServiceRegistry;
 
     /*
      * Map general ids (user@context) to full ids (ox://user@context/resource.browserx.taby, this is used for lookups via isConnected
      */
-    protected IDMap<Set<ID>> generalToConcreteIDMap;
+    protected final IDMap<Set<ID>> generalToConcreteIDMap;
 
     /*
      * Map full client IDs to the AtmosphereResource that represents their connection to the server, this is used for sending
      */
-    protected ConcurrentHashMap<ID, AtmosphereResource> concreteIDToResourceMap;
+    protected final ConcurrentHashMap<ID, AtmosphereResource> concreteIDToResourceMap;
 
     /*
      * Map for holding outboxes
      */
-    protected ConcurrentHashMap<ID, List<EnqueuedStanza>> outboxes;
+    protected final ConcurrentHashMap<ID, List<EnqueuedStanza>> outboxes;
 
     /*
      * Give resources time to linger before finally cleaning up
@@ -134,13 +134,13 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     /*
      * Maintain a mapping of all IDs that use a certain session
      */
-    protected ConcurrentHashMap<String, Set<ID>> idsPerSession;
+    protected final ConcurrentHashMap<String, Set<ID>> idsPerSession;
 
-    protected ConcurrentHashMap<ID, Long> sequenceNumbers;
+    protected final ConcurrentHashMap<ID, Long> sequenceNumbers;
 
-    protected ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>> resendBuffers;
+    protected final ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>> resendBuffers;
 
-    protected StanzaSequenceGate gate = new StanzaSequenceGate("RTAtmosphereHandler") {
+    protected final StanzaSequenceGate gate = new StanzaSequenceGate("RTAtmosphereHandler") {
 
         @Override
         public void handleInternal(Stanza stanza, ID recipient) throws OXException {
@@ -154,9 +154,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      */
     public RTAtmosphereHandler() {
         super();
-    }
-
-    public void init() {
         atmosphereServiceRegistry = AtmosphereServiceRegistry.getInstance();
         generalToConcreteIDMap = new IDMap<Set<ID>>();
         concreteIDToResourceMap = new ConcurrentHashMap<ID, AtmosphereResource>();
@@ -164,7 +161,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         idsPerSession = new ConcurrentHashMap<String, Set<ID>>();
         sequenceNumbers = new ConcurrentHashMap<ID, Long>();
         resendBuffers = new ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>>();
+    }
 
+    public void init() {
         atmosphereResourceReaper = new AtmosphereResourceReaper();
     }
 
