@@ -306,11 +306,10 @@ public final class JerichoParser {
             if (contains('<', segment)) {
                 final Matcher m = FIX_START_TAG.matcher(segment);
                 if (m.find() && isEmpty(m.group(2))) {
-                    final StringAllocator sb = new StringAllocator(m.group(1)).append('>');
                     /*
                      * Re-parse start tag
                      */
-                    final StreamedSource nestedSource = new StreamedSource(sb.toString());
+                    final StreamedSource nestedSource = new StreamedSource(new StringAllocator(m.group(1)).append('>').toString());
                     for (final Segment nestedSegment : nestedSource) {
                         handleSegment(handler, nestedSegment);
                     }
