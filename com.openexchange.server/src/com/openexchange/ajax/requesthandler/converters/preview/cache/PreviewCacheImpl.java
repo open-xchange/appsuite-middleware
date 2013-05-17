@@ -99,7 +99,7 @@ public final class PreviewCacheImpl implements PreviewCache, EventHandler {
                 final int contextId = session.getContextId();
                 removeAlikes(event.getProperty(FileStorageEventConstants.E_TAG).toString(), userId, contextId);
             } catch (final OXException e) {
-                LOG.warn("Couldn't remove cache enrty.", e);
+                LOG.warn("Couldn't remove cache entry.", e);
             }
         } else if (FileStorageEventConstants.DELETE_TOPIC.equals(topic)) {
             try {
@@ -108,7 +108,7 @@ public final class PreviewCacheImpl implements PreviewCache, EventHandler {
                 final int contextId = session.getContextId();
                 removeAlikes(event.getProperty(FileStorageEventConstants.E_TAG).toString(), userId, contextId);
             } catch (final OXException e) {
-                LOG.warn("Couldn't remove cache enrty.", e);
+                LOG.warn("Couldn't remove cache entry.", e);
             }
         }
     }
