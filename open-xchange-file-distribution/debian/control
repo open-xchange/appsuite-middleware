@@ -10,6 +10,8 @@ Package: open-xchange-file-distribution
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}, open-xchange-grizzly (>= @OXVERSION@)
+Replaces: open-xchange-core (<< 7.4.0-0)
+Conflicts: open-xchange-core (<< 7.4.0-0)
 Description: Cluster wide file distribution
  This package installs bundles taking care to distribute files in the cluster. This is especially used for collaborative work on documents
  when new images are added.
