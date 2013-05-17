@@ -36,6 +36,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-eas-provisioning"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-eas-provisioning-mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-eas-provisioning-sms"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-distribution"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-storage-cifs"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-freebusy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-grizzly"/>
