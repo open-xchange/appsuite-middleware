@@ -81,6 +81,7 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         data.setFileMIMEType("text/plain");
         data.setFolderId(folder.getObjectID());
         File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+        data.setFileName(upload.getName());
 
         infoMgr.newAction(data, upload);
 
@@ -112,6 +113,7 @@ public class OXMFInfostoreTest extends AbstractPublicationTest {
         data.setFileMIMEType("text/plain");
         data.setFolderId(folder.getObjectID());
         File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
+        data.setFileName(upload.getName());
 
         infoMgr.newAction(data, upload);
 
