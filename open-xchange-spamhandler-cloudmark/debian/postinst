@@ -17,6 +17,11 @@ set -e
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+# SoftwareChange_Request-1452
+pfile=/opt/open-xchange/etc/spamhandler_cloudmark.properties
+if ! ox_exists_property com.openexchange.spamhandler.cloudmark.targetHamEmailAddress $pfile; then
+   ox_set_property com.openexchange.spamhandler.cloudmark.targetHamEmailAddress "" $pfile
+fi
 
 case "$1" in
     configure)

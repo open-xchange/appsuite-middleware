@@ -39,6 +39,15 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %clean
 %{__rm} -rf %{buildroot}
 
+%post
+. /opt/open-xchange/lib/oxfunctions.sh
+
+# SoftwareChange_Request-1452
+pfile=/opt/open-xchange/etc/spamhandler_cloudmark.properties
+if ! ox_exists_property com.openexchange.spamhandler.cloudmark.targetHamEmailAddress $pfile; then
+   ox_set_property com.openexchange.spamhandler.cloudmark.targetHamEmailAddress "" $pfile
+fi
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
