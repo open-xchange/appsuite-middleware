@@ -216,48 +216,54 @@ public class CapabilityServiceImpl implements CapabilityService {
         }
         // ---------------- Now the ones from database ------------------ //
         {
-            final Set<String> set = new HashSet<String>();
-            final Set<String> removees = new HashSet<String>();
-            // Context-sensitive
-            for (final String sCap : getContextCaps(session.getContextId())) {
-                final char firstChar = sCap.charAt(0);
-                if ('-' == firstChar) {
-                    final String val = toLowerCase(sCap.substring(1));
-                    set.remove(val);
-                    removees.add(val);
-                } else {
-                    if ('+' == firstChar) {
-                        set.add(toLowerCase(sCap.substring(1)));
+            final int contextId = session.getContextId();
+            if (contextId > 0) {
+                final Set<String> set = new HashSet<String>();
+                final Set<String> removees = new HashSet<String>();
+                // Context-sensitive
+                for (final String sCap : getContextCaps(contextId)) {
+                    final char firstChar = sCap.charAt(0);
+                    if ('-' == firstChar) {
+                        final String val = toLowerCase(sCap.substring(1));
+                        set.remove(val);
+                        removees.add(val);
                     } else {
-                        set.add(toLowerCase(sCap));
+                        if ('+' == firstChar) {
+                            set.add(toLowerCase(sCap.substring(1)));
+                        } else {
+                            set.add(toLowerCase(sCap));
+                        }
                     }
                 }
-            }
-            // User-sensitive
-            for (final String sCap : getUserCaps(session.getUserId(), session.getContextId())) {
-                final char firstChar = sCap.charAt(0);
-                if ('-' == firstChar) {
-                    final String val = toLowerCase(sCap.substring(1));
-                    set.remove(val);
-                    removees.add(val);
-                } else {
-                    if ('+' == firstChar) {
-                        final String cap = toLowerCase(sCap.substring(1));
-                        set.add(cap);
-                        removees.remove(cap);
-                    } else {
-                        final String cap = toLowerCase(sCap);
-                        set.add(cap);
-                        removees.remove(cap);
+                // User-sensitive
+                final int userId = session.getUserId();
+                if (userId > 0) {
+                    for (final String sCap : getUserCaps(userId, contextId)) {
+                        final char firstChar = sCap.charAt(0);
+                        if ('-' == firstChar) {
+                            final String val = toLowerCase(sCap.substring(1));
+                            set.remove(val);
+                            removees.add(val);
+                        } else {
+                            if ('+' == firstChar) {
+                                final String cap = toLowerCase(sCap.substring(1));
+                                set.add(cap);
+                                removees.remove(cap);
+                            } else {
+                                final String cap = toLowerCase(sCap);
+                                set.add(cap);
+                                removees.remove(cap);
+                            }
+                        }
                     }
                 }
-            }
-            // Merge them into result set
-            for (final String sCap : removees) {
-                capabilities.remove(getCapability(sCap));
-            }
-            for (final String sCap : set) {
-                capabilities.add(getCapability(sCap));
+                // Merge them into result set
+                for (final String sCap : removees) {
+                    capabilities.remove(getCapability(sCap));
+                }
+                for (final String sCap : set) {
+                    capabilities.add(getCapability(sCap));
+                }
             }
         }
 
