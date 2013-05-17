@@ -18,15 +18,26 @@ set -e
 # the debian-policy package
 
 . /opt/open-xchange/lib/oxfunctions.sh
+postFix() {
+    local version=${1%-*}
+    version=${version//[-.]/}
 
-# SoftwareChange_Request-1452
-pfile=/opt/open-xchange/etc/spamhandler_cloudmark.properties
-if ! ox_exists_property com.openexchange.spamhandler.cloudmark.targetHamEmailAddress $pfile; then
-   ox_set_property com.openexchange.spamhandler.cloudmark.targetHamEmailAddress "" $pfile
-fi
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    # SoftwareChange_Request-1452
+    pfile=/opt/open-xchange/etc/spamhandler_cloudmark.properties
+    if ! ox_exists_property com.openexchange.spamhandler.cloudmark.targetHamEmailAddress $pfile; then
+       ox_set_property com.openexchange.spamhandler.cloudmark.targetHamEmailAddress "" $pfile
+    fi
+}
 
 case "$1" in
     configure)
+        test -n "$2" && {
+           # we are in update mode, run postFix to apply fixes
+           postFix "$2"
+        }
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
