@@ -2143,32 +2143,57 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 stmt = null;
                 rs = null;
             }
+            final Set<String> capsToInsert = new HashSet<String>(capsToAdd);
             // Delete existing ones
             if (null != capsToRemove && !capsToRemove.isEmpty()) {
-                stmt = con.prepareStatement("DELETE FROM capability_context WHERE cid=? AND cap=?");
-                stmt.setInt(1, contextId);
                 for (final String cap : capsToRemove) {
-                    stmt.setString(2, cap);
-                    stmt.addBatch();
-                }
-                stmt.executeBatch();
-                Databases.closeSQLStuff(stmt);
-                stmt = null;
-            }
-            // Insert new ones
-            if (null != capsToAdd) {
-                capsToAdd.removeAll(existing);
-                if (!capsToAdd.isEmpty()) {
-                    stmt = con.prepareStatement("INSERT INTO capability_context (cid, cap) VALUES (?, ?)");
-                    stmt.setInt(1, contextId);
-                    for (final String cap : capsToAdd) {
+                    if (existing.contains(cap)) {
+                        if (null == stmt) {
+                            stmt = con.prepareStatement("DELETE FROM capability_context WHERE cid=? AND cap=?");
+                            stmt.setInt(1, contextId);
+                        }
                         stmt.setString(2, cap);
                         stmt.addBatch();
+                        existing.remove(cap);
                     }
+                    final String attributedCap = "+" + cap;
+                    if (existing.contains(attributedCap)) {
+                        if (null == stmt) {
+                            stmt = con.prepareStatement("DELETE FROM capability_context WHERE cid=? AND cap=?");
+                            stmt.setInt(1, contextId);
+                        }
+                        stmt.setString(2, attributedCap);
+                        stmt.addBatch();
+                        existing.remove(attributedCap);
+                    }
+                    capsToInsert.add("-" + cap);
+                }
+                if (null != stmt) {
                     stmt.executeBatch();
                     Databases.closeSQLStuff(stmt);
                     stmt = null;
                 }
+            }
+            // Insert new ones
+            if (!capsToInsert.isEmpty()) {
+                stmt = con.prepareStatement("INSERT INTO capability_context (cid, cap) VALUES (?, ?)");
+                stmt.setInt(1, contextId);
+                for (final String cap : capsToInsert) {
+                    if (cap.startsWith("-")) {
+                        // A capability to remove
+                        stmt.setString(2, cap);
+                        stmt.addBatch();
+                    } else {
+                        if (!existing.contains(cap) && !existing.contains("+" + cap)) {
+                            // A capability to add
+                            stmt.setString(2, cap);
+                            stmt.addBatch();
+                        }
+                    }
+                }
+                stmt.executeBatch();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
             }
             con.commit(); // COMMIT
             rollback = false;

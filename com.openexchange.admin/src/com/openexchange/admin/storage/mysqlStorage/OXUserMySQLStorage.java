@@ -256,34 +256,60 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt = null;
                 rs = null;
             }
+            final Set<String> capsToInsert = new HashSet<String>(capsToAdd);
             // Delete existing ones
             if (null != capsToRemove && !capsToRemove.isEmpty()) {
-                stmt = con.prepareStatement("DELETE FROM capability_user WHERE cid=? AND user=? AND cap=?");
-                stmt.setInt(1, contextId);
-                stmt.setInt(2, user.getId().intValue());
                 for (final String cap : capsToRemove) {
-                    stmt.setString(3, cap);
-                    stmt.addBatch();
-                }
-                stmt.executeBatch();
-                Databases.closeSQLStuff(stmt);
-                stmt = null;
-            }
-            // Insert new ones
-            if (null != capsToAdd) {
-                capsToAdd.removeAll(existing);
-                if (!capsToAdd.isEmpty()) {
-                    stmt = con.prepareStatement("INSERT INTO capability_user (cid, user, cap) VALUES (?, ?, ?)");
-                    stmt.setInt(1, contextId);
-                    stmt.setInt(2, user.getId().intValue());
-                    for (final String cap : capsToAdd) {
+                    if (existing.contains(cap)) {
+                        if (null == stmt) {
+                            stmt = con.prepareStatement("DELETE FROM capability_user WHERE cid=? AND user=? AND cap=?");
+                            stmt.setInt(1, contextId);
+                            stmt.setInt(2, user.getId().intValue());
+                        }
                         stmt.setString(3, cap);
                         stmt.addBatch();
+                        existing.remove(cap);
                     }
+                    final String attributedCap = "+" + cap;
+                    if (existing.contains(attributedCap)) {
+                        if (null == stmt) {
+                            stmt = con.prepareStatement("DELETE FROM capability_user WHERE cid=? AND user=? AND cap=?");
+                            stmt.setInt(1, contextId);
+                            stmt.setInt(2, user.getId().intValue());
+                        }
+                        stmt.setString(3, attributedCap);
+                        stmt.addBatch();
+                        existing.remove(attributedCap);
+                    }
+                    capsToInsert.add("-" + cap);
+                }
+                if (null != stmt) {
                     stmt.executeBatch();
                     Databases.closeSQLStuff(stmt);
                     stmt = null;
                 }
+            }
+            // Insert new ones
+            if (!capsToInsert.isEmpty()) {
+                stmt = con.prepareStatement("INSERT INTO capability_user (cid, user, cap) VALUES (?, ?, ?)");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, user.getId().intValue());
+                for (final String cap : capsToInsert) {
+                    if (cap.startsWith("-")) {
+                        // A capability to remove
+                        stmt.setString(3, cap);
+                        stmt.addBatch();
+                    } else {
+                        if (!existing.contains(cap) && !existing.contains("+" + cap)) {
+                            // A capability to add
+                            stmt.setString(3, cap);
+                            stmt.addBatch();
+                        }
+                    }
+                }
+                stmt.executeBatch();
+                Databases.closeSQLStuff(stmt);
+                stmt = null;
             }
             con.commit(); // COMMIT
             rollback = false;
@@ -895,13 +921,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             con.commit();
 
             /*-
-             * 
+             *
             try {
                 ClientAdminThread.cache.reinitAccessCombinations();
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
-             * 
+             *
              */
             // JCS
             final BundleContext context = AdminCache.getBundleContext();
@@ -2235,13 +2261,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
 
                 /*-
-                 * 
+                 *
                 try {
                     ClientAdminThread.cache.reinitAccessCombinations();
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }
-                 * 
+                 *
                  */
                 // JCS
                 final BundleContext context = AdminCache.getBundleContext();
@@ -2393,13 +2419,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             con.commit();
 
             /*-
-             * 
+             *
             try {
                 ClientAdminThread.cache.reinitAccessCombinations();
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
-             * 
+             *
              */
             // JCS
             final BundleContext context = AdminCache.getBundleContext();

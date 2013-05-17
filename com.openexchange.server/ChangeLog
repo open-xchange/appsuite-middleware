@@ -5,6 +5,7 @@
 * 2013-05-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 26611: Sanitize masked/commented HTML tags
+ - Fix for bug 26648: User concurrent-capable List/SortedSet to support concurrent accesses without throwing ConcurrentModificationException
 
 * 2013-05-15 - marcus.klein@open-xchange.com
 

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.concurrent;
+package com.openexchange.java;
 
 import java.io.Serializable;
 import java.util.AbstractSet;
@@ -61,6 +61,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * constant over time. This class does not permit the <tt>null</tt> element.
  * <p>
  * Moreover it supports full concurrency of retrievals and adjustable expected concurrency for updates.
+ * <p>
+ * Extends common <tt>Set</tt> methods by:
+ * <ul>
+ * <li>{@link #addIfAbsent(Object)}</li>
+ * <li>{@link #removeIfPresent(Object)}</li>
+ * </ul>
+ * <p>
+ * &nbsp;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -165,9 +173,49 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> implements Clonea
         return map.put(o, PRESENT) == null;
     }
 
+    /**
+     * If the specified element is not already contained, add it to set. This is equivalent to
+     *
+     * <pre>
+     * if (!set.contains(e))
+     *     return set.add(e);
+     * else
+     *     return false
+     * </pre>
+     *
+     * except that the action is performed atomically.
+     *
+     * @param e element to be added
+     * @return <code>true</code> if element has been added; otherwise <code>false</code>
+     */
+    public boolean addIfAbsent(final E e) {
+        return map.putIfAbsent(e, PRESENT) == null;
+    }
+
     @Override
     public boolean remove(final Object o) {
         return map.remove(o) == PRESENT;
+    }
+
+    /**
+     * Removes the entry for a key only if currently mapped to a given value. This is equivalent to
+     *
+     * <pre>
+     * if (set.contains(o)) {
+     *     set.remove(o);
+     *     return true;
+     * } else {
+     *     return false;
+     * }
+     * </pre>
+     *
+     * except that the action is performed atomically.
+     *
+     * @param o element to remove
+     * @return <tt>true</tt> if the value was removed
+     */
+    public boolean removeIfPresent(final Object o) {
+        return map.remove(o, PRESENT);
     }
 
     @Override
@@ -178,8 +226,7 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> implements Clonea
     @Override
     public Object clone() {
         try {
-            @SuppressWarnings("unchecked")
-            final ConcurrentHashSet<E> newSet = (ConcurrentHashSet<E>) super.clone();
+            @SuppressWarnings("unchecked") final ConcurrentHashSet<E> newSet = (ConcurrentHashSet<E>) super.clone();
             newSet.map.putAll(map);
             return newSet;
         } catch (final CloneNotSupportedException e) {
@@ -209,8 +256,7 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> implements Clonea
 
         // Read in all elements in the proper order.
         for (int i = 0; i < size; i++) {
-            @SuppressWarnings("unchecked")
-            final E e = (E) s.readObject();
+            @SuppressWarnings("unchecked") final E e = (E) s.readObject();
             map.put(e, PRESENT);
         }
     }

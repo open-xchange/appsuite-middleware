@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import org.atmosphere.cpr.AtmosphereHandler;
 import org.atmosphere.cpr.AtmosphereRequest;
@@ -71,6 +70,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.ConcurrentHashSet;
+import com.openexchange.java.ConcurrentList;
+import com.openexchange.java.ConcurrentSortedSet;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
@@ -98,7 +100,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link RTAtmosphereHandler} - Handler that gets associated with the {@link RTAtmosphereChannel} and does the main work of handling
  * incoming and outgoing Stanzas. Transformation of Stanzas is handed over to the proper OXRTHandler
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
@@ -107,38 +109,38 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(LogFactory.getLog(RTAtmosphereHandler.class));
 
-    protected AtmosphereServiceRegistry atmosphereServiceRegistry;
+    protected final AtmosphereServiceRegistry atmosphereServiceRegistry;
 
     /*
      * Map general ids (user@context) to full ids (ox://user@context/resource.browserx.taby, this is used for lookups via isConnected
      */
-    protected IDMap<Set<ID>> generalToConcreteIDMap;
+    protected final IDMap<Set<ID>> generalToConcreteIDMap;
 
     /*
      * Map full client IDs to the AtmosphereResource that represents their connection to the server, this is used for sending
      */
-    protected ConcurrentHashMap<ID, AtmosphereResource> concreteIDToResourceMap;
+    protected final ConcurrentHashMap<ID, AtmosphereResource> concreteIDToResourceMap;
 
     /*
      * Map for holding outboxes
      */
-    protected ConcurrentHashMap<ID, List<EnqueuedStanza>> outboxes;
+    protected final ConcurrentHashMap<ID, List<EnqueuedStanza>> outboxes;
 
     /*
      * Give resources time to linger before finally cleaning up
      */
-    AtmosphereResourceReaper atmosphereResourceReaper = null;
+    volatile AtmosphereResourceReaper atmosphereResourceReaper = null;
 
     /*
      * Maintain a mapping of all IDs that use a certain session
      */
-    protected ConcurrentHashMap<String, Set<ID>> idsPerSession;
+    protected final ConcurrentHashMap<String, Set<ID>> idsPerSession;
 
-    protected ConcurrentHashMap<ID, Long> sequenceNumbers;
+    protected final ConcurrentHashMap<ID, Long> sequenceNumbers;
 
-    protected ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>> resendBuffers;
+    protected final ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>> resendBuffers;
 
-    protected StanzaSequenceGate gate = new StanzaSequenceGate("RTAtmosphereHandler") {
+    protected final StanzaSequenceGate gate = new StanzaSequenceGate("RTAtmosphereHandler") {
 
         @Override
         public void handleInternal(Stanza stanza, ID recipient) throws OXException {
@@ -152,9 +154,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      */
     public RTAtmosphereHandler() {
         super();
-    }
-    
-    public void init() {
         atmosphereServiceRegistry = AtmosphereServiceRegistry.getInstance();
         generalToConcreteIDMap = new IDMap<Set<ID>>();
         concreteIDToResourceMap = new ConcurrentHashMap<ID, AtmosphereResource>();
@@ -162,7 +161,9 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         idsPerSession = new ConcurrentHashMap<String, Set<ID>>();
         sequenceNumbers = new ConcurrentHashMap<ID, Long>();
         resendBuffers = new ConcurrentHashMap<ID, SortedSet<EnqueuedStanza>>();
-        
+    }
+
+    public void init() {
         atmosphereResourceReaper = new AtmosphereResourceReaper();
     }
 
@@ -258,7 +259,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             writeExceptionToResource(e, resource);
         }
     }
-    
+
     protected void handlePost(String postData, ID constructedId, ServerSession serverSession) throws Exception {
         /*
          * Use a POST request to synchronously send data over the server. No need to track state, as we answer over suspended get
@@ -304,7 +305,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                             EnqueuedStanza found = null;
                             long seq = json.optLong("seq");
 
-                            for (EnqueuedStanza enqueuedStanza : new LinkedList<EnqueuedStanza>(resendBuffer)) {
+                            for (EnqueuedStanza enqueuedStanza : resendBuffer) { // Iterates over a snapshot
                                 if (enqueuedStanza.sequenceNumber == seq) {
                                     found = enqueuedStanza;
                                     break;
@@ -383,7 +384,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      * <li>Adds an entry to the concreteID -> AtmosphereResource map
      * <li>Registers the concreteID to the ResourceDirectory service
      * </ol>
-     * 
+     *
      * @param concreteID The concrete ID of the connected client
      * @param atmosphereResource The resource of the connected client
      * @param serverSession
@@ -421,7 +422,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         final Set<ID> idSet = com.openexchange.tools.Collections.opt(
             idsPerSession,
             session.getSessionID(),
-            Collections.synchronizedSet(new HashSet<ID>()));
+            new ConcurrentHashSet<ID>());
         if (idSet.add(concreteID)) {
             concreteID.on("dispose", new IDEventHandler() {
 
@@ -446,11 +447,12 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     /**
      * Inform the {@link AtmosphereResourceReaper} about the re/appearing of this specific client so that already allocated resources and
      * saved messages aren't deleted after the specified lingerin time.
-     * 
+     *
      * @return <code>true</code> if the reaper already hold a {@link Moribund} for the given ID. Otherwise <code>false</code>.
      * @param concreteID The concrete id of the re/appearing client
      */
     private boolean refreshReaper(final ID concreteID) {
+        final AtmosphereResourceReaper atmosphereResourceReaper = this.atmosphereResourceReaper;
         Moribund removed = atmosphereResourceReaper.remove(concreteID);
         atmosphereResourceReaper.add(new Moribund(concreteID) {
 
@@ -502,7 +504,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     /**
      * Write a simple JSON error to the client.
-     * 
+     *
      * @param exception the exception to send.
      * @param resource the resource representing the client
      * @throws IOException
@@ -520,7 +522,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     /**
      * Check if an entity is connected to the associated Channel by checking if we are tracking the generalID of the entity and additionally
      * if we have at least one connected resource for this client.
-     * 
+     *
      * @param id the ID of the entity you are looking for.
      * @return true if the entity is connected via one or more resources, false otherwise
      */
@@ -549,7 +551,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     /**
      * Handle incoming Stanza and decide if they have an internal namespace and need to be handled by the Channel/Handler or if they should
      * be dispatched iow. transformed to POJOs and handed over to the MessageDispatcher.
-     * 
+     *
      * @param stanza The Stanza to handle
      * @param atmosphereState The associated state
      * @throws OXException
@@ -601,7 +603,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     protected SortedSet<EnqueuedStanza> resendBufferFor(ID id) {
         SortedSet<EnqueuedStanza> resendBuffer = resendBuffers.get(id);
         if (resendBuffer == null) {
-            resendBuffer = new TreeSet<EnqueuedStanza>();
+            resendBuffer = new ConcurrentSortedSet<EnqueuedStanza>();
             SortedSet<EnqueuedStanza> activeBuffer = resendBuffers.putIfAbsent(id, resendBuffer);
             return (activeBuffer != null) ? activeBuffer : resendBuffer;
         }
@@ -611,7 +613,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     protected List<EnqueuedStanza> outboxFor(ID id) {
         List<EnqueuedStanza> outbox = outboxes.get(id);
         if (outbox == null) {
-            outbox = Collections.synchronizedList(new LinkedList<EnqueuedStanza>());
+            outbox = new ConcurrentList<EnqueuedStanza>();
             List<EnqueuedStanza> activeOutbox = outboxes.putIfAbsent(id, outbox);
             return (activeOutbox != null) ? activeOutbox : outbox;
         }
@@ -652,7 +654,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 if (resendBuffer != null) {
                     /* Stanzas will be removed from the resendBuffer after the according ACK was received. */
                     List<EnqueuedStanza> toRemove = new LinkedList<EnqueuedStanza>();
-                    for (EnqueuedStanza stanza : new LinkedList<EnqueuedStanza>(resendBuffer)) {
+                    for (EnqueuedStanza stanza : resendBuffer) { // Iterate over snapshot
                         if (stanza.incCounter()) {
                             stanza.stanza.trace("Drained from resendBuffer");
                             stanzasToSend.add(stanza.stanza);
@@ -754,7 +756,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
     /**
      * Build an unique {@link ID} <code>{"ox", userLogin, context, resource}</code> from the infos given by the AtmosphereResource and
      * ServerSession.
-     * 
+     *
      * @param atmosphereResource the current AtmosphereResource
      * @param serverSession the associated serverSession
      * @return the constructed unique ID

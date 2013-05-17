@@ -104,10 +104,19 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "attachment", description = "ID of the requested attachment OR"),
     @Parameter(name = "cid", description = "Value of header 'Content-ID' of the requested attachment"),
     @Parameter(name = "save", description = "1 overwrites the defined mimetype for this attachment to force the download dialog, otherwise 0."),
-    @Parameter(name = "filter", optional=true, description = "1 to apply HTML white-list filter rules if and only if requested attachment is of MIME type text/htm* AND parameter save is set to 0.")
-}, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this attachment, except the parameter save is set to 1.")
+    @Parameter(name = "filter", optional = true, description = "1 to apply HTML white-list filter rules if and only if requested attachment is of MIME type text/htm* AND parameter save is set to 0.") }, responseDescription = "The raw byte data of the document. The response type for the HTTP Request is set accordingly to the defined mimetype for this attachment, except the parameter save is set to 1.")
 @DispatcherNotes(allowPublicSession = true)
 public final class GetAttachmentAction extends AbstractMailAction implements ETagAwareAJAXActionService {
+
+    private static final long EXPIRES_MILLIS_YEAR = AJAXRequestResult.YEAR_IN_MILLIS * 50;
+    private static final String MIME_APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
+    private static final String PARAMETER_FILTER = Mail.PARAMETER_FILTER;
+    private static final String PARAMETER_SAVE = Mail.PARAMETER_SAVE;
+    private static final String PARAMETER_ID = AJAXServlet.PARAMETER_ID;
+    private static final String PARAMETER_FOLDERID = AJAXServlet.PARAMETER_FOLDERID;
+    private static final String PARAMETER_MAILCID = Mail.PARAMETER_MAILCID;
+    private static final String PARAMETER_MAILATTCHMENT = Mail.PARAMETER_MAILATTCHMENT;
+    private static final String PARAMETER_DELIVERY = Mail.PARAMETER_DELIVERY;
 
     /**
      * Initializes a new {@link GetAttachmentAction}.
@@ -150,18 +159,18 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             /*
              * Read in parameters
              */
-            final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-            final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
-            final String sequenceId = req.getParameter(Mail.PARAMETER_MAILATTCHMENT);
-            final String imageContentId = req.getParameter(Mail.PARAMETER_MAILCID);
+            final String folderPath = req.checkParameter(PARAMETER_FOLDERID);
+            final String uid = req.checkParameter(PARAMETER_ID);
+            final String sequenceId = req.getParameter(PARAMETER_MAILATTCHMENT);
+            final String imageContentId = req.getParameter(PARAMETER_MAILCID);
             final boolean saveToDisk;
             {
-                final String saveParam = req.getParameter(Mail.PARAMETER_SAVE);
-                saveToDisk = AJAXRequestDataTools.parseBoolParameter(saveParam) || "download".equals(toLowerCase(req.getParameter(Mail.PARAMETER_DELIVERY)));
+                final String saveParam = req.getParameter(PARAMETER_SAVE);
+                saveToDisk = AJAXRequestDataTools.parseBoolParameter(saveParam) || "download".equals(toLowerCase(req.getParameter(PARAMETER_DELIVERY)));
             }
             final boolean filter;
             {
-                final String filterParam = req.getParameter(Mail.PARAMETER_FILTER);
+                final String filterParam = req.getParameter(PARAMETER_FILTER);
                 filter = Boolean.parseBoolean(filterParam) || "1".equals(filterParam);
             }
             /*
@@ -169,8 +178,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
              */
             final MailServletInterface mailInterface = getMailInterface(req);
             if (sequenceId == null && imageContentId == null) {
-                throw MailExceptionCode.MISSING_PARAM.create(new com.openexchange.java.StringAllocator().append(Mail.PARAMETER_MAILATTCHMENT).append(" | ").append(
-                    Mail.PARAMETER_MAILCID).toString());
+                throw MailExceptionCode.MISSING_PARAM.create(new com.openexchange.java.StringAllocator().append(PARAMETER_MAILATTCHMENT).append(" | ").append(PARAMETER_MAILCID).toString());
             }
             final MailPart mailPart;
             final IFileHolder.InputStreamClosure isClosure;
@@ -179,7 +187,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 if (mailPart == null) {
                     throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
                 }
-                if (filter && !saveToDisk && mailPart.getContentType().isMimeType(MimeTypes.MIME_TEXT_HTM_ALL)) {
+                if (filter && !saveToDisk && mailPart.getContentType().startsWith("text/htm")) {
                     /*
                      * Apply filter
                      */
@@ -229,7 +237,14 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             /*
              * Read from stream
              */
-            final FileHolder fileHolder = new FileHolder(isClosure, mailPart.getSize(), mailPart.getContentType().toString(), mailPart.getFileName());
+            final FileHolder fileHolder;
+            if (saveToDisk) {
+                fileHolder = new FileHolder(isClosure, mailPart.getSize(), MIME_APPL_OCTET, mailPart.getFileName());
+                fileHolder.setDelivery("download");
+                req.getRequest().putParameter(PARAMETER_DELIVERY, "download");
+            } else {
+                fileHolder = new FileHolder(isClosure, mailPart.getSize(), mailPart.getContentType().toString(), mailPart.getFileName());
+            }
             final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             /*
              * Set format
@@ -240,7 +255,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             /*
              * Set ETag
              */
-            setETag(getHash(folderPath, uid, imageContentId == null ? sequenceId : imageContentId), AJAXRequestResult.YEAR_IN_MILLIS * 50, result);
+            setETag(getHash(folderPath, uid, imageContentId == null ? sequenceId : imageContentId), EXPIRES_MILLIS_YEAR, result);
             /*
              * Return result
              */
@@ -261,9 +276,9 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             /*
              * Read in parameters
              */
-            final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-            final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
-            final String sequenceId = req.checkParameter(Mail.PARAMETER_MAILATTCHMENT);
+            final String folderPath = req.checkParameter(PARAMETER_FOLDERID);
+            final String uid = req.checkParameter(PARAMETER_ID);
+            final String sequenceId = req.checkParameter(PARAMETER_MAILATTCHMENT);
             final String destFolderIdentifier = req.checkParameter(Mail.PARAMETER_DESTINATION_FOLDER);
             /*
              * Get mail interface
@@ -341,7 +356,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
     }
 
     private String getHash(final String folderPath, final String uid, final String sequenceId) {
-        return HashUtility.getHash(new com.openexchange.java.StringAllocator(32).append(folderPath).append('/').append(uid).append('/').append(sequenceId).toString(), "md5", "hex");
+        return HashUtility.getHash(new StringAllocator(32).append(folderPath).append('/').append(uid).append('/').append(sequenceId).toString(), "md5", "hex");
     }
 
     /** ASCII-wise to lower-case */
