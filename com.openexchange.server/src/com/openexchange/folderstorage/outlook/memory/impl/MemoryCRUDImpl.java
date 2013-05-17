@@ -51,9 +51,9 @@ package com.openexchange.folderstorage.outlook.memory.impl;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.concurrent.ConcurrentHashSet;
 import com.openexchange.folderstorage.outlook.memory.MemoryCRUD;
 import com.openexchange.folderstorage.outlook.memory.MemoryFolder;
+import com.openexchange.java.ConcurrentHashSet;
 
 /**
  * {@link MemoryCRUDImpl}
