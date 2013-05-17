@@ -491,7 +491,24 @@ public final class SessionHandler {
         if (async) {
             ThreadPools.getThreadPool().submit(new StoreSessionTask(session, sessionStorageService, addIfAbsent, latch));
         } else {
-            new StoreSessionTask(session, sessionStorageService, addIfAbsent, latch).call();
+            final StoreSessionTask task = new StoreSessionTask(session, sessionStorageService, addIfAbsent, latch);
+            final Thread thread = Thread.currentThread();
+            boolean ran = false;
+            task.beforeExecute(thread);
+            try {
+                task.call();
+                ran = true;
+                task.afterExecute(null);
+            } catch (final Exception ex) {
+                if (!ran) {
+                    task.afterExecute(ex);
+                }
+                // Else the exception occurred within
+                // afterExecute itself in which case we don't
+                // want to call it again.
+                final OXException oxe = (ex instanceof OXException ? (OXException) ex : SessionExceptionCodes.SESSIOND_EXCEPTION.create(ex, ex.getMessage()));
+                LOG.warn(oxe.getMessage(), oxe);
+            }
         }
     }
 
