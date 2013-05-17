@@ -61,6 +61,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * constant over time. This class does not permit the <tt>null</tt> element.
  * <p>
  * Moreover it supports full concurrency of retrievals and adjustable expected concurrency for updates.
+ * <p>
+ * Extends common <tt>Set</tt> methods by:
+ * <ul>
+ * <li>{@link #addIfAbsent(Object)}</li>
+ * <li>{@link #removeIfPresent(Object)}</li>
+ * </ul>
+ * <p>
+ * &nbsp;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
