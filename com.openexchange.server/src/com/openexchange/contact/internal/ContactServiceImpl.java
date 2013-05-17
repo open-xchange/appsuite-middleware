@@ -618,11 +618,15 @@ public class ContactServiceImpl extends DefaultContactService {
          */
         FolderObject folder = Tools.getFolder(contextID, folderID);
         Check.isContactFolder(folder, session);
-        /*
-         * check general permissions
-         */
+        // Bug 26639: Skip permission check if only image fields are loaded
         EffectivePermission permission = Tools.getPermission(session, folder);
-        Check.canReadOwn(permission, session, folderID);
+        if (moreThanImageFieldsRequested(fields) || !folderID.equals("6")) {
+            /*
+             * check general permissions
+             */
+            Check.canReadOwn(permission, session, folderID);
+            
+        }
         /*
          * prepare fields and sort options
          */
@@ -650,6 +654,28 @@ public class ContactServiceImpl extends DefaultContactService {
          * filter results respecting object permission restrictions, adding attachment info as needed
          */
         return new ResultIterator(contacts, queryFields.needsAttachmentInfo(), session, permission.canReadAllObjects());
+    }
+
+    private boolean moreThanImageFieldsRequested(ContactField[] fields) {
+        if (fields.length == 0) {
+            return false;
+        }
+        if (fields.length > 2) {
+            return true;
+        }
+        if (fields[0] == ContactField.IMAGE1) {
+            if (fields.length > 1) {
+                return fields[1] != ContactField.IMAGE1_CONTENT_TYPE;
+            }
+            return false;
+        }
+        if (fields[0] == ContactField.IMAGE1_CONTENT_TYPE) {
+            if (fields.length > 1) {
+                return fields[1] != ContactField.IMAGE1;
+            }
+            return false;
+        }
+        return true;
     }
 
     @Override
