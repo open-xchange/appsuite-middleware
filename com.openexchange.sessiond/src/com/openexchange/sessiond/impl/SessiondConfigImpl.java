@@ -74,6 +74,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     private long randomTokenTimeout = 30000L;
     private long longLifeTime = 7L * 24L * 60L * 60L * 1000L;
     private boolean autoLogin = false;
+    private boolean asyncPutToSessionStorage = false;
     private String obfuscationKey = "auw948cz,spdfgibcsp9e8ri+<#qawcghgifzign7c6gnrns9oysoeivn";
 
     public SessiondConfigImpl(final ConfigurationService conf) {
@@ -118,8 +119,17 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         }
 
         tmp = conf.getProperty(SESSIOND_AUTOLOGIN.getPropertyName(), SESSIOND_AUTOLOGIN.getDefaultValue());
-        autoLogin = Boolean.parseBoolean(tmp);
+        autoLogin = Boolean.parseBoolean(tmp.trim());
+
+        tmp = conf.getProperty("com.openexchange.sessiond.asyncPutToSessionStorage", "false");
+        asyncPutToSessionStorage = Boolean.parseBoolean(tmp.trim());
+
         obfuscationKey = conf.getProperty("com.openexchange.sessiond.encryptionKey", obfuscationKey);
+    }
+
+    @Override
+    public boolean isAsyncPutToSessionStorage() {
+        return asyncPutToSessionStorage;
     }
 
     @Override

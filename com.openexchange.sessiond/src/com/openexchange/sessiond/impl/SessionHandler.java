@@ -124,6 +124,9 @@ public final class SessionHandler {
     /** Whether there is no limit when adding a new session */
     private static volatile boolean noLimit;
 
+    /** Whether there is no limit when adding a new session */
+    private static volatile boolean asyncPutToSessionStorage;
+
     /** The obfuscator */
     protected static Obfuscator obfuscator;
 
@@ -171,6 +174,7 @@ public final class SessionHandler {
                 LOG.error("create instance of SessionIdGenerator", exc);
             }
             noLimit = (config.getMaxSessions() == 0);
+            asyncPutToSessionStorage = config.isAsyncPutToSessionStorage();
             synchronized (SessionHandler.class) {
                 // Make it visible to other threads, too
                 obfuscator = new Obfuscator(config.getObfuscationKey());
@@ -436,7 +440,12 @@ public final class SessionHandler {
             if (false == session.isTransient()) {
                 final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
                 if (sessionStorageService != null) {
-                    storeSessionSync(addedSession, sessionStorageService, false);
+                    if (asyncPutToSessionStorage) {
+                        // Enforced asynchronous put
+                        storeSessionAsync(addedSession, sessionStorageService, false, null);
+                    } else {
+                        storeSessionSync(addedSession, sessionStorageService, false);
+                    }
                 }
             }
             // Post event for created session
@@ -522,8 +531,14 @@ public final class SessionHandler {
         if (null == sessions || sessions.isEmpty() || null == sessionStorageService) {
             return;
         }
-        for (final SessionImpl session : sessions) {
-            storeSessionSync(session, sessionStorageService, true);
+        if (asyncPutToSessionStorage) {
+            for (final SessionImpl session : sessions) {
+                storeSessionAsync(session, sessionStorageService, true, null);
+            }
+        } else {
+            for (final SessionImpl session : sessions) {
+                storeSessionSync(session, sessionStorageService, true);
+            }
         }
     }
 
@@ -823,7 +838,11 @@ public final class SessionHandler {
         final SessionImpl addedSession = sessionControl.getSession();
         final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
         if (sessionStorageService != null) {
-            storeSessionSync(addedSession, sessionStorageService, false);
+            if (asyncPutToSessionStorage) {
+                storeSessionAsync(addedSession, sessionStorageService, false, null);
+            } else {
+                storeSessionSync(addedSession, sessionStorageService, false);
+            }
         }
         // Post event for created session
         postSessionCreation(addedSession);
