@@ -40,12 +40,14 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %{__rm} -rf %{buildroot}
 
 %post
-. /opt/open-xchange/lib/oxfunctions.sh
+if [ ${1:-0} -eq 2 ]; then
+  . /opt/open-xchange/lib/oxfunctions.sh
 
-# SoftwareChange_Request-1452
-pfile=/opt/open-xchange/etc/spamhandler_cloudmark.properties
-if ! ox_exists_property com.openexchange.spamhandler.cloudmark.targetHamEmailAddress $pfile; then
-   ox_set_property com.openexchange.spamhandler.cloudmark.targetHamEmailAddress "" $pfile
+  # SoftwareChange_Request-1452
+  pfile=/opt/open-xchange/etc/spamhandler_cloudmark.properties
+  if ! ox_exists_property com.openexchange.spamhandler.cloudmark.targetHamEmailAddress $pfile; then
+     ox_set_property com.openexchange.spamhandler.cloudmark.targetHamEmailAddress "" $pfile
+  fi
 fi
 
 %files
