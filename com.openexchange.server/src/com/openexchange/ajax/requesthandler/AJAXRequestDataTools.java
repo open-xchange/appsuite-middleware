@@ -50,7 +50,6 @@
 package com.openexchange.ajax.requesthandler;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -66,6 +65,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Streams;
 import com.openexchange.java.UnsynchronizedPushbackReader;
+import com.openexchange.java.UnsynchronizedStringReader;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -198,45 +198,100 @@ public class AJAXRequestDataTools {
             retval.setUploadStreamProvider(new HTTPRequestInputStreamProvider(req));
         } else {
             /*
-             * Guess an appropriate body object
+             * Guess an appropriate body object (if the request indicates a body object)
              */
-            UnsynchronizedPushbackReader reader = null;
-            try {
-                reader = new UnsynchronizedPushbackReader(AJAXServlet.getReaderFor(req));
-                final int read = reader.read();
-                if (read < 0) {
-                    retval.setData(null);
-                    String data = req.getParameter("data");
-                    if (data != null && data.length() > 0) {
-                        try {
-                            char c = data.charAt(0);
-                            if ('[' == c || '{' == c) {
-                                retval.setData(JSONObject.parse(new StringReader(data)));
-                            } else {
-                                retval.setData(data);
+            if (hasBody(req)) {
+                UnsynchronizedPushbackReader reader = null;
+                try {
+                    reader = new UnsynchronizedPushbackReader(AJAXServlet.getReaderFor(req));
+                    int read = reader.read();
+                    if (read < 0) {
+                        trySetDataByParameter(req, retval);
+                    } else {
+                        // Skip whitespaces
+                        while (isWhitespace((char) read)) {
+                            read = reader.read();
+                            if (read < 0) {
+                                trySetDataByParameter(req, retval);
+                                Streams.close(reader);
+                                reader = null;
+                                return retval;
                             }
-                        } catch (JSONException e) {
-                            retval.setData(data);
                         }
-                    }
-                } else {
-                    final char c = (char) read;
-                    reader.unread(c);
-                    if ('[' == c || '{' == c) {
-                        try {
-                            retval.setData(JSONObject.parse(reader));
-                        } catch (JSONException e) {
+                        // Check first non-whitespace character
+                        final char c = (char) read;
+                        reader.unread(c);
+                        if ('[' == c || '{' == c) {
+                            try {
+                                retval.setData(JSONObject.parse(reader));
+                            } catch (JSONException e) {
+                                retval.setData(AJAXServlet.readFrom(reader));
+                            }
+                        } else {
                             retval.setData(AJAXServlet.readFrom(reader));
                         }
-                    } else {
-                        retval.setData(AJAXServlet.readFrom(reader));
                     }
+                } finally {
+                    Streams.close(reader);
                 }
-            } finally {
-                Streams.close(reader);
+            } else {
+                trySetDataByParameter(req, retval);
             }
         }
         return retval;
+    }
+
+    private void trySetDataByParameter(final HttpServletRequest req, final AJAXRequestData retval) {
+        retval.setData(null);
+        final String data = req.getParameter("data");
+        if (data != null && data.length() > 0) {
+            try {
+                final char c = data.charAt(0);
+                if ('[' == c || '{' == c) {
+                    retval.setData(JSONObject.parse(new UnsynchronizedStringReader(data)));
+                } else {
+                    retval.setData(data);
+                }
+            } catch (final JSONException e) {
+                retval.setData(data);
+            }
+        }
+    }
+
+    /**
+     * High speed test for whitespace!  Faster than the java one (from some testing).
+     *
+     * @return <code>true</code> if the indicated character is whitespace; otherwise <code>false</code>
+     */
+    private boolean isWhitespace(char c) {
+        switch (c) {
+            case 9:  //'unicode: 0009
+            case 10: //'unicode: 000A'
+            case 11: //'unicode: 000B'
+            case 12: //'unicode: 000C'
+            case 13: //'unicode: 000D'
+            case 28: //'unicode: 001C'
+            case 29: //'unicode: 001D'
+            case 30: //'unicode: 001E'
+            case 31: //'unicode: 001F'
+            case ' ': // Space
+                //case Character.SPACE_SEPARATOR:
+                //case Character.LINE_SEPARATOR:
+            case Character.PARAGRAPH_SEPARATOR:
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * Check if the incoming request has a body. From RFC 2616: An entity-body is only present when a message-body is present (section 7.2),
+     * the presence of a message-body is signaled by the inclusion of a Content-Length or Transfer-Encoding header (section 4.3)
+     *
+     * @param httpServletRequest The incoming request
+     * @return <code>true</code> if the incoming request includes a body, <code>false</code> otherwise
+     */
+    public static boolean hasBody(final HttpServletRequest httpServletRequest) {
+        return (httpServletRequest.getContentLength() > 0) || (httpServletRequest.getHeader("Transfer-Encoding") != null);
     }
 
     private static boolean parseBoolParameter(final String name, final HttpServletRequest req) {

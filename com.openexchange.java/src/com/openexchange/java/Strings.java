@@ -65,7 +65,7 @@ import java.util.regex.Pattern;
 
 /**
  * {@link Strings} - A library for performing operations that create Strings
- * 
+ *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class Strings {
@@ -75,8 +75,33 @@ public class Strings {
     }
 
     /**
+     * High speed test for whitespace!  Faster than the java one (from some testing).
+     *
+     * @return <code>true</code> if the indicated character is whitespace; otherwise <code>false</code>
+     */
+    public static boolean isWhitespace(final char c) {
+        switch (c) {
+            case 9:  //'unicode: 0009
+            case 10: //'unicode: 000A'
+            case 11: //'unicode: 000B'
+            case 12: //'unicode: 000C'
+            case 13: //'unicode: 000D'
+            case 28: //'unicode: 001C'
+            case 29: //'unicode: 001D'
+            case 30: //'unicode: 001E'
+            case 31: //'unicode: 001F'
+            case ' ': // Space
+                //case Character.SPACE_SEPARATOR:
+                //case Character.LINE_SEPARATOR:
+            case Character.PARAGRAPH_SEPARATOR:
+                return true;
+        }
+        return false;
+    }
+
+    /**
      * Gets specified string's ASCII bytes
-     * 
+     *
      * @param str The string
      * @return The ASCII bytes
      */
@@ -86,7 +111,7 @@ public class Strings {
 
     /**
      * Gets specified string's ASCII bytes
-     * 
+     *
      * @param str The string
      * @return The ASCII bytes
      */
@@ -96,7 +121,7 @@ public class Strings {
 
     /**
      * Writes specified string's ASCII bytes to given stream.
-     * 
+     *
      * @param str The string
      * @param out The stream to write to
      * @throws IOException If an I/O error occurs
@@ -109,7 +134,7 @@ public class Strings {
 
     /**
      * Splits given string by comma separator.
-     * 
+     *
      * @param s The string to split
      * @return The splitted string
      */
@@ -124,7 +149,7 @@ public class Strings {
 
     /**
      * Splits given string by CR?LF; yields line-wise output.
-     * 
+     *
      * @param s The string to split
      * @return The splitted string
      */
@@ -139,7 +164,7 @@ public class Strings {
 
     /**
      * Splits given string by whitespaces.
-     * 
+     *
      * @param s The string to split
      * @return The splitted string
      */
@@ -155,7 +180,7 @@ public class Strings {
      * that will work as a literal replacement <code>s</code> in the <code>appendReplacement</code> method of the {@link Matcher} class. The
      * <code>String</code> produced will match the sequence of characters in <code>s</code> treated as a literal sequence. Slashes ('\') and
      * dollar signs ('$') will be given no special meaning.
-     * 
+     *
      * @param s The string to be literalized
      * @return A literal string replacement
      */
@@ -182,7 +207,7 @@ public class Strings {
 
     /**
      * Checks for an empty string.
-     * 
+     *
      * @param string The string
      * @return <code>true</code> if empty; else <code>false</code>
      */
@@ -202,7 +227,7 @@ public class Strings {
      * Fixes possible charset problem in given string.
      * <p>
      * E.g.:&nbsp;&quot;&#195;&#164&quot; instead of &quot;&auml;&quot;
-     * 
+     *
      * @param s The string to check
      * @return The fixed string
      */
@@ -231,7 +256,7 @@ public class Strings {
 
     /**
      * Checks given bytes for valid UTF-8 bytes.
-     * 
+     *
      * @param bytes The bytes to check
      * @return <code>true</code> for valid UTF-8 bytes; otherwise <code>false</code>
      */
@@ -246,7 +271,7 @@ public class Strings {
 
     /**
      * Joins a collection of objects by connecting the results of their #toString() method with a connector
-     * 
+     *
      * @param coll Collection to be connected
      * @param connector Connector place between two objects
      * @return connected strings or null if collection == null or empty string if collection is empty
@@ -292,7 +317,7 @@ public class Strings {
 
     /**
      * Removes byte order marks from UTF8 strings.
-     * 
+     *
      * @return new instance of trimmed string - or reference to old one if unchanged
      */
     public static String trimBOM(final String str) {
@@ -337,7 +362,7 @@ public class Strings {
      * <li>In no case will it return a String of length greater than <code>maxWidth</code>.</li>
      * </ul>
      * </p>
-     * 
+     *
      * <pre>
      * StringUtils.abbreviate(null, *)      = null
      * StringUtils.abbreviate("", 4)        = ""
@@ -347,7 +372,7 @@ public class Strings {
      * StringUtils.abbreviate("abcdefg", 4) = "a..."
      * StringUtils.abbreviate("abcdefg", 3) = IllegalArgumentException
      * </pre>
-     * 
+     *
      * @param str The String to check, may be null
      * @param maxWidth The maximum length of result String, must be at least 4
      * @return The abbreviated String, <code>null</code> if null String input
@@ -365,7 +390,7 @@ public class Strings {
      * somewhere in the result.
      * <p>
      * In no case will it return a String of length greater than <code>maxWidth</code>.
-     * 
+     *
      * <pre>
      * StringUtils.abbreviate(null, *, *)                = null
      * StringUtils.abbreviate("", 0, 4)                  = ""
@@ -381,14 +406,14 @@ public class Strings {
      * StringUtils.abbreviate("abcdefghij", 0, 3)        = IllegalArgumentException
      * StringUtils.abbreviate("abcdefghij", 5, 6)        = IllegalArgumentException
      * </pre>
-     * 
+     *
      * @param str The String to check, may be null
      * @param offset The left edge of source String
      * @param maxWidth The maximum length of result String, must be at least <code>4</code>
      * @return The abbreviated String, <code>null</code> if null String input
      * @throws IllegalArgumentException If the width is too small
      */
-    public static String abbreviate(final String str, int offset, final int maxWidth) {
+    public static String abbreviate(final String str, final int offset, final int maxWidth) {
         if (str == null) {
             return null;
         }
