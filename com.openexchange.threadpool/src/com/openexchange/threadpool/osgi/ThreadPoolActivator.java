@@ -121,7 +121,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
                 threadPool.prestartAllCoreThreads();
             }
             // Log configuration       Fix for bug 24724: Pass stack trace as separate argument to log routine, rather than appending it into log message
-            
+
             final int queueCapacity = confService.getIntProperty("com.openexchange.log.queueCapacity", -1);
             final boolean appendTraceToMessage = confService.getBoolProperty("com.openexchange.log.appendTraceToMessage", false);
             Log.setAppendTraceToMessage(appendTraceToMessage);
@@ -256,7 +256,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
         boolean retval = true;
         final int length = s.length();
         for (int i = 0; i < length && retval; i++) {
-            retval = Character.isWhitespace(s.charAt(i));
+            retval = Strings.isWhitespace(s.charAt(i));
         }
         return retval;
     }

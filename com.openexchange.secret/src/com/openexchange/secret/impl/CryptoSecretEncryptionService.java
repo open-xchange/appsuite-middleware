@@ -53,6 +53,7 @@ import java.security.GeneralSecurityException;
 import org.apache.commons.logging.Log;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.secret.Decrypter;
 import com.openexchange.secret.RankingAwareSecretService;
@@ -139,7 +140,7 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
         final int len = str.length();
         boolean ret = true;
         for (int i = 0; ret && i < len; i++) {
-            ret = Character.isWhitespace(str.charAt(i));
+            ret = Strings.isWhitespace(str.charAt(i));
         }
         return ret;
     }

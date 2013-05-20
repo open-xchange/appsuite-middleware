@@ -77,6 +77,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
@@ -498,7 +499,7 @@ public final class GetAction extends AbstractMailAction {
         char prev = '\0';
         for (int i = 0; i < len; i++) {
             final char c = fileName.charAt(i);
-            if (Character.isWhitespace(c)) {
+            if (Strings.isWhitespace(c)) {
                 if (prev != '_') {
                     prev = '_';
                     sb.append(prev);

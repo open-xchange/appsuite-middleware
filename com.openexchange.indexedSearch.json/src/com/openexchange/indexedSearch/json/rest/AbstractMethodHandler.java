@@ -62,6 +62,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -204,10 +205,10 @@ public abstract class AbstractMethodHandler implements MethodHandler {
             return false;
         }
         int i = 0;
-        if (Character.isWhitespace(toCheck.charAt(i))) {
+        if (Strings.isWhitespace(toCheck.charAt(i))) {
             do {
                 i++;
-            } while (i < len && Character.isWhitespace(toCheck.charAt(i)));
+            } while (i < len && Strings.isWhitespace(toCheck.charAt(i)));
         }
         if (i >= len) {
             return false;
@@ -228,7 +229,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

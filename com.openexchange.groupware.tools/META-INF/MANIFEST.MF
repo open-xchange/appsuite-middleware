@@ -10,6 +10,7 @@ Export-Package: com.openexchange.groupware.tools.chunk,
  com.openexchange.groupware.tools.mappings.database,
  com.openexchange.groupware.tools.mappings.json
 Import-Package: com.openexchange.exception,
+ com.openexchange.java,
  com.openexchange.log,
  com.openexchange.session,
  org.apache.commons.logging,

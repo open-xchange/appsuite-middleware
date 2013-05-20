@@ -85,6 +85,7 @@ import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.AsciiReader;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -625,7 +626,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
         }
         final int length = value.length();
         int pos = 0;
-        while (pos < length && Character.isWhitespace(value.charAt(pos))) {
+        while (pos < length && Strings.isWhitespace(value.charAt(pos))) {
             pos++;
         }
         final StringBuilder builder = new StringBuilder(length << 1);
@@ -663,7 +664,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

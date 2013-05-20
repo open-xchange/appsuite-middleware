@@ -78,6 +78,7 @@ import java.util.Locale;
 import com.davekoelle.AlphanumComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.java.Strings;
 
 /**
  * {@link SpecialAlphanumSortContactComparator} - Sorts with respect to {@link Contact#SPECIAL_SORTING}. Considering given names, too, if
@@ -216,7 +217,7 @@ public class SpecialAlphanumSortContactComparator implements Comparator<Contact>
     private static boolean isNotEmpty(final String string) {
         if (null != string) {
             for (int i = 0; i < string.length(); i++) {
-                if (false == Character.isWhitespace(string.charAt(i))) {
+                if (false == Strings.isWhitespace(string.charAt(i))) {
                     return true;
                 }
             }

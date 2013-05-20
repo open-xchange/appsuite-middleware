@@ -70,6 +70,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -322,10 +323,10 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
             return false;
         }
         int i = 0;
-        if (Character.isWhitespace(toCheck.charAt(i))) {
+        if (Strings.isWhitespace(toCheck.charAt(i))) {
             do {
                 i++;
-            } while (i < len && Character.isWhitespace(toCheck.charAt(i)));
+            } while (i < len && Strings.isWhitespace(toCheck.charAt(i)));
         }
         if (i >= len) {
             return false;

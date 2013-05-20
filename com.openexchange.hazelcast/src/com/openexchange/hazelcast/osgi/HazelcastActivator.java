@@ -350,7 +350,7 @@ public class HazelcastActivator extends HousekeepingActivator {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

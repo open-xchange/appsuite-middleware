@@ -133,6 +133,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.log.Log;
 import com.openexchange.mail.FullnameArgument;
@@ -5127,7 +5128,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }
@@ -5196,7 +5197,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             return startingChar == toCheck.charAt(0);
         }
         int i = 0;
-        while (i < len && Character.isWhitespace(toCheck.charAt(i))) {
+        while (i < len && Strings.isWhitespace(toCheck.charAt(i))) {
             i++;
         }
         if (i >= len) {

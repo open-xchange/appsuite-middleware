@@ -108,6 +108,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -1317,7 +1318,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }
@@ -1331,7 +1332,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         char prev = '\0';
         for (int i = 0; i < len; i++) {
             final char c = fileName.charAt(i);
-            if (Character.isWhitespace(c)) {
+            if (Strings.isWhitespace(c)) {
                 if (prev != '_') {
                     prev = '_';
                     sb.append(prev);

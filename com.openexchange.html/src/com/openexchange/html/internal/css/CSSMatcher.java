@@ -373,7 +373,7 @@ public final class CSSMatcher {
         }
         final int len = s.length();
         int pos = 0;
-        while (pos < len && Character.isWhitespace(s.charAt(pos))) {
+        while (pos < len && Strings.isWhitespace(s.charAt(pos))) {
             pos++;
         }
         final StringBuilder builder = new StringBuilder(length << 1);
@@ -717,7 +717,7 @@ public final class CSSMatcher {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

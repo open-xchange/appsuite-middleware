@@ -58,6 +58,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.idn.IDNA;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
@@ -1289,7 +1290,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         final int len = str.length();
         boolean ret = true;
         for (int i = 0; ret && i < len; i++) {
-            ret = Character.isWhitespace(str.charAt(i));
+            ret = Strings.isWhitespace(str.charAt(i));
         }
         return ret;
     }

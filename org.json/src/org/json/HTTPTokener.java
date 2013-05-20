@@ -52,7 +52,7 @@ public class HTTPTokener extends JSONTokener {
         final org.json.helpers.StringAllocator sb = new org.json.helpers.StringAllocator();
         do {
             c = next();
-        } while (Character.isWhitespace(c));
+        } while (isWhitespace(c));
         if (c == '"' || c == '\'') {
             q = c;
             for (;;) {
@@ -67,11 +67,37 @@ public class HTTPTokener extends JSONTokener {
             }
         }
         for (;;) {
-            if (c == 0 || Character.isWhitespace(c)) {
+            if (c == 0 || isWhitespace(c)) {
                 return sb.toString();
             }
             sb.append(c);
             c = next();
+        }
+    }
+
+    /**
+     * High speed test for whitespace!  Faster than the java one (from some testing).
+     *
+     * @return <code>true</code> if the indicated character is whitespace; otherwise <code>false</code>
+     */
+    private static boolean isWhitespace(final char c) {
+        switch (c) {
+            case 9:  //'unicode: 0009
+            case 10: //'unicode: 000A'
+            case 11: //'unicode: 000B'
+            case 12: //'unicode: 000C'
+            case 13: //'unicode: 000D'
+            case 28: //'unicode: 001C'
+            case 29: //'unicode: 001D'
+            case 30: //'unicode: 001E'
+            case 31: //'unicode: 001F'
+            case ' ': // Space
+                //case Character.SPACE_SEPARATOR:
+                //case Character.LINE_SEPARATOR:
+            case Character.PARAGRAPH_SEPARATOR:
+                return true;
+            default:
+                return false;
         }
     }
 }
