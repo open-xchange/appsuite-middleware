@@ -49,7 +49,14 @@
 
 package com.openexchange.mail.api.enhanced;
 
+import static com.openexchange.mail.MailExceptionCode.getSize;
+import javax.mail.internet.MimeMessage;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.config.cascade.ConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -68,6 +75,7 @@ import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.text.TextFinder;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.spamhandler.SpamHandler;
 
 /**
@@ -85,6 +93,13 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     private static final MailField[] FIELDS_FULL = new MailField[] { MailField.FULL };
 
     private static final SearchTerm<Integer> TERM_FLAG_SEEN = new FlagTerm(MailMessage.FLAG_SEEN, false);
+
+    /**
+     * Initializes a new {@link MailMessageStorageLong}.
+     */
+    protected MailMessageStorageLong() {
+        super();
+    }
 
     @Override
     public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws OXException {

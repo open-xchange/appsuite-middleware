@@ -62,6 +62,7 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.imap.IMAPAccess;
 import com.openexchange.imap.IMAPProvider;
@@ -111,7 +112,7 @@ public final class IMAPActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ThreadPoolService.class,
-            TimerService.class, SessiondService.class, DatabaseService.class, TextXtractService.class };
+            TimerService.class, SessiondService.class, DatabaseService.class, TextXtractService.class, ConfigViewFactory.class };
     }
 
     @Override

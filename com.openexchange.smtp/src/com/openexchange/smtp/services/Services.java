@@ -49,32 +49,70 @@
 
 package com.openexchange.smtp.services;
 
-import com.openexchange.osgi.ServiceRegistry;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link SMTPServiceRegistry} - A registry for services needed by SMTP bundle
+ * {@link Services} - The static service lookup.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
-public final class SMTPServiceRegistry {
+public final class Services {
 
-	private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+    /**
+     * Initializes a new {@link Services}.
+     */
+    private Services() {
+        super();
+    }
 
-	/**
-	 * Gets the service registry
-	 *
-	 * @return The service registry
-	 */
-	public static ServiceRegistry getServiceRegistry() {
-		return REGISTRY;
-	}
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
 
-	/**
-	 * Initializes a new {@link SMTPServiceRegistry}
-	 */
-	private SMTPServiceRegistry() {
-		super();
-	}
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
+    }
+
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.caching.hazelcast\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
+    }
 
 }
