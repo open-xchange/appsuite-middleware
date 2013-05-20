@@ -9196,6 +9196,11 @@ msgstr ""
 msgid "Invoked method is not supported."
 msgstr ""
 
+#. Maximum message is exceeded. Max. is %1$s, but message is %2$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:536
+msgid "Maximum message is exceeded. Max. is %1$s, but message is %2$s."
+msgstr ""
+
 #. *
 #. * There was an issue in authenticating your E-Mail password. This may be because of a recent password change. To continue please logout
 #. * now and then log back in with your most current password. (server=%1$s | user=%2$s)
