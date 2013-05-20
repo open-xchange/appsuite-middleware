@@ -94,7 +94,7 @@ public class XMLTokener extends JSONTokener {
         StringBuffer sb;
         do {
             c = next();
-        } while (Character.isWhitespace(c));
+        } while (isWhitespace(c));
         if (c == 0) {
             return null;
         }
@@ -156,7 +156,7 @@ public class XMLTokener extends JSONTokener {
         char q;
         do {
             c = next();
-        } while (Character.isWhitespace(c));
+        } while (isWhitespace(c));
         switch (c) {
         case 0:
             throw syntaxError("Misshaped meta tag");
@@ -187,7 +187,7 @@ public class XMLTokener extends JSONTokener {
         default:
             for (;;) {
                 c = next();
-                if (Character.isWhitespace(c)) {
+                if (isWhitespace(c)) {
                     return Boolean.TRUE;
                 }
                 switch (c) {
@@ -224,7 +224,7 @@ public class XMLTokener extends JSONTokener {
         StringBuffer sb;
         do {
             c = next();
-        } while (Character.isWhitespace(c));
+        } while (isWhitespace(c));
         switch (c) {
         case 0:
             throw syntaxError("Misshaped element");
@@ -269,7 +269,7 @@ public class XMLTokener extends JSONTokener {
             for (;;) {
                 sb.append(c);
                 c = next();
-                if (Character.isWhitespace(c)) {
+                if (isWhitespace(c)) {
                     return sb.toString();
                 }
                 switch (c) {
@@ -291,6 +291,32 @@ public class XMLTokener extends JSONTokener {
                 	// NOOP
                 }
             }
+        }
+    }
+
+    /**
+     * High speed test for whitespace!  Faster than the java one (from some testing).
+     *
+     * @return <code>true</code> if the indicated character is whitespace; otherwise <code>false</code>
+     */
+    private static boolean isWhitespace(final char c) {
+        switch (c) {
+            case 9:  //'unicode: 0009
+            case 10: //'unicode: 000A'
+            case 11: //'unicode: 000B'
+            case 12: //'unicode: 000C'
+            case 13: //'unicode: 000D'
+            case 28: //'unicode: 001C'
+            case 29: //'unicode: 001D'
+            case 30: //'unicode: 001E'
+            case 31: //'unicode: 001F'
+            case ' ': // Space
+                //case Character.SPACE_SEPARATOR:
+                //case Character.LINE_SEPARATOR:
+            case Character.PARAGRAPH_SEPARATOR:
+                return true;
+            default:
+                return false;
         }
     }
 }

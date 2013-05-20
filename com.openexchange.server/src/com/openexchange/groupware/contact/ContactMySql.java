@@ -62,6 +62,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.Contacts.Mapper;
@@ -2017,7 +2018,7 @@ public class ContactMySql implements ContactSql {
         final int len = stringBuilder.length();
         if (ignoreTrailingWhitespaces) {
             for (int i = pos + suffix.length(); i < len; i++) {
-                if (!Character.isWhitespace(stringBuilder.charAt(i))) {
+                if (!Strings.isWhitespace(stringBuilder.charAt(i))) {
                     return -1;
                 }
             }
@@ -2029,7 +2030,7 @@ public class ContactMySql implements ContactSql {
     static void removeMultipleTrailingWhitespaces(final StringBuilder stringBuilder) {
         final int length = stringBuilder.length();
         int pos = length - 1;
-        while (pos > 0 && Character.isWhitespace(stringBuilder.charAt(pos))) {
+        while (pos > 0 && Strings.isWhitespace(stringBuilder.charAt(pos))) {
             pos--;
         }
         if ((pos < length - 1)) {

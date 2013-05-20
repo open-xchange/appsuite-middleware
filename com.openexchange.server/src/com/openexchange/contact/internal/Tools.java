@@ -77,6 +77,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.l10n.SuperCollator;
 import com.openexchange.log.LogFactory;
 import com.openexchange.preferences.ServerUserSetting;
@@ -287,7 +288,7 @@ public final class Tools {
         if (null != string) {
 		    final int length = string.length();
 		    for (int i = 0; i < length; i++) {
-		    	if (false == Character.isWhitespace(string.charAt(i))) {
+		    	if (false == Strings.isWhitespace(string.charAt(i))) {
 		    		return false;
 		    	}
 		    }

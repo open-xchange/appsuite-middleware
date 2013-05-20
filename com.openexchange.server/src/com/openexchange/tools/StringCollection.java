@@ -59,6 +59,7 @@ import java.util.Set;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -579,7 +580,7 @@ public final class StringCollection {
     public static boolean isEmpty(final String s) {
         final int length = s.length();
         for (int a = 0; a < length; a++) {
-            if (!Character.isWhitespace(s.charAt(a))) {
+            if (!Strings.isWhitespace(s.charAt(a))) {
                 return false;
             }
         }

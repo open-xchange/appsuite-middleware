@@ -53,6 +53,7 @@ import java.util.Calendar;
 import java.util.Map;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
@@ -414,7 +415,7 @@ public class Mappings {
         boolean isSNull = true;
         for (int i = 0; (isWhitespace || isSNull) && i < len; i++) {
             final char c = string.charAt(i);
-            isWhitespace = Character.isWhitespace(c);
+            isWhitespace = Strings.isWhitespace(c);
             if (isSNull) {
                 switch (i) {
                 case 0:

@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.java.Strings;
 
 /**
  * {@link UUEncodedMultiPart} - Find possible uuencoded attachments in "normal" text (like Outlook does) and converts them to
@@ -156,7 +157,7 @@ public class UUEncodedMultiPart {
     private static final int examineBeginToken(final String beginToken) {
         int count = 0;
         char c = beginToken.charAt(count);
-        while (Character.isWhitespace(c)) {
+        while (Strings.isWhitespace(c)) {
             c = beginToken.charAt(++count);
         }
         return count;

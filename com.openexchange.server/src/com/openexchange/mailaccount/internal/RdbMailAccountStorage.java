@@ -89,6 +89,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.StringAllocator;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -2397,7 +2398,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }
@@ -2434,7 +2435,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         for (int i = 0; valid && i < len; i++) {
             final char c = name.charAt(i);
             valid = (Arrays.binarySearch(CHARS_INVALID, c) < 0);
-            isWhitespace = Character.isWhitespace(c);
+            isWhitespace = Strings.isWhitespace(c);
         }
         return !isWhitespace && valid;
     }

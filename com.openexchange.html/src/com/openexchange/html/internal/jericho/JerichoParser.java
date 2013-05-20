@@ -68,6 +68,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.parser.HtmlHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogFactory;
 
 /**
@@ -327,10 +328,10 @@ public final class JerichoParser {
             return false;
         }
         int i = 0;
-        if (Character.isWhitespace(toCheck.charAt(i))) {
+        if (Strings.isWhitespace(toCheck.charAt(i))) {
             do {
                 i++;
-            } while (i < len && Character.isWhitespace(toCheck.charAt(i)));
+            } while (i < len && Strings.isWhitespace(toCheck.charAt(i)));
         }
         if (i >= len) {
             return false;

@@ -311,7 +311,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             return true;
         }
         for (int i = 0; i < string.length(); i++) {
-            if (false == Character.isWhitespace(string.charAt(i))) {
+            if (false == Strings.isWhitespace(string.charAt(i))) {
                 return false;
             }
         }

@@ -95,8 +95,9 @@ public class Strings {
                 //case Character.LINE_SEPARATOR:
             case Character.PARAGRAPH_SEPARATOR:
                 return true;
+            default:
+                return false;
         }
-        return false;
     }
 
     /**
@@ -218,7 +219,7 @@ public class Strings {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }
