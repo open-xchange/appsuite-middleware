@@ -51,6 +51,7 @@ package com.openexchange.imap;
 
 import static com.openexchange.imap.threader.Threadables.applyThreaderTo;
 import static com.openexchange.imap.threader.Threadables.getThreadableFor;
+import static com.openexchange.mail.MailExceptionCode.getSize;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.fold;
@@ -104,7 +105,11 @@ import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.cache.ListLsubCache;
@@ -2675,6 +2680,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 msgs[i] = MimeMessageConverter.convertMailMessage(mailMessages[i], MimeMessageConverter.BEHAVIOR_CLONE | MimeMessageConverter.BEHAVIOR_STREAM2FILE);
             }
             /*
+             * Check messages
+             */
+            checkMessages(msgs);
+            /*
              * Check if destination folder supports user flags
              */
             final boolean supportsUserFlags = UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId);
@@ -3627,6 +3636,59 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      */
     private static String randomUUID() {
         return UUID.randomUUID().toString();
+    }
+
+    private void checkMessages(final Message[] messages) throws OXException {
+        if (null == messages || messages.length <= 0) {
+            return;
+        }
+        final ConfigViewFactory factory = IMAPServiceRegistry.getService(ConfigViewFactory.class);
+        if (null == factory) {
+            return;
+        }
+        final ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+        final ConfigProperty<Long> property = view.property("com.openexchange.mail.maxMailSize", Long.class);
+        if (property.isDefined()) {
+            final Long l = property.get();
+            final long maxMailSize = null == l ? -1 : l.longValue();
+            if (maxMailSize > 0) {
+                // Check message size
+                for (final Message message : messages) {
+                    if (null != message) {
+                        ThresholdFileHolder tfh = null;
+                        try {
+                            long length;
+                            try {
+                                length = message.getSize();
+                            } catch (final MessageRemovedException e) {
+                                throw MimeMailException.handleMessagingException(e, imapConfig, session, imapFolder);
+                            } catch (final MessagingException e) {
+                                // Ignore
+                                length = -1;
+                            } catch (final RuntimeException e) {
+                                // Ignore
+                                length = -1;
+                            }
+                            if (length <= 0) {
+                                tfh = new ThresholdFileHolder();
+                                message.writeTo(tfh.asOutputStream());
+                                length = tfh.getLength();
+                            }
+                            if (length > maxMailSize) {
+                                // Deny message transport since max. message size is exceeded
+                                throw MailExceptionCode.MAX_MESSAGE_SIZE_EXCEEDED.create(
+                                    getSize(maxMailSize, 2, false, true),
+                                    getSize(length, 2, false, true));
+                            }
+                        } catch (final Exception e) {
+                            LOG.warn("Could not determine & check message's real size.", e);
+                        } finally {
+                            Streams.close(tfh);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**

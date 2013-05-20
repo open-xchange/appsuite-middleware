@@ -49,19 +49,18 @@
 
 package com.openexchange.smtp.osgi;
 
-import static com.openexchange.smtp.services.SMTPServiceRegistry.getServiceRegistry;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.activation.MailcapCommandMap;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.RegistryCustomizer;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.smtp.SMTPProvider;
+import com.openexchange.smtp.services.Services;
 
 /**
  * {@link SMTPActivator} - The {@link BundleActivator activator} for SMTP bundle.
@@ -81,7 +80,7 @@ public final class SMTPActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class };
+        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -92,7 +91,6 @@ public final class SMTPActivator extends HousekeepingActivator {
         if (LOG.isWarnEnabled()) {
             LOG.warn("Absent service: " + clazz.getName());
         }
-        getServiceRegistry().removeService(clazz);
     }
 
     @Override
@@ -100,27 +98,13 @@ public final class SMTPActivator extends HousekeepingActivator {
         if (LOG.isInfoEnabled()) {
             LOG.info("Re-available service: " + clazz.getName());
         }
-        getServiceRegistry().addService(clazz, getService(clazz));
     }
 
     @Override
     public void startBundle() throws Exception {
         try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-            {
-                final ServiceRegistry registry = getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (final Class<?> classe : classes) {
-                    final Object service = getService(classe);
-                    if (null != service) {
-                        registry.addService(classe, service);
-                    }
-                }
-            }
-            track(HostnameService.class, new RegistryCustomizer<HostnameService>(context, HostnameService.class, getServiceRegistry()));
+            Services.setServiceLookup(this);
+            trackService(HostnameService.class);
             track(MailcapCommandMap.class, new MailcapServiceTracker(context));
             openTrackers();
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
@@ -137,10 +121,7 @@ public final class SMTPActivator extends HousekeepingActivator {
     public void stopBundle() throws Exception {
         try {
             cleanUp();
-            /*
-             * Clear service registry
-             */
-            getServiceRegistry().clearRegistry();
+            Services.setServiceLookup(null);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
