@@ -46,30 +46,73 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.realtime.atmosphere;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.realtime.atmosphere.impl.EnqueuedStanzaTest;
-import com.openexchange.realtime.atmosphere.impl.RTClientStateTest;
-import com.openexchange.realtime.atmosphere.impl.stanza.PresenceBuilderTest;
-import com.openexchange.realtime.atmosphere.presence.converter.JSONToPresenceStateTest;
-import com.openexchange.realtime.atmosphere.protocol.RTProtocolTest;
+package com.openexchange.realtime.atmosphere.impl;
+
+import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import org.atmosphere.cpr.AtmosphereResource;
+import org.json.JSONArray;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
+import com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter;
+import com.openexchange.realtime.packet.Stanza;
+
 
 /**
- * {@link UnitTests}
+ * The {@link AtmosphereStanzaTransmitter} is a {@link StanzaTransmitter} that is based on an {@link AtmosphereResource}.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    PresenceBuilderTest.class,
-    JSONToPresenceStateTest.class,
-    EnqueuedStanzaTest.class,
-    RTClientStateTest.class,
-    RTProtocolTest.class
-})
-public class UnitTests {
+public class AtmosphereStanzaTransmitter implements StanzaTransmitter {
+    
+    private AtmosphereResource resource;
+    private Lock lock = new ReentrantLock();
+    
+    public AtmosphereStanzaTransmitter(AtmosphereResource resource) {
+        super();
+        this.resource = resource;
+    }
+
+    @Override
+    public boolean send(List<Stanza> stanzas) throws OXException {
+        try {
+            lock.lock();
+            if (resource.isCancelled() || resource.isResumed() || stanzas.isEmpty()) {
+                return false;
+            }
+            JSONArray array = new JSONArray();
+            StanzaWriter stanzaWriter = new StanzaWriter();
+            for (Stanza stanza : stanzas) {
+                array.put(stanzaWriter.write(stanza));
+            }
+            resource.getResponse().write(array.toString());
+            switch (resource.transport()) {
+            case LONG_POLLING: 
+                if (resource.isSuspended()) {
+                    resource.resume();                
+                }
+            }
+            
+            return true;
+            
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public void suspend() {
+        try {
+            lock.lock();
+            if (resource.isCancelled() || resource.isResumed() || resource.isSuspended()) {
+                return;
+            }
+            resource.suspend();
+        } finally {
+            lock.unlock();
+        }
+    }
 
 }

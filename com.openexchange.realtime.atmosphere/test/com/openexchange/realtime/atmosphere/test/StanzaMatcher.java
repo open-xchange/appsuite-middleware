@@ -46,30 +46,59 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.realtime.atmosphere;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.realtime.atmosphere.impl.EnqueuedStanzaTest;
-import com.openexchange.realtime.atmosphere.impl.RTClientStateTest;
-import com.openexchange.realtime.atmosphere.impl.stanza.PresenceBuilderTest;
-import com.openexchange.realtime.atmosphere.presence.converter.JSONToPresenceStateTest;
-import com.openexchange.realtime.atmosphere.protocol.RTProtocolTest;
+package com.openexchange.realtime.atmosphere.test;
+
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
+
 
 /**
- * {@link UnitTests}
+ * {@link StanzaMatcher}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    PresenceBuilderTest.class,
-    JSONToPresenceStateTest.class,
-    EnqueuedStanzaTest.class,
-    RTClientStateTest.class,
-    RTProtocolTest.class
-})
-public class UnitTests {
+public class StanzaMatcher extends BaseMatcher<Stanza> {
+
+    private ID from;
+    private ID to;
+    private String namespace;
+    private String name;
+    private Object payload;
+    
+    public static StanzaMatcher isStanza(ID from, ID to, String namespace, String name, Object payload) {
+        return new StanzaMatcher(from, to, namespace, name, payload);
+    }
+    
+    public StanzaMatcher(ID from, ID to, String namespace, String name, Object payload) {
+        this.from = from;
+        this.to = to;
+        this.namespace = namespace;
+        this.name = name;
+        this.payload = payload;
+    }
+
+    @Override
+    public boolean matches(Object arg0) {
+        if (! (arg0 instanceof Stanza)) {
+            return false;
+        }
+        
+        Stanza s = (Stanza) arg0;
+        
+        return s.getFrom().equals(from) &&
+            s.getTo().equals(to) &&
+            s.getPayload().getNamespace().equals(namespace) &&
+            s.getPayload().getElementName().equals(name) &&
+            s.getPayload().getData().equals(payload);
+    }
+
+    @Override
+    public void describeTo(Description arg0) {
+        
+    }
 
 }

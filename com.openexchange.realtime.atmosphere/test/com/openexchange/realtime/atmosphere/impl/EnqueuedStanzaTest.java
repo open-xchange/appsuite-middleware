@@ -46,30 +46,32 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.realtime.atmosphere;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.realtime.atmosphere.impl.EnqueuedStanzaTest;
-import com.openexchange.realtime.atmosphere.impl.RTClientStateTest;
-import com.openexchange.realtime.atmosphere.impl.stanza.PresenceBuilderTest;
-import com.openexchange.realtime.atmosphere.presence.converter.JSONToPresenceStateTest;
-import com.openexchange.realtime.atmosphere.protocol.RTProtocolTest;
+package com.openexchange.realtime.atmosphere.impl;
+
+import org.junit.Test;
+import com.openexchange.realtime.packet.Message;
+import static org.junit.Assert.*;
+
 
 /**
- * {@link UnitTests}
+ * {@link EnqueuedStanzaTest}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    PresenceBuilderTest.class,
-    JSONToPresenceStateTest.class,
-    EnqueuedStanzaTest.class,
-    RTClientStateTest.class,
-    RTProtocolTest.class
-})
-public class UnitTests {
-
+public class EnqueuedStanzaTest {
+    @Test
+    public void incCounterShouldReturnTrueTheFirstOneHundredTimesAndFalseAfterThat() {
+        Message message = new Message();
+        message.setSequenceNumber(23);
+        
+        EnqueuedStanza enqueuedStanza = new EnqueuedStanza(message);
+        for(int i = 0; i < 101; i++) {
+            if (i < 100) {
+                assertTrue(enqueuedStanza.incCounter());
+            } else {
+                assertFalse(enqueuedStanza.incCounter());
+            }
+        }
+    }
 }

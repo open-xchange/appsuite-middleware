@@ -49,33 +49,25 @@
 
 package com.openexchange.realtime.atmosphere.impl;
 
-import java.util.concurrent.locks.ReentrantLock;
+import com.openexchange.realtime.atmosphere.protocol.RTClientState;
+import com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter;
 
-import org.atmosphere.cpr.AtmosphereResource;
-
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link RTAtmosphereState} - Assembles the AtmosphereResource, Serversession and
- * ID into a single class and make it lockable.
+ * A {@link StateEntry} holds an RTClientState, the current transmitter for this id and knows whether it has been created during this request.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class RTAtmosphereState {
-	public AtmosphereResource atmosphereResource;
-	public ServerSession session;
-	public ID id;
+public class StateEntry {
 
-	private final ReentrantLock lock = new ReentrantLock();
-	public boolean handshake = true;
-
-	public void lock() {
-		lock.lock();
-	}
-
-	public void unlock() {
-		lock.unlock();
-	}
-
+    public StateEntry(RTClientState state, StanzaTransmitter transmitter, boolean created) {
+        super();
+        this.state = state;
+        this.transmitter = transmitter;
+        this.created = created;
+        
+    }
+    public RTClientState state;
+    public boolean created;
+    public StanzaTransmitter transmitter;
 }

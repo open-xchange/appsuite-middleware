@@ -46,30 +46,64 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.realtime.atmosphere;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.realtime.atmosphere.impl.EnqueuedStanzaTest;
-import com.openexchange.realtime.atmosphere.impl.RTClientStateTest;
-import com.openexchange.realtime.atmosphere.impl.stanza.PresenceBuilderTest;
-import com.openexchange.realtime.atmosphere.presence.converter.JSONToPresenceStateTest;
-import com.openexchange.realtime.atmosphere.protocol.RTProtocolTest;
+package com.openexchange.realtime.atmosphere.protocol;
+
+import java.util.List;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
 
 /**
- * {@link UnitTests}
+ * {@link RTClientState}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    PresenceBuilderTest.class,
-    JSONToPresenceStateTest.class,
-    EnqueuedStanzaTest.class,
-    RTClientStateTest.class,
-    RTProtocolTest.class
-})
-public class UnitTests {
+public interface RTClientState {
+
+    /**
+     * Called when the client sent an acknowledgement for a stanza
+     * @param sequenceNumber
+     */
+    public abstract void acknowledgementReceived(long sequenceNumber);
+
+    /**
+     * Enqueues a stanza. If it contains a sequence number, it is enqueued in the resendBuffer, otherwise in the nonsequenceStanzas
+     * @param stanza
+     */
+    public abstract void enqueue(Stanza stanza);
+
+    /**
+     * Retrieves a list of stanzas that are still to be transmitted to the client
+     * @return
+     */
+    public abstract List<Stanza> getStanzasToSend();
+
+    /**
+     * A purge run removes all unsequenced stanzas from the state and increases the TTL counter of sequenced stanzas.
+     */
+    public abstract void purge();
+
+    public abstract ID getId();
+
+    public abstract void lock();
+
+    public abstract void unlock();
+
+    /**
+     * Touch sets the last-seen timestamp for this state entry
+     */
+    public abstract void touch();
+
+    /**
+     * Retrieves the timestamp for when this user was last seen
+     */
+    public abstract long getLastSeen();
+
+    /**
+     * Checks whether this state should be considered timed out relative to the given timestamp
+     * @param timestamp - The timestamp to check the timeout status for
+     * @return true if the timestamp is more than two minutes ahead of the lastSeen timestamp, false otherwise
+     */
+    public abstract boolean isTimedOut(long timestamp);
 
 }

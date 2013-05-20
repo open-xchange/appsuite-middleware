@@ -46,30 +46,30 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.realtime.atmosphere;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.realtime.atmosphere.impl.EnqueuedStanzaTest;
-import com.openexchange.realtime.atmosphere.impl.RTClientStateTest;
-import com.openexchange.realtime.atmosphere.impl.stanza.PresenceBuilderTest;
-import com.openexchange.realtime.atmosphere.presence.converter.JSONToPresenceStateTest;
-import com.openexchange.realtime.atmosphere.protocol.RTProtocolTest;
+package com.openexchange.realtime.atmosphere.protocol;
+
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
+
 
 /**
- * {@link UnitTests}
+ * A {@link StanzaTransmitter} tries to transmit stanzas to a connected client.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    PresenceBuilderTest.class,
-    JSONToPresenceStateTest.class,
-    EnqueuedStanzaTest.class,
-    RTClientStateTest.class,
-    RTProtocolTest.class
-})
-public class UnitTests {
-
+public interface StanzaTransmitter {
+    
+    /**
+     * Attempts to send a stanza to a connected client and resumes the transmitter
+     * @throws OXException 
+     */
+    public boolean send(List<Stanza> stanzas) throws OXException;
+    
+    /**
+     * Suspends the transmitter
+     */
+    public void suspend();
 }
