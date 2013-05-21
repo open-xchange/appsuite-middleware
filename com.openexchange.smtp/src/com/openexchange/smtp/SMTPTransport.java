@@ -82,7 +82,8 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
-import com.openexchange.ajax.container.ThresholdFileHolder;
+import org.apache.commons.io.output.CountingOutputStream;
+import org.apache.commons.io.output.NullOutputStream;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
 import com.openexchange.config.cascade.ConfigProperty;
@@ -130,7 +131,6 @@ import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.config.SMTPSessionProperties;
 import com.openexchange.smtp.filler.SMTPMessageFiller;
 import com.openexchange.smtp.services.Services;
-import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.smtp.SMTPMessage;
 
@@ -879,10 +879,10 @@ public final class SMTPTransport extends MailTransport {
             final long maxMailSize = null == l ? -1 : l.longValue();
             if (maxMailSize > 0) {
                 // Check message size
-                final ThresholdFileHolder tfh = new ThresholdFileHolder();
+                final CountingOutputStream counter = new CountingOutputStream(new NullOutputStream());
                 try {
-                    message.writeTo(tfh.asOutputStream());
-                    final long length = tfh.getLength();
+                    message.writeTo(counter);
+                    final long length = counter.getByteCount();
                     if (length > maxMailSize) {
                         // Deny message transport since max. message size is exceeded
                         throw MailExceptionCode.MAX_MESSAGE_SIZE_EXCEEDED.create(getSize(maxMailSize, 2, false, true), getSize(length, 2, false, true));
@@ -890,14 +890,7 @@ public final class SMTPTransport extends MailTransport {
                 } catch (final Exception e) {
                     LOG.warn("Could not determine & check message's real size.", e);
                 } finally {
-                    final Runnable r = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            Streams.close(tfh);
-                        }
-                    };
-                    ThreadPools.getThreadPool().submit(ThreadPools.task(r));
+                    Streams.close(counter);
                 }
             }
         }
