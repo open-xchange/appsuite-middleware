@@ -49,14 +49,7 @@
 
 package com.openexchange.mail.api.enhanced;
 
-import static com.openexchange.mail.MailExceptionCode.getSize;
-import javax.mail.internet.MimeMessage;
-import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.config.cascade.ConfigProperty;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -75,7 +68,6 @@ import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.text.TextFinder;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.spamhandler.SpamHandler;
 
 /**
