@@ -49,8 +49,12 @@
 
 package com.openexchange.mail.json.actions;
 
-import javax.mail.Message;
+import java.util.ArrayList;
+import java.util.List;
 import javax.mail.internet.MimeMessage;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -65,6 +69,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.transport.MailTransport;
@@ -98,14 +103,26 @@ public final class BounceAction extends AbstractMailAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult perform(final MailRequest req) throws OXException, JSONException {
+        final JSONArray paths = (JSONArray) req.getRequest().getData();
+        if (null == paths) {
+            return new AJAXRequestResult(performBounce(req, req.checkParameter(AJAXServlet.PARAMETER_FOLDERID), req.checkParameter(AJAXServlet.PARAMETER_ID)), "mail");
+        }
+        final int length = paths.length();
+        final List<MailMessage> ret = new ArrayList<MailMessage>(length);
+        for (int i = 0; i < length; i++) {
+            final JSONObject jo = paths.getJSONObject(i);
+            ret.add(performBounce(req, jo.getString(AJAXServlet.PARAMETER_FOLDERID), jo.getString(AJAXServlet.PARAMETER_ID)));
+        }
+        return new AJAXRequestResult(ret, "mail");
+    }
+
+    private MailMessage performBounce(final MailRequest req, final String folderPath, final String uid) throws OXException {
         try {
             final ServerSession session = req.getSession();
             /*
              * Read in parameters
              */
-            final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-            final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
             final String view = req.getParameter(Mail.PARAMETER_VIEW);
             final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
             /*
@@ -127,23 +144,39 @@ public final class BounceAction extends AbstractMailAction {
             if (null == message) {
                 throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
             }
-            message.setHeader("Reply-To", session.getUser().getMail());
             /*
              * Transport
              */
             final MailTransport transport = MailTransport.getInstance(session, mailInterface.getAccountID());
             try {
-                final MailMessage sentMail;
+                final MimeMessage mimeMessage;
                 if (message instanceof MimeMailMessage) {
-                    sentMail = transport.sendMailMessage(new ContentAwareComposedMailMessage(((MimeMailMessage) message).getMimeMessage(), session, null), ComposeType.NEW);
+                    final MimeMessage mm = ((MimeMailMessage) message).getMimeMessage();
+                    boolean readOnly = false;
+                    try {
+                        mm.setHeader("X-Ignore", "Ignore");
+                        mm.removeHeader("X-Ignore");
+                    } catch (final javax.mail.IllegalWriteException e) {
+                        readOnly = true;
+                    } catch (final javax.mail.MessagingException e) {
+                        throw MimeMailException.handleMessagingException(e);
+                    }
+                    if (readOnly) {
+                        mimeMessage = new MimeMessage(mm);
+                    } else {
+                        mimeMessage = mm;
+                    }
                 } else {
-                    final Message msg = MimeMessageConverter.convertMailMessage(message, false);
-                    sentMail = transport.sendMailMessage(new ContentAwareComposedMailMessage((MimeMessage) msg, session, null), ComposeType.NEW);
+                    mimeMessage = (MimeMessage) MimeMessageConverter.convertMailMessage(message, false);
                 }
+                mimeMessage.setHeader("Reply-To", session.getUser().getMail());
+                final MailMessage sentMail = transport.sendMailMessage(new ContentAwareComposedMailMessage(mimeMessage, session, null), ComposeType.NEW);
                 if (!sentMail.containsAccountId()) {
                     sentMail.setAccountId(mailInterface.getAccountID());
                 }
-                return new AJAXRequestResult(sentMail, "mail");
+                return sentMail;
+            } catch (final javax.mail.MessagingException e) {
+                throw MimeMailException.handleMessagingException(e);
             } finally {
                 transport.close();
             }
