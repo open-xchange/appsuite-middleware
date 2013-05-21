@@ -161,11 +161,7 @@ public final class BounceAction extends AbstractMailAction {
                     } catch (final javax.mail.MessagingException e) {
                         throw MimeMailException.handleMessagingException(e);
                     }
-                    if (readOnly) {
-                        mimeMessage = new MimeMessage(mm);
-                    } else {
-                        mimeMessage = mm;
-                    }
+                    mimeMessage = readOnly ? new MimeMessage(mm) : mm;
                 } else {
                     mimeMessage = (MimeMessage) MimeMessageConverter.convertMailMessage(message, false);
                 }
