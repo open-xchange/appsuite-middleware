@@ -55,6 +55,9 @@ import com.openexchange.api2.MailInterfaceMonitor;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.groupware.importexport.MailImportResult;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
@@ -238,6 +241,17 @@ public abstract class MailServletInterface {
      * @throws OXException If mail cannot be fetched from store
      */
     public abstract MailMessage getMessage(String folder, String msgUID, boolean markAsSeen) throws OXException;
+
+    /**
+     * Gets the mail identified through given ID from store located in given folder.
+     *
+     * @param folder The folder path
+     * @param msgUID The mail ID
+     * @param markSeen Whether to mark as seen
+     * @return The mail identified through given ID from store located in given folder.
+     * @throws OXException If mail cannot be fetched from store
+     */
+    public abstract MailMessage getMessage(String folder, String msgUID, boolean markSeen) throws OXException;
 
     /**
      * Returns a message's attachment located at given <code>attachmentPosition</code> wrapped by an instance of
@@ -480,6 +494,11 @@ public abstract class MailServletInterface {
      * Returns user-specific mail configuration
      */
     public abstract MailConfig getMailConfig() throws OXException;
+
+    /**
+     * Returns user-specific mail access
+     */
+    public abstract MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess() throws OXException;
 
     /**
      * Gets the account ID to which the (primary) mail access is connected

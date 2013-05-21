@@ -418,6 +418,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     @Override
     public void close(final boolean putIntoCache) throws OXException {
         try {
+            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = this.mailAccess;
             if (mailAccess != null) {
                 mailAccess.close(putIntoCache);
             }
@@ -1111,6 +1112,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         initConnection(accountId);
         return prepareFullname(accountId, mailAccess.getFolderStorage().getFolder(INBOX_ID).getFullname());
+    }
+
+    @Override
+    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess() throws OXException {
+        return mailAccess;
     }
 
     @Override

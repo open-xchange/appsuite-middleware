@@ -124,6 +124,7 @@ public abstract class MailTransport {
      * </pre>
      *
      * @param session The session
+     * @param accountId The account identifier
      * @return A proper instance of {@link MailTransport}
      * @throws OXException If instantiation fails
      */
