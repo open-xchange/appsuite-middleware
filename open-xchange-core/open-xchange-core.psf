@@ -33,8 +33,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.datatypes.genericonf.storage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.documentation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.documentation.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.filemanagement.distributed"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.filemanagement.distributed.servlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.file.storage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.file.storage.composition"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.1,com.openexchange.file.storage.config"/>
