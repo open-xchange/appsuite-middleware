@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage.filestorage;
 
 import java.util.List;
+import com.openexchange.file.storage.CacheAware;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
@@ -140,7 +141,11 @@ public final class FileStorageFolderImpl extends AbstractFolder {
         deefault = fsFolder.isDefaultFolder();
         total = fsFolder.getFileCount();
         defaultType = deefault ? FileStorageContentType.getInstance().getModule() : 0;
-        cacheable = !fsFolder.isDefaultFolder();
+        if (fsFolder instanceof CacheAware) {
+            cacheable = !fsFolder.isDefaultFolder() && ((CacheAware) fsFolder).cacheable();
+        } else {
+            cacheable = !fsFolder.isDefaultFolder();
+        }
     }
 
     @Override
