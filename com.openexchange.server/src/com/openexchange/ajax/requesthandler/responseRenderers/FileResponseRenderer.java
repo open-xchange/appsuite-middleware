@@ -52,34 +52,42 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 import static com.openexchange.java.Streams.close;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
+import org.apache.tika.Tika;
+import org.apache.tika.config.TikaConfig;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.MetadataException;
+import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.jpeg.JpegDirectory;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.HTMLDetector;
+import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
-import com.openexchange.log.LogFactory;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.images.ImageTransformationService;
@@ -94,7 +102,7 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class FileResponseRenderer implements ResponseRenderer {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(FileResponseRenderer.class));
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(FileResponseRenderer.class);
 
     private static final int BUFLEN = 2048;
 
@@ -114,11 +122,14 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private static final Pattern PATTERN_BYTE_RANGES = Pattern.compile("^bytes=\\d*-\\d*(,\\d*-\\d*)*$");
 
+    private final Tika tika;
+
     /**
      * Initializes a new {@link FileResponseRenderer}.
      */
     public FileResponseRenderer() {
         super();
+        tika = new Tika(TikaConfig.getDefaultConfig());
     }
 
     @Override
@@ -154,7 +165,23 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             return;
         }
+        writeFileHolder(file, request, result, req, resp);
+    }
+
+    /**
+     * Writes specified file holder.
+     *
+     * @param fileHolder The file holder
+     * @param requestData The AJAX request data
+     * @param result The AJAX response
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     */
+    public void writeFileHolder(final IFileHolder fileHolder, final AJAXRequestData requestData, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
+        IFileHolder file = fileHolder;
         final String fileName = file.getName();
+        final long length;
+        final List<Closeable> closeables = new LinkedList<Closeable>();
         InputStream documentData = null;
         try {
             final String fileContentType = file.getContentType();
@@ -174,13 +201,17 @@ public class FileResponseRenderer implements ResponseRenderer {
                 delivery = file.getDelivery();
             }
             String contentType = AJAXServlet.encodeUrl(req.getParameter(PARAMETER_CONTENT_TYPE), true);
+            boolean contentTypeByParameter = false;
             if (null == contentType) {
                 if (DOWNLOAD.equalsIgnoreCase(delivery)) {
                     contentType = SAVE_AS_TYPE;
                 } else {
                     contentType = fileContentType;
                 }
+            } else {
+                contentTypeByParameter = true;
             }
+            contentType = unquote(contentType);
             String contentDisposition = AJAXServlet.encodeUrl(req.getParameter(PARAMETER_CONTENT_DISPOSITION));
             if (null == contentDisposition) {
                 if (VIEW.equalsIgnoreCase(delivery)) {
@@ -191,14 +222,14 @@ public class FileResponseRenderer implements ResponseRenderer {
                     contentDisposition = file.getDisposition();
                 }
             }
+            contentDisposition = unquote(contentDisposition);
             // Write to Servlet's output stream
-            file = transformIfImage(request, file, delivery);
+            file = transformIfImage(requestData, file, delivery);
             if (null == file) {
                 // Quit with 404
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND, "File not found.");
                 return;
             }
-            final long length = file.getLength(); // Scaling image could have changed the size
             // Set binary input stream
             {
                 final InputStream stream = file.getStream();
@@ -218,15 +249,72 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             final String userAgent = AJAXServlet.sanitizeParam(req.getHeader("user-agent"));
             if (SAVE_AS_TYPE.equals(contentType) || DOWNLOAD.equalsIgnoreCase(delivery)) {
-                final StringBuilder sb = new StringBuilder(32);
+                // Write as a common file download: application/octet-stream
+                final StringAllocator sb = new StringAllocator(32);
                 sb.append(isEmpty(contentDisposition) ? "attachment" : checkedContentDisposition(contentDisposition.trim(), file));
-                DownloadUtility.appendFilenameParameter(file.getName(), null, userAgent, sb);
+                DownloadUtility.appendFilenameParameter(fileName, null, userAgent, sb);
                 resp.setHeader("Content-Disposition", sb.toString());
-                resp.setContentType(null == contentType ? SAVE_AS_TYPE : contentType);
+                resp.setContentType(SAVE_AS_TYPE);
+                length = file.getLength();
             } else {
-                final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
-                final String cts = null == fileContentType ? contentTypeByFileName : fileContentType;
-                final CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileName, cts, contentDisposition, userAgent);
+                // Determine what Content-Type is indicated by file name
+                String contentTypeByFileName;
+                if (null == fileName) {
+                    // Not known
+                    contentTypeByFileName = null;
+                } else {
+                    contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
+                    if (SAVE_AS_TYPE.equals(contentTypeByFileName)) {
+                        // Not known
+                        contentTypeByFileName = null;
+                    }
+                }
+                // Generate checked download
+                final CheckedDownload checkedDownload;
+                {
+                    long fileLength = file.getLength();
+                    String cts;
+                    if (null == fileContentType || SAVE_AS_TYPE.equals(fileContentType)) {
+                        if (null == contentTypeByFileName) {
+                            // Let Tika detect the Content-Type
+                            final ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(documentData);
+                            // We know for sure
+                            fileLength = baos.size();
+                            documentData = Streams.asInputStream(baos);
+                            cts = tika.detect(Streams.asInputStream(baos));
+                            if ("text/plain".equals(cts)) {
+                                cts = HTMLDetector.containsHTMLTags(baos.toByteArray()) ? "text/html" : cts;
+                            }
+                        } else {
+                            cts = contentTypeByFileName;
+                        }
+                    } else {
+                        if ((null != contentTypeByFileName) && !equalPrimaryTypes(fileContentType, contentTypeByFileName)) {
+                            // Differing Content-Types sources
+                            final ThresholdFileHolder temp = new ThresholdFileHolder();
+                            closeables.add(temp);
+                            temp.write(documentData);
+                            // We know for sure
+                            fileLength = temp.getLength();
+                            documentData = temp.getStream();
+                            cts = detectMimeType(temp.getStream());
+                            if ("text/plain".equals(cts)) {
+                                final byte[] bytes = Streams.stream2bytes(temp.getStream());
+                                cts = HTMLDetector.containsHTMLTags(bytes) ? "text/html" : cts;
+                            }
+                        } else {
+                            cts = fileContentType;
+                        }
+                    }
+                    checkedDownload = DownloadUtility.checkInlineDownload(documentData, fileLength, fileName, cts, contentDisposition, userAgent);
+                }
+                /*
+                 * Set stream
+                 */
+                documentData = checkedDownload.getInputStream();
+                /*
+                 * Set headers...
+                 */
                 if (delivery == null || !delivery.equalsIgnoreCase(VIEW)) {
                     if (isEmpty(contentDisposition)) {
                         resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
@@ -243,10 +331,16 @@ public class FileResponseRenderer implements ResponseRenderer {
                             }
                         }
                     }
+                } else if (delivery.equalsIgnoreCase(VIEW) && null != fileName) {
+                    final StringAllocator sb = new StringAllocator(32);
+                    sb.append("inline");
+                    DownloadUtility.appendFilenameParameter(fileName, null, userAgent, sb);
+                    resp.setHeader("Content-Disposition", sb.toString());
                 }
                 /*
                  * Set Content-Length if possible
                  */
+                length = checkedDownload.getSize();
                 if (length > 0) {
                     resp.setHeader("Accept-Ranges", "bytes");
                     resp.setHeader("Content-Length", Long.toString(length));
@@ -261,41 +355,55 @@ public class FileResponseRenderer implements ResponseRenderer {
                  *   - it's primary type is not equal to contentTypeByFileName's primary type; e.g. both start with "text/"
                  */
                 String preferredContentType = checkedDownload.getContentType();
-                if (!SAVE_AS_TYPE.equals(contentTypeByFileName)) {
-                    if (SAVE_AS_TYPE.equals(preferredContentType)) {
-                        preferredContentType = contentTypeByFileName;
-                    } else {
-                        final String primaryType1 = getPrimaryType(preferredContentType);
-                        final String primaryType2 = getPrimaryType(contentTypeByFileName);
-                        if (!toLowerCase(primaryType1).startsWith(toLowerCase(primaryType2))) {
+                if (null != contentTypeByFileName) {
+                    if (preferredContentType.startsWith(SAVE_AS_TYPE) || !equalPrimaryTypes(preferredContentType, contentTypeByFileName)) {
+                        try {
+                            final ContentType tmp = new ContentType(preferredContentType);
+                            tmp.setBaseType(contentTypeByFileName);
+                            preferredContentType = tmp.toString();
+                        } catch (final Exception e) {
                             preferredContentType = contentTypeByFileName;
                         }
                     }
                 }
-                if (contentType == null) {
+                if (!contentTypeByParameter || contentType == null || SAVE_AS_TYPE.equals(contentType)) {
                     resp.setContentType(preferredContentType);
                     contentType = preferredContentType;
                 } else {
-                    if (SAVE_AS_TYPE.equals(preferredContentType)) {
-                        trySetSanitizedContentType(contentType, resp);
+                    if (SAVE_AS_TYPE.equals(preferredContentType) || equalPrimaryTypes(preferredContentType, contentType)) {
+                        // Set if sanitize-able
+                        if (!trySetSanitizedContentType(contentType, preferredContentType, resp)) {
+                            contentType = preferredContentType;
+                        }
                     } else {
-                        final String primaryType1 = getPrimaryType(preferredContentType);
-                        final String primaryType2 = getPrimaryType(contentType);
-                        if (toLowerCase(primaryType1).startsWith(toLowerCase(primaryType2))) {
-                            trySetSanitizedContentType(contentType, resp);
+                        // Specified Content-Type does NOT match file's real MIME type
+                        final ThresholdFileHolder temp = new ThresholdFileHolder();
+                        closeables.add(temp);
+                        temp.write(documentData);
+                        documentData = temp.getStream();
+                        preferredContentType = detectMimeType(temp.getStream());
+                        if ("text/plain".equals(preferredContentType)) {
+                            final byte[] bytes = Streams.stream2bytes(temp.getStream());
+                            preferredContentType = HTMLDetector.containsHTMLTags(bytes) ? "text/html" : preferredContentType;
+                        }
+                        // One more time...
+                        if (equalPrimaryTypes(preferredContentType, contentType)) {
+                            // Set if sanitize-able
+                            if (!trySetSanitizedContentType(contentType, preferredContentType, resp)) {
+                                contentType = preferredContentType;
+                            }
                         } else {
-                            // Specified Content-Type does NOT match file's real MIME type
-                            // Therefore ignore it due to security reasons (see bug #25343)
+                            // Ignore it due to security reasons (see bug #25343)
                             final StringAllocator sb = new StringAllocator(128);
-                            sb.append("Denied parameter \"").append(PARAMETER_CONTENT_TYPE).append("\" due to security constraints (");
-                            sb.append(contentType).append(" vs. ").append(preferredContentType).append(").");
+                            sb.append("Denied parameter \"").append(PARAMETER_CONTENT_TYPE);
+                            sb.append("\" due to security constraints (requested \"");
+                            sb.append(contentType).append("\" , but is \"").append(preferredContentType).append("\").");
                             LOG.warn(sb.toString());
                             resp.setContentType(preferredContentType);
                             contentType = preferredContentType;
                         }
                     }
                 }
-                documentData = checkedDownload.getInputStream();
             }
             /*
              * Browsers don't like the Pragma header the way we usually set this. Especially if files are sent to the browser. So removing
@@ -324,8 +432,8 @@ public class FileResponseRenderer implements ResponseRenderer {
              */
             try {
                 final ServletOutputStream outputStream = resp.getOutputStream();
-                final String sRange = req.getHeader("Range");
-                if (null != sRange && length > 0) {
+                final String sRange;
+                if (length > 0 && null != (sRange = req.getHeader("Range"))) {
                     // Taken from http://balusc.blogspot.co.uk/2009/02/fileservlet-supporting-resume-and.html
                     // Range header should match format "bytes=n-n,n-n,n-n...". If not, then return 416.
                     if (!PATTERN_BYTE_RANGES.matcher(sRange).matches()) {
@@ -337,7 +445,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     // then return full file.
                     boolean full = false;
                     {
-                        final String ifRange = request.getHeader("If-Range");
+                        final String ifRange = requestData.getHeader("If-Range");
                         final String eTag = result.getHeader("ETag");
                         if (ifRange != null && !ifRange.equals(eTag)) {
                             try {
@@ -394,7 +502,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                         // Return single part of file.
                         final Range r = ranges.get(0);
                         resp.setHeader("Content-Range", new StringAllocator("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
-                        resp.setHeader("Content-Length", String.valueOf(r.length));
+                        resp.setHeader("Content-Length", Long.toString(r.length));
                         resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 206.
 
                         // Copy single part range.
@@ -402,29 +510,24 @@ public class FileResponseRenderer implements ResponseRenderer {
                     } else {
                         // Return multiple parts of file.
                         final String boundary = MULTIPART_BOUNDARY;
-                        resp.setContentType("multipart/byteranges; boundary=" + boundary);
+                        resp.setContentType(new StringAllocator("multipart/byteranges; boundary=").append(boundary).toString());
                         resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 206.
 
-                        {
-                            // Cast back to ServletOutputStream to get the easy println methods.
-                            final ServletOutputStream sos = outputStream;
+                        // Copy multi part range.
+                        for (final Range r : ranges) {
+                            // Add multipart boundary and header fields for every range.
+                            outputStream.println();
+                            outputStream.println(new StringAllocator("--").append(boundary).toString());
+                            outputStream.println(new StringAllocator("Content-Type: ").append(contentType).toString());
+                            outputStream.println(new StringAllocator("Content-Range: bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
 
-                            // Copy multi part range.
-                            for (final Range r : ranges) {
-                                // Add multipart boundary and header fields for every range.
-                                sos.println();
-                                sos.println("--" + boundary);
-                                sos.println("Content-Type: " + contentType);
-                                sos.println("Content-Range: bytes " + r.start + "-" + r.end + "/" + r.total);
-
-                                // Copy single part range of multi part range.
-                                copy(documentData, outputStream, r.start, r.length);
-                            }
-
-                            // End with multipart boundary.
-                            sos.println();
-                            sos.println("--" + boundary + "--");
+                            // Copy single part range of multi part range.
+                            copy(documentData, outputStream, r.start, r.length);
                         }
+
+                        // End with multipart boundary.
+                        outputStream.println();
+                        outputStream.println(new StringAllocator("--").append(boundary).append("--").toString());
                     }
                 } else {
                     final int len = BUFLEN;
@@ -442,6 +545,8 @@ public class FileResponseRenderer implements ResponseRenderer {
                 } else {
                     LOG.warn("Lost connection to client while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
                 }
+            } catch (final com.sun.mail.util.MessageRemovedIOException e) {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Message not found.");
             } catch (final IOException e) {
                 if ("connection reset by peer".equals(toLowerCase(e.getMessage()))) {
                     /*-
@@ -460,92 +565,104 @@ public class FileResponseRenderer implements ResponseRenderer {
         } catch (final Exception e) {
             LOG.error("Exception while trying to output file" + (isEmpty(fileName) ? "" : " " + fileName), e);
         } finally {
-            close(file);
-            close(documentData);
+            close(file, documentData);
+            close(closeables);
         }
     }
 
     /** Attempts to set a sanitized <code>Content-Type</code> header value to given HTTP response. */
-    private void trySetSanitizedContentType(final String contentType, final HttpServletResponse resp) {
+    private boolean trySetSanitizedContentType(final String contentType, final String fallbackContentType, final HttpServletResponse resp) {
         try {
             resp.setContentType(new ContentType(contentType).getBaseType());
+            return true;
         } catch (final Exception e) {
             // Ignore
-            resp.setContentType(contentType);
+            resp.setContentType(fallbackContentType);
         }
+        return false;
     }
 
     /** Checks if transformation is needed */
-    private boolean isTransformationNeeded(final AJAXRequestData request, final IFileHolder file, final String delivery)
-        throws OXException, IOException {
+    private boolean isTransformationNeeded(final AJAXRequestData request, final IFileHolder file, final String delivery) throws OXException, IOException {
 
-        boolean transformationNeeded = !file.getContentType().equalsIgnoreCase("image/jpeg");
-        if(!transformationNeeded) {
+        // this check is only for jpeg images, other image formats are always transformated
+        boolean transformationNeeded = !file.getContentType().toLowerCase().startsWith("image/jpeg");
+        if (!transformationNeeded) {
             transformationNeeded = request.isSet("cropWidth") || request.isSet("cropHeight");
         }
-        if(!transformationNeeded && (DOWNLOAD.equalsIgnoreCase(delivery)==false)) {
-            if(request.isSet("rotate")) {
-                final Boolean rotate = request.getParameter("rotate", Boolean.class);
-                if(rotate!=null) {
-                    transformationNeeded = rotate.booleanValue();
-                }
+        if (!transformationNeeded) {
+            // we need repetitive access to the stream for further testing
+            final InputStream stream = file.getStream();
+            if (null == stream) {
+                LOG.warn("(Possible) Image file misses stream data");
+                return false;
             }
-            // compress not needed to be checked, because we already have a jpeg
-        }
-        if(!transformationNeeded) {
+            BufferedInputStream inputStream = null;
+            if (file.repetitive()) {
+                inputStream = new BufferedInputStream(stream);
+            } else if (stream.markSupported() && file.getLength() > 0 && file.getLength() < 0x20000) {
+                // mark supported, but only allowing files < 128kb
+                inputStream = new BufferedInputStream(stream, (int) file.getLength());
+            }
+            if (inputStream == null) {
+                // no repetitive stream available... transformation must be done
+                transformationNeeded = true;
+            }
+            else {
 
-            if (request.isSet("width") || request.isSet("height")) {
-
-                final int maxWidth = request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0;
-                final int maxHeight = request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0;
-
-                // we will check for the size if our stream is repeatable or can be resetted,
-                // so we are able to retrieve the jpeg metadata without changing the stream.
-
-                final InputStream stream = file.getStream();
-                if (null == stream) {
-                    LOG.warn("(Possible) Image file misses stream data");
-                    return false;
-                }
-                BufferedInputStream inputStream = null;
-                if(file.repetitive()) {
-                    inputStream = new BufferedInputStream(stream);
-                } else if(stream.markSupported()&&file.getLength()>0&&file.getLength()<0x20000) {
-                    // mark supported, but only allowing files < 128kb
-                    inputStream = new BufferedInputStream(stream, (int)file.getLength());
-                }
-                if(inputStream==null) {
-                    transformationNeeded = true;
-                }
-                else {
-
-                    try {
-                        final com.drew.metadata.Metadata metadata = ImageMetadataReader.readMetadata(inputStream, false);
-                        if(metadata!=null) {
-                            int width = 0;
-                            int height = 0;
-                            final JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
-                            if (null != jpegDirectory) {
-                                width = jpegDirectory.getImageWidth();
-                                height = jpegDirectory.getImageHeight();
+                try {
+                    // retrieve MetaData to check if width, height or rotate requires a transformation
+                    final com.drew.metadata.Metadata metadata = ImageMetadataReader.readMetadata(inputStream, false);
+                    if (metadata == null) {
+                        transformationNeeded = true;
+                    } else {
+                        // check for rotation
+                        int orientation = 1;
+                        final ExifIFD0Directory exifDirectory = metadata.getDirectory(ExifIFD0Directory.class);
+                        if(exifDirectory!=null) {
+                            orientation = exifDirectory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+                        }
+                        if(orientation!=1) {
+                            final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
+                            if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
+                                transformationNeeded = true;
                             }
-                            transformationNeeded = (maxWidth>0&&width>maxWidth)||(maxHeight>0&&height>maxHeight);
+                        }
+
+                        // check width & height
+                        final JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
+                        if (null == jpegDirectory) {
+                            transformationNeeded = true;
+                        } else {
+                            // check width & height
+                            final int width = jpegDirectory.getImageWidth();
+                            final int height = jpegDirectory.getImageHeight();
+                            final int maxWidth = request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0;
+                            final int maxHeight = request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0;
+                            final ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
+
+                            // transformation only required if the image size exceeds the requested size
+                            if(scaleType==ScaleType.CONTAIN) {
+                                transformationNeeded = (maxWidth > 0 && width > maxWidth) || (maxHeight > 0 && height > maxHeight);
+                            }
+                            // cover... the size must have the exact size
+                            else {
+                                transformationNeeded = (maxWidth > 0 && width != maxWidth) || (maxHeight > 0 && height != maxHeight);
+                            }
                         }
                     }
-                    catch (final ImageProcessingException e) {
-                        transformationNeeded = false;
-                    } catch (final MetadataException e) {
-                        transformationNeeded = false;
-                    }
-                    if(!file.repetitive()&&stream.markSupported()) {
-                        stream.reset();
-                    }
+                } catch (final ImageProcessingException e) {
+                    transformationNeeded = true;
+                } catch (final MetadataException e) {
+                    transformationNeeded = true;
+                }
+                if (!file.repetitive() && stream.markSupported()) {
+                    stream.reset();
                 }
             }
         }
         return transformationNeeded;
     }
-
 
     private IFileHolder transformIfImage(final AJAXRequestData request, final IFileHolder file, final String delivery) throws IOException, OXException {
         /*
@@ -574,41 +691,41 @@ public class FileResponseRenderer implements ResponseRenderer {
             stream.mark(131072); // 128KB
         }
         // start transformations: scale, rotate, ...
-        ImageTransformations transformations = scaler.transfom(stream);
+        final ImageTransformations transformations = scaler.transfom(stream);
         // rotate by default when not delivering as download
-        Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
+        final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
         if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
             transformations.rotate();
         }
         if (request.isSet("cropWidth") || request.isSet("cropHeight")) {
-            int cropX = request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0;
-            int cropY = request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0;
-            int cropWidth = request.getParameter("cropWidth", int.class).intValue();
-            int cropHeight = request.getParameter("cropHeight", int.class).intValue();
+            final int cropX = request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0;
+            final int cropY = request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0;
+            final int cropWidth = request.getParameter("cropWidth", int.class).intValue();
+            final int cropHeight = request.getParameter("cropHeight", int.class).intValue();
             transformations.crop(cropX, cropY, cropWidth, cropHeight);
         }
         if (request.isSet("width") || request.isSet("height")) {
-            int maxWidth = request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0;
-            int maxHeight = request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0;
-            ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
+            final int maxWidth = request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0;
+            final int maxHeight = request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0;
+            final ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
             transformations.scale(maxWidth, maxHeight, scaleType);
         }
         // compress by default when not delivering as download
-        Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
+        final Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
         if ((null == compress && false == DOWNLOAD.equalsIgnoreCase(delivery)) || (null != compress && compress.booleanValue())) {
             transformations.compress();
         }
         /*
          * transform
          */
-        InputStream transformed = transformations.getInputStream(file.getContentType());
+        final InputStream transformed = transformations.getInputStream(file.getContentType());
         if (null == transformed) {
             LOG.warn("Got no resulting input stream from transformation, trying to recover original input");
             if (markSupported) {
                 try {
                     stream.reset();
                     return file;
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     LOG.warn("Error resetting input stream", e);
                 }
             }
@@ -672,12 +789,43 @@ public class FileResponseRenderer implements ResponseRenderer {
         return isWhitespace;
     }
 
+    /**
+     * Removes single or double quotes from a string if its quoted.
+     *
+     * @param s The value to be unquoted
+     * @return The unquoted value or <code>null</code>
+     */
+    private String unquote(final String s) {
+        if (!isEmpty(s) && ((s.startsWith("\"") && s.endsWith("\"")) || (s.startsWith("'") && s.endsWith("'")))) {
+            return s.substring(1, s.length() - 1);
+        }
+        return s;
+    }
+
     private String getPrimaryType(final String contentType) {
         if (isEmpty(contentType)) {
             return contentType;
         }
         final int pos = contentType.indexOf('/');
         return pos > 0 ? contentType.substring(0, pos) : contentType;
+    }
+
+    private boolean equalPrimaryTypes(final String contentType1, final String contentType2) {
+        if (null == contentType1 || null == contentType2) {
+            return false;
+        }
+        return toLowerCase(getPrimaryType(contentType1)).startsWith(toLowerCase(getPrimaryType(contentType2)));
+    }
+
+    private String detectMimeType(final InputStream in) throws IOException {
+        if (null == in) {
+            return null;
+        }
+        try {
+            return tika.detect(in);
+        } finally {
+            close(in);
+        }
     }
 
     /**
