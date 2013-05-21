@@ -109,6 +109,7 @@ import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.contact.ContactService;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -119,7 +120,10 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.importexport.MailImportResult;
@@ -5108,6 +5112,27 @@ public class Mail extends PermissionServlet implements UploadListener {
                     final String[] aliases = user.getAliases();
                     for (final String alias : aliases) {
                         validAddrs.add(new QuotedInternetAddress(alias));
+                    }
+                    if (MailProperties.MSISDN_ENABLED) {
+                        final int contactId = user.getContactId();
+                        if (contactId > 0) {
+                            final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+                            if (null != contactService) {
+                                try {
+                                    final Contact contact = contactService.getContact(session, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), Integer.toString(contactId));
+                                    final Set<String> set = ContactUtil.gatherTelephoneNumbers(contact);
+                                    for (final String number : set) {
+                                        try {
+                                            validAddrs.add(new QuotedInternetAddress(number));
+                                        } catch (final Exception e) {
+                                            // Ignore invalid number
+                                        }
+                                    }
+                                } catch (final Exception e) {
+                                    LOG.warn("Could not check for valid MSISDN numbers.", e);
+                                }
+                            }
+                        }
                     }
                     if (!validAddrs.contains(from)) {
                         throw MailExceptionCode.INVALID_SENDER.create(from.toString());

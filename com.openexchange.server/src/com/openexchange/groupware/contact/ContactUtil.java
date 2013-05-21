@@ -49,28 +49,41 @@
 
 package com.openexchange.groupware.contact;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.util.MsisdnCheck;
 
 /**
  * First start of a utility class for contacts. This class should contain methods that are useful for the complete backend and not only the
  * contacts component.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ContactUtil {
 
+    /**
+     * Initializes a new {@link ContactUtil}.
+     */
     private ContactUtil() {
         super();
     }
 
-    public static void generateDisplayName(Contact contact) {
+    /**
+     * Generates the display name for given contact
+     *
+     * @param contact The contact
+     */
+    public static void generateDisplayName(final Contact contact) {
         if (contact.containsDisplayName()) {
             return;
         }
-        boolean hasUsefulGivenName = contact.containsGivenName() && contact.getGivenName() != null && contact.getGivenName().length() > 0;
-        boolean hasUsefulSureName = contact.containsSurName() && contact.getSurName() != null && contact.getSurName().length() > 0;
+        final boolean hasUsefulGivenName = contact.containsGivenName() && contact.getGivenName() != null && contact.getGivenName().length() > 0;
+        final boolean hasUsefulSureName = contact.containsSurName() && contact.getSurName() != null && contact.getSurName().length() > 0;
         if (hasUsefulGivenName || hasUsefulSureName) {
-            StringBuilder sb = new StringBuilder();
+            final StringBuilder sb = new StringBuilder();
             if (hasUsefulSureName) {
                 sb.append(contact.getSurName());
             }
@@ -88,4 +101,83 @@ public class ContactUtil {
             return;
         }
     }
+
+    /**
+     * Gathers valid MSISDN telephone numbers for given contact
+     *
+     * @param contact The contact
+     * @return The set providing valid MSISDN number for given contact
+     */
+    public static Set<String> gatherTelephoneNumbers(final Contact contact) {
+        if (null == contact) {
+            return Collections.emptySet();
+        }
+        final Set<String> set = new HashSet<String>(20);
+        String tmp = contact.getTelephoneAssistant();
+        if (MsisdnCheck.checkMsisdn(tmp)) {
+            set.add(tmp);
+        }
+        tmp = contact.getTelephoneBusiness1();
+        if (MsisdnCheck.checkMsisdn(tmp)) {
+            set.add(tmp);
+        }
+        tmp = contact.getTelephoneBusiness2();
+        if (MsisdnCheck.checkMsisdn(tmp)) {
+            set.add(tmp);
+        }
+        tmp = contact.getTelephoneCallback();
+        if (MsisdnCheck.checkMsisdn(tmp)) {
+            set.add(tmp);
+        }
+        tmp = contact.getTelephoneCar();
+        if (MsisdnCheck.checkMsisdn(tmp)) {
+            set.add(tmp);
+        }
+        tmp = contact.getTelephoneCompany();
+        if (MsisdnCheck.checkMsisdn(tmp)) {
+            set.add(tmp);
+        }
+        tmp = contact.getTelephoneHome1();
+        if (MsisdnCheck.checkMsisdn(tmp)) {
+            set.add(tmp);
+        }
+        tmp = contact.getTelephoneHome2();
+        if (MsisdnCheck.checkMsisdn(tmp)) {
+            set.add(tmp);
+        }
+        tmp = contact.getTelephoneIP();
+        if (MsisdnCheck.checkMsisdn(tmp)) {
+            set.add(tmp);
+        }
+        tmp = contact.getTelephoneISDN();
+        if (MsisdnCheck.checkMsisdn(tmp)) {
+            set.add(tmp);
+        }
+        tmp = contact.getTelephoneOther();
+        if (MsisdnCheck.checkMsisdn(tmp)) {
+            set.add(tmp);
+        }
+        tmp = contact.getTelephonePager();
+        if (MsisdnCheck.checkMsisdn(tmp)) {
+            set.add(tmp);
+        }
+        tmp = contact.getTelephonePrimary();
+        if (MsisdnCheck.checkMsisdn(tmp)) {
+            set.add(tmp);
+        }
+        tmp = contact.getTelephoneRadio();
+        if (MsisdnCheck.checkMsisdn(tmp)) {
+            set.add(tmp);
+        }
+        tmp = contact.getTelephoneTelex();
+        if (MsisdnCheck.checkMsisdn(tmp)) {
+            set.add(tmp);
+        }
+        tmp = contact.getTelephoneTTYTTD();
+        if (MsisdnCheck.checkMsisdn(tmp)) {
+            set.add(tmp);
+        }
+        return set;
+    }
+    
 }

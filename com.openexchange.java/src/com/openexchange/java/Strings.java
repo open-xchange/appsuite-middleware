@@ -101,6 +101,29 @@ public class Strings {
     }
 
     /**
+     * High speed test for ASCII numbers!
+     *
+     * @return <code>true</code> if the indicated character is whitespace; otherwise <code>false</code>
+     */
+    public static boolean isDigit(final char c) {
+        switch (c) {
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
      * Gets specified string's ASCII bytes
      *
      * @param str The string

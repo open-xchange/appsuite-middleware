@@ -95,8 +95,10 @@ import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
+import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
@@ -1830,9 +1832,29 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
                 final User user = getUser();
                 validAddrs.add(new QuotedInternetAddress(user.getMail()));
-                final String[] aliases = user.getAliases();
-                for (final String alias : aliases) {
+                for (final String alias : user.getAliases()) {
                     validAddrs.add(new QuotedInternetAddress(alias));
+                }
+                if (MailProperties.MSISDN_ENABLED) {
+                    final int contactId = user.getContactId();
+                    if (contactId > 0) {
+                        final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+                        if (null != contactService) {
+                            try {
+                                final Contact contact = contactService.getContact(session, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), Integer.toString(contactId));
+                                final Set<String> set = ContactUtil.gatherTelephoneNumbers(contact);
+                                for (final String number : set) {
+                                    try {
+                                        validAddrs.add(new QuotedInternetAddress(number));
+                                    } catch (final Exception e) {
+                                        // Ignore invalid number
+                                    }
+                                }
+                            } catch (final Exception e) {
+                                LOG.warn("Could not check for valid MSISDN numbers.", e);
+                            }
+                        }
+                    }
                 }
                 for (final MailMessage mail : mails) {
                     final InternetAddress[] from = mail.getFrom();
@@ -3044,9 +3066,29 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     }
                     final User user = getUser();
                     validAddrs.add(new QuotedInternetAddress(user.getMail()));
-                    final String[] aliases = user.getAliases();
-                    for (final String alias : aliases) {
+                    for (final String alias : user.getAliases()) {
                         validAddrs.add(new QuotedInternetAddress(alias));
+                    }
+                    if (MailProperties.MSISDN_ENABLED) {
+                        final int contactId = user.getContactId();
+                        if (contactId > 0) {
+                            final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+                            if (null != contactService) {
+                                try {
+                                    final Contact contact = contactService.getContact(session, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), Integer.toString(contactId));
+                                    final Set<String> set = ContactUtil.gatherTelephoneNumbers(contact);
+                                    for (final String number : set) {
+                                        try {
+                                            validAddrs.add(new QuotedInternetAddress(number));
+                                        } catch (final Exception e) {
+                                            // Ignore invalid number
+                                        }
+                                    }
+                                } catch (final Exception e) {
+                                    LOG.warn("Could not check for valid MSISDN numbers.", e);
+                                }
+                            }
+                        }
                     }
                     if (!validAddrs.contains(new QuotedInternetAddress(fromAddr))) {
                         throw MailExceptionCode.INVALID_SENDER.create(fromAddr);
