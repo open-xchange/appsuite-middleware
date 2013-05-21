@@ -82,7 +82,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
-import org.apache.commons.io.output.CountingOutputStream;
 import org.apache.commons.io.output.NullOutputStream;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
@@ -134,6 +133,7 @@ import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.config.SMTPSessionProperties;
 import com.openexchange.smtp.filler.SMTPMessageFiller;
 import com.openexchange.smtp.services.Services;
+import com.openexchange.smtp.util.CountingOutputStream;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.smtp.SMTPMessage;
 
