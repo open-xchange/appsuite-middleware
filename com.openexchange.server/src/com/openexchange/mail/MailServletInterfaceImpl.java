@@ -417,6 +417,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     @Override
     public void close(final boolean putIntoCache) throws OXException {
         try {
+            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = this.mailAccess;
             if (mailAccess != null) {
                 mailAccess.close(putIntoCache);
             }
@@ -1103,6 +1104,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
+    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess() throws OXException {
+        return mailAccess;
+    }
+
+    @Override
     public MailConfig getMailConfig() throws OXException {
         return mailConfig;
     }
@@ -1120,6 +1126,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public MailMessage getMessage(final String folder, final String msgUID) throws OXException {
+        return getMessage(folder, msgUID, true);
+    }
+
+    @Override
+    public MailMessage getMessage(final String folder, final String msgUID, final boolean markAsSeen) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -1127,7 +1138,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             throw MailExceptionCode.FOLDER_DOES_NOT_HOLD_MESSAGES.create(MailFolder.DEFAULT_FOLDER_ID);
         }
         final String fullname = argument.getFullname();
-        final MailMessage mail = mailAccess.getMessageStorage().getMessage(fullname, msgUID, true);
+        final MailMessage mail = mailAccess.getMessageStorage().getMessage(fullname, msgUID, markAsSeen);
         if (mail != null) {
             if (!mail.containsAccountId() || mail.getAccountId() < 0) {
                 mail.setAccountId(accountId);
