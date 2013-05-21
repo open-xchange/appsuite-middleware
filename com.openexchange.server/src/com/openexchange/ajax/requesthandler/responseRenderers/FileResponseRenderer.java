@@ -613,25 +613,27 @@ public class FileResponseRenderer implements ResponseRenderer {
                 try {
                     // retrieve MetaData to check if width, height or rotate requires a transformation
                     final com.drew.metadata.Metadata metadata = ImageMetadataReader.readMetadata(inputStream, false);
-                    if (metadata == null)
+                    if (metadata == null) {
                         transformationNeeded = true;
-                    else {
+                    } else {
                         // check for rotation
                         int orientation = 1;
                         final ExifIFD0Directory exifDirectory = metadata.getDirectory(ExifIFD0Directory.class);
-                        if(exifDirectory!=null)
+                        if(exifDirectory!=null) {
                             orientation = exifDirectory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+                        }
                         if(orientation!=1) {
                             final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
-                            if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue())
+                            if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
                                 transformationNeeded = true;
+                            }
                         }
 
                         // check width & height
                         final JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
-                        if (null == jpegDirectory)
+                        if (null == jpegDirectory) {
                             transformationNeeded = true;
-                        else {
+                        } else {
                             // check width & height
                             final int width = jpegDirectory.getImageWidth();
                             final int height = jpegDirectory.getImageHeight();
