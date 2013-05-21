@@ -130,6 +130,7 @@ import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.config.SMTPSessionProperties;
 import com.openexchange.smtp.filler.SMTPMessageFiller;
 import com.openexchange.smtp.services.Services;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.smtp.SMTPMessage;
 
@@ -878,9 +879,8 @@ public final class SMTPTransport extends MailTransport {
             final long maxMailSize = null == l ? -1 : l.longValue();
             if (maxMailSize > 0) {
                 // Check message size
-                ThresholdFileHolder tfh = null;
+                final ThresholdFileHolder tfh = new ThresholdFileHolder();
                 try {
-                    tfh = new ThresholdFileHolder();
                     message.writeTo(tfh.asOutputStream());
                     final long length = tfh.getLength();
                     if (length > maxMailSize) {
@@ -890,7 +890,14 @@ public final class SMTPTransport extends MailTransport {
                 } catch (final Exception e) {
                     LOG.warn("Could not determine & check message's real size.", e);
                 } finally {
-                    Streams.close(tfh);
+                    final Runnable r = new Runnable() {
+
+                        @Override
+                        public void run() {
+                            Streams.close(tfh);
+                        }
+                    };
+                    ThreadPools.getThreadPool().submit(ThreadPools.task(r));
                 }
             }
         }

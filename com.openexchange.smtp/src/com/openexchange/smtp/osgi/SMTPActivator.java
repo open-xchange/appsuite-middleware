@@ -61,6 +61,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.smtp.SMTPProvider;
 import com.openexchange.smtp.services.Services;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link SMTPActivator} - The {@link BundleActivator activator} for SMTP bundle.
@@ -80,7 +81,7 @@ public final class SMTPActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class, ConfigViewFactory.class };
+        return new Class<?>[] { ConfigurationService.class, MailAccountStorageService.class, ConfigViewFactory.class, ThreadPoolService.class };
     }
 
     @Override
