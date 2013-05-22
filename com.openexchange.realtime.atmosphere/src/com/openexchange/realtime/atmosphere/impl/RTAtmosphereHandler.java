@@ -451,51 +451,59 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
      */
     private boolean refreshReaper(final ID concreteID) {
         final AtmosphereResourceReaper atmosphereResourceReaper = this.atmosphereResourceReaper;
-        Moribund removed = atmosphereResourceReaper.remove(concreteID);
-        atmosphereResourceReaper.add(new Moribund(concreteID) {
+        Moribund removed = null;
+        try {
+            concreteID.lock("moribundRefresh");
+            
+            removed = atmosphereResourceReaper.remove(concreteID);
+            atmosphereResourceReaper.add(new Moribund(concreteID) {
 
-            @Override
-            public void die() throws OXException {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Disconnecting: " + this);
-                }
-
-                // remove concreteID from general -> concreteID mapping
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Removing from generalID -> conreteID map: " + this);
-                }
-                ID generalID = concreteID.toGeneralForm();
-                Set<ID> fullIDs = generalToConcreteIDMap.get(generalID);
-                if (fullIDs != null) {
-                    fullIDs.remove(concreteID);
-                    if (fullIDs.isEmpty()) {
-                        generalToConcreteIDMap.remove(generalID);
+                @Override
+                public void die() throws OXException {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Disconnecting: " + this);
                     }
+
+                    // remove concreteID from general -> concreteID mapping
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Removing from generalID -> conreteID map: " + this);
+                    }
+                    ID generalID = concreteID.toGeneralForm();
+                    Set<ID> fullIDs = generalToConcreteIDMap.get(generalID);
+                    if (fullIDs != null) {
+                        fullIDs.remove(concreteID);
+                        if (fullIDs.isEmpty()) {
+                            generalToConcreteIDMap.remove(generalID);
+                        }
+                    }
+
+                    // remove concreteID -> Resource mapping
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Removing from concreteID -> resource map: " + this);
+                    }
+                    concreteIDToResourceMap.remove(concreteID);
+
+                    // clear outboxes
+                    outboxes.remove(concreteID);
+                    resendBuffers.remove(concreteID);
+                    sequenceNumbers.remove(concreteID);
+
+                    // remove concreteID from cluster wide resourceDirectory
+                    ResourceDirectory resourceDirectory = AtmosphereServiceRegistry.getInstance().getService(ResourceDirectory.class);
+                    try {
+                        resourceDirectory.remove(concreteID);
+                    } catch (OXException e) {
+                        LOG.error("Could not unregister resource with ID: " + concreteID, e);
+                    }
+
+                    // clean up stanza buffer in sequence gate
+                    gate.freeRessourcesFor(concreteID);
                 }
+            });
+        } finally {
+            concreteID.unlock("moribundRefresh");
+        }
 
-                // remove concreteID -> Resource mapping
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Removing from concreteID -> resource map: " + this);
-                }
-                concreteIDToResourceMap.remove(concreteID);
-
-                // clear outboxes
-                outboxes.remove(concreteID);
-                resendBuffers.remove(concreteID);
-                sequenceNumbers.remove(concreteID);
-
-                // remove concreteID from cluster wide resourceDirectory
-                ResourceDirectory resourceDirectory = AtmosphereServiceRegistry.getInstance().getService(ResourceDirectory.class);
-                try {
-                    resourceDirectory.remove(concreteID);
-                } catch (OXException e) {
-                    LOG.error("Could not unregister resource with ID: " + concreteID, e);
-                }
-
-                // clean up stanza buffer in sequence gate
-                gate.freeRessourcesFor(concreteID);
-            }
-        });
 
         return removed != null;
     }
