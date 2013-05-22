@@ -62,7 +62,10 @@ import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.session.Session;
 
 /**
  * {@link UserizedFolderImpl} - The {@link UserizedFolder} implementation.
@@ -73,49 +76,46 @@ public final class UserizedFolderImpl implements UserizedFolder {
 
     private static final long serialVersionUID = 5090343231211791986L;
 
+    private final Session session;
+    private final User user;
+    private final Context context;
+
     private Folder folder;
-
     private Permission ownPermission;
-
     private Date lastModifiedUTC;
-
     private Date creationDateUTC;
-
     private Locale locale;
-
     private Boolean deefault;
-
     private Integer defaultType;
-
     private Type type;
-
     private Permission[] permissions;
-
     private String[] subfolderIds;
-
     private String parentId;
-
     private Date creationDate;
-
     private Date lastModified;
-
     private volatile Map<FolderField, FolderProperty> properties;
-
     private int[] totalAndUnread;
 
     /**
      * Initializes a new {@link UserizedFolderImpl} from specified folder.
      *
      * @param folder The underlying folder
+     * @param session The associated session
+     * @param user The associated user
+     * @param context The associated context
      * @throws IllegalArgumentException If folder is <code>null</code>
      */
-    public UserizedFolderImpl(final Folder folder) {
+    public UserizedFolderImpl(final Folder folder, final Session session, final User user, final Context context) {
         super();
         if (null == folder) {
             throw new IllegalArgumentException("Folder is null.");
         }
         // TODO: clone folder?
         this.folder = folder;
+        this.session = session;
+        this.user = user;
+        this.context = context;
+
     }
 
     @Override
@@ -136,6 +136,21 @@ public final class UserizedFolderImpl implements UserizedFolder {
         } catch (final CloneNotSupportedException e) {
             throw new InternalError(e.getMessage());
         }
+    }
+
+    @Override
+    public User getUser() {
+        return user;
+    }
+
+    @Override
+    public Context getContext() {
+        return context;
+    }
+
+    @Override
+    public Session getSession() {
+        return session;
     }
 
     @Override

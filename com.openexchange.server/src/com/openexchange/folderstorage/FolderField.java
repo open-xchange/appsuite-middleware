@@ -63,9 +63,7 @@ public final class FolderField implements Serializable {
     private static final long serialVersionUID = 3017091379073715144L;
 
     private final int field;
-
     private final String name;
-
     private final Object defaultValue;
 
     /**

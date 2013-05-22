@@ -49,12 +49,10 @@
 
 package com.openexchange.folderstorage.database;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.util.Date;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
@@ -69,10 +67,13 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.tasks.TaskStorage;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
  * {@link DatabaseFolder} - A database folder.
@@ -85,22 +86,11 @@ public class DatabaseFolder extends AbstractFolder {
 
     private static final long serialVersionUID = -4035221612481906228L;
 
-    private boolean cacheable;
-    private int contextId;
-    private int objectId;
-    protected boolean global;
+    private static final TIntSet COUNTABLE_MODULES = new TIntHashSet(new int[] { FolderObject.CALENDAR, FolderObject.CONTACT, FolderObject.TASK, FolderObject.INFOSTORE });
 
-    /**
-     * Initializes an empty {@link DatabaseFolder}.
-     *
-     * @param cacheable <code>true</code> if this database folder is cacheable; otherwise <code>false</code>
-     */
-    public DatabaseFolder(final boolean cacheable) {
-        super();
-        this.cacheable = cacheable;
-        global = true;
-        subscribed = true;
-    }
+    private boolean cacheable;
+    private final int objectId;
+    protected boolean global;
 
     /**
      * Initializes a new cacheable {@link DatabaseFolder} from given database folder.
@@ -159,16 +149,6 @@ public class DatabaseFolder extends AbstractFolder {
         clone.cacheable = cacheable;
         clone.global = global;
         return clone;
-    }
-
-    /**
-     * Sets the context identifier
-     *
-     * @param contextId The context identifier to set
-     */
-    public <F extends DatabaseFolder> F setContextId(int contextId) {
-        this.contextId = contextId;
-        return (F) this;
     }
 
     /**
@@ -236,53 +216,29 @@ public class DatabaseFolder extends AbstractFolder {
 
     @Override
     public int getTotal() {
-        switch (contentType.getModule()) {
-        case FolderObject.CALENDAR:
-            // TODO: Add calendar invocation here
-            return super.getTotal();
-        case FolderObject.CONTACT:
-            // TODO: Add contact invocation here
-            return super.getTotal();
-        case FolderObject.TASK:
-            try {
-                return TaskStorage.getInstance().countTasks(ContextStorage.getStorageContext(contextId), -1, objectId, false, false);
-            } catch (final Exception e) {
-                // Ignore
-                return super.getTotal();
-            }
-        case FolderObject.INFOSTORE:
-            return getTotalInfostore(contextId, objectId, super.getTotal());
-        default:
-            return super.getTotal();
+        final int module = contentType.getModule();
+        if (COUNTABLE_MODULES.contains(module)) {
+            return itemCount(module);
         }
+        return super.getTotal();
     }
 
-    private static int getTotalInfostore(int contextId, int folderId, int defaultValue) {
-        if (contextId <= 0 || folderId <= 0) {
-            return defaultValue;
-        }
-        final DatabaseService service = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        if (null == service) {
-            return defaultValue;
-        }
-        try {
-            Connection con = service.getReadOnly(contextId);
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
+    private int itemCount(final int module) {
+        final Props props = LogProperties.optLogProperties();
+        final Session session = (Session) (null == props ? null : props.get(LogProperties.Name.SESSION_SESSION));
+        if (null != session) {
             try {
-                stmt = con.prepareStatement("SELECT COUNT(id) FROM infostore WHERE cid=? and folder_id=?");
-                stmt.setLong(1, contextId);
-                stmt.setLong(2, folderId);
-                rs = stmt.executeQuery();
-                return rs.next() ? rs.getInt(1) : defaultValue;
-            } finally {
-                Databases.closeSQLStuff(rs, stmt);
-                service.backReadOnly(contextId, con);
+                final FolderObject fo = new FolderObject(objectId);
+                fo.setModule(module);
+                final Context ctx = ContextStorage.getStorageContext(session.getContextId());
+                final int count = (int) new OXFolderAccess(ctx).getItemCount(fo, session, ctx);
+                return count < 0 ? super.getTotal() : count;
+            } catch (final OXException e) {
+                // Ignore
+                LOG.debug(e.getMessage(), e);
             }
-        } catch (final Exception e) {
-            // Ignore
-            return defaultValue;
         }
+        return super.getTotal();
     }
 
 }
