@@ -71,8 +71,9 @@ import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.Directory;
 import com.drew.metadata.MetadataException;
-import com.drew.metadata.exif.ExifIFD0Directory;
+import com.drew.metadata.exif.ExifDirectory;
 import com.drew.metadata.jpeg.JpegDirectory;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.FileHolder;
@@ -612,15 +613,15 @@ public class FileResponseRenderer implements ResponseRenderer {
 
                 try {
                     // retrieve MetaData to check if width, height or rotate requires a transformation
-                    final com.drew.metadata.Metadata metadata = ImageMetadataReader.readMetadata(inputStream, false);
+                    final com.drew.metadata.Metadata metadata = ImageMetadataReader.readMetadata(inputStream);
                     if (metadata == null) {
                         transformationNeeded = true;
                     } else {
                         // check for rotation
                         int orientation = 1;
-                        final ExifIFD0Directory exifDirectory = metadata.getDirectory(ExifIFD0Directory.class);
+                        final Directory exifDirectory = metadata.getDirectory(ExifDirectory.class);
                         if(exifDirectory!=null) {
-                            orientation = exifDirectory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+                            orientation = exifDirectory.getInt(ExifDirectory.TAG_ORIENTATION);
                         }
                         if(orientation!=1) {
                             final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
@@ -630,13 +631,14 @@ public class FileResponseRenderer implements ResponseRenderer {
                         }
 
                         // check width & height
-                        final JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
-                        if (null == jpegDirectory) {
+                        final Directory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
+                        if (null == jpegDirectory || !(jpegDirectory instanceof JpegDirectory)) {
                             transformationNeeded = true;
                         } else {
                             // check width & height
-                            final int width = jpegDirectory.getImageWidth();
-                            final int height = jpegDirectory.getImageHeight();
+                            JpegDirectory jpegDirectory2 = (JpegDirectory) jpegDirectory;
+                            final int width = jpegDirectory2.getImageWidth();
+                            final int height = jpegDirectory2.getImageHeight();
                             final int maxWidth = request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0;
                             final int maxHeight = request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0;
                             final ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
