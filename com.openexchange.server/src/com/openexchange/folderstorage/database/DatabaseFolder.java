@@ -49,7 +49,12 @@
 
 package com.openexchange.folderstorage.database;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Date;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
@@ -64,7 +69,10 @@ import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.tasks.TaskStorage;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link DatabaseFolder} - A database folder.
@@ -78,7 +86,8 @@ public class DatabaseFolder extends AbstractFolder {
     private static final long serialVersionUID = -4035221612481906228L;
 
     private boolean cacheable;
-
+    private int contextId;
+    private int objectId;
     protected boolean global;
 
     /**
@@ -118,7 +127,8 @@ public class DatabaseFolder extends AbstractFolder {
         super();
         this.cacheable = cacheable;
         global = true;
-        id = String.valueOf(folderObject.getObjectID());
+        objectId = folderObject.getObjectID();
+        id = String.valueOf(objectId);
         name = folderObject.getFolderName();
         parent = String.valueOf(folderObject.getParentFolderID());
         type = getType(folderObject.getType());
@@ -152,6 +162,16 @@ public class DatabaseFolder extends AbstractFolder {
     }
 
     /**
+     * Sets the context identifier
+     *
+     * @param contextId The context identifier to set
+     */
+    public <F extends DatabaseFolder> F setContextId(int contextId) {
+        this.contextId = contextId;
+        return (F) this;
+    }
+
+    /**
      * Sets the cachable flag.
      *
      * @param cacheable The cachable flag.
@@ -166,44 +186,38 @@ public class DatabaseFolder extends AbstractFolder {
     }
 
     private static Type getType(final int type) {
-        if (FolderObject.SYSTEM_TYPE == type) {
+        switch (type) {
+        case FolderObject.SYSTEM_TYPE:
             return SystemType.getInstance();
-        }
-        if (FolderObject.PRIVATE == type) {
+        case FolderObject.PRIVATE:
             return PrivateType.getInstance();
-        }
-        if (FolderObject.PUBLIC == type) {
+        case FolderObject.PUBLIC:
             return PublicType.getInstance();
+        default:
+            return null;
         }
-        if (FolderObject.SYSTEM_TYPE == type) {
-            return SystemType.getInstance();
-        }
-        return null;
     }
 
     private static ContentType getContentType(final int module) {
-        if (FolderObject.SYSTEM_MODULE == module) {
+        switch (module) {
+        case FolderObject.SYSTEM_MODULE:
+            return SystemContentType.getInstance();
+        case FolderObject.CALENDAR:
+            return CalendarContentType.getInstance();
+        case FolderObject.CONTACT:
+            return ContactContentType.getInstance();
+        case FolderObject.TASK:
+            return TaskContentType.getInstance();
+        case FolderObject.INFOSTORE:
+            return InfostoreContentType.getInstance();
+        case FolderObject.UNBOUND:
+            return UnboundContentType.getInstance();
+        default:
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Unknown database folder content type: " + module);
+            }
             return SystemContentType.getInstance();
         }
-        if (FolderObject.CALENDAR == module) {
-            return CalendarContentType.getInstance();
-        }
-        if (FolderObject.CONTACT == module) {
-            return ContactContentType.getInstance();
-        }
-        if (FolderObject.TASK == module) {
-            return TaskContentType.getInstance();
-        }
-        if (FolderObject.INFOSTORE == module) {
-            return InfostoreContentType.getInstance();
-        }
-        if (FolderObject.UNBOUND == module) {
-            return UnboundContentType.getInstance();
-        }
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Unknown database folder content type: " + module);
-        }
-        return SystemContentType.getInstance();
     }
 
     @Override
@@ -218,6 +232,57 @@ public class DatabaseFolder extends AbstractFolder {
      */
     public void setGlobal(final boolean global) {
         this.global = global;
+    }
+
+    @Override
+    public int getTotal() {
+        switch (contentType.getModule()) {
+        case FolderObject.CALENDAR:
+            // TODO: Add calendar invocation here
+            return super.getTotal();
+        case FolderObject.CONTACT:
+            // TODO: Add contact invocation here
+            return super.getTotal();
+        case FolderObject.TASK:
+            try {
+                return TaskStorage.getInstance().countTasks(ContextStorage.getStorageContext(contextId), -1, objectId, false, false);
+            } catch (final Exception e) {
+                // Ignore
+                return super.getTotal();
+            }
+        case FolderObject.INFOSTORE:
+            return getTotalInfostore(contextId, objectId, super.getTotal());
+        default:
+            return super.getTotal();
+        }
+    }
+
+    private static int getTotalInfostore(int contextId, int folderId, int defaultValue) {
+        if (contextId <= 0 || folderId <= 0) {
+            return defaultValue;
+        }
+        final DatabaseService service = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        if (null == service) {
+            return defaultValue;
+        }
+        try {
+            Connection con = service.getReadOnly(contextId);
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = con.prepareStatement("SELECT COUNT(id) FROM infostore WHERE cid=? and folder_id=?");
+                stmt.setLong(1, contextId);
+                stmt.setLong(2, folderId);
+                rs = stmt.executeQuery();
+                return rs.next() ? rs.getInt(1) : defaultValue;
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
+                service.backReadOnly(contextId, con);
+            }
+        } catch (final Exception e) {
+            // Ignore
+            return defaultValue;
+        }
     }
 
 }
