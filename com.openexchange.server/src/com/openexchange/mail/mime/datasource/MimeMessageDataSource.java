@@ -621,7 +621,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
         }
 
         @Override
-        public void setTo(final Collection<? extends Address> to) {
+        public void setTo(final Collection<Address> to) {
             message.setTo(to);
         }
 
@@ -661,7 +661,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
         }
 
         @Override
-        public void setCc(final Collection<? extends Address> cc) {
+        public void setCc(final Collection<Address> cc) {
             message.setCc(cc);
         }
 
@@ -696,7 +696,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
         }
 
         @Override
-        public void setBcc(final Collection<? extends Address> bcc) {
+        public void setBcc(final Collection<Address> bcc) {
             message.setBcc(bcc);
         }
 
@@ -721,7 +721,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
         }
 
         @Override
-        public void setReplyTo(final Collection<? extends Address> replyTo) {
+        public void setReplyTo(final Collection<Address> replyTo) {
             message.setReplyTo(replyTo);
         }
 
