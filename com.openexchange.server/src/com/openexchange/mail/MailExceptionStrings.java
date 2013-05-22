@@ -535,4 +535,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // Maximum message is exceeded. Max. is %1$s, but message is %2$s.
     public static final String MAX_MESSAGE_SIZE_EXCEEDED_MSG = "Maximum message is exceeded. Max. is %1$s, but message is %2$s.";
 
+    // Re-sending message denied because message is not located in %1$s folder.
+    public static final String RESEND_DENIED_MSG = "Re-sending message denied because message is not located in %1$s folder.";
+
 }
