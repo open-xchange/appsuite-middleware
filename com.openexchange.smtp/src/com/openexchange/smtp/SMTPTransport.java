@@ -74,6 +74,7 @@ import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.NoSuchProviderException;
+import javax.mail.Provider;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
@@ -133,7 +134,6 @@ import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.config.SMTPSessionProperties;
 import com.openexchange.smtp.filler.SMTPMessageFiller;
 import com.openexchange.smtp.services.Services;
-import com.openexchange.smtp.util.CountingOutputStream;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.smtp.SMTPMessage;
 
@@ -309,12 +309,35 @@ public final class SMTPTransport extends MailTransport {
         }
         throw MailExceptionCode.UNEXPECTED_ERROR.create(cause, cause.getMessage());
     }
+    
+    private long getMaxMailSize() throws OXException {
+        ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
+
+        if (factory != null) {
+            ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+            ConfigProperty<Long> property = view.property("com.openexchange.mail.maxMailSize", Long.class);
+
+            if (property.isDefined()) {
+                Long l = property.get();
+                long maxMailSize = null == l ? -1 : l.longValue();
+                if (maxMailSize > 0) {
+                    return maxMailSize;
+                }
+            }
+        }
+        
+        return -1;
+    }
 
     private javax.mail.Session getSMTPSession() throws OXException {
         if (null == smtpSession) {
             synchronized (this) {
                 if (null == smtpSession) {
                     final Properties smtpProps = SMTPSessionProperties.getDefaultSessionProperties();
+                    smtpProps.put("mail.smtp.class", JavaSMTPTransport.class.getName());
+                    smtpProps.put("com.openexchange.mail.maxMailSize", Long.toString(getMaxMailSize()));
+                    
+                    
                     final SMTPConfig smtpConfig = getTransportConfig0();
                     /*
                      * Set properties
@@ -423,6 +446,12 @@ public final class SMTPTransport extends MailTransport {
                     // smtpProps.put(MIMESessionPropertyNames.PROP_SMTPHOST, smtpConfig.getServer());
                     // smtpProps.put(MIMESessionPropertyNames.PROP_SMTPPORT, sPort);
                     smtpSession = javax.mail.Session.getInstance(smtpProps, null);
+                    smtpSession.addProvider(new Provider(
+                        Provider.Type.TRANSPORT,
+                        "smtp",
+                        "com.sun.mail.smtp.JavaSMTPTransport",
+                        "Open-Xchange, Inc.",
+                        "7.2.2"));
                 }
             }
         }
@@ -805,8 +834,7 @@ public final class SMTPTransport extends MailTransport {
         }
     }
 
-    private void transport(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
-        checkMessage(smtpMessage);
+    private void transport(final MimeMessage smtpMessage, final Address[] recipients, Transport transport, final SMTPConfig smtpConfig) throws OXException {
         try {
             transport.sendMessage(smtpMessage, recipients);
         } catch (final MessagingException e) {
@@ -819,6 +847,10 @@ public final class SMTPTransport extends MailTransport {
                     LOG.warn(message.replaceFirst("[dD][cC][hH]", Matcher.quoteReplacement("javax.activation.DataContentHandler")));
                     transportAlt(smtpMessage, recipients, transport, smtpConfig);
                     return;
+                }
+            } else if (e.getNextException() instanceof IOException) {
+                if (e.getNextException().getMessage().equals("Maximum message size is exceeded.")) {
+                    throw MailExceptionCode.MAX_MESSAGE_SIZE_EXCEEDED.create(getSize(getMaxMailSize(), 2, false, true));
                 }
             }
             throw MimeMailException.handleMessagingException(e, smtpConfig, session);
@@ -886,38 +918,6 @@ public final class SMTPTransport extends MailTransport {
                     if (!filter.accepts(internetAddress.getAddress())) {
                         throw SMTPExceptionCode.RECIPIENT_NOT_ALLOWED.create(internetAddress.toUnicodeString());
                     }
-                }
-            }
-        }
-    }
-
-    private void checkMessage(final MimeMessage message) throws OXException {
-        if (null == message) {
-            return;
-        }
-        final ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
-        if (null == factory) {
-            return;
-        }
-        final ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-        final ConfigProperty<Long> property = view.property("com.openexchange.mail.maxMailSize", Long.class);
-        if (property.isDefined()) {
-            final Long l = property.get();
-            final long maxMailSize = null == l ? -1 : l.longValue();
-            if (maxMailSize > 0) {
-                // Check message size
-                final CountingOutputStream counter = new CountingOutputStream(new NullOutputStream());
-                try {
-                    message.writeTo(counter);
-                    final long length = counter.getByteCount();
-                    if (length > maxMailSize) {
-                        // Deny message transport since max. message size is exceeded
-                        throw MailExceptionCode.MAX_MESSAGE_SIZE_EXCEEDED.create(getSize(maxMailSize, 2, false, true), getSize(length, 2, false, true));
-                    }
-                } catch (final Exception e) {
-                    LOG.warn("Could not determine & check message's real size.", e);
-                } finally {
-                    Streams.close(counter);
                 }
             }
         }

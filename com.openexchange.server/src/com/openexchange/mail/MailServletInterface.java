@@ -243,17 +243,6 @@ public abstract class MailServletInterface {
     public abstract MailMessage getMessage(String folder, String msgUID, boolean markAsSeen) throws OXException;
 
     /**
-     * Gets the mail identified through given ID from store located in given folder.
-     *
-     * @param folder The folder path
-     * @param msgUID The mail ID
-     * @param markSeen Whether to mark as seen
-     * @return The mail identified through given ID from store located in given folder.
-     * @throws OXException If mail cannot be fetched from store
-     */
-    public abstract MailMessage getMessage(String folder, String msgUID, boolean markSeen) throws OXException;
-
-    /**
      * Returns a message's attachment located at given <code>attachmentPosition</code> wrapped by an instance of
      * <code>JSONMessageAttachmentObject</code> for a convenient access to its attributes and content.
      *
