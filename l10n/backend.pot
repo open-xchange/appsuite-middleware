@@ -9201,6 +9201,12 @@ msgstr ""
 msgid "Maximum message is exceeded. Max. is %1$s, but message is %2$s."
 msgstr ""
 
+#. Re-sending message denied because message is not located in %1$s folder.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:539
+msgid ""
+"Re-sending message denied because message is not located in %1$s folder."
+msgstr ""
+
 #. *
 #. * There was an issue in authenticating your E-Mail password. This may be because of a recent password change. To continue please logout
 #. * now and then log back in with your most current password. (server=%1$s | user=%2$s)
