@@ -484,5 +484,8 @@ public final class InternalList {
         // Extends the resources' description field
         new com.openexchange.groupware.update.tasks.EnlargeResourceDescription(),
 
+        // Extends the UID field
+        new com.openexchange.groupware.update.tasks.EnlargeCalendarUid(),
+
     };
 }
