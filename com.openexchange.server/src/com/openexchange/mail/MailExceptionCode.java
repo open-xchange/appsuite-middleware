@@ -446,7 +446,7 @@ public enum MailExceptionCode implements OXExceptionCode {
      */
     UNSUPPORTED_OPERATION(MailExceptionStrings.UNSUPPORTED_OPERATION_MSG, CATEGORY_ERROR, 87),
     /**
-     * Maximum message is exceeded. Max. is %1$s, but message is %2$s.
+     * Maximum message size is exceeded. Max. is %1$s.
      */
     MAX_MESSAGE_SIZE_EXCEEDED(MailExceptionStrings.MAX_MESSAGE_SIZE_EXCEEDED_MSG, CATEGORY_USER_INPUT, 88),
     /**

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,67 +47,56 @@
  *
  */
 
-package com.openexchange.smtp.util;
+package com.sun.mail.smtp;
 
 import java.io.OutputStream;
-import org.apache.commons.io.output.ProxyOutputStream;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.URLName;
+import com.sun.mail.smtp.SMTPTransport;
 
 /**
- * {@link CountingOutputStream} - Aligned to {@link org.apache.commons.io.output.CountingOutputStream} with <code>synchronized</code> removed.
+ * {@link JavaSMTPTransport}
  * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class CountingOutputStream extends ProxyOutputStream {
-
-    /** The count of bytes that have passed. */
-    private long count = 0;
+public class JavaSMTPTransport extends SMTPTransport {
 
     /**
-     * Constructs a new CountingOutputStream.
+     * Initializes a new {@link JavaSMTPTransport}.
      * 
-     * @param out the OutputStream to write to
+     * @param session
+     * @param urlname
+     * @param name
+     * @param isSSL
      */
-    public CountingOutputStream(OutputStream out) {
-        super(out);
+    public JavaSMTPTransport(Session session, URLName urlname, String name, boolean isSSL) {
+        super(session, urlname, name, isSSL);
     }
 
-    // -----------------------------------------------------------------------
-
     /**
-     * Updates the count with the number of bytes that are being written.
+     * Initializes a new {@link JavaSMTPTransport}.
      * 
-     * @param n number of bytes to be written to the stream
+     * @param session
+     * @param urlname
      */
-    @Override
-    protected void beforeWrite(int n) {
-        count += n;
+    public JavaSMTPTransport(Session session, URLName urlname) {
+        super(session, urlname);
     }
 
-    // -----------------------------------------------------------------------
-    /**
-     * The number of bytes that have passed through this stream.
-     * 
-     * @return the number of bytes accumulated
-     * @throws ArithmeticException if the byte count is too large
-     */
-    public int getCount() {
-        long result = getByteCount();
-        if (result > Integer.MAX_VALUE) {
-            throw new ArithmeticException("The byte count " + result + " is too large to be converted to an int");
+    protected OutputStream data() throws MessagingException {
+        OutputStream data = super.data();
+
+        long maxMailSize = -1L;
+        String sMaxMailSize = session.getProperty("com.openexchange.mail.maxMailSize");
+        if (sMaxMailSize != null) {
+            maxMailSize = Long.valueOf(sMaxMailSize);
         }
-        return (int) result;
-    }
 
-    /**
-     * The number of bytes that have passed through this stream.
-     * <p>
-     * NOTE: This method is an alternative for <code>getCount()</code>. It was added because that method returns an integer which will
-     * result in incorrect count for files over 2GB.
-     * 
-     * @return the number of bytes accumulated
-     */
-    public long getByteCount() {
-        return this.count;
-    }
+        if (maxMailSize != -1) {
+            return new CountingOutputStream(data, maxMailSize);
+        }
 
+        return data;
+    }
 }
