@@ -125,9 +125,6 @@ public class ContactUtil {
         if (MsisdnCheck.checkMsisdn(tmp)) {
             set.add(tmp);
         }
-        if (MsisdnCheck.checkMsisdn(tmp)) {
-            set.add(tmp);
-        }
         tmp = contact.getTelephoneBusiness1();
         if (MsisdnCheck.checkMsisdn(tmp)) {
             set.add(tmp);
@@ -190,5 +187,5 @@ public class ContactUtil {
         }
         return set;
     }
-    
+
 }
