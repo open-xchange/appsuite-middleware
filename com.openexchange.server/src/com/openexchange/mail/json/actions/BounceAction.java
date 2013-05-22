@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.actions;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.internet.MimeMessage;
@@ -57,6 +58,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -69,6 +71,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
@@ -161,7 +164,15 @@ public final class BounceAction extends AbstractMailAction {
                     } catch (final javax.mail.MessagingException e) {
                         throw MimeMailException.handleMessagingException(e);
                     }
-                    mimeMessage = readOnly ? new MimeMessage(mm) : mm;
+                    if (readOnly) {
+                        // Construct a new one
+                        final ThresholdFileHolder tmp = new ThresholdFileHolder();
+                        getCloseables(req).add(tmp);
+                        mm.writeTo(tmp.asOutputStream());
+                        mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), tmp.getStream());
+                    } else {
+                        mimeMessage = mm;
+                    }
                 } else {
                     mimeMessage = (MimeMessage) MimeMessageConverter.convertMailMessage(message, false);
                 }
@@ -173,6 +184,8 @@ public final class BounceAction extends AbstractMailAction {
                 return sentMail;
             } catch (final javax.mail.MessagingException e) {
                 throw MimeMailException.handleMessagingException(e);
+            } catch (final IOException e) {
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             } finally {
                 transport.close();
             }

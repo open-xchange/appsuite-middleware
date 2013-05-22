@@ -50,11 +50,14 @@
 package com.openexchange.mail.json.actions;
 
 import static com.openexchange.mail.json.parser.MessageParser.parseAddressKey;
+import java.io.Closeable;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -151,9 +154,8 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         MailServletInterface mailInterface = null;
         if (state == null) {
         	return MailServletInterface.getInstance(mailRequest.getSession());
-        } else {
-        	mailInterface = state.optProperty(PROPERTY_MAIL_IFACE);
         }
+        mailInterface = state.optProperty(PROPERTY_MAIL_IFACE);
         if (mailInterface == null) {
             final MailServletInterface newMailInterface = MailServletInterface.getInstance(mailRequest.getSession());
             mailInterface = state.putProperty(PROPERTY_MAIL_IFACE, newMailInterface);
@@ -164,6 +166,29 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             }
         }
         return mailInterface;
+    }
+
+    /**
+     * Gets the closeables.
+     *
+     * @param mailRequest The mail request
+     * @return The closeables or <code>null</code> if state is absent
+     * @throws OXException If closebales cannot be returned
+     */
+    protected Collection<Closeable> getCloseables(final MailRequest mailRequest) throws OXException {
+        final AJAXState state = mailRequest.getRequest().getState();
+        if (state == null) {
+            return null;
+        }
+        Collection<Closeable> closeables = state.optProperty(PROPERTY_CLOSEABLES);
+        if (null == closeables) {
+            final Collection<Closeable> newCloseables = new LinkedList<Closeable>();
+            closeables = state.putProperty(PROPERTY_CLOSEABLES, newCloseables);
+            if (null == closeables) {
+                closeables = newCloseables;
+            }
+        }
+        return closeables;
     }
 
     @Override
