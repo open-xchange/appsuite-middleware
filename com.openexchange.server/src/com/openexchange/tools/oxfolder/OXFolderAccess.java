@@ -60,16 +60,23 @@ import java.util.Iterator;
 import java.util.List;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.contact.ContactService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.Contacts;
+import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.tasks.TaskStorage;
 import com.openexchange.groupware.tasks.Tasks;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -78,6 +85,8 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -435,7 +444,7 @@ public class OXFolderAccess {
             return isEmpty(fo, session, ctx);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Throwable t) {
+        } catch (final RuntimeException t) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(ctx.getContextId()));
         }
     }
@@ -491,7 +500,7 @@ public class OXFolderAccess {
             }
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Throwable t) {
+        } catch (final RuntimeException t) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(ctx.getContextId()));
         }
     }
@@ -509,33 +518,104 @@ public class OXFolderAccess {
         try {
             final int userId = session.getUserId();
             final int module = fo.getModule();
-            if (FolderObject.TASK == module) {
+            switch (module) {
+            case FolderObject.TASK: {
                 final Tasks tasks = Tasks.getInstance();
                 return readCon == null ? tasks.isFolderEmpty(ctx, fo.getObjectID()) : tasks.isFolderEmpty(ctx, readCon, fo.getObjectID());
-            } else if (FolderObject.CALENDAR == module) {
+            }
+            case FolderObject.CALENDAR: {
                 final AppointmentSQLInterface calSql =
                     ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
                 return readCon == null ? calSql.isFolderEmpty(userId, fo.getObjectID()) : calSql.isFolderEmpty(
                     userId,
                     fo.getObjectID(),
                     readCon);
-            } else if (FolderObject.CONTACT == module) {
+            }
+            case FolderObject.CONTACT: {
                 return readCon == null ? !Contacts.containsAnyObjectInFolder(fo.getObjectID(), ctx) : !Contacts.containsAnyObjectInFolder(
                     fo.getObjectID(),
                     readCon,
                     ctx);
-            } else if (FolderObject.PROJECT == module) {
+            }
+            case FolderObject.PROJECT:
                 return true;
-            } else if (FolderObject.INFOSTORE == module) {
+            case FolderObject.INFOSTORE: {
                 final InfostoreFacade db =
                     new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
                 return db.isFolderEmpty(fo.getObjectID(), ctx);
-            } else {
+            }
+            default:
                 throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(module), Integer.valueOf(ctx.getContextId()));
             }
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final Throwable t) {
+        } catch (final RuntimeException t) {
+            throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(ctx.getContextId()));
+        }
+    }
+
+    /**
+     * Gets the folder's item count.
+     *
+     * @param fo The folder
+     * @param session The session
+     * @param ctx The context
+     * @return The item count or <code>-1</code> if unknown
+     * @throws OXException If item count cannot be returned
+     */
+    public long getItemCount(final FolderObject fo, final Session session, final Context ctx) throws OXException {
+        try {
+            final int userId = session.getUserId();
+            final int module = fo.getModule();
+            switch (module) {
+            case FolderObject.TASK:
+                return TaskStorage.getInstance().countTasks(ctx, userId, fo.getObjectID(), false, false);
+            case FolderObject.CALENDAR:
+                {
+                    // TODO: Implement appointment count
+                    final AppointmentSqlFactoryService service = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
+                    final AppointmentSQLInterface calSql = service.createAppointmentSql(session);
+                    return readCon == null ? 0 : 0;
+                }
+            case FolderObject.CONTACT:
+                try {
+                    // TODO: Improve contact count
+                    final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+                    final SearchIterator<Contact> it = contactService.getAllContacts(session, Integer.toString(fo.getObjectID()), new ContactField[] {ContactField.OBJECT_ID});
+                    try {
+                        int count = 0;
+                        while (it.hasNext()) {
+                            it.next();
+                            count++;
+                        }
+                        return count;
+                    } finally {
+                        it.close();
+                    }
+                } catch (final OXException e) {
+                    if (ContactExceptionCodes.NO_ACCESS_PERMISSION.equals(e)) {
+                        return 0;
+                    }
+                    throw e;
+                }
+            case FolderObject.PROJECT:
+                return 0;
+            case FolderObject.INFOSTORE:
+                try {
+                    final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
+                    final User user = session instanceof ServerSession ? ((ServerSession) session).getUser() : UserStorage.getStorageUser(userId, ctx);
+                    final UserConfiguration userConf = session instanceof ServerSession ? ((ServerSession) session).getUserConfiguration() : UserConfigurationStorage.getInstance().getUserConfiguration(userId, user.getGroups(), ctx);
+                    return db.countDocuments(fo.getObjectID(), ctx, user, userConf);
+                } catch (final OXException e) {
+                    if (InfostoreExceptionCodes.NO_READ_PERMISSION.equals(e)) {
+                        return 0;
+                    }
+                    throw e;
+                }
+            default:
+                return -1;
+            }
+        } catch (final RuntimeException t) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(ctx.getContextId()));
         }
     }
