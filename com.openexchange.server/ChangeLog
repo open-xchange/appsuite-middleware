@@ -1,6 +1,15 @@
+* 2013-05-22 - marc.arens@open-xchange.com
+
+ - Fix for bug 26580: Remove superfluous warning
+
 * 2013-05-21 - marcus.klein@open-xchange.com
 
  - Fix for bug 26680: Moved filemanagement bundles into an own package open-xchange-file-distribution.
+ 
+ * 2013-05-17 - marc.arens@open-xchange.com
+
+ - Fix for bug 26226: Use concurrent data structures to prevent NegativeArraySizeException
+ - Fix for bug 25944: GETS are now periodically closed by server pongs
 
 * 2013-05-16 - marcus.klein@open-xchange.com
 

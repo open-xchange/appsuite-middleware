@@ -213,8 +213,6 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                         case LONG_POLLING:
                             if (!resource.getResponse().isCommitted()) {
                                 resource.suspend();
-                            } else {
-                                LOG.warn("Resource is already committed.");
                             }
                             break;
                         default:
