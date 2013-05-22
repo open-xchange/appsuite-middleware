@@ -136,6 +136,14 @@ public class LoginCounter implements LoginCounterMBean {
 
     @Override
     public Map<String, Integer> getNumberOfLogins(final Date startDate, final Date endDate, boolean aggregate, String regex) throws MBeanException {
+        if (startDate == null) {
+            throw new MBeanException(new IllegalArgumentException("Parameter 'startDate' must not be null!"));
+        }
+        
+        if (endDate == null) {
+            throw new MBeanException(new IllegalArgumentException("Parameter 'endDate' must not be null!"));
+        }
+        
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         Map<String, Integer> schemaMap = null;
         try {
@@ -151,7 +159,7 @@ public class LoginCounter implements LoginCounterMBean {
         }
 
         /*
-         * Get all logins in every schema
+         * Get all logins of every schema
          */
         int sum = 0;
         final Map<String, Integer> results = new HashMap<String, Integer>();
@@ -175,13 +183,12 @@ public class LoginCounter implements LoginCounterMBean {
                 stmt = connection.prepareStatement(sb.toString());
                 stmt.setString(1, "client:(" + regex + ")");
                 rs = stmt.executeQuery();
-                final Date lastLogin = new Date();
                 while (rs.next()) {
                     final int contextId = rs.getInt(1);
                     final int userId = rs.getInt(2);
                     final String client = rs.getString(3);
                     try {
-                        Long.parseLong(rs.getString(4));
+                        Date lastLogin = new Date(Long.parseLong(rs.getString(4)));
                         if (lastLogin.after(startDate) && lastLogin.before(endDate)) {
                             if (aggregate) {
                                 UserContextId userContextId = new UserContextId(contextId, userId);

@@ -49,6 +49,7 @@
 
 package com.openexchange.smtp;
 
+import static com.openexchange.mail.MailExceptionCode.getSize;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
@@ -73,6 +74,7 @@ import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.NoSuchProviderException;
+import javax.mail.Provider;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
@@ -81,8 +83,12 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
+import org.apache.commons.io.output.NullOutputStream;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
+import com.openexchange.config.cascade.ConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -92,6 +98,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
+import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
@@ -123,8 +130,9 @@ import com.openexchange.smtp.config.MailAccountSMTPProperties;
 import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.config.SMTPSessionProperties;
 import com.openexchange.smtp.filler.SMTPMessageFiller;
-import com.openexchange.smtp.services.SMTPServiceRegistry;
+import com.openexchange.smtp.services.Services;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.sun.mail.smtp.JavaSMTPTransport;
 import com.sun.mail.smtp.SMTPMessage;
 
 /**
@@ -299,12 +307,35 @@ public final class SMTPTransport extends MailTransport {
         }
         throw MailExceptionCode.UNEXPECTED_ERROR.create(cause, cause.getMessage());
     }
+    
+    private long getMaxMailSize() throws OXException {
+        ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
+
+        if (factory != null) {
+            ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+            ConfigProperty<Long> property = view.property("com.openexchange.mail.maxMailSize", Long.class);
+
+            if (property.isDefined()) {
+                Long l = property.get();
+                long maxMailSize = null == l ? -1 : l.longValue();
+                if (maxMailSize > 0) {
+                    return maxMailSize;
+                }
+            }
+        }
+        
+        return -1;
+    }
 
     private javax.mail.Session getSMTPSession() throws OXException {
         if (null == smtpSession) {
             synchronized (this) {
                 if (null == smtpSession) {
                     final Properties smtpProps = SMTPSessionProperties.getDefaultSessionProperties();
+                    smtpProps.put("mail.smtp.class", JavaSMTPTransport.class.getName());
+                    smtpProps.put("com.openexchange.mail.maxMailSize", Long.toString(getMaxMailSize()));
+                    
+                    
                     final SMTPConfig smtpConfig = getTransportConfig0();
                     /*
                      * Set properties
@@ -370,7 +401,7 @@ public final class SMTPTransport extends MailTransport {
                          */
                         String hostName = smtpLocalhost;
                         if (null == hostName) {
-                            final HostnameService hostnameService = SMTPServiceRegistry.getServiceRegistry().getService(HostnameService.class);
+                            final HostnameService hostnameService = Services.getService(HostnameService.class);
                             if (null == hostnameService) {
                                 hostName = getHostName();
                             } else {
@@ -413,6 +444,12 @@ public final class SMTPTransport extends MailTransport {
                     // smtpProps.put(MIMESessionPropertyNames.PROP_SMTPHOST, smtpConfig.getServer());
                     // smtpProps.put(MIMESessionPropertyNames.PROP_SMTPPORT, sPort);
                     smtpSession = javax.mail.Session.getInstance(smtpProps, null);
+                    smtpSession.addProvider(new Provider(
+                        Provider.Type.TRANSPORT,
+                        "smtp",
+                        "com.sun.mail.smtp.JavaSMTPTransport",
+                        "Open-Xchange, Inc.",
+                        "7.2.2"));
                 }
             }
         }
@@ -771,7 +808,7 @@ public final class SMTPTransport extends MailTransport {
         }
     }
 
-    private void transport(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
+    private void transport(final MimeMessage smtpMessage, final Address[] recipients, Transport transport, final SMTPConfig smtpConfig) throws OXException {
         try {
             transport.sendMessage(smtpMessage, recipients);
         } catch (final MessagingException e) {
@@ -784,6 +821,10 @@ public final class SMTPTransport extends MailTransport {
                     LOG.warn(message.replaceFirst("[dD][cC][hH]", Matcher.quoteReplacement("javax.activation.DataContentHandler")));
                     transportAlt(smtpMessage, recipients, transport, smtpConfig);
                     return;
+                }
+            } else if (e.getNextException() instanceof IOException) {
+                if (e.getNextException().getMessage().equals("Maximum message size is exceeded.")) {
+                    throw MailExceptionCode.MAX_MESSAGE_SIZE_EXCEEDED.create(getSize(getMaxMailSize(), 2, false, true));
                 }
             }
             throw MimeMailException.handleMessagingException(e, smtpConfig, session);
@@ -799,7 +840,7 @@ public final class SMTPTransport extends MailTransport {
             }
             transport.sendMessage(smtpMessage, recipients);
             invokeLater(new Runnable() {
-                
+
                 @Override
                 public void run() {
                     try {
@@ -842,7 +883,7 @@ public final class SMTPTransport extends MailTransport {
         if ((recipients == null) || (recipients.length == 0)) {
             throw SMTPExceptionCode.MISSING_RECIPIENTS.create();
         }
-        final ConfigurationService service = SMTPServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService service = Services.getService(ConfigurationService.class);
         if (null != service) {
             final Filter filter = service.getFilterFromProperty("com.openexchange.mail.transport.redirectWhitelist");
             if (null != filter) {
@@ -906,8 +947,7 @@ public final class SMTPTransport extends MailTransport {
     @Override
     protected ITransportProperties createNewMailProperties() throws OXException {
         try {
-            final MailAccountStorageService storageService =
-                SMTPServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+            final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
             return new MailAccountSMTPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
         } catch (final OXException e) {
             throw e;
@@ -915,7 +955,7 @@ public final class SMTPTransport extends MailTransport {
     }
 
     private void saveChangesSafe(final MimeMessage mimeMessage) throws OXException {
-        final HostnameService hostnameService = SMTPServiceRegistry.getServiceRegistry().getService(HostnameService.class);
+        final HostnameService hostnameService = Services.getService(HostnameService.class);
         String hostName;
         if (null == hostnameService) {
             hostName = getHostName();
@@ -994,7 +1034,7 @@ public final class SMTPTransport extends MailTransport {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

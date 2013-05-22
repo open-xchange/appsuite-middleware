@@ -54,7 +54,9 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link MsService} - The messaging service.
- * 
+ * <p>
+ * To avoid class loading problems, please use <a href="http://en.wikipedia.org/wiki/Plain_Old_Java_Object">POJO</a>s if possible.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MsService {
@@ -77,7 +79,7 @@ public interface MsService {
 
     /**
      * Gets the (local) message Inbox.
-     * 
+     *
      * @return The message Inbox
      */
     MessageInbox getMessageInbox();
@@ -85,14 +87,14 @@ public interface MsService {
     /**
      * Set of current members of the cluster. Returning set instance is not modifiable. Every member in the cluster has the same member list
      * in the same order. First member is the oldest member.
-     * 
+     *
      * @return The members
      */
     Set<Member> getMembers();
 
     /**
      * Transports a message to given member only.
-     * 
+     *
      * @param message The message
      * @param member The member to transfer to
      * @throws OXException If transport attempt fails

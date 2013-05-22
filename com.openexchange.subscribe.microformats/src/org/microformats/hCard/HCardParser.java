@@ -660,7 +660,7 @@ public class HCardParser {
 
 			Appendable appendSoftSpace() {
 				for ( final StringBuilder sb : builders ) {
-                    if ( sb.length() > 0 && !Character.isWhitespace(sb.charAt(sb.length() -1)) ) {
+                    if ( sb.length() > 0 && !isWhitespace(sb.charAt(sb.length() -1)) ) {
                         sb.append(' ');
                     }
                 }
@@ -756,4 +756,30 @@ public class HCardParser {
 	private static String collapseWhitespace(final String text) {
 		return text.replaceAll("\\s+", " ");
 	}
+
+	/**
+     * High speed test for whitespace!  Faster than the java one (from some testing).
+     *
+     * @return <code>true</code> if the indicated character is whitespace; otherwise <code>false</code>
+     */
+    private static boolean isWhitespace(final char c) {
+        switch (c) {
+            case 9:  //'unicode: 0009
+            case 10: //'unicode: 000A'
+            case 11: //'unicode: 000B'
+            case 12: //'unicode: 000C'
+            case 13: //'unicode: 000D'
+            case 28: //'unicode: 001C'
+            case 29: //'unicode: 001D'
+            case 30: //'unicode: 001E'
+            case 31: //'unicode: 001F'
+            case ' ': // Space
+                //case Character.SPACE_SEPARATOR:
+                //case Character.LINE_SEPARATOR:
+            case Character.PARAGRAPH_SEPARATOR:
+                return true;
+            default:
+                return false;
+        }
+    }
 }

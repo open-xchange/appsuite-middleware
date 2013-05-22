@@ -109,14 +109,17 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.ScaleType;
+import com.openexchange.tools.images.TransformedImage;
 import com.openexchange.tools.io.IOUtils;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.Parameter;
@@ -1032,6 +1035,32 @@ public class OXContainerConverter {
     }
 
     /**
+     * Generates a "X-ABCROP-RECTANGLE" parameter for the supplied transformed image.
+     *
+     * @param transformedImage The transformed image
+     * @return The parameter
+     */
+    private static Parameter getABCropRectangle(TransformedImage transformedImage) {
+        Parameter parameter = new Parameter("X-ABCROP-RECTANGLE");
+        StringAllocator stringAllocator = new StringAllocator(64);
+        stringAllocator.append("ABClipRect_1&");
+        int width = transformedImage.getWidth();
+        int height = transformedImage.getHeight();
+        if (width < height) {
+            stringAllocator.append('-').append((height - width) / 2).append("&0&").append(height).append('&').append(height);
+        } else if (width > height) {
+            stringAllocator.append("0&-").append((width - height) / 2).append('&').append(width).append('&').append(width);
+        } else {
+            stringAllocator.append("0&0&").append(width).append('&').append(height);
+        }
+        if (null != transformedImage.getMD5()) {
+            stringAllocator.append('&').append(Base64.encode(transformedImage.getMD5()));
+        }
+        parameter.addValue(new ParameterValue(stringAllocator.toString()));
+        return parameter;
+    }
+
+    /**
      * Performs a crop operation on the source image as defined by the
      * supplied clipping rectangle.
      *
@@ -1072,33 +1101,13 @@ public class OXContainerConverter {
      * @throws IOException
      * @throws OXException
      */
-    private static byte[] scaleImageIfNeeded(byte[] source, int maxWidth, int maxHeight, String formatName) throws IOException, OXException {
-        /*
-         * don't try problematic image formats
-         */
-        if ("vnd.microsoft.icon".equalsIgnoreCase(formatName) || "x-icon".equalsIgnoreCase(formatName)) {
-            // ImageIO has problems reading icons: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6633448
-            return source;
-        }
-        InputStream inputStream = null;
-        try {
-            /*
-             * read source image
-             */
-            inputStream = new ByteArrayInputStream(source);
-            BufferedImage sourceImage = ImageIO.read(inputStream);
-            /*
-             * scale the image if needed
-             */
-            if (sourceImage.getWidth() > maxWidth || sourceImage.getHeight() > maxHeight) {
-                ImageTransformationService imageService = ServerServiceRegistry.getInstance().getService(
-                    ImageTransformationService.class, true);
-                return imageService.transfom(sourceImage).scale(maxWidth, maxHeight, ScaleType.CONTAIN).getBytes(formatName);
-            } else {
-                return source;
-            }
-        } finally {
-            Streams.close(inputStream);
+    private static TransformedImage scaleImageIfNeeded(byte[] source, int maxWidth, int maxHeight, String formatName) throws IOException, OXException {
+        ImageTransformationService imageService = ServerServiceRegistry.getInstance().getService(
+            ImageTransformationService.class, true);
+        if (0 < maxWidth || 0 < maxHeight) {
+            return imageService.transfom(source).scale(maxWidth, maxHeight, ScaleType.CONTAIN).getTransformedImage(formatName);
+        } else {
+            return imageService.transfom(source).getTransformedImage(formatName);
         }
     }
 
@@ -1111,8 +1120,10 @@ public class OXContainerConverter {
      * @throws IOException
      * @throws OXException
      */
-    private static byte[] scaleImageIfNeeded(byte[] source, String formatName) throws IOException, OXException {
+    private static TransformedImage scaleImageIfNeeded(byte[] source, String formatName) throws IOException, OXException {
         if (null != source) {
+            int maxWidth = -1;
+            int maxHeight = -1;
             ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class, true);
             String value = configService.getProperty("com.openexchange.contact.scaleVCardImages", "");
             if (null != value && 0 < value.length()) {
@@ -1121,15 +1132,15 @@ public class OXContainerConverter {
                     throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(value);
                 }
                 try {
-                    int maxWidth = Integer.parseInt(value.substring(0, idx));
-                    int maxHeight = Integer.parseInt(value.substring(idx + 1));
-                    return scaleImageIfNeeded(source, maxWidth, maxHeight, formatName);
+                    maxWidth = Integer.parseInt(value.substring(0, idx));
+                    maxHeight = Integer.parseInt(value.substring(idx + 1));
                 } catch (NumberFormatException e) {
                     throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, value);
                 }
             }
+            return scaleImageIfNeeded(source, maxWidth, maxHeight, formatName);
         }
-        return source;
+        return null;
     }
 
     /**
@@ -1795,8 +1806,9 @@ public class OXContainerConverter {
                         }
                         type.addValue(new ParameterValue(param));
                     }
+                    TransformedImage transformedImage = null;
                     try {
-                        imageData = scaleImageIfNeeded(imageData, contact.getImageContentType());
+                        transformedImage = scaleImageIfNeeded(imageData, contact.getImageContentType());
                     } catch (IOException x) {
                         LOG.error("error scaling image, falling back to unscaled image.", x);
                     } catch (OXException x) {
@@ -1808,7 +1820,13 @@ public class OXContainerConverter {
                      * Add image data as it is since ValueDefinition#write(FoldingWriter fw, Property property)) applies proper encoding
                      * dependent on "ENCODING" parameter
                      */
-                    addProperty(object, "PHOTO", "ENCODING", new String[] { "B" }, imageData).addParameter(type);
+                    if (null != transformedImage) {
+                        Property photoProperty = addProperty(object, "PHOTO", "ENCODING", new String[] { "B" }, transformedImage.getImageData());
+                        photoProperty.addParameter(type);
+                        photoProperty.addParameter(getABCropRectangle(transformedImage));
+                    } else {
+                        addProperty(object, "PHOTO", "ENCODING", new String[] { "B" }, imageData).addParameter(type);
+                    }
                 }
             }
             String s = null;

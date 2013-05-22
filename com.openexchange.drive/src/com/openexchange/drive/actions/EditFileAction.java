@@ -1,0 +1,125 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.drive.actions;
+
+import com.openexchange.drive.FileVersion;
+
+/**
+ * {@link EditFileAction}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class EditFileAction extends AbstractAction<FileVersion> {
+
+    private int sortKey;
+
+    public EditFileAction(FileVersion file, FileVersion newFile, String path) {
+        this(file, newFile, path, 0);
+    }
+
+    public EditFileAction(FileVersion file, FileVersion newFile, String path, int sortKey) {
+        super(file, newFile);
+        this.sortKey = sortKey;
+        parameters.put(PARAMETER_PATH, path);
+    }
+
+    @Override
+    public Action getAction() {
+        return Action.EDIT;
+    }
+
+    /**
+     * Gets the sortKey
+     *
+     * @return The sortKey
+     */
+    public int getSortKey() {
+        return sortKey;
+    }
+
+    /**
+     * Sets the sortKey
+     *
+     * @param sortKey The sortKey to set
+     */
+    public void setSortKey(int sortKey) {
+        this.sortKey = sortKey;
+    }
+
+    @Override
+    public int compareTo(DriveAction<FileVersion> other) {
+        int result = super.compareTo(other);
+        if (0 != result) {
+            return result;
+        }
+        if (EditFileAction.class.isInstance(other)) {
+            EditFileAction otherEditFileAction = (EditFileAction)other;
+            /*
+             * compare sort keys if available
+             */
+            result = this.getSortKey() - otherEditFileAction.getSortKey();
+            if (0 != result) {
+                return result;
+            }
+            /*
+             * compare new version if available
+             */
+            if (null != this.getNewVersion() && null != otherEditFileAction.getNewVersion()) {
+                result = -1 * this.getNewVersion().getName().compareTo(otherEditFileAction.getNewVersion().getName());
+            }
+            if (0 != result) {
+                return result;
+            }
+        }
+        return result;
+    }
+
+}
+

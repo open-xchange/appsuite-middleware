@@ -185,7 +185,7 @@ public class PresencePublisher implements ChangeListener {
         /*
          * Check if Resource contains Presence. Check if id is still registered in directory. If no longer registered - if Presence was
          * unavailable -> do nothing - if Presence wasn't unavailable -> add to expirer list Needs cluster wide sorted list + cluster wide
-         * executor that checks for expiration candidates that are older than a minute and didn't send unavailable presence. If time ist
+         * executor that checks for expiration candidates that are older than a minute and didn't send unavailable presence. If time is
          * over send unavailable presence
          */
 

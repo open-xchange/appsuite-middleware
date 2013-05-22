@@ -56,6 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceExceptionCode;
 import com.openexchange.resource.storage.ResourceStorage;
@@ -268,7 +269,7 @@ public final class ResourceUpdate {
         }
         final char[] chars = s.toCharArray();
         for (final char c : chars) {
-            if (!Character.isWhitespace(c)) {
+            if (!Strings.isWhitespace(c)) {
                 return false;
             }
         }

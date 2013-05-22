@@ -113,6 +113,11 @@ public final class MailProperties implements IMailProperties {
         }
     }
 
+    /**
+     * TODO: Interim flag until feature can be disabled via configuration.
+     */
+    public static final boolean MSISDN_ENABLED = true;
+
     private final AtomicBoolean loaded;
 
     /*-

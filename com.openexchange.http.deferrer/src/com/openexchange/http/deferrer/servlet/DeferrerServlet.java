@@ -238,8 +238,22 @@ public class DeferrerServlet extends HttpServlet {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    /**
+     * Gets the ASCII string from specified bytes.
+     *
+     * @param bytes The bytes
+     * @return The ASCII string
+     */
+    public static String toAsciiString(final byte[] bytes) {
+        final StringBuilder sb = new StringBuilder(bytes.length);
+        for (int i = 0; i < bytes.length; i++) {
+            sb.append((char) (bytes[i] & 0x00FF));
+        }
+        return sb.toString();
     }
 }

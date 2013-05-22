@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 8
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -52,12 +52,16 @@ Build for patch 2013-05-10
 Build for patch 2013-05-09
 * Fri May 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-23
+* Tue Apr 30 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-04-17
 * Fri Apr 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-12
 * Wed Apr 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Fourth candidate for 7.2.0 release
 * Tue Apr 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Third candidate for 7.2.0 release
+* Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-04-04
 * Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.2.0 release
 * Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -77,6 +81,8 @@ Third release candidate for 6.22.2/7.0.2
 * Thu Mar 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second release candidate for 6.22.2/7.0.2
 * Mon Mar 04 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-03-08
+* Mon Mar 04 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-03-07
 * Mon Mar 04 2013 Marcus Klein <marcus.kleni@open-xchange.com>
 Build for patch 2013-03-08
@@ -84,7 +90,7 @@ Build for patch 2013-03-08
 Build for patch 2013-03-07
 * Wed Feb 27 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 6.22.2/7.0.2
-* Tue Feb 26 2013 Marcus Klein <marcus.kleni@open-xchange.com>
+* Tue Feb 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-02-22
 * Mon Feb 25 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-02-22

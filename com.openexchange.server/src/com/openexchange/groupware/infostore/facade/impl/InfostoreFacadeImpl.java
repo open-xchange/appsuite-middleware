@@ -603,6 +603,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
 
                     document.setVersion(1);
                     document.setFilestoreLocation(saveFile.getId());
+                    document.setFileMD5Sum(saveFile.getMd5());
                     if (document.getFileSize() == 0) {
                         document.setFileSize(qfs.getFileSize(saveFile.getId()));
                     }
@@ -851,9 +852,21 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     }
                 }
 
-
                 final String oldFileName = oldDocument.getFileName();
-                if (document.getFileName() != null && !document.getFileName().equals(oldFileName)) {
+                if (updatedCols.contains(Metadata.FOLDER_ID_LITERAL) && oldDocument.getFolderId() != document.getFolderId()) {
+                    // this is a move - reserve in target folder
+                    String fileName = null != document.getFileName() ? document.getFileName() : oldFileName;
+                    final InfostoreFilenameReservation reservation = reserve(
+                        fileName,
+                        document.getFolderId(),
+                        oldDocument.getId(),
+                        context, true);
+                    reservations.add(reservation);
+                    document.setFileName(reservation.getFilename());
+                    updatedCols.add(Metadata.FILENAME_LITERAL);
+                } else if (updatedCols.contains(Metadata.FILENAME_LITERAL) && null != document.getFileName() &&
+                    false == document.getFileName().equals(oldFileName)) {
+                    // this is a rename - reserve in current folder
                     final InfostoreFilenameReservation reservation = reserve(
                         document.getFileName(),
                         oldDocument.getFolderId(),
@@ -861,7 +874,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                         context, true);
                     reservations.add(reservation);
                     document.setFileName(reservation.getFilename());
-                	updatedCols.add(Metadata.FILENAME_LITERAL);
+                    updatedCols.add(Metadata.FILENAME_LITERAL);
                 }
 
                 final String oldTitle = oldDocument.getTitle();
@@ -911,6 +924,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     if (ignoreVersion) {
                         document.setVersion(oldDocument.getVersion());
                         updatedCols.add(Metadata.VERSION_LITERAL);
+                        updatedCols.add(Metadata.FILESTORE_LOCATION_LITERAL);
 
                         final UpdateVersionAction updateVersionAction = new UpdateVersionAction();
                         updateVersionAction.setContext(context);
@@ -918,7 +932,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                         updateVersionAction.setOldDocuments(Arrays.asList(oldDocument));
                         updateVersionAction.setProvider(this);
                         updateVersionAction.setQueryCatalog(QUERIES);
-                        updateVersionAction.setModified(modifiedCols);
+                        updateVersionAction.setModified(updatedCols.toArray(new Metadata[updatedCols.size()]));
                         updateVersionAction.setTimestamp(sequenceNumber);
 
                         // Remove old file "version"
@@ -976,6 +990,19 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                     updateAction.setModified(modifiedCols);
                     updateAction.setTimestamp(Long.MAX_VALUE);
                     perform(updateAction, true);
+                }
+
+                // insert tombstone row to del_infostore table in case of move operations to aid folder based synchronizations
+                if (updatedCols.contains(Metadata.FOLDER_ID_LITERAL) && oldDocument.getFolderId() != document.getFolderId()) {
+                    DocumentMetadataImpl tombstoneDocument = new DocumentMetadataImpl(oldDocument);
+                    tombstoneDocument.setLastModified(document.getLastModified());
+                    tombstoneDocument.setModifiedBy(document.getModifiedBy());
+                    InsertDocumentIntoDelTableAction tombstoneAction = new InsertDocumentIntoDelTableAction();
+                    tombstoneAction.setContext(context);
+                    tombstoneAction.setDocuments(Arrays.asList(new DocumentMetadata[] { tombstoneDocument }));
+                    tombstoneAction.setProvider(this);
+                    tombstoneAction.setQueryCatalog(QUERIES);
+                    perform(tombstoneAction, true);
                 }
 
                 final long indexFolderId = document.getFolderId() == oldDocument.getFolderId() ? -1L : oldDocument.getFolderId();

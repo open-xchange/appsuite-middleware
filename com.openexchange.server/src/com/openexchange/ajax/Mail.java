@@ -108,6 +108,7 @@ import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.parser.SearchTermParser;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.contact.ContactService;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -118,7 +119,10 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.groupware.EnumComponent;
+import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.importexport.MailImportResult;
@@ -132,6 +136,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.log.Log;
 import com.openexchange.mail.FullnameArgument;
@@ -4868,7 +4873,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     if (msgIdentifier == null) {
                         warnings.addAll(mailServletInterface.getWarnings());
                         if (warnings.isEmpty()) {
-                            throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();                            
+                            throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();
                         }
                         final Response response = new Response(session);
                         response.setData(JSONObject.NULL);
@@ -5091,6 +5096,27 @@ public class Mail extends PermissionServlet implements UploadListener {
                     for (final String alias : aliases) {
                         validAddrs.add(new QuotedInternetAddress(alias));
                     }
+                    if (MailProperties.MSISDN_ENABLED) {
+                        final int contactId = user.getContactId();
+                        if (contactId > 0) {
+                            final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+                            if (null != contactService) {
+                                try {
+                                    final Contact contact = contactService.getContact(session, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), Integer.toString(contactId));
+                                    final Set<String> set = ContactUtil.gatherTelephoneNumbers(contact);
+                                    for (final String number : set) {
+                                        try {
+                                            validAddrs.add(new QuotedInternetAddress(number));
+                                        } catch (final Exception e) {
+                                            // Ignore invalid number
+                                        }
+                                    }
+                                } catch (final Exception e) {
+                                    LOG.warn("Could not check for valid MSISDN numbers.", e);
+                                }
+                            }
+                        }
+                    }
                     if (!validAddrs.contains(from)) {
                         throw MailExceptionCode.INVALID_SENDER.create(from.toString());
                     }
@@ -5110,7 +5136,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }
@@ -5179,7 +5205,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             return startingChar == toCheck.charAt(0);
         }
         int i = 0;
-        while (i < len && Character.isWhitespace(toCheck.charAt(i))) {
+        while (i < len && Strings.isWhitespace(toCheck.charAt(i))) {
             i++;
         }
         if (i >= len) {

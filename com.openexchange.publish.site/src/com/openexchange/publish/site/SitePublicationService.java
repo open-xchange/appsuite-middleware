@@ -74,7 +74,7 @@ import com.openexchange.publish.helpers.SecurityStrategy;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SitePublicationService extends AbstractPublicationService implements PublicationService {
+public class SitePublicationService extends AbstractPublicationService {
 
     public static final String DISPLAY_NAME = "displayName";
 
@@ -144,6 +144,7 @@ public class SitePublicationService extends AbstractPublicationService implement
     public void beforeUpdate(Publication publication) throws OXException {
         super.beforeUpdate(publication);
         Publication oldPublication = loadInternally(publication.getContext(), publication.getId());
+        publication.getConfiguration().remove(URL);
         addSecret(publication, oldPublication);
         removeSecret(publication);
     }

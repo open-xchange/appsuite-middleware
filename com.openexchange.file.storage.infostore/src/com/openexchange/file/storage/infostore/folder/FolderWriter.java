@@ -88,11 +88,11 @@ public final class FolderWriter {
         }
         try {
             final DefaultFileStorageFolder ret = new DefaultFileStorageFolder();
-            ret.setCreationDate(folder.getCreationDate());
+            ret.setCreationDate(folder.getCreationDateUTC());
             ret.setDefaultFolder(folder.isDefault());
             ret.setExists(true);
             ret.setId(folder.getID());
-            ret.setLastModifiedDate(folder.getLastModified());
+            ret.setLastModifiedDate(folder.getLastModifiedUTC());
             ret.setName(folder.getName());
             ret.setParentId(folder.getParentID());
             ret.setPermissions(parsePermission(folder.getPermissions()));
@@ -179,7 +179,7 @@ public final class FolderWriter {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

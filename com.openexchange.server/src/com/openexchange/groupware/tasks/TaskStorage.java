@@ -184,7 +184,7 @@ public abstract class TaskStorage {
      * @return number of tasks in the folder.
      * @throws OXException if an error occurs while counting the task.
      */
-    abstract int countTasks(Context ctx, int userId, int folderId, boolean onlyOwn, boolean noPrivate) throws OXException;
+    public abstract int countTasks(Context ctx, int userId, int folderId, boolean onlyOwn, boolean noPrivate) throws OXException;
 
     /**
      * This method is currently unimplemented.

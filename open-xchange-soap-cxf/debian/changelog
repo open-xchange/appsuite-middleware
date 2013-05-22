@@ -1,3 +1,9 @@
+open-xchange-soap-cxf (7.4.0-0) UNRELEASED; urgency=low
+
+  * prepare for 7.4.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Apr 2013 10:30:09 +0200
+
 open-xchange-soap-cxf (7.2.0-8) UNRELEASED; urgency=low
 
   * Build for patch 2013-05-10
@@ -52,6 +58,18 @@ open-xchange-soap-cxf (7.2.0-0) UNRELEASED; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 15 Mar 2013 13:33:44 +0100
 
+open-xchange-soap-cxf (7.0.2-9) unstable; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 13 May 2013 14:45:42 +0200
+
+open-xchange-soap-cxf (7.0.2-8) unstable; urgency=low
+
+  * Build for patch 2013-04-17
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 30 Apr 2013 12:39:59 +0200
+
 open-xchange-soap-cxf (7.0.2-7) unstable; urgency=low
 
   * Build for patch 2013-04-04
@@ -99,6 +117,18 @@ open-xchange-soap-cxf (7.0.2-0) unstable; urgency=low
   * prepare for 7.0.2 release
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 19 Feb 2013 08:55:13 +0100
+
+open-xchange-soap-cxf (7.0.1-7) unstable; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 13 May 2013 14:26:33 +0200
+
+open-xchange-soap-cxf (7.0.1-6) unstable; urgency=low
+
+  * Build for patch 2013-04-04
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 02 Apr 2013 09:53:46 +0200
 
 open-xchange-soap-cxf (7.0.1-5) unstable; urgency=low
 
@@ -208,6 +238,18 @@ open-xchange-soap-cxf (6.23.0-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 03 Sep 2012 13:45:52 +0200
 
+open-xchange-soap-cxf (6.22.1-15) unstable; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 13 May 2013 11:46:25 +0200
+
+open-xchange-soap-cxf (6.22.1-14) unstable; urgency=low
+
+  * Build for patch 2013-04-04
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 02 Apr 2013 09:09:44 +0200
+
 open-xchange-soap-cxf (6.22.1-13) unstable; urgency=low
 
   * Build for patch 2013-03-07
@@ -292,17 +334,29 @@ open-xchange-soap-cxf (6.22.1-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 26 Oct 2012 10:03:09 +0200
 
+open-xchange-soap-cxf (6.22.0-11) unstable; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Marcus Klein <marcus.kleni@open-xchange.com>  Mon, 13 May 2013 14:05:27 +0200
+
+open-xchange-soap-cxf (6.22.0-10) unstable; urgency=low
+
+  * Build for patch 2013-04-04
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 02 Apr 2013 11:06:50 +0200
+
 open-xchange-soap-cxf (6.22.0-9) unstable; urgency=low
 
   * Build for patch 2013-03-08
 
- -- Marcus Klein <marcus.kleni@open-xchange.com>  Mon, 04 Mar 2013 12:02:52 +0100
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 04 Mar 2013 12:02:52 +0100
 
 open-xchange-soap-cxf (6.22.0-8) unstable; urgency=low
 
   * Build for patch 2013-02-22
 
- -- Marcus Klein <marcus.kleni@open-xchange.com>  Tue, 26 Feb 2013 09:53:51 +0100
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 26 Feb 2013 09:53:51 +0100
 
 open-xchange-soap-cxf (6.22.0-7) unstable; urgency=low
 

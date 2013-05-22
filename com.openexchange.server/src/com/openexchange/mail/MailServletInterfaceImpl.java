@@ -95,8 +95,10 @@ import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
+import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
@@ -107,6 +109,7 @@ import com.openexchange.groupware.upload.quotachecker.MailUploadQuotaChecker;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -414,6 +417,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     @Override
     public void close(final boolean putIntoCache) throws OXException {
         try {
+            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = this.mailAccess;
             if (mailAccess != null) {
                 mailAccess.close(putIntoCache);
             }
@@ -1100,6 +1104,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
+    public MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getMailAccess() throws OXException {
+        return mailAccess;
+    }
+
+    @Override
     public MailConfig getMailConfig() throws OXException {
         return mailConfig;
     }
@@ -1117,6 +1126,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public MailMessage getMessage(final String folder, final String msgUID) throws OXException {
+        return getMessage(folder, msgUID, true);
+    }
+
+    @Override
+    public MailMessage getMessage(final String folder, final String msgUID, final boolean markAsSeen) throws OXException {
         final FullnameArgument argument = prepareMailFolderParam(folder);
         final int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -1124,7 +1138,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             throw MailExceptionCode.FOLDER_DOES_NOT_HOLD_MESSAGES.create(MailFolder.DEFAULT_FOLDER_ID);
         }
         final String fullname = argument.getFullname();
-        final MailMessage mail = mailAccess.getMessageStorage().getMessage(fullname, msgUID, true);
+        final MailMessage mail = mailAccess.getMessageStorage().getMessage(fullname, msgUID, markAsSeen);
         if (mail != null) {
             if (!mail.containsAccountId() || mail.getAccountId() < 0) {
                 mail.setAccountId(accountId);
@@ -1297,7 +1311,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }
@@ -1311,7 +1325,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         char prev = '\0';
         for (int i = 0; i < len; i++) {
             final char c = fileName.charAt(i);
-            if (Character.isWhitespace(c)) {
+            if (Strings.isWhitespace(c)) {
                 if (prev != '_') {
                     prev = '_';
                     sb.append(prev);
@@ -1808,9 +1822,29 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
                 final User user = getUser();
                 validAddrs.add(new QuotedInternetAddress(user.getMail()));
-                final String[] aliases = user.getAliases();
-                for (final String alias : aliases) {
+                for (final String alias : user.getAliases()) {
                     validAddrs.add(new QuotedInternetAddress(alias));
+                }
+                if (MailProperties.MSISDN_ENABLED) {
+                    final int contactId = user.getContactId();
+                    if (contactId > 0) {
+                        final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+                        if (null != contactService) {
+                            try {
+                                final Contact contact = contactService.getContact(session, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), Integer.toString(contactId));
+                                final Set<String> set = ContactUtil.gatherTelephoneNumbers(contact);
+                                for (final String number : set) {
+                                    try {
+                                        validAddrs.add(new QuotedInternetAddress(number));
+                                    } catch (final Exception e) {
+                                        // Ignore invalid number
+                                    }
+                                }
+                            } catch (final Exception e) {
+                                LOG.warn("Could not check for valid MSISDN numbers.", e);
+                            }
+                        }
+                    }
                 }
                 for (final MailMessage mail : mails) {
                     final InternetAddress[] from = mail.getFrom();
@@ -3016,9 +3050,29 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     }
                     final User user = getUser();
                     validAddrs.add(new QuotedInternetAddress(user.getMail()));
-                    final String[] aliases = user.getAliases();
-                    for (final String alias : aliases) {
+                    for (final String alias : user.getAliases()) {
                         validAddrs.add(new QuotedInternetAddress(alias));
+                    }
+                    if (MailProperties.MSISDN_ENABLED) {
+                        final int contactId = user.getContactId();
+                        if (contactId > 0) {
+                            final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
+                            if (null != contactService) {
+                                try {
+                                    final Contact contact = contactService.getContact(session, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), Integer.toString(contactId));
+                                    final Set<String> set = ContactUtil.gatherTelephoneNumbers(contact);
+                                    for (final String number : set) {
+                                        try {
+                                            validAddrs.add(new QuotedInternetAddress(number));
+                                        } catch (final Exception e) {
+                                            // Ignore invalid number
+                                        }
+                                    }
+                                } catch (final Exception e) {
+                                    LOG.warn("Could not check for valid MSISDN numbers.", e);
+                                }
+                            }
+                        }
                     }
                     if (!validAddrs.contains(new QuotedInternetAddress(fromAddr))) {
                         throw MailExceptionCode.INVALID_SENDER.create(fromAddr);

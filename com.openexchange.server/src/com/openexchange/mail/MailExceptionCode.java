@@ -53,6 +53,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.groupware.upload.impl.UploadUtility;
 
 /**
  * Mail exception codes.
@@ -444,6 +445,14 @@ public enum MailExceptionCode implements OXExceptionCode {
      * Invoked method is not supported.
      */
     UNSUPPORTED_OPERATION(MailExceptionStrings.UNSUPPORTED_OPERATION_MSG, CATEGORY_ERROR, 87),
+    /**
+     * Maximum message size is exceeded. Max. is %1$s.
+     */
+    MAX_MESSAGE_SIZE_EXCEEDED(MailExceptionStrings.MAX_MESSAGE_SIZE_EXCEEDED_MSG, CATEGORY_USER_INPUT, 88),
+    /**
+     * Re-sending message denied because message is not located in %1$s folder.
+     */
+    RESEND_DENIED(MailExceptionStrings.RESEND_DENIED_MSG, CATEGORY_USER_INPUT, 89),
     ;
 
     private static final String PREFIX = "MSG";
@@ -533,4 +542,21 @@ public enum MailExceptionCode implements OXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
+
+    // --------------------------------------------------------------------------------------- //
+
+    /**
+     * Converts given number of bytes to a human readable format.
+     *
+     * @param size The number of bytes
+     * @param precision The number of digits allowed after dot
+     * @param longName <code>true</code> to use unit's long name (e.g. <code>Megabytes</code>) or short name (e.g. <code>MB</code>)
+     * @param realSize <code>true</code> to bytes' real size of <code>1024</code> used for detecting proper unit; otherwise
+     *            <code>false</code> to narrow unit with <code>1000</code>.
+     * @return The number of bytes in a human readable format
+     */
+    public static String getSize(final long size, final int precision, final boolean longName, final boolean realSize) {
+        return UploadUtility.getSize(size, precision, longName, realSize);
+    }
+
 }

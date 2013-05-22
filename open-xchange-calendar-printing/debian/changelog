@@ -1,3 +1,9 @@
+open-xchange-calendar-printing (7.4.0-0) UNRELEASED; urgency=low
+
+  * prepare for 7.4.0
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 15 Apr 2013 10:29:14 +0200
+
 open-xchange-calendar-printing (7.2.0-8) UNRELEASED; urgency=low
 
   * Build for patch 2013-05-10
@@ -52,6 +58,18 @@ open-xchange-calendar-printing (7.2.0-0) UNRELEASED; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 15 Mar 2013 13:32:46 +0100
 
+open-xchange-calendar-printing (7.0.2-9) unstable; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 13 May 2013 14:45:03 +0200
+
+open-xchange-calendar-printing (7.0.2-8) unstable; urgency=low
+
+  * Build for patch 2013-04-17
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 30 Apr 2013 12:39:21 +0200
+
 open-xchange-calendar-printing (7.0.2-7) unstable; urgency=low
 
   * Build for patch 2013-04-04
@@ -99,6 +117,18 @@ open-xchange-calendar-printing (7.0.2-0) unstable; urgency=low
   * prepare for 7.0.2 release
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 19 Feb 2013 08:54:25 +0100
+
+open-xchange-calendar-printing (7.0.1-7) unstable; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 13 May 2013 14:25:56 +0200
+
+open-xchange-calendar-printing (7.0.1-6) unstable; urgency=low
+
+  * Build for patch 2013-04-04
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 02 Apr 2013 09:53:11 +0200
 
 open-xchange-calendar-printing (7.0.1-5) unstable; urgency=low
 
@@ -208,6 +238,18 @@ open-xchange-calendar-printing (6.23.0-0) unstable; urgency=low
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 03 Sep 2012 13:46:10 +0200
 
+open-xchange-calendar-printing (6.22.1-15) unstable; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 13 May 2013 11:46:43 +0200
+
+open-xchange-calendar-printing (6.22.1-14) unstable; urgency=low
+
+  * Build for patch 2013-04-04
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 02 Apr 2013 09:09:59 +0200
+
 open-xchange-calendar-printing (6.22.1-13) unstable; urgency=low
 
   * Build for patch 2013-03-07
@@ -291,6 +333,18 @@ open-xchange-calendar-printing (6.22.1-0) unstable; urgency=low
   * prepare for 6.22.1
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 26 Oct 2012 10:03:33 +0200
+
+open-xchange-calendar-printing (6.22.0-11) unstable; urgency=low
+
+  * Build for patch 2013-05-09
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 13 May 2013 14:05:41 +0200
+
+open-xchange-calendar-printing (6.22.0-10) unstable; urgency=low
+
+  * Build for patch 2013-04-04
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 02 Apr 2013 11:07:07 +0200
 
 open-xchange-calendar-printing (6.22.0-9) unstable; urgency=low
 

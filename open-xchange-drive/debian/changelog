@@ -1,0 +1,11 @@
+open-xchange-drive (7.4.0-0) unstable; urgency=low
+
+  * prepare for 7.4.0
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Mon, 15 Apr 2013 10:28:36 +0200
+
+open-xchange-drive (7.0.1-0) unstable; urgency=low
+
+  * Initial release
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Tue, 09 Apr 2012 16:46:32 +0200

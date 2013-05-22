@@ -106,9 +106,7 @@ public final class SetAttributeAction extends AbstractUserAction {
              * Parse attribute JSON object
              */
             final JSONObject jData = (JSONObject) request.getData();
-            /*
-             * Perform update
-             */
+            // Check if we are allowed to overwrite an existing attribute.
             final String name = jData.getString("name");
             final Context context = session.getContext();
             if (setIfAbsent) {
@@ -117,13 +115,22 @@ public final class SetAttributeAction extends AbstractUserAction {
                     return new AJAXRequestResult(Boolean.FALSE);
                 }
             }
-            /*
-             * Set
-             */
-            userService.setUserAttribute(name, jData.get("value").toString(), id, context);
-            /*
-             * Return
-             */
+            // Parse the value.
+            Object tmp = jData.opt("value");
+            final String value;
+            if (null == tmp) {
+                // HTTP/JSON API allows to omit the value attribute in the JSON object.
+                value = null;
+            } else if (JSONObject.NULL.equals(tmp)) {
+                // HTTP/JSON API allows to sent JSON null for the value of the attribute.
+                value = null;
+            } else {
+                // Normal new value for the attribute.
+                value = tmp.toString();
+            }
+            // Apply the parsed value.
+            userService.setUserAttribute(name, value, id, context);
+            // Return
             return new AJAXRequestResult(Boolean.TRUE);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());

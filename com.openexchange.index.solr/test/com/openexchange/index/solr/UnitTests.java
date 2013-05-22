@@ -66,7 +66,6 @@ import org.junit.runners.Suite.SuiteClasses;
     SolrAttachmentSearchTermVisitorTest.class,
     SimpleQueryBuilderTest.class,
     MailSolrIndexAccessTest.class,
-    AddressComparatorTest.class,
     XMLBasedFieldConfigurationTest.class,
     SolrMailDocumentConverterTest.class,
     SolrAttachmentDocumentConverterTest.class

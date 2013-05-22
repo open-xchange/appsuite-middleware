@@ -51,14 +51,41 @@ package com.openexchange.config.cascade;
 
 import com.openexchange.exception.OXException;
 
-
 /**
- * {@link ConfigViewFactory}
+ * {@link ConfigViewFactory} - The factory to yield {@link ConfigView}s.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ConfigViewFactory {
+
+    /**
+     * Gets a user-specific configuration view in following order:
+     * <ol>
+     * <li>USER; if not available, falls-back to:</li>
+     * <li>CONTEXT; if not available, falls-back to:</li>
+     * <li>SERVER</li>
+     * </ol>
+     *
+     * @param user The user identifier
+     * @param context The context identifier
+     * @return The user-sensitive configuration view
+     * @throws OXException If user-sensitive configuration view cannot be returned
+     */
     public ConfigView getView(int user, int context) throws OXException;
+
+    /**
+     * Gets a server/global configuration view.
+     *
+     * @return The configuration view
+     * @throws OXException If configuration view cannot be returned
+     */
     public ConfigView getView() throws OXException;
+
+    /**
+     * The search path order.
+     *
+     * @return The search path order
+     * @throws OXException If search path cannot be returned
+     */
     public String[] getSearchPath() throws OXException;
 }

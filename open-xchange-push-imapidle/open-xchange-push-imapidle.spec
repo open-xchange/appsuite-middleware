@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-imap
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 8
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -59,12 +59,16 @@ Build for patch 2013-05-10
 Build for patch 2013-05-09
 * Fri May 03 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-04-23
+* Tue Apr 30 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-04-17
 * Fri Apr 12 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-04-12
 * Wed Apr 10 2013 Carsten Hoeger <choeger@open-xchange.com>
 Fourth candidate for 7.2.0 release
 * Tue Apr 09 2013 Carsten Hoeger <choeger@open-xchange.com>
 Third candidate for 7.2.0 release
+* Tue Apr 02 2013 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2013-04-04
 * Tue Apr 02 2013 Carsten Hoeger <choeger@open-xchange.com>
 Second candidate for 7.2.0 release
 * Tue Apr 02 2013 Carsten Hoeger <choeger@open-xchange.com>

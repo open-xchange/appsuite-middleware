@@ -222,6 +222,9 @@ public class InfostoreAdapterFileAccess implements FileStorageIgnorableVersionFi
 
     @Override
     public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+        if (modifiedFields.contains(Field.URL)) {
+            checkUrl(file);
+        }
         getInfostore(file.getFolderId()).saveDocument(
             new FileMetadata(file),
             data,

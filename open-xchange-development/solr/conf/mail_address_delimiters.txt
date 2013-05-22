@@ -1,0 +1,3 @@
+. => ALPHA
+- => ALPHA
+_ => ALPHA

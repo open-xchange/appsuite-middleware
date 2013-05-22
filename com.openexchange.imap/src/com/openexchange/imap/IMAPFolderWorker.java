@@ -351,9 +351,14 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             closeOtherFolders();
         }
         final boolean isDefaultFolder = DEFAULT_FOLDER_ID.equals(fullName);
+        final boolean isIdenticalFolder;
+        if (isDefaultFolder) {
+            isIdenticalFolder = (imapFolder == null ? false : 0 == imapFolder.getFullName().length());
+        } else {
+            isIdenticalFolder = (imapFolder == null ? false : fullName.equals(imapFolder.getFullName()));
+        }
         if (imapFolder != null) {
             final String imapFolderFullname = imapFolder.getFullName();
-            final boolean isIdenticalFolder = isDefaultFolder ? 0 == imapFolderFullname.length() : fullName.equals(imapFolderFullname);
             /*
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */

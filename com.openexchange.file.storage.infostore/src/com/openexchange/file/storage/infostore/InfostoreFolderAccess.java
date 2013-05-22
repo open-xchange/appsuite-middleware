@@ -212,6 +212,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
         final ParsedFolder folder = new ParsedFolder();
         folder.setID(folderId);
         folder.setParentID(newParentId);
+        folder.setTreeID(REAL_TREE_ID);
         service.updateFolder(folder, null, session, null);
         return folder.getNewID() == null ? folderId : folder.getNewID();
     }
@@ -222,6 +223,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess {
         final ParsedFolder folder = new ParsedFolder();
         folder.setID(folderId);
         folder.setName(newName);
+        folder.setTreeID(REAL_TREE_ID);
         service.updateFolder(folder, null, session, null);
         return folder.getNewID() == null ? folderId : folder.getNewID();
     }

@@ -49,6 +49,8 @@
 
 package com.openexchange.config.cascade.context.matching;
 
+import com.openexchange.java.Strings;
+
 /**
  * {@link ContextSetTermParser}
  *
@@ -184,7 +186,7 @@ public class ContextSetTermParser {
             com.openexchange.java.StringAllocator tagBuilder = new com.openexchange.java.StringAllocator();
             while (index < length) {
                 char ch = string.charAt(index++);
-                if (Character.isWhitespace(ch)) {
+                if (Strings.isWhitespace(ch)) {
                     if (!finishTag(tagBuilder)) {
                         continue;
                     }

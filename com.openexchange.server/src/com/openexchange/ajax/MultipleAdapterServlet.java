@@ -66,6 +66,7 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedPushbackReader;
 import com.openexchange.log.LogFactory;
 import com.openexchange.multiple.MultipleHandler;
@@ -224,10 +225,10 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
             return false;
         }
         int i = 0;
-        if (Character.isWhitespace(toCheck.charAt(i))) {
+        if (Strings.isWhitespace(toCheck.charAt(i))) {
             do {
                 i++;
-            } while (i < len && Character.isWhitespace(toCheck.charAt(i)));
+            } while (i < len && Strings.isWhitespace(toCheck.charAt(i)));
         }
         if (i >= len) {
             return false;

@@ -77,6 +77,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
@@ -446,7 +447,7 @@ public final class HtmlProcessing {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }
@@ -710,7 +711,7 @@ public final class HtmlProcessing {
                     /*
                      * Continue only if next starting position is equal to offset or if just one whitespace character has been skipped
                      */
-                    next = ((offset == pos) || ((pos - offset == 1) && Character.isWhitespace(line.charAt(offset))));
+                    next = ((offset == pos) || ((pos - offset == 1) && Strings.isWhitespace(line.charAt(offset))));
                     if (next) {
                         currentLevel++;
                         offset = (pos + 4);
@@ -719,7 +720,7 @@ public final class HtmlProcessing {
             }
             if (offset > 0) {
                 try {
-                    offset = (offset < line.length()) && Character.isWhitespace(line.charAt(offset)) ? offset + 1 : offset;
+                    offset = (offset < line.length()) && Strings.isWhitespace(line.charAt(offset)) ? offset + 1 : offset;
                 } catch (final StringIndexOutOfBoundsException e) {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace(e.getMessage(), e);

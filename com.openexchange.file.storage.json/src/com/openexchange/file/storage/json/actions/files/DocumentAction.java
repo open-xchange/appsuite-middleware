@@ -92,7 +92,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         final File fileMetadata = fileAccess.getFileMetadata(id, version);
 
         final IFileHolder.InputStreamClosure isClosure = new IFileHolder.InputStreamClosure() {
-            
+
             @Override
             public InputStream newStream() throws OXException, IOException {
                 return new BufferedInputStream(fileAccess.getDocument(id, version));
@@ -104,7 +104,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
         createAndSetETag(fileMetadata, request, result);
 
-		return result;
+        return result;
     }
 
 	private void createAndSetETag(File fileMetadata, InfostoreRequest request, AJAXRequestResult result) throws OXException {

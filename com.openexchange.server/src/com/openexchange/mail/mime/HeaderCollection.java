@@ -70,6 +70,7 @@ import javax.mail.internet.MimeUtility;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.java.CharsetDetector;
@@ -888,7 +889,7 @@ public class HeaderCollection implements Serializable {
             }
             for (int i = 0; i < length; i++) {
                 final char c = str.charAt(i);
-                if (Character.isWhitespace(c) || (c >= 128)) {
+                if ((c >= 128) || Strings.isWhitespace(c)) {
                     /*
                      * Whitespace or non-ascii character
                      */
@@ -934,7 +935,7 @@ public class HeaderCollection implements Serializable {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

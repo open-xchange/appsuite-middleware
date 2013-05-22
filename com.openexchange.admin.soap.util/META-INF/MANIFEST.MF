@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Admin SOAP Util Bundle
 Bundle-SymbolicName: com.openexchange.admin.soap.util
-Bundle-Version: 7.2.0
+Bundle-Version: 7.4.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.admin.rmi,
@@ -10,6 +10,7 @@ Import-Package: com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.exceptions,
  com.openexchange.admin.rmi.extensions,
  com.openexchange.exception,
+ com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,

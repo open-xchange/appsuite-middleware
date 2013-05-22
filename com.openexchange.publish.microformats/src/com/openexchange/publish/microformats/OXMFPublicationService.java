@@ -193,6 +193,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
     public void beforeUpdate(final Publication publication) throws OXException {
         super.beforeUpdate(publication);
         final Publication oldPublication = loadInternally(publication.getContext(), publication.getId());
+        publication.getConfiguration().remove(URL);
         addSecretIfNeeded(publication, oldPublication);
         removeSecretIfNeeded(publication);
     }
@@ -201,6 +202,14 @@ public class OXMFPublicationService extends AbstractPublicationService {
     public void modifyOutgoing(final Publication publication) throws OXException {
         super.modifyOutgoing(publication);
 
+        updateUrl(publication);
+
+        publication.getConfiguration().remove(SECRET);
+
+        publication.setDisplayName( (String) publication.getConfiguration().get(SITE));
+    }
+
+    private void updateUrl(final Publication publication) {
         final Map<String, Object> configuration = publication.getConfiguration();
 
         final StringBuilder urlBuilder = new StringBuilder(rootURL);
@@ -211,10 +220,6 @@ public class OXMFPublicationService extends AbstractPublicationService {
         }
 
         publication.getConfiguration().put(URL, urlBuilder.toString());
-
-        publication.getConfiguration().remove(SECRET);
-
-        publication.setDisplayName( (String) publication.getConfiguration().get(SITE));
     }
 
     protected String normalizeSiteName(final String siteName) {

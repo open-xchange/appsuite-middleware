@@ -71,4 +71,9 @@ public interface Topic<E> extends MessageDispatcher<E> {
      */
     void publish(E message);
 
+    /**
+     * Cancels this topic.
+     */
+    void cancel();
+
 }

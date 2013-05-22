@@ -51,11 +51,13 @@ package com.openexchange.index.solr.internal.mail;
 
 import static com.openexchange.index.solr.internal.LuceneQueryTools.buildQueryStringWithOr;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrInputDocument;
@@ -71,15 +73,16 @@ import com.openexchange.index.QueryParameters.Order;
 import com.openexchange.index.solr.internal.AbstractSolrIndexAccess;
 import com.openexchange.index.solr.internal.config.FieldConfiguration;
 import com.openexchange.index.solr.internal.querybuilder.SolrQueryBuilder;
+import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.index.MailIndexField;
 import com.openexchange.mail.index.MailUUID;
+import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.solr.SolrCoreIdentifier;
-
 
 /**
  * {@link SolrMailIndexAccess}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
@@ -88,12 +91,15 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
 
     private final SolrMailDocumentConverter converter;
 
+    private final Locale userLocale;
+
     /**
      * Initializes a new {@link SolrMailIndexAccess}.
      */
-    public SolrMailIndexAccess(SolrCoreIdentifier identifier, SolrQueryBuilder queryBuilder, FieldConfiguration fieldConfig) {
+    public SolrMailIndexAccess(SolrCoreIdentifier identifier, SolrQueryBuilder queryBuilder, FieldConfiguration fieldConfig, Locale userLocale) {
         super(identifier, fieldConfig);
         this.queryBuilder = queryBuilder;
+        this.userLocale = userLocale;
         converter = new SolrMailDocumentConverter(fieldConfig);
     }
 
@@ -156,25 +162,35 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
         IndexField sortField = parameters.getSortField();
         Order order = parameters.getOrder();
         boolean sortManually = false;
+        Set<IndexField> modifiedFields;
+        if (fields == null) {
+            modifiedFields = new HashSet<IndexField>(Arrays.asList(MailIndexField.values()));
+        } else {
+            modifiedFields = new HashSet<IndexField>(fields);
+        }
+        
         QueryParameters newParameters = parameters;
-        if (sortField != null && (sortField instanceof MailIndexField)) {
-            if (sortField.equals(MailIndexField.FROM) || sortField.equals(MailIndexField.TO)
-               || sortField.equals(MailIndexField.CC) || sortField.equals(MailIndexField.BCC)) {
-                sortManually = true;
-                newParameters = new QueryParameters.Builder()
-                                                    .setSearchTerm(parameters.getSearchTerm())
-                                                    .setHandler(parameters.getHandler())
-                                                    .setAccountFolders(parameters.getAccountFolders())
-                                                    .setIndexIds(parameters.getIndexIds())
-                                                    .setModule(parameters.getModule())
-                                                    .setOffset(parameters.getOff())
-                                                    .setLength(parameters.getLen())
-                                                    .build();
+        if (sortField != null) {
+            modifiedFields.add(sortField);
+            if (sortField instanceof MailIndexField) {
+                if (sortField.equals(MailIndexField.FROM) || sortField.equals(MailIndexField.TO)
+                    || sortField.equals(MailIndexField.CC) || sortField.equals(MailIndexField.BCC)) {
+                    sortManually = true;
+                    newParameters = new QueryParameters.Builder()
+                        .setSearchTerm(parameters.getSearchTerm())
+                        .setHandler(parameters.getHandler())
+                        .setAccountFolders(parameters.getAccountFolders())
+                        .setIndexIds(parameters.getIndexIds())
+                        .setModule(parameters.getModule())
+                        .setOffset(parameters.getOff())
+                        .setLength(parameters.getLen())
+                        .build();
+                }
             }
         }
 
         SolrQuery solrQuery = queryBuilder.buildQuery(newParameters);
-        setFieldList(solrQuery, fields);
+        setFieldList(solrQuery, modifiedFields);
         IndexResult<MailMessage> indexResult = queryChunkWise(
             fieldConfig.getUUIDField(),
             converter,
@@ -182,15 +198,26 @@ public class SolrMailIndexAccess extends AbstractSolrIndexAccess<MailMessage> {
             newParameters.getOff(),
             newParameters.getLen(),
             100);
-        
+
         if (indexResult.equals(Indexes.emptyResult())) {
             return indexResult;
         }
 
         if (sortManually) {
-            Collections.sort(indexResult.getResults(), new AddressComparator((MailIndexField) sortField, order));
+            MailIndexField mailSortField = (MailIndexField) sortField;
+            if (mailSortField.hasMailField() && mailSortField.getMailField().getListField() != null) {
+                MailSortField compareField = MailSortField.getField(mailSortField.getMailField().getListField().getField());
+                if (compareField != null) {
+                    boolean orderDesc = order == null ? false : order == Order.DESC ? true : false;
+                    MailDocumentComparator documentComparator = new MailDocumentComparator(new MailMessageComparator(
+                        compareField,
+                        orderDesc,
+                        userLocale));
+                    Collections.sort(indexResult.getResults(), documentComparator);
+                }
+            }
         }
-        
+
         return indexResult;
     }
 

@@ -65,6 +65,7 @@ import com.openexchange.http.grizzly.GrizzlyConfig;
 import com.openexchange.http.grizzly.http.servlet.HttpServletRequestWrapper;
 import com.openexchange.http.grizzly.http.servlet.HttpServletResponseWrapper;
 import com.openexchange.http.grizzly.util.IPTools;
+import com.openexchange.log.ForceLog;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.log.LogProperties;
@@ -73,7 +74,7 @@ import com.openexchange.log.Props;
 /**
  * {@link WrappingFilter} - Wrap the Request in {@link HttpServletResponseWrapper} and the Response in {@link HttpServletResponseWrapper}
  * and creates a new HttpSession and do various tasks to achieve feature parity with the ajp based implementation.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class WrappingFilter implements Filter {
@@ -136,6 +137,13 @@ public class WrappingFilter implements Filter {
                 }
                  protocol = httpServletRequest.getScheme();
             }
+
+            if(!isValidProtocol(protocol)) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Could not detect a valid protocol header value in " + protocol + ", falling back to default");
+                }
+                 protocol = httpServletRequest.getScheme();
+            }
             
             if (remoteIP.isEmpty()) {
                 if (LOG.isDebugEnabled()) {
@@ -144,9 +152,9 @@ public class WrappingFilter implements Filter {
                 }
                 remoteIP = httpServletRequest.getRemoteAddr();
             }
-            
+
             httpServletRequestWrapper = new HttpServletRequestWrapper(protocol, remoteIP, httpServletRequest.getServerPort(), httpServletRequest);
-            
+
         } else {
             httpServletRequestWrapper = new HttpServletRequestWrapper(httpServletRequest);
         }
@@ -166,6 +174,7 @@ public class WrappingFilter implements Filter {
 
             // Remote infos
             logProperties.put(LogProperties.Name.GRIZZLY_REMOTE_PORT, httpServletRequestWrapper.getRemotePort());
+            logProperties.put(LogProperties.Name.GRIZZLY_REMOTE_ADDRESS, ForceLog.valueOf(httpServletRequestWrapper.getRemoteAddr()));
             logProperties.put(LogProperties.Name.GRIZZLY_REQUEST_IP, httpServletRequestWrapper.getRemoteAddr());
 
             // Names, addresses
@@ -181,7 +190,7 @@ public class WrappingFilter implements Filter {
 
         chain.doFilter(httpServletRequestWrapper, httpServletResponseWrapper);
     }
-    
+
     private boolean isValidProtocol(String protocolHeaderValue) {
         return HTTP_SCHEME.equals(protocolHeaderValue) || HTTPS_SCHEME.equals(protocolHeaderValue);
     }

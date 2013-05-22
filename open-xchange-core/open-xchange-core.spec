@@ -9,7 +9,7 @@ BuildRequires: open-xchange-log4j
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 9
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0 
@@ -213,6 +213,13 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
            fi
        done
     fi
+fi
+
+# SoftwareChange_Request-1458
+# -----------------------------------------------------------------------
+pfile=/opt/open-xchange/etc/mail.properties
+if ! ox_exists_property com.openexchange.mail.maxMailSize $pfile; then
+    ox_set_property com.openexchange.mail.maxMailSize -1 $pfile
 fi
 
 # SoftwareChange_Request-1358
@@ -623,10 +630,18 @@ exit 0
 Build for patch 2013-05-10
 * Mon May 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-05-09
+* Tue May 07 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-05-08
 * Fri May 03 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-23
+* Tue Apr 30 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-04-17
 * Sun Apr 28 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-25
+* Thu Apr 18 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-04-30
+* Wed Apr 17 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-04-09
 * Fri Apr 12 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-12
 * Wed Apr 10 2013 Marcus Klein <marcus.klein@open-xchange.com>
@@ -634,11 +649,15 @@ Fourth candidate for 7.2.0 release
 * Tue Apr 09 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Third candidate for 7.2.0 release
 * Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-04-04
+* Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.2.0 release
 * Tue Apr 02 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-04
 * Tue Mar 26 2013 Marcus Klein <marcus.klein@open-xchange.com>
 First release candidate for 7.2.0
+* Mon Mar 18 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-03-18
 * Mon Mar 18 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-03-18
 * Fri Mar 15 2013 Marcus Klein <marcus.klein@open-xchange.com>

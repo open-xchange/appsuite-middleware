@@ -90,6 +90,7 @@ import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
@@ -570,7 +571,7 @@ public final class HtmlServiceImpl implements HtmlService {
             LOG.warn("Stack-overflow during processing HTML content.", soe);
             // Retry with Tika framework
             try {
-                return extractFrom(new UnsynchronizedByteArrayInputStream(htmlContent.getBytes(Charsets.ISO_8859_1)));
+                return extractFrom(new java.io.ByteArrayInputStream(htmlContent.getBytes(Charsets.ISO_8859_1)));
             } catch (final OXException e) {
                 LOG.error("Error during processing HTML content.", e);
                 return "";
@@ -707,7 +708,7 @@ public final class HtmlServiceImpl implements HtmlService {
         final int len = string.length();
         boolean isWhitespace = true;
         for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
+            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

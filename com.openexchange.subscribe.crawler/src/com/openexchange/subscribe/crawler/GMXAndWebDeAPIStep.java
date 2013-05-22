@@ -257,8 +257,17 @@ public class GMXAndWebDeAPIStep extends AbstractStep<Contact[], Object> implemen
                     if (contactJSON.has("company")) {
                         contact.setCompany(contactJSON.getString("company"));
                     }
+                    
                     //setting the displayname
-                    contact.setDisplayName(contact.getGivenName() + " " + contact.getSurName());
+                    if (contactJSON.has("name") && contactJSON.has("firstName")){
+                    	contact.setDisplayName(contact.getGivenName() + " " + contact.getSurName());
+                    } else if (contactJSON.has("name")){
+                    	contact.setDisplayName(contact.getSurName());
+                    } else if (contactJSON.has("firstName")){
+                    	contact.setDisplayName(contact.getGivenName());
+                    } else {
+                    	contact.setDisplayName("");
+                    }
 
                     if (contactJSON.hasAndNotNull("birthday")/* && JSONObject.NULL != contactJSON.get("birthday")*/) {
                         JSONObject birthdayJSON = contactJSON.getJSONObject("birthday");
