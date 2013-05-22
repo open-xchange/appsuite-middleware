@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json;
 
+import java.io.Closeable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,6 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXState;
 import com.openexchange.ajax.requesthandler.AJAXStateHandler;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.actions.AllAction;
@@ -163,6 +165,7 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
         if (null != mailInterface) {
             mailInterface.close(true);
         }
+        Streams.close(state.<Collection<Closeable>>removeProperty(PROPERTY_CLOSEABLES));
     }
 
 }
