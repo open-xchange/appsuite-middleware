@@ -9196,9 +9196,9 @@ msgstr ""
 msgid "Invoked method is not supported."
 msgstr ""
 
-#. Maximum message is exceeded. Max. is %1$s, but message is %2$s.
+#. Maximum message size is exceeded. Max. is %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:536
-msgid "Maximum message is exceeded. Max. is %1$s, but message is %2$s."
+msgid "Maximum message size is exceeded. Max. is %1$s."
 msgstr ""
 
 #. Re-sending message denied because message is not located in %1$s folder.
