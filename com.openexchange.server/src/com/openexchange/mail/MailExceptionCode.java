@@ -453,6 +453,10 @@ public enum MailExceptionCode implements OXExceptionCode {
      * Maximum message is exceeded. Max. is %1$s, but message is %2$s.
      */
     MAX_MESSAGE_SIZE_EXCEEDED(MailExceptionStrings.MAX_MESSAGE_SIZE_EXCEEDED_MSG, CATEGORY_USER_INPUT, 88),
+    /**
+     * Re-sending message denied because message is not located in %1$s folder.
+     */
+    RESEND_DENIED(MailExceptionStrings.RESEND_DENIED_MSG, CATEGORY_USER_INPUT, 89),
     ;
 
     private static final String PREFIX = "MSG";
