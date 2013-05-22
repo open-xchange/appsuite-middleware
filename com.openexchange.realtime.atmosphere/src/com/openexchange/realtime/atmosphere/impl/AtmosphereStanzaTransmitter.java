@@ -96,7 +96,8 @@ public class AtmosphereStanzaTransmitter implements StanzaTransmitter {
             }
             
             return true;
-            
+        } catch (Throwable t) {
+            return false;
         } finally {
             lock.unlock();
         }
