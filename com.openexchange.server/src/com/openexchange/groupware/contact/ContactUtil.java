@@ -113,7 +113,15 @@ public class ContactUtil {
             return Collections.emptySet();
         }
         final Set<String> set = new HashSet<String>(20);
-        String tmp = contact.getTelephoneAssistant();
+        String tmp = contact.getCellularTelephone1();
+        if (MsisdnCheck.checkMsisdn(tmp)) {
+            set.add(tmp);
+        }
+        tmp = contact.getCellularTelephone2();
+        if (MsisdnCheck.checkMsisdn(tmp)) {
+            set.add(tmp);
+        }
+        tmp = contact.getTelephoneAssistant();
         if (MsisdnCheck.checkMsisdn(tmp)) {
             set.add(tmp);
         }
@@ -179,5 +187,5 @@ public class ContactUtil {
         }
         return set;
     }
-    
+
 }
