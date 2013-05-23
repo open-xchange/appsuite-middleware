@@ -49,6 +49,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/bundles/*
 
 %changelog
+* Wed May 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-05-22
 * Wed May 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-05-10
 * Mon May 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
