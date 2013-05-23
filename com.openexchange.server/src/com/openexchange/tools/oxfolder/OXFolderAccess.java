@@ -566,10 +566,12 @@ public class OXFolderAccess {
     public long getItemCount(final FolderObject fo, final Session session, final Context ctx) throws OXException {
         try {
             final int userId = session.getUserId();
-            final int module = fo.getModule();
-            switch (module) {
+            switch (fo.getModule()) {
             case FolderObject.TASK:
-                return TaskStorage.getInstance().countTasks(ctx, userId, fo.getObjectID(), false, false);
+                {
+                    final boolean isShared = FolderObject.SHARED == fo.getType(userId);
+                    return TaskStorage.getInstance().countTasks(ctx, userId, fo.getObjectID(), false, isShared);
+                }
             case FolderObject.CALENDAR:
                 {
                     // TODO: Implement appointment count

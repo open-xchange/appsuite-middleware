@@ -69,11 +69,17 @@ import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DatabaseFolder} - A database folder.
@@ -90,6 +96,7 @@ public class DatabaseFolder extends AbstractFolder {
 
     private boolean cacheable;
     private final int objectId;
+    private final FolderObject folderObject;
     protected boolean global;
 
     /**
@@ -117,6 +124,7 @@ public class DatabaseFolder extends AbstractFolder {
         super();
         this.cacheable = cacheable;
         global = true;
+        this.folderObject = folderObject;
         objectId = folderObject.getObjectID();
         id = String.valueOf(objectId);
         name = folderObject.getFolderName();
@@ -218,20 +226,36 @@ public class DatabaseFolder extends AbstractFolder {
     public int getTotal() {
         final int module = contentType.getModule();
         if (COUNTABLE_MODULES.contains(module)) {
-            return itemCount(module);
+            return itemCount();
         }
         return super.getTotal();
     }
 
-    private int itemCount(final int module) {
+    private int itemCount() {
         final Props props = LogProperties.optLogProperties();
         final Session session = (Session) (null == props ? null : props.get(LogProperties.Name.SESSION_SESSION));
         if (null != session) {
             try {
-                final FolderObject fo = new FolderObject(objectId);
-                fo.setModule(module);
+                final FolderObject folderObject = this.folderObject;
+                if (session instanceof ServerSession) {
+                    final ServerSession serverSession = (ServerSession) session;
+                    final EffectivePermission permission = folderObject.getEffectiveUserPermission(session.getUserId(), serverSession.getUserConfiguration());
+                    if (permission.getFolderPermission() <= 0 || permission.getReadPermission() <= 0) {
+                        return 0;
+                    }
+                    final Context ctx = serverSession.getContext();
+                    final int count = (int) new OXFolderAccess(ctx).getItemCount(folderObject, session, ctx);
+                    return count < 0 ? super.getTotal() : count;
+                }
                 final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-                final int count = (int) new OXFolderAccess(ctx).getItemCount(fo, session, ctx);
+                final int userId = session.getUserId();
+                final User user = UserStorage.getStorageUser(userId, ctx);
+                final UserConfiguration userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(userId, user.getGroups(), ctx);
+                final EffectivePermission permission = folderObject.getEffectiveUserPermission(userId, userConfiguration);
+                if (permission.getFolderPermission() <= 0 || permission.getReadPermission() <= 0) {
+                    return 0;
+                }
+                final int count = (int) new OXFolderAccess(ctx).getItemCount(folderObject, session, ctx);
                 return count < 0 ? super.getTotal() : count;
             } catch (final OXException e) {
                 // Ignore
