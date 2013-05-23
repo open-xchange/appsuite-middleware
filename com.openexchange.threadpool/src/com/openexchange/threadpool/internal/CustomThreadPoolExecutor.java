@@ -1185,8 +1185,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             lineSeparator = System.getProperty("line.separator");
             tasks = new NonBlockingHashMap<Long, TaskInfo>(8192);
             final ConfigurationService service = ThreadPoolServiceRegistry.getService(ConfigurationService.class);
-            minWaitTime = null == service ? 20000L : service.getIntProperty("AJP_WATCHER_FREQUENCY", 20000);
-            maxRunningTime = null == service ? 60000L : service.getIntProperty("AJP_WATCHER_MAX_RUNNING_TIME", 60000);
+            minWaitTime = null == service ? 20000L : service.getIntProperty("com.openexchange.requestwatcher.frequency", 20000);
+            maxRunningTime = null == service ? 60000L : service.getIntProperty("com.openexchange.requestwatcher.maxRequestAge", 60000);
         }
 
         void stopWhenFinished() {
@@ -1218,6 +1218,9 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         @Override
         public void run() {
             try {
+                final String lineSeparator = this.lineSeparator;
+                final long maxRunningTime = this.maxRunningTime;
+                final TaskInfo poison = this.poison;
                 for (;;) {
                     try {
                         Thread.sleep(minWaitTime);
