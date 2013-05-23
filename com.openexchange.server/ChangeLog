@@ -1,3 +1,7 @@
+* 2013-05-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26760: Fixed possible ArrayIndexOutOfBoundsException
+
 * 2013-05-07 - marcus.klein@open-xchange.com
 
  - Fix for bug 26431: Properly accepting not existing value or a JSON null value when setting a user attribute.

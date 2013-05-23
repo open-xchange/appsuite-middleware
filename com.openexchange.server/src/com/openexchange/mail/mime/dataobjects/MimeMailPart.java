@@ -274,6 +274,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      *
      * @return The {@link Part part} or <code>null</code>
      */
+    @Override
     public Part getPart() {
         return part;
     }
@@ -794,6 +795,9 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @return The stripped byte array
      */
     private static byte[] stripEmptyStartingLine(final byte[] data) {
+        if (null == data || data.length <= 1) {
+            return data;
+        }
         /*
          * Starts with an empty line?
          */
