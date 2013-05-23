@@ -5,7 +5,13 @@ Bundle-SymbolicName: com.openexchange.test
 Bundle-Version: 6.21.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-ClassPath: lib/json.jar,
- .,
+Bundle-ClassPath: .,
+ lib/json.jar,
  lib/jchronic-0.2.3.jar,
- lib/junit-4.6.jar
+ lib/junit-4.6.jar,
+ lib/cglib-nodep-2.2.jar,
+ lib/javassist-3.17.1-GA.jar,
+ lib/junit-addons-1.4.jar,
+ lib/mockito-all-1.9.5.jar,
+ lib/objenesis-1.2.jar,
+ lib/powermock-mockito-1.5-full.jar
