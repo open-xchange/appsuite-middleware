@@ -102,8 +102,6 @@ public final class DownloadUtility {
         return checkInlineDownload(inputStream, fileName, contentTypeStr, null, userAgent);
     }
 
-    private static final String MIME_APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
-
     /**
      * Checks specified input stream intended for inline display for harmful data if its Content-Type indicates image content.
      *
@@ -116,13 +114,32 @@ public final class DownloadUtility {
      * @throws OXException If checking download fails
      */
     public static CheckedDownload checkInlineDownload(final InputStream inputStream, final String fileName, final String sContentType, final String overridingDisposition, final String userAgent) throws OXException {
+        return checkInlineDownload(inputStream, -1L, fileName, sContentType, overridingDisposition, userAgent);
+    }
+
+
+    private static final String MIME_APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
+
+    /**
+     * Checks specified input stream intended for inline display for harmful data if its Content-Type indicates image content.
+     *
+     * @param inputStream The input stream
+     * @param size The size of the passed stream
+     * @param fileName The file name
+     * @param sContentType The <i>Content-Type</i> string
+     * @param overridingDisposition Optionally overrides the <i>Content-Disposition</i> header
+     * @param userAgent The <i>User-Agent</i>
+     * @return The checked download providing input stream, content type, and content disposition to use
+     * @throws OXException If checking download fails
+     */
+    public static CheckedDownload checkInlineDownload(final InputStream inputStream, final long sizer, final String fileName, final String sContentType, final String overridingDisposition, final String userAgent) throws OXException {
         try {
             /*
              * We are supposed to let the client display the attachment. Therefore set attachment's Content-Type and inline disposition to let
              * the client decide if it's able to display.
              */
             final ContentType contentType = new ContentType(sContentType);
-            if (contentType.startsWith(MIME_APPL_OCTET)) {
+            if ((null != fileName) && contentType.startsWith(MIME_APPL_OCTET)) {
                 /*
                  * Try to determine MIME type
                  */
@@ -132,9 +149,13 @@ public final class DownloadUtility {
                 contentType.setSubType(ct.substring(pos + 1));
             }
             String sContentDisposition = overridingDisposition;
+            long sz = sizer;
             InputStream in = inputStream;
+            // Some variables
             String fn = fileName;
-            if (contentType.startsWith("text/htm") || fileNameImpliesHtml(fileName)) {
+            byte[] bytes;
+            // Check by Content-Type and file name
+            if (contentType.startsWith("text/htm")) {
                 /*
                  * HTML content requested for download...
                  */
@@ -144,18 +165,20 @@ public final class DownloadUtility {
                     /*
                      * Sanitizing of HTML content needed
                      */
-                    final ByteArrayOutputStream bytes = Streams.stream2ByteArrayOutputStream(in);
+                    final ByteArrayOutputStream baos = Streams.stream2ByteArrayOutputStream(in);
                     final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
                     String cs = contentType.getCharsetParameter();
                     if (!CharsetDetector.isValid(cs)) {
-                        cs = CharsetDetector.detectCharset(Streams.asInputStream(bytes));
+                        cs = CharsetDetector.detectCharset(Streams.asInputStream(baos));
                         if ("US-ASCII".equalsIgnoreCase(cs)) {
                             cs = "ISO-8859-1";
                         }
                     }
-                    String htmlContent = bytes.toString(cs);
+                    String htmlContent = baos.toString(cs);
                     htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
-                    in = Streams.newByteArrayInputStream(htmlContent.getBytes(Charsets.forName(cs)));
+                    final byte[] tmp = htmlContent.getBytes(Charsets.forName(cs));
+                    sz = tmp.length;
+                    in = Streams.newByteArrayInputStream(tmp);
                 }
             } else if (contentType.startsWith("image/") || fileNameImpliesImage(fileName)) {
                 /*
@@ -188,7 +211,7 @@ public final class DownloadUtility {
                          * Check for HTML since no corresponding file extension is known
                          */
                         if (HTMLDetector.containsHTMLTags(sequence)) {
-                            return asAttachment(inputStream, preparedFileName);
+                            return asAttachment(inputStream, preparedFileName, sz);
                         }
                     } else {
                         final Set<String> extensions = new HashSet<String>(MimeType2ExtMap.getFileExtensions(contentType.getBaseType()));
@@ -202,7 +225,7 @@ public final class DownloadUtility {
                                  * No content type known
                                  */
                                 if (HTMLDetector.containsHTMLTags(sequence)) {
-                                    return asAttachment(inputStream, preparedFileName);
+                                    return asAttachment(inputStream, preparedFileName, sz);
                                 }
                             } else {
                                 final int pos = ct.indexOf('/');
@@ -222,7 +245,7 @@ public final class DownloadUtility {
                              * Unknown magic bytes. Check for HTML.
                              */
                             if (HTMLDetector.containsHTMLTags(sequence)) {
-                                return asAttachment(inputStream, preparedFileName);
+                                return asAttachment(inputStream, preparedFileName, sz);
                             }
                         } else if (!contentType.isMimeType(detectedCT)) {
                             /*
@@ -232,24 +255,52 @@ public final class DownloadUtility {
                         }
                     }
                     /*
-                     * New combined input stream
+                     * New combined input stream (with original size)
                      */
                     in = new CombinedInputStream(sequence, in);
                 }
+            } else if (fileNameImpliesHtml(fileName) && HTMLDetector.containsHTMLTags((bytes = Streams.stream2bytes(in)))) {
+                /*
+                 * HTML content requested for download...
+                 */
+                if (null == sContentDisposition) {
+                    sContentDisposition = "attachment";
+                } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
+                    /*
+                     * Sanitizing of HTML content needed
+                     */
+                    final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                    String cs = contentType.getCharsetParameter();
+                    if (!CharsetDetector.isValid(cs)) {
+                        cs = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
+                        if ("US-ASCII".equalsIgnoreCase(cs)) {
+                            cs = "ISO-8859-1";
+                        }
+                    }
+                    String htmlContent = new String(bytes, Charsets.forName(cs));
+                    htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
+                    final byte[] tmp = htmlContent.getBytes(Charsets.forName(cs));
+                    sz = tmp.length;
+                    in = Streams.newByteArrayInputStream(tmp);
+                }
             }
+            /*
+             * Create return value
+             */
             final CheckedDownload retval;
             if (sContentDisposition == null) {
-                final String baseType = contentType.getBaseType();
                 final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append("attachment");
-                appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : baseType, userAgent, builder);
-                retval = new CheckedDownload(baseType, builder.toString(), in);
+                appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : contentType.toString(), userAgent, builder);
+                contentType.removeParameter("name");
+                retval = new CheckedDownload(contentType.toString(), builder.toString(), in, sz);
             } else if (sContentDisposition.indexOf(';') < 0) {
-                final String baseType = contentType.getBaseType();
                 final com.openexchange.java.StringAllocator builder = new com.openexchange.java.StringAllocator(32).append(sContentDisposition);
-                appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : baseType, userAgent, builder);
-                retval = new CheckedDownload(baseType, builder.toString(), in);
+                appendFilenameParameter(fileName, contentType.isBaseType("application", "octet-stream") ? null : contentType.toString(), userAgent, builder);
+                contentType.removeParameter("name");
+                retval = new CheckedDownload(contentType.toString(), builder.toString(), in, sz);
             } else {
-                retval =  new CheckedDownload(contentType.getBaseType(), sContentDisposition, in);
+                contentType.removeParameter("name");
+                retval = new CheckedDownload(contentType.toString(), sContentDisposition, in, sz);
             }
             return retval;
         } catch (final UnsupportedEncodingException e) {
@@ -260,11 +311,27 @@ public final class DownloadUtility {
     }
 
     private static boolean fileNameImpliesHtml(final String fileName) {
-        return MimeType2ExtMap.getContentType(fileName).startsWith("text/htm");
+        return null != fileName && MimeType2ExtMap.getContentType(fileName).startsWith("text/htm");
     }
 
     private static boolean fileNameImpliesImage(final String fileName) {
-        return MimeType2ExtMap.getContentType(fileName).startsWith("image/");
+        return null != fileName && MimeType2ExtMap.getContentType(fileName).startsWith("image/");
+    }
+
+    /**
+     * Appends the <tt>"filename"</tt> parameter to specified {@link StringBuilder} instance; e.g.
+     *
+     * <pre>
+     * "attachment; filename="readme.txt"
+     *            ^---------------------^
+     * </pre>
+     *
+     * @param fileName The file name
+     * @param userAgent The user agent identifier
+     * @param appendTo The {@link StringBuilder} instance to append to
+     */
+    public static void appendFilenameParameter(final String fileName, final String userAgent, final StringBuilder appendTo) {
+        appendFilenameParameter(fileName, null, userAgent, appendTo);
     }
 
     /**
@@ -308,17 +375,33 @@ public final class DownloadUtility {
          * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-8859-1
          */
         String foo = new String(fn.getBytes(Charsets.UTF_8), Charsets.ISO_8859_1);
-        final boolean isAndroid = (null != userAgent && userAgent.toLowerCase(Locale.ENGLISH).indexOf("android") >= 0);
+        final boolean isAndroid = (null != userAgent && toLowerCase(userAgent).indexOf("android") >= 0);
         if (isAndroid) {
             // myfile.dat => myfile.DAT
             final int pos = foo.lastIndexOf('.');
             if (pos >= 0) {
-                foo = foo.substring(0, pos) + foo.substring(pos).toUpperCase(Locale.ENGLISH);
+                foo = foo.substring(0, pos) + toUpperCase(foo.substring(pos));
             }
         } else {
             appendTo.append("; filename*=UTF-8''").append(URLCoder.encode(fn));
         }
         appendTo.append("; filename=\"").append(foo).append('"');
+    }
+
+    /**
+     * Appends the <tt>"filename"</tt> parameter to specified {@link StringBuilder} instance; e.g.
+     *
+     * <pre>
+     * "attachment; filename="readme.txt"
+     *            ^---------------------^
+     * </pre>
+     *
+     * @param fileName The file name
+     * @param userAgent The user agent identifier
+     * @param appendTo The {@link com.openexchange.java.StringAllocator} instance to append to
+     */
+    public static void appendFilenameParameter(final String fileName, final String userAgent, final com.openexchange.java.StringAllocator appendTo) {
+        appendFilenameParameter(fileName, null, userAgent, appendTo);
     }
 
     /**
@@ -362,12 +445,12 @@ public final class DownloadUtility {
          * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-8859-1
          */
         String foo = new String(fn.getBytes(Charsets.UTF_8), Charsets.ISO_8859_1);
-        final boolean isAndroid = (null != userAgent && userAgent.toLowerCase(Locale.ENGLISH).indexOf("android") >= 0);
+        final boolean isAndroid = (null != userAgent && toLowerCase(userAgent).indexOf("android") >= 0);
         if (isAndroid) {
             // myfile.dat => myfile.DAT
             final int pos = foo.lastIndexOf('.');
             if (pos >= 0) {
-                foo = foo.substring(0, pos) + foo.substring(pos).toUpperCase(Locale.ENGLISH);
+                foo = foo.substring(0, pos) + toUpperCase(foo.substring(pos));
             }
         } else {
             appendTo.append("; filename*=UTF-8''").append(URLCoder.encode(fn));
@@ -383,12 +466,12 @@ public final class DownloadUtility {
         return PAT_QUOTE.matcher(PAT_BSLASH.matcher(str).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"");
     }
 
-    private static CheckedDownload asAttachment(final InputStream inputStream, final String preparedFileName) {
+    private static CheckedDownload asAttachment(final InputStream inputStream, final String preparedFileName, final long size) {
         /*
          * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.
          */
         return new CheckedDownload(MIME_APPL_OCTET, new com.openexchange.java.StringAllocator(64).append("attachment; filename=\"").append(
-            preparedFileName).append('"').toString(), inputStream);
+            preparedFileName).append('"').toString(), inputStream, size);
     }
 
     // private static final Pattern P = Pattern.compile("^[\\w\\d\\:\\/\\.]+(\\.\\w{3,4})$");
@@ -470,16 +553,25 @@ public final class DownloadUtility {
     public static final class CheckedDownload {
 
         private final String contentType;
-
         private final String contentDisposition;
-
         private final InputStream inputStream;
+        private final long size;
 
-        CheckedDownload(final String contentType, final String contentDisposition, final InputStream inputStream) {
+        CheckedDownload(final String contentType, final String contentDisposition, final InputStream inputStream, final long size) {
             super();
             this.contentType = contentType;
             this.contentDisposition = contentDisposition;
             this.inputStream = inputStream;
+            this.size = size;
+        }
+
+        /**
+         * Gets the size
+         *
+         * @return The size
+         */
+        public long getSize() {
+            return size;
         }
 
         /**
@@ -510,6 +602,7 @@ public final class DownloadUtility {
         }
     }
 
+    /** ASCII-wise to lower-case */
     private static String toLowerCase(final CharSequence chars) {
         if (null == chars) {
             return null;
@@ -519,6 +612,20 @@ public final class DownloadUtility {
         for (int i = 0; i < length; i++) {
             final char c = chars.charAt(i);
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
+    }
+
+    /** ASCII-wise to upper-case */
+    private static String toUpperCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
         }
         return builder.toString();
     }

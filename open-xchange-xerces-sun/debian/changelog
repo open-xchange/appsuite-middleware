@@ -1,3 +1,9 @@
+open-xchange-xerces-sun (7.0.1-8) unstable; urgency=low
+
+  * Build for patch 2013-05-22
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 22 May 2013 12:08:40 +0200
+
 open-xchange-xerces-sun (7.0.1-7) unstable; urgency=low
 
   * Build for patch 2013-05-09
