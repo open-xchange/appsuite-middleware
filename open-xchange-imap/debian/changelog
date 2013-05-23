@@ -1,3 +1,9 @@
+open-xchange-imap (7.2.0-10) UNRELEASED; urgency=low
+
+  * Build for patch 2013-05-22
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 22 May 2013 14:44:18 +0200
+
 open-xchange-imap (7.2.0-9) UNRELEASED; urgency=low
 
   * Build for patch 2013-05-10

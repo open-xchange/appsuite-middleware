@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:	@OXVERSION@
-%define		ox_release 8
+%define		ox_release 9
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -100,6 +100,8 @@ fi
 %attr(640,root,open-xchange) /opt/open-xchange/etc/contacts-ldap/*/*.example
 
 %changelog
+* Wed May 22 2013 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-05-22
 * Wed May 15 2013 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-05-10
 * Mon May 13 2013 Marcus Klein <marcus.klein@open-xchange.com>
