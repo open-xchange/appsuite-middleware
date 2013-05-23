@@ -1,11 +1,11 @@
 
 package com.openexchange.mail.utils;
 
-import static org.junit.Assert.assertEquals;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.mail.internet.InternetAddress;
+import junit.framework.TestCase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +30,7 @@ import com.openexchange.session.Session;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ UserStorage.class, ServerServiceRegistry.class, ContactUtil.class })
-public class MsisdnUtilityTest {
+public class MsisdnUtilityTest extends TestCase {
 
     Session mockedSession = PowerMockito.mock(Session.class);
 
@@ -44,6 +44,7 @@ public class MsisdnUtilityTest {
 
     Contact contact = new Contact();
 
+    @Override
     @Before
     public void setUp() throws OXException {
         PowerMockito.mockStatic(UserStorage.class);

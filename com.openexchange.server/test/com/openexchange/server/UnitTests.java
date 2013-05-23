@@ -55,7 +55,7 @@ import junit.framework.TestSuite;
 
 /**
  * {@link UnitTests}
- *
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class UnitTests {
@@ -74,6 +74,7 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.tools.collections.OXCollectionsTest.class);
         tests.addTestSuite(com.openexchange.tools.iterator.SearchIteratorDelegatorTest.class);
         tests.addTest(new JUnit4TestAdapter(com.openexchange.tools.net.URIParserTest.class));
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.mail.utils.MsisdnUtilityTest.class));
         return tests;
     }
 }
