@@ -73,7 +73,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MailProperties} - Global mail properties read from properties file.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailProperties implements IMailProperties {
@@ -84,7 +84,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the singleton instance of {@link MailProperties}.
-     *
+     * 
      * @return The singleton instance of {@link MailProperties}
      */
     public static MailProperties getInstance() {
@@ -112,11 +112,6 @@ public final class MailProperties implements IMailProperties {
             }
         }
     }
-
-    /**
-     * TODO: Interim flag until feature can be disabled via configuration.
-     */
-    public static final boolean MSISDN_ENABLED = true;
 
     private final AtomicBoolean loaded;
 
@@ -189,6 +184,11 @@ public final class MailProperties implements IMailProperties {
     private String authProxyDelimiter;
 
     /**
+     * Indicates whether MSISDN addresses should be supported or not.
+     */
+    private boolean supportMsisdnAddresses;
+
+    /**
      * Initializes a new {@link MailProperties}
      */
     private MailProperties() {
@@ -199,7 +199,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Exclusively loads the global mail properties
-     *
+     * 
      * @throws OXException If loading of global mail properties fails
      */
     public void loadProperties() throws OXException {
@@ -230,7 +230,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Waits for loading this properties.
-     *
+     * 
      * @throws InterruptedException If another thread interrupted the current thread before or while the current thread was waiting for
      *             loading the properties.
      */
@@ -277,6 +277,7 @@ public final class MailProperties implements IMailProperties {
         rateLimit = 0;
         maxToCcBcc = 0;
         authProxyDelimiter = null;
+        supportMsisdnAddresses = false;
     }
 
     private void loadProperties0() throws OXException {
@@ -376,8 +377,7 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            final String attachDisplaySizeStr =
-                configuration.getProperty("com.openexchange.mail.attachmentDisplaySizeLimit", "8192").trim();
+            final String attachDisplaySizeStr = configuration.getProperty("com.openexchange.mail.attachmentDisplaySizeLimit", "8192").trim();
             try {
                 attachDisplaySize = Integer.parseInt(attachDisplaySizeStr);
                 logBuilder.append("\tAttachment Display Size Limit: ").append(attachDisplaySize).append('\n');
@@ -419,8 +419,7 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            final String allowNestedStr =
-                configuration.getProperty("com.openexchange.mail.allowNestedDefaultFolderOnAltNamespace", "false").trim();
+            final String allowNestedStr = configuration.getProperty("com.openexchange.mail.allowNestedDefaultFolderOnAltNamespace", "false").trim();
             allowNestedDefaultFolderOnAltNamespace = Boolean.parseBoolean(allowNestedStr);
             logBuilder.append("\tAllow Nested Default Folders on AltNamespace: ").append(allowNestedDefaultFolderOnAltNamespace).append(
                 '\n');
@@ -453,8 +452,7 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            final String adminMailLoginEnabledStr =
-                configuration.getProperty("com.openexchange.mail.adminMailLoginEnabled", "false").trim();
+            final String adminMailLoginEnabledStr = configuration.getProperty("com.openexchange.mail.adminMailLoginEnabled", "false").trim();
             adminMailLoginEnabled = Boolean.parseBoolean(adminMailLoginEnabledStr);
             logBuilder.append("\tAdmin Mail Login Enabled: ").append(adminMailLoginEnabled).append('\n');
         }
@@ -496,8 +494,9 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            final String partModifierStr =
-                configuration.getProperty("com.openexchange.mail.partModifierImpl", DummyPartModifier.class.getName()).trim();
+            final String partModifierStr = configuration.getProperty(
+                "com.openexchange.mail.partModifierImpl",
+                DummyPartModifier.class.getName()).trim();
             try {
                 PartModifier.init(partModifierStr);
                 logBuilder.append("\tPartModifier Implementation: ").append(PartModifier.getInstance().getClass().getName()).append('\n');
@@ -631,6 +630,12 @@ public final class MailProperties implements IMailProperties {
             }
         }
 
+        {
+            final String supportMsisdnAddressesStr = configuration.getProperty("com.openexchange.mail.supportMsisdnAddresses", "false").trim();
+            supportMsisdnAddresses = Boolean.parseBoolean(supportMsisdnAddressesStr);
+            logBuilder.append("\tSupports MSISDN addresses: ").append(supportMsisdnAddresses).append('\n');
+        }
+
         logBuilder.append("Global mail properties successfully loaded!");
         if (LOG.isInfoEnabled()) {
             LOG.info(logBuilder.toString());
@@ -639,7 +644,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Reads the properties from specified property file and returns an appropriate instance of {@link Properties}
-     *
+     * 
      * @param propFile The property file
      * @return The appropriate instance of {@link Properties}
      * @throws OXException If reading property file fails
@@ -659,8 +664,8 @@ public final class MailProperties implements IMailProperties {
             return properties;
         } catch (final IOException e) {
             throw MailConfigException.create(
-                new com.openexchange.java.StringAllocator(256).append("I/O error while reading properties from file \"").append(propFile).append("\": ").append(
-                    e.getMessage()).toString(),
+                new com.openexchange.java.StringAllocator(256).append("I/O error while reading properties from file \"").append(propFile).append(
+                    "\": ").append(e.getMessage()).toString(),
                 e);
         } finally {
             Streams.close(fis);
@@ -669,7 +674,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Reads the properties from specified property file and returns an appropriate instance of {@link Properties}
-     *
+     * 
      * @param in The property stream
      * @return The appropriate instance of {@link Properties}
      * @throws OXException If reading property file fails
@@ -680,7 +685,9 @@ public final class MailProperties implements IMailProperties {
             properties.load(in);
             return properties;
         } catch (final IOException e) {
-            throw MailConfigException.create(new com.openexchange.java.StringAllocator(256).append("I/O error: ").append(e.getMessage()).toString(), e);
+            throw MailConfigException.create(
+                new com.openexchange.java.StringAllocator(256).append("I/O error: ").append(e.getMessage()).toString(),
+                e);
         } finally {
             Streams.close(in);
         }
@@ -698,7 +705,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the default MIME charset.
-     *
+     * 
      * @return The default MIME charset
      */
     public String getDefaultMimeCharset() {
@@ -707,7 +714,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the default mail provider.
-     *
+     * 
      * @return The default mail provider
      */
     public String getDefaultMailProvider() {
@@ -716,7 +723,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Indicates if admin mail login is enabled; meaning whether admin user's try to login to mail system is permitted or not.
-     *
+     * 
      * @return <code>true</code> if admin mail login is enabled; otherwise <code>false</code>
      */
     public boolean isAdminMailLoginEnabled() {
@@ -744,7 +751,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Checks if client's IP address should be added to mail headers on delivery as custom header <code>"X-Originating-IP"</code>.
-     *
+     * 
      * @return <code>true</code> if client's IP address should be added otherwise <code>false</code>
      */
     public boolean isAddClientIPAddress() {
@@ -753,7 +760,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the JavaMail properties.
-     *
+     * 
      * @return The JavaMail properties
      */
     public Properties getJavaMailProperties() {
@@ -762,7 +769,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the login source.
-     *
+     * 
      * @return The login source
      */
     public LoginSource getLoginSource() {
@@ -771,7 +778,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the password source.
-     *
+     * 
      * @return The password source
      */
     public PasswordSource getPasswordSource() {
@@ -780,7 +787,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the mail server source.
-     *
+     * 
      * @return The mail server source
      */
     public ServerSource getMailServerSource() {
@@ -789,7 +796,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the transport server source.
-     *
+     * 
      * @return The transport server source
      */
     public ServerSource getTransportServerSource() {
@@ -803,7 +810,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the global mail server.
-     *
+     * 
      * @return The global mail server
      */
     public String getMailServer() {
@@ -812,7 +819,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the master password.
-     *
+     * 
      * @return The master password
      */
     public String getMasterPassword() {
@@ -821,7 +828,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the sent mail rate limit (how many mails can be sent in
-     *
+     * 
      * @return
      */
     public int getMaxToCcBcc() {
@@ -830,7 +837,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the quote line colors.
-     *
+     * 
      * @return The quote line colors
      */
     public String[] getQuoteLineColors() {
@@ -839,7 +846,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the sent mail rate limit (how many mails can be sent in
-     *
+     * 
      * @return
      */
     public int getRateLimit() {
@@ -848,7 +855,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the setting if the rate limit should only affect the primary account or all accounts
-     *
+     * 
      * @return
      */
     public boolean getRateLimitPrimaryOnly() {
@@ -857,7 +864,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the global transport server
-     *
+     * 
      * @return The global transport server
      */
     public String getTransportServer() {
@@ -891,7 +898,7 @@ public final class MailProperties implements IMailProperties {
 
     /**
      * Gets the phishing headers.
-     *
+     * 
      * @return The phishing headers or <code>null</code> if none defined
      */
     public String[] getPhishingHeaders() {
@@ -920,4 +927,12 @@ public final class MailProperties implements IMailProperties {
         return authProxyDelimiter;
     }
 
+    /**
+     * Gets if MSISDN addresses are supported or not
+     * 
+     * @return <code>true</code>, if MSISDN addresses are supported. otherwise <code>false</code>
+     */
+    public boolean isSupportMsisdnAddresses() {
+        return supportMsisdnAddresses;
+    }
 }

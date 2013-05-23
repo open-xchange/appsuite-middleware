@@ -69,12 +69,8 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXState;
-import com.openexchange.contact.ContactService;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactUtil;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.log.LogProperties;
@@ -90,6 +86,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.DisplayMode;
+import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -100,7 +97,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractMailAction}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractMailAction implements AJAXActionService, MailActionConstants {
@@ -126,12 +123,13 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     /**
      * Cachable formats: <code>"apiResponse"</code>, <code>"json"</code>.
      */
-    protected static final Set<String> CACHABLE_FORMATS = Collections.unmodifiableSet(new HashSet<String>(
-        Arrays.asList("apiResponse", "json")));
+    protected static final Set<String> CACHABLE_FORMATS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+        "apiResponse",
+        "json")));
 
     /**
      * Gets the service of specified type
-     *
+     * 
      * @param clazz The service's class
      * @return The service or <code>null</code> is absent
      */
@@ -141,7 +139,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     /**
      * Gets the mail interface.
-     *
+     * 
      * @param mailRequest The mail request
      * @return The mail interface
      * @throws OXException If mail interface cannot be initialized
@@ -153,7 +151,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         final AJAXState state = mailRequest.getRequest().getState();
         MailServletInterface mailInterface = null;
         if (state == null) {
-        	return MailServletInterface.getInstance(mailRequest.getSession());
+            return MailServletInterface.getInstance(mailRequest.getSession());
         }
         mailInterface = state.optProperty(PROPERTY_MAIL_IFACE);
         if (mailInterface == null) {
@@ -170,7 +168,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     /**
      * Gets the closeables.
-     *
+     * 
      * @param mailRequest The mail request
      * @return The closeables or <code>null</code> if state is absent
      * @throws OXException If closebales cannot be returned
@@ -221,7 +219,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     /**
      * Performs specified mail request.
-     *
+     * 
      * @param req The mail request
      * @return The result
      * @throws OXException If an error occurs
@@ -231,7 +229,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     /**
      * Triggers the contact collector for specified mail's addresses.
-     *
+     * 
      * @param session The session
      * @param mail The mail
      */
@@ -270,7 +268,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     /**
      * Triggers the contact collector for specified JSON mail's addresses.
-     *
+     * 
      * @param session The session
      * @param mail The JSON mail
      */
@@ -318,7 +316,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     /**
      * Detects the display mode.
-     *
+     * 
      * @param modifyable whether modifiable.
      * @param view the view
      * @param usm The user mail settings
@@ -341,8 +339,8 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 usm.setAllowHTMLImages(false);
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             } else {
-                LOG.warn(new com.openexchange.java.StringAllocator(64).append("Unknown value in parameter ").append(Mail.PARAMETER_VIEW).append(": ").append(view).append(
-                    ". Using user's mail settings as fallback."));
+                LOG.warn(new com.openexchange.java.StringAllocator(64).append("Unknown value in parameter ").append(Mail.PARAMETER_VIEW).append(
+                    ": ").append(view).append(". Using user's mail settings as fallback."));
                 displayMode = modifyable ? DisplayMode.MODIFYABLE : DisplayMode.DISPLAY;
             }
         } else {
@@ -353,7 +351,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     /**
      * Gets the result filled with JSON <code>NULL</code>.
-     *
+     * 
      * @return The result with JSON <code>NULL</code>.
      */
     protected static AJAXRequestResult getJSONNullResult() {
@@ -362,7 +360,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     /**
      * Resolves specified "from" address to associated account identifier
-     *
+     * 
      * @param session The session
      * @param from The from address
      * @param checkTransportSupport <code>true</code> to check transport support
@@ -416,26 +414,8 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                     for (final String alias : aliases) {
                         validAddrs.add(new QuotedInternetAddress(alias));
                     }
-                    if (MailProperties.MSISDN_ENABLED) {
-                        final int contactId = user.getContactId();
-                        if (contactId > 0) {
-                            final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
-                            if (null != contactService) {
-                                try {
-                                    final Contact contact = contactService.getContact(session, Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID), Integer.toString(contactId));
-                                    final Set<String> set = ContactUtil.gatherTelephoneNumbers(contact);
-                                    for (final String number : set) {
-                                        try {
-                                            validAddrs.add(new QuotedInternetAddress(number));
-                                        } catch (final Exception e) {
-                                            // Ignore invalid number
-                                        }
-                                    }
-                                } catch (final Exception e) {
-                                    LOG.warn("Could not check for valid MSISDN numbers.", e);
-                                }
-                            }
-                        }
+                    if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
+                        MsisdnUtility.addMsisdnAddress(validAddrs, session);
                     }
                     if (!validAddrs.contains(from)) {
                         throw MailExceptionCode.INVALID_SENDER.create(from.toString());
