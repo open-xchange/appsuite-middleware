@@ -1,9 +1,3 @@
-open-xchange-file-distribution (7.2.1-1) UNRELEASED; urgency=low
-
-  * Third candidate for 7.2.1 release
-
- -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 22 May 2013 15:48:15 +0200
-
 open-xchange-file-distribution (7.2.1-0) UNRELEASED; urgency=low
 
   * moved file distribution bundles to own package
