@@ -133,10 +133,37 @@ public abstract class AbstractObjectCountTest extends AbstractAJAXSession {
         permissions.setGroupPermission(false);
         permissions.setFolderAdmin(false);
         permissions.setAllPermission(
-            OCLPermission.READ_FOLDER,
-            OCLPermission.READ_OWN_OBJECTS,
             OCLPermission.CREATE_OBJECTS_IN_FOLDER,
-            OCLPermission.DELETE_OWN_OBJECTS);
+            OCLPermission.READ_ALL_OBJECTS,
+            OCLPermission.WRITE_ALL_OBJECTS,
+            OCLPermission.DELETE_ALL_OBJECTS);
+        folder.addPermission(permissions);
+        return ftm.insertFolderOnServer(folder);
+    }
+
+    /**
+     * Creates a public folder for the given module (see modules section in {@link FolderObject}).
+     * @param client will be the folder owner and can read all objects.
+     * @param module the module under test
+     * @param userId2 will be the user the folder can be read by. He can only see his own objects.
+     */
+    protected static FolderObject createPublicFolder(AJAXClient client, int module, int userId2) throws OXException, IOException, JSONException {
+        FolderTestManager ftm = new FolderTestManager(client);
+        FolderObject folder = ftm.generatePublicFolder(
+            UUID.randomUUID().toString(),
+            module,
+            FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
+            client.getValues().getUserId());
+
+        OCLPermission permissions = new OCLPermission();
+        permissions.setEntity(userId2);
+        permissions.setGroupPermission(false);
+        permissions.setFolderAdmin(false);
+        permissions.setAllPermission(
+            OCLPermission.CREATE_OBJECTS_IN_FOLDER,
+            OCLPermission.READ_OWN_OBJECTS,
+            OCLPermission.WRITE_ALL_OBJECTS,
+            OCLPermission.DELETE_ALL_OBJECTS);
         folder.addPermission(permissions);
         return ftm.insertFolderOnServer(folder);
     }
