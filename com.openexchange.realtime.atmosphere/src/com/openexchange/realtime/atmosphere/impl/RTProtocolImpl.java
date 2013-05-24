@@ -170,8 +170,8 @@ public class RTProtocolImpl implements RTProtocol {
             }
 
             if (gate.handle(stanza, stanza.getTo())) {
-                stanza.trace("Sending receipt for client message " + stanza.getSequenceNumber());
-                enqueueAcknowledgement(stanza.getFrom(), stanza.getSequenceNumber(), state, transmitter);
+                stanza.trace("Adding receipt for client message " + stanza.getSequenceNumber() + " to acknowledgement list");
+                acknowledgements.add(stanza.getSequenceNumber());
             }
         } finally {
             state.unlock();
