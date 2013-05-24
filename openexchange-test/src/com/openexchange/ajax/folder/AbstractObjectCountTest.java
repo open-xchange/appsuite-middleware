@@ -118,7 +118,7 @@ public abstract class AbstractObjectCountTest extends AbstractAJAXSession {
      * Creates a shared folder for the given module (see modules section in {@link FolderObject}).
      * @param client will be the folder owner and can read all objects.
      * @param module the module under test
-     * @param userId2 will be the user the folder is shared to. He can only see his own objects.
+     * @param userId2 will be the user the folder is shared to. He can only see all objects.
      */
     protected static FolderObject createSharedFolder(AJAXClient client, int module, int userId2) throws OXException, IOException, JSONException {
         FolderTestManager ftm = new FolderTestManager(client);
