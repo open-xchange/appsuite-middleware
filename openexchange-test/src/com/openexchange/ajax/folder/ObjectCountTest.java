@@ -52,6 +52,7 @@ package com.openexchange.ajax.folder;
 import java.io.IOException;
 import java.util.UUID;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequestNew;
 import com.openexchange.ajax.folder.actions.GetResponseNew;
@@ -106,9 +107,9 @@ public class ObjectCountTest extends AbstractAJAXSession {
             FolderObject created = createPrivateFolder(ftm, FolderObject.CONTACT);
             Folder folder = getFolder(client1, created.getObjectID(), DEFAULT_COLUMNS);
             assertEquals("Wrong object count", 0, folder.getTotal());
-            Contact contact = ctm.newAction(ContactTestManager.generateContact(created.getObjectID()));
+            ctm.newAction(ContactTestManager.generateContact(created.getObjectID()));
             Folder reloaded = getFolder(client1, created.getObjectID(), DEFAULT_COLUMNS);
-            assertEquals("Wrong object count", 1, folder.getTotal());
+            assertEquals("Wrong object count", 1, reloaded.getTotal());
         } catch (Exception e) {
             ctm.cleanUp();
             ftm.cleanUp();

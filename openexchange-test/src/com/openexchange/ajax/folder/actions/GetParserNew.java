@@ -96,11 +96,13 @@ public class GetParserNew extends AbstractAJAXParser<GetResponseNew> implements 
 
     @Override
     protected GetResponseNew createResponse(Response response) throws JSONException {
+        JSONObject data;
         Folder folder;
         if (response.hasError()) {
+            data = null;
             folder = null;
         } else {
-            JSONObject data = (JSONObject) response.getData();
+            data = (JSONObject) response.getData();
             try {
                 folder = new FolderParser(this).parseFolder(data);
             } catch (OXException e) {
@@ -108,7 +110,7 @@ public class GetParserNew extends AbstractAJAXParser<GetResponseNew> implements 
             }
         }
 
-        return new GetResponseNew(response, folder);
+        return new GetResponseNew(response, data, folder);
     }
     
     @Override
