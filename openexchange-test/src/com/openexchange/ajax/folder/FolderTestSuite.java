@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder;
 
+import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.ajax.folder.api2.Bug15752Test;
@@ -109,6 +110,10 @@ public final class FolderTestSuite {
         tests.addTestSuite(UpdateTest.class);
         tests.addTestSuite(VisibleFoldersTest.class);
         tests.addTestSuite(SubscribeTest.class);
+
+        // Test for object counts for database folder
+        tests.addTest(new JUnit4TestAdapter(ContactObjectCountTest.class));
+        tests.addTest(new JUnit4TestAdapter(TaskObjectCountTest.class));
 
         // EAS subscribe
         tests.addTestSuite(com.openexchange.ajax.folder.eas.SubscribeTest.class);
