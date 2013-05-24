@@ -152,6 +152,16 @@ public class LdapContactStorage extends DefaultContactStorage {
         check(session.getContextId(), folderId);
         return doList(session, folderId, ids, fields, sortOptions);
     }
+    
+    @Override
+    public int count(Session session, String folderId, boolean canReadAll) throws OXException {
+        check(session.getContextId(), folderId);
+        /*
+         * FIXME: Implement counting of contacts within a given folder.
+         * doList doesn't even use the folderId parameter. What has to be done here?
+         */
+        return -1;
+    }
 
     @Override
     public SearchIterator<Contact> deleted(Session session, String folderId, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {

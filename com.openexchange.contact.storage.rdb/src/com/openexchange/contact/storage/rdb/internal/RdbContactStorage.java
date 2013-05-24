@@ -626,6 +626,21 @@ public class RdbContactStorage extends DefaultContactStorage {
     public SearchIterator<Contact> list(Session session, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException {
     	return this.getContacts(false, session, folderId, ids, null, fields, null, sortOptions);
     }
+    
+    @Override
+    public int count(Session session, String folderId, boolean canReadAll) throws OXException {
+        int contextID = session.getContextId();
+        int userID = session.getUserId();
+        ConnectionHelper connectionHelper = new ConnectionHelper(session);
+        Connection connection = connectionHelper.getReadOnly();
+        try {
+            return executor.count(connection, Table.CONTACTS, contextID, userID, parse(folderId), canReadAll);
+        } catch (SQLException e) {
+            throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+        } finally {
+            connectionHelper.backReadOnly();
+        }
+    }
 
     @Override
     public SearchIterator<Contact> searchByBirthday(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException {
