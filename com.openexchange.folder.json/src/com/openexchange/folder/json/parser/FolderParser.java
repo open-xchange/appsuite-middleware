@@ -54,7 +54,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
-import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.Folder;
@@ -68,11 +67,14 @@ import com.openexchange.folderstorage.Permission;
  */
 public final class FolderParser {
 
+    private final ContentTypeDiscoveryService discoveryService;
+
     /**
      * Initializes a new {@link FolderParser}.
      */
-    private FolderParser() {
+    public FolderParser(ContentTypeDiscoveryService discoveryService) {
         super();
+        this.discoveryService = discoveryService;
     }
 
     /**
@@ -82,7 +84,7 @@ public final class FolderParser {
      * @return The parsed folder
      * @throws OXException If parsing folder fails
      */
-    public static Folder parseFolder(final JSONObject folderJsonObject) throws OXException {
+    public Folder parseFolder(final JSONObject folderJsonObject) throws OXException {
         try {
             final ParsedFolder folder = new ParsedFolder();
 
@@ -100,8 +102,6 @@ public final class FolderParser {
 
             if (folderJsonObject.hasAndNotNull(FolderField.MODULE.getName())) {
                 try {
-                    final ContentTypeDiscoveryService discoveryService =
-                        ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class, true);
                     final String contentTypeString = folderJsonObject.getString(FolderField.MODULE.getName());
                     final ContentType contentType = discoveryService.getByString(contentTypeString);
                     if (null == contentType) {
