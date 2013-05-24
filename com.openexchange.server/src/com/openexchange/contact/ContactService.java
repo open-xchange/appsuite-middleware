@@ -164,6 +164,16 @@ public interface ContactService {
      * @throws OXException
      */
     SearchIterator<Contact> getAllContacts(Session session, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    
+    /**
+     * Counts all contacts within the given folder.
+     * 
+     * @param session the session
+     * @param folderId ID of the folder to count in
+     * @return the number of contacts
+     * @throws OXException
+     */
+    int countContacts(Session session, String folderId) throws OXException;
 
     /**
      * Gets a list of contacts with all fields.

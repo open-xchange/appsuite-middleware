@@ -129,6 +129,47 @@ public class Executor {
     }
 
     /**
+     *  Gets the number of records in a folder.
+     *  
+     * @param connection The db connection to use
+     * @param table The database table to query
+     * @param contextID The context ID
+     * @param folderID The folder ID
+     * @return The number of records
+     * @throws SQLException
+     * @throws OXException
+     */
+    public int count(Connection connection, Table table, int contextID, int userID, int folderID, boolean canReadAll) throws SQLException, OXException {
+        StringAllocator allocator = new StringAllocator(128);
+        if (canReadAll) {
+            String pflag = Mappers.CONTACT.get(ContactField.PRIVATE_FLAG).getColumnLabel();
+            allocator.append("SELECT COUNT(*) FROM ").append(table).append(" WHERE ")
+                .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
+                .append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=? AND ")
+                .append("((").append(pflag).append(" IS NULL OR ").append(pflag).append("=0) OR (").append(Mappers.CONTACT.get(ContactField.CREATED_BY).getColumnLabel()).append("=?));");
+        } else {
+            allocator.append("SELECT COUNT(*) FROM ").append(table).append(" WHERE ")
+                .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=? AND ")
+                .append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=? AND ")
+                .append(Mappers.CONTACT.get(ContactField.CREATED_BY).getColumnLabel()).append("=?;");
+        }
+        
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
+        try {
+            stmt = connection.prepareStatement(allocator.toString());
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, folderID);
+            stmt.setInt(3, userID);
+            resultSet = logExecuteQuery(stmt);
+            int count = resultSet.next() ? resultSet.getInt(1) : 0;
+            return count;
+        } finally {
+            closeSQLStuff(resultSet, stmt);
+        }
+    }
+
+    /**
      * Selects a single contact from the database.
      *
      * @param connection

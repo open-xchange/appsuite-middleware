@@ -67,8 +67,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.Contacts;
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
@@ -85,7 +83,6 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -585,23 +582,8 @@ public class OXFolderAccess {
             }
             case FolderObject.CONTACT:
                 try {
-                    // TODO: Improve contact count
                     final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
-                    final SearchIterator<Contact> it =
-                        contactService.getAllContacts(
-                            session,
-                            Integer.toString(folder.getObjectID()),
-                            new ContactField[] { ContactField.OBJECT_ID });
-                    try {
-                        int count = 0;
-                        while (it.hasNext()) {
-                            it.next();
-                            count++;
-                        }
-                        return count;
-                    } finally {
-                        it.close();
-                    }
+                    return contactService.countContacts(session, Integer.toString(folder.getObjectID()));
                 } catch (final OXException e) {
                     if (ContactExceptionCodes.NO_ACCESS_PERMISSION.equals(e)) {
                         return 0;

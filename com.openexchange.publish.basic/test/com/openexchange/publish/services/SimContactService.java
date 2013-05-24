@@ -413,4 +413,9 @@ public class SimContactService implements ContactService {
 
     }
 
+    @Override
+    public int countContacts(Session session, String folderId) throws OXException {
+        return 0;
+    }
+
 }

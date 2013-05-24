@@ -230,8 +230,15 @@ public abstract class DefaultContactService implements ContactService {
         Check.argNotNull(folderIDs, "folderIDs");
         return this.doGetContacts(session, folderIDs, fields, sortOptions);
     }
+    
+    @Override
+    public int countContacts(Session session, String folderId) throws OXException {
+        Check.argNotNull(session, "session");
+        Check.argNotNull(folderId, "folderId");
+        return this.doCountContacts(session, folderId);
+    }
 
-	@Override
+    @Override
 	public SearchIterator<Contact> getContacts(Session session, String folderId, String[] ids, ContactField[] fields, SortOptions sortOptions) throws OXException {
 		Check.argNotNull(session, "session");
 		Check.argNotNull(folderId, "folderId");
@@ -452,5 +459,7 @@ public abstract class DefaultContactService implements ContactService {
 
     protected abstract SearchIterator<Contact> doGetContacts(Session session, List<String> folderIDs, ContactField[] fields,
         SortOptions sortOptions) throws OXException;
+    
+    protected abstract int doCountContacts(Session session, String folderId) throws OXException;
 
 }

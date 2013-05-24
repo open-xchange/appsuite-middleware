@@ -151,6 +151,19 @@ public interface ContactStorage {
     Contact get(Session session, String folderId, String id, ContactField[] fields) throws OXException;
 
     /**
+     * Counts all contacts within the given folder.
+     * 
+     * @param session the session
+     * @param folderId the ID of the folder
+     * @param canReadAll Whether the requesting user is allowed to see all objects within the folder.
+     * If set to <code>true</code> all objects should be counted except the ones that are marked as private.
+     * If set to <code>false</code>, only objects that have been created by the user may be counted.
+     * @return the number of contacts
+     * @throws OXException
+     */
+    int count(Session session, String folderId, boolean canReadAll) throws OXException;
+
+    /**
      * Gets all contacts with specified fields in a folder.
      *
      * @param session the session
@@ -385,5 +398,4 @@ public interface ContactStorage {
      * @throws OXException
      */
     SearchIterator<Contact> searchByAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException;
-
 }
