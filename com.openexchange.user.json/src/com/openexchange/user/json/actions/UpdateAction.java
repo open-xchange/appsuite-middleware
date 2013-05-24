@@ -54,6 +54,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import javax.activation.MimetypesFileTypeMap;
 import org.json.JSONException;
@@ -218,11 +219,15 @@ public final class UpdateAction extends AbstractUserAction {
 		UploadEvent uploadEvent = null;
 		try {
 		    uploadEvent = request.getUploadEvent();
-		    final UploadFile file = uploadEvent.getUploadFileByFieldName("file");
-		    if (null == file) {
+		    final UploadFile uploadFile;
+            {
+                final List<UploadFile> list = uploadEvent.getUploadFilesByFieldName("file");
+                uploadFile = null == list || list.isEmpty() ? null : list.get(0);
+            }
+		    if (null == uploadFile) {
 		        throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();
 		    }
-		    setImageData(contact, file);
+		    setImageData(contact, uploadFile);
 		} finally {
 		    if (null != uploadEvent) {
 		        uploadEvent.cleanUp();
