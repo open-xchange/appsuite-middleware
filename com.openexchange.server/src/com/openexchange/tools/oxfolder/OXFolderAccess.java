@@ -154,9 +154,9 @@ public class OXFolderAccess {
      * Loads matching <code>com.openexchange.groupware.container.FolderObject</code> instance either from cache (if enabled) or from
      * underlying storage.
      *
-     * @param folderId - the folder ID
-     * @return matching <code>com.openexchange.groupware.container.FolderObject</code> instance
-     * @throws OXException
+     * @param folderId The folder ID
+     * @return The matching <code>com.openexchange.groupware.container.FolderObject</code> instance
+     * @throws OXException If operation fails
      */
     public final FolderObject getFolderObject(final int folderId) throws OXException {
         return getFolderObject(folderId, true);
@@ -166,10 +166,10 @@ public class OXFolderAccess {
      * Loads matching <code>com.openexchange.groupware.container.FolderObject</code> instance either from cache (if enabled) or from
      * underlying storage.
      *
-     * @param folderId - the folder ID
+     * @param folderId The folder ID
      * @param fromCache - <code>true</code> to look-up cache; otherwise <code>false</code>
-     * @return matching <code>com.openexchange.groupware.container.FolderObject</code> instance
-     * @throws OXException
+     * @return The matching <code>com.openexchange.groupware.container.FolderObject</code> instance
+     * @throws OXException If operation fails
      */
     public final FolderObject getFolderObject(final int folderId, final boolean fromCache) throws OXException {
         final FolderObject fo;
@@ -185,8 +185,8 @@ public class OXFolderAccess {
      * Creates a <code>java.util.List</code> of <code>FolderObject</code> instances which match given folder IDs.
      *
      * @param folderIDs - the folder IDs as an <code>int</code> array
-     * @return a <code>java.util.List</code> of <code>FolderObject</code> instances
-     * @throws OXException
+     * @return A <code>java.util.List</code> of <code>FolderObject</code> instances
+     * @throws OXException If operation fails
      */
     public final List<FolderObject> getFolderObjects(final int[] folderIDs) throws OXException {
         final List<FolderObject> retval = new ArrayList<FolderObject>(folderIDs.length);
@@ -207,8 +207,8 @@ public class OXFolderAccess {
      * Creates a <code>java.util.List</code> of <code>FolderObject</code> instances fills which match given folder IDs.
      *
      * @param folderIDs - the folder IDs backed by a <code>java.util.Collection</code>
-     * @return a <code>java.util.List</code> of <code>FolderObject</code> instances
-     * @throws OXException
+     * @return A <code>java.util.List</code> of <code>FolderObject</code> instances
+     * @throws OXException If operation fails
      */
     public final List<FolderObject> getFolderObjects(final Collection<Integer> folderIDs) throws OXException {
         final int size = folderIDs.size();
@@ -231,10 +231,10 @@ public class OXFolderAccess {
      * Determines folder type. The returned value is either <code>FolderObject.PRIVATE</code>, <code>FolderObject.PUBLIC</code> or
      * <code>FolderObject.SHARED</code>. <b>NOTE:</b> This method assumes that given user has read access!
      *
-     * @param folderId - the folder ID
-     * @param userId - the user ID
-     * @return the folder type
-     * @throws OXException
+     * @param folderId The folder ID
+     * @param userId The user ID
+     * @return The folder type
+     * @throws OXException If operation fails
      */
     public final int getFolderType(final int folderId, final int userId) throws OXException {
         return getFolderObject(folderId).getType(userId);
@@ -245,8 +245,8 @@ public class OXFolderAccess {
      * <code>FolderObject.PUBLIC</code>. <b>NOTE:</b> Do not use this method to check if folder is shared (<code>FolderObject.SHARED</code>
      * ), use {@link #getFolderType(int, int)} instead.
      *
-     * @param folderId - the folder ID
-     * @return the folder type
+     * @param folderId The folder ID
+     * @return The folder type
      * @throws OXException
      * @see <code>getFolderType(int, int)</code>
      */
@@ -257,9 +257,9 @@ public class OXFolderAccess {
     /**
      * Determines folder module.
      *
-     * @param folderId - the folder ID
+     * @param folderId The folder ID
      * @return folder module
-     * @throws OXException
+     * @throws OXException If operation fails
      */
     public final int getFolderModule(final int folderId) throws OXException {
         return getFolderObject(folderId).getModule();
@@ -268,9 +268,9 @@ public class OXFolderAccess {
     /**
      * Determines folder owner.
      *
-     * @param folderId - the folder ID
-     * @return folder owner
-     * @throws OXException
+     * @param folderId The folder ID
+     * @return The folder owner
+     * @throws OXException If operation fails
      */
     public final int getFolderOwner(final int folderId) throws OXException {
         return getFolderObject(folderId).getCreatedBy();
@@ -279,10 +279,10 @@ public class OXFolderAccess {
     /**
      * Determines if folder is shared. <b>NOTE:</b> This method assumes that given user has read access!
      *
-     * @param folderId - the folder ID
-     * @param userId - the user ID
+     * @param folderId The folder ID
+     * @param userId The user ID
      * @return <code>true</code> if folder is shared, otherwise <code>false</code>
-     * @throws OXException
+     * @throws OXException If operation fails
      */
     public final boolean isFolderShared(final int folderId, final int userId) throws OXException {
         return (getFolderType(folderId, userId) == FolderObject.SHARED);
@@ -291,9 +291,9 @@ public class OXFolderAccess {
     /**
      * Determines if folder is an user's default folder.
      *
-     * @param folderId - the folder ID
+     * @param folderId The folder ID
      * @return <code>true</code> if folder is marked as a default folder, otherwise <code>false</code>
-     * @throws OXException
+     * @throws OXException If operation fails
      */
     public final boolean isDefaultFolder(final int folderId) throws OXException {
         return getFolderObject(folderId).isDefaultFolder();
@@ -302,9 +302,9 @@ public class OXFolderAccess {
     /**
      * Determines given folder's name.
      *
-     * @param folderId - the folder ID
-     * @return folder name
-     * @throws OXException
+     * @param folderId The folder ID
+     * @return The folder name
+     * @throws OXException If operation fails
      */
     public String getFolderName(final int folderId) throws OXException {
         return getFolderObject(folderId).getFolderName();
@@ -313,9 +313,9 @@ public class OXFolderAccess {
     /**
      * Determines given folder's parent ID.
      *
-     * @param folderId - the folder ID
-     * @return folder parent ID
-     * @throws OXException
+     * @param folderId The folder ID
+     * @return The folder parent ID
+     * @throws OXException If operation fails
      */
     public int getParentFolderID(final int folderId) throws OXException {
         return getFolderObject(folderId).getParentFolderID();
@@ -324,9 +324,9 @@ public class OXFolderAccess {
     /**
      * Determines given folder's last modifies date.
      *
-     * @param folderId
-     * @return folder's last modifies date
-     * @throws OXException
+     * @param folderId The folder ID
+     * @return The folder's last modifies date
+     * @throws OXException If operation fails
      */
     public Date getFolderLastModified(final int folderId) throws OXException {
         return getFolderObject(folderId).getLastModified();
@@ -335,11 +335,11 @@ public class OXFolderAccess {
     /**
      * Determines user's effective permission on the folder matching given folder ID.
      *
-     * @param folderId - the folder ID
-     * @param userId - the user ID
-     * @param userConfig - the user configuration
-     * @return user's effective permission
-     * @throws OXException
+     * @param folderId The folder ID
+     * @param userId The user ID
+     * @param userConfig The user configuration
+     * @return The user's effective permission
+     * @throws OXException If operation fails
      */
     public final EffectivePermission getFolderPermission(final int folderId, final int userId, final UserConfiguration userConfig) throws OXException {
         try {
@@ -353,10 +353,10 @@ public class OXFolderAccess {
     /**
      * Determines user's default folder of given module.
      *
-     * @param userId - the user ID
-     * @param module - the module
-     * @return user's default folder of given module
-     * @throws OXException
+     * @param userId The user ID
+     * @param module The module
+     * @return The user's default folder of given module
+     * @throws OXException If operation fails
      */
     public final FolderObject getDefaultFolder(final int userId, final int module) throws OXException {
         try {
@@ -406,20 +406,20 @@ public class OXFolderAccess {
      * <b>Note</b>: This method checks only by contained items and does <small><b>NOT</b></small> check by the user's effective folder
      * permission itself. Thus the user is supposed to hold sufficient folder permissions on specified folder.
      *
-     * @param fo - the folder object
-     * @param session - current user session
-     * @param ctx - the context
-     * @return
-     * @throws OXException
+     * @param folder The folder object
+     * @param session The current user session
+     * @param ctx The context
+     * @return <code>true</code> if user can delete all objects in folder; otherwise <code>false</code>
+     * @throws OXException If operation fails
      */
-    public final boolean canDeleteAllObjectsInFolder(final FolderObject fo, final Session session, final Context ctx) throws OXException {
+    public final boolean canDeleteAllObjectsInFolder(final FolderObject folder, final Session session, final Context ctx) throws OXException {
         final int userId = session.getUserId();
         final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(userId, ctx);
         try {
             /*
              * Check user permission on folder
              */
-            final OCLPermission oclPerm = fo.getEffectiveUserPermission(userId, userConfig, readCon);
+            final OCLPermission oclPerm = folder.getEffectiveUserPermission(userId, userConfig, readCon);
             if (!oclPerm.isFolderVisible()) {
                 /*
                  * Folder is not visible to user
@@ -436,12 +436,12 @@ public class OXFolderAccess {
                 /*
                  * User may only delete own objects. Check if folder contains foreign objects which must not be deleted.
                  */
-                return !containsForeignObjects(fo, session, ctx);
+                return !containsForeignObjects(folder, session, ctx);
             }
             /*
              * No delete permission: Return true if folder is empty
              */
-            return isEmpty(fo, session, ctx);
+            return isEmpty(folder, session, ctx);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException t) {
@@ -452,49 +452,49 @@ public class OXFolderAccess {
     /**
      * Checks if given folder contains session-user-foreign objects.
      *
-     * @param fo The folder to check
+     * @param folder The folder to check
      * @param session The session
      * @param ctx The context
      * @return <code>true</code> if given folder contains session-user-foreign objects; otherwise <code>false</code>
      * @throws OXException If check fails
      */
-    public final boolean containsForeignObjects(final FolderObject fo, final Session session, final Context ctx) throws OXException {
+    public final boolean containsForeignObjects(final FolderObject folder, final Session session, final Context ctx) throws OXException {
         try {
             final int userId = session.getUserId();
-            final int module = fo.getModule();
+            final int module = folder.getModule();
             if (module == FolderObject.TASK) {
                 final Tasks tasks = Tasks.getInstance();
                 if (null == readCon) {
                     Connection rc = null;
                     try {
                         rc = DBPool.pickup(ctx);
-                        return tasks.containsNotSelfCreatedTasks(session, rc, fo.getObjectID());
+                        return tasks.containsNotSelfCreatedTasks(session, rc, folder.getObjectID());
                     } finally {
                         if (null != rc) {
                             DBPool.closeReaderSilent(ctx, rc);
                         }
                     }
                 }
-                return tasks.containsNotSelfCreatedTasks(session, readCon, fo.getObjectID());
+                return tasks.containsNotSelfCreatedTasks(session, readCon, folder.getObjectID());
             } else if (module == FolderObject.CALENDAR) {
                 final AppointmentSQLInterface calSql =
                     ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
                 if (readCon == null) {
-                    return calSql.checkIfFolderContainsForeignObjects(userId, fo.getObjectID());
+                    return calSql.checkIfFolderContainsForeignObjects(userId, folder.getObjectID());
                 }
-                return calSql.checkIfFolderContainsForeignObjects(userId, fo.getObjectID(), readCon);
+                return calSql.checkIfFolderContainsForeignObjects(userId, folder.getObjectID(), readCon);
             } else if (module == FolderObject.CONTACT) {
                 if (readCon == null) {
-                    return Contacts.containsForeignObjectInFolder(fo.getObjectID(), userId, session);
+                    return Contacts.containsForeignObjectInFolder(folder.getObjectID(), userId, session);
                 }
-                return Contacts.containsForeignObjectInFolder(fo.getObjectID(), userId, session, readCon);
+                return Contacts.containsForeignObjectInFolder(folder.getObjectID(), userId, session, readCon);
             } else if (module == FolderObject.PROJECT) {
                 return false;
             } else if (module == FolderObject.INFOSTORE) {
                 final InfostoreFacade db =
                     new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
                 final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(userId, ctx);
-                return db.hasFolderForeignObjects(fo.getObjectID(), ctx, UserStorage.getStorageUser(session.getUserId(), ctx), userConfig);
+                return db.hasFolderForeignObjects(folder.getObjectID(), ctx, UserStorage.getStorageUser(session.getUserId(), ctx), userConfig);
             } else {
                 throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(module), Integer.valueOf(ctx.getContextId()));
             }
@@ -508,32 +508,32 @@ public class OXFolderAccess {
     /**
      * Checks if given folder is empty.
      *
-     * @param fo The folder to check
+     * @param folder The folder to check
      * @param session The session
      * @param ctx The context
      * @return <code>true</code> if given folder is empty; otherwise <code>false</code>
      * @throws OXException If checking emptiness fails
      */
-    public final boolean isEmpty(final FolderObject fo, final Session session, final Context ctx) throws OXException {
+    public final boolean isEmpty(final FolderObject folder, final Session session, final Context ctx) throws OXException {
         try {
             final int userId = session.getUserId();
-            final int module = fo.getModule();
+            final int module = folder.getModule();
             switch (module) {
             case FolderObject.TASK: {
                 final Tasks tasks = Tasks.getInstance();
-                return readCon == null ? tasks.isFolderEmpty(ctx, fo.getObjectID()) : tasks.isFolderEmpty(ctx, readCon, fo.getObjectID());
+                return readCon == null ? tasks.isFolderEmpty(ctx, folder.getObjectID()) : tasks.isFolderEmpty(ctx, readCon, folder.getObjectID());
             }
             case FolderObject.CALENDAR: {
                 final AppointmentSQLInterface calSql =
                     ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
-                return readCon == null ? calSql.isFolderEmpty(userId, fo.getObjectID()) : calSql.isFolderEmpty(
+                return readCon == null ? calSql.isFolderEmpty(userId, folder.getObjectID()) : calSql.isFolderEmpty(
                     userId,
-                    fo.getObjectID(),
+                    folder.getObjectID(),
                     readCon);
             }
             case FolderObject.CONTACT: {
-                return readCon == null ? !Contacts.containsAnyObjectInFolder(fo.getObjectID(), ctx) : !Contacts.containsAnyObjectInFolder(
-                    fo.getObjectID(),
+                return readCon == null ? !Contacts.containsAnyObjectInFolder(folder.getObjectID(), ctx) : !Contacts.containsAnyObjectInFolder(
+                    folder.getObjectID(),
                     readCon,
                     ctx);
             }
@@ -542,7 +542,7 @@ public class OXFolderAccess {
             case FolderObject.INFOSTORE: {
                 final InfostoreFacade db =
                     new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
-                return db.isFolderEmpty(fo.getObjectID(), ctx);
+                return db.isFolderEmpty(folder.getObjectID(), ctx);
             }
             default:
                 throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(module), Integer.valueOf(ctx.getContextId()));
@@ -557,33 +557,32 @@ public class OXFolderAccess {
     /**
      * Gets the folder's item count.
      *
-     * @param fo The folder
+     * @param folder The folder
      * @param session The session
      * @param ctx The context
      * @return The item count or <code>-1</code> if unknown
      * @throws OXException If item count cannot be returned
      */
-    public long getItemCount(final FolderObject fo, final Session session, final Context ctx) throws OXException {
+    public long getItemCount(final FolderObject folder, final Session session, final Context ctx) throws OXException {
         try {
             final int userId = session.getUserId();
-            switch (fo.getModule()) {
+            switch (folder.getModule()) {
             case FolderObject.TASK:
                 {
-                    final boolean isShared = FolderObject.SHARED == fo.getType(userId);
-                    return TaskStorage.getInstance().countTasks(ctx, userId, fo.getObjectID(), false, isShared);
+                    final boolean isShared = FolderObject.SHARED == folder.getType(userId);
+                    return TaskStorage.getInstance().countTasks(ctx, userId, folder.getObjectID(), false, isShared);
                 }
             case FolderObject.CALENDAR:
                 {
-                    // TODO: Implement appointment count
                     final AppointmentSqlFactoryService service = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
                     final AppointmentSQLInterface calSql = service.createAppointmentSql(session);
-                    return readCon == null ? 0 : 0;
+                    return calSql.countObjectsInFolder(folder.getObjectID());
                 }
             case FolderObject.CONTACT:
                 try {
                     // TODO: Improve contact count
                     final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
-                    final SearchIterator<Contact> it = contactService.getAllContacts(session, Integer.toString(fo.getObjectID()), new ContactField[] {ContactField.OBJECT_ID});
+                    final SearchIterator<Contact> it = contactService.getAllContacts(session, Integer.toString(folder.getObjectID()), new ContactField[] {ContactField.OBJECT_ID});
                     try {
                         int count = 0;
                         while (it.hasNext()) {
@@ -607,7 +606,7 @@ public class OXFolderAccess {
                     final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
                     final User user = session instanceof ServerSession ? ((ServerSession) session).getUser() : UserStorage.getStorageUser(userId, ctx);
                     final UserConfiguration userConf = session instanceof ServerSession ? ((ServerSession) session).getUserConfiguration() : UserConfigurationStorage.getInstance().getUserConfiguration(userId, user.getGroups(), ctx);
-                    return db.countDocuments(fo.getObjectID(), ctx, user, userConf);
+                    return db.countDocuments(folder.getObjectID(), ctx, user, userConf);
                 } catch (final OXException e) {
                     if (InfostoreExceptionCodes.NO_READ_PERMISSION.equals(e)) {
                         return 0;
