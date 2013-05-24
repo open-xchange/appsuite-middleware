@@ -90,7 +90,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link OXFolderAccess} - Provides access to OX folders.
+ * {@link OXFolderAccess} - Provides access to database folders.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -363,8 +363,7 @@ public class OXFolderAccess {
             final int folderId = OXFolderSQL.getUserDefaultFolder(userId, module, readCon, ctx);
             if (folderId == -1) {
                 if (FolderObject.INFOSTORE != module) {
-                    throw
-                        OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(
+                    throw OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(
                         folderModule2String(module),
                         getUserName(userId, ctx),
                         Integer.valueOf(ctx.getContextId()));
@@ -494,7 +493,11 @@ public class OXFolderAccess {
                 final InfostoreFacade db =
                     new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
                 final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(userId, ctx);
-                return db.hasFolderForeignObjects(folder.getObjectID(), ctx, UserStorage.getStorageUser(session.getUserId(), ctx), userConfig);
+                return db.hasFolderForeignObjects(
+                    folder.getObjectID(),
+                    ctx,
+                    UserStorage.getStorageUser(session.getUserId(), ctx),
+                    userConfig);
             } else {
                 throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(module), Integer.valueOf(ctx.getContextId()));
             }
@@ -521,7 +524,10 @@ public class OXFolderAccess {
             switch (module) {
             case FolderObject.TASK: {
                 final Tasks tasks = Tasks.getInstance();
-                return readCon == null ? tasks.isFolderEmpty(ctx, folder.getObjectID()) : tasks.isFolderEmpty(ctx, readCon, folder.getObjectID());
+                return readCon == null ? tasks.isFolderEmpty(ctx, folder.getObjectID()) : tasks.isFolderEmpty(
+                    ctx,
+                    readCon,
+                    folder.getObjectID());
             }
             case FolderObject.CALENDAR: {
                 final AppointmentSQLInterface calSql =
@@ -567,22 +573,25 @@ public class OXFolderAccess {
         try {
             final int userId = session.getUserId();
             switch (folder.getModule()) {
-            case FolderObject.TASK:
-                {
-                    final boolean isShared = FolderObject.SHARED == folder.getType(userId);
-                    return TaskStorage.getInstance().countTasks(ctx, userId, folder.getObjectID(), false, isShared);
-                }
-            case FolderObject.CALENDAR:
-                {
-                    final AppointmentSqlFactoryService service = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
-                    final AppointmentSQLInterface calSql = service.createAppointmentSql(session);
-                    return calSql.countObjectsInFolder(folder.getObjectID());
-                }
+            case FolderObject.TASK: {
+                final boolean isShared = FolderObject.SHARED == folder.getType(userId);
+                return TaskStorage.getInstance().countTasks(ctx, userId, folder.getObjectID(), false, isShared);
+            }
+            case FolderObject.CALENDAR: {
+                final AppointmentSqlFactoryService service =
+                    ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
+                final AppointmentSQLInterface calSql = service.createAppointmentSql(session);
+                return calSql.countObjectsInFolder(folder.getObjectID());
+            }
             case FolderObject.CONTACT:
                 try {
                     // TODO: Improve contact count
                     final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
-                    final SearchIterator<Contact> it = contactService.getAllContacts(session, Integer.toString(folder.getObjectID()), new ContactField[] {ContactField.OBJECT_ID});
+                    final SearchIterator<Contact> it =
+                        contactService.getAllContacts(
+                            session,
+                            Integer.toString(folder.getObjectID()),
+                            new ContactField[] { ContactField.OBJECT_ID });
                     try {
                         int count = 0;
                         while (it.hasNext()) {
@@ -603,9 +612,15 @@ public class OXFolderAccess {
                 return 0;
             case FolderObject.INFOSTORE:
                 try {
-                    final InfostoreFacade db = new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
-                    final User user = session instanceof ServerSession ? ((ServerSession) session).getUser() : UserStorage.getStorageUser(userId, ctx);
-                    final UserConfiguration userConf = session instanceof ServerSession ? ((ServerSession) session).getUserConfiguration() : UserConfigurationStorage.getInstance().getUserConfiguration(userId, user.getGroups(), ctx);
+                    final InfostoreFacade db =
+                        new InfostoreFacadeImpl(readCon == null ? new DBPoolProvider() : new StaticDBPoolProvider(readCon));
+                    final User user =
+                        session instanceof ServerSession ? ((ServerSession) session).getUser() : UserStorage.getStorageUser(userId, ctx);
+                    final UserConfiguration userConf =
+                        session instanceof ServerSession ? ((ServerSession) session).getUserConfiguration() : UserConfigurationStorage.getInstance().getUserConfiguration(
+                            userId,
+                            user.getGroups(),
+                            ctx);
                     return db.countDocuments(folder.getObjectID(), ctx, user, userConf);
                 } catch (final OXException e) {
                     if (InfostoreExceptionCodes.NO_READ_PERMISSION.equals(e)) {
