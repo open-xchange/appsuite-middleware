@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder.actions;
 
+import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.folderstorage.Folder;
@@ -63,17 +64,24 @@ public class GetResponseNew extends AbstractAJAXResponse {
 
     private final Folder folder;
 
+    private final JSONObject json;
+
     /**
      * Initializes a new {@link GetResponseNew}.
      * @param response
      */
-    protected GetResponseNew(Response response, Folder folder) {
+    protected GetResponseNew(Response response, JSONObject json, Folder folder) {
         super(response);
+        this.json = json;
         this.folder = folder;
     }
 
     public Folder getFolder() {
         return folder;
+    }
+    
+    public JSONObject getJSON() {
+        return json;
     }
 
 }

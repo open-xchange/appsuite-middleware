@@ -149,6 +149,11 @@ public final class FolderParser {
                 folder.setPermissions(permissions);
             }
 
+            if (folderJsonObject.hasAndNotNull(FolderField.TOTAL.getName())) {
+                int total = folderJsonObject.getInt(FolderField.TOTAL.getName());
+                folder.setTotal(total);
+            }
+
             return folder;
         } catch (final JSONException e) {
             throw FolderExceptionErrorMessage.JSON_ERROR.create(e, e.getMessage());
