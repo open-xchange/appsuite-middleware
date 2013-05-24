@@ -52,7 +52,7 @@ package com.openexchange.ajax.folder;
 import java.io.IOException;
 import java.util.UUID;
 import org.json.JSONException;
-import org.json.JSONObject;
+import org.junit.Before;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequestNew;
 import com.openexchange.ajax.folder.actions.GetResponseNew;
@@ -63,93 +63,73 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.internal.ContentTypeRegistry;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.test.ContactTestManager;
 import com.openexchange.test.FolderTestManager;
 
-
 /**
- * {@link ObjectCountTest}
+ * {@link AbstractObjectCountTest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ObjectCountTest extends AbstractAJAXSession {
-    
-    private static final int[] DEFAULT_COLUMNS = new int[] { 1, 2, 3, 4, 5, 6, 20, 300, 301, 302, 309 };
-    
-    private AJAXClient client1;
-    
-    private AJAXClient client2;
+public abstract class AbstractObjectCountTest extends AbstractAJAXSession {
 
-    public ObjectCountTest(String name) {
+    protected static final int[] DEFAULT_COLUMNS = new int[] { 1, 2, 3, 4, 5, 6, 20, 300, 301, 302, 309 };
+
+    protected AJAXClient client1;
+
+    protected AJAXClient client2;
+
+    protected AbstractObjectCountTest(String name) {
         super(name);
     }
-    
+
     @Override
+    @Before
     protected void setUp() throws Exception {
         super.setUp();
         client1 = getClient();
         client2 = new AJAXClient(User.User2);
-        
+
         ContentTypeRegistry ctr = ContentTypeRegistry.getInstance();
         ServiceRegistry.getInstance().addService(ContentTypeRegistry.class, ctr);
     }
-    
-    /*
-     * ----------------------- Tests for contact module -----------------------
-     */
-    public void testCountInPrivateFolderForContacts() throws Exception {
-        FolderTestManager ftm = new FolderTestManager(client1);
-        ContactTestManager ctm = new ContactTestManager(client1);
-        try {
-            FolderObject created = createPrivateFolder(ftm, FolderObject.CONTACT);
-            Folder folder = getFolder(client1, created.getObjectID(), DEFAULT_COLUMNS);
-            assertEquals("Wrong object count", 0, folder.getTotal());
-            ctm.newAction(ContactTestManager.generateContact(created.getObjectID()));
-            Folder reloaded = getFolder(client1, created.getObjectID(), DEFAULT_COLUMNS);
-            assertEquals("Wrong object count", 1, reloaded.getTotal());
-        } catch (Exception e) {
-            ctm.cleanUp();
-            ftm.cleanUp();
-        }
-    }
-    
-    private Folder getFolder(AJAXClient client, int folderId, int[] columns) throws OXException, IOException, JSONException {
+
+    protected static Folder getFolder(AJAXClient client, int folderId, int[] columns) throws OXException, IOException, JSONException {
         GetRequestNew req = new GetRequestNew(EnumAPI.OX_NEW, String.valueOf(folderId), columns);
         GetResponseNew resp = client.execute(req);
         return resp.getFolder();
     }
-    
+
     /**
      * Creates a private folder for the given module (see modules section in {@link FolderObject}).
      * Client1 will be the folder owner.
      */
-    private FolderObject createPrivateFolder(FolderTestManager ftm, int module) throws OXException, IOException, JSONException {
+    protected static FolderObject createPrivateFolder(AJAXClient client, FolderTestManager ftm, int module) throws OXException, IOException, JSONException {
         FolderObject folder = ftm.generatePrivateFolder(
             UUID.randomUUID().toString(),
             module,
-            getParentFolderForModule(client1, module),
-            client1.getValues().getUserId());
+            getParentFolderForModule(client, module),
+            client.getValues().getUserId());
         return ftm.insertFolderOnServer(folder);
     }
-    
+
     /**
      * Creates a shared folder for the given module (see modules section in {@link FolderObject}).
-     * Client1 will be the folder owner and can read all objects.
-     * Client2 will be the user the folder is shared to. He can only see his own objects.
+     * @param client will be the folder owner and can read all objects.
+     * @param module the module under test
+     * @param userId2 will be the user the folder is shared to. He can only see his own objects.
      */
-    private FolderObject createSharedFolder(int module) throws OXException, IOException, JSONException {
-        FolderTestManager ftm = new FolderTestManager(client1);
+    protected static FolderObject createSharedFolder(AJAXClient client, int module, int userId2) throws OXException, IOException, JSONException {
+        FolderTestManager ftm = new FolderTestManager(client);
         FolderObject folder = ftm.generateSharedFolder(
             UUID.randomUUID().toString(),
             module,
-            getParentFolderForModule(client1, module),
-            client1.getValues().getUserId());
-        
+            getParentFolderForModule(client, module),
+            client.getValues().getUserId());
+
         OCLPermission permissions = new OCLPermission();
-        permissions.setEntity(client2.getValues().getUserId());
+        permissions.setEntity(userId2);
         permissions.setGroupPermission(false);
         permissions.setFolderAdmin(false);
         permissions.setAllPermission(
@@ -160,24 +140,23 @@ public class ObjectCountTest extends AbstractAJAXSession {
         folder.addPermission(permissions);
         return ftm.insertFolderOnServer(folder);
     }
-    
-    private int getParentFolderForModule(AJAXClient client, int module) throws OXException, IOException, JSONException {
+
+    protected static int getParentFolderForModule(AJAXClient client, int module) throws OXException, IOException, JSONException {
         switch (module) {
             case FolderObject.CALENDAR:
                 return client.getValues().getPrivateAppointmentFolder();
-                
+
             case FolderObject.TASK:
                 return client.getValues().getPrivateTaskFolder();
-                
+
             case FolderObject.INFOSTORE:
                 return client.getValues().getPrivateInfostoreFolder();
-                
+
             case FolderObject.CONTACT:
                 return client.getValues().getPrivateContactFolder();
-            
+
             default:
                 return -1;
         }
     }
-
 }
