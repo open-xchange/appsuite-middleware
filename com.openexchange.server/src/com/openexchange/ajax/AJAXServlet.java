@@ -1156,6 +1156,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             final String rce = req.getCharacterEncoding();
             charEnc = null == rce ? ServerConfig.getProperty(Property.DefaultEncoding) : rce;
         }
+        final String uploadDir = ServerConfig.getProperty(Property.UploadDirectory);
         for (final FileItem fileItem : items) {
             if (fileItem.isFormField()) {
                 try {
@@ -1166,7 +1167,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             } else {
                 if (fileItem.getSize() > 0 || !isEmpty(fileItem.getName())) {
                     try {
-                        uploadEvent.addUploadFile(processUploadedFile(fileItem, ServerConfig.getProperty(Property.UploadDirectory)));
+                        uploadEvent.addUploadFile(processUploadedFile(fileItem, uploadDir));
                     } catch (final Exception e) {
                         throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
                     }
