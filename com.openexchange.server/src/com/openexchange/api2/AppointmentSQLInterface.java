@@ -434,4 +434,13 @@ public interface AppointmentSQLInterface {
      * @throws OXException
      */
     public int getFolder(int objectId) throws OXException;
+
+    /**
+     * Counts the visible calendar objects in the given folder.
+     * 
+     * @param folderId
+     * @return
+     * @throws OXException
+     */
+    public int countObjectsInFolder(int folderId) throws OXException;
 }

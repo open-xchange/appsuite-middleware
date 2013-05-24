@@ -347,4 +347,12 @@ public class TransactionallyCachingCalendar implements AppointmentSQLInterface {
 		return delegate.getFolder(objectId);
 	}
 
+    /* (non-Javadoc)
+     * @see com.openexchange.api2.AppointmentSQLInterface#count(int)
+     */
+    @Override
+    public int countObjectsInFolder(int folderId) throws OXException {
+        return delegate.countObjectsInFolder(folderId);
+    }
+
 }
