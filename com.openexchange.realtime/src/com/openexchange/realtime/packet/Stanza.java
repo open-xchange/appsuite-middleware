@@ -86,7 +86,7 @@ public abstract class Stanza implements Serializable {
     private static final Log LOG = LogFactory.getLog(Stanza.class);
 
     // recipient and sender
-    private ID to, from, sequencePrincipal;
+    private ID to, from, sequencePrincipal, onBehalfOf;
 
     // All 3 basic stanza types either have an optional or mandatory id field
     private String id = "";
@@ -160,6 +160,26 @@ public abstract class Stanza implements Serializable {
      */
     public void setFrom(final ID from) {
         this.from = from;
+    }
+    
+    
+    /**
+     * Sets the onBehalfOf
+     *
+     * @param onBehalfOf The onBehalfOf to set
+     */
+    public void setOnBehalfOf(ID onBehalfOf) {
+        this.onBehalfOf = onBehalfOf;
+    }
+    
+    
+    /**
+     * Gets the onBehalfOf
+     *
+     * @return The onBehalfOf
+     */
+    public ID getOnBehalfOf() {
+        return onBehalfOf;
     }
     
     

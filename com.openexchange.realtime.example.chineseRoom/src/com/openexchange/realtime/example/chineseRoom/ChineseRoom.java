@@ -147,12 +147,19 @@ public @NotThreadSafe class ChineseRoom extends GroupDispatcher implements Compo
             stanza.trace("Not a member");
             return; // Discard
         }
+        
+        // Send the message to the one who asked
+        send(getWelcomeMessage(stanza.getFrom()));
+    }
+    
+    @Override
+    public Stanza getWelcomeMessage(ID onBehalfOf) {
         // As an answer, we create a new message
         // to the one who asked for the log containing all
         // LoggedMessages
         Message message = new Message();
         message.setFrom(getId());
-        message.setTo(stanza.getFrom());
+        message.setTo(onBehalfOf);
         for(LoggedMessage logged: messages) {
             // Add a payload entry for every logged message
             // We can just throw in the LoggedMessage instances, because
@@ -165,8 +172,7 @@ public @NotThreadSafe class ChineseRoom extends GroupDispatcher implements Compo
             .build()
             ));
         }
-        // Send the message to the one who asked
-        send(message);
+        return message;
     }
     
     // Droo Chonosen mot nom Kontrobo§, so§on oof dor Stro§o ond orzohtlon soch wos

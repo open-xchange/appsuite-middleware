@@ -49,76 +49,57 @@
 
 package com.openexchange.realtime.atmosphere.http;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.json.JSONArray;
-import org.json.JSONException;
+import java.util.concurrent.TimeUnit;
 import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.impl.JSONProtocolHandler;
-import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
-import com.openexchange.realtime.atmosphere.impl.StateEntry;
-import com.openexchange.realtime.atmosphere.impl.StateManager;
-import com.openexchange.realtime.exception.RealtimeExceptionCodes;
+import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
+import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
+import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link SendAction}
+ * The {@link QueryAction} delivers a message, waits for a response and sends that back to the client
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SendAction extends RTAction  {
+public class QueryAction extends RTAction {
 
-    private JSONProtocolHandler protocolHandler;
-    private StateManager stateManager;
+    private ServiceLookup services;
 
-    public SendAction(ServiceLookup services, StateManager stateManager, JSONProtocolHandler protocolHandler) {
-        this.stateManager = stateManager;
-        this.protocolHandler = protocolHandler;
+    /**
+     * Initializes a new {@link QueryAction}.
+     * @param services
+     */
+    public QueryAction(ServiceLookup services) {
+        super();
+        this.services = services;
     }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        Object data = request.getData();
-
-        List<JSONObject> objects = null;
-        if (data instanceof JSONArray) {
-            JSONArray array = (JSONArray) data;
-            objects = new ArrayList<JSONObject>(array.length());
-            for(int i = 0, length = array.length(); i < length; i++) {
-                try {
-                    objects.add(array.getJSONObject(i));
-                } catch (JSONException e) {
-                    throw new OXException(e);
-                }
-            }
-        } else if (data instanceof JSONObject) {
-            objects = Arrays.asList((JSONObject) data);
-        }
-        
         ID id = constructID(request, session);
         
-        StateEntry entry = stateManager.retrieveState(id);
+        StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(id, session, (JSONObject) request.getData());
         
-        List<Long> acknowledgements = new ArrayList<Long>(objects.size());
+        Stanza stanza = stanzaBuilder.build();
+        if (stanza.traceEnabled()) {
+            stanza.trace("received in backend");
+        }
         
-        protocolHandler.handleIncomingMessages(id, session, entry, objects, null);
+        stanza.setOnBehalfOf(id);
         
-        Map<String, Object> r = new HashMap<String, Object>();
-        r.put("acknowledgements", acknowledgements);
+        stanza.transformPayloadsToInternal();
+        stanza.initializeDefaults();
         
-        return new AJAXRequestResult(r, "native");
+        Stanza answer = services.getService(MessageDispatcher.class).sendSynchronously(stanza, request.isSet("timeout") ? request.getIntParameter("timeout") : 30, TimeUnit.SECONDS);
+        return new AJAXRequestResult(new StanzaWriter().write(answer), "json");
     }
-
-    
 
 }

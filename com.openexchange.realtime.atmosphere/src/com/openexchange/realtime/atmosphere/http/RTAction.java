@@ -49,76 +49,32 @@
 
 package com.openexchange.realtime.atmosphere.http;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.impl.JSONProtocolHandler;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
-import com.openexchange.realtime.atmosphere.impl.StateEntry;
-import com.openexchange.realtime.atmosphere.impl.StateManager;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link SendAction}
+ * {@link RTAction}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SendAction extends RTAction  {
+public abstract class RTAction implements AJAXActionService {
+    
+    protected ID constructID(AJAXRequestData request, ServerSession session) throws OXException {
+        String userLogin = session.getUserlogin();
+        String contextName = session.getContext().getName();
 
-    private JSONProtocolHandler protocolHandler;
-    private StateManager stateManager;
+        String resource = request.getParameter("resource");
 
-    public SendAction(ServiceLookup services, StateManager stateManager, JSONProtocolHandler protocolHandler) {
-        this.stateManager = stateManager;
-        this.protocolHandler = protocolHandler;
-    }
-
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        Object data = request.getData();
-
-        List<JSONObject> objects = null;
-        if (data instanceof JSONArray) {
-            JSONArray array = (JSONArray) data;
-            objects = new ArrayList<JSONObject>(array.length());
-            for(int i = 0, length = array.length(); i < length; i++) {
-                try {
-                    objects.add(array.getJSONObject(i));
-                } catch (JSONException e) {
-                    throw new OXException(e);
-                }
-            }
-        } else if (data instanceof JSONObject) {
-            objects = Arrays.asList((JSONObject) data);
+        if (resource == null) {
+            throw RealtimeExceptionCodes.INVALID_ID.create();
         }
         
-        ID id = constructID(request, session);
-        
-        StateEntry entry = stateManager.retrieveState(id);
-        
-        List<Long> acknowledgements = new ArrayList<Long>(objects.size());
-        
-        protocolHandler.handleIncomingMessages(id, session, entry, objects, null);
-        
-        Map<String, Object> r = new HashMap<String, Object>();
-        r.put("acknowledgements", acknowledgements);
-        
-        return new AJAXRequestResult(r, "native");
+        return new ID(RTAtmosphereChannel.PROTOCOL, null, userLogin, contextName, resource);
     }
-
-    
-
 }

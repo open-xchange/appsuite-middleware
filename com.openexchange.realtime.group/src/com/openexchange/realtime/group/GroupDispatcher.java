@@ -492,4 +492,8 @@ public class GroupDispatcher implements ComponentHandle {
         return false;
     }
 
+    public Stanza getWelcomeMessage(ID onBehalfOf) {
+        throw new UnsupportedOperationException("Clients can not join this group synchronously");
+    }
+
 }

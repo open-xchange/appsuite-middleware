@@ -67,19 +67,25 @@ import com.openexchange.server.ServiceLookup;
 public class RealtimeActions implements AJAXActionServiceFactory {
     
     private AJAXActionService SEND = null;
+    private AJAXActionService QUERY = null;
 
     public RealtimeActions(ServiceLookup services, StateManager stateManager, JSONProtocolHandler protocolHandler) {
         SEND = new SendAction(services, stateManager, protocolHandler);
+        QUERY = new QueryAction(services);
     }
     
     @Override
     public Collection<?> getSupportedServices() {
-        return Arrays.asList("send");
+        return Arrays.asList("send", "query");
     }
 
     @Override
     public AJAXActionService createActionService(String action) throws OXException {
+        if ("query".equals(action)) {
+            return QUERY;
+        }
         return SEND;
+
     }
 
 }
