@@ -6,6 +6,7 @@
 
  - Fix for bug 26474: Avoid timeout through initiating 102 Processing interim responses
  - Fix for bug 26479: Accept multiple upload files associated with the same field name
+ - Fix for bug 24519: Maintain inlined images during auto-save and forward/reply actions
 
 * 2013-05-23 - thorben.betten@open-xchange.com
 

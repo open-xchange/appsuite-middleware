@@ -1887,11 +1887,14 @@ public class MimeMessageFiller {
          */
         final String cid;
         {
-            tmp.setLength(0);
-            final int atPos = id.indexOf('@');
-            tmp.append(PATTERN_DASHES.matcher(atPos < 0 ? id : id.substring(0, atPos)).replaceAll(""));
-            tmp.append('@').append(VERSION_NAME);
-            cid = tmp.toString();
+            if (imageProvider.isLocalFile()) {
+                tmp.setLength(0);
+                tmp.append(PATTERN_DASHES.matcher(id).replaceAll(""));
+                tmp.append('@').append(Version.NAME);
+                cid = tmp.toString();
+            } else {
+                cid = id;
+            }
         }
         if (appendBodyPart) {
             boolean found = false;
@@ -1978,6 +1981,8 @@ public class MimeMessageFiller {
 
     private static interface ImageProvider {
 
+        public boolean isLocalFile();
+
         public String getFileName();
 
         public DataSource getDataSource() throws OXException;
@@ -1992,6 +1997,11 @@ public class MimeMessageFiller {
         public ManagedFileImageProvider(final ManagedFile managedFile) {
             super();
             this.managedFile = managedFile;
+        }
+
+        @Override
+        public boolean isLocalFile() {
+            return true;
         }
 
         @Override
@@ -2024,6 +2034,11 @@ public class MimeMessageFiller {
             final DataProperties dataProperties = data.getDataProperties();
             contentType = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
             fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
+        }
+
+        @Override
+        public boolean isLocalFile() {
+            return false;
         }
 
         @Override
