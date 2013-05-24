@@ -58,6 +58,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -65,8 +66,8 @@ import org.json.JSONException;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.atmosphere.impl.RTProtocolImpl;
 import com.openexchange.realtime.atmosphere.protocol.RTClientState;
-import com.openexchange.realtime.atmosphere.protocol.RTProtocol;
 import com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Message;
@@ -82,7 +83,7 @@ public class RTProtocolTest {
     boolean bufferEmptied = false;
     Stanza sequenceGateStanza = null;
     
-    RTProtocol protocol = new RTProtocol() {
+    RTProtocol protocol = new RTProtocolImpl() {
         public void emptyBuffer(RTClientState state, StanzaTransmitter transmitter) {
             bufferEmptied = true;
         };
@@ -119,8 +120,8 @@ public class RTProtocolTest {
         when(state.getStanzasToSend()).thenReturn(bufferedStanzas);
         when(transmitter.send(bufferedStanzas)).thenReturn(true);
         
-        // Needs an untouched RTProtocol. Method is mocked for the remain
-        new RTProtocol().emptyBuffer(state, transmitter);
+        // Needs an untouched RTProtocol. Method is mocked for the remaining tests
+        new RTProtocolImpl().emptyBuffer(state, transmitter);
         
         verify(transmitter).send(bufferedStanzas);
         verify(state).purge();
@@ -133,7 +134,8 @@ public class RTProtocolTest {
         
         when(state.getStanzasToSend()).thenReturn(emptyBuffer);
         
-        new RTProtocol().getReceived(state, transmitter);
+        // Needs an untouched RTProtocol. Method is mocked for the remaining tests
+        new RTProtocolImpl().getReceived(state, transmitter);
         
         verify(transmitter).suspend();
         verify(state).touch();
@@ -216,6 +218,25 @@ public class RTProtocolTest {
         
         verify(state).enqueue(argThat(isStanza(from, from, "atmosphere", "received", 2l)));
         assertTrue(bufferEmptied);
+    }
+    
+    @Test
+    public void alternativelyAcknowledgementsAreCollectedInAList() throws OXException {
+        Message message = new Message();
+        ID from = new ID("test@1");
+        message.setFrom(from);
+        message.setSequenceNumber(2);
+        
+        ArrayList<Long> acknowledgements = new ArrayList<Long>();
+        
+        
+        protocol.receivedMessage(message, gate, state, false, transmitter, acknowledgements);
+        
+        verify(state, never()).enqueue(argThat(isStanza(from, from, "atmosphere", "received", 2l)));
+        assertFalse(bufferEmptied);
+        
+        assertEquals(1, acknowledgements.size());
+        assertEquals((Long)2l, acknowledgements.get(0));
     }
     
     @Test

@@ -50,16 +50,8 @@
 package com.openexchange.realtime.atmosphere.impl;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.atmosphere.cpr.AtmosphereHandler;
 import org.atmosphere.cpr.AtmosphereRequest;
@@ -71,13 +63,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.ConcurrentHashSet;
-import com.openexchange.java.ConcurrentList;
-import com.openexchange.java.ConcurrentSortedSet;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
-import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
 import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
 import com.openexchange.realtime.atmosphere.protocol.RTProtocol;
 import com.openexchange.realtime.atmosphere.stanza.StanzaBuilder;
@@ -87,16 +75,8 @@ import com.openexchange.realtime.dispatch.StanzaSender;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.handle.StanzaQueueService;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.IDEventHandler;
-import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.payload.PayloadTree;
-import com.openexchange.realtime.payload.PayloadTreeNode;
-import com.openexchange.realtime.util.IDMap;
 import com.openexchange.realtime.util.StanzaSequenceGate;
-import com.openexchange.threadpool.Task;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.session.ServerSession;
 
@@ -114,7 +94,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
 
     protected final StateManager stateManager = new StateManager();
 
-    protected final RTProtocol protocol = RTProtocol.getInstance();
+    protected final RTProtocol protocol = RTProtocolImpl.getInstance();
 
     protected final StanzaSequenceGate gate = new StanzaSequenceGate("RTAtmosphereHandler") {
 
@@ -123,6 +103,8 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             handleIncoming(stanza);
         }
     };
+    
+    JSONProtocolHandler protocolHandler = new JSONProtocolHandler(protocol, gate);
 
     public RTAtmosphereHandler() {
         super();
@@ -178,40 +160,11 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         if (postData != null) {
             List<JSONObject> stanzas = parseJSON(postData);
 
-            for (JSONObject json : stanzas) {
-                if (json.has("type")) {
-                    String type = json.optString("type");
-            
-                    
-                    if (type.equals("ping")) {
-                        // PING received
-                        protocol.ping(constructedId, json.optBoolean("commit"), entry.state, entry.transmitter);
-                        return;
-                    }
-
-                    if (type.equals("ack")) {
-                        // ACK received
-                        /*
-                         * TODO: optimize this (e.g. client sends only the highest sequence number of a fully received sequence).
-                         */
-                        long seq = json.optLong("seq");
-
-                        protocol.acknowledgementReceived(seq, entry.state);
-                    }
-                    return;
-                }
-                // Handle regular message
-                StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(constructedId, serverSession, json);
-                Stanza stanza = stanzaBuilder.build();
-                if (stanza.traceEnabled()) {
-                    stanza.trace("received in atmosphere handler");
-                }
-
-                protocol.receivedMessage(stanza, gate, entry.state, entry.created, entry.transmitter);
-
-            }
+            protocolHandler.handleIncomingMessages(constructedId, serverSession, entry, stanzas, null);
         }
     }
+
+    
 
     /**
      * Handle incoming Stanza. Called by the StanzaSequenceGate to dispatch stanzas.
@@ -305,6 +258,14 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             stanzas.add(new JSONObject(postData));
         }
         return stanzas;
+    }
+
+    public StateManager getStateManager() {
+        return stateManager;
+    }
+
+    public JSONProtocolHandler getProtocolHandler() {
+        return protocolHandler;
     }
 
 }

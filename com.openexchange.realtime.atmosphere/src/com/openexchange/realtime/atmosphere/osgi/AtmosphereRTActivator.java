@@ -50,14 +50,16 @@
 package com.openexchange.realtime.atmosphere.osgi;
 
 import org.osgi.framework.BundleContext;
+
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
 import com.openexchange.http.grizzly.service.atmosphere.AtmosphereService;
-import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.realtime.Channel;
 import com.openexchange.realtime.atmosphere.AtmosphereConfig;
+import com.openexchange.realtime.atmosphere.http.RealtimeActions;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereChannel;
 import com.openexchange.realtime.atmosphere.impl.RTAtmosphereHandler;
 import com.openexchange.realtime.atmosphere.payload.converter.primitive.ByteToJSONConverter;
@@ -76,7 +78,7 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 
-public class AtmosphereRTActivator extends HousekeepingActivator {
+public class AtmosphereRTActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -115,6 +117,8 @@ public class AtmosphereRTActivator extends HousekeepingActivator {
         converter.declarePreferredFormat(Presence.STATUS_PATH, PresenceState.class.getSimpleName());
         converter.declarePreferredFormat(Presence.MESSAGE_PATH, String.class.getSimpleName());
         converter.declarePreferredFormat(Presence.PRIORITY_PATH, Byte.class.getSimpleName());
+        
+        registerModule(new RealtimeActions(this, handler.getStateManager(), handler.getProtocolHandler()), "rt");
 
         getService(CapabilityService.class).declareCapability("rt");
 

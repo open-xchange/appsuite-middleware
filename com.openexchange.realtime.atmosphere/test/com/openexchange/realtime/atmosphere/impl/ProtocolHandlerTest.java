@@ -49,73 +49,80 @@
 
 package com.openexchange.realtime.atmosphere.impl;
 
-import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import org.atmosphere.cpr.AtmosphereResource;
-import org.json.JSONArray;
+import static com.openexchange.realtime.atmosphere.test.StanzaMatcher.isStanza;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import java.util.Arrays;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
+import com.openexchange.realtime.atmosphere.protocol.RTClientState;
+import com.openexchange.realtime.atmosphere.protocol.RTProtocol;
 import com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter;
+import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
-
+import com.openexchange.realtime.util.StanzaSequenceGate;
 
 /**
- * The {@link AtmosphereStanzaTransmitter} is a {@link StanzaTransmitter} that is based on an {@link AtmosphereResource}.
+ * {@link ProtocolHandlerTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class AtmosphereStanzaTransmitter implements StanzaTransmitter {
+public class ProtocolHandlerTest {
     
-    private AtmosphereResource resource;
-    private Lock lock = new ReentrantLock();
-    private boolean canSend = true;
+    private JSONProtocolHandler handler;
+    private RTProtocol protocol;
+    private ID id = new ID("test@1");
+    private StanzaSequenceGate gate = new StanzaSequenceGate("Test") {
+        
+        @Override
+        public void handleInternal(Stanza stanza, ID recipient) throws OXException {
+        }
+    };
     
-    public AtmosphereStanzaTransmitter(AtmosphereResource resource) {
-        super();
-        this.resource = resource;
+    
+    @Before
+    public void setup() {
+        protocol = mock(RTProtocol.class);
+        handler = new JSONProtocolHandler(protocol, gate);
+    }
+    
+    @Test
+    public void passesATypePingJSONObjectToThePingMethod() throws OXException, JSONException {
+        String message = "{type: 'ping', commit: true}";
+        handle(message);
+        
+        verify(protocol).ping(id, true, null, null);
+    }
+    
+    @Test
+    public void passesATypePingJSONObjectToThePingMethodWithoutCommit() throws OXException, JSONException {
+        String message = "{type: 'ping'}";
+        handle(message);
+        
+        verify(protocol).ping(id, false, null, null);
+    }
+    
+    @Test
+    public void passesAnAck() throws OXException, JSONException {
+        String message = "{type: 'ack', seq: 12}";
+        handle(message);
+        
+        verify(protocol).acknowledgementReceived(12l, null);
+        
+    }
+    
+    @Test
+    public void passesARegularMessage() throws OXException, JSONException {
+        String message = "{element: 'message', payloads: [{namespace: 'test', element: 'number', data: 23}], to: 'test@1', from: 'test@1'}";
+        handle(message);
+        verify(protocol).receivedMessage(argThat(isStanza(id, id, "test", "number", 23)), eq(gate), isNull(RTClientState.class), eq(false), isNull(StanzaTransmitter.class));
     }
 
-    @Override
-    public boolean send(List<Stanza> stanzas) throws OXException {
-        try {
-            lock.lock();
-            if (!canSend || resource.isCancelled() || resource.isResumed() || stanzas.isEmpty()) {
-                return false;
-            }
-            JSONArray array = new JSONArray();
-            StanzaWriter stanzaWriter = new StanzaWriter();
-            for (Stanza stanza : stanzas) {
-                array.put(stanzaWriter.write(stanza));
-            }
-            resource.getResponse().write(array.toString());
-            switch (resource.transport()) {
-            case LONG_POLLING: 
-                if (resource.isSuspended()) {
-                    resource.resume(); 
-                }
-                canSend = false;
-            }
-            
-            return true;
-        } catch (Throwable t) {
-            return false;
-        } finally {
-            lock.unlock();
-        }
+    private void handle(String message) throws OXException, JSONException {
+        handler.handleIncomingMessages(id, null, new StateEntry(null, null, false), Arrays.asList(new JSONObject(message)), null);
     }
-
-    @Override
-    public void suspend() {
-        try {
-            lock.lock();
-            if (resource.isCancelled() || resource.isResumed() || resource.isSuspended()) {
-                return;
-            }
-            resource.suspend();
-        } finally {
-            lock.unlock();
-        }
-    }
-
 }

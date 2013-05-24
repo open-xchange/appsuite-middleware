@@ -47,75 +47,39 @@
  *
  */
 
-package com.openexchange.realtime.atmosphere.impl;
+package com.openexchange.realtime.atmosphere.http;
 
-import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import org.atmosphere.cpr.AtmosphereResource;
-import org.json.JSONArray;
+import java.util.Arrays;
+import java.util.Collection;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
-import com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter;
-import com.openexchange.realtime.packet.Stanza;
+import com.openexchange.realtime.atmosphere.impl.JSONProtocolHandler;
+import com.openexchange.realtime.atmosphere.impl.StateManager;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * The {@link AtmosphereStanzaTransmitter} is a {@link StanzaTransmitter} that is based on an {@link AtmosphereResource}.
+ * {@link RealtimeActions}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class AtmosphereStanzaTransmitter implements StanzaTransmitter {
+public class RealtimeActions implements AJAXActionServiceFactory {
     
-    private AtmosphereResource resource;
-    private Lock lock = new ReentrantLock();
-    private boolean canSend = true;
+    private AJAXActionService SEND = null;
+
+    public RealtimeActions(ServiceLookup services, StateManager stateManager, JSONProtocolHandler protocolHandler) {
+        SEND = new SendAction(services, stateManager, protocolHandler);
+    }
     
-    public AtmosphereStanzaTransmitter(AtmosphereResource resource) {
-        super();
-        this.resource = resource;
+    @Override
+    public Collection<?> getSupportedServices() {
+        return Arrays.asList("send");
     }
 
     @Override
-    public boolean send(List<Stanza> stanzas) throws OXException {
-        try {
-            lock.lock();
-            if (!canSend || resource.isCancelled() || resource.isResumed() || stanzas.isEmpty()) {
-                return false;
-            }
-            JSONArray array = new JSONArray();
-            StanzaWriter stanzaWriter = new StanzaWriter();
-            for (Stanza stanza : stanzas) {
-                array.put(stanzaWriter.write(stanza));
-            }
-            resource.getResponse().write(array.toString());
-            switch (resource.transport()) {
-            case LONG_POLLING: 
-                if (resource.isSuspended()) {
-                    resource.resume(); 
-                }
-                canSend = false;
-            }
-            
-            return true;
-        } catch (Throwable t) {
-            return false;
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    @Override
-    public void suspend() {
-        try {
-            lock.lock();
-            if (resource.isCancelled() || resource.isResumed() || resource.isSuspended()) {
-                return;
-            }
-            resource.suspend();
-        } finally {
-            lock.unlock();
-        }
+    public AJAXActionService createActionService(String action) throws OXException {
+        return SEND;
     }
 
 }

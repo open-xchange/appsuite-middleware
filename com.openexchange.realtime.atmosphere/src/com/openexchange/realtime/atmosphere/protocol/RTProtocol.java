@@ -49,34 +49,19 @@
 
 package com.openexchange.realtime.atmosphere.protocol;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.payload.PayloadTree;
-import com.openexchange.realtime.payload.PayloadTreeNode;
 import com.openexchange.realtime.util.StanzaSequenceGate;
 
-
 /**
- * The {@link RTProtocol} contains the logic to handle all protocol events of the RT protocol.
+ * {@link RTProtocol}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class RTProtocol {
-    
-    private static final AtomicReference<RTProtocol> PROTOCOL = new AtomicReference<RTProtocol>();
-
-    public static RTProtocol getInstance() {
-        if (null == PROTOCOL.get()) {
-            PROTOCOL.compareAndSet(null, new RTProtocol());
-        }
-        return PROTOCOL.get();
-    }
+public interface RTProtocol {
 
     /**
      * Called when a GET request is received from the client. 
@@ -84,145 +69,47 @@ public class RTProtocol {
      * @param transmitter - the client transmitter 
      * @throws OXException 
      */
-    public void getReceived(RTClientState state, StanzaTransmitter transmitter) throws OXException {
-        emptyBuffer(state, transmitter);
-    }
-    
+    public abstract void getReceived(RTClientState state, StanzaTransmitter transmitter) throws OXException;
+
     /**
      * Called when a Ping is received from the client. If the ping asks for a commit, a Pong message is generated, enqueued and the buffer is emptied, otherwise only the states
      * timestamp is touched.
      * @throws OXException 
      */
-    public void ping(ID from, boolean commit, RTClientState state, StanzaTransmitter transmitter) throws OXException {
-        try {
-            state.lock();
-            state.touch();
-            if (commit) {
-                sendPong(from, state, transmitter);
-            }
-        } finally {
-            state.unlock();
-        }
-    }
+    public abstract void ping(ID from, boolean commit, RTClientState state, StanzaTransmitter transmitter) throws OXException;
 
     /**
      * A 'received' message was received from the client
      */
-    public void acknowledgementReceived(long seq, RTClientState state) {
-        state.acknowledgementReceived(seq);
-    }
+    public abstract void acknowledgementReceived(long seq, RTClientState state);
 
     /**
      * Enqueus a stanza and empties the buffer
      * @throws OXException 
      */
-    public void send(Stanza stanza, RTClientState state, StanzaTransmitter transmitter) throws OXException {
-        try {
-            state.lock();
-            state.enqueue(stanza);
-            emptyBuffer(state, transmitter);
-        } finally {
-            state.unlock();
-        }
-    }
-    
+    public abstract void send(Stanza stanza, RTClientState state, StanzaTransmitter transmitter) throws OXException;
+
     /**
      * A message was received from the client
      * @param newState 
      * @throws OXException 
      */
-    public void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean newState, StanzaTransmitter transmitter) throws OXException {
-        try {
-            state.lock();
-            state.touch();
-            if (newState) {
-                sendNextSequence(stanza.getFrom(), state, transmitter);
-            }
+    public abstract void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean newState, StanzaTransmitter transmitter) throws OXException;
 
-            if (gate.handle(stanza, stanza.getTo())) {
-                sendAcknowledgement(stanza.getFrom(), stanza.getSequenceNumber(), state, transmitter);
-            }
-        } finally {
-            state.unlock();
-        }
-    }
+    /**
+     * A message was received from the client. Instead of sending acknlowledgements, they will be collected in the passed acknowledgements list.
+     */
+    public abstract void receivedMessage(Stanza stanza, StanzaSequenceGate gate, RTClientState state, boolean b, StanzaTransmitter transmitter, List<Long> acknowledgements) throws OXException;
 
     /**
      * Empties the buffer, if there are messages to be sent
      * @throws OXException 
      */
-    public void emptyBuffer(RTClientState state, StanzaTransmitter transmitter) throws OXException {
-        try {
-            state.lock();
-            state.touch();
+    public abstract void emptyBuffer(RTClientState state, StanzaTransmitter transmitter) throws OXException;
 
-            List<Stanza> stanzasToSend = state.getStanzasToSend();
-            if (stanzasToSend.isEmpty()) {
-                transmitter.suspend();
-                return;
-            }
-            if (transmitter.send(stanzasToSend)) {
-                state.purge();
-            }
-        } finally {
-            state.unlock();
-        }
-    }
-    
-    // Protected methods
-    
-    protected void sendPong(ID to, RTClientState state, StanzaTransmitter transmitter) throws OXException {
-        Stanza s = new Message();
-        s.setFrom(to);
-        s.setTo(to);
-        s.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
-            "1",
-            "json",
-            "atmosphere",
-            "pong").build()));
-        state.enqueue(s);
-        emptyBuffer(state, transmitter);
-    }
-    
-    protected void sendNextSequence(ID to, RTClientState state, StanzaTransmitter transmitter) throws OXException {
-        Stanza s = new Message();
-        s.setFrom(to);
-        s.setTo(to);
-        s.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
-            0,
-            "json",
-            "atmosphere",
-            "nextSequence").build()));
-        state.enqueue(s);
-        emptyBuffer(state, transmitter);
-    }
+    public abstract void handleOXException(OXException e);
 
-    protected void sendAcknowledgement(ID to, long sequenceNumber, RTClientState state, StanzaTransmitter transmitter) throws OXException {
-        Stanza s = new Message();
-        s.setFrom(to);
-        s.setTo(to);
-        s.addPayload(new PayloadTree(PayloadTreeNode.builder().withPayload(
-            sequenceNumber,
-            "json",
-            "atmosphere",
-            "received").build()));
-        state.enqueue(s);
-        emptyBuffer(state, transmitter);
-    }
+    public abstract void handleException(Exception e);
 
 
-    public void handleOXException(OXException e) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public void handleException(Exception e) {
-        // TODO Auto-generated method stub
-        
-    }
-
-
-
-
-    
 }

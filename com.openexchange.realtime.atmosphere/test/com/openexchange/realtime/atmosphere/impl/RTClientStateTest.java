@@ -134,12 +134,12 @@ public class RTClientStateTest {
     @Test
     public void aPurgeRunShouldCleanOutSequencedStanzasAfterOneHundredAttempts() {
         Message sequenced = new Message();
-        sequenced.setSequenceNumber(23);
+        sequenced.setSequenceNumber(0);
         state.enqueue(sequenced);
         
         state.purge();
         
-        assertEquals(state.getResendBuffer().get(23l).stanza, sequenced);
+        assertEquals(state.getResendBuffer().get(0l).stanza, sequenced);
         
         for (int i = 0; i < 100; i++) {
             state.purge();
@@ -151,10 +151,10 @@ public class RTClientStateTest {
     @Test
     public void receivingAnAcknowledgementShouldRemoveTheStanzaFromTheResendBuffer() {
         Message sequenced = new Message();
-        sequenced.setSequenceNumber(23);
+        sequenced.setSequenceNumber(0);
         state.enqueue(sequenced);
         
-        state.acknowledgementReceived(23);
+        state.acknowledgementReceived(0);
         
         assertTrue(state.getResendBuffer().isEmpty());
     }
