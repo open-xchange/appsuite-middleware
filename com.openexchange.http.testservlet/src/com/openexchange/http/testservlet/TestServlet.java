@@ -92,24 +92,23 @@ public class TestServlet extends HttpServlet {
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         resp.setStatus(HttpServletResponse.SC_OK);
         // Uncomment to test long-running task
-        /*-
-         *
+
         try {
-            System.out.println("Going asleep...");
-            Thread.sleep(100000);
+            final int millis = 360000;
+            System.out.println("Going asleep for " + millis + " millis...");
+            Thread.sleep(millis);
             System.out.println("... and now continues processing.");
         } catch (final InterruptedException e) {
             e.printStackTrace();
         }
-         *
-         */
+
         final StringBuilder page = new StringBuilder();
         page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
         page.append("<html>\n");
         page.append("<head><title>TestServlet's doGet Page</title></head>\n");
         page.append("<body>\n");
         page.append("<h1>TestServlet's doGet Page</h1><hr/>\n");
-        page.append("<p>This is a tiny paragraph with some text inside!</p>\n");
+        page.append("<p>This is a <i>tiny</i> paragraph with some text inside!</p>\n");
         page.append("</p><p><b>Headers</b><br>");
         final Enumeration<?> paramEnum = req.getHeaderNames();
         while (paramEnum.hasMoreElements()) {
