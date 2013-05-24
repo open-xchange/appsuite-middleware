@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,64 +47,33 @@
  *
  */
 
-package com.openexchange.ajax.contact;
+package com.openexchange.ajax.folder.actions;
 
-import java.util.Date;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.modules.Module;
-import com.openexchange.test.ContactTestManager;
-import com.openexchange.test.FolderTestManager;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.folderstorage.Folder;
 
-public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
 
-	protected ContactTestManager manager;
-	protected FolderTestManager folderManager;
-	protected int folderID;
+/**
+ * {@link GetResponseNew}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ */
+public class GetResponseNew extends AbstractAJAXResponse {
 
-	public AbstractManagedContactTest(String name) {
-		super(name);
-	}
+    private final Folder folder;
 
-	@Override
-	public void setUp() throws Exception {
-	    super.setUp();
+    /**
+     * Initializes a new {@link GetResponseNew}.
+     * @param response
+     */
+    protected GetResponseNew(Response response, Folder folder) {
+        super(response);
+        this.folder = folder;
+    }
 
-	    manager = new ContactTestManager(getClient());
-	    manager.setFailOnError(false);
+    public Folder getFolder() {
+        return folder;
+    }
 
-	    folderManager = new FolderTestManager(getClient());
-	    folderManager.setFailOnError(false);
-
-	    UserValues values = getClient().getValues();
-	    FolderObject folder = folderManager.generatePublicFolder(
-	    		"ManagedContactTest_"+(new Date().getTime()),
-	    		Module.CONTACTS.getFolderConstant(),
-	    		values.getPrivateContactFolder(),
-	    		values.getUserId());
-	    folder = folderManager.insertFolderOnServer(folder);
-	    folderID = folder.getObjectID();
-	}
-
-	@Override
-	public void tearDown() throws Exception {
-        manager.cleanUp();
-    	folderManager.cleanUp();
-	    super.tearDown();
-	}
-
-	protected Contact generateContact(String lastname) {
-	    Contact contact = new Contact();
-	    contact.setSurName(lastname);
-	    contact.setGivenName("Given name");
-	    contact.setDisplayName(contact.getSurName() +", "+contact.getGivenName());
-	    contact.setParentFolderID(folderID);
-	    return contact;
-	}
-
-	protected Contact generateContact() {
-	    return generateContact("Surname");
-	}
 }

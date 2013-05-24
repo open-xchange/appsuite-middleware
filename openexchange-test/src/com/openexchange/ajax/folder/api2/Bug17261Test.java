@@ -31,7 +31,7 @@ public class Bug17261Test extends AbstractAJAXSession {
         folderName = "Bug17621 Folder" + System.currentTimeMillis();
         client2 = new AJAXClient(User.User2);
         ftm1 = new FolderTestManager(client);
-        folder = ftm1.generateFolder(folderName, FolderObject.CONTACT, 1, new int[] {client.getValues().getUserId()});
+        folder = ftm1.generatePublicFolder(folderName, FolderObject.CONTACT, 1, new int[] {client.getValues().getUserId()});
         final InsertRequest insertFolderReq = new InsertRequest(EnumAPI.OUTLOOK, folder, false);
         final InsertResponse insertFolderResp = client.execute(insertFolderReq);
 
@@ -41,7 +41,7 @@ public class Bug17261Test extends AbstractAJAXSession {
 
     public void testInsertingFolderWithSameNameFromSecondUser() throws Exception {
         ftm2 = new FolderTestManager(client2);
-        secondFolder = ftm2.generateFolder(folderName, FolderObject.CONTACT, 1, new int[] {client2.getValues().getUserId()});
+        secondFolder = ftm2.generatePublicFolder(folderName, FolderObject.CONTACT, 1, new int[] {client2.getValues().getUserId()});
         final InsertRequest insertSecondFolderReq = new InsertRequest(EnumAPI.OUTLOOK, secondFolder, false);
         final InsertResponse insertSecondFolderResp = client2.execute(insertSecondFolderReq);
 
@@ -59,7 +59,7 @@ public class Bug17261Test extends AbstractAJAXSession {
             OCLPermission.NO_PERMISSIONS);
 
         ftm2 = new FolderTestManager(client2);
-        secondFolder = ftm2.generateFolder(folderName, FolderObject.CONTACT, 1, new int[] {client2.getValues().getUserId()});
+        secondFolder = ftm2.generatePublicFolder(folderName, FolderObject.CONTACT, 1, new int[] {client2.getValues().getUserId()});
         final InsertRequest insertSecondFolderReq = new InsertRequest(EnumAPI.OUTLOOK, secondFolder, false);
         final InsertResponse insertSecondFolderResp = client2.execute(insertSecondFolderReq);
 
@@ -70,7 +70,7 @@ public class Bug17261Test extends AbstractAJAXSession {
     }
 
     public void testInsertingFolderCauseException() throws Exception {
-        secondFolder = ftm1.generateFolder(folderName, FolderObject.CONTACT, 1, new int[] {client.getValues().getUserId()});
+        secondFolder = ftm1.generatePublicFolder(folderName, FolderObject.CONTACT, 1, new int[] {client.getValues().getUserId()});
         final InsertRequest insertSecondFolderReq = new InsertRequest(EnumAPI.OUTLOOK, secondFolder, false);
         final InsertResponse insertSecondFolderResp = client2.execute(insertSecondFolderReq);
 
