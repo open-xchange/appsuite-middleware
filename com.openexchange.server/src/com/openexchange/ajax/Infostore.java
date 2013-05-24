@@ -57,6 +57,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -287,7 +288,12 @@ public class Infostore extends PermissionServlet {
                 UploadEvent upload = null;
                 try {
                     upload = processUpload(req);
-                    final UploadFile uploadFile = upload.getUploadFileByFieldName("file");
+                    final UploadFile uploadFile;
+                    {
+                        final List<UploadFile> list = upload.getUploadFilesByFieldName("file");
+                        uploadFile = null == list || list.isEmpty() ? null : list.get(0);
+                    }
+
                     if (null != uploadFile) {
                         checkSize(uploadFile.getSize(), UserSettingMailStorage.getInstance().getUserSettingMail(
                             session.getUserId(),

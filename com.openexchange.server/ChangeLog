@@ -1,3 +1,8 @@
+* 2013-05-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26474: Avoid timeout through initiating 102 Processing interim responses
+ - Fix for bug 26479: Accept multiple upload files associated with the same field name
+
 * 2013-05-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 26760: Fixed possible ArrayIndexOutOfBoundsException
