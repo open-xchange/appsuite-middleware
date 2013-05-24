@@ -24,7 +24,7 @@ public abstract class ManagedTaskTest extends AbstractAJAXSession {
 	    manager = new TaskTestManager(getClient());
 	    fManager = new FolderTestManager(getClient());
 	    folderID = fManager.insertFolderOnServer(
-	    	fManager.generateFolder(
+	    	fManager.generatePublicFolder(
 	    			"Managed task test folder #"+System.currentTimeMillis(), 
 	    			Module.TASK.getFolderConstant(), 
 	    			getClient().getValues().getPrivateTaskFolder(), 

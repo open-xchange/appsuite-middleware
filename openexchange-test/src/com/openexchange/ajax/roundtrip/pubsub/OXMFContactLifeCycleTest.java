@@ -81,12 +81,12 @@ public class OXMFContactLifeCycleTest extends AbstractPubSubRoundtripTest {
         this.fMgr = getFolderManager();
 
         // setup folders
-        this.pubFolder = fMgr.generateFolder(
+        this.pubFolder = fMgr.generatePublicFolder(
             "publishRoundtripTest",
             FolderObject.CONTACT,
             getClient().getValues().getPrivateContactFolder(),
             getClient().getValues().getUserId());
-        this.subFolder = fMgr.generateFolder(
+        this.subFolder = fMgr.generatePublicFolder(
             "subscribeRoundtripTest",
             FolderObject.CONTACT,
             getClient().getValues().getPrivateContactFolder(),

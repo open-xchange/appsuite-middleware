@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,64 +47,80 @@
  *
  */
 
-package com.openexchange.ajax.contact;
+package com.openexchange.ajax.folder.actions;
 
-import java.util.Date;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.modules.Module;
-import com.openexchange.test.ContactTestManager;
-import com.openexchange.test.FolderTestManager;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.Header;
 
-public abstract class AbstractManagedContactTest extends AbstractAJAXSession {
 
-	protected ContactTestManager manager;
-	protected FolderTestManager folderManager;
-	protected int folderID;
+/**
+ * {@link GetRequestNew}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ */
+public class GetRequestNew implements AJAXRequest<GetResponseNew> {
+    
+    private final boolean failOnError;
+    
+    private final API api;
 
-	public AbstractManagedContactTest(String name) {
-		super(name);
-	}
+    private final String folderId;
 
-	@Override
-	public void setUp() throws Exception {
-	    super.setUp();
+    private final int[] columns;
+    
+    public GetRequestNew(API api, String folderId, int[] columns) {
+        this(api, folderId, columns, true);
+    }
+    
+    public GetRequestNew(API api, String folderId, int[] columns, boolean failOnError) {
+        super();
+        this.api = api;
+        this.folderId = folderId;
+        this.columns = columns;
+        this.failOnError = failOnError;
+    }
 
-	    manager = new ContactTestManager(getClient());
-	    manager.setFailOnError(false);
+    @Override
+    public Method getMethod() {
+        return Method.GET;
+    }
 
-	    folderManager = new FolderTestManager(getClient());
-	    folderManager.setFailOnError(false);
+    @Override
+    public String getServletPath() {
+        return api.getUrl();
+    }
 
-	    UserValues values = getClient().getValues();
-	    FolderObject folder = folderManager.generatePublicFolder(
-	    		"ManagedContactTest_"+(new Date().getTime()),
-	    		Module.CONTACTS.getFolderConstant(),
-	    		values.getPrivateContactFolder(),
-	    		values.getUserId());
-	    folder = folderManager.insertFolderOnServer(folder);
-	    folderID = folder.getObjectID();
-	}
+    @Override
+    public Parameter[] getParameters() throws IOException, JSONException {
+        List<Parameter> params = new ArrayList<Parameter>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ID, folderId));
+        params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
+        if (api.getTreeId() != -1) {
+            params.add(new Parameter("tree", api.getTreeId()));
+        }
 
-	@Override
-	public void tearDown() throws Exception {
-        manager.cleanUp();
-    	folderManager.cleanUp();
-	    super.tearDown();
-	}
+        return params.toArray(new Parameter[params.size()]);
+    }
 
-	protected Contact generateContact(String lastname) {
-	    Contact contact = new Contact();
-	    contact.setSurName(lastname);
-	    contact.setGivenName("Given name");
-	    contact.setDisplayName(contact.getSurName() +", "+contact.getGivenName());
-	    contact.setParentFolderID(folderID);
-	    return contact;
-	}
+    @Override
+    public GetParserNew getParser() {
+        return new GetParserNew(failOnError);
+    }
 
-	protected Contact generateContact() {
-	    return generateContact("Surname");
-	}
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
 }

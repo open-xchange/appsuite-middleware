@@ -242,7 +242,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
     }
 
     protected FolderObject createDefaultContactFolder() throws OXException, IOException, SAXException, JSONException {
-        FolderObject folder = getFolderManager().generateFolder(
+        FolderObject folder = getFolderManager().generatePublicFolder(
             "pubsub default contact folder "+System.currentTimeMillis(),
             FolderObject.CONTACT,
             getClient().getValues().getPrivateContactFolder(),
@@ -259,7 +259,7 @@ public abstract class AbstractPubSubTest extends AbstractAJAXSession {
     	if (folderName == null) {
     		folderName = "pubsub default infostore folder "+getName()+"-"+System.currentTimeMillis();
     	}
-    	FolderObject folder = getFolderManager().generateFolder(
+    	FolderObject folder = getFolderManager().generatePublicFolder(
                 folderName,
                 FolderObject.INFOSTORE,
                 getClient().getValues().getPrivateInfostoreFolder(),

@@ -80,7 +80,7 @@ public abstract class AbstractVCardImportTest extends AbstractVCardTest {
     protected void setUp() throws Exception {
         super.setUp();
         folderManager = new FolderTestManager(client);
-        testFolder = folderManager.generateFolder(
+        testFolder = folderManager.generatePublicFolder(
             "VCard Interface Tests",
             Module.CONTACTS.getFolderConstant(),
             client.getValues().getPrivateContactFolder(),
