@@ -49,15 +49,18 @@
 
 package com.openexchange.ajax.container;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link FileHolder} - The basic {@link IFileHolder} implementation.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added some JavaDoc comments
  */
@@ -73,7 +76,7 @@ public class FileHolder implements IFileHolder {
 
     /**
      * Initializes a new {@link FileHolder}.
-     * 
+     *
      * @param is The input stream
      * @param length The stream length
      * @param contentType The stream's MIME type
@@ -89,7 +92,7 @@ public class FileHolder implements IFileHolder {
 
     /**
      * Initializes a new {@link FileHolder}.
-     * 
+     *
      * @param isClosure The input stream closure
      * @param length The stream length
      * @param contentType The stream's MIME type
@@ -101,6 +104,35 @@ public class FileHolder implements IFileHolder {
         this.length = length;
         this.contentType = contentType;
         this.name = name;
+    }
+
+    /**
+     * Initializes a new {@link FileHolder}.
+     *
+     * @param file The file
+     * @param contentType The file's MIME type
+     */
+    public FileHolder(final File file, final String contentType) {
+        super();
+        this.length = file.length();
+        if (contentType == null){
+            this.contentType = MimeType2ExtMap.getContentType(file);
+        } else {
+            this.contentType = contentType;
+        }
+        this.name = file.getName();
+        this.isClosure = new InputStreamClosure() {
+
+            @Override
+            public InputStream newStream() throws OXException, IOException {
+                return new FileInputStream(file);
+            }
+        };
+
+    }
+
+    public FileHolder(final File file) {
+        this(file, null);
     }
 
     @Override
@@ -119,7 +151,7 @@ public class FileHolder implements IFileHolder {
         if (null != isClosure) {
             try {
                 return isClosure.newStream();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
         }
@@ -129,7 +161,7 @@ public class FileHolder implements IFileHolder {
 
     /**
      * Sets the input stream
-     * 
+     *
      * @param is The input stream
      */
     public void setStream(final InputStream is) {
@@ -145,7 +177,7 @@ public class FileHolder implements IFileHolder {
 
     /**
      * Sets the stream length
-     * 
+     *
      * @param length The length
      */
     public void setLength(final long length) {
@@ -159,7 +191,7 @@ public class FileHolder implements IFileHolder {
 
     /**
      * Sets stream's MIME type.
-     * 
+     *
      * @param contentType The MIME type
      */
     public void setContentType(final String contentType) {
@@ -173,7 +205,7 @@ public class FileHolder implements IFileHolder {
 
     /**
      * Sets stream's resource name.
-     * 
+     *
      * @param name The resource name
      */
     public void setName(final String name) {
@@ -187,7 +219,7 @@ public class FileHolder implements IFileHolder {
 
     /**
      * Sets the disposition.
-     * 
+     *
      * @param disposition The disposition
      */
     public void setDisposition(final String disposition) {
@@ -196,10 +228,10 @@ public class FileHolder implements IFileHolder {
 
     /**
      * Sets the delivery
-     * 
+     *
      * @param delivery The delivery to set
      */
-    public void setDelivery(String delivery) {
+    public void setDelivery(final String delivery) {
         this.delivery = delivery;
     }
 

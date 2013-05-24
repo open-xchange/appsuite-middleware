@@ -68,7 +68,7 @@ import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.MetadataException;
-import com.drew.metadata.exif.ExifIFD0Directory;
+import com.drew.metadata.exif.ExifDirectory;
 import com.drew.metadata.jpeg.JpegDirectory;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
@@ -370,7 +370,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
             ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             managedFile = mfm.createManagedFile(inputStream);
             try {
-                metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(managedFile.getInputStream()), false);
+                metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(managedFile.getInputStream()));
             } catch (ImageProcessingException e) {
                 LOG.warn("error getting metadata", e);
             }
@@ -405,14 +405,15 @@ public class ImageTransformationsImpl implements ImageTransformations {
         int width = 0;
         int height = 0;
         try {
-            Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
+            Directory directory = metadata.getDirectory(ExifDirectory.class);
             if (null != directory) {
-                orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+                orientation = directory.getInt(ExifDirectory.TAG_ORIENTATION);
             }
-            JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
-            if (null != jpegDirectory) {
-                width = jpegDirectory.getImageWidth();
-                height = jpegDirectory.getImageHeight();
+            Directory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
+            if (null != jpegDirectory && jpegDirectory instanceof JpegDirectory) {
+                JpegDirectory jpegDirectory2 = (JpegDirectory) jpegDirectory;
+                width = jpegDirectory2.getImageWidth();
+                height = jpegDirectory2.getImageHeight();
             }
         } catch (MetadataException e) {
             LOG.debug("Unable to retrieve image information.", e);

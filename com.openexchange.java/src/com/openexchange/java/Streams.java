@@ -57,6 +57,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Collection;
 
 /**
  * {@link Streams} - A utility class for streams.
@@ -280,6 +281,25 @@ public class Streams {
      * @param closeables The {@link Closeable} instances
      */
     public static void close(final Closeable... closeables) {
+        if (null != closeables) {
+            for (final Closeable toClose : closeables) {
+                if (null != toClose) {
+                    try {
+                        toClose.close();
+                    } catch (final Exception e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Safely closes specified {@link Closeable} instances.
+     *
+     * @param closeables The {@link Closeable} instances
+     */
+    public static void close(final Collection<Closeable> closeables) {
         if (null != closeables) {
             for (final Closeable toClose : closeables) {
                 if (null != toClose) {

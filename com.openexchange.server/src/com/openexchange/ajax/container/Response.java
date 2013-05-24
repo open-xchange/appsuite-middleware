@@ -118,6 +118,11 @@ public final class Response {
     private final List<OXException> warnings;
 
     /**
+     * The flag whether to include stack trace or not.
+     */
+    private boolean includeStackTraceOnError;
+
+    /**
      * This constructor parses a server response into an object.
      *
      * @param response the response JSON object.
@@ -125,6 +130,7 @@ public final class Response {
     public Response(final JSONObject response) {
         this(DEFAULT_LOCALE);
         this.json = response;
+        includeStackTraceOnError = false;
     }
 
     /**
@@ -134,7 +140,7 @@ public final class Response {
      * @throws OXException If user's locale cannot be detected
      */
     public Response(final Session session) throws OXException {
-        this(null == session ? DEFAULT_LOCALE : getServerSessionFrom(session).getUser().getLocale());
+        this(localeFrom(session));
     }
 
     /**
@@ -143,7 +149,7 @@ public final class Response {
      * @param session The server session providing user data; if <code>null</code> default locale {@link Locale#US} is used
      */
     public Response(final ServerSession session) {
-        this(null == session ? DEFAULT_LOCALE : session.getUser().getLocale());
+        this(localeFrom(session));
     }
 
     /**
@@ -164,6 +170,7 @@ public final class Response {
         properties = new HashMap<String, Object>(8);
         this.json = null;
         this.locale = locale;
+        includeStackTraceOnError = false;
     }
 
     /**
@@ -195,7 +202,7 @@ public final class Response {
      * @return This {@link Response} with locale applied.
      */
     public Response setLocale(final ServerSession session) {
-        this.locale = null == session ? DEFAULT_LOCALE : session.getUser().getLocale();
+        this.locale = localeFrom(session);
         return this;
     }
 
@@ -207,7 +214,7 @@ public final class Response {
      * @throws OXException If locale cannot be detected
      */
     public Response setLocale(final Session session) throws OXException {
-        this.locale = null == session ? DEFAULT_LOCALE : getServerSessionFrom(session).getUser().getLocale();
+        this.locale = localeFrom(session);
         return this;
     }
 
@@ -463,11 +470,36 @@ public final class Response {
         return Collections.unmodifiableList(warnings);
     }
 
-    private static ServerSession getServerSessionFrom(final Session session) throws OXException {
-        if (session instanceof ServerSession) {
-            return (ServerSession) session;
+    /**
+     * Sets whether to include stack trace.
+     *
+     * @param includeStackTraceOnError <code>true</code> to include stack trace; otherwise <code>false</code>
+     */
+    public void setIncludeStackTraceOnError(final boolean includeStackTraceOnError) {
+        this.includeStackTraceOnError = includeStackTraceOnError;
+    }
+
+    /**
+     * Checks whether to include stack trace.
+     *
+     * @return <code>true</code> to include stack trace; otherwise <code>false</code>
+     */
+    public boolean includeStackTraceOnError() {
+        return includeStackTraceOnError;
+    }
+
+    private static Locale localeFrom(final Session session) throws OXException {
+        if (null == session) {
+            return DEFAULT_LOCALE;
         }
-        return ServerSessionAdapter.valueOf(session);
+        return localeFrom(session instanceof ServerSession ? (ServerSession) session : ServerSessionAdapter.valueOf(session));
+    }
+
+    private static Locale localeFrom(final ServerSession serverSession) {
+        if (null == serverSession) {
+            return DEFAULT_LOCALE;
+        }
+        return serverSession.isAnonymous() ? DEFAULT_LOCALE : (null == serverSession.getUser() ? DEFAULT_LOCALE : serverSession.getUser().getLocale());
     }
 
 }
