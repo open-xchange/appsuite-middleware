@@ -112,7 +112,7 @@ public abstract class StanzaSequenceGate {
                  * all members left the GroupDispatcher(SequencePrincipal)
                  */
                 if (meantime == null) {
-                    stanza.getSequencePrincipal().on("dispose", new IDEventHandler() {
+                    stanza.getSequencePrincipal().on(ID.Events.DISPOSE, new IDEventHandler() {
 
                         @Override
                         public void handle(String event, ID id, Object source, Map<String, Object> properties) {

@@ -49,14 +49,12 @@
 
 package com.openexchange.realtime.atmosphere.impl;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.protocol.RTClientState;
 import com.openexchange.realtime.atmosphere.protocol.RTProtocol;
 import com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter;
-import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Message;
 import com.openexchange.realtime.packet.Stanza;
@@ -135,12 +133,22 @@ public class RTProtocolImpl implements RTProtocol {
         try {
             state.lock();
             state.touch();
+            stanza.trace("Received message in RTProtocol with asynchronous acknowledgements");
+            boolean enqueued = false;
             if (newState) {
-                sendNextSequence(stanza.getFrom(), state, transmitter);
+                stanza.trace("We have no state about this client " + stanza.getFrom()+ " sending nextSequence message");
+                enqueueNextSequence(stanza.getFrom(), state, transmitter);
+                enqueued = true;
             }
 
             if (gate.handle(stanza, stanza.getTo())) {
-                sendAcknowledgement(stanza.getFrom(), stanza.getSequenceNumber(), state, transmitter);
+                stanza.trace("Sending receipt for client message " + stanza.getSequenceNumber());
+                enqueueAcknowledgement(stanza.getFrom(), stanza.getSequenceNumber(), state, transmitter);
+                enqueued = true;
+            }
+            
+            if (enqueued) {
+                emptyBuffer(state, transmitter);
             }
         } finally {
             state.unlock();
@@ -155,12 +163,15 @@ public class RTProtocolImpl implements RTProtocol {
         try {
             state.lock();
             state.touch();
+            stanza.trace("Received message in RTProtocol with synchronous acknowledgements");
             if (newState) {
-                sendNextSequence(stanza.getFrom(), state, transmitter);
+                stanza.trace("We have no state about this client " + stanza.getFrom()+ " sending nextSequence message");
+                enqueueNextSequence(stanza.getFrom(), state, transmitter);
             }
 
             if (gate.handle(stanza, stanza.getTo())) {
-                sendAcknowledgement(stanza.getFrom(), stanza.getSequenceNumber(), state, transmitter);
+                stanza.trace("Sending receipt for client message " + stanza.getSequenceNumber());
+                enqueueAcknowledgement(stanza.getFrom(), stanza.getSequenceNumber(), state, transmitter);
             }
         } finally {
             state.unlock();
@@ -204,7 +215,7 @@ public class RTProtocolImpl implements RTProtocol {
         emptyBuffer(state, transmitter);
     }
     
-    protected void sendNextSequence(ID to, RTClientState state, StanzaTransmitter transmitter) throws OXException {
+    protected void enqueueNextSequence(ID to, RTClientState state, StanzaTransmitter transmitter) throws OXException {
         Stanza s = new Message();
         s.setFrom(to);
         s.setTo(to);
@@ -214,10 +225,9 @@ public class RTProtocolImpl implements RTProtocol {
             "atmosphere",
             "nextSequence").build()));
         state.enqueue(s);
-        emptyBuffer(state, transmitter);
     }
 
-    protected void sendAcknowledgement(ID to, long sequenceNumber, RTClientState state, StanzaTransmitter transmitter) throws OXException {
+    protected void enqueueAcknowledgement(ID to, long sequenceNumber, RTClientState state, StanzaTransmitter transmitter) throws OXException {
         Stanza s = new Message();
         s.setFrom(to);
         s.setTo(to);
@@ -227,7 +237,6 @@ public class RTProtocolImpl implements RTProtocol {
             "atmosphere",
             "received").build()));
         state.enqueue(s);
-        emptyBuffer(state, transmitter);
     }
 
 

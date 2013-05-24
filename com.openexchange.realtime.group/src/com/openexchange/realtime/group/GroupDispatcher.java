@@ -122,7 +122,7 @@ public class GroupDispatcher implements ComponentHandle {
         this.id = id;
         this.handler = handler;
         final AtomicReference<Set<ID>> idsRef = this.idsRef;
-        id.on("dispose", new IDEventHandler() {
+        id.on(ID.Events.DISPOSE, new IDEventHandler() {
 
             @Override
             public void handle(String event, ID id, Object source, Map<String, Object> properties) {
@@ -293,7 +293,7 @@ public class GroupDispatcher implements ComponentHandle {
         }
 
         stamps.put(id, stamp);
-        id.on("dispose", LEAVE);
+        id.on(ID.Events.DISPOSE, LEAVE);
         if (first) {
             firstJoined(id);
         }
@@ -337,7 +337,7 @@ public class GroupDispatcher implements ComponentHandle {
         if (empty) {
             Map<String, Object> properties = new HashMap<String, Object>();
             properties.put("id", id);
-            this.id.trigger("dispose", this, properties);
+            this.id.trigger(ID.Events.DISPOSE, this, properties);
         }
     }
 

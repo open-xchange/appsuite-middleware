@@ -96,12 +96,15 @@ public class RTClientStateImpl implements RTClientState {
             try {
                 lock();
                 stanza.setSequenceNumber(sequenceNumber);
+                stanza.trace("RTClientState recasting stanza to sequence number "+ sequenceNumber + " for delivery");
                 sequenceNumber++;
             } finally {
                 unlock();
             }
+            stanza.trace("add to resend buffer");
             resendBuffer.put(stanza.getSequenceNumber(), new EnqueuedStanza(stanza));
         } else {
+            stanza.trace("add to nonsequenceStanza list");
             nonsequenceStanzas.add(stanza);
         }
     }
@@ -133,11 +136,15 @@ public class RTClientStateImpl implements RTClientState {
     public void purge() {
         try {
             lock();
+            for (Stanza s : nonsequenceStanzas) {
+                s.trace("Stanza could not be delivered");
+            }
             nonsequenceStanzas.clear();
             List<Long> toRemove = new ArrayList<Long>(resendBuffer.size());
             for(EnqueuedStanza es: resendBuffer.values()) {
                 if (!es.incCounter()) {
                     toRemove.add(es.sequenceNumber);
+                    es.stanza.trace("TTL reached, this stanza will be lost!");
                 }
             }
             for (Long seq : toRemove) {

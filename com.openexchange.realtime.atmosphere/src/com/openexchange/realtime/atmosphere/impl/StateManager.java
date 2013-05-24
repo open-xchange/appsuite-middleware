@@ -80,7 +80,7 @@ public class StateManager {
             created = meantime == null;
             state = (created) ? state : meantime;
             if (created) {
-                id.on("dipose", new IDEventHandler() {
+                id.on(ID.Events.DISPOSE, new IDEventHandler() {
                     
                     @Override
                     public void handle(String event, ID id, Object source, Map<String, Object> properties) {
@@ -109,7 +109,7 @@ public class StateManager {
     public void timeOutStaleStates(long timestamp) {
         for(RTClientState state: new ArrayList<RTClientState>(states.values())) {
             if (state.isTimedOut(timestamp)) {
-                state.getId().trigger("dispose", this);
+                state.getId().trigger(ID.Events.DISPOSE, this);
             }
         }
     }

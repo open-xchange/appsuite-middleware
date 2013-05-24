@@ -127,13 +127,12 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
         try {
             ServerSession serverSession = sessionValidator.getServerSession();
             ID constructedId = constructId(resource, serverSession);
-            StateEntry entry = stateManager.retrieveState(constructedId);
             if (method.equalsIgnoreCase("GET")) {
 
                 AtmosphereStanzaTransmitter transmitter = new AtmosphereStanzaTransmitter(resource);
                 stateManager.rememberTransmitter(constructedId, transmitter);
 
-                entry = stateManager.retrieveState(constructedId);
+                StateEntry entry = stateManager.retrieveState(constructedId);
                 
                 ResourceDirectory resourceDirectory = AtmosphereServiceRegistry.getInstance().getService(ResourceDirectory.class);
                 resourceDirectory.set(constructedId, new DefaultResource());
@@ -141,6 +140,8 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
                 protocol.getReceived(entry.state, entry.transmitter);
 
             } else if (method.equalsIgnoreCase("POST")) {
+                StateEntry entry = stateManager.retrieveState(constructedId);
+                
                 String postData = request.getReader().readLine();
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("Incoming: " + postData);

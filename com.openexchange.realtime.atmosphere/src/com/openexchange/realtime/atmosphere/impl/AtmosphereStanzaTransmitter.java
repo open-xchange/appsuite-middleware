@@ -80,7 +80,9 @@ public class AtmosphereStanzaTransmitter implements StanzaTransmitter {
     public boolean send(List<Stanza> stanzas) throws OXException {
         try {
             lock.lock();
+            trace(stanzas, "Trying to send as part of a batch of " +stanzas.size() + " stanzas");
             if (!canSend || resource.isCancelled() || resource.isResumed() || stanzas.isEmpty()) {
+                trace(stanzas, "Stale AtmosphereStanzaTransmitter, enqueue again");
                 return false;
             }
             JSONArray array = new JSONArray();
@@ -88,20 +90,28 @@ public class AtmosphereStanzaTransmitter implements StanzaTransmitter {
             for (Stanza stanza : stanzas) {
                 array.put(stanzaWriter.write(stanza));
             }
+            trace(stanzas, "Writing to stream");
             resource.getResponse().write(array.toString());
             switch (resource.transport()) {
             case LONG_POLLING: 
                 if (resource.isSuspended()) {
+                    trace(stanzas, "Delivering to client");
                     resource.resume(); 
                 }
                 canSend = false;
             }
-            
+            trace(stanzas, "Done sending");
             return true;
         } catch (Throwable t) {
             return false;
         } finally {
             lock.unlock();
+        }
+    }
+
+    private void trace(List<Stanza> stanzas, String string) {
+        for (Stanza stanza : stanzas) {
+            stanza.trace(string);
         }
     }
 

@@ -115,11 +115,11 @@ public class StateManagerTest {
         
         List<Integer> disposed = new ArrayList<Integer>();
         
-        entry1.state.getId().on("dispose", new DisposeHandler(disposed, 1));
-        entry2.state.getId().on("dispose", new DisposeHandler(disposed, 2));
-        entry3.state.getId().on("dispose", new DisposeHandler(disposed, 3));
-        entry4.state.getId().on("dispose", new DisposeHandler(disposed, 4));
-        entry5.state.getId().on("dispose", new DisposeHandler(disposed, 5));
+        entry1.state.getId().on(ID.Events.DISPOSE, new DisposeHandler(disposed, 1));
+        entry2.state.getId().on(ID.Events.DISPOSE, new DisposeHandler(disposed, 2));
+        entry3.state.getId().on(ID.Events.DISPOSE, new DisposeHandler(disposed, 3));
+        entry4.state.getId().on(ID.Events.DISPOSE, new DisposeHandler(disposed, 4));
+        entry5.state.getId().on(ID.Events.DISPOSE, new DisposeHandler(disposed, 5));
         
         stateManager.timeOutStaleStates(120001);
         

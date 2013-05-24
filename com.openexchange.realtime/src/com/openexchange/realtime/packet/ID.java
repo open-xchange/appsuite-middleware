@@ -495,4 +495,17 @@ public class ID implements Serializable {
         
         return lock;
     }
+    
+    /**
+     * 
+     * {@link Events} is a collection of event constants to be used with {@link ID#trigger(String, Object)} and {@link ID#on(String, IDEventHandler)} 
+     *
+     * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+     */
+    public static interface Events {
+        /**
+         * This event is triggered, when an ID goes offline. You can use this to free up resources this ID uses, for example state information associated with the ID
+         */
+        public static final String DISPOSE = "dispose";
+    }
 }

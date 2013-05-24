@@ -112,7 +112,7 @@ public class JSONProtocolHandler {
             StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(constructedId, serverSession, json);
             Stanza stanza = stanzaBuilder.build();
             if (stanza.traceEnabled()) {
-                stanza.trace("received in atmosphere handler");
+                stanza.trace("received in backend");
             }
             
             if (acknowledgements == null) {
