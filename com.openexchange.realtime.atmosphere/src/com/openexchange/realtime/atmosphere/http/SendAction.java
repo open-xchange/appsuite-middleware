@@ -111,7 +111,7 @@ public class SendAction extends RTAction  {
         
         List<Long> acknowledgements = new ArrayList<Long>(objects.size());
         
-        protocolHandler.handleIncomingMessages(id, session, entry, objects, null);
+        protocolHandler.handleIncomingMessages(id, session, entry, objects, acknowledgements);
         
         Map<String, Object> r = new HashMap<String, Object>();
         r.put("acknowledgements", acknowledgements);

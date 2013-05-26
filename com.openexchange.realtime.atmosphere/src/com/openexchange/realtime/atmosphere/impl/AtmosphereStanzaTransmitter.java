@@ -78,6 +78,9 @@ public class AtmosphereStanzaTransmitter implements StanzaTransmitter {
 
     @Override
     public boolean send(List<Stanza> stanzas) throws OXException {
+        if (stanzas.isEmpty()) {
+            return true;
+        }
         try {
             lock.lock();
             trace(stanzas, "Trying to send as part of a batch of " +stanzas.size() + " stanzas");
