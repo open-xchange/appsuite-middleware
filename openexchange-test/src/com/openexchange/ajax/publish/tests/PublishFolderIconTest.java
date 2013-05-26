@@ -85,7 +85,7 @@ public class PublishFolderIconTest extends AbstractPublicationTest {
         super.setUp();
 
         // create contact folder
-        folder = fMgr.generateFolder(
+        folder = fMgr.generatePublicFolder(
             "publishedContacts_"+new Date().getTime(),
             FolderObject.CONTACT,
             getClient().getValues().getPrivateContactFolder(),

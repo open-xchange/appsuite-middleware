@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
@@ -89,6 +90,8 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.CommonSearchResponse;
 import com.openexchange.ajax.framework.ListIDs;
+import com.openexchange.ajax.framework.MultipleRequest;
+import com.openexchange.ajax.framework.MultipleResponse;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -255,6 +258,33 @@ public class ContactTestManager implements TestManager {
     public void newAction(final Contact... contacts) {
         for (int i = 0; i < contacts.length; i++) {
             this.newAction(contacts[i]);
+        }
+    }
+    
+    /**
+     * Create multiple contacts via a multiple request
+     */
+    public void newActionMultiple(final Contact... contacts) {
+        final InsertRequest requests[] = new InsertRequest[contacts.length];
+        int i;
+        for (i = 0; i < requests.length; i++) {
+            requests[i] = new InsertRequest(contacts[i], getFailOnError());
+        }
+
+        try {
+            MultipleRequest<InsertResponse> request = MultipleRequest.create(requests);
+            MultipleResponse<InsertResponse> responses = getClient().execute(request, getSleep());
+            lastResponse = responses;
+            Iterator<InsertResponse> it = responses.iterator();
+            i = 0;
+            while (it.hasNext()) {
+                InsertResponse response = it.next();
+                response.fillObject(contacts[i]);
+                getCreatedEntities().add(contacts[i]);
+                i++;
+            }
+        } catch (final Exception e) {
+            doExceptionHandling(e, "NewRequest");
         }
     }
 

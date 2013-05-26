@@ -5465,6 +5465,58 @@ public class CalendarMySQL implements CalendarSqlImp {
         return 0;
     }
 
+
+    @Override
+    public int countObjectsInFolder(Session session, int folderId, int folderType, EffectivePermission permission) throws OXException {
+        Context ctx = Tools.getContext(session);
+
+        SELECT select = new SELECT(new COUNT(ASTERISK));
+        List<Object> values = new ArrayList<Object>();
+        values.add(ctx.getContextId());
+        values.add(folderId);
+        if (folderType == FolderObject.PUBLIC) {
+            if (permission.canReadAllObjects()) {
+                select.FROM("prg_dates").WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("fid", PLACEHOLDER)));
+            } else if (permission.canReadOwnObjects()) {
+                select.FROM("prg_dates").WHERE(
+                    new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("fid", PLACEHOLDER).AND(new EQUALS("created_from", session.getUserId()))));
+                values.add(session.getUserId());
+            } else {
+                return 0; // Cannot see any objects.
+            }
+        } else if (folderType == FolderObject.SHARED) {
+            if (permission.canReadAllObjects()) {
+                select.FROM("prg_dates_members").WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("pfid", PLACEHOLDER)));
+            } else if (permission.canReadOwnObjects()) {
+                return 0; // Cannot have "own" objects in shared folders.
+            } else {
+                return 0; // Cannot see any objects.
+            }
+        } else if (folderType == FolderObject.PRIVATE) {
+            select.FROM("prg_dates_members").WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("pfid", PLACEHOLDER))); // Can always see everything.
+        }
+
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            connection = DBPool.pickup(ctx);
+            stmt = new StatementBuilder().prepareStatement(connection, select, values);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
+        } finally {
+            DBUtils.closeResources(rs, stmt, null, true, ctx);
+            DBPool.push(ctx, connection);
+        }
+
+        return 0;
+    }
+
     public static void setServiceLookup(ServiceLookup serviceLookup) {
         CalendarMySQL.SERVICES_REF.set(serviceLookup);
     }

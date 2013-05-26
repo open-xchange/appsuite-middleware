@@ -90,7 +90,7 @@ public class SubscriptionFolderIconTest extends AbstractSubscriptionTest {
         fMgr = getFolderManager();
 
         // create contact folder
-        folder = fMgr.generateFolder(
+        folder = fMgr.generatePublicFolder(
             "publishedContacts",
             FolderObject.CONTACT,
             getClient().getValues().getPrivateContactFolder(),

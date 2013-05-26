@@ -1431,6 +1431,20 @@ public class CalendarSql implements AppointmentSQLInterface {
         return extractOccurrences(appointments, start, end);
     }
 
+    @Override
+    public int countObjectsInFolder(int folderId) throws OXException {
+        OXFolderAccess oxfa = new OXFolderAccess(Tools.getContext(session));
+        int folderType = oxfa.getFolderType(folderId, session.getUserId());
+        UserConfiguration userConfiguration = Tools.getUserConfiguration(Tools.getContext(session), session.getUserId());
+        EffectivePermission folderPermission = oxfa.getFolderPermission(folderId, session.getUserId(), userConfiguration);
+
+        if (!folderPermission.isFolderVisible()) {
+            throw OXCalendarExceptionCodes.NO_PERMISSIONS_TO_READ.create();
+        }
+
+        return CalendarSql.cimp.countObjectsInFolder(session, folderId, folderType, folderPermission);
+    }
+
     private int[] addColumnIfNecessary(final int[] cols, final int... columnsToAdd) {
 
         final ArrayList<Integer> columns = new ArrayList<Integer>();

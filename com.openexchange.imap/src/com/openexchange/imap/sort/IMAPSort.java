@@ -109,7 +109,6 @@ public final class IMAPSort {
      * @throws MessagingException If a messaging error occurs
      */
     public static Message[] sortMessages(final IMAPFolder imapFolder, final MailFields usedFields, final int[] filter, final MailSortField sortField, final OrderDirection orderDir, final Locale locale, final IMAPConfig imapConfig) throws MessagingException {
-        boolean applicationSort = true;
         Message[] msgs = null;
         final MailSortField sortBy = sortField == null ? MailSortField.RECEIVED_DATE : sortField;
         final int messageCount = imapFolder.getMessageCount();
@@ -121,60 +120,48 @@ public final class IMAPSort {
          * Perform an IMAP-based sort provided that SORT capability is supported and IMAP sort is enabled through config or number of
          * messages to sort exceeds limit.
          */
+        boolean applicationSort = true;
         if (imapConfig.isImapSort() || (imapConfig.getCapabilities().hasSort() && (size >= MailProperties.getInstance().getMailFetchLimit()))) {
             try {
-                final int[] seqNums;
-                {
-                    /*
-                     * Get IMAP sort criteria
-                     */
-                    final String sortCriteria = getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC);
+                // Get IMAP sort criteria
+                final String sortCriteria = getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC);
+                if (null != sortCriteria) {
+                    final int[] seqNums;
+                    {
+                        // Do IMAP sort
+                        final long start = System.currentTimeMillis();
+                        seqNums = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria, filter);
+                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP sort took ").append(
+                                (System.currentTimeMillis() - start)).append("msec").toString());
+                        }
+                    }
+                    if ((seqNums == null) || (seqNums.length == 0)) {
+                        return EMPTY_MSGS;
+                    }
+                    final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), imapConfig.getIMAPProperties().isFastFetch());
+                    final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
                     final long start = System.currentTimeMillis();
-                    seqNums = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria, filter);
+                    msgs =
+                        new MessageFetchIMAPCommand(
+                            imapFolder,
+                            imapConfig.getImapCapabilities().hasIMAP4rev1(),
+                            seqNums,
+                            fetchProfile,
+                            false,
+                            true,
+                            body).doCommand();
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP sort took ").append((System.currentTimeMillis() - start)).append(
-                            "msec").toString());
+                        LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP fetch for ").append(seqNums.length).append(
+                            " messages took ").append((System.currentTimeMillis() - start)).append("msec").toString());
                     }
+                    if ((msgs == null) || (msgs.length == 0)) {
+                        return EMPTY_MSGS;
+                    }
+                    applicationSort = false;
                 }
-                if ((seqNums == null) || (seqNums.length == 0)) {
-                    return EMPTY_MSGS;
-                }
-                final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), imapConfig.getIMAPProperties().isFastFetch());
-                final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
-                final long start = System.currentTimeMillis();
-                msgs = new MessageFetchIMAPCommand(
-                    imapFolder,
-                    imapConfig.getImapCapabilities().hasIMAP4rev1(),
-                    seqNums,
-                    fetchProfile,
-                    false,
-                    true,
-                    body).doCommand();
-                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(new com.openexchange.java.StringAllocator(128).append("IMAP fetch for ").append(seqNums.length).append(" messages took ").append(
-                        (System.currentTimeMillis() - start)).append("msec").toString());
-                }
-                if ((msgs == null) || (msgs.length == 0)) {
-                    return EMPTY_MSGS;
-                }
-
-                // CHECK SORTING FOR DEBUG PURPOSE
-                // System.out.println("\n\tCHECKING SORTING!!!\n\n");
-                // boolean failed = false;
-                // for (int i = 0; i < seqNums.length && !failed; i++) {
-                // if (seqNums[i] != msgs[i].getMessageNumber()) {
-                // failed = true;
-                // }
-                // }
-                // if (failed) {
-                // System.out.println("\n\tSORTING LOST DURING FETCH!!!\n\n");
-                // } else {
-                // System.out.println("\n\tSORTING OK!!!\n\n");
-                // }
-
-                applicationSort = false;
             } catch (final FolderClosedException e) {
                 /*
                  * Caused by a protocol error such as a socket error. No retry in this case.
@@ -185,17 +172,6 @@ public final class IMAPSort {
                  * Caused by a protocol error such as a socket error. No retry in this case.
                  */
                 throw e;
-            } catch (final OXException e) {
-                if (e.isPrefix("MSG") && e.getCode() == IMAPException.Code.UNSUPPORTED_SORT_FIELD.getNumber()) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e.getMessage(), e);
-                    }
-                } else {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn(e.getMessage(), e);
-                    }
-                }
-                applicationSort = true;
             } catch (final MessagingException e) {
                 if (e.getNextException() instanceof ProtocolException) {
                     final ProtocolException protocolException = (ProtocolException) e.getNextException();
@@ -262,10 +238,9 @@ public final class IMAPSort {
      *
      * @param sortField The sort field
      * @param descendingDirection The order direction
-     * @return The sort criteria ready for being used inside IMAP's <i>SORT</i> command
-     * @throws OXException If an unsupported sort field is specified
+     * @return The sort criteria ready for being used inside IMAP's <i>SORT</i> command or <code>null</code> if sort field is not supported by IMAP
      */
-    public static String getSortCritForIMAPCommand(final MailSortField sortField, final boolean descendingDirection) throws OXException {
+    public static String getSortCritForIMAPCommand(final MailSortField sortField, final boolean descendingDirection) {
         final StringBuilder imapSortCritBuilder = new StringBuilder(16).append(descendingDirection ? "REVERSE " : "");
         switch (sortField) {
         case SENT_DATE:
@@ -290,7 +265,7 @@ public final class IMAPSort {
             imapSortCritBuilder.append("SIZE");
             break;
         default:
-            throw IMAPException.create(IMAPException.Code.UNSUPPORTED_SORT_FIELD, sortField.getKey());
+            return null;
         }
         return imapSortCritBuilder.toString();
     }

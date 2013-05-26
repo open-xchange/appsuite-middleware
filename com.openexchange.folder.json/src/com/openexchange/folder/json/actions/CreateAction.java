@@ -59,6 +59,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.parser.FolderParser;
 import com.openexchange.folder.json.services.ServiceRegistry;
+import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
@@ -112,7 +113,7 @@ public final class CreateAction extends AbstractFolderAction {
          * Parse folder object
          */
         final JSONObject folderObject = (JSONObject) request.getData();
-        final Folder folder = FolderParser.parseFolder(folderObject);
+        final Folder folder = new FolderParser(ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class)).parseFolder(folderObject);
         folder.setParentID(parentId);
         folder.setTreeID(treeId);
         /*

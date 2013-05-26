@@ -624,4 +624,12 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 		return new InternalOrganizerStrategy();
 	}
 
+    /* (non-Javadoc)
+     * @see com.openexchange.api2.AppointmentSQLInterface#count(int)
+     */
+    @Override
+    public int countObjectsInFolder(int folderId) throws OXException {
+        return delegate.countObjectsInFolder(folderId);
+    }
+
 }
