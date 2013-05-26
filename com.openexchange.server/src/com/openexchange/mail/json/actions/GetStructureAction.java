@@ -188,8 +188,8 @@ public final class GetStructureAction extends AbstractMailAction {
                 LOG.error(e.getMessage(), e);
             }
             throw e;
-        } catch (final Exception e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e);
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
