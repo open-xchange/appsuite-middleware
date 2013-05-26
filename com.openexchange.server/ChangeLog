@@ -1,3 +1,8 @@
+* 2013-05-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26737: Added update task to enlarge the UID field of calendar tables
+ - Fix for bug 26781: Proper invocation of OXException constructor
+
 * 2013-05-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 26474: Avoid timeout through initiating 102 Processing interim responses
