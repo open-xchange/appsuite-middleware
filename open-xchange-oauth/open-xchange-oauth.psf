@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.http.deferrer"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.facebook"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.flickr"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.linkedin"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.msn"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.tumblr"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.twitter"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.yahoo"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.xing"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.xing"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.2.0,com.openexchange.http.deferrer"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.2.0,com.openexchange.oauth"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.2.0,com.openexchange.oauth.facebook"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.2.0,com.openexchange.oauth.flickr"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.2.0,com.openexchange.oauth.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.2.0,com.openexchange.oauth.linkedin"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.2.0,com.openexchange.oauth.msn"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.2.0,com.openexchange.oauth.tumblr"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.2.0,com.openexchange.oauth.twitter"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.2.0,com.openexchange.oauth.yahoo"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.2.0,com.openexchange.oauth.xing"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master-7.2.0,com.openexchange.xing"/>
 </provider>
 </psf>
