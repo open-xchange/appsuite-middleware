@@ -56,6 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.recovery.SecretCleanUpService;
 import com.openexchange.secret.recovery.json.SecretRecoveryAJAXRequest;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -76,10 +77,20 @@ public final class CleanUpAction extends AbstractSecretRecoveryAction {
 
     @Override
     protected AJAXRequestResult perform(final SecretRecoveryAJAXRequest req) throws OXException, JSONException {
-        final String secret = getService(SecretService.class).getSecret(req.getSession());
-        getService(SecretCleanUpService.class).cleanUp(secret, req.getSession());
-
-        final JSONObject object = new JSONObject();
+        final SecretService secretService = getService(SecretService.class);
+        if (null == secretService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SecretService.class.getName());
+        }
+        final SecretCleanUpService secretCleanUpService = getService(SecretCleanUpService.class);
+        if (null == secretCleanUpService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SecretCleanUpService.class.getName());
+        }
+        // Get the secret string
+        final String secret = secretService.getSecret(req.getSession());
+        // Do the clean-up
+        secretCleanUpService.cleanUp(secret, req.getSession());
+        // Prepare response
+        final JSONObject object = new JSONObject(1);
         object.put("clean_up", true);
         return new AJAXRequestResult(object, "json");
     }
