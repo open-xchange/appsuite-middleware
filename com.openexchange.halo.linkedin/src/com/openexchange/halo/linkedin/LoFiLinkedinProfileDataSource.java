@@ -109,6 +109,7 @@ public class LoFiLinkedinProfileDataSource extends AbstractLinkedinDataSource im
                 String personal;
                 try {
                     personal = new InternetAddress(string).getPersonal();
+                    personal.replace(",", " ");
                     if (null != personal && !"".equals(personal)) {
                         String[] pSplit = personal.split("\\s+");
                         if (pSplit.length == 2) {
