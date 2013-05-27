@@ -5479,7 +5479,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 select.FROM("prg_dates").WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("fid", PLACEHOLDER)));
             } else if (permission.canReadOwnObjects()) {
                 select.FROM("prg_dates").WHERE(
-                    new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("fid", PLACEHOLDER).AND(new EQUALS("created_from", session.getUserId()))));
+                    new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("fid", PLACEHOLDER).AND(new EQUALS("created_from", PLACEHOLDER))));
                 values.add(session.getUserId());
             } else {
                 return 0; // Cannot see any objects.
@@ -5505,7 +5505,8 @@ public class CalendarMySQL implements CalendarSqlImp {
             stmt = new StatementBuilder().prepareStatement(connection, select, values);
             rs = stmt.executeQuery();
             if (rs.next()) {
-                return rs.getInt(1);
+                int retval = rs.getInt(1);
+                return retval;
             }
         } catch (SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
