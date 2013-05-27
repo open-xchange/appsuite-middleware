@@ -66,6 +66,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
@@ -847,9 +848,14 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                              */
                             closeQuitely((InputStream) content);
                         }
-                        final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size);
+                        final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(2048);
                         part.writeTo(out);
-                        multipart = new MIMEMultipartWrapper(new MIMEMultipartMailPart(getContentType(), out.toByteArray()));
+                        if (part instanceof Message) {
+                            part = new MimeMessage(MimeDefaultSession.getDefaultSession(), Streams.asInputStream(out));
+                        } else {
+                            part = new MimeBodyPart(Streams.asInputStream(out));
+                        }
+                        multipart = new JavaMailMultipartWrapper((Multipart) part.getContent());
                     }
                 }
             } catch (final MessagingException e) {
