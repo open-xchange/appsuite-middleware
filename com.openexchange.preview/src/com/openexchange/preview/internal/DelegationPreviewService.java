@@ -75,6 +75,7 @@ import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewPolicy;
 import com.openexchange.preview.PreviewService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
 
@@ -139,7 +140,7 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
         final String mimeType = documentData.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);
         final PreviewService previewService = getBestFitOrDelegate(toLowerCase(mimeType), output);
         if (previewService == null) {
-            throw new OXException();
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(PreviewService.class);
         }
         return previewService.getPreviewFor(documentData, output, session, pages);
     }
