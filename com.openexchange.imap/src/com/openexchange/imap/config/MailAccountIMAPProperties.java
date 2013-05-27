@@ -126,21 +126,6 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
     }
 
     @Override
-    public int getImapConnectionIdleTime() {
-        final String tmp = properties.get("com.openexchange.imap.maxIMAPConnectionIdleTime");
-        if (null == tmp) {
-            return IMAPProperties.getInstance().getImapConnectionIdleTime();
-        }
-
-        try {
-            return Integer.parseInt(tmp.trim());
-        } catch (final NumberFormatException e) {
-            LOG.error("IMAP Connection Idle Time: Invalid value.", e);
-            return IMAPProperties.getInstance().getImapConnectionIdleTime();
-        }
-    }
-
-    @Override
     public int getImapConnectionTimeout() {
         final String tmp = properties.get("com.openexchange.imap.imapConnectionTimeout");
         if (null == tmp) {

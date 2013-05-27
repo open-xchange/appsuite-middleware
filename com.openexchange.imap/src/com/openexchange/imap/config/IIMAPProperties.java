@@ -98,13 +98,6 @@ public interface IIMAPProperties extends IMailProperties {
     public String getImapAuthEnc();
 
     /**
-     * Gets the IMAP connection idle time.
-     *
-     * @return The IMAP connection idle time
-     */
-    public int getImapConnectionIdleTime();
-
-    /**
      * Gets the IMAP connection timeout.
      *
      * @return The IMAP connection timeout
