@@ -375,7 +375,7 @@ public class GroupDispatcher implements ComponentHandle {
     /**
      * Determine whether an ID is a member of this group. Useful if you want to only accept messages for IDs that are members.
      */
-    protected boolean isMember(ID id) {
+    public boolean isMember(ID id) {
         return idsRef.get().contains(id);
     }
 
