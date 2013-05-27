@@ -68,9 +68,8 @@ public class LanguageProfilerBuilderTest extends TestCase {
 
     private void createLanguageProfile() throws IOException, TikaException, URISyntaxException {
         // Sort of dependency injection
-        if (ngramProfile == null) {
+        if (ngramProfile == null)
             testCreateProfile();
-        }
 
         langProfile = new LanguageProfile();
 
@@ -81,7 +80,7 @@ public class LanguageProfilerBuilderTest extends TestCase {
                     stream, encoding));
             String line = reader.readLine();
             while (line != null) {
-                if (line.length() > 0 && (line.length() == 0 || line.charAt(0) != '#')) {// skips the
+                if (line.length() > 0 && !line.startsWith("#")) {// skips the
                                                                  // ngp
                                                                  // header/comment
                     int space = line.indexOf(' ');
@@ -95,11 +94,9 @@ public class LanguageProfilerBuilderTest extends TestCase {
         }
     }
 
-    @Override
     public void tearDown() throws Exception {
         File profile = new File(profileName + "." + FILE_EXTENSION);
-        if (profile.exists()) {
+        if (profile.exists())
             profile.delete();
-        }
     }
 }

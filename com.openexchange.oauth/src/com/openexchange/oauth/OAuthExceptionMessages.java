@@ -146,6 +146,9 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
     // The associated OAuth provider denied the request: %1$s.
     public static final String DENIED_BY_PROVIDER_MSG = "The associated OAuth provider denied the request: %1$s.";
 
+    // The OAuth authentication process has been canceled.
+    public static final String CANCELED_BY_USER_MSG = "The OAuth authentication process has been canceled.";
+
     /**
      * Initializes a new {@link OAuthExceptionMessages}.
      */

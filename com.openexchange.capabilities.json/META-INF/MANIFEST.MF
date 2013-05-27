@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Capabilities JSON Interface
 Bundle-SymbolicName: com.openexchange.capabilities.json
-Bundle-Version: 7.2.0
+Bundle-Version: 7.2.1
 Bundle-Activator: com.openexchange.capabilities.json.osgi.CapabilitiesJSONActivator
 Bundle-Vendor: Open-Xchange Inc
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

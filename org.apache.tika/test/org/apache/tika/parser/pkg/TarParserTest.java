@@ -18,7 +18,6 @@ package org.apache.tika.parser.pkg;
 
 import java.io.InputStream;
 
-import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.Parser;
@@ -43,7 +42,7 @@ public class TarParserTest extends AbstractPkgTest {
             stream.close();
         }
 
-        assertEquals("application/x-tar", metadata.get(HttpHeaders.CONTENT_TYPE));
+        assertEquals("application/x-tar", metadata.get(Metadata.CONTENT_TYPE));
         String content = handler.toString();
         assertTrue(content.contains("test-documents/testEXCEL.xls"));
         assertTrue(content.contains("Sample Excel Worksheet"));

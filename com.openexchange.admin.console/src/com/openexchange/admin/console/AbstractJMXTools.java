@@ -66,7 +66,6 @@ import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
-import javax.management.Query;
 import javax.management.ReflectionException;
 import javax.management.RuntimeMBeanException;
 import javax.management.openmbean.CompositeDataSupport;
@@ -95,7 +94,7 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
 
     protected static final char OPT_JMX_AUTH_USER_SHORT = 'J';
 
-    private static final String CRLF = "\r\n";
+    private static final String CRLF = System.getProperty("line.separator");
 
     protected String JMX_HOST = "localhost";
 
@@ -186,10 +185,12 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
                 try {
                     final Object o = mbc.getAttribute(objectName, element.getName());
                     if (o != null) {
-                        retval.append(objectName.getCanonicalName()).append(",").append(element.getName()).append(" = ");
+                        retval.append(objectName.getCanonicalName()).append(',').append(element.getName()).append(" = ");
                         if (o instanceof int[]) {
                             final int[] i = (int[]) o;
                             retval.append(Arrays.toString(i)).append(CRLF);
+                        } else {
+                            retval.append(o.toString()).append(CRLF);
                         }
                     }
                 } catch (final RuntimeMBeanException e) {

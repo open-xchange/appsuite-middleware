@@ -68,9 +68,7 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class MSNOAuthActivator extends HousekeepingActivator {
 
-    private static final String API_KEY = "com.openexchange.oauth.msn.apiKey";
-
-    private static final String API_SECRET = "com.openexchange.oauth.msn.apiSecret";
+    
 
     private OAuthService oauthService;
 
@@ -88,11 +86,10 @@ public class MSNOAuthActivator extends HousekeepingActivator {
         final ConfigurationService config = getService(ConfigurationService.class);
         oauthService = getService(OAuthService.class);
 
-        oAuthMetadata = new OAuthServiceMetaDataMSNImpl(config.getProperty(API_KEY), config.getProperty(API_SECRET), getService(DeferringURLService.class));
+        oAuthMetadata = new OAuthServiceMetaDataMSNImpl(getService(DeferringURLService.class));
 
         registerService(OAuthServiceMetaData.class, oAuthMetadata);
         LOG.info("OAuthServiceMetaData for MSN was started");
-        LOG.info("API-Key for MSN : "+config.getProperty(API_KEY)+", API-Secret for MSN : "+config.getProperty(API_SECRET));
 
         final MSNService msnService = new MSNServiceImpl(this);
 

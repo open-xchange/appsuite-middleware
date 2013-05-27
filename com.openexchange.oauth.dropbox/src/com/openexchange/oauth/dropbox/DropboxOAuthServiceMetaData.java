@@ -74,6 +74,7 @@ import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthToken;
+import com.openexchange.session.Session;
 
 /**
  * {@link DropboxOAuthServiceMetaData}
@@ -111,7 +112,7 @@ public final class DropboxOAuthServiceMetaData extends AbstractOAuthServiceMetaD
     }
 
     @Override
-    public OAuthInteraction initOAuth(final String callbackUrl) throws OXException {
+    public OAuthInteraction initOAuth(final String callbackUrl, final Session session) throws OXException {
         try {
             final AppKeyPair appKeys = new AppKeyPair(apiKey, apiSecret);
             final DropboxAPI<WebAuthSession> dropboxAPI =

@@ -242,9 +242,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants {
     private static final class Key {
 
         private final int cid;
-
         private final int user;
-
         private final int hash;
 
         public Key(final int user, final int cid) {

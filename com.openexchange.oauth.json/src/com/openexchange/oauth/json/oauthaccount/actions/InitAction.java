@@ -156,7 +156,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         /*
          * Invoke
          */
-        final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrl);
+        final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrl, session);
         final OAuthToken requestToken = interaction.getRequestToken();
         /*
          * Create a container to set some state information: Request token's secret, call-back URL, whatever
@@ -220,7 +220,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         /*
          * Invoke
          */
-        final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrlBuilder.toString());
+        final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrlBuilder.toString(), session);
         final OAuthToken requestToken = interaction.getRequestToken();
         /*
          * Create a container to set some state information: Request token's secret, call-back URL, whatever

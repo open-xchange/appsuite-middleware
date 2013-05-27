@@ -50,6 +50,7 @@
 package com.openexchange.webdav.xml.framework;
 
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
 
 /**
  *
@@ -60,7 +61,7 @@ public class WebDAVSession {
     private final HttpClient client;
 
     public WebDAVSession() {
-        this(new HttpClient());
+        this(newHttpClient());
     }
 
     public WebDAVSession(final HttpClient client) {
@@ -69,6 +70,13 @@ public class WebDAVSession {
     }
 
     public HttpClient getClient() {
+        return client;
+    }
+
+    private static HttpClient newHttpClient() {
+        final HttpClient client = new HttpClient();
+        client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
+        client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
         return client;
     }
 }

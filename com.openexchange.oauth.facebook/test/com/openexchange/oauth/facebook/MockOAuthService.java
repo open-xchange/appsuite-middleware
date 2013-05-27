@@ -141,7 +141,7 @@ public class MockOAuthService implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#initOAuth(java.lang.String, java.lang.String)
      */
     @Override
-    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl) {
+    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, Session session) {
         // Nothing to do
         return null;
     }

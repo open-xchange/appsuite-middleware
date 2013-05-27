@@ -118,6 +118,30 @@ if grep COMMONPROPERTIESDIR $pfile >/dev/null; then
     fi
 fi
 
+# SoftwareChange_Request-1455
+pfile=/opt/open-xchange/etc/sessiond.properties
+if ! ox_exists_property com.openexchange.sessiond.asyncPutToSessionStorage $pfile; then
+    ox_set_property com.openexchange.sessiond.asyncPutToSessionStorage false $pfile
+fi
+
+# SoftwareChange_Request-1448
+ox_set_property com.openexchange.push.udp.pushEnabled false /opt/open-xchange/etc/push-udp.properties
+ox_set_property com.openexchange.push.udp.registerDistributionEnabled false /opt/open-xchange/etc/push-udp.properties
+ox_set_property com.openexchange.push.udp.eventDistributionEnabled false /opt/open-xchange/etc/push-udp.properties
+ox_set_property com.openexchange.push.udp.multicastEnabled false /opt/open-xchange/etc/push-udp.properties
+
+# SoftwareChange_Request-1445
+pfile=/opt/open-xchange/etc/hazelcast.properties
+if ! ox_exists_property com.openexchange.hazelcast.maxOperationTimeout $pfile; then
+    ox_set_property com.openexchange.hazelcast.maxOperationTimeout 300000 $pfile
+fi
+
+# SoftwareChange_Request-1426
+pfile=/opt/open-xchange/etc/server.properties
+if ! ox_exists_property com.openexchange.log.maxMessageLength $pfile; then
+    ox_set_property com.openexchange.log.maxMessageLength -1 $pfile
+fi
+
 # SoftwareChange_Request-1358
 # -----------------------------------------------------------------------
 if [ -n "$2" ]; then
@@ -263,6 +287,7 @@ fi
 # SoftwareChange_Request-1237
 # SoftwareChange_Request-1243
 # SoftwareChange_Request-1245
+# SoftwareChange_Request-1392
 # -----------------------------------------------------------------------
 pfile=/opt/open-xchange/etc/ox-scriptconf.sh
 jopts=$(eval ox_read_property JAVA_XTRAOPTS $pfile)
@@ -275,10 +300,15 @@ if [ $permval -lt 256 ]; then
 fi
 # -----------------------------------------------------------------------
 for opt in "-XX:+DisableExplicitGC" "-server" "-Djava.awt.headless=true" \
-	"-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=75" \
-	"-XX:+UseCMSInitiatingOccupancyOnly"; do
+    "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=" \
+    "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB"; do
     if ! echo $nopts | grep -- $opt > /dev/null; then
-	nopts="$nopts $opt"
+        if [ "$opt" = "-XX:CMSInitiatingOccupancyFraction=" ]; then
+            opt="-XX:CMSInitiatingOccupancyFraction=75"
+        elif [ "$opt" = "-XX:NewRatio=" ]; then
+            opt="-XX:NewRatio=3"
+        fi
+        nopts="$nopts $opt"
     fi
 done
 # -----------------------------------------------------------------------
@@ -320,8 +350,9 @@ EOF
 fi
 
 # SoftwareChange_Request-1214
+# SoftwareChange_Request-1429
 pfile=/opt/open-xchange/etc/file-logging.properties
-for opt in org.apache.cxf.level com.openexchange.soap.cxf.logger.level; do
+for opt in org.apache.cxf.level com.openexchange.soap.cxf.logger.level org.jaudiotagger.level; do
     if ! ox_exists_property $opt $pfile; then
        ox_set_property $opt WARNING $pfile
     fi

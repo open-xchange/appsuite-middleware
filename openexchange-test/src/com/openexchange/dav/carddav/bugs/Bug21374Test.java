@@ -52,7 +52,6 @@ package com.openexchange.dav.carddav.bugs;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.carddav.CardDAVTest;
 import com.openexchange.dav.carddav.VCardResource;
@@ -60,9 +59,9 @@ import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link Bug21374Test}
- * 
+ *
  * Changed Profession (vCard: "TITLE") not synchronized from addressbook client
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug21374Test extends CardDAVTest {
@@ -70,7 +69,7 @@ public class Bug21374Test extends CardDAVTest {
 	public Bug21374Test(String name) {
 		super(name);
 	}
-	
+
 	public void testCreateWithProfession() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
@@ -99,7 +98,7 @@ public class Bug21374Test extends CardDAVTest {
          * verify contact on server
          */
         final Contact contact = super.getContact(uid);
-        super.rememberForCleanUp(contact);        
+        super.rememberForCleanUp(contact);
         assertEquals("uid wrong", uid, contact.getUid());
         assertEquals("profession wrong", profession, contact.getProfession());
         /*
@@ -109,9 +108,9 @@ public class Bug21374Test extends CardDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         final List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
         final VCardResource card = assertContains(uid, addressData);
-        assertEquals("N wrong", firstName, card.getVCard().getName().getGivenName());
-        assertEquals("N wrong", lastName, card.getVCard().getName().getFamilyName());
-        assertEquals("FN wrong", firstName + " " + lastName, card.getVCard().getFormattedName().getFormattedName());
+        assertEquals("N wrong", firstName, card.getGivenName());
+        assertEquals("N wrong", lastName, card.getFamilyName());
+        assertEquals("FN wrong", firstName + " " + lastName, card.getFN());
         assertEquals("TITLE wrong", profession, card.getVCard().getTitle().getTitle());
 	}
 }

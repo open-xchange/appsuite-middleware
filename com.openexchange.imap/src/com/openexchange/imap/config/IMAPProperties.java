@@ -60,7 +60,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPProtocol;
 import com.openexchange.imap.entity2acl.Entity2ACL;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.services.Services;
 import com.openexchange.mail.api.AbstractProtocolProperties;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailConfig.BoolCapVal;
@@ -151,7 +151,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         final com.openexchange.java.StringAllocator logBuilder = new com.openexchange.java.StringAllocator(1024);
         logBuilder.append("\nLoading global IMAP properties...\n");
 
-        final ConfigurationService configuration = IMAPServiceRegistry.getService(ConfigurationService.class);
+        final ConfigurationService configuration = Services.getService(ConfigurationService.class);
         {
             final String tmp = configuration.getProperty("com.openexchange.imap.notifyRecent", STR_FALSE).trim();
             notifyRecent = Boolean.parseBoolean(tmp);
@@ -339,7 +339,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                             IMAPProtocol.getInstance().setOverallExternalMaxCount(-1);
                             logBuilder.append("\tMax. Number of External Connections: Invalid value \"").append(tmp).append(
                                 "\". Setting to fallback: No restrictions").append('\n');
-                        } catch (final OXException e) {
+                        } catch (final RuntimeException e) {
                             IMAPProtocol.getInstance().setOverallExternalMaxCount(-1);
                             logBuilder.append("\tMax. Number of External Connections: Invalid value \"").append(tmp).append(
                                 "\". Setting to fallback: No restrictions").append('\n');

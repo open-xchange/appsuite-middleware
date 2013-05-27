@@ -18,14 +18,14 @@ package org.apache.tika.parser.image;
 
 import java.io.InputStream;
 
-import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
-import org.apache.tika.metadata.TIFF;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.xml.sax.helpers.DefaultHandler;
 
 import junit.framework.TestCase;
+
+import static junit.framework.Assert.assertEquals;
 
 public class PSDParserTest extends TestCase {
 
@@ -36,13 +36,28 @@ public class PSDParserTest extends TestCase {
      */
     public void testPSD() throws Exception {
         Metadata metadata = new Metadata();
-        metadata.set(HttpHeaders.CONTENT_TYPE, "image/x-psd");
+        metadata.set(Metadata.CONTENT_TYPE, "image/x-psd");
         InputStream stream =
             getClass().getResourceAsStream("/test-documents/testPSD.psd");
         parser.parse(stream, new DefaultHandler(), metadata, new ParseContext());
 
-        assertEquals("537", metadata.get(TIFF.IMAGE_WIDTH));
-        assertEquals("51", metadata.get(TIFF.IMAGE_LENGTH));
-        assertEquals("8", metadata.get(TIFF.BITS_PER_SAMPLE));
+        assertEquals("537", metadata.get(Metadata.IMAGE_WIDTH));
+        assertEquals("51", metadata.get(Metadata.IMAGE_LENGTH));
+        assertEquals("8", metadata.get(Metadata.BITS_PER_SAMPLE));
+    }
+    
+    /**
+     * Tests a very basic file, without much metadata,
+     *  where some of the data lengths are padded to be even
+     */
+    public void testOddPSD() throws Exception {
+        Metadata metadata = new Metadata();
+        metadata.set(Metadata.CONTENT_TYPE, "image/x-psd");
+        InputStream stream =
+            getClass().getResourceAsStream("/test-documents/testPSD2.psd");
+        parser.parse(stream, new DefaultHandler(), metadata, new ParseContext());
+        assertEquals("69", metadata.get(Metadata.IMAGE_WIDTH));
+        assertEquals("70", metadata.get(Metadata.IMAGE_LENGTH));
+        assertEquals("8", metadata.get(Metadata.BITS_PER_SAMPLE));
     }
 }

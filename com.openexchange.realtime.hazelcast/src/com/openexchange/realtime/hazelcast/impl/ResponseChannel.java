@@ -152,6 +152,7 @@ public class ResponseChannel implements Channel{
 
     @Override
     public void send(Stanza stanza, ID recipient) throws OXException {
+        stanza.trace("Delivering synchronously. ResponseChannel.");
         Lock lock = locks.get(recipient);
         try {
             lock.lock();

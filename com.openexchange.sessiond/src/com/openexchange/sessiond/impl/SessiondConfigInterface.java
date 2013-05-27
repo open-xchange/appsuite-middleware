@@ -82,6 +82,13 @@ public interface SessiondConfigInterface {
     boolean isAutoLogin();
 
     /**
+     * Whether to enforce putting sessions into session storage asynchronously.
+     *
+     * @return <code>true</code> for async put; otherwise <code>false</code>
+     */
+    boolean isAsyncPutToSessionStorage();
+
+    /**
      * Gets a key to encrypt passwords when putting session into storage.
      *
      * @return The obfuscation key

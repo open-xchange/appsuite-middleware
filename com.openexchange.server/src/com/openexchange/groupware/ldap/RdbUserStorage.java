@@ -216,7 +216,7 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void writeLoginInfo(final Connection con, final User user, final Context context, final int userId) throws SQLException {
+    private static void writeLoginInfo(Connection con, User user, Context context, int userId) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(INSERT_LOGIN_INFO);
@@ -230,7 +230,7 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void writeUserAttributes(final Connection con, final User user, final Context context, final int userId) throws SQLException {
+    private static void writeUserAttributes(Connection con, User user, Context context, int userId) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(INSERT_ATTRIBUTES);
@@ -264,7 +264,7 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void setStringOrNull(final int parameter, final PreparedStatement stmt, final String value) throws SQLException {
+    private static void setStringOrNull(int parameter, PreparedStatement stmt, String value) throws SQLException {
         if (value == null) {
             stmt.setNull(parameter, java.sql.Types.VARCHAR);
         } else {
@@ -273,7 +273,7 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
-    public User getUser(final int userId, final Context context) throws OXException {
+    public User getUser(int userId, Context context) throws OXException {
         final Connection con = DBPool.pickup(context);
         try {
             return getUser(context, con, new int[] { userId })[0];
@@ -287,7 +287,7 @@ public class RdbUserStorage extends UserStorage {
         return getUser(ctx, con, new int[] { userId })[0];
     }
 
-    private User[] getUser(final Context ctx, final Connection con, final int[] userIds) throws OXException {
+    private static User[] getUser(Context ctx, Connection con, int[] userIds) throws OXException {
         final int length = userIds.length;
         if (0 == length) {
             return new User[0];
@@ -342,7 +342,7 @@ public class RdbUserStorage extends UserStorage {
         loadLoginInfo(ctx, con, users);
         loadContact(ctx, con, users);
         loadGroups(ctx, con, users);
-        loadAttributes(ctx, con, users);
+        loadAttributes(ctx.getContextId(), con, users, false);
         final User[] retval = new User[users.size()];
         for (int i = 0; i < length; i++) {
             retval[i] = users.get(I(userIds[i]));
@@ -373,7 +373,7 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void loadLoginInfo(final Context context, final Connection con, final Map<Integer, UserImpl> users) throws OXException {
+    private static void loadLoginInfo(Context context, Connection con, Map<Integer, UserImpl> users) throws OXException {
         try {
             final Iterator<Integer> iter = users.keySet().iterator();
             for (int i = 0; i < users.size(); i += IN_LIMIT) {
@@ -400,7 +400,7 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void loadContact(final Context ctx, final Connection con, final Map<Integer, UserImpl> users) throws OXException {
+    private static void loadContact(Context ctx, Connection con, Map<Integer, UserImpl> users) throws OXException {
         try {
             final Iterator<UserImpl> iter = users.values().iterator();
             for (int i = 0; i < users.size(); i += IN_LIMIT) {
@@ -434,7 +434,7 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void loadGroups(final Context context, final Connection con, final Map<Integer, UserImpl> users) throws OXException {
+    private static void loadGroups(Context context, Connection con, Map<Integer, UserImpl> users) throws OXException {
         final Map<Integer, List<Integer>> tmp = new HashMap<Integer, List<Integer>>(users.size(), 1);
         for (final User user : users.values()) {
             final List<Integer> userGroups = new ArrayList<Integer>();
@@ -471,7 +471,10 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void loadAttributes(final Context context, final Connection con, final Map<Integer, UserImpl> users) throws OXException {
+    private static void loadAttributes(int contextId, Connection con, Map<Integer, UserImpl> users, boolean lockRows) throws OXException {
+        if (lockRows && users.size() != 1) {
+            throw UserExceptionCode.LOCKING_NOT_ALLOWED.create(I(users.size()));
+        }
         final Map<Integer, Map<String, Set<String>>> usersAttrs = new HashMap<Integer, Map<String, Set<String>>>();
         try {
             final Iterator<Integer> iter = users.keySet().iterator();
@@ -480,9 +483,13 @@ public class RdbUserStorage extends UserStorage {
                 ResultSet result = null;
                 try {
                     final int length = Arrays.determineRealSize(users.size(), i, IN_LIMIT);
-                    stmt = con.prepareStatement(getIN(SELECT_ATTRS, length));
+                    String sql = getIN(SELECT_ATTRS, length);
+                    if (lockRows) {
+                        sql += " FOR UPDATE";
+                    }
+                    stmt = con.prepareStatement(sql);
                     int pos = 1;
-                    stmt.setInt(pos++, context.getContextId());
+                    stmt.setInt(pos++, contextId);
                     for (int j = 0; j < length; j++) {
                         final int userId = i(iter.next());
                         stmt.setInt(pos++, userId);
@@ -507,6 +514,7 @@ public class RdbUserStorage extends UserStorage {
         } catch (final SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
+        // Proceed iterating users
         for (final UserImpl user : users.values()) {
             final Map<String, Set<String>> attrs = usersAttrs.get(I(user.getId()));
             // Check for aliases
@@ -614,6 +622,16 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
+    /**
+     * Stores a public user attribute. This attribute is prepended with "attr_". This prefix is used to separate public user attributes from
+     * internal user attributes. Public user attributes prefixed with "attr_" can be read and written by every client through the HTTP/JSON
+     * API.
+     * @param name Name of the attribute.
+     * @param value Value of the attribute. If the value is <code>null</code>, the attribute is removed.
+     * @param userId Identifier of the user that attribute should be set.
+     * @param context Context the user resides in.
+     * @throws OXException if writing the attribute fails.
+     */
     @Override
     public void setUserAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
         if (null == name) {
@@ -623,6 +641,14 @@ public class RdbUserStorage extends UserStorage {
         setAttribute(attrName, value, userId, context);
     }
 
+    /**
+     * Stores a internal user attribute. Internal user attributes must not be exposed to clients through the HTTP/JSON API.
+     * @param name Name of the attribute.
+     * @param value Value of the attribute. If the value is <code>null</code>, the attribute is removed.
+     * @param userId Identifier of the user that attribute should be set.
+     * @param context Context the user resides in.
+     * @throws OXException if writing the attribute fails.
+     */
     @Override
     public void setAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
         if (null == name) {
@@ -650,67 +676,19 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void setAttribute(final int contextId, final Connection con, final int userId, final String name, final String value) throws SQLException {
-        setAttribute(contextId, con, userId, name, value, 0);
-    }
-
-    private static final int MAX_RETRY = 3;
-
-    private void setAttribute(final int contextId, final Connection con, final int userId, final String name, final String value, final int retryCount) throws SQLException {
-        PreparedStatement stmt = null;
-        boolean retry = false;
-        {
-            ResultSet rs = null;
-            try {
-                stmt = con.prepareStatement("SELECT value FROM user_attribute WHERE cid=? AND id=? AND name=? FOR UPDATE");
-                int pos = 1;
-                stmt.setInt(pos++, contextId);
-                stmt.setInt(pos++, userId);
-                stmt.setString(pos, name);
-                rs = stmt.executeQuery();
-            } finally {
-                closeSQLStuff(rs, stmt);
-                stmt = null;
-            }
-        }
-        try {
-            stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");
-            int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
-            stmt.setString(pos, name);
-            stmt.executeUpdate();
-        } finally {
-            closeSQLStuff(stmt);
-            stmt = null;
-        }
+    private static void setAttribute(int contextId, Connection con, int userId, String name, String value) throws SQLException, OXException {
+        Map<Integer, UserImpl> userMap = createSingleUserMap(userId);
+        loadAttributes(contextId, con, userMap, true);
+        Map<String, Set<String>> oldAttributes = userMap.get(I(userId)).getAttributes();
+        Map<String, Set<String>> attributes = new HashMap<String, Set<String>>(oldAttributes);
         if (null != value) {
-            try {
-                stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value) VALUES (?,?,?,?)");
-                int pos = 1;
-                stmt.setInt(pos++, contextId);
-                stmt.setInt(pos++, userId);
-                stmt.setString(pos++, name);
-                stmt.setString(pos, value);
-                try {
-                    stmt.executeUpdate();
-                } catch (final SQLException e) {
-                    if (retryCount > MAX_RETRY) {
-                        throw e;
-                    }
-                    // Another thread inserted in the meantime: Retry
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Detected concurrent insertion of a user's attribute.", e);
-                    }
-                    retry = true;
-                }
-            } finally {
-                closeSQLStuff(stmt);
-            }
+            HashSet<String> values = new HashSet<String>();
+            values.add(value);
+            attributes.put(name, values);
+        } else {
+            attributes.remove(name);
         }
-        if (retry) {
-            setAttribute(contextId, con, userId, name, value, retryCount + 1);
-        }
+        updateAttributes(contextId, userId, con, oldAttributes, attributes);
     }
 
     @Override
@@ -731,7 +709,7 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private String getAttribute(final int contextId, final Connection con, final int userId, final String name) throws SQLException {
+    private static String getAttribute(int contextId, Connection con, int userId, String name) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -747,16 +725,17 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private void updateAttributes(final Context ctx, final User user, final Connection con) throws SQLException, OXException {
+    private static void updateAttributes(Context ctx, User user, Connection con) throws SQLException, OXException {
         final int contextId = ctx.getContextId();
         final int userId = user.getId();
-        final UserImpl load = new UserImpl();
-        load.setId(userId);
-        final Map<Integer, UserImpl> loadMap = new HashMap<Integer, UserImpl>(1);
-        loadMap.put(I(userId), load);
-        loadAttributes(ctx, con, loadMap);
-        final Map<String, Set<String>> oldAttributes = load.getAttributes();
+        final Map<Integer, UserImpl> loadMap = createSingleUserMap(userId);
+        loadAttributes(ctx.getContextId(), con, loadMap, true);
+        final Map<String, Set<String>> oldAttributes = loadMap.get(I(userId)).getAttributes();
         final Map<String, Set<String>> attributes = user.getAttributes();
+        updateAttributes(contextId, userId, con, oldAttributes, attributes);
+    }
+
+    private static void updateAttributes(int contextId, int userId, Connection con, Map<String, Set<String>> oldAttributes, Map<String, Set<String>> attributes) throws SQLException, OXException {
         final Map<String, Set<String>> added = new HashMap<String, Set<String>>();
         final Map<String, Set<String>> removed = new HashMap<String, Set<String>>();
         final Map<String, Set<String[]>> changed = new LinkedHashMap<String, Set<String[]>>();
@@ -856,11 +835,10 @@ public class RdbUserStorage extends UserStorage {
                         final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
                         LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
                         LOG.error("Expected lines: " + size + " Updated lines: " + lines);
-                        final Map<Integer, UserImpl> map = new HashMap<Integer, UserImpl>(1);
-                        map.put(I(userId), load);
-                        loadAttributes(ctx, con, map);
+                        final Map<Integer, UserImpl> map = createSingleUserMap(userId);
+                        loadAttributes(contextId, con, map, false);
                         for (int i : map.keySet()) {
-                            LOG.error("User " + i + ": " + map.get(i).getAttributes().toString());
+                            LOG.error("User " + i + ": " + map.get(I(i)).getAttributes().toString());
                         }
                         throw e;
                     }
@@ -871,7 +849,15 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private String toString(final Map<String, Set<String[]>> changed) {
+    private static Map<Integer, UserImpl> createSingleUserMap(int userId) {
+        final UserImpl load = new UserImpl();
+        load.setId(userId);
+        Map<Integer, UserImpl> loadMap = new HashMap<Integer, UserImpl>(1);
+        loadMap.put(I(userId), load);
+        return loadMap;
+    }
+
+    private static String toString(Map<String, Set<String[]>> changed) {
         final StringBuilder sb = new StringBuilder("{");
         for (final Map.Entry<String, Set<String[]>> entry : changed.entrySet()) {
             sb.append(entry.getKey());
@@ -1008,10 +994,11 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
+    @Override
     public User searchUser(final String email, final Context context) throws OXException {
         return searchUser(email, context, true);
     }
-    
+
     @Override
     public User searchUser(final String email, final Context context, boolean considerAliases) throws OXException {
         String sql = "SELECT id FROM user WHERE cid=? AND mail LIKE ?";
@@ -1136,7 +1123,7 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private int[] listAllUser(final Context ctx, final Connection con) throws OXException {
+    private static int[] listAllUser(Context ctx, Connection con) throws OXException {
         final int[] users;
         PreparedStatement stmt = null;
         ResultSet result = null;

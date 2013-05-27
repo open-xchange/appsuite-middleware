@@ -1,0 +1,17 @@
+Source: open-xchange-file-distribution
+Section: web
+Priority: optional
+Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-core (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-file-distribution
+Architecture: all
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}, open-xchange-grizzly (>= @OXVERSION@)
+Replaces: open-xchange-core (<< 7.2.1-0)
+Conflicts: open-xchange-core (<< 7.2.1-0)
+Description: Cluster wide file distribution
+ This package installs bundles taking care to distribute files in the cluster. This is especially used for collaborative work on documents
+ when new images are added.

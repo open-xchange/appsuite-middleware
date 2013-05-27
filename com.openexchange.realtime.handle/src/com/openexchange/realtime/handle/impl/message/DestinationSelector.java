@@ -51,9 +51,9 @@ package com.openexchange.realtime.handle.impl.message;
 
 import java.util.Map.Entry;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.RealtimeExceptionCodes;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.ResourceDirectory;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.handle.impl.Services;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.util.IDMap;

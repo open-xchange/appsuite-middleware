@@ -60,14 +60,15 @@ import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthHTTPClientFactory;
 import com.openexchange.oauth.httpclient.OAuthHTTPClient;
+import com.openexchange.tools.session.ServerSession;
 
 public class ScribeHTTPClientFactoryImpl implements OAuthHTTPClientFactory {
 
 	protected Map<Class<?>, List<HTTPResponseProcessor>> processors = new HashMap<Class<?>, List<HTTPResponseProcessor>>();
 
 	@Override
-	public HTTPClient create(OAuthAccount account) throws OXException {
-		OAuthHTTPClient client = new OAuthHTTPClient(account, account.getAPI(), account.getMetaData().getAPIKey(), account.getMetaData().getAPISecret());
+	public HTTPClient create(OAuthAccount account, ServerSession session) throws OXException {
+		OAuthHTTPClient client = new OAuthHTTPClient(account, account.getAPI(), account.getMetaData().getAPIKey(session), account.getMetaData().getAPISecret(session));
 		client.setProcessors(processors);
 		return client;
 	}

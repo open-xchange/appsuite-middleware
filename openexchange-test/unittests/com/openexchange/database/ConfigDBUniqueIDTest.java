@@ -57,15 +57,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 import java.util.Set;
-
 import junit.framework.JUnit4TestAdapter;
-
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import com.openexchange.concurrent.ConcurrentHashSet;
+import com.openexchange.java.ConcurrentHashSet;
 
 /**
  * {@link ConfigDBUniqueIDTest}

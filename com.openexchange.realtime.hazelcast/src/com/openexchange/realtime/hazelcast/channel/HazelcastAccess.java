@@ -51,6 +51,7 @@ package com.openexchange.realtime.hazelcast.channel;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 
@@ -76,6 +77,7 @@ public class HazelcastAccess {
      * Gets the Hazelcast instance, throwing appropriate exceptions if it is not accessible.
      * 
      * @return The Hazelcast instance
+     * @throws OXException if the HazelcastInstance can't be found
      */
     public static HazelcastInstance getHazelcastInstance() throws OXException {
         HazelcastInstance hazelcastInstance = optHazelcastInstance();
@@ -92,6 +94,16 @@ public class HazelcastAccess {
      */
     public static HazelcastInstance optHazelcastInstance() {
         return REFERENCE.get();
+    }
+
+    /**
+     * Get the local Hazelcast Member.
+     * 
+     * @return the local Hazelcast Member.
+     * @throws OXException if the HazelcastInstance can't be found
+     */
+    public static Member getLocalMember() throws OXException {
+        return getHazelcastInstance().getCluster().getLocalMember();
     }
 
     private HazelcastAccess() {

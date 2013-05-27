@@ -209,6 +209,12 @@ public class AppointmentWriter extends CalendarWriter {
             writeParameter(CalendarFields.RECURRENCE_DATE_POSITION, appointmentObject.getRecurrenceDatePosition(),
                     jsonObj);
         }
+        if (appointmentObject.containsChangeExceptions() && appointmentObject.getChangeException() != null &&appointmentObject.getChangeException().length > 0) {
+            jsonObj.put(CalendarFields.CHANGE_EXCEPTIONS, getExceptionAsJSONArray(appointmentObject.getChangeException()));
+        }
+        if (appointmentObject.containsDeleteExceptions() && appointmentObject.getDeleteException() != null && appointmentObject.getDeleteException().length > 0) {
+            jsonObj.put(CalendarFields.DELETE_EXCEPTIONS,  getExceptionAsJSONArray(appointmentObject.getDeleteException()));
+        }
         if (appointmentObject.containsParticipants()) {
             jsonObj.put(CalendarFields.PARTICIPANTS, getParticipantsAsJSONArray(appointmentObject));
         }

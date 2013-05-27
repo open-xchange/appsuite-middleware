@@ -62,6 +62,7 @@ import java.util.regex.Pattern;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.FacebookApi;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.API;
@@ -70,6 +71,7 @@ import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthToken;
+import com.openexchange.session.Session;
 
 /**
  * {@link OAuthServiceMetaDataFacebookImpl}
@@ -78,17 +80,17 @@ import com.openexchange.oauth.OAuthToken;
  */
 public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
 
-    private final ConfigurationService configurationService;
     private final DeferringURLService deferrer;
 
     /**
      * Initializes a new {@link OAuthServiceMetaDataFacebookImpl}.
      * @param configurationService
      */
-    public OAuthServiceMetaDataFacebookImpl(final ConfigurationService configurationService, final DeferringURLService deferrer) {
+    public OAuthServiceMetaDataFacebookImpl(final DeferringURLService deferrer) {
         super();
-        this.configurationService=configurationService;
         this.deferrer = deferrer;
+        setAPIKeyName("com.openexchange.facebook.apiKey");
+        setAPISecretName("com.openexchange.facebook.secretKey");
     }
 
     @Override
@@ -99,16 +101,6 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     @Override
     public String getId() {
         return "com.openexchange.oauth.facebook";
-    }
-
-    @Override
-    public String getAPIKey() {
-        return configurationService.getProperty("com.openexchange.facebook.apiKey");
-    }
-
-    @Override
-    public String getAPISecret() {
-        return configurationService.getProperty("com.openexchange.facebook.secretKey");
     }
 
     @Override
@@ -128,7 +120,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     }
 
     @Override
-    public String modifyCallbackURL(final String callbackUrl) {
+    public String modifyCallbackURL(final String callbackUrl, Session session) {
         if (deferrer == null) {
             return callbackUrl;
         }
@@ -147,7 +139,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, final Map<String, Object> state) {
         final String code = parameter.get("code");
         arguments.put(OAuthConstants.ARGUMENT_PIN, code);
-        arguments.put(OAuthConstants.ARGUMENT_CALLBACK, modifyCallbackURL((String)state.get(OAuthConstants.ARGUMENT_CALLBACK)));
+        arguments.put(OAuthConstants.ARGUMENT_CALLBACK, modifyCallbackURL((String)state.get(OAuthConstants.ARGUMENT_CALLBACK), (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION)));
     }
 
     private static final int BUFSIZE = 8192;
@@ -156,6 +148,7 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
     public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OXException {
         final String code = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
         final String callback = (String) arguments.get(OAuthConstants.ARGUMENT_CALLBACK);
+        final Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
 
         Reader reader = null;
         try {
@@ -163,9 +156,9 @@ public class OAuthServiceMetaDataFacebookImpl extends AbstractOAuthServiceMetaDa
             /*
              * Compose URL
              */
-            builder.append("https://graph.facebook.com/oauth/access_token?client_id=").append(getAPIKey());
+            builder.append("https://graph.facebook.com/oauth/access_token?client_id=").append(getAPIKey(session));
             builder.append("&redirect_uri=").append(URLEncoder.encode(callback, "UTF-8"));
-            builder.append("&client_secret=").append(getAPISecret());
+            builder.append("&client_secret=").append(getAPISecret(session));
             builder.append("&code=").append(code);
             final URL url = new URL(builder.toString());
             final URLConnection connection = url.openConnection();

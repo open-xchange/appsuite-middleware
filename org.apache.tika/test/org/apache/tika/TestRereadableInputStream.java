@@ -60,7 +60,7 @@ public class TestRereadableInputStream extends TestCase {
     /**
      * Test that the constructor's readToEndOfStreamOnFirstRewind parameter
      * correctly determines the behavior.
-     *
+     * 
      * @throws IOException
      */
     public void testRewind() throws IOException {
@@ -136,7 +136,6 @@ public class TestRereadableInputStream extends TestCase {
             super(inputStream);
         }
 
-        @Override
         public void close() throws IOException {
             super.close();
             closed = true;

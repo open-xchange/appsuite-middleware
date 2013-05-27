@@ -109,7 +109,7 @@ public class YahooServiceImpl implements YahooService {
     }
 
     @Override
-    public List<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) {
+    public List<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) throws OXException {
         List<Contact> contacts = new ArrayList<Contact>();
         OAuthAccount account = null;
 
@@ -122,14 +122,14 @@ public class YahooServiceImpl implements YahooService {
                 return Collections.emptyList();
             }
             final Token accessToken = new Token(account.getToken(), account.getSecret());
-            contacts = useAccessTokenToAccessData(accessToken);
+            contacts = useAccessTokenToAccessData(accessToken, session);
 
         return contacts;
     }
 
-    private List<Contact> useAccessTokenToAccessData(final Token accessToken) {
-        final OAuthService service = new ServiceBuilder().provider(YahooApi.class).apiKey(activator.getOAuthMetaData().getAPIKey()).apiSecret(
-            activator.getOAuthMetaData().getAPISecret()).build();
+    private List<Contact> useAccessTokenToAccessData(final Token accessToken, Session session) throws OXException {
+        final OAuthService service = new ServiceBuilder().provider(YahooApi.class).apiKey(activator.getOAuthMetaData().getAPIKey(session)).apiSecret(
+            activator.getOAuthMetaData().getAPISecret(session)).build();
         // Get the GUID of the current user from yahoo. This is needed for later requests
         final String guid;
         {

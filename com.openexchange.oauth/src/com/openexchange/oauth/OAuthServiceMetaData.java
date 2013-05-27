@@ -51,6 +51,7 @@ package com.openexchange.oauth;
 
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 
 /**
@@ -79,16 +80,34 @@ public interface OAuthServiceMetaData {
     /**
      * Gets the API key.
      *
+     * @depcrecated: Please use {@link #getAPIKey(Session)} and also please implement {@link #getAPIKey(Session)}
      * @return The API key
      */
     String getAPIKey();
+    
+    /**
+     * Gets the API key that belongs to a given session
+     * @param session
+     * @return The API key
+     * @throws OXException
+     */
+    String getAPIKey(Session session) throws OXException;
 
     /**
      * Gets the API secret.
      *
+     * @deprecated: Use {@link #getAPISecret(Session)} and also implement {@link #getAPISecret(Session)}
      * @return The API secret
      */
     String getAPISecret();
+    
+    /**
+     * Gets the API secret that belongs to a given session
+     * @param session
+     * @return The API key
+     * @throws OXException
+     */
+    String getAPISecret(Session session) throws OXException;
 
     /**
      * Indicates if this meta data needs a request token to obtain authorization URL.
@@ -148,14 +167,15 @@ public interface OAuthServiceMetaData {
      * @param callbackUrl
      * @return
      */
-    OAuthInteraction initOAuth(String callbackUrl) throws OXException;
+    OAuthInteraction initOAuth(String callbackUrl, Session session) throws OXException;
 
     /**
      * Gives the strategy the opportunity to modify a callback URL.
      * @param callbackUrl
+     * @param session 
      * @return the modified callback URL
      */
-    String modifyCallbackURL(String callbackUrl);
+    String modifyCallbackURL(String callbackUrl, Session session);
 
     /**
      * Gets the style of API (e.g. Facebook, Twitter...).

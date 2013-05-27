@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: MSN Oauth Metadata
 Bundle-SymbolicName: com.openexchange.oauth.msn
-Bundle-Version: 7.2.0
+Bundle-Version: 7.2.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
@@ -13,10 +13,12 @@ Import-Package: com.openexchange.config,
  com.openexchange.log,
  com.openexchange.oauth,
  com.openexchange.osgi,
+ com.openexchange.server,
  com.openexchange.session,
  com.openexchange.tools.ssl,
  com.openexchange.tools.versit.converter,
  org.apache.commons.httpclient,
+ org.apache.commons.httpclient.cookie;version="3.1.0",
  org.apache.commons.httpclient.methods,
  org.apache.commons.httpclient.params,
  org.apache.commons.httpclient.protocol,

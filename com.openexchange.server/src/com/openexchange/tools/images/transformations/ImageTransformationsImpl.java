@@ -54,6 +54,9 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.DigestOutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -68,7 +71,7 @@ import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.MetadataException;
-import com.drew.metadata.exif.ExifDirectory;
+import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.jpeg.JpegDirectory;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
@@ -79,6 +82,7 @@ import com.openexchange.log.LogFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
+import com.openexchange.tools.images.TransformedImage;
 import com.openexchange.tools.images.impl.ImageInformation;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -181,6 +185,13 @@ public class ImageTransformationsImpl implements ImageTransformations {
         return null == bytes ? null : Streams.newByteArrayInputStream(bytes);
     }
 
+    @Override
+    public TransformedImage getTransformedImage(String formatName) throws IOException {
+        String imageFormat = getImageFormat(formatName);
+        BufferedImage bufferedImage = getImage(imageFormat);
+        return writeTransformedImage(bufferedImage, imageFormat);
+    }
+
     /**
      * Gets a value indicating whether the denoted format name leads to transformations or not.
      *
@@ -249,6 +260,39 @@ public class ImageTransformationsImpl implements ImageTransformations {
             }
         }
         return false;
+    }
+
+    /**
+     * Writes out an image into a byte-array and wraps it into a transformed image.
+     *
+     * @param image The image to write
+     * @param formatName The format to use, e.g. "jpeg" or "tiff"
+     * @return The image data
+     * @throws IOException
+     */
+    private TransformedImage writeTransformedImage(BufferedImage image, String formatName) throws IOException {
+        if (null == image) {
+            return null;
+        }
+        DigestOutputStream digestOutputStream = null;
+        UnsynchronizedByteArrayOutputStream outputStream = null;
+        try {
+            outputStream = new UnsynchronizedByteArrayOutputStream(8192);
+            digestOutputStream = new DigestOutputStream(outputStream, MessageDigest.getInstance("MD5"));
+            if (needsCompression(formatName)) {
+                writeCompressed(image, formatName, digestOutputStream);
+            } else {
+                write(image, formatName, digestOutputStream);
+            }
+            byte[] imageData = outputStream.toByteArray();
+            byte[] md5 = digestOutputStream.getMessageDigest().digest();
+            return new TransformedImageImpl(
+                image.getWidth(), image.getHeight(), null != imageData ? imageData.length : 0, formatName, imageData, md5);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IOException(e);
+        } finally {
+            Streams.close(digestOutputStream, outputStream);
+        }
     }
 
     /**
@@ -370,7 +414,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
             ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
             managedFile = mfm.createManagedFile(inputStream);
             try {
-                metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(managedFile.getInputStream()));
+                metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(managedFile.getInputStream()), false);
             } catch (ImageProcessingException e) {
                 LOG.warn("error getting metadata", e);
             }
@@ -405,15 +449,14 @@ public class ImageTransformationsImpl implements ImageTransformations {
         int width = 0;
         int height = 0;
         try {
-            Directory directory = metadata.getDirectory(ExifDirectory.class);
+            Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
             if (null != directory) {
-                orientation = directory.getInt(ExifDirectory.TAG_ORIENTATION);
+                orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
             }
-            Directory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
-            if (null != jpegDirectory && jpegDirectory instanceof JpegDirectory) {
-                JpegDirectory jpegDirectory2 = (JpegDirectory) jpegDirectory;
-                width = jpegDirectory2.getImageWidth();
-                height = jpegDirectory2.getImageHeight();
+            JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
+            if (null != jpegDirectory) {
+                width = jpegDirectory.getImageWidth();
+                height = jpegDirectory.getImageHeight();
             }
         } catch (MetadataException e) {
             LOG.debug("Unable to retrieve image information.", e);

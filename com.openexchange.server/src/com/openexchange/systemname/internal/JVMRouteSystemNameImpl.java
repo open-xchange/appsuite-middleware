@@ -72,6 +72,8 @@ public final class JVMRouteSystemNameImpl implements SystemNameService {
 
     @Override
     public String getSystemName() {
-        return configurationService.getProperty("AJP_JVM_ROUTE", "OX1");
+        final String value = configurationService.getProperty("com.openexchange.server.backendRoute");
+        return null == value ? configurationService.getProperty("AJP_JVM_ROUTE", "OX1") : value;
     }
+
 }

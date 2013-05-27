@@ -50,6 +50,7 @@
 package com.openexchange.realtime.packet;
 
 import static org.junit.Assert.*;
+import java.util.concurrent.locks.Lock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -106,6 +107,17 @@ public class IDTest {
     @Test(expected = IllegalArgumentException.class)
     public void testIDWithDefaultContext() {
         new ID("thorben");
+    }
+    
+    @Test
+    public void testIDLocking() throws Exception {
+        ID id1 = new ID("protocol", "component", "user", "context", "resource");
+        ID id2 = new ID("protocol", "component", "user", "context", "resource");
+        assertEquals("IDs were not equal", id1, id2);
+        
+        Lock lock1 = id1.getLock("scope");
+        Lock lock2 = id2.getLock("scope");
+        assertTrue("Locks were not identical", lock1 == lock2);
     }
 
 }

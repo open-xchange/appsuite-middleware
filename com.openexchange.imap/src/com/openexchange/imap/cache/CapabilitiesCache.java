@@ -57,7 +57,7 @@ import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionFactory;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.services.Services;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.mail.config.MailProperties;
@@ -143,7 +143,7 @@ public final class CapabilitiesCache {
         private CacheKey getKeyInternal() {
             CacheKey tmp = key;
             if (null == tmp) {
-                final CacheService service = IMAPServiceRegistry.getService(CacheService.class);
+                final CacheService service = Services.getService(CacheService.class);
                 key = tmp = null == service ? null : service.newCacheKey(MailCacheCode.CAPS.getCode(), user);
             }
             return tmp;

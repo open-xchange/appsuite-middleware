@@ -64,7 +64,7 @@ public final class Log implements org.apache.commons.logging.Log {
 
     /**
      * Sets whether to prefer to append stack traces to message itself or pass them as separate argument.
-     * 
+     *
      * @param appendTraceToMessage <code>true</code> to append stack traces to message; otherwise <code>false</code>
      */
     public static void setAppendTraceToMessage(final boolean appendTraceToMessage) {
@@ -73,7 +73,7 @@ public final class Log implements org.apache.commons.logging.Log {
 
     /**
      * Checks whether to prefer to append stack traces to message itself or pass them as separate argument.
-     * 
+     *
      * @return <code>true</code> to append stack traces to message; otherwise <code>false</code>
      */
     public static boolean appendTraceToMessage() {
@@ -84,7 +84,7 @@ public final class Log implements org.apache.commons.logging.Log {
 
     /**
      * Sets the log service.
-     * 
+     *
      * @param logService The log service
      */
     public static void set(final LogService logService) {

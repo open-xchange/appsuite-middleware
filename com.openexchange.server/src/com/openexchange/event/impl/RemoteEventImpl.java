@@ -50,6 +50,7 @@
 package com.openexchange.event.impl;
 
 import com.openexchange.event.RemoteEvent;
+import com.openexchange.java.StringAllocator;
 
 /**
  * {@link RemoteEventImpl} - Implementation of {@link RemoteEvent}.
@@ -59,15 +60,10 @@ import com.openexchange.event.RemoteEvent;
 public final class RemoteEventImpl implements RemoteEvent {
 
     private final int contextId;
-
     private final int userId;
-
     private final int module;
-
     private final int action;
-
     private final int folderId;
-
     private final long timestamp;
 
     /**
@@ -118,6 +114,15 @@ public final class RemoteEventImpl implements RemoteEvent {
     @Override
     public long getTimestamp() {
         return timestamp;
+    }
+
+    @Override
+    public String toString() {
+        final StringAllocator builder = new StringAllocator(256);
+        builder.append("RemoteEventImpl [contextId=").append(contextId).append(", userId=").append(userId);
+        builder.append(", module=").append(module).append(", action=").append(action).append(", folderId=").append(folderId);
+        builder.append(", timestamp=").append(timestamp).append(']');
+        return builder.toString();
     }
 
 }

@@ -118,8 +118,8 @@ public final class OSGiOAuthService extends AbstractOSGiDelegateService<OAuthSer
     }
 
     @Override
-    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl) throws OXException {
-        return getService0().initOAuth(serviceMetaData, callbackUrl);
+    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, Session session) throws OXException {
+        return getService0().initOAuth(serviceMetaData, callbackUrl, session);
     }
 
     @Override

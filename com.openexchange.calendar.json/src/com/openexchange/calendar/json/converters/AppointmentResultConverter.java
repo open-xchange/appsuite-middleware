@@ -72,6 +72,7 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.results.CollectionDelta;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.collections.PropertizedList;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -127,6 +128,14 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
                 }
             } catch (final JSONException e) {
                 throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
+            }
+        }
+
+        if (appointmentList instanceof PropertizedList) {
+            final PropertizedList<Appointment> propList = (PropertizedList<Appointment>) appointmentList;
+            final Integer i = (Integer) propList.getProperty("more");
+            if (null != i && i.intValue() > 0) {
+                result.setResponseProperty("more", i);
             }
         }
 

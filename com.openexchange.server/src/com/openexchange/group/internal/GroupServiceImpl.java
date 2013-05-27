@@ -63,16 +63,10 @@ import com.openexchange.groupware.ldap.User;
  */
 public final class GroupServiceImpl implements GroupService {
 
-    /**
-     * Default constructor.
-     */
     public GroupServiceImpl() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void create(final Context ctx, final User user, final Group group)
         throws OXException {
@@ -80,9 +74,6 @@ public final class GroupServiceImpl implements GroupService {
         create.perform();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void update(final Context ctx, final User user, final Group group,
         final Date lastRead) throws OXException {
@@ -98,7 +89,7 @@ public final class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public Group getGroup(Context ctx, int groupId) throws OXException {
+    public Group getGroup(final Context ctx, final int groupId) throws OXException {
         return GroupStorage.getInstance().getGroup(groupId, ctx);
     }
 }

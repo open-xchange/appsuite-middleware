@@ -58,6 +58,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -211,6 +212,8 @@ public final class MimeType2ExtMap {
         return getContentType(file.getName());
     }
 
+    private static final String MIME_APPL_OCTET = MimeTypes.MIME_APPL_OCTET;
+
     /**
      * Gets the MIME type associated with given file name.
      *
@@ -220,19 +223,19 @@ public final class MimeType2ExtMap {
     public static String getContentType(final String fileName) {
         init();
         if (null == fileName) {
-            return MimeTypes.MIME_APPL_OCTET;
+            return MIME_APPL_OCTET;
         }
         final int pos = fileName.lastIndexOf('.');
         if (pos < 0) {
-            return MimeTypes.MIME_APPL_OCTET;
+            return MIME_APPL_OCTET;
         }
         final String s1 = fileName.substring(pos + 1);
         if (s1.length() == 0) {
-            return MimeTypes.MIME_APPL_OCTET;
+            return MIME_APPL_OCTET;
         }
         final String type = typeMap.get(s1.toLowerCase(Locale.ENGLISH));
         if (null == type) {
-            return MimeTypes.MIME_APPL_OCTET;
+            return MIME_APPL_OCTET;
         }
         return type;
     }
@@ -246,21 +249,30 @@ public final class MimeType2ExtMap {
     public static String getContentTypeByExtension(final String extension) {
         init();
         if (null == extension || 0 == extension.length()) {
-            return MimeTypes.MIME_APPL_OCTET;
+            return MIME_APPL_OCTET;
         }
         final String type = typeMap.get(extension.toLowerCase(Locale.ENGLISH));
         if (null == type) {
-            return MimeTypes.MIME_APPL_OCTET;
+            return MIME_APPL_OCTET;
         }
         return type;
     }
 
-    private static final List<String> DEFAULT_EXT;
+    private static final List<String> DEFAULT_EXT = Collections.unmodifiableList(Arrays.asList("dat"));
 
-    static {
-        final List<String> l = new ArrayList<String>(1);
-        l.add("dat");
-        DEFAULT_EXT = Collections.unmodifiableList(l);
+    /**
+     * Gets the file extension for given MIME type.
+     *
+     * @param mimeType The MIME type
+     * @return The file extension for given MIME type or <code>dat</code> if none found
+     */
+    public static List<String> getFileExtensions(String mimeType) {
+        init();
+        if (!extMap.containsKey(mimeType.toLowerCase(Locale.ENGLISH))) {
+            return DEFAULT_EXT;
+        }
+        final List<String> list = extMap.get(mimeType);
+        return null == list ? DEFAULT_EXT : Collections.unmodifiableList(list);
     }
 
     /**
@@ -269,9 +281,13 @@ public final class MimeType2ExtMap {
      * @param mimeType The MIME type
      * @return The file extension for given MIME type or <code>dat</code> if none found
      */
-    public static List<String> getFileExtensions(final String mimeType) {
+    public static String getFileExtension(String mimeType) {
         init();
-        return extMap.containsKey(mimeType.toLowerCase(Locale.ENGLISH)) ? Collections.unmodifiableList(extMap.get(mimeType)) : DEFAULT_EXT;
+        if (!extMap.containsKey(mimeType.toLowerCase(Locale.ENGLISH))) {
+            return "dat";
+        }
+        final List<String> list = extMap.get(mimeType);
+        return null == list || list.isEmpty() ? "dat" : list.get(0);
     }
 
     /**

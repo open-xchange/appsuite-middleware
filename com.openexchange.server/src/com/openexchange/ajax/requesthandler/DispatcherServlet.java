@@ -389,7 +389,8 @@ public class DispatcherServlet extends SessionServlet {
         if (LogProperties.isEnabled()) {
             final StringAllocator logBuilder = new StringAllocator(1024).append("Error processing request:").append(lineSeparator);
             if (LOG instanceof PropertiesAppendingLogWrapper) {
-                logBuilder.append(LogProperties.getAndPrettyPrint(((PropertiesAppendingLogWrapper) LOG).getPropertiesFor(com.openexchange.log.LogPropertyName.LogLevel.ERROR)));
+                final Set<Name> nonmatching = ((PropertiesAppendingLogWrapper) LOG).getPropertiesFor(com.openexchange.log.LogPropertyName.LogLevel.ERROR, LogProperties.optLogProperties());
+                logBuilder.append(LogProperties.getAndPrettyPrint(nonmatching));
             } else {
                 logBuilder.append(LogProperties.getAndPrettyPrint(PROPS_TO_IGNORE));
             }
@@ -425,7 +426,7 @@ public class DispatcherServlet extends SessionServlet {
         ServerSession session = getSessionObject(httpRequest, dispatcher.mayUseFallbackSession(module, action));
         if (session == null) {
             if (!dispatcher.mayOmitSession(module, action)) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
+                throw dispatcher.mayUseFallbackSession(module, action) ? AjaxExceptionCodes.MISSING_COOKIE.create(Login.PUBLIC_SESSION_NAME) : AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
             }
             session = fakeSession();
         }

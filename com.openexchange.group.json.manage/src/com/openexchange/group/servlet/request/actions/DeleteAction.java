@@ -94,7 +94,7 @@ public final class DeleteAction extends AbstractGroupAction {
         final GroupService groupService = getService(GroupService.class);
         final ServerSession session = req.getSession();
         groupService.delete(session.getContext(), session.getUser(), groupId, timestamp);
-        return new AJAXRequestResult(new JSONArray(), timestamp, "json");
+        return new AJAXRequestResult(new JSONArray(0), timestamp, "json");
     }
 
 }

@@ -71,9 +71,8 @@ import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
-import com.drew.metadata.Directory;
 import com.drew.metadata.MetadataException;
-import com.drew.metadata.exif.ExifDirectory;
+import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.jpeg.JpegDirectory;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.FileHolder;
@@ -81,11 +80,11 @@ import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
+import com.openexchange.ajax.helper.HTMLDetector;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.HTMLDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
@@ -114,7 +113,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private volatile ImageTransformationService scaler;
 
-    private static final String DELIVERY = "delivery";
+    private static final String DELIVERY = AJAXServlet.PARAMETER_DELIVERY;
 
     private static final String DOWNLOAD = "download";
     private static final String VIEW = "view";
@@ -613,32 +612,29 @@ public class FileResponseRenderer implements ResponseRenderer {
 
                 try {
                     // retrieve MetaData to check if width, height or rotate requires a transformation
-                    final com.drew.metadata.Metadata metadata = ImageMetadataReader.readMetadata(inputStream);
-                    if (metadata == null) {
+                    final com.drew.metadata.Metadata metadata = ImageMetadataReader.readMetadata(inputStream, false);
+                    if (metadata == null)
                         transformationNeeded = true;
-                    } else {
+                    else {
                         // check for rotation
                         int orientation = 1;
-                        final Directory exifDirectory = metadata.getDirectory(ExifDirectory.class);
-                        if(exifDirectory!=null) {
-                            orientation = exifDirectory.getInt(ExifDirectory.TAG_ORIENTATION);
-                        }
+                        final ExifIFD0Directory exifDirectory = metadata.getDirectory(ExifIFD0Directory.class);
+                        if(exifDirectory!=null)
+                            orientation = exifDirectory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
                         if(orientation!=1) {
                             final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
-                            if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
+                            if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue())
                                 transformationNeeded = true;
-                            }
                         }
 
                         // check width & height
-                        final Directory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
-                        if (null == jpegDirectory || !(jpegDirectory instanceof JpegDirectory)) {
+                        final JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
+                        if (null == jpegDirectory)
                             transformationNeeded = true;
-                        } else {
+                        else {
                             // check width & height
-                            JpegDirectory jpegDirectory2 = (JpegDirectory) jpegDirectory;
-                            final int width = jpegDirectory2.getImageWidth();
-                            final int height = jpegDirectory2.getImageHeight();
+                            final int width = jpegDirectory.getImageWidth();
+                            final int height = jpegDirectory.getImageHeight();
                             final int maxWidth = request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0;
                             final int maxHeight = request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0;
                             final ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));

@@ -56,24 +56,20 @@ import java.net.URL;
 import java.util.concurrent.atomic.AtomicReference;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.DistributedFileManagement;
+import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link DistributedFileManagementImpl}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class DistributedFileManagementImpl implements DistributedFileManagement {
 
-    private String mapName;
-
-    private String address;
-
-    private ServiceLookup services;
+    private static final int TIMEOUT = 10000;
 
     private static AtomicReference<HazelcastInstance> REFERENCE = new AtomicReference<HazelcastInstance>();
 
@@ -83,7 +79,14 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
         DistributedFileManagementImpl.REFERENCE.set(hazelcastInstance);
     }
 
+    // ---------------------------------- Member stuff -------------------------------------- //
+
+    private final String mapName;
+    private final String address;
+    private final ServiceLookup services;
+
     public DistributedFileManagementImpl(ServiceLookup services, String address, String mapName) {
+        super();
         this.services = services;
         this.address = address;
         this.mapName = mapName;
@@ -105,10 +108,9 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
         InputStream retval = null;
         if (url != null) {
             try {
-                InputStream inputStream = loadFile("http://" + url + "/" + id);
-                retval = inputStream;
+                retval = loadFile("http://" + url + "/" + id);
             } catch (IOException e) {
-                e.printStackTrace();
+                throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
             }
         }
 
@@ -125,11 +127,12 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
                 con.setRequestMethod("POST");
                 con.connect();
             } catch (IOException e) {
-                // TODO:
+                throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
             }
         }
     }
 
+    @Override
     public boolean exists(String id) throws OXException {
         return map().containsKey(id);
     }
@@ -144,7 +147,7 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
                 con.setRequestMethod("DELETE");
                 con.connect();
             } catch (IOException e) {
-                // TODO:
+                throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());
             }
         }
     }
@@ -165,12 +168,28 @@ public class DistributedFileManagementImpl implements DistributedFileManagement 
         URL remoteUrl = new URL(url);
         HttpURLConnection con = (HttpURLConnection) remoteUrl.openConnection();
         con.setRequestMethod("GET");
+        con.setReadTimeout(TIMEOUT);
         con.connect();
 
-        int responseCode = con.getResponseCode();
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            return con.getInputStream();
+        boolean close = true;
+        try {
+            int responseCode = con.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                final InputStream in = con.getInputStream();
+                close = false;
+                return in;
+            }
+            return null;
+        } finally {
+            if (close) {
+                try {
+                    // The only way to close a HttpURLConnection
+                    con.getInputStream().close();
+                } catch (Exception e) {
+                    // Ignore
+                }
+            }
         }
-        return null;
     }
+
 }

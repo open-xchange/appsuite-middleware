@@ -186,7 +186,7 @@ public final class IMAPSort {
                  */
                 throw e;
             } catch (final OXException e) {
-                if (e.isPrefix("MSG") && e.getCode() == IMAPException.Code.UNSUPPORTED_SORT_FIELD.getNumber()) {
+                if (IMAPException.Code.UNSUPPORTED_SORT_FIELD.equals(e) || e.getCode() == 2049) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(e.getMessage(), e);
                     }

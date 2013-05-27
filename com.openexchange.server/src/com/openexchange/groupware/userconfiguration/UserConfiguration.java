@@ -67,6 +67,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.userconfiguration.osgi.TrackerAvailabilityChecker;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogFactory;
@@ -1367,7 +1368,11 @@ public final class UserConfiguration implements Serializable, Cloneable {
                     }
                 }
             } catch (final OXException x) {
-                LOG.error(x.getMessage(), x);
+                if (UserExceptionCode.USER_NOT_FOUND.equals(x)) {
+                    LOG.debug(x.getMessage(), x);
+                } else {
+                    LOG.error(x.getMessage(), x);
+                }
             } catch (final RuntimeException x) {
                 LOG.error(x.getMessage(), x);
             }

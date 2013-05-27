@@ -148,6 +148,9 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
         public URLParameter(String name, int[] values) {
             this(name, convert(values));
         }
+        public URLParameter(String name, boolean value) {
+            this(name, Boolean.toString(value));
+        }
     }
 
     class FileParameter extends Parameter {

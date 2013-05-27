@@ -209,6 +209,41 @@ public class RequestTools {
         }
     }
 
+    /**
+     * Applies image data from file to given contact.
+     *
+     * @param contact The contact
+     * @param bytes The image data
+     * @param mimeType The image MIME type
+     * @throws OXException If applying image data to contact fails
+     */
+    public static void setImageData(final Contact contact, final byte[] bytes, final String mimeType) throws OXException {
+        FileInputStream fis = null;
+        try {
+            // First check MIME type
+            String contentType = null == mimeType ? "image/jpeg" : toLowerCase(mimeType);
+            if (!contentType.startsWith("image/")) {
+                final String readableType = null == mimeType ? "application/unknown" : mimeType;
+                throw AjaxExceptionCodes.NO_IMAGE_FILE.create("file", readableType);
+            }
+            // Check image data
+            contentType = com.openexchange.java.ImageTypeDetector.getMimeType(bytes);
+            if (!toLowerCase(contentType).startsWith("image/") || com.openexchange.java.HTMLDetector.containsHTMLTags(bytes)) {
+                throw AjaxExceptionCodes.NO_IMAGE_FILE.create("file", contentType);
+            }
+            // Final check for image's width & height using javax.imageio.*
+            if (!isValidImage(Streams.newByteArrayInputStream(bytes))) {
+                throw AjaxExceptionCodes.NO_IMAGE_FILE.create("file", contentType);
+            }
+            contact.setImage1(bytes);
+            contact.setImageContentType(contentType);
+        } catch (final RuntimeException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, "Error while applying contact image.");
+        } finally {
+            Streams.close(fis);
+        }
+    }
+
     private static String checkIsImageFile(final UploadFile file) throws OXException {
         if (null == file) {
             throw AjaxExceptionCodes.NO_UPLOAD_IMAGE.create();

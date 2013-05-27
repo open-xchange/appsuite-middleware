@@ -51,9 +51,12 @@ package com.openexchange.oauth.linkedin;
 
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.LinkedInApi;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.osgi.Activator;
+import com.openexchange.session.Session;
 
 /**
  * {@link OAuthServiceMetaDataLinkedInImpl}
@@ -68,6 +71,8 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
     public OAuthServiceMetaDataLinkedInImpl(Activator activator) {
         super();
         this.activator = activator;
+        setAPIKeyName("com.openexchange.socialplugin.linkedin.apikey");
+        setAPISecretName("com.openexchange.socialplugin.linkedin.apisecret");
     }
 
     @Override
@@ -78,16 +83,6 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractOAuthServiceMetaDa
     @Override
     public String getId() {
         return "com.openexchange.socialplugin.linkedin";
-    }
-
-    @Override
-    public String getAPIKey() {
-        return activator.getConfigurationService().getProperty("com.openexchange.socialplugin.linkedin.apikey");
-    }
-
-    @Override
-    public String getAPISecret() {
-        return activator.getConfigurationService().getProperty("com.openexchange.socialplugin.linkedin.apisecret");
     }
 
     @Override

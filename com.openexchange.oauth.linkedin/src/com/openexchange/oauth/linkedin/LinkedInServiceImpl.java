@@ -113,11 +113,11 @@ public class LinkedInServiceImpl implements LinkedInService{
     }
 
 
-    public Response performRequest(final Session session, final int user, final int contextId, final int accountId, final Verb method, final String url) {
+    public Response performRequest(final Session session, final int user, final int contextId, final int accountId, final Verb method, final String url) throws OXException {
         final OAuthServiceMetaData linkedInMetaData = new OAuthServiceMetaDataLinkedInImpl(activator);
 
-        final OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(linkedInMetaData.getAPIKey()).apiSecret(
-            linkedInMetaData.getAPISecret()).build();
+        final OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(linkedInMetaData.getAPIKey(session)).apiSecret(
+            linkedInMetaData.getAPISecret(session)).build();
 
         OAuthAccount account = null;
         try {

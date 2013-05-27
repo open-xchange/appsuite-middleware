@@ -45,3 +45,11 @@ gui > io.ox/migration//gui
 modules/calendar/notifyAcceptedDeclinedAsCreator > io.ox/calendar//notifyAcceptedDeclinedAsCreator
 modules/calendar/notifyAcceptedDeclinedAsParticipant > io.ox/calendar//notifyAcceptedDeclinedAsParticipant
 modules/calendar/notifyNewModifiedDeleted > io.ox/calendar//notifyNewModifiedDeleted
+
+# Calendar FreeBusy
+modules/calendar/calendar_freebusy > io.ox/calendar//freeBusy
+
+# Task notifications
+modules/tasks/notifyAcceptedDeclinedAsCreator > io.ox/tasks//notifyAcceptedDeclinedAsCreator
+modules/tasks/notifyAcceptedDeclinedAsParticipant > io.ox/tasks//notifyAcceptedDeclinedAsParticipant
+modules/tasks/notifyNewModifiedDeleted > io.ox/tasks//notifyNewModifiedDeleted

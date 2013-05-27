@@ -54,6 +54,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.logging.Log;
@@ -70,6 +71,7 @@ import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthToken;
+import com.openexchange.session.Session;
 
 /**
  * {@link OAuthServiceMetaDataMSNImpl}
@@ -81,29 +83,35 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OAuthServiceMetaDataMSNImpl.class));
 
+    private static final String API_KEY = "com.openexchange.oauth.msn.apiKey";
+
+    private static final String API_SECRET = "com.openexchange.oauth.msn.apiSecret";
+
     private static final String accessTokenGrabber = "https://login.live.com/oauth20_token.srf";
 
     private static final String REFRESH_TOKEN_KEY = "refresh_token";
 
     private final DeferringURLService deferrer;
 
-    public OAuthServiceMetaDataMSNImpl(String apiKey, String apiSecret, DeferringURLService deferrer) {
+
+    public OAuthServiceMetaDataMSNImpl(DeferringURLService deferrer) {
         setId("com.openexchange.oauth.msn");
-        setApiKey(apiKey);
-        setApiSecret(apiSecret);
         setDisplayName("WindowsLive / MSN");
         this.deferrer = deferrer;
+
+        setAPIKeyName(API_KEY);
+        setAPISecretName(API_SECRET);
     }
 
     @Override
-    public OAuthInteraction initOAuth(String callbackUrl) throws OXException {
+    public OAuthInteraction initOAuth(String callbackUrl, Session session) throws OXException {
         try {
             if (deferrer != null) {
                 callbackUrl = deferrer.getDeferredURL(callbackUrl);
             }
             // https://login.live.com/oauth20_authorize.srf?client_id=CLIENT_ID&scope=wl.signin&response_type=RESPONSE_TYPE&redirect_uri=REDIRECT_URL
             final String authUrl = new StringBuilder("https://login.live.com/oauth20_authorize.srf?client_id=")
-            	.append(getAPIKey())
+            	.append(getAPIKey(session))
             	.append("&scope=wl.basic,wl.contacts_birthday,wl.offline_access,wl.contacts_photos,wl.contacts_skydrive,wl.contacts_emails,wl.photos,wl.postal_addresses,wl.skydrive&response_type=code&redirect_uri=")
             	.append(URLEncoder.encode(callbackUrl, "UTF-8")).toString();
 
@@ -130,7 +138,7 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
         } catch (UnsupportedEncodingException e) {
             LOG.error(e.getMessage(), e);
         }
-        return super.initOAuth(callbackUrl);
+        return super.initOAuth(callbackUrl, session);
     }
 
     @Override
@@ -149,21 +157,27 @@ public class OAuthServiceMetaDataMSNImpl extends AbstractOAuthServiceMetaData {
         try {
             String verifier = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
             String callback = (String) arguments.get(OAuthConstants.ARGUMENT_CALLBACK);
+            Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
 
             StringBuilder params = new StringBuilder();
-            params.append("?client_id=").append(getAPIKey());
+            params.append("?client_id=").append(getAPIKey(session));
             params.append("&redirect_uri=").append(URLEncoder.encode(callback, "UTF-8"));
-            params.append("&client_secret=").append(URLEncoder.encode(getAPISecret(), "UTF-8"));
+            params.append("&client_secret=").append(URLEncoder.encode(getAPISecret(session), "UTF-8"));
             params.append("&code=").append(verifier);
             params.append("&grant_type=authorization_code");
 
             HttpClient httpClient = new HttpClient();
+            final int timeout = 10000;
+            httpClient.getParams().setSoTimeout(timeout);
+            httpClient.getParams().setIntParameter("http.connection.timeout", timeout);
+            httpClient.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
+            httpClient.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
             Protocol protocol = new Protocol("https", new TrustAllAdapter(), 443);
             httpClient.getHostConfiguration().setHost("login.live.com", 443, protocol);
             String urlString = accessTokenGrabber;
             PostMethod postMethod = new PostMethod(urlString + params);
 
-            addParameter(postMethod, "client_id", getAPIKey());
+            addParameter(postMethod, "client_id", getAPIKey(session));
             addParameter(postMethod,"redirect_uri", callback);
             addParameter(postMethod,"client_secret", getAPISecret());
             addParameter(postMethod,"code", verifier);

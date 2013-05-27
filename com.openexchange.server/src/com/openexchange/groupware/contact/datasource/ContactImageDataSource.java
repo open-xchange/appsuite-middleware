@@ -197,7 +197,9 @@ public final class ContactImageDataSource implements ImageDataSource {
          * Return contact image
          */
         final byte[] imageBytes = contact.getImage1();
-        final DataProperties properties = new DataProperties();
+        final DataProperties properties = new DataProperties(8);
+        properties.put(DataProperties.PROPERTY_FOLDER_ID, Integer.toString(folder));
+        properties.put(DataProperties.PROPERTY_ID, Integer.toString(objectId));
         if (imageBytes == null) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(new StringBuilder("Requested a non-existing image in contact: object-id=").append(objectId).append(" folder=").append(

@@ -82,8 +82,7 @@ public abstract class AbstractPOIContainerExtractionTest extends TestCase {
        public List<String> filenames = new ArrayList<String>();
        public List<MediaType> mediaTypes = new ArrayList<MediaType>();
        
-       @Override
-    public void handle(String filename, MediaType mediaType,
+       public void handle(String filename, MediaType mediaType,
             InputStream stream) {
           filenames.add(filename);
           mediaTypes.add(mediaType);

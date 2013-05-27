@@ -111,7 +111,7 @@ public class ConfirmAction extends TaskAction {
         }
         final Date timestamp = taskSql.setUserConfirmation(taskId, session.getUserId(), task.getConfirm(), task.getConfirmMessage());
 
-        return new AJAXRequestResult(new JSONObject(), timestamp, "json");
+        return new AJAXRequestResult(new JSONObject(0), timestamp, "json");
     }
 
 }

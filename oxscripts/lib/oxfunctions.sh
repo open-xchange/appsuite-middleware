@@ -562,4 +562,6 @@ ox_kill_readerengine_instances() {
 
         kill -KILL ${PID}
     done
+
+    rm -f /tmp/OSL_PIPE_*
 }

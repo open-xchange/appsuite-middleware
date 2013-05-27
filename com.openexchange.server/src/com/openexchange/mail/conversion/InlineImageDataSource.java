@@ -212,7 +212,8 @@ public final class InlineImageDataSource implements ImageDataSource {
         }
         final MailPart mailPart;
         {
-            final FullnameArgument arg = prepareMailFolderParam(dataArguments.get(ARGS[0]));
+            final String fullnameArgument = dataArguments.get(ARGS[0]);
+            final FullnameArgument arg = prepareMailFolderParam(fullnameArgument);
             final String fullname = arg.getFullname();
             final String mailId = dataArguments.get(ARGS[1]);
             final String cid = dataArguments.get(ARGS[2]);
@@ -251,7 +252,9 @@ public final class InlineImageDataSource implements ImageDataSource {
                     }
                 }
             }
-            final DataProperties properties = new DataProperties();
+            final DataProperties properties = new DataProperties(8);
+            properties.put(DataProperties.PROPERTY_FOLDER_ID, fullnameArgument);
+            properties.put(DataProperties.PROPERTY_ID, mailId);
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contentType.getBaseType());
             final String charset = contentType.getCharsetParameter();
             if (charset != null) {

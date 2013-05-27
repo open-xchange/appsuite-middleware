@@ -50,12 +50,15 @@
 package com.openexchange.oauth.facebook;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
+import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.PropertyListener;
+import com.openexchange.exception.OXException;
 
 
 /**
@@ -72,6 +75,11 @@ public class MockConfigurationService implements ConfigurationService {
     public boolean getBoolProperty(String name, boolean defaultValue) {
         // Nothing to do
         return false;
+    }
+
+    @Override
+    public Map<String, String> getProperties(final PropertyFilter filter) throws OXException {
+        return Collections.emptyMap();
     }
 
     /* (non-Javadoc)

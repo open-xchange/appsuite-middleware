@@ -70,6 +70,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -156,8 +157,7 @@ public class CapabilityServiceImpl implements CapabilityService {
             }
         }
         // What about autologin?
-        boolean autologin = autologin();
-        if (autologin) {
+        if (autologin()) {
             capabilities.add(new Capability("autologin", true));
         }
         // Now the declared ones
@@ -166,56 +166,104 @@ public class CapabilityServiceImpl implements CapabilityService {
                 capabilities.add(getCapability(cap));
             }
         }
-        // Portal
+        // ------------- Combined capabilities/permissions ------------ //
         if (!session.isAnonymous()) {
-            if (session.getUserConfiguration().hasPortal()) {
+            // Portal
+            final UserConfiguration userConfiguration = session.getUserConfiguration();
+            if (userConfiguration.hasPortal()) {
                 capabilities.add(getCapability("portal"));
+                capabilities.remove(getCapability("deniedPortal"));
+            } else {
+                capabilities.remove(getCapability("portal"));
+                capabilities.add(getCapability("deniedPortal"));
+            }
+            // Free-Busy
+            if (userConfiguration.hasFreeBusy()) {
+                capabilities.add(getCapability("freebusy"));
+            } else {
+                capabilities.remove(getCapability("freebusy"));
+            }
+            // Conflict-Handling
+            if (userConfiguration.hasConflictHandling()) {
+                capabilities.add(getCapability("conflict_handling"));
+            } else {
+                capabilities.remove(getCapability("conflict_handling"));
+            }
+            // Participants-Dialog
+            if (userConfiguration.hasParticipantsDialog()) {
+                capabilities.add(getCapability("participants_dialog"));
+            } else {
+                capabilities.remove(getCapability("participants_dialog"));
+            }
+            // Group-ware
+            if (userConfiguration.hasGroupware()) {
+                capabilities.add(getCapability("groupware"));
+            } else {
+                capabilities.remove(getCapability("groupware"));
+            }
+            // PIM
+            if (userConfiguration.hasPIM()) {
+                capabilities.add(getCapability("pim"));
+            } else {
+                capabilities.remove(getCapability("pim"));
+            }
+            // Spam
+            if (session.getUserSettingMail().isSpamEnabled()) {
+                capabilities.add(getCapability("spam"));
+            } else {
+                capabilities.remove(getCapability("spam"));
             }
         }
-        // Now the ones from database
+        // ---------------- Now the ones from database ------------------ //
         {
-            final Set<String> set = new HashSet<String>();
-            final Set<String> removees = new HashSet<String>();
-            // Context-sensitive
-            for (final String sCap : getContextCaps(session.getContextId())) {
-                final char firstChar = sCap.charAt(0);
-                if ('-' == firstChar) {
-                    final String val = toLowerCase(sCap.substring(1));
-                    set.remove(val);
-                    removees.add(val);
-                } else {
-                    if ('+' == firstChar) {
-                        set.add(toLowerCase(sCap.substring(1)));
+            final int contextId = session.getContextId();
+            if (contextId > 0) {
+                final Set<String> set = new HashSet<String>();
+                final Set<String> removees = new HashSet<String>();
+                // Context-sensitive
+                for (final String sCap : getContextCaps(contextId)) {
+                    final char firstChar = sCap.charAt(0);
+                    if ('-' == firstChar) {
+                        final String val = toLowerCase(sCap.substring(1));
+                        set.remove(val);
+                        removees.add(val);
                     } else {
-                        set.add(toLowerCase(sCap));
+                        if ('+' == firstChar) {
+                            set.add(toLowerCase(sCap.substring(1)));
+                        } else {
+                            set.add(toLowerCase(sCap));
+                        }
                     }
                 }
-            }
-            // User-sensitive
-            for (final String sCap : getUserCaps(session.getUserId(), session.getContextId())) {
-                final char firstChar = sCap.charAt(0);
-                if ('-' == firstChar) {
-                    final String val = toLowerCase(sCap.substring(1));
-                    set.remove(val);
-                    removees.add(val);
-                } else {
-                    if ('+' == firstChar) {
-                        final String cap = toLowerCase(sCap.substring(1));
-                        set.add(cap);
-                        removees.remove(cap);
-                    } else {
-                        final String cap = toLowerCase(sCap);
-                        set.add(cap);
-                        removees.remove(cap);
+                // User-sensitive
+                final int userId = session.getUserId();
+                if (userId > 0) {
+                    for (final String sCap : getUserCaps(userId, contextId)) {
+                        final char firstChar = sCap.charAt(0);
+                        if ('-' == firstChar) {
+                            final String val = toLowerCase(sCap.substring(1));
+                            set.remove(val);
+                            removees.add(val);
+                        } else {
+                            if ('+' == firstChar) {
+                                final String cap = toLowerCase(sCap.substring(1));
+                                set.add(cap);
+                                removees.remove(cap);
+                            } else {
+                                final String cap = toLowerCase(sCap);
+                                set.add(cap);
+                                removees.remove(cap);
+                            }
+                        }
                     }
                 }
-            }
-            // Merge them into result set
-            for (final String sCap : removees) {
-                capabilities.remove(getCapability(sCap));
-            }
-            for (final String sCap : set) {
-                capabilities.add(getCapability(sCap));
+                // Merge them into result set
+                for (final String sCap : removees) {
+                    capabilities.remove(getCapability(sCap));
+                }
+                for (final String sCap : set) {
+                    capabilities.add(getCapability(sCap));
+                }
             }
         }
 
@@ -266,7 +314,7 @@ public class CapabilityServiceImpl implements CapabilityService {
      *
      * @return The checkers
      */
-    public List<CapabilityChecker> getCheckers() {
+    protected List<CapabilityChecker> getCheckers() {
         return Collections.emptyList();
     }
 

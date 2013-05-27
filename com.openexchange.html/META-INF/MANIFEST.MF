@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange HTML Bundle
 Bundle-SymbolicName: com.openexchange.html
-Bundle-Version: 7.2.0
+Bundle-Version: 7.2.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
@@ -35,7 +35,9 @@ Import-Package: com.openexchange.config,
  net.htmlparser.jericho,
  net.htmlparser.jericho.nodoc,
  org.apache.commons.httpclient;version="3.1.0",
+ org.apache.commons.httpclient.cookie;version="3.1.0",
  org.apache.commons.httpclient.methods;version="3.1.0",
+ org.apache.commons.httpclient.params;version="3.1.0",
  org.apache.commons.io,
  org.apache.commons.logging,
  org.apache.log4j,

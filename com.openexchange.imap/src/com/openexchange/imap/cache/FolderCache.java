@@ -49,6 +49,8 @@
 
 package com.openexchange.imap.cache;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import javax.mail.MessagingException;
 import com.openexchange.caching.CacheKey;
@@ -59,11 +61,10 @@ import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.cache.util.FolderMap;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.converters.IMAPFolderConverter;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.services.Services;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPFolder;
@@ -232,7 +233,7 @@ public final class FolderCache {
                     mailFolder = newFld;
                 }
             } catch (final MessagingException e) {
-                throw MimeMailException.handleMessagingException(e, folderStorage.getImapConfig(), session);
+                throw IMAPException.handleMessagingException(e, folderStorage.getImapConfig(), session, accountId, mapFor("fullName", fullName));
             }
         }
         /*
@@ -270,7 +271,7 @@ public final class FolderCache {
             }
             return IMAPFolderConverter.convertFolder(f, session, folderStorage.getImapAccess(), folderStorage.getContext());
         } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+            throw IMAPException.handleMessagingException(e, imapConfig, session, folderStorage.getAccountId(), mapFor("fullName", fullName));
         }
     }
 
@@ -301,7 +302,7 @@ public final class FolderCache {
         SessionMailCache.getInstance(session, accountId).get(entry);
         final FolderMap folderMap = entry.getValue();
         if (null != folderMap) {
-            final MailFolder mailFolder = folderMap.get(fullName);
+            final MailFolder mailFolder = folderMap.remove(fullName);
             if (null != mailFolder) {
                 final String parentFullname = mailFolder.getParentFullname();
                 if (null != parentFullname) {
@@ -310,7 +311,6 @@ public final class FolderCache {
                         folderMap.remove("");
                     }
                 }
-                folderMap.remove(fullName);
             }
         }
     }
@@ -351,7 +351,7 @@ public final class FolderCache {
             super();
             this.folderMap = folderMap;
             final int code = MailCacheCode.FOLDERS.getCode();
-            key = IMAPServiceRegistry.getService(CacheService.class).newCacheKey(code, code);
+            key = Services.getService(CacheService.class).newCacheKey(code, code);
         }
 
         @Override
@@ -373,6 +373,21 @@ public final class FolderCache {
         public Class<FolderMap> getEntryClass() {
             return FolderMap.class;
         }
+    }
+
+    private static Map<String, Object> mapFor(final String... pairs) {
+        if (null == pairs) {
+            return null;
+        }
+        final int length = pairs.length;
+        if (0 == length || (length % 2) != 0) {
+            return null;
+        }
+        final Map<String, Object> map = new HashMap<String, Object>(length >> 1);
+        for (int i = 0; i < length; i+=2) {
+            map.put(pairs[i], pairs[i+1]);
+        }
+        return map;
     }
 
 }

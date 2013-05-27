@@ -110,6 +110,17 @@ public interface ResourceDirectory {
      * @throws OXException
      */
     Resource set(ID id, Resource resource) throws OXException;
+    
+    /**
+     * Sets or updates the presence data of a resource identified by the supplied ID if and only if no previous resource was set for this id.
+     *
+     * @param id The (concrete) resource ID to set the status for
+     * @param resource The resource data to set
+     * @return The previously associated resource of the ID in case of an update, <code>null</code> if there was no value associated
+     *         with the ID before. If a non-null value is returned here, the resource directory has not saved the supplied value.
+     * @throws OXException
+     */
+    Resource setIfAbsent(ID id, Resource resource) throws OXException;
 
     /**
      * Removes all available resources for the supplied ID. If the ID is in general form, all matching entries are removed from the

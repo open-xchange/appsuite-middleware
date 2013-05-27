@@ -102,9 +102,24 @@ public class StanzaWriter {
         object.put("from", stanza.getFrom().toString());
         object.put("to", stanza.getTo().toString());
         object.put("selector", stanza.getSelector());
+        
         String id = stanza.getId();
         if (id != null && !id.isEmpty()) {
             object.put("id", id);
+        }
+        
+        String tracer = stanza.getTracer();
+        if (tracer != null) {
+            object.put("tracer", tracer);
+            JSONArray arr = new JSONArray(stanza.getLogEntries().size());
+            for (String entry: stanza.getLogEntries()) {
+                arr.put(entry);
+            }
+            object.put("log", arr);
+        }
+        
+        if (stanza.getSequenceNumber() > -1) {
+            object.put("seq", stanza.getSequenceNumber());
         }
     }
 

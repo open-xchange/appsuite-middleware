@@ -257,7 +257,11 @@ public class DefaultNotificationParticipantResolver implements
 			participant.setUser(u);
 			participant.setContext(ctx);
 
-			participant.setFolderId(util.getFolderIdForUser(appId, u.getId(), ctx.getContextId()));
+			int folderIdForUser = util.getFolderIdForUser(appId, u.getId(), ctx.getContextId());
+			if (folderIdForUser <= 0) {
+			    folderIdForUser = appointment.getParentFolderID();
+			}
+            participant.setFolderId(folderIdForUser);
 
 			final NotificationConfiguration configuration = defaultConfiguration
 					.clone();

@@ -51,6 +51,7 @@ package com.openexchange.log.internal;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
@@ -59,8 +60,15 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.log.LogProperties;
-import com.openexchange.log.LogPropertyName;
 import com.openexchange.log.Loggable;
+import com.openexchange.log.Loggable.Level;
+import com.openexchange.log.internal.callback.DebugCallback;
+import com.openexchange.log.internal.callback.ErrorCallback;
+import com.openexchange.log.internal.callback.FatalCallback;
+import com.openexchange.log.internal.callback.InfoCallback;
+import com.openexchange.log.internal.callback.LogCallback;
+import com.openexchange.log.internal.callback.TraceCallback;
+import com.openexchange.log.internal.callback.WarnCallback;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadRenamer;
 
@@ -117,17 +125,31 @@ final class LoggerTask extends AbstractTask<Object> {
     private final BlockingQueue<Loggable> queue;
     private final AtomicBoolean keepgoing;
     private final String lineSeparator;
+    private final int maxMessageLength;
+
+    private final Map<Level, LogCallback> callbacks;
 
     /**
      * Initializes a new {@link LoggerTask}.
      *
      * @param queue
+     * @param maxMessageLength
      */
-    protected LoggerTask(final BlockingQueue<Loggable> queue) {
+    protected LoggerTask(final BlockingQueue<Loggable> queue, final int maxMessageLength) {
         super();
         lineSeparator = System.getProperty("line.separator");
         keepgoing = new AtomicBoolean(true);
         this.queue = queue;
+        this.maxMessageLength = maxMessageLength;
+
+        final Map<Loggable.Level, LogCallback> callbacks = new EnumMap<Loggable.Level, LogCallback>(Loggable.Level.class);
+        callbacks.put(Loggable.Level.DEBUG, new DebugCallback());
+        callbacks.put(Loggable.Level.ERROR, new ErrorCallback());
+        callbacks.put(Loggable.Level.FATAL, new FatalCallback());
+        callbacks.put(Loggable.Level.INFO, new InfoCallback());
+        callbacks.put(Loggable.Level.TRACE, new TraceCallback());
+        callbacks.put(Loggable.Level.WARNING, new WarnCallback());
+        this.callbacks = callbacks;
     }
 
     /**
@@ -154,126 +176,112 @@ final class LoggerTask extends AbstractTask<Object> {
     }
 
     @Override
-    public Object call() throws Exception {
-        try {
-            final List<Loggable> loggables = new ArrayList<Loggable>(16);
-            while (keepgoing.get()) {
+    public Object call() {
+        final List<Loggable> loggables = new ArrayList<Loggable>(16);
+        while (keepgoing.get()) {
+            try {
                 loggables.clear();
-                try {
-                    if (queue.isEmpty()) {
-                        /*
-                         * Blocking wait for at least 1 Loggable to arrive.
-                         */
-                        final Loggable loggable = queue.take();
-                        if (POISON == loggable) {
-                            return null;
-                        }
-                        loggables.add(loggable);
-                    }
-                    queue.drainTo(loggables);
-                    final boolean quit = loggables.remove(POISON);
-                    for (final Loggable loggable : loggables) {
-                        final Throwable t = loggable.getThrowable();
-                        final Log log = loggable.getLog();
-                        final Object message = null == loggable.getMessage() ? "" : loggable.getMessage();
-                        switch (loggable.getLevel()) {
-                        case FATAL:
-                            if (log.isFatalEnabled()) {
-                                if (null == t) {
-                                    log.fatal(prependLocation(message, loggable, LogPropertyName.LogLevel.FATAL));
-                                } else {
-                                    log.fatal(prependLocation(message, loggable, LogPropertyName.LogLevel.FATAL), t);
-                                }
-                            }
-                            break;
-                        case ERROR:
-                            if (log.isErrorEnabled()) {
-                                if (null == t) {
-                                    log.error(prependLocation(message, loggable, LogPropertyName.LogLevel.ERROR));
-                                } else {
-                                    log.error(prependLocation(message, loggable, LogPropertyName.LogLevel.ERROR), t);
-                                }
-                            }
-                            break;
-                        case WARNING:
-                            if (log.isWarnEnabled()) {
-                                if (null == t) {
-                                    log.warn(prependLocation(message, loggable, LogPropertyName.LogLevel.WARNING));
-                                } else {
-                                    log.warn(prependLocation(message, loggable, LogPropertyName.LogLevel.WARNING), t);
-                                }
-                            }
-                            break;
-                        case INFO:
-                            if (log.isInfoEnabled()) {
-                                if (null == t) {
-                                    log.info(prependLocation(message, loggable, LogPropertyName.LogLevel.INFO));
-                                } else {
-                                    log.info(prependLocation(message, loggable, LogPropertyName.LogLevel.INFO), t);
-                                }
-                            }
-                            break;
-                        case DEBUG:
-                            if (log.isDebugEnabled()) {
-                                if (null == t) {
-                                    log.debug(prependLocation(message, loggable, LogPropertyName.LogLevel.DEBUG));
-                                } else {
-                                    log.debug(prependLocation(message, loggable, LogPropertyName.LogLevel.DEBUG), t);
-                                }
-                            }
-                            break;
-                        case TRACE:
-                            if (log.isTraceEnabled()) {
-                                if (null == t) {
-                                    log.trace(prependLocation(message, loggable, LogPropertyName.LogLevel.TRACE));
-                                } else {
-                                    log.trace(prependLocation(message, loggable, LogPropertyName.LogLevel.TRACE), t);
-                                }
-                            }
-                            break;
-                        default:
-                            // No-op
-                        }
-                    }
-                    if (quit) {
+                if (queue.isEmpty()) {
+                    /*
+                     * Blocking wait for at least 1 Loggable to arrive.
+                     */
+                    final Loggable loggable = queue.take();
+                    if (POISON == loggable) {
                         return null;
                     }
-                } catch (final RuntimeException e) {
-                    // Log task run failed...
+                    loggables.add(loggable);
+                }
+                queue.drainTo(loggables);
+                final boolean quit = loggables.remove(POISON);
+                for (final Loggable loggable : loggables) {
+                    final LogCallback callback = callbacks.get(loggable.getLevel());
+                    if (null != callback && callback.isLoggable(loggable.getLog())) {
+                        invokeCallback(loggable, callback);
+                    }
+                }
+                if (quit) {
+                    return null;
+                }
+            } catch (final Exception e) {
+                // Log task run failed...
+                try {
                     final org.apache.commons.logging.Log logger = LogFactory.getLog(LoggerTask.class);
                     logger.error("LoggerTask run failed", e);
+                } catch (final Exception x) {
+                    // Ignore
                 }
             }
-        } catch (final Exception e) {
-            // Log task failed...
-            final org.apache.commons.logging.Log logger = LogFactory.getLog(LoggerTask.class);
-            logger.error("LoggerTask run failed", e);
         }
         return null;
     }
 
     private static final Pattern CRLF = Pattern.compile("\r?\n");
 
-    private String prependLocation(final Object message, final Loggable loggable, final LogPropertyName.LogLevel logLevel) {
+    private void invokeCallback(final Loggable loggable, final LogCallback callback) {
         // Append message's string
         String msg;
-        if (null == message) {
-            msg = "null";
-        } else {
-            msg = message.toString();
-            if (msg.startsWith(PREFIX)) {
-                return msg;
+        {
+            final Object message = loggable.getMessage();
+            if (null == message) {
+                msg = "null";
+            } else {
+                msg = toString(message, loggable);
+                if (msg.startsWith(PREFIX)) {
+                    callback.log(msg, loggable.getThrowable(), loggable.getLog());
+                    return;
+                }
+                msg = CRLF.matcher(msg).replaceAll(lineSeparator + " ");
             }
-            msg = CRLF.matcher(msg).replaceAll(lineSeparator + " ");
         }
         // Check stack trace
         final StackTraceElement[] trace = loggable.getCallerTrace();
         if (null == trace) {
-            return msg;
+            callback.log(msg, loggable.getThrowable(), loggable.getLog());
+            return;
         }
         // Stack trace available: <stack-trace> + <LF> + <message>
-        final com.openexchange.java.StringAllocator sb = new com.openexchange.java.StringAllocator(1024);
-        for (final StackTraceElement ste : trace) {
+        final StringBuilder sb = new StringBuilder(1024);
+        appendLogLocation(trace, sb);
+        sb.append(msg);
+        // Finally, invoke callback with appropriate message chunks
+        final int maxMessageLength = this.maxMessageLength;
+        if (maxMessageLength > 0 && sb.length() > maxMessageLength) {
+            final String delim = lineSeparator + " ";
+            boolean first = true;
+            do {
+                final int pos = sb.lastIndexOf(delim, maxMessageLength);
+                if (pos > 0) {
+                    String substring = sb.substring(0, pos);
+                    if (first) {
+                        first = false;
+                    } else {
+                        substring = "..." + delim + substring;
+                    }
+                    sb.delete(0, pos + delim.length());
+                    callback.log(substring + "...", sb.length() <= 0 ? loggable.getThrowable() : null, loggable.getLog());
+                } else {
+                    String substring = sb.substring(0, maxMessageLength);
+                    if (first) {
+                        first = false;
+                    } else {
+                        substring = "..." + delim + substring;
+                    }
+                    sb.delete(0, maxMessageLength);
+                    callback.log(substring + "...", sb.length() <= 0 ? loggable.getThrowable() : null, loggable.getLog());
+                }
+            } while (sb.length() > maxMessageLength);
+            if (sb.length() > 0) {
+                callback.log("..." + delim + sb.toString(), loggable.getThrowable(), loggable.getLog());
+            }
+        } else {
+            callback.log(sb.toString(), loggable.getThrowable(), loggable.getLog());
+        }
+    }
+
+    private void appendLogLocation(final StackTraceElement[] trace, final StringBuilder sb) {
+        boolean found = false;
+        for (int i = 0; !found && i < trace.length; i++) {
+            final StackTraceElement ste = trace[i];
             final String className = ste.getClassName();
             if (null != className && !className.startsWith("com.openexchange.log") && !className.startsWith("com.openexchange.exception.Log") && className.indexOf("LoggingLogic", 16) < 0) {
                 sb.append(PREFIX).append(className).append('.').append(ste.getMethodName());
@@ -292,12 +300,34 @@ final class LoggerTask extends AbstractTask<Object> {
                         sb.append(')');
                     }
                 }
+                // sb.append(" (").append(loggable.getLog().getClass().getSimpleName()).append(')');
                 sb.append(lineSeparator).append(' ');
-                break;
+                found = true;
             }
         }
-        sb.append(msg);
-        return sb.toString();
+    }
+
+    /**
+     * Gets the message's string representation
+     *
+     * @param message The loggable's message
+     * @param loggable The associated loggable
+     * @return The message's string representation
+     * @throws IllegalArgumentException If {@link Object#toString()} fails
+     */
+    private String toString(final Object message, final Loggable loggable) {
+        try {
+            return message.toString();
+        } catch (final Exception e) {
+            // Bad message object
+            final StringBuilder sb = new StringBuilder(256);
+            sb.append("Bad message object.").append(lineSeparator);
+            final StackTraceElement[] trace = loggable.getCallerTrace();
+            if (null != trace) {
+                appendLogLocation(trace, sb);
+            }
+            throw new IllegalArgumentException(sb.toString(), e);
+        }
     }
 
 }

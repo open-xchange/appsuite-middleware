@@ -49,12 +49,15 @@
 
 package com.openexchange.contacts.json.actions;
 
+import java.util.EnumSet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactRequest;
+import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.server.ServiceLookup;
 
@@ -77,8 +80,9 @@ public class GetAction extends ContactAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(final ContactRequest request) throws OXException {
-        final Contact contact = getContactService().getContact(request.getSession(), request.getFolderID(), request.getObjectID());
+    protected AJAXRequestResult perform(ContactRequest request) throws OXException {
+        ContactField[] fields = ContactMapper.getInstance().getAllFields(EnumSet.of(ContactField.IMAGE1, ContactField.LAST_MODIFIED_UTC));
+        Contact contact = getContactService().getContact(request.getSession(), request.getFolderID(), request.getObjectID(), fields);
         return new AJAXRequestResult(contact, contact.getLastModified(), "contact");
     }
 }

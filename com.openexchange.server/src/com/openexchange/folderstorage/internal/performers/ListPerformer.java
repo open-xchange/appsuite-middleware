@@ -61,7 +61,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import org.apache.commons.logging.Log;
 import com.openexchange.concurrent.CallerRunsCompletionService;
@@ -305,7 +304,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                     final FolderStorage tmp = entry.getKey();
                     final int[] indexes = entry.getValue().toArray();
                     final Log log = LOG;
-                    completionService.submit(new Callable<Object>() {
+                    completionService.submit(new ThreadPools.TrackableCallable<Object>() {
 
                         @Override
                         public Object call() throws OXException {
@@ -463,7 +462,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
              * Get all visible subfolders from each storage
              */
             for (final FolderStorage neededStorage : neededStorages) {
-                completionService.submit(new Callable<List<SortableId>>() {
+                completionService.submit(new ThreadPools.TrackableCallable<List<SortableId>>() {
 
                     @Override
                     public List<SortableId> call() throws OXException {
@@ -571,7 +570,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             final FolderStorage tmp = entry.getKey();
             final int[] indexes = entry.getValue().toArray();
             final Log log = LOG;
-            completionService.submit(new Callable<Object>() {
+            completionService.submit(new ThreadPools.TrackableCallable<Object>() {
 
                 @Override
                 public Object call() throws Exception {

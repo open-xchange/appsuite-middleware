@@ -152,7 +152,9 @@ public enum UserExceptionCode implements OXExceptionCode {
     /**
      * %s is not a valid time zone.
      */
-    INVALID_TIMEZONE(UserExceptionMessage.INVALID_TIMEZONE_MSG, Category.CATEGORY_USER_INPUT, 24);
+    INVALID_TIMEZONE(UserExceptionMessage.INVALID_TIMEZONE_MSG, Category.CATEGORY_USER_INPUT, 24),
+    /** Locking attributes of multiple users is not allowed. You tried to lock %1$d user's attributes. */
+    LOCKING_NOT_ALLOWED(UserExceptionMessage.LOCKING_NOT_ALLOWED_MSG, Category.CATEGORY_ERROR, 25);
 
     private static final String PREFIX = "USR";
 

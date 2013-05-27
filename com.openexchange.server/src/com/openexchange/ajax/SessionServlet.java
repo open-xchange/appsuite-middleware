@@ -56,8 +56,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,6 +73,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.config.ConfigurationService;
@@ -90,6 +89,7 @@ import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogFactory;
@@ -146,19 +146,6 @@ public abstract class SessionServlet extends AJAXServlet {
     private static final Lock RANGE_LOCK = new ReentrantLock();
 
     private static volatile SubnetMask allowedSubnet;
-
-    /** The log properties for session-related information. */
-    protected static final Set<LogProperties.Name> LOG_PROPERTIES;
-
-    static {
-        final Set<LogProperties.Name> set = EnumSet.noneOf(LogProperties.Name.class);
-        set.add(LogProperties.Name.SESSION_SESSION_ID);
-        set.add(LogProperties.Name.SESSION_USER_ID);
-        set.add(LogProperties.Name.SESSION_CONTEXT_ID);
-        set.add(LogProperties.Name.SESSION_CLIENT_ID);
-        set.add(LogProperties.Name.SESSION_SESSION);
-        LOG_PROPERTIES = Collections.unmodifiableSet(set);
-    }
 
     /**
      * Initializes a new {@link SessionServlet}.
@@ -307,23 +294,25 @@ public abstract class SessionServlet extends AJAXServlet {
         try {
             initializeSession(req);
             session = getSessionObject(req, true);
-            /*
-             * Check max. concurrent AJAX requests
-             */
-            final int maxConcurrentRequests = getMaxConcurrentRequests(session);
-            if (maxConcurrentRequests > 0) {
-                counter = (AtomicInteger) session.getParameter(Session.PARAM_COUNTER);
-                if (null != counter && counter.incrementAndGet() > maxConcurrentRequests) {
-                    if (INFO) {
-                        LOG.info("User " + session.getUserId() + " in context " + session.getContextId() + " exceeded max. concurrent requests (" + maxConcurrentRequests + ").");
+            if (null != session) {
+                /*
+                 * Check max. concurrent AJAX requests
+                 */
+                final int maxConcurrentRequests = getMaxConcurrentRequests(session);
+                if (maxConcurrentRequests > 0) {
+                    counter = (AtomicInteger) session.getParameter(Session.PARAM_COUNTER);
+                    if (null != counter && counter.incrementAndGet() > maxConcurrentRequests) {
+                        if (INFO) {
+                            LOG.info("User " + session.getUserId() + " in context " + session.getContextId() + " exceeded max. concurrent requests (" + maxConcurrentRequests + ").");
+                        }
+                        throw AjaxExceptionCodes.TOO_MANY_REQUESTS.create();
                     }
-                    throw AjaxExceptionCodes.TOO_MANY_REQUESTS.create();
                 }
-            }
-            ThreadLocalSessionHolder.getInstance().setSession(session);
-            if (null != threadCounter && null != session) {
-                sessionId = session.getSessionID();
-                threadCounter.increment(sessionId);
+                ThreadLocalSessionHolder.getInstance().setSession(session);
+                if (null != threadCounter) {
+                    sessionId = session.getSessionID();
+                    threadCounter.increment(sessionId);
+                }
             }
             super.service(new CountingHttpServletRequest(req), resp);
         } catch (final OXException e) {
@@ -363,7 +352,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 threadCounter.decrement(sessionId);
             }
             ThreadLocalSessionHolder.getInstance().setSession(null);
-            LogProperties.removeLogProperties(LOG_PROPERTIES);
+            LogProperties.removeSessionProperties();
             if (null != counter) {
                 counter.getAndDecrement();
             }
@@ -440,7 +429,7 @@ public abstract class SessionServlet extends AJAXServlet {
             } catch (final Exception e2) {
                 LOG.error("Cookies could not be removed.", e2);
             } finally {
-                LogProperties.removeLogProperties(LOG_PROPERTIES);
+                LogProperties.removeSessionProperties();
             }
         }
     }
@@ -580,15 +569,7 @@ public abstract class SessionServlet extends AJAXServlet {
             }
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
-        {
-            final Props properties = LogProperties.getLogProperties();
-            properties.put(LogProperties.Name.SESSION_SESSION_ID, sessionId);
-            properties.put(LogProperties.Name.SESSION_USER_ID, Integer.valueOf(session.getUserId()));
-            properties.put(LogProperties.Name.SESSION_CONTEXT_ID, Integer.valueOf(session.getContextId()));
-            final String client  = session.getClient();
-            properties.put(LogProperties.Name.SESSION_CLIENT_ID, client == null ? "unknown" : client);
-            properties.put(LogProperties.Name.SESSION_SESSION, session);
-        }
+        LogProperties.putSessionProperties(session);
         /*
          * Get session secret
          */
@@ -631,14 +612,14 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /**
      * Check if the secret encoded in the open-xchange-secret Cookie matches the secret saved in the Session.
-     * 
+     *
      * @param source    The configured CookieHashSource
      * @param req       The incoming HttpServletRequest
      * @param session   The Session object looked up for the incoming request
      * @throws OXException If the secrets differ
      */
     public static void checkSecret(final CookieHashSource source, final HttpServletRequest req, final Session session) throws OXException {
-        final String secret = extractSecret(source, req, session.getHash(), session.getClient());
+        final String secret = extractSecret(source, req, session.getHash(), session.getClient(), (String) session.getParameter("user-agent"));
         if (secret == null || !session.getSecret().equals(secret)) {
             if (INFO && null != secret) {
                 LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");
@@ -656,16 +637,41 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return The secret string or <code>null</code>
      */
     public static String extractSecret(final CookieHashSource cookieHash, final HttpServletRequest req, final String hash, final String client) {
+        return extractSecret(cookieHash, req, hash, client, null);
+    }
+
+    /**
+     * Extracts the secret string from specified cookies using given hash string.
+     *
+     * @param req the HTTP servlet request object.
+     * @param hash remembered hash from session.
+     * @param client the remembered client from the session.
+     * @param originalUserAgent The original User-Agent associated with session
+     * @return The secret string or <code>null</code>
+     */
+    public static String extractSecret(final CookieHashSource cookieHash, final HttpServletRequest req, final String hash, final String client, final String originalUserAgent) {
         final Cookie[] cookies = req.getCookies();
         if (null != cookies) {
-            final String cookieName = Login.SECRET_PREFIX + getHash(cookieHash, req, hash, client);
+            String cookieName = Login.SECRET_PREFIX + getHash(cookieHash, req, hash, client);
             for (final Cookie cookie : cookies) {
                 if (cookieName.equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }
+            final String userAgent = req.getHeader("User-Agent");
+            if (null != userAgent && null != originalUserAgent) {
+                final BrowserDetector browserDetector = new BrowserDetector(originalUserAgent);
+                if (browserDetector.isSafari() && toLowerCase(userAgent).startsWith("applecoremedia/")) {
+                    cookieName = Login.SECRET_PREFIX + hash;
+                    for (final Cookie cookie : cookies) {
+                        if (cookieName.equals(cookie.getName())) {
+                            return cookie.getValue();
+                        }
+                    }
+                }
+            }
             if (INFO) {
-                LOG.info("Didn't found an appropriate Cookie for name \"" + cookieName + "\" (CookieHashSource=" + cookieHash.toString() + ") which provides the session secret.");
+                LOG.info("Didn't find an appropriate Cookie for name \"" + cookieName + "\" (CookieHashSource=" + cookieHash.toString() + ") which provides the session secret.");
             }
         } else if (INFO) {
             LOG.info("Missing Cookies in HTTP request. No session secret can be looked up.");
@@ -815,6 +821,20 @@ public abstract class SessionServlet extends AJAXServlet {
             }
         }
         return null;
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

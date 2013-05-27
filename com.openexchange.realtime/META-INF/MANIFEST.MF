@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Message Dispatcher Framework
 Bundle-SymbolicName: com.openexchange.realtime
-Bundle-Version: 7.2.0
+Bundle-Version: 7.2.1
 Bundle-Activator: com.openexchange.realtime.osgi.RealtimeActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -22,12 +22,14 @@ Import-Package: com.google.common.base,
  com.openexchange.timer,
  com.openexchange.tools.session,
  com.openexchange.user,
+ javax.annotation.concurrent,
  org.apache.commons.logging,
  org.cliffc.high_scale_lib,
  org.osgi.framework,
  org.osgi.service.event,
  sun.misc
 Export-Package: com.openexchange.realtime,
+ com.openexchange.realtime.exception,
  com.openexchange.realtime.packet,
  com.openexchange.realtime.payload,
  com.openexchange.realtime.payload.converter,

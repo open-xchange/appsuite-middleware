@@ -53,6 +53,7 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link ConfigurationService}
@@ -68,6 +69,15 @@ public interface ConfigurationService {
      * @return The filter or <code>null</code> if there is no such property
      */
     public Filter getFilterFromProperty(String name);
+
+    /**
+     * Gets all properties that fulfills given filter's acceptance criteria.
+     *
+     * @param filter The filter
+     * @return The appropriate properties
+     * @throws OXException If properties cannot be returned
+     */
+    public Map<String, String> getProperties(PropertyFilter filter) throws OXException;
 
     /**
      * Searches for the property with the specified name in this property list. If the name is not found in this property list, the default

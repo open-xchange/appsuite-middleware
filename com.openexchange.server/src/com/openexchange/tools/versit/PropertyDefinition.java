@@ -120,9 +120,11 @@ public class PropertyDefinition {
                 property.addParameter(encoding);
                 continue;
             }
-            final Parameter param = getParameter(paramName).parse(s, paramName);
+            Parameter param = getParameter(paramName).parse(s, paramName);
             if (param == null) {
-                return null;
+                Parameter flagParam = new Parameter(paramName);
+                flagParam.addValue(new ParameterValue(""));
+                param = flagParam;
             }
             property.addParameter(param);
         }

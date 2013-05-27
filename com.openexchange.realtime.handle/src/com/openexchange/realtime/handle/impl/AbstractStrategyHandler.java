@@ -52,9 +52,9 @@ package com.openexchange.realtime.handle.impl;
 import java.util.concurrent.BlockingQueue;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
-import com.openexchange.realtime.RealtimeExceptionCodes;
 import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.Stanza;
 
 

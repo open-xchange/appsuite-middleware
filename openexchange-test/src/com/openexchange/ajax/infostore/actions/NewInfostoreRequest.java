@@ -51,7 +51,8 @@ package com.openexchange.ajax.infostore.actions;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -67,21 +68,24 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreResponse> {
 
     private DocumentMetadata metadata;
-
-    private final File upload;
+    private final InputStream input;
 
     public NewInfostoreRequest() {
-        this(null, null);
+        this(null, (InputStream) null);
     }
 
     public NewInfostoreRequest(DocumentMetadata data) {
-        this(data, null);
+        this(data, (InputStream) null);
     }
 
-    public NewInfostoreRequest(DocumentMetadata data, File upload) {
+    public NewInfostoreRequest(DocumentMetadata data, File upload) throws FileNotFoundException {
+        this(data, new FileInputStream(upload));
+    }
+
+    public NewInfostoreRequest(DocumentMetadata data, InputStream input) {
         super();
         this.metadata = data;
-        this.upload = upload;
+        this.input = input;
     }
 
     public void setMetadata(DocumentMetadata metadata) {
@@ -116,22 +120,22 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
 
     @Override
     public Method getMethod() {
-        return null == upload ? Method.PUT : Method.UPLOAD;
+        return null == input ? Method.PUT : Method.UPLOAD;
     }
 
     @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
+    public Parameter[] getParameters() throws JSONException {
         List<Parameter> tmp = new ArrayList<Parameter>(3);
         tmp.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW));
-        if (null != upload) {
+        if (null != input) {
             tmp.add(new FieldParameter("json", getBody()));
-            tmp.add(new FileParameter("file", upload.getName(), new FileInputStream(upload), metadata.getFileMIMEType()));
+            tmp.add(new FileParameter("file", metadata.getFileName(), input, metadata.getFileMIMEType()));
         }
         return tmp.toArray(new Parameter[tmp.size()]);
     }
 
     @Override
     public NewInfostoreParser getParser() {
-        return new NewInfostoreParser(getFailOnError(), null != upload);
+        return new NewInfostoreParser(getFailOnError(), null != input);
     }
 }

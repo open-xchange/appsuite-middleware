@@ -108,6 +108,7 @@ import com.openexchange.image.ImageUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.HTMLDetector;
 import com.openexchange.java.Streams;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
@@ -127,6 +128,7 @@ import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -590,8 +592,8 @@ public class MimeMessageFiller {
         for (final Iterator<Map.Entry<String, String>> iter = mail.getNonMatchingHeaders(SUPPRESS_HEADERS); iter.hasNext();) {
             final Map.Entry<String, String> entry = iter.next();
             final String name = entry.getKey();
-            if (name.toLowerCase(Locale.ENGLISH).startsWith("x-")) {
-                mimeMessage.addHeader(name, entry.getValue());
+            if (isCustomOrReplyHeader(name)) {
+                mimeMessage.setHeader(name, entry.getValue());
             }
         }
     }
@@ -648,6 +650,24 @@ public class MimeMessageFiller {
                 }
             }
         }
+    }
+
+    /**
+     * Checks if specified header name is a custom header (starts ignore-case with <code>"X-"</code>) or refers to a reply-relevant header.
+     *
+     * @param headerName The header name to check
+     * @return <code>true</code> if specified header name is a custom OR reply-relevant header; otherwise <code>false</code>
+     */
+    public static boolean isCustomOrReplyHeader(final String headerName) {
+        if (isEmpty(headerName)) {
+            return false;
+        }
+        final char first = headerName.charAt(0);
+        if ((('X' == first) || ('x' == first)) && ('-' == headerName.charAt(1))) {
+            return true;
+        }
+        final String lc = toLowerCase(headerName);
+        return "references".equals(lc) || "in-reply-to".equals(lc);
     }
 
     /**
@@ -740,6 +760,8 @@ public class MimeMessageFiller {
             throw MimeMailException.handleMessagingException(e);
         }
     }
+
+    private static final Pattern BODY_START = Pattern.compile("<body.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     /**
      * Fills the body of given instance of {@link MimeMessage} with the contents specified through given instance of
@@ -1058,8 +1080,22 @@ public class MimeMessageFiller {
                              */
                             if (HTMLDetector.containsHTMLTags(content.getBytes(Charsets.ISO_8859_1))) {
                                 isHtml = true;
-                                final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
-                                text = wellFormedHTMLContent;                                
+                                if (BODY_START.matcher(content).find()) {
+                                    final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
+                                    text = wellFormedHTMLContent;
+                                } else {
+                                    final StringAllocator sb = new StringAllocator(content.length() + 512);
+                                    sb.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n");
+                                    sb.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">\n");
+                                    sb.append("<head>\n");
+                                    sb.append("    <meta content=\"text/html; charset=").append(charset).append("\" http-equiv=\"Content-Type\"/>\n");
+                                    sb.append("</head>\n");
+                                    sb.append("<body>\n");
+                                    sb.append(content);
+                                    sb.append("</body>\n");
+                                    sb.append("</html>");
+                                    text = sb.toString();
+                                }
                             } else {
                                 isHtml = false;
                                 text = content;
@@ -1567,7 +1603,7 @@ public class MimeMessageFiller {
      * @param charset The charset
      * @return A body part of type <code>text/html</code> from given HTML content
      * @throws MessagingException If a messaging error occurs
-     * @throws OXException 
+     * @throws OXException
      */
     protected final BodyPart createHtmlBodyPart(final String wellFormedHTMLContent, final String charset) throws MessagingException, OXException {
         try {
@@ -1747,9 +1783,9 @@ public class MimeMessageFiller {
                         try {
                             imageProvider = new ImageDataImageProvider(dataSource, imageLocation, session);
                         } catch (final OXException e) {
-                            if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
+                            if (MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND.equals(e) || isFolderNotFound(e)) {
                                 tmp.setLength(0);
-                                m.appendLiteralReplacement(sb, imageTag);
+                                m.appendLiteralReplacement(sb, blankSrc(imageTag));
                                 continue;
                             }
                             throw e;
@@ -2025,4 +2061,24 @@ public class MimeMessageFiller {
         return isWhitespace;
     }
 
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
+    }
+
+    private static boolean isFolderNotFound(final OXException e) {
+        if (null == e) {
+            return false;
+        }
+        return ((MimeMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) || ("IMAP".equals(e.getPrefix()) && (MimeMailExceptionCode.FOLDER_NOT_FOUND.getNumber() == e.getCode())));
+    }
 }

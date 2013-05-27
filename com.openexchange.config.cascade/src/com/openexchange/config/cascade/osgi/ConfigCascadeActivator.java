@@ -52,8 +52,6 @@ package com.openexchange.config.cascade.osgi;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -108,7 +106,7 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
         });
 
         final BundleContext context = this.context;
-        track(createFilter("server"), new ServiceTrackerCustomizer<ConfigProviderService, ConfigProviderService>() {
+        track(TrackingProvider.createFilter("server", context), new ServiceTrackerCustomizer<ConfigProviderService, ConfigProviderService>() {
 
             @Override
             public ConfigProviderService addingService(final ServiceReference<ConfigProviderService> reference) {
@@ -131,7 +129,6 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
             public void removedService(final ServiceReference<ConfigProviderService> reference, final ConfigProviderService service) {
                 context.ungetService(reference);
             }
-
         });
 
         openTrackers();
@@ -177,19 +174,11 @@ public class ConfigCascadeActivator extends HousekeepingActivator{
                 continue;
             }
 
-            final ServiceTracker<ConfigProviderService, ConfigProviderService> tracker = track(createFilter(scope));
-            cascade.setProvider(scope, new TrackingProvider(tracker));
-            tracker.open();
+            final TrackingProvider trackingProvider = new TrackingProvider(scope, context);
+            rememberTracker(trackingProvider);
+            cascade.setProvider(scope, trackingProvider);
+            trackingProvider.open();
         }
-    }
-
-    Filter createFilter(final String scope) {
-        try {
-            return context.createFilter("(& (objectclass="+ConfigProviderService.class.getName()+") (scope="+scope+"))");
-        } catch (final InvalidSyntaxException e) {
-            LOG.fatal(e.getMessage(), e);
-        }
-        return null;
     }
 
 }

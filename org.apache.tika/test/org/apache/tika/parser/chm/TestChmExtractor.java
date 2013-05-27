@@ -34,7 +34,6 @@ import org.apache.tika.parser.chm.core.ChmExtractor;
 public class TestChmExtractor extends TestCase {
     private ChmExtractor chmExtractor = null;
 
-    @Override
     public void setUp() throws Exception {
         chmExtractor = new ChmExtractor(
                 new ByteArrayInputStream(TestParameters.chmData));
@@ -85,7 +84,6 @@ public class TestChmExtractor extends TestCase {
         }
     }
 
-    @Override
     public void tearDown() throws Exception {
     }
 

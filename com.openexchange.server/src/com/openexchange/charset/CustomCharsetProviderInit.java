@@ -50,8 +50,8 @@
 package com.openexchange.charset;
 
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.server.Initialization;
 
 /**
@@ -78,7 +78,7 @@ public final class CustomCharsetProviderInit implements Initialization {
          * Add alias charsets
          */
         provider.addAliasCharset("BIG5", "BIG-5", "BIG_5");
-        provider.addAliasCharset("UTF-8", "UTF_8");
+        provider.addAliasCharset("UTF-8", "UTF_8", "iso-UTF-8");
         // provider.addAliasCharset("US-ASCII", "x-unknown");
         provider.addAliasCharset("ISO-8859-1", "ISO", "x-unknown");
         provider.addAliasCharset("MacRoman", "MACINTOSH");

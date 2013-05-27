@@ -61,7 +61,7 @@
     <property name="jcs"                value="jcs-1.2.7.9.2.jar"/>
     <property name="mail"               value="mail-1.4.5.jar"/>
     <property name="junit"              value="junit-4.6.jar"/>
-    <property name="mysql-connector"    value="mysql-connector-java-5.1.23-bin.jar"/>
+    <property name="mysql-connector"    value="mysql-connector-java-5.1.25-bin.jar"/>
     <property name="jdom"               value="jdom-1.1.1.jar"/>
     <property name="csv"               value="opencsv-2.0.jar"/>
 

@@ -18,10 +18,8 @@ package org.apache.tika.parser.image;
 
 import java.io.InputStream;
 
-import org.apache.tika.metadata.HttpHeaders;
-import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
-import org.apache.tika.metadata.TIFF;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.xml.sax.helpers.DefaultHandler;
@@ -34,7 +32,7 @@ public class ImageParserTest extends TestCase {
 
     public void testBMP() throws Exception {
         Metadata metadata = new Metadata();
-        metadata.set(HttpHeaders.CONTENT_TYPE, "image/bmp");
+        metadata.set(Metadata.CONTENT_TYPE, "image/bmp");
         InputStream stream =
             getClass().getResourceAsStream("/test-documents/testBMP.bmp");
         parser.parse(stream, new DefaultHandler(), metadata, new ParseContext());
@@ -48,14 +46,14 @@ public class ImageParserTest extends TestCase {
         assertEquals("BI_RGB", metadata.get("Compression CompressionTypeName"));
         assertEquals("image/bmp", metadata.get("Content-Type"));
         
-        assertEquals("100", metadata.get(TIFF.IMAGE_WIDTH));
-        assertEquals("75", metadata.get(TIFF.IMAGE_LENGTH));
-        assertEquals("8 8 8", metadata.get(TIFF.BITS_PER_SAMPLE));
+        assertEquals("100", metadata.get(Metadata.IMAGE_WIDTH));
+        assertEquals("75", metadata.get(Metadata.IMAGE_LENGTH));
+        assertEquals("8 8 8", metadata.get(Metadata.BITS_PER_SAMPLE));
     }
 
     public void testGIF() throws Exception {
         Metadata metadata = new Metadata();
-        metadata.set(HttpHeaders.CONTENT_TYPE, "image/gif");
+        metadata.set(Metadata.CONTENT_TYPE, "image/gif");
         InputStream stream =
             getClass().getResourceAsStream("/test-documents/testGIF.gif");
         parser.parse(stream, new DefaultHandler(), metadata, new ParseContext());
@@ -78,14 +76,14 @@ public class ImageParserTest extends TestCase {
         assertEquals("0", metadata.get("Dimension VerticalPixelOffset"));
         assertEquals("image/gif", metadata.get("Content-Type"));
         
-        assertEquals("100", metadata.get(TIFF.IMAGE_WIDTH));
-        assertEquals("75", metadata.get(TIFF.IMAGE_LENGTH));
-        assertEquals("Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements.  See the NOTICE file distributed with this work for additional information regarding copyright ownership.", metadata.get(MSOffice.COMMENTS));
+        assertEquals("100", metadata.get(Metadata.IMAGE_WIDTH));
+        assertEquals("75", metadata.get(Metadata.IMAGE_LENGTH));
+        assertEquals("Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements.  See the NOTICE file distributed with this work for additional information regarding copyright ownership.", metadata.get(TikaCoreProperties.COMMENTS));
     }
 
     public void testJPEG() throws Exception {
         Metadata metadata = new Metadata();
-        metadata.set(HttpHeaders.CONTENT_TYPE, "image/jpeg");
+        metadata.set(Metadata.CONTENT_TYPE, "image/jpeg");
         InputStream stream =
             getClass().getResourceAsStream("/test-documents/testJPEG.jpg");
         parser.parse(stream, new DefaultHandler(), metadata, new ParseContext());
@@ -113,14 +111,14 @@ public class ImageParserTest extends TestCase {
         assertEquals("image/jpeg", metadata.get("Content-Type"));
         assertEquals("process=0, samplePrecision=8, numLines=75, samplesPerLine=100, numFrameComponents=3", metadata.get("markerSequence sof"));
         
-        assertEquals("100", metadata.get(TIFF.IMAGE_WIDTH));
-        assertEquals("75", metadata.get(TIFF.IMAGE_LENGTH));
-        assertEquals("Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements.  See the NOTICE file distributed with this work for additional information regarding copyright ownership.", metadata.get(MSOffice.COMMENTS));
+        assertEquals("100", metadata.get(Metadata.IMAGE_WIDTH));
+        assertEquals("75", metadata.get(Metadata.IMAGE_LENGTH));
+        assertEquals("Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements.  See the NOTICE file distributed with this work for additional information regarding copyright ownership.", metadata.get(TikaCoreProperties.COMMENTS));
     }
 
     public void testPNG() throws Exception {
         Metadata metadata = new Metadata();
-        metadata.set(HttpHeaders.CONTENT_TYPE, "image/png");
+        metadata.set(Metadata.CONTENT_TYPE, "image/png");
         InputStream stream =
             getClass().getResourceAsStream("/test-documents/testPNG.png");
         parser.parse(stream, new DefaultHandler(), metadata, new ParseContext());
@@ -150,9 +148,9 @@ public class ImageParserTest extends TestCase {
         assertEquals("year=2008, month=5, day=6, hour=6, minute=18, second=47", metadata.get("Document ImageModificationTime"));
         assertEquals("image/png", metadata.get("Content-Type"));
         
-        assertEquals("100", metadata.get(TIFF.IMAGE_WIDTH));
-        assertEquals("75", metadata.get(TIFF.IMAGE_LENGTH));
-        assertEquals("8 8 8", metadata.get(TIFF.BITS_PER_SAMPLE));
+        assertEquals("100", metadata.get(Metadata.IMAGE_WIDTH));
+        assertEquals("75", metadata.get(Metadata.IMAGE_LENGTH));
+        assertEquals("8 8 8", metadata.get(Metadata.BITS_PER_SAMPLE));
     }
 
 }

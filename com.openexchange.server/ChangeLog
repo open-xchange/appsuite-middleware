@@ -1,43 +1,295 @@
+* 2013-05-22 - marc.arens@open-xchange.com
+
+ - Fix for bug 26580: Remove superfluous warning
+
+* 2013-05-21 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26680: Moved filemanagement bundles into an own package open-xchange-file-distribution.
+ 
+ * 2013-05-17 - marc.arens@open-xchange.com
+
+ - Fix for bug 26226: Use concurrent data structures to prevent NegativeArraySizeException
+ - Fix for bug 25944: GETS are now periodically closed by server pongs
+
+* 2013-05-16 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26085: Disabling push UDP bundle by setting all push UDP related enabling properties to false.
+
+* 2013-05-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26611: Sanitize masked/commented HTML tags
+ - Fix for bug 26648: User concurrent-capable List/SortedSet to support concurrent accesses without throwing ConcurrentModificationException
+
+* 2013-05-15 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26179: Removed configuration file for audit extension and placed it as example in the packages documentation.
+
+* 2013-05-15 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 25985: Task config mapping for jslob interface.
+
+* 2013-05-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26162: Check for intermediately removed file prior to opening a FileInputStream to it
+ - Fix for bug 26102: Accept "application/ics" when checking for an iCal attachment
+
+* 2013-05-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26170: Renamed App Suite calendar printing templates again according to the required naming scheme.
+
+* 2013-05-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26501: Return an empty JSON object to indicate successful delete operation
+ - Fix for bug 26565: Check for possible null message while logging
+ - Fix for bug 26577: Iterate over a snapshot, not the (possibly concurrently modified) collection itself
+ - Fix for bug 26317: Treat "text/comma-separated-values" part like a binary one
+
+* 2013-05-13 - dennis.sieben@open-xchange.com
+
+ - Fix for bug 26545: Changed from getJSONArray to optJSONArray to avoid exception
+
+* 2013-05-13 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 26207: Full DateTime for Due Date of Tasks on ical creation.
+
+* 2013-05-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26473: Orderly detect "Folder not found" error message when trying to resolve a "local" image by a URL
+
+* 2013-05-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26456: Accept flag parameters (without a parameter value)
+ - Fix for bug 26385: Try to determine ICal part's MIME type by file name if not appropriate
+ - Fix for bug 26314: Propagate an absent/non-existing folder through event framework to notify USM module, too
+
+* 2013-05-08 - marc.arens@open-xchange.com
+
+ - Fix for bug 26335: Only wait for a request body if headers indicate a body
+
+* 2013-05-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26464: Avoid buffer overflow through interpreting infinite locking as locked for 10 years
+
+* 2013-05-07 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 26400: TimeZone Parameter for ITIP analyze call had impact on the object itself.
+ - Fix for bug 26418: Shared folder id in notification mail headers.
+
+* 2013-05-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26354: Using the same row locks for all methods modifying the user attributes to avoid deadlocks.
+
 * 2013-05-07 - thorben.betten@open-xchange.com
 
+ - Fix for bug 26382: Listen to file storage events, too
+ - Fix for bug 26346: Detect a canceled OAuth authentication process
+ - Fix for bug 26265: Add more logging properties when trying to output a message
+ - Preparation to fix bug 26392: Maintain contact's image data on convert request
  - Fix for bug 25982: Accept context name/identifier as a valid tag name that applies only to associated context
+
+* 2013-05-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 24786: Set appropriate error category to display more meaningful error message
+
+* 2013-05-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26105: Add proper context identifier to distributed event
+
+* 2013-05-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26359: Deal with possibly absent CommonEvent instance
+ - Fix for bug 26360: Moved source bundles from 'lib' to its own 'source' directory and changed MANIFEST.MF + .classpath files accordingly
+
+* 2013-05-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26323: Deal with multi-threading problem if OSGi cache service gets unavailable.
 
 * 2013-05-03 - thorben.betten@open-xchange.com
 
+ - Fix for bug 26341: Don't stick to certain values, but only check existence of associated option
+ - Fix for bug 26305: Obtain group names directly from JCS cache
+ - Fix for bug 26266: Ensure user/context information is prepended to log message whenever available
+ - Fix for bug 26370: Handle unexpected UnknownHostException gracefully
  - Fix for bug 26373: Sanitize on "delivery=view", too
+ - Fix for bug 26362: Honor new "delivery" parameter
+
+* 2013-05-02 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25672: Don't delete already existing delete exceptions   
 
 * 2013-05-02 - thorben.betten@open-xchange.com
 
+ - Fix for bug 26300: Deal with absent session when checking request-count boundary
+ - Fix for bug 26267: Use lenient Cookie parsing policy
  - Fix for bug 26305: Use safe hash calculation to avoid hash collisions
+ - Fix for bug 26054: Adapted logging to output USR-0010 error code as DEBUG only
+ - Fix for bug 26306: Fixed access of attachments within a nested message
+
+* 2013-04-30 - marcus.klein@open-xchange.com
+
+ - Fix for bug 24724: Revoked version of org.apache.log4j OSGi bundle to 1.2.13. This version does not split log messages when using
+   SyslogAppender. Log messages are truncated by the underlying UDP network traffic. Newer version splits too long log messages which makes
+   the log output more unreadable.
+
+* 2013-04-30 - marc.arens@open-xchange.com
+
+ - Fix for bug 26022: Don't assume defaultcontext
+ 
+* 2013-04-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26022: Add capability to deal with an anonymous session in ServerSessionAdapter
+ - Fix for bug 26244: Fixed XSS injection using utf-16 content type
+
+* 2013-04-30 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25783: Correctly unfold content lines in iCal files   
 
 * 2013-04-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 26243: Fixed vulnerability of XSS injection by content-type header
 
+* 2013-04-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26166: Deal with possible null reference returned by
+                      "com.openexchange.mail.api.IMailMessageStorage.getMessage(String, String, boolean)"
+ - Fix for bug 26174: Use proper property name for server route
+ - Fix for bug 26164: Add capability "deniedPortal" if portal is disabled
+ - Fix for bug 25133: Fixed HTTP "Content-Type" header for requested message source content
+
 * 2013-04-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 26237: Fixed possible XSS vulnerability
+ - Fix for bug 26202: Avoid too long log messages if debug is disabled
+ - Fix for bug 26186: Refactored config-cascade to not dynamically look-up services via ServiceTracker, using a queue for tracking instead
+
+* 2013-04-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26198: Consider "timezone" URL parameter for mail module's ALL and LIST request
+ - Fix for bug 26188: Improved error message if a publication has been revoked in the meantime
+ - Fix for bug 26221: Convert HTML error message to plain text before logging it
+
+* 2013-04-26 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 26185: Changed default values in contact-storage-ldap/cache.properties template
+ - Fix for bug 26209: Don't try to load contact in case of DELETE event
+
+* 2013-04-25 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25799: Don't query contact image data for GET request   
+
+* 2013-04-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26116: Invalidate cache entry on document change/deletion
+ - Fix for bug 26120: Adapted logging behavior to client actions
+ - Fix for bug 26170: Added template file to Debian packaging file "conffiles"
+
+* 2013-04-23 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 26076: Deserialize 'image1' field in user update action   
+
+* 2013-04-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25791: Reliably enter stop() routine through registering own shut-down hook for document converter
+ - Fix for bug 26075: Understandable error message if file name conns illegal characters
+ - Fix for bug 26073: Provide statement's string representation on log invocation
+ - Fix for bug 26082: Convert native null object to JSONObject.NULL
+ - Fix for bug 26100: Create a unique file name for each mail inside a ZIP archive
+
+* 2013-04-22 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 26046: Fixed conflict bahaviour for DST and Full time recurring appointments.
+
+* 2013-04-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26028: Indicate proper file name for single multipart-part
+ - Fix for bug 26065: Check if MP3 file provides proper ID2v2 tag
+ - Fix for bug 26032: Properly support media request through AppleCoreMedia user agent
+ - Fix for bug 26045: Maintain original OXException instance
+ - Fix for bug 26083: Consider all parameters when generating key for preview cache
+
+* 2013-04-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26057: Honor optional URL parameter "timezone"
+
+* 2013-04-19 - marcus.klein@open-xchange.com
+
+ - Fix for bug 26036: Added required service to needed services list of RSS bundle activator.
+
+* 2013-04-18 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 26015: Added missing missing timezone for halo calls.
+
+* 2013-04-18 - marc.arens@open-xchange.com
+
+ - Fix for bug 25842: Use com.openexchange.servlet.maxBodySize for parameters transported via PUT/POST body
+
+* 2013-04-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26003: Deal with possibly unknown MIME type when determining file extension
+ - Fix for bug 25981: Added capability for RSS
+
+* 2013-04-17 - marcus.klein@open-xchange.com
+
+ - Fix for bug 25911: Package com.openexchange.audit component for tracking user actions.
+
+* 2013-04-17 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 25952: Added missing change and delete exception field to get request for appointments.
 
 * 2013-04-17 - thorben.betten@open-xchange.com
 
+ - Fix for bug 25939: Moved snippet bundles to core package
+ - Fix for bug 25942: Check object's type before casting to Multipart
  - Fix for bug 25957: Deny "vbscript" URLs
 
 * 2013-04-16 - thorben.betten@open-xchange.com
 
- - Fix for bug 25903: Added null guard when reading settings
  - Fix for bug 25909: Proper initialization of service trackers although registering contact-collect service is disabled
-
-* 2013-04-15 - martin.herfurth@open-xchange.com
-
- - Fix for bug 25895: Cropped files at 500kb fixed.
+ - Fix for bug 25921: Added several null guards
+ - Fix for bug 25894: Proper formatting for JSON runtime statistics
+ - Fix for bug 25923: Fixed possible StringIndexOutOfBoundsException when parsing message content
 
 * 2013-04-15 - marc.arens@open-xchange.com
 
  - Fix for bug 25863: Move ArrayList.clear() to beginning of runloop and add logging in case of error
 
+* 2013-04-15 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 25895: Cropped files at 500kb fixed.
+
+* 2013-04-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25898: Added alias for odd charset name "iso-UTF-8"
+ - Fix for bug 25903: Added null guard when reading settings
+
+* 2013-04-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25799: Don't pass field 570 down to the storage layer
+ - Fix for bug 25768: Process contact delete batches in chunks, don't keep records in 'del_contacts_image' 
+ 
+* 2013-04-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25252: Fixed API call
+ - Fix for bug 25051: Interpret unparseable JSON token as a string
+
+* 2013-04-12 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 25837: Added several enhancements to avoid flooding of the distributed hazelcast topic for cache events
+
 * 2013-04-12 - marcus.klein@open-xchange.com
 
  - Fix for bug 25819: Changing the IMAP server, IMAP login and SMTP server is now possible for user objects.
+
+* 2013-04-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 25814: Added null guard
+ - Fix for bug 25807: Added null guard
+ - Fix for bug 25869: Log severe errors if mail transport failed
+ - Fix for bug 25847: Try to sanitize Content-Type header to an appropriate value (if signaled differently by file name)
+
+* 2013-04-10 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 24662: Added dynamic checksum calculation for X-ABCROP-RECTANGLE parameter 
 
 * 2013-04-10 - thorben.betten@open-xchange.com
 

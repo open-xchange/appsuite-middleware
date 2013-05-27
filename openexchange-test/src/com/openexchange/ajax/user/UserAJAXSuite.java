@@ -49,18 +49,21 @@
 
 package com.openexchange.ajax.user;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
-public class UserAJAXSuite extends TestSuite {
+/**
+ * Test suite for all user interface tests.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+@RunWith(Suite.class)
+@SuiteClasses({ GetTest.class, AllTest.class, ListTest.class, Bug13911Test.class, Bug17539Test.class, Bug26354Test.class })
+// TODO Enable tests 26431 on branch develop.
+public final class UserAJAXSuite {
 
-	public static Test suite(){
-		final TestSuite tests = new TestSuite();
-        tests.addTestSuite(GetTest.class);
-        tests.addTestSuite(AllTest.class);
-        tests.addTestSuite(ListTest.class);
-		tests.addTestSuite(Bug13911Test.class);
-		tests.addTestSuite(Bug17539Test.class);
-		return tests;
-	}
+    private UserAJAXSuite() {
+        super();
+    }
 }

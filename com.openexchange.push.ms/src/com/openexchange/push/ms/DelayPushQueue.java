@@ -49,9 +49,12 @@
 
 package com.openexchange.push.ms;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.logging.Log;
 import com.openexchange.log.LogFactory;
 import com.openexchange.ms.Topic;
@@ -61,41 +64,41 @@ import com.openexchange.ms.Topic;
  * other PIM Objects shouldn't be pushed immediately because they can be changed within a short timeframe to adjust details or other objects
  * might be created in the same folder which would lead to yet another push event. Introduced to stay compatible with old {c.o}.push.udp
  * implementation.
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class DelayPushQueue implements Runnable {
 
+    /** The logger */
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DelayPushQueue.class));
 
+    /** The special poison object */
+    private static final DelayedPushMsObject POISON = new DelayedPushMsObject(null, 0, 0);
+
     private final int delayDuration;
-
     private final int maxDelayDuration;
-
-    private final ConcurrentHashMap<PushMsObject,DelayedPushMsObject> existingPushObjects = new ConcurrentHashMap<PushMsObject, DelayedPushMsObject>();
-
+    private final ConcurrentHashMap<PushMsObject,DelayedPushMsObject> existingPushObjects;
     private final DelayQueue<DelayedPushMsObject> delayQueue;
-
     private final Thread pollThread;
-
-    private boolean isRunning = false;
-
-    private final Topic<PushMsObject> publisher;
+    private final AtomicBoolean isRunning;
+    private final Topic<Map<String, Object>> publisher;
 
     /**
      * Initializes a new {@link DelayPushQueue}.
-     * 
+     *
      * @param publisher the publisher used to finally publish the pushMsObjects in this DelayQueue.
      * @param delayDuration the default delay time for an object in this DelayQueue, gets refreshed when objects in the same folder are
      *            updated within the delayDuration
      * @param maxDelayDuration the maximum time an object can be in this DelayQueue before being finally published.
      */
-    public DelayPushQueue(Topic<PushMsObject> publisher, int delayDuration, int maxDelayDuration) {
+    public DelayPushQueue(final Topic<Map<String, Object>> publisher, final int delayDuration, final int maxDelayDuration) {
+        super();
+        existingPushObjects = new ConcurrentHashMap<PushMsObject, DelayedPushMsObject>();
         delayQueue = new DelayQueue<DelayedPushMsObject>();
         this.publisher = publisher;
         this.delayDuration = delayDuration;
         this.maxDelayDuration = maxDelayDuration;
-        isRunning = true;
+        isRunning = new AtomicBoolean(true);
         pollThread = new Thread(this);
         pollThread.setName(this.getClass().getName());
         pollThread.start();
@@ -103,10 +106,10 @@ public class DelayPushQueue implements Runnable {
 
     /**
      * Add a pushMsObject into the DealyQueue. If the pushMsObject is already contained within this queue its delay will be refreshed.
-     * 
+     *
      * @param pushMsObject the pushMsObject to add
      */
-    public void add(PushMsObject pushMsObject) {
+    public void add(final PushMsObject pushMsObject) {
         DelayedPushMsObject delayedPushMsObject = existingPushObjects.get(pushMsObject);
         if (delayedPushMsObject != null) {
             // just refresh the delay by touching
@@ -118,29 +121,54 @@ public class DelayPushQueue implements Runnable {
         }
     }
 
+    /**
+     * Closes this <code>DelayPushQueue</code>.
+     */
     public void close() {
-        isRunning = false;
+        isRunning.set(false);
+        // Feed poison element to enforce quit
+        delayQueue.put(POISON);
+        // Clear rest
         existingPushObjects.clear();
         delayQueue.clear();
     }
 
     @Override
     public void run() {
-        while (isRunning) {
+        final DelayQueue<DelayedPushMsObject> delayQueue = this.delayQueue;
+        final List<DelayedPushMsObject> objects = new ArrayList<DelayedPushMsObject>(16);
+        while (isRunning.get()) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Get push objects from DelayQueue with size: " + delayQueue.size());
+                LOG.debug("Awating push objects from DelayQueue with current size: " + delayQueue.size());
             }
             try {
-                final DelayedPushMsObject delayedPushMsObject = delayQueue.poll(10, TimeUnit.SECONDS);
-                if (delayedPushMsObject != null) {
-                    PushMsObject pushObject = delayedPushMsObject.getPushObject();
-                    // remove from mapping
-                    existingPushObjects.remove(pushObject);
-                    // and publish
-                    publisher.publish(delayedPushMsObject.getPushObject());
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Published delayed PushMsObject: " + delayedPushMsObject.getPushObject());
+                objects.clear();
+                if (delayQueue.isEmpty()) {
+                    /*
+                     * Blocking wait for at least 1 DelayedPushMsObject to arrive.
+                     */
+                    final DelayedPushMsObject object = delayQueue.take();
+                    if (POISON == object) {
+                        return;
                     }
+                    objects.add(object);
+                }
+                delayQueue.drainTo(objects);
+                final boolean quit = objects.remove(POISON);
+                for (final DelayedPushMsObject delayedPushMsObject : objects) {
+                    if (delayedPushMsObject != null) {
+                        final PushMsObject pushObject = delayedPushMsObject.getPushObject();
+                        // remove from mapping
+                        existingPushObjects.remove(pushObject);
+                        // and publish
+                        publisher.publish(delayedPushMsObject.getPushObject().writePojo());
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Published delayed PushMsObject: " + delayedPushMsObject.getPushObject());
+                        }
+                    }
+                }
+                if (quit) {
+                    return;
                 }
             } catch (final Exception exc) {
                 LOG.error(exc.getMessage(), exc);

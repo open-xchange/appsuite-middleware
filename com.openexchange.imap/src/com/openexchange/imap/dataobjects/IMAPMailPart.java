@@ -1,0 +1,264 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.imap.dataobjects;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Enumeration;
+import javax.activation.DataHandler;
+import javax.mail.MessagingException;
+import javax.mail.Part;
+import javax.mail.internet.MimeUtility;
+import javax.mail.internet.ParameterList;
+import com.openexchange.exception.OXException;
+import com.openexchange.imap.util.InputStreamProvider;
+import com.openexchange.imap.util.ThresholdInputStreamProvider;
+import com.openexchange.java.StringAllocator;
+import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.mime.ContentDisposition;
+import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.dataobjects.MimeRawSource;
+import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.sun.mail.iap.ByteArray;
+import com.sun.mail.imap.IMAPInputStream;
+import com.sun.mail.imap.IMAPMessage;
+import com.sun.mail.imap.protocol.BODYSTRUCTURE;
+
+/**
+ * {@link IMAPMailPart} - A mail part that references an IMAP message part.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class IMAPMailPart extends MailPart implements MimeRawSource {
+
+    private static final long serialVersionUID = 6469037985453175593L;
+
+    private final InputStreamProvider inProvider;
+    private final BODYSTRUCTURE body;
+
+    /**
+     * Initializes a new {@link IMAPMailPart}.
+     *
+     * @param byteArray The associated part's binary data
+     * @param body The body structure information
+     * @throws IOException If an I/O error occurs
+     */
+    public IMAPMailPart(final ByteArray byteArray, final BODYSTRUCTURE body) throws IOException {
+        super();
+        final ThresholdInputStreamProvider inProvider = new ThresholdInputStreamProvider();
+        inProvider.write(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount());
+        this.inProvider = inProvider;
+        this.body = body;
+    }
+
+    /**
+     * Initializes a new {@link IMAPMailPart}.
+     *
+     * @param msg The associated IMAP message
+     * @param sectionId The referenced section identifier
+     * @param peek Whether to peek (<code>\Seen</code> flag not set) or not
+     * @param body The body structure information
+     */
+    public IMAPMailPart(final IMAPMessage msg, final String sectionId, final boolean peek, final BODYSTRUCTURE body) {
+        super();
+        inProvider = new InputStreamProvider() {
+
+            @Override
+            public InputStream getInputStream() throws OXException {
+                return new IMAPInputStream(msg, sectionId, body.size, peek);
+            }
+        };
+        this.body = body;
+    }
+
+    @Override
+    public void prepareForCaching() {
+        // Nope
+    }
+
+    @Override
+    public void loadContent() throws OXException {
+        // Nope
+    }
+
+    @Override
+    public InputStream getInputStream() throws OXException {
+        final String encoding = getFirstHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC);
+        if (null != encoding) {
+            try {
+                return MimeUtility.decode(inProvider.getInputStream(), encoding);
+            } catch (final MessagingException e) {
+                throw MimeMailException.handleMessagingException(e);
+            }
+        }
+        return inProvider.getInputStream();
+    }
+
+    @Override
+    public InputStream getRawInputStream() throws OXException {
+        return inProvider.getInputStream();
+    }
+
+    @Override
+    public Part getPart() {
+        return null;
+    }
+
+    @Override
+    public MailPart getEnclosedMailPart(final int index) throws OXException {
+        return null;
+    }
+
+    @Override
+    public int getEnclosedCount() throws OXException {
+        return MailPart.NO_ENCLOSED_PARTS;
+    }
+
+    @Override
+    public DataHandler getDataHandler() throws OXException {
+        try {
+            return new DataHandler(new MessageDataSource(getInputStream(), body.type + "/" + body.subtype));
+        } catch (final IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public Object getContent() throws OXException {
+        try {
+            return getDataHandler().getContent();
+        } catch (final IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Applies specified body structure information to this IMAP mail part.
+     *
+     * @param bodystructure The body structure information
+     */
+    public void applyBodyStructure(final BODYSTRUCTURE bodystructure) {
+        if (null == bodystructure) {
+            return;
+        }
+        {
+            final String disposition = bodystructure.disposition;
+            final ParameterList dParams = bodystructure.dParams;
+            if (null != disposition || null != dParams) {
+                final ContentDisposition contentDisposition = new ContentDisposition();
+                if (null != disposition) {
+                    contentDisposition.setDisposition(disposition);
+                }
+                if (null != dParams) {
+                    for (final Enumeration<?> names = dParams.getNames(); names.hasMoreElements();) {
+                        final String name = names.nextElement().toString();
+                        contentDisposition.setParameter(name, dParams.get(name));
+                    }
+                }
+                setContentDisposition(contentDisposition);
+            }
+        }
+        {
+            final ParameterList cParams = bodystructure.cParams;
+            if (null != bodystructure.type || null != bodystructure.subtype || null != cParams) {
+                final ContentType contentType = new ContentType();
+                if (null != bodystructure.type) {
+                    contentType.setPrimaryType(toLowerCase(bodystructure.type));
+                }
+                if (null != bodystructure.subtype) {
+                    contentType.setSubType(toLowerCase(bodystructure.subtype));
+                }
+                if (null != cParams) {
+                    for (final Enumeration<?> names = cParams.getNames(); names.hasMoreElements();) {
+                        final String name = names.nextElement().toString();
+                        contentType.setParameter(name, cParams.get(name));
+                    }
+                }
+                setContentType(contentType);
+            }
+        }
+        {
+            final String encoding = bodystructure.encoding;
+            if (null != encoding) {
+                setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, encoding);
+            }
+        }
+        {
+            final String fileName = bodystructure.attachment;
+            if (null != fileName) {
+                getContentDisposition().setFilenameParameter(fileName);
+            }
+        }
+        {
+            final int size = bodystructure.size;
+            if (size > 0) {
+                setSize(size);
+            }
+        }
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
+    }
+
+}

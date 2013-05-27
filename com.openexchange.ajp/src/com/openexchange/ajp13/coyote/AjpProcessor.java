@@ -95,6 +95,7 @@ import com.openexchange.ajp13.watcher.AJPv13TaskMonitor;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.java.Charsets;
+import com.openexchange.log.ForceLog;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.Props;
@@ -717,7 +718,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 final Props properties = LogProperties.getLogProperties();
                 properties.put(LogProperties.Name.AJP_THREAD_NAME, thread.getName());
                 properties.put(LogProperties.Name.AJP_REMOTE_PORT, Integer.valueOf(socket.getPort()));
-                properties.put(LogProperties.Name.AJP_REMOTE_ADDRESS, socket.getInetAddress().getHostAddress());
+                properties.put(LogProperties.Name.AJP_REMOTE_ADDRESS, ForceLog.valueOf(socket.getInetAddress().getHostAddress()));
             }
             final boolean debug = LOG.isDebugEnabled();
             try {
@@ -932,7 +933,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     /*
                      * ... and write bytes
                      */
-                    final byte[] bytes = e.getData().getBytes("UTF-8");
+                    final byte[] bytes = e.getData().getBytes(Charsets.UTF_8);
                     final ByteChunk byteChunk = new ByteChunk(packetSize);
                     byteChunk.append(bytes, 0, bytes.length);
                     outputBuffer.doWrite(byteChunk);
@@ -970,6 +971,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     finish();
                 } catch (final IOException e) {
                     // Lost connection
+                    if (debug) {
+                        LOG.debug("Lost connection to web server.", e);
+                    }
                     error = true;
                 } catch (final Throwable t) {
                     ExceptionUtils.handleThrowable(t);
@@ -1078,6 +1082,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 final Lock hardLock = mainLock.writeLock();
                 hardLock.lock();
                 try {
+                    boolean doReadMessage = true;
                     if (response.isCommitted()) {
                         /*
                          * Write empty SEND-BODY-CHUNK package
@@ -1098,18 +1103,40 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         /*
                          * Receive probably empty body chunk
                          */
-                        final ByteChunk byteChunk = new ByteChunk(8192);
-                        final int read = inputBuffer.doRead(byteChunk, request);
-                        if (read > 0) {
-                            // Received a non-empty data chunk...
-                            // Dump that chunk to ServletInputStream
-                            int len = byteChunk.getLength();
-                            if (len > read) {
-                                len = read;
+                        if (doReadMessage) {
+                            // ... by separate AJP message
+                            final AjpMessage bodyMessage = new AjpMessage(packetSize);
+                            readMessage(bodyMessage);
+                            // No data received.
+                            if (bodyMessage.getLen() > 0) {
+                                final int blen = bodyMessage.peekInt();
+                                if (blen > 0) {
+                                    // Received a non-empty data chunk...
+                                    // Dump that chunk to ServletInputStream
+                                    final MessageBytes bodyBytes = MessageBytes.newInstance();
+                                    bodyMessage.getBytes(bodyBytes);
+                                    final ByteChunk bc = bodyBytes.getByteChunk();
+                                    final int len = bc.getLength();
+                                    final byte[] chunk = new byte[len];
+                                    System.arraycopy(bc.getBuffer(), bc.getStart(), chunk, 0, len);
+                                    request.appendToBuffer(chunk);
+                                }
                             }
-                            final byte[] chunk = new byte[len];
-                            System.arraycopy(byteChunk.getBuffer(), byteChunk.getStart(), chunk, 0, len);
-                            request.appendToBuffer(chunk);
+                        } else {
+                            // ... by ByteChunk read attempt
+                            final ByteChunk byteChunk = new ByteChunk(8192);
+                            final int read = inputBuffer.doRead(byteChunk, request, false);
+                            if (read > 0) {
+                                // Received a non-empty data chunk...
+                                // Dump that chunk to ServletInputStream
+                                int len = byteChunk.getLength();
+                                if (len > read) {
+                                    len = read;
+                                }
+                                final byte[] chunk = new byte[len];
+                                System.arraycopy(byteChunk.getBuffer(), byteChunk.getStart(), chunk, 0, len);
+                                request.appendToBuffer(chunk);
+                            }
                         }
                         if (DEBUG) {
                             LOG.debug("Performed keep-alive through an empty get-body-chunk package (and received requested chunk).");
@@ -1975,7 +2002,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         {
             sink.reset();
             for (final Entry<String, List<String>> entry : response.getHeaderEntrySet()) {
-                for (String value : entry.getValue()) {
+                for (final String value : entry.getValue()) {
                     writeHeaderSafe(entry.getKey(), value, sink);
                     numHeaders++;
                 }
@@ -2206,6 +2233,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         request.recycle();
         response.recycle();
         certificates.recycle();
+        LogProperties.removeLogProperties();
     }
 
     // ------------------------------------- InputStreamInputBuffer Inner Class
@@ -2220,6 +2248,14 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          */
         @Override
         public int doRead(final ByteChunk chunk, final HttpServletRequestImpl req) throws IOException {
+            return doRead(chunk, req, true);
+        }
+
+        /**
+         * Read bytes into the specified chunk.
+         */
+        @Override
+        public int doRead(final ByteChunk chunk, final HttpServletRequestImpl req, final boolean refillIfEmpty) throws IOException {
             if (endOfStream) {
                 return -1;
             }
@@ -2231,7 +2267,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     return 0;
                 }
             } else if (empty) {
-                if (!refillReadBuffer()) {
+                if (!refillIfEmpty || !refillReadBuffer()) {
                     return -1;
                 }
             }

@@ -90,7 +90,7 @@ import com.openexchange.imap.entity2acl.Entity2ACLInit;
 import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.services.Services;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.Log;
@@ -225,7 +225,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             synchronized (IMAPAccess.class) {
                 tmp = validityDisabled;
                 if (null == tmp) {
-                    final ConfigurationService service = IMAPServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
                     tmp = Boolean.valueOf(service != null && service.getBoolProperty("com.openexchange.imap.validityDisabled", false));
                     validityDisabled = tmp;
                 }
@@ -868,7 +868,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 }
             } else if (DEBUG && MailAccount.DEFAULT_ID == accountId) {
                 LOG.debug(new com.openexchange.java.StringAllocator(256).append("\n\n\tPropagating client IP address disabled on Open-Xchange server \"").append(
-                    IMAPServiceRegistry.getService(ConfigurationService.class).getProperty("AJP_JVM_ROUTE")).append("\"\n").toString());
+                    Services.getService(ConfigurationService.class).getProperty("com.openexchange.server.backendRoute")).append("\"\n").toString());
             }
             /*
              * Get connected store
@@ -977,7 +977,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return true;
         }
 
-        final MailAccountStorageService storageService = IMAPServiceRegistry.getService(MailAccountStorageService.class);
+        final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
         if (null == storageService) {
             return false;
         }
@@ -1180,7 +1180,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         Entity2ACLInit.getInstance().start();
         maxCountCache = new NonBlockingHashMap<String, Integer>(16);
 
-        final ConfigurationService confService = IMAPServiceRegistry.getService(ConfigurationService.class);
+        final ConfigurationService confService = Services.getService(ConfigurationService.class);
         final boolean useIMAPStoreCache = null == confService ? true : confService.getBoolProperty("com.openexchange.imap.useIMAPStoreCache", true);
         USE_IMAP_STORE_CACHE.set(useIMAPStoreCache);
         long failedAuthTimeout;
@@ -1239,7 +1239,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             aclCapableServers = new NonBlockingHashMap<String, Boolean>();
         }
         if (null == cleanUpTimerTask) {
-            final TimerService timerService = IMAPServiceRegistry.getService(TimerService.class);
+            final TimerService timerService = Services.getService(TimerService.class);
             if (null != timerService) {
                 final Map<HostAndPort, Long> map1 = timedOutServers;
                 final Runnable r = new Runnable() {
@@ -1381,7 +1381,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     protected IMailProperties createNewMailProperties() throws OXException {
-        final MailAccountStorageService storageService = IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
+        final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
         return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
     }
 

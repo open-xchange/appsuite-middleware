@@ -63,12 +63,12 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 
 /**
- * 
+ *
  * This service rewrites the hostname for the direct links which are sent via email to
  * appointments participants.
- * 
- * 
- * 
+ *
+ *
+ *
  * @author Manuel Kraft
  *
  */
@@ -78,7 +78,7 @@ public final class ParallelsHostnameService implements HostnameService {
 
     @Override
     public String getHostname(final int userId, final int contextId) {
-        if(contextId!=-1){
+        if (contextId > 0) {
             final ContextService service = ParallelsServiceRegistry.getServiceRegistry().getService(ContextService.class);
             String hostname = null;
             Context ctx;
@@ -98,11 +98,11 @@ public final class ParallelsHostnameService implements HostnameService {
                     for (final String login_mapping : login_mappings) {
                         if(login_mapping.startsWith(suffix_branded)){
                             /**
-                             * 
+                             *
                              *  We found our mapping which contains the branded URL!
-                             * 
+                             *
                              *  Now split up the string to get the URL part
-                             * 
+                             *
                              */
                             final String[] URL_ = login_mapping.split("\\|\\|"); // perhaps replace with substring(start,end) if would be faster
                             if(URL_.length!=2){
@@ -136,7 +136,7 @@ public final class ParallelsHostnameService implements HostnameService {
 
             return hostname;
         }else{
-            LOG.error("getHostname: Got context with id -1, dont generating any hostname");
+            LOG.error("getHostname: Got context with id "+contextId+", dont generating any hostname");
             return null;
         }
 

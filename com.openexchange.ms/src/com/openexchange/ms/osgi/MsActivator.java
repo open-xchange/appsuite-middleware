@@ -57,7 +57,9 @@ import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.ms.MsService;
 import com.openexchange.ms.internal.HzMsService;
+import com.openexchange.ms.internal.Services;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link MsActivator} - The activator for <i>"com.openexchange.ms"</i> bundle.
@@ -75,11 +77,12 @@ public class MsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class };
+        return new Class<?>[] { HazelcastConfigurationService.class, TimerService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
         final HazelcastConfigurationService configService = getService(HazelcastConfigurationService.class);
         final boolean enabled = configService.isEnabled();
         if (enabled) {
@@ -122,6 +125,12 @@ public class MsActivator extends HousekeepingActivator {
             });
             openTrackers();
         }
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        Services.setServiceLookup(null);
     }
 
     @Override

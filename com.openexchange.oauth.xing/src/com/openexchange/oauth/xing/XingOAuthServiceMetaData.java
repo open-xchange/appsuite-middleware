@@ -58,10 +58,11 @@ import com.openexchange.java.StringAllocator;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractOAuthServiceMetaData;
+import com.openexchange.session.Session;
 
 /**
  * {@link XingOAuthServiceMetaData}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements com.openexchange.oauth.ScribeAware {
@@ -70,7 +71,7 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
 
     /**
      * Initializes a new {@link XingOAuthServiceMetaData}.
-     * 
+     *
      * @param configService The configuration service
      * @throws IllegalStateException If either API key or secret is missing
      */
@@ -100,9 +101,9 @@ public final class XingOAuthServiceMetaData extends AbstractOAuthServiceMetaData
     }
 
     @Override
-    public String modifyCallbackURL(final String callbackUrl) {
+    public String modifyCallbackURL(final String callbackUrl, final Session session) {
         if (null == callbackUrl || null == domain) {
-            return super.modifyCallbackURL(callbackUrl);
+            return super.modifyCallbackURL(callbackUrl, session);
         }
         try {
             final URL url = new URL(callbackUrl);

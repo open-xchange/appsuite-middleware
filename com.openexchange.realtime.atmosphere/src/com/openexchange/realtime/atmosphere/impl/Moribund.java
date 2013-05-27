@@ -49,65 +49,33 @@
 
 package com.openexchange.realtime.atmosphere.impl;
 
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import org.atmosphere.cpr.AtmosphereResource;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
-import com.openexchange.realtime.atmosphere.osgi.AtmosphereServiceRegistry;
-import com.openexchange.realtime.directory.ResourceDirectory;
 import com.openexchange.realtime.packet.ID;
-import com.openexchange.realtime.packet.Stanza;
-import com.openexchange.realtime.util.IDMap;
 
 /**
- * {@link Moribund}
+ * {@link Moribund} - Represents an ID/client/resources that can be added to the {@link AtmosphereResourceReaper} which in turn can sort the
+ * Moribunds and instruct them to free used resources and remove themselfes from the system by callying {@link Moribund#die()}.
  * 
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class Moribund implements Comparable<Moribund> {
+public abstract class Moribund implements Comparable<Moribund> {
 
     public static final org.apache.commons.logging.Log LOG = Log.loggerFor(Moribund.class);
 
     /* Start of lingering in milliseconds */
     private final long lingeringStart;
 
-    private ID concreteID;
-
-    private AtmosphereResource atmosphereResource;
-
-    /*
-     * Map general ids (user@context) to full ids (ox://user@context/resource.browserx.taby)
-     */
-    private final IDMap<Set<ID>> generalToFullIDMap;
-
-    /*
-     * Map full client IDs to the AtmosphereResource that represents their connection to the server
-     */
-    private final IDMap<AtmosphereResource> fullIDToResourceMap;
-
-    /*
-     * 
-     */
-    private ConcurrentHashMap<ID, List<Stanza>> outboxes;
+    private ID id;
 
     /**
      * Initializes a new {@link Moribund}.
      * 
-     * @param concreteId
-     * @param atmosphereResource
-     * @param generalToFullIDMap
-     * @param fullIDToResourceMap
-     * @param outboxes
+     * @param concreteId The concrete client ID
      */
-    public Moribund(ID concreteId, AtmosphereResource atmosphereResource, IDMap<Set<ID>> generalToFullIDMap, IDMap<AtmosphereResource> fullIDToResourceMap, ConcurrentHashMap<ID, List<Stanza>> outboxes) {
-        this.concreteID = concreteId;
-        this.atmosphereResource = atmosphereResource;
-        this.generalToFullIDMap = generalToFullIDMap;
-        this.fullIDToResourceMap = fullIDToResourceMap;
-        this.outboxes = outboxes;
+    public Moribund(ID concreteID) {
         this.lingeringStart = System.currentTimeMillis();
+        this.id = concreteID;
     }
 
     @Override
@@ -124,10 +92,15 @@ public class Moribund implements Comparable<Moribund> {
     /**
      * Get the lingering time of this moribund in milliseconds.
      * 
+     * @param now
      * @return the lingering time of this moribund in milliseconds
      */
-    public long getLinger() {
-        return System.currentTimeMillis() - lingeringStart;
+    public long getLinger(long now) {
+        return now - lingeringStart;
+    }
+
+    public ID getConcreteID() {
+        return id;
     }
 
     /**
@@ -135,65 +108,18 @@ public class Moribund implements Comparable<Moribund> {
      * 
      * @throws OXException when he fails to to clean up the traces he left behind and die
      */
-    public void die() throws OXException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Disconnecting: " + this);
-        }
-
-        // remove concreteID from general -> concreteID mapping
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Removing from generalID -> conreteID map: " + this);
-        }
-        ID generalID = concreteID.toGeneralForm();
-        Set<ID> fullIDs = generalToFullIDMap.get(generalID);
-        fullIDs.remove(concreteID);
-        if (fullIDs.isEmpty()) {
-            generalToFullIDMap.remove(generalID);
-        }
-
-        // remove concreteID -> Resource mapping
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Removing from concreteID -> resource map: " + this);
-        }
-        fullIDToResourceMap.remove(concreteID);
-
-        // clear outboxes
-        outboxes.remove(concreteID);
-
-        // remove concreteID from cluster wide resourceDirectory
-        ResourceDirectory resourceDirectory = AtmosphereServiceRegistry.getInstance().getService(ResourceDirectory.class);
-        try {
-            resourceDirectory.remove(concreteID);
-        } catch (OXException e) {
-            LOG.error("Could not unregister resource with ID: " + concreteID, e);
-        }
-    }
-
-    /**
-     * @return
-     */
-    public ID getConcreteID() {
-        return concreteID;
-    }
-
-    /**
-     * @return
-     */
-    public AtmosphereResource getResource() {
-        return atmosphereResource;
-    }
+    public abstract void die() throws OXException;
 
     @Override
     public String toString() {
-        return concreteID + " - " + atmosphereResource.uuid();
+        return id.toString();
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((atmosphereResource == null) ? 0 : atmosphereResource.hashCode());
-        result = prime * result + ((concreteID == null) ? 0 : concreteID.hashCode());
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
         result = prime * result + (int) (lingeringStart ^ (lingeringStart >>> 32));
         return result;
     }
@@ -207,15 +133,11 @@ public class Moribund implements Comparable<Moribund> {
         if (!(obj instanceof Moribund))
             return false;
         Moribund other = (Moribund) obj;
-        if (atmosphereResource == null) {
-            if (other.atmosphereResource != null)
+
+        if (id == null) {
+            if (other.id != null)
                 return false;
-        } else if (!atmosphereResource.equals(other.atmosphereResource))
-            return false;
-        if (concreteID == null) {
-            if (other.concreteID != null)
-                return false;
-        } else if (!concreteID.equals(other.concreteID))
+        } else if (!id.equals(other.id))
             return false;
         if (lingeringStart != other.lingeringStart)
             return false;

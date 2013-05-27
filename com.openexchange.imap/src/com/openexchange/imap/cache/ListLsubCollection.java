@@ -72,7 +72,7 @@ import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.services.Services;
 import com.openexchange.java.StringAllocator;
 import com.openexchange.log.Log;
 import com.openexchange.mail.mime.MimeMailException;
@@ -312,7 +312,7 @@ final class ListLsubCollection {
             synchronized (ListLsubCollection.class) {
                 tmp = initAclThreshold;
                 if (null == tmp) {
-                    final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
                     tmp = Integer.valueOf(null == service ? 500 : service.getIntProperty("com.openexchange.imap.initAclThreshold", 500));
                 }
             }
@@ -327,7 +327,7 @@ final class ListLsubCollection {
             synchronized (ListLsubCollection.class) {
                 tmp = initStatusThreshold;
                 if (null == tmp) {
-                    final ConfigurationService service = IMAPServiceRegistry.getService(ConfigurationService.class);
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
                     tmp = Integer.valueOf(null == service ? 500 : service.getIntProperty("com.openexchange.imap.initStatusThreshold", 500));
                 }
             }

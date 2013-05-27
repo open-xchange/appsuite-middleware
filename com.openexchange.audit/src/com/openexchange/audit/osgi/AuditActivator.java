@@ -49,31 +49,26 @@
 
 package com.openexchange.audit.osgi;
 
-import static com.openexchange.audit.services.AuditServiceRegistry.getServiceRegistry;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.apache.commons.logging.Log;
-import com.openexchange.log.LogFactory;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.audit.impl.AuditEventHandler;
+import com.openexchange.audit.services.Services;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * @author Benjamin Otterbach
  */
 public class AuditActivator extends HousekeepingActivator {
 
-	private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuditActivator.class));
-
-	final Dictionary<String,Object> serviceProperties;
+	private static final Log LOG = com.openexchange.log.Log.loggerFor(AuditActivator.class);
 
 	public AuditActivator() {
 		super();
-		serviceProperties = new Hashtable<String,Object>();
-		serviceProperties.put(EventConstants.EVENT_TOPIC, new String[]{"com/openexchange/groupware/*"});
 	}
 
 	@Override
@@ -86,7 +81,6 @@ public class AuditActivator extends HousekeepingActivator {
 		if (LOG.isWarnEnabled()) {
 			LOG.warn("Absent service: " + clazz.getName());
 		}
-		getServiceRegistry().addService(clazz, getService(clazz));
 	}
 
 	@Override
@@ -94,39 +88,27 @@ public class AuditActivator extends HousekeepingActivator {
 		if (LOG.isInfoEnabled()) {
 			LOG.info("Re-available service: " + clazz.getName());
 		}
-		getServiceRegistry().removeService(clazz);
 	}
 
 	@Override
-	protected void startBundle() throws Exception {
-		try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-			{
-				final ServiceRegistry registry = getServiceRegistry();
-				registry.clearRegistry();
-				final Class<?>[] classes = getNeededServices();
-				for (int i = 0; i < classes.length; i++) {
-					final Object service = getService(classes[i]);
-					if (null != service) {
-						registry.addService(classes[i], service);
-					}
-				}
-			}
-			registerService(EventHandler.class, AuditEventHandler.getInstance(), serviceProperties);
-		} catch (final Throwable t) {
-			LOG.error(t.getMessage(), t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		}
+    protected void startBundle() throws Exception {
+        try {
+            Services.setServiceLookup(this);
+            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { "com/openexchange/groupware/*", FileStorageEventConstants.ALL_TOPICS });
+            registerService(EventHandler.class, AuditEventHandler.getInstance(), serviceProperties);
+        } catch (final Throwable t) {
+            LOG.error(t.getMessage(), t);
+            throw t instanceof Exception ? (Exception) t : new Exception(t);
+        }
 
-	}
+    }
 
 	@Override
 	protected void stopBundle() throws Exception {
 		try {
 		    cleanUp();
-		    getServiceRegistry().clearRegistry();
+		    Services.setServiceLookup(null);
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);

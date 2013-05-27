@@ -50,13 +50,11 @@
 package com.openexchange.control.osgi;
 
 import static com.openexchange.control.internal.GeneralControl.shutdown;
-import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.control.internal.GeneralControl;
-import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -70,7 +68,7 @@ public final class ControlActivator extends HousekeepingActivator {
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(ControlActivator.class));
 
-    private Thread shutdownHookThread;
+    private volatile Thread shutdownHookThread;
 
     /**
      * Initializes a new {@link ControlActivator}
@@ -97,9 +95,9 @@ public final class ControlActivator extends HousekeepingActivator {
             /*
              * Add shutdown hook
              */
-            shutdownHookThread = new ControlShutdownHookThread(context);
+            final Thread shutdownHookThread = new ControlShutdownHookThread(context);
             Runtime.getRuntime().addShutdownHook(shutdownHookThread);
-
+            this.shutdownHookThread = shutdownHookThread;
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -110,6 +108,7 @@ public final class ControlActivator extends HousekeepingActivator {
     public void stopBundle() throws Exception {
         LOG.info("stopping bundle: com.openexchange.control");
         try {
+            final Thread shutdownHookThread = this.shutdownHookThread;
             if (null != shutdownHookThread) {
                 if (!shutdownHookThread.isAlive()) {
                     /*
@@ -126,25 +125,22 @@ public final class ControlActivator extends HousekeepingActivator {
                         LOG.error("Virtual machine is already in the process of shutting down!", e);
                     }
                 }
-                shutdownHookThread = null;
+                this.shutdownHookThread = null;
             }
-
-                closeTrackers();
+            // Do bundle clean-up
+            cleanUp();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
-        } finally {
-            cleanUp();
         }
     }
 
     private static final class ManagementServiceTrackerCustomizer implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
 
         private final BundleContext bundleContext;
-
         private final org.apache.commons.logging.Log logger;
 
-        public ManagementServiceTrackerCustomizer(final BundleContext bundleContext, final org.apache.commons.logging.Log logger) {
+        ManagementServiceTrackerCustomizer(final BundleContext bundleContext, final org.apache.commons.logging.Log logger) {
             super();
             this.bundleContext = bundleContext;
             this.logger = logger;
@@ -157,16 +153,10 @@ public final class ControlActivator extends HousekeepingActivator {
                 addedService.registerMBean(new ObjectName("com.openexchange.control", "name", "Control"), new GeneralControl(bundleContext));
                 logger.info("Control MBean successfully registered.");
                 return addedService;
-            } catch (final MalformedObjectNameException e) {
+            } catch (final Exception e) {
                 logger.error("Control MBean registration failed.", e);
-                bundleContext.ungetService(reference);
-            } catch (final OXException e) {
-                logger.error("Control MBean registration failed.", e);
-                bundleContext.ungetService(reference);
-            } catch (final NullPointerException e) {
-                logger.error("Control MBean registration failed.", e);
-                bundleContext.ungetService(reference);
             }
+            bundleContext.ungetService(reference);
             return null;
         }
 
@@ -181,11 +171,7 @@ public final class ControlActivator extends HousekeepingActivator {
                 try {
                     service.unregisterMBean(new ObjectName("com.openexchange.control", "name", "Control"));
                     logger.info("Control MBean successfully unregistered.");
-                } catch (final MalformedObjectNameException e) {
-                    logger.error("Control MBean unregistration failed.", e);
-                } catch (final OXException e) {
-                    logger.error("Control MBean unregistration failed.", e);
-                } catch (final NullPointerException e) {
+                } catch (final Exception e) {
                     logger.error("Control MBean unregistration failed.", e);
                 } finally {
                     bundleContext.ungetService(reference);
@@ -208,7 +194,7 @@ public final class ControlActivator extends HousekeepingActivator {
          *
          * @param bundleContext The bundle context
          */
-        public ControlShutdownHookThread(final BundleContext bundleContext) {
+        ControlShutdownHookThread(final BundleContext bundleContext) {
             super();
             this.bundleContext = bundleContext;
         }

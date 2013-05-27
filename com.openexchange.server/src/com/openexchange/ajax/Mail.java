@@ -72,6 +72,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
@@ -185,6 +186,7 @@ import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadRenamer;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.encoding.URLCoder;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -506,6 +508,9 @@ public class Mail extends PermissionServlet implements UploadListener {
         try {
             final String folderId = paramContainer.checkStringParam(PARAMETER_MAILFOLDER);
             final String ignore = paramContainer.getStringParam(PARAMETER_IGNORE);
+            String tmp = paramContainer.getStringParam(Mail.PARAMETER_TIMEZONE);
+            final TimeZone timeZone = isEmpty(tmp) ? null : TimeZoneUtils.getTimeZone(tmp.trim());
+            tmp = null;
             boolean bIgnoreDelete = false;
             boolean bIgnoreModified = false;
             if (ignore != null && ignore.indexOf("deleted") != -1) {
@@ -532,7 +537,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             if (mail != null) {
                                 final JSONArray ja = new JSONArray();
                                 for (final MailFieldWriter writer : writers) {
-                                    writer.writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                                    writer.writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId, timeZone);
                                 }
                                 jsonWriter.value(ja);
                             }
@@ -542,7 +547,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         final MailMessage[] deleted = mailInterface.getDeletedMessages(folderId, columns);
                         for (final MailMessage mail : deleted) {
                             final JSONArray ja = new JSONArray();
-                            WRITER_ID.writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                            WRITER_ID.writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId, timeZone);
                             jsonWriter.value(ja);
                         }
                     }
@@ -711,6 +716,9 @@ public class Mail extends PermissionServlet implements UploadListener {
             if (sort != null && order == null) {
                 throw MailExceptionCode.MISSING_PARAM.create(PARAMETER_ORDER);
             }
+            String tmp = paramContainer.getStringParam(Mail.PARAMETER_TIMEZONE);
+            final TimeZone timeZone = isEmpty(tmp) ? null : TimeZoneUtils.getTimeZone(tmp.trim());
+            tmp = null;
 
             final int[] fromToIndices;
             {
@@ -766,7 +774,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         if (mail != null && !mail.isDeleted()) {
                             final JSONArray ja = new JSONArray();
                             for (final MailFieldWriter writer : writers) {
-                                writer.writeField(ja, mail, mail.getThreadLevel(), false, mailInterface.getAccountID(), userId, contextId);
+                                writer.writeField(ja, mail, mail.getThreadLevel(), false, mailInterface.getAccountID(), userId, contextId, timeZone);
                             }
                             jsonWriter.value(ja);
                         }
@@ -783,7 +791,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         if (mail != null && !mail.isDeleted()) {
                             final JSONArray ja = new JSONArray();
                             for (final MailFieldWriter writer : writers) {
-                                writer.writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                                writer.writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId, timeZone);
                             }
                             jsonWriter.value(ja);
                         }
@@ -1698,6 +1706,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                         throw MailExceptionCode.INVALID_INT_VALUE.create(PARAMETER_ORDER);
                     }
                 }
+                String tmp = paramContainer.getStringParam(Mail.PARAMETER_TIMEZONE);
+                final TimeZone timeZone = isEmpty(tmp) ? null : TimeZoneUtils.getTimeZone(tmp.trim());
+                tmp = null;
                 /*
                  * Pre-Select field writers
                  */
@@ -1711,7 +1722,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     if (mail != null && !mail.isDeleted()) {
                         final JSONArray ja = new JSONArray();
                         for (final MailFieldWriter writer : writers) {
-                            writer.writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                            writer.writeField(ja, mail, 0, false, mailInterface.getAccountID(), userId, contextId, timeZone);
                         }
                         jsonWriter.value(ja);
                     }
@@ -2944,6 +2955,9 @@ public class Mail extends PermissionServlet implements UploadListener {
             } else {
                 throw new JSONException(MessageFormat.format("Request body is not a JSON value: {0}", body));
             }
+            String s = paramContainer.getStringParam(Mail.PARAMETER_TIMEZONE);
+            final TimeZone timeZone = isEmpty(s) ? null : TimeZoneUtils.getTimeZone(s.trim());
+            s = null;
             /*
              * Perform search dependent on passed JSON value
              */
@@ -3004,7 +3018,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 if (mail != null && !mail.isDeleted()) {
                                     final JSONArray arr = new JSONArray();
                                     for (final MailFieldWriter writer : writers) {
-                                        writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                                        writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId, timeZone);
                                     }
                                     jsonWriter.value(arr);
                                 }
@@ -3018,7 +3032,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 if (mail != null && !mail.isDeleted()) {
                                     final JSONArray arr = new JSONArray();
                                     for (final MailFieldWriter writer : writers) {
-                                        writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                                        writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId, timeZone);
                                     }
                                     jsonWriter.value(arr);
                                 }
@@ -3065,7 +3079,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         final MailMessage mail = it.next();
                         final JSONArray arr = new JSONArray();
                         for (final MailFieldWriter writer : writers) {
-                            writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId);
+                            writer.writeField(arr, mail, 0, false, mailInterface.getAccountID(), userId, contextId, timeZone);
                         }
                         jsonWriter.value(arr);
                     }
@@ -3142,6 +3156,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final String tmp = paramContainer.getStringParam(PARAMETER_HEADERS);
                 headers = null == tmp ? null : SPLIT.split(tmp, 0);
             }
+            String tmp = paramContainer.getStringParam(Mail.PARAMETER_TIMEZONE);
+            final TimeZone timeZone = isEmpty(tmp) ? null : TimeZoneUtils.getTimeZone(tmp.trim());
+            tmp = null;
             /*
              * Pre-Select field writers
              */
@@ -3182,11 +3199,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                         if (mail != null) {
                             final JSONArray ja = new JSONArray();
                             for (int j = 0; j < writers.length; j++) {
-                                writers[j].writeField(ja, mail, 0, false, accountID, userId, contextId);
+                                writers[j].writeField(ja, mail, 0, false, accountID, userId, contextId, timeZone);
                             }
                             if (null != headerWriters) {
                                 for (int j = 0; j < headerWriters.length; j++) {
-                                    headerWriters[j].writeField(ja, mail, 0, false, accountID, userId, contextId);
+                                    headerWriters[j].writeField(ja, mail, 0, false, accountID, userId, contextId, timeZone);
                                 }
                             }
                             jsonWriter.value(ja);
@@ -4868,7 +4885,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     if (msgIdentifier == null) {
                         warnings.addAll(mailServletInterface.getWarnings());
                         if (warnings.isEmpty()) {
-                            throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();                            
+                            throw MailExceptionCode.SEND_FAILED_UNKNOWN.create();
                         }
                         final Response response = new Response(session);
                         response.setData(JSONObject.NULL);

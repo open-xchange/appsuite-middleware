@@ -51,7 +51,7 @@ package com.openexchange.java;
 
 /**
  * {@link HTMLDetector} - Detects HTML tags in a byte sequence.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HTMLDetector {
@@ -64,11 +64,77 @@ public final class HTMLDetector {
     }
 
     /**
+     * Checks if given String contains common HTML tags.
+     *
+     * @param sequence The String to check
+     * @return <code>true</code> if given String contains common HTML tags; otherwise <code>false</code>
+     */
+    public static boolean containsHTMLTags(final String sequence) {
+        if (sequence == null) {
+            throw new NullPointerException();
+        }
+        if (containsHTMLTag(sequence, "html")) {
+            return true;
+        }
+        if (containsHTMLTag(sequence, "head")) {
+            return true;
+        }
+        if (containsHTMLTag(sequence, "body")) {
+            return true;
+        }
+        if (containsHTMLTag(sequence, "script")) {
+            return true;
+        }
+        if (containsIgnoreCase(sequence, "javascript")) {
+            return true;
+        }
+        if (containsIgnoreCase(sequence, "<img")) {
+            return true;
+        }
+        if (containsIgnoreCase(sequence, "<br>")) {
+            return true;
+        }
+        if (containsIgnoreCase(sequence, "<p>")) {
+            return true;
+        }
+        if (containsIgnoreCase(sequence, "<object")) {
+            return true;
+        }
+        if (containsIgnoreCase(sequence, "<embed")) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if given String contains specified HTML tag.
+     *
+     * @param sequence The String to check
+     * @param tag The HTML tag; e.g. <code>"body"</code>
+     * @return <code>true</code> if given String contains specified HTML tag; otherwise <code>false</code>
+     */
+    public static boolean containsHTMLTag(final String sequence, final String tag) {
+        if (sequence == null) {
+            throw new NullPointerException();
+        }
+        return containsIgnoreCase(sequence, new StringAllocator(tag.length() + 2).append('<').append(tag).append('>').toString());
+    }
+
+    /**
+     * Checks if given String contains specified string.
+     *
+     * @param sequence The String to check
+     * @param str The string
+     * @return <code>true</code> if given String contains specified string; otherwise <code>false</code>
+     */
+    private static boolean containsIgnoreCase(final String sequence, final String str) {
+        return (toLowerCase(sequence).indexOf(toLowerCase(str)) >= 0);
+    }
+
+    /**
      * Checks if given byte sequence contains common HTML tags.
-     * 
+     *
      * @param sequence The byte sequence to check
-     *  @param off The offset within byte array
-     * @param len The length of valid bytes starting from offset
      * @return <code>true</code> if given byte sequence contains common HTML tags; otherwise <code>false</code>
      */
     public static boolean containsHTMLTags(final byte[] sequence) {
@@ -110,7 +176,7 @@ public final class HTMLDetector {
 
     /**
      * Checks if given byte sequence contains common HTML tags.
-     * 
+     *
      * @param sequence The byte sequence to check
      * @param off The offset within byte array
      * @param len The length of valid bytes starting from offset
@@ -165,7 +231,7 @@ public final class HTMLDetector {
 
     /**
      * Checks if given byte sequence contains specified HTML tag.
-     * 
+     *
      * @param sequence The byte sequence to check
      * @param tag The HTML tag; e.g. <code>"body"</code>
      * @return <code>true</code> if given byte sequence contains specified HTML tag; otherwise <code>false</code>
@@ -179,7 +245,7 @@ public final class HTMLDetector {
 
     /**
      * Checks if given byte sequence contains specified HTML tag.
-     * 
+     *
      * @param sequence The byte sequence to check
      * @param off The offset within byte array
      * @param len The length of valid bytes starting from offset
@@ -205,18 +271,18 @@ public final class HTMLDetector {
 
     /**
      * Checks if given byte sequence contains specified string.
-     * 
+     *
      * @param sequence The byte sequence to check
      * @param str The string
      * @return <code>true</code> if given byte sequence contains specified string; otherwise <code>false</code>
      */
     private static boolean containsIgnoreCase(final byte[] sequence, final String str) {
         // lower-case
-        if (indexOf(sequence, Charsets.toAsciiBytes(toLowerCase(str)), 0, sequence.length) != -1) {
+        if (indexOf(sequence, Charsets.toAsciiBytes(toLowerCase(str)), 0, sequence.length) >= 0) {
             return true;
         }
         // upper-case
-        return (indexOf(sequence, Charsets.toAsciiBytes(toUpperCase(str)), 0, sequence.length) != -1);
+        return (indexOf(sequence, Charsets.toAsciiBytes(toUpperCase(str)), 0, sequence.length) >= 0);
     }
 
     /**
@@ -224,7 +290,7 @@ public final class HTMLDetector {
      * <p>
      * The sub-array to search in begins at the specified <code>beginIndex</code> and extends to the byte at index <code>endIndex - 1</code>
      * . Thus the length of the sub-array is <code>endIndex-beginIndex</code>.
-     * 
+     *
      * @param data The byte array to search in
      * @param pattern The byte pattern to search for
      * @param beginIndex The beginning index, inclusive.
@@ -269,7 +335,7 @@ public final class HTMLDetector {
 
     /**
      * Computes the failure function using a boot-strapping process, where the pattern matches against itself.
-     * 
+     *
      * @param pattern The pattern
      * @return The failures
      */

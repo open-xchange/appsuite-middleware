@@ -91,9 +91,19 @@ public final class DataProperties implements Cloneable {
     public static final String PROPERTY_DISPOSITION = "com.openexchange.conversion.disposition";
 
     /**
-     *
+     * Property for E-Mail header prefix.
      */
     public static final String PROPERTY_EMAIL_HEADER_PREFIX= "com.openexchange.conversion.email.header";
+
+    /**
+     * Property for identifier
+     */
+    public static final String PROPERTY_ID = "com.openexchange.conversion.id";
+
+    /**
+     * Property for folder identifier.
+     */
+    public static final String PROPERTY_FOLDER_ID = "com.openexchange.conversion.folderId";
 
     /**
      * Constant for empty data arguments

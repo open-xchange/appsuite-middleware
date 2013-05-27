@@ -49,7 +49,6 @@
 
 package com.openexchange.imap.osgi;
 
-import static com.openexchange.imap.services.IMAPServiceRegistry.getServiceRegistry;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
@@ -58,6 +57,7 @@ import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.caching.CacheService;
@@ -70,15 +70,13 @@ import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
 import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.services.Services;
 import com.openexchange.imap.threader.ThreadableCache;
 import com.openexchange.imap.threader.ThreadableLoginHandler;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -111,7 +109,7 @@ public final class IMAPActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ThreadPoolService.class,
-            TimerService.class, SessiondService.class, DatabaseService.class, TextXtractService.class };
+            TimerService.class, SessiondService.class, DatabaseService.class, TextXtractService.class, EventAdmin.class };
     }
 
     @Override
@@ -122,7 +120,6 @@ public final class IMAPActivator extends HousekeepingActivator {
         if (LOG.isWarnEnabled()) {
             LOG.warn("Absent service: " + clazz.getName());
         }
-        getServiceRegistry().removeService(clazz);
     }
 
     @Override
@@ -130,29 +127,12 @@ public final class IMAPActivator extends HousekeepingActivator {
         if (LOG.isInfoEnabled()) {
             LOG.info("Re-available service: " + clazz.getName());
         }
-        getServiceRegistry().addService(clazz, getService(clazz));
     }
 
     @Override
     public void startBundle() throws Exception {
         try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-            {
-                final ServiceRegistry registry = getServiceRegistry();
-                registry.clearRegistry();
-                final Class<?>[] classes = getNeededServices();
-                for (int i = 0; i < classes.length; i++) {
-                    final Object service = getService(classes[i]);
-                    if (null != service) {
-                        registry.addService(classes[i], service);
-                    }
-                }
-
-                registry.addService(SecretService.class, secretService = new WhiteboardSecretService(context));
-                secretService.open();
-            }
+            Services.setServiceLookup(this);
             Config.LoggerProvider = LoggerProvider.DISABLED;
             IMAPStoreCache.initInstance();
             /*
@@ -216,7 +196,7 @@ public final class IMAPActivator extends HousekeepingActivator {
 
                     private void handleSession(final Session session) {
                         try {
-                            final SessiondService service = IMAPServiceRegistry.getService(SessiondService.class);
+                            final SessiondService service = Services.getService(SessiondService.class);
                             if (null != service && service.getAnyActiveSessionForUser(session.getUserId(), session.getContextId()) == null) {
                                 ListLsubCache.dropFor(session);
                                 IMAPStoreCache.getInstance().dropFor(session.getUserId(), session.getContextId());
@@ -247,7 +227,7 @@ public final class IMAPActivator extends HousekeepingActivator {
              */
             IMAPStoreCache.shutDownInstance();
             ThreadableCache.getInstance().clear();
-            getServiceRegistry().clearRegistry();
+            Services.setServiceLookup(null);
             if (secretService != null) {
                 secretService.close();
                 secretService = null;

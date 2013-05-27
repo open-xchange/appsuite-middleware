@@ -50,11 +50,12 @@
 package com.openexchange.ajax.infostore.actions;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class DeleteInfostoreResponse extends AbstractInfostoreResponse {
+public class DeleteInfostoreResponse extends AbstractAJAXResponse {
 
     protected DeleteInfostoreResponse(Response response) {
         super(response);

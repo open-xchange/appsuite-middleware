@@ -52,7 +52,6 @@ package com.openexchange.dav.carddav.bugs;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.carddav.CardDAVTest;
 import com.openexchange.dav.carddav.VCardResource;
@@ -60,31 +59,31 @@ import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link Bug21177Test}
- * 
+ *
  * String with special characters not transferred correctly from CardDAV client
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug21177Test extends CardDAVTest {
 
 	public Bug21177Test(String name) {
 		super(name);
-	}	
-	
+	}
+
 	public void testAddSpecialCharacters() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
 		 */
-		final String syncToken = super.fetchSyncToken();		
+		final String syncToken = super.fetchSyncToken();
 		/*
 		 * create contact
 		 */
     	final String uid = randomUID();
     	final String firstName = "\u00c4\u00f6\u00df\u00e1\u00e8-\u00dc\u00f8\u00f5\u00e5";
-    	final String lastName = "test";    	
-    	final String vCard = 
-    			"BEGIN:VCARD" + "\r\n" + 
-    			"VERSION:3.0" + "\r\n" + 
+    	final String lastName = "test";
+    	final String vCard =
+    			"BEGIN:VCARD" + "\r\n" +
+    			"VERSION:3.0" + "\r\n" +
 				"N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
 				"FN:" + firstName + " " + lastName + "\r\n" +
 				"UID:" + uid + "\r\n" +
@@ -97,7 +96,7 @@ public class Bug21177Test extends CardDAVTest {
          * verify contact on server
          */
         final Contact contact = super.getContact(uid);
-        super.rememberForCleanUp(contact);        
+        super.rememberForCleanUp(contact);
         assertEquals("uid wrong", uid, contact.getUid());
         assertEquals("firstname wrong", firstName, contact.getGivenName());
         assertEquals("lastname wrong", lastName, contact.getSurName());
@@ -108,8 +107,8 @@ public class Bug21177Test extends CardDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         final List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
         final VCardResource card = assertContains(uid, addressData);
-        assertEquals("N wrong", firstName, card.getVCard().getName().getGivenName());
-        assertEquals("N wrong", lastName, card.getVCard().getName().getFamilyName());
-        assertEquals("FN wrong", firstName + " " + lastName, card.getVCard().getFormattedName().getFormattedName());
+        assertEquals("N wrong", firstName, card.getGivenName());
+        assertEquals("N wrong", lastName, card.getFamilyName());
+        assertEquals("FN wrong", firstName + " " + lastName, card.getFN());
 	}
 }

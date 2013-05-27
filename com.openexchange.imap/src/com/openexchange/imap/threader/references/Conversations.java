@@ -381,13 +381,14 @@ public final class Conversations {
         Iterator<Conversation> iter = toFold.iterator();
         int i = 0;
         while (iter.hasNext()) {
-            final Conversation conversation = iter.next();
             if (i > lastProcessed) {
-                foldInto(conversation, iter);
+                foldInto(iter.next(), iter);
                 lastProcessed = i;
                 iter = toFold.iterator();
                 i = 0;
             } else {
+                // Consume iterator until proper position reached
+                iter.next();
                 i++;
             }
         }

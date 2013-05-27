@@ -79,16 +79,16 @@ public abstract class RunLoop<E> implements Runnable {
         while(true) {
             try {
                 handle(queue.take());
-            } catch (OXException e) {
-                LOG.error(e.getMessage(), e);
             } catch (InterruptedException e) {
                 return;
+            } catch (Throwable t) {
+                LOG.error(t.getMessage(), t);
             }
         }
     }
     
-    public void offer(E element) {
-        queue.offer(element);
+    public boolean offer(final E element) {
+        return this.queue.offer(element);
     }
 
     protected abstract void handle(E element) throws OXException;

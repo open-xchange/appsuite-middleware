@@ -101,7 +101,7 @@ public interface OAuthService {
      * @throws OXException If initialization fails
      * @return The OAuth interaction providing needed steps
      */
-    OAuthInteraction initOAuth(String serviceMetaData, String callbackUrl) throws OXException;
+    OAuthInteraction initOAuth(String serviceMetaData, String callbackUrl, Session session) throws OXException;
 
     /**
      * Creates a new OAuth account completely from specified arguments.

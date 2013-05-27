@@ -21,8 +21,8 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 
 import org.apache.tika.config.TikaConfig;
-import org.apache.tika.metadata.DublinCore;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.xml.sax.helpers.DefaultHandler;
@@ -36,7 +36,6 @@ public class TestParsers extends TikaTest {
 
     private Tika tika;
 
-    @Override
     public void setUp() throws Exception {
         tc = TikaConfig.getDefaultConfig();
         tika = new Tika(tc);
@@ -53,7 +52,7 @@ public class TestParsers extends TikaTest {
         } finally {
             stream.close();
         }
-        assertEquals("Sample Word Document", metadata.get(DublinCore.TITLE));
+        assertEquals("Sample Word Document", metadata.get(TikaCoreProperties.TITLE));
     }
 
     public void testEXCELExtraction() throws Exception {
@@ -71,7 +70,7 @@ public class TestParsers extends TikaTest {
         } finally {
             stream.close();
         }
-        assertEquals("Simple Excel document", metadata.get(DublinCore.TITLE));
+        assertEquals("Simple Excel document", metadata.get(TikaCoreProperties.TITLE));
     }
 
     public void testOptionalHyphen() throws Exception {

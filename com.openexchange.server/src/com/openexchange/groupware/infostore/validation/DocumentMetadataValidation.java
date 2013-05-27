@@ -53,33 +53,64 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.utils.Metadata;
 
+/**
+ * {@link DocumentMetadataValidation}
+ */
 public class DocumentMetadataValidation {
 
-	Map<Metadata,String> errors = new HashMap<Metadata, String>();
-	List<Metadata> errorFields = new ArrayList<Metadata>();
+    private final Map<Metadata, String> errors;
+    private final List<Metadata> errorFields;
+    private OXException exception;
 
-	public boolean isValid() {
-		return errors.isEmpty();
-	}
+    /**
+     * Initializes a new {@link DocumentMetadataValidation}.
+     */
+    public DocumentMetadataValidation() {
+        super();
+        errors = new HashMap<Metadata, String>();
+        errorFields = new ArrayList<Metadata>();
+    }
 
-	public boolean hasErrors(final Metadata field) {
-		return errors.containsKey(field);
-	}
+    public boolean isValid() {
+        return errors.isEmpty();
+    }
 
-	public String getError(final Metadata field) {
-		return errors.get(field);
-	}
+    public boolean hasErrors(final Metadata field) {
+        return errors.containsKey(field);
+    }
 
-	public void setError(final Metadata field, final String error) {
-		errors.put(field, error);
-		errorFields.add(field);
-	}
+    public String getError(final Metadata field) {
+        return errors.get(field);
+    }
 
-	public List<Metadata> getInvalidFields() {
-		return errorFields;
-	}
+    public void setError(final Metadata field, final String error) {
+        errors.put(field, error);
+        errorFields.add(field);
+    }
 
+    public List<Metadata> getInvalidFields() {
+        return errorFields;
+    }
+
+    /**
+     * Gets the exception
+     *
+     * @return The exception
+     */
+    public OXException getException() {
+        return exception;
+    }
+
+    /**
+     * Sets the exception
+     *
+     * @param exception The exception to set
+     */
+    public void setException(OXException exception) {
+        this.exception = exception;
+    }
 
 }

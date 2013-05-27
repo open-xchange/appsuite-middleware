@@ -102,12 +102,12 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      * reason. Following the exception, the Folder is reset to the "closed" state.
      * </p>
      */
-    FOLDER_CLOSED(MimeMailExceptionMessage.FOLDER_CLOSED_MSG, CATEGORY_USER_INPUT, 1003),
+    FOLDER_CLOSED(MimeMailExceptionMessage.FOLDER_CLOSED_MSG, CATEGORY_USER_INPUT, 1003, LogLevel.ERROR),
     /**
      * Folder "%1$s" has been closed on mail server %2$s with login %3$s (user=%4$s, context=%5$s) due to some reason.<br>
      * Probably your request took too long.
      */
-    FOLDER_CLOSED_EXT(MimeMailExceptionMessage.FOLDER_CLOSED_EXT_MSG, CATEGORY_USER_INPUT, FOLDER_CLOSED.detailNumber),
+    FOLDER_CLOSED_EXT(MimeMailExceptionMessage.FOLDER_CLOSED_EXT_MSG, CATEGORY_USER_INPUT, FOLDER_CLOSED.detailNumber, LogLevel.ERROR),
     /**
      * Illegal write attempt: %1$s
      * <p>
@@ -137,7 +137,7 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
     /**
      * Invalid email address %1$s
      */
-    INVALID_EMAIL_ADDRESS(MimeMailExceptionMessage.INVALID_EMAIL_ADDRESS_MSG, CATEGORY_USER_INPUT, 1008),
+    INVALID_EMAIL_ADDRESS(MimeMailExceptionMessage.INVALID_EMAIL_ADDRESS_MSG, CATEGORY_USER_INPUT, 1008, LogLevel.ERROR),
     /**
      * Wrong message header: %1$s
      * <p>
@@ -156,11 +156,11 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
     /**
      * Invalid search expression: %1$s
      */
-    SEARCH_ERROR(MimeMailExceptionMessage.SEARCH_ERROR_MSG, CATEGORY_USER_INPUT, 1011),
+    SEARCH_ERROR(MimeMailExceptionMessage.SEARCH_ERROR_MSG, CATEGORY_USER_INPUT, 1011, LogLevel.ERROR),
     /**
      * Message could not be sent because it is too large
      */
-    MESSAGE_TOO_LARGE(MimeMailExceptionMessage.MESSAGE_TOO_LARGE_MSG, CATEGORY_USER_INPUT, 1012),
+    MESSAGE_TOO_LARGE(MimeMailExceptionMessage.MESSAGE_TOO_LARGE_MSG, CATEGORY_USER_INPUT, 1012, LogLevel.ERROR),
     /**
      * Message could not be sent to following recipients: %1$s
      * <p>
@@ -168,11 +168,11 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
      * sent and valid addresses to which the message was not sent.
      * </p>
      */
-    SEND_FAILED(MimeMailExceptionMessage.SEND_FAILED_MSG, CATEGORY_USER_INPUT, 1013),
+    SEND_FAILED(MimeMailExceptionMessage.SEND_FAILED_MSG, CATEGORY_USER_INPUT, 1013, LogLevel.ERROR),
     /**
      * Message could not be sent to following recipients: %1$s %2$s (arbitrary server information)
      */
-    SEND_FAILED_EXT(MimeMailExceptionMessage.SEND_FAILED_EXT_MSG, CATEGORY_USER_INPUT, 1013),
+    SEND_FAILED_EXT(MimeMailExceptionMessage.SEND_FAILED_EXT_MSG, CATEGORY_USER_INPUT, 1013, LogLevel.ERROR),
     /**
      * Lost connection to mail server.
      */
@@ -264,15 +264,15 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
     /**
      * Message could not be sent: %1$s
      */
-    SEND_FAILED_MSG(MimeMailExceptionMessage.SEND_FAILED_MSG, CATEGORY_USER_INPUT, 1028),
+    SEND_FAILED_MSG(MimeMailExceptionMessage.SEND_FAILED_MSG, CATEGORY_USER_INPUT, 1028, LogLevel.ERROR),
     /**
      * Message could not be sent: %1$s %2$s (arbitrary server information)
      */
-    SEND_FAILED_MSG_EXT(MimeMailExceptionMessage.SEND_FAILED_EXT_MSG, CATEGORY_USER_INPUT, 1028),
+    SEND_FAILED_MSG_EXT(MimeMailExceptionMessage.SEND_FAILED_EXT_MSG, CATEGORY_USER_INPUT, 1028, LogLevel.ERROR),
     /**
      * Message cannot be displayed.
      */
-    MESSAGE_NOT_DISPLAYED(MimeMailExceptionMessage.MESSAGE_NOT_DISPLAYED_MSG, CATEGORY_USER_INPUT, 1029),
+    MESSAGE_NOT_DISPLAYED(MimeMailExceptionMessage.MESSAGE_NOT_DISPLAYED_MSG, CATEGORY_USER_INPUT, 1029, LogLevel.ERROR),
     /**
      * Wrong or missing login data to access mail transport server %1$s. Error message from mail transport server: %2$s
      */
@@ -285,19 +285,19 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
     /**
      * Error processing mail server response. The administrator has been informed.
      */
-    PROCESSING_ERROR(MimeMailExceptionMessage.PROCESSING_ERROR_MSG, CATEGORY_USER_INPUT, 1031),
+    PROCESSING_ERROR(MimeMailExceptionMessage.PROCESSING_ERROR_MSG, CATEGORY_USER_INPUT, 1031, LogLevel.ERROR),
     /**
      * Error processing %1$s mail server response for login %2$s (user=%3$s, context=%4$s). The administrator has been informed.
      */
-    PROCESSING_ERROR_EXT(MimeMailExceptionMessage.PROCESSING_ERROR_EXT_MSG, CATEGORY_USER_INPUT, PROCESSING_ERROR.detailNumber),
+    PROCESSING_ERROR_EXT(MimeMailExceptionMessage.PROCESSING_ERROR_EXT_MSG, CATEGORY_USER_INPUT, PROCESSING_ERROR.detailNumber, LogLevel.ERROR),
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR(MailExceptionCode.IO_ERROR),
+    IO_ERROR(MailExceptionCode.IO_ERROR, LogLevel.ERROR),
     /**
      * I/O error "%1$s" occurred in communication with "%2$s" mail server for login %3$s (user=%4$s, context=%5$s).
      */
-    IO_ERROR_EXT(MailExceptionCode.IO_ERROR, MimeMailExceptionMessage.IO_ERROR_EXT_MSG),
+    IO_ERROR_EXT(MailExceptionCode.IO_ERROR, MimeMailExceptionMessage.IO_ERROR_EXT_MSG, LogLevel.ERROR),
     /**
      * Error processing mail server response. The administrator has been informed. Error message: %1$s
      */
@@ -309,27 +309,36 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
     PROCESSING_ERROR_WE_EXT(MimeMailExceptionMessage.PROCESSING_ERROR_WE_EXT_MSG, CATEGORY_ERROR, PROCESSING_ERROR_WE.detailNumber), ;
 
     private final String message;
-
     private final int detailNumber;
-
     private final Category category;
+    private final LogLevel logLevel;
+
+    private MimeMailExceptionCode(final String message, final Category category, final int detailNumber, final LogLevel logLevel) {
+        this.message = message;
+        this.detailNumber = detailNumber;
+        this.category = category;
+        this.logLevel = logLevel;
+    }
 
     private MimeMailExceptionCode(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
+        this.logLevel = null;
     }
 
-    private MimeMailExceptionCode(final MailExceptionCode code, final String message) {
+    private MimeMailExceptionCode(final MailExceptionCode code, final String message, final LogLevel logLevel) {
         this.message = message;
         this.detailNumber = code.getNumber();
         this.category = code.getCategory();
+        this.logLevel = logLevel;
     }
 
-    private MimeMailExceptionCode(final MailExceptionCode code) {
+    private MimeMailExceptionCode(final MailExceptionCode code, final LogLevel logLevel) {
         this.message = code.getMessage();
         this.detailNumber = code.getNumber();
         this.category = code.getCategory();
+        this.logLevel = logLevel;
     }
 
     @Override
@@ -405,6 +414,9 @@ public enum MimeMailExceptionCode implements OXExceptionCode {
         }
         ret.addCategory(category);
         ret.setPrefix(getPrefix());
+        if (null != logLevel) {
+            ret.setLogLevel(logLevel);
+        }
         return ret;
     }
 }

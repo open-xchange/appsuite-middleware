@@ -121,6 +121,15 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
     }
 
     /**
+     * Gets the direct byte buffer; <b>not</b> a copy!
+     *
+     * @return The byte buffer
+     */
+    public byte[] getBuf() {
+        return buf;
+    }
+
+    /**
      * Writes the specified byte to this byte array output stream.
      *
      * @param b The byte to be written.

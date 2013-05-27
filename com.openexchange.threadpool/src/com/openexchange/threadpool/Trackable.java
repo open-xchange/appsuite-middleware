@@ -49,7 +49,7 @@
 
 package com.openexchange.threadpool;
 
-import java.util.Map;
+import com.openexchange.log.Props;
 
 
 /**
@@ -64,5 +64,5 @@ public interface Trackable {
      *
      * @return The log properties or <code>null</code>
      */
-    Map<String, Object> optLogProperties();
+    Props optLogProperties();
 }

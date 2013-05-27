@@ -19,10 +19,8 @@ package org.apache.tika.parser.prt;
 import java.io.InputStream;
 
 import org.apache.tika.TikaTest;
-import org.apache.tika.metadata.DublinCore;
-import org.apache.tika.metadata.HttpHeaders;
-import org.apache.tika.metadata.MSOffice;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.ContentHandler;
 
@@ -37,15 +35,15 @@ public class PRTParserTest extends TikaTest {
           ContentHandler handler = new BodyContentHandler();
           new PRTParser().parse(input, handler, metadata);
 
-          assertEquals("application/x-prt", metadata.get(HttpHeaders.CONTENT_TYPE));
+          assertEquals("application/x-prt", metadata.get(Metadata.CONTENT_TYPE));
 
           // This file has a date
           assertEquals("2011-06-20T16:54:00",
-                metadata.get(DublinCore.DATE));
+                metadata.get(TikaCoreProperties.CREATED));
           assertEquals("2011-06-20T16:54:00",
-                metadata.get(MSOffice.CREATION_DATE));
+                metadata.get(Metadata.CREATION_DATE));
           // But no description
-          assertEquals(null, metadata.get(DublinCore.DESCRIPTION));
+          assertEquals(null, metadata.get(TikaCoreProperties.DESCRIPTION));
 
           String contents = handler.toString();
           
@@ -75,15 +73,15 @@ public class PRTParserTest extends TikaTest {
           ContentHandler handler = new BodyContentHandler();
           new PRTParser().parse(input, handler, metadata);
 
-          assertEquals("application/x-prt", metadata.get(HttpHeaders.CONTENT_TYPE));
+          assertEquals("application/x-prt", metadata.get(Metadata.CONTENT_TYPE));
 
           // File has both a date and a description
           assertEquals("1997-04-01T08:59:00",
-                metadata.get(DublinCore.DATE));
+                metadata.get(Metadata.DATE));
           assertEquals("1997-04-01T08:59:00",
-                metadata.get(MSOffice.CREATION_DATE));
+                metadata.get(Metadata.CREATION_DATE));
           assertEquals("TIKA TEST PART DESCRIPTION INFORMATION\r\n",
-                metadata.get(DublinCore.DESCRIPTION));
+                metadata.get(TikaCoreProperties.DESCRIPTION));
 
           String contents = handler.toString();
           

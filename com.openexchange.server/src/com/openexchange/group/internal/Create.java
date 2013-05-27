@@ -51,10 +51,15 @@ package com.openexchange.group.internal;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.apache.commons.logging.Log;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.log.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
+import com.openexchange.group.GroupEventConstants;
 import com.openexchange.group.GroupExceptionCodes;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
@@ -64,6 +69,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -119,6 +125,7 @@ public final class Create {
         check();
         insert();
         propagate();
+        sentEvent();
     }
 
     /**
@@ -196,5 +203,19 @@ public final class Create {
     private void propagate() throws OXException {
         final UserStorage storage = UserStorage.getInstance();
         storage.invalidateUser(ctx, group.getMember());
+    }
+
+    /**
+     * Sent event about created group.
+     */
+    private void sentEvent() {
+        final EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
+        if (null != eventAdmin) {
+            final Dictionary<String, Object> dict = new Hashtable<String, Object>(4);
+            dict.put(GroupEventConstants.PROPERTY_CONTEXT_ID, Integer.valueOf(ctx.getContextId()));
+            dict.put(GroupEventConstants.PROPERTY_USER_ID, Integer.valueOf(user.getId()));
+            dict.put(GroupEventConstants.PROPERTY_GROUP_ID, Integer.valueOf(group.getIdentifier()));
+            eventAdmin.postEvent(new Event(GroupEventConstants.TOPIC_CREATE, dict));
+        }
     }
 }

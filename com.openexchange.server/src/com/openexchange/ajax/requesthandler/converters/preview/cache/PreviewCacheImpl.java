@@ -57,29 +57,60 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import org.apache.commons.logging.Log;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.preview.cache.CachedPreview;
 import com.openexchange.preview.cache.PreviewCache;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 
 /**
  * {@link PreviewCacheImpl} - The database-backed preview cache implementation for documents.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PreviewCacheImpl implements PreviewCache {
+public final class PreviewCacheImpl implements PreviewCache, EventHandler {
+
+    private static final Log LOG = com.openexchange.log.Log.loggerFor(PreviewCacheImpl.class);
 
     /**
      * Initializes a new {@link PreviewCacheImpl}.
      */
     public PreviewCacheImpl() {
         super();
+    }
+
+    @Override
+    public void handleEvent(final Event event) {
+        final String topic = event.getTopic();
+        if (FileStorageEventConstants.UPDATE_TOPIC.equals(topic)) {
+            try {
+                final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
+                final int userId = session.getUserId();
+                final int contextId = session.getContextId();
+                removeAlikes(event.getProperty(FileStorageEventConstants.E_TAG).toString(), userId, contextId);
+            } catch (final OXException e) {
+                LOG.warn("Couldn't remove cache entry.", e);
+            }
+        } else if (FileStorageEventConstants.DELETE_TOPIC.equals(topic)) {
+            try {
+                final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
+                final int userId = session.getUserId();
+                final int contextId = session.getContextId();
+                removeAlikes(event.getProperty(FileStorageEventConstants.E_TAG).toString(), userId, contextId);
+            } catch (final OXException e) {
+                LOG.warn("Couldn't remove cache entry.", e);
+            }
+        }
     }
 
     @Override
@@ -202,13 +233,13 @@ public final class PreviewCacheImpl implements PreviewCache {
             String property = confService.getProperty("com.openexchange.preview.cache.quota", "-1").trim();
             try {
                 quota = Long.parseLong(property);
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 quota = -1L;
             }
             property = confService.getProperty("com.openexchange.preview.cache.quotaPerDocument", "-1").trim();
             try {
                 quotaPerDocument = Long.parseLong(property);
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 quotaPerDocument = -1L;
             }
         }
@@ -362,6 +393,78 @@ public final class PreviewCacheImpl implements PreviewCache {
             throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    @Override
+    public void remove(final int userId, final int contextId) throws OXException {
+        final DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        if (databaseService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
+        }
+        final Connection con = databaseService.getWritable(contextId);
+        boolean committed = true;
+        PreparedStatement stmt = null;
+        try {
+            con.setAutoCommit(false);
+            committed = false;
+            if (userId > 0) {
+                stmt = con.prepareStatement("DELETE FROM preview WHERE cid=? AND user=?");
+                int pos = 1;
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos, userId);
+            } else {
+                stmt = con.prepareStatement("DELETE FROM preview WHERE cid=?");
+                stmt.setInt(1, contextId);
+            }
+            stmt.executeUpdate();
+            con.commit();
+            committed = true;
+        } catch (final DataTruncation e) {
+            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final SQLException e) {
+            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            if (!committed) {
+                Databases.rollback(con);
+            }
+            Databases.closeSQLStuff(stmt);
+            Databases.autocommit(con);
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    @Override
+    public void removeAlikes(final String id, final int userId, final int contextId) throws OXException {
+        final DatabaseService databaseService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        if (databaseService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
+        }
+        final Connection con = databaseService.getWritable(contextId);
+        boolean committed = true;
+        PreparedStatement stmt = null;
+        try {
+            con.setAutoCommit(false);
+            committed = false;
+            stmt = con.prepareStatement("DELETE FROM preview WHERE cid=? AND user=? AND id LIKE ?");
+            int pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setString(pos, id + "%");
+            stmt.executeUpdate();
+            con.commit();
+            committed = true;
+        } catch (final DataTruncation e) {
+            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final SQLException e) {
+            throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            if (!committed) {
+                Databases.rollback(con);
+            }
+            Databases.closeSQLStuff(stmt);
+            Databases.autocommit(con);
+            databaseService.backWritable(contextId, con);
         }
     }
 

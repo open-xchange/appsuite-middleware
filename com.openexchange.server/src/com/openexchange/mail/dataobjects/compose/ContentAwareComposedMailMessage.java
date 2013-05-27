@@ -51,6 +51,9 @@ package com.openexchange.mail.dataobjects.compose;
 
 import java.io.InputStream;
 import javax.activation.DataHandler;
+import javax.mail.Address;
+import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -59,18 +62,18 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ContentAwareComposedMailMessage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ContentAwareComposedMailMessage extends ComposedMailMessage implements ContentAware {
 
     private static final long serialVersionUID = 7469781321067672927L;
 
-    private final Object content;
+    private final MimeMessage content;
 
     /**
      * Initializes a new {@link ContentAwareComposedMailMessage}.
-     * 
+     *
      * @param content The content object
      * @param session The session
      * @param ctx The context
@@ -78,6 +81,41 @@ public class ContentAwareComposedMailMessage extends ComposedMailMessage impleme
     public ContentAwareComposedMailMessage(final MimeMessage content, final Session session, final Context ctx) {
         super(session, ctx);
         this.content = content;
+    }
+
+    private static InternetAddress[] convert(final Address[] a) {
+        if (null == a) {
+            return null;
+        }
+        final int length = a.length;
+        final InternetAddress[] ret = new InternetAddress[length];
+        for (int i = 0; i < length; i++) {
+            ret[i] = (InternetAddress) a[i];
+        }
+        return ret;
+    }
+
+    @Override
+    public boolean containsFrom() {
+        return true;
+    }
+
+    @Override
+    public InternetAddress[] getFrom() {
+        try {
+            return convert(content.getFrom());
+        } catch (MessagingException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public String getFirstHeader(String name) {
+        try {
+            return content.getHeader(name, null);
+        } catch (MessagingException e) {
+            return null;
+        }
     }
 
     @Override

@@ -58,21 +58,21 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
- * {@link MoveTest} - Tests various move operations via the CardDAV interface 
- * 
+ * {@link MoveTest} - Tests various move operations via the CardDAV interface
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class MoveTest extends CardDAVTest {
 
 	public MoveTest(String name) {
 		super(name);
-	}	
+	}
 
 	public void testMoveContactToSubfolderOnServer() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
 		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());		
+		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
 		/*
 		 * create subfolder and contact on server
 		 */
@@ -81,7 +81,7 @@ public class MoveTest extends CardDAVTest {
 		super.rememberForCleanUp(subFolder);
     	String uid = randomUID();
     	String firstName = "test";
-    	String lastName = "jaqueline";    	
+    	String lastName = "jaqueline";
 		Contact contact = new Contact();
 		contact.setSurName(lastName);
 		contact.setGivenName(firstName);
@@ -95,31 +95,31 @@ public class MoveTest extends CardDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
         VCardResource contactCard = assertContains(uid, addressData);
-        assertEquals("N wrong", firstName, contactCard.getVCard().getName().getGivenName());
-        assertEquals("N wrong", lastName, contactCard.getVCard().getName().getFamilyName());
-        assertEquals("FN wrong", firstName + " " + lastName, contactCard.getVCard().getFormattedName().getFormattedName());
+        assertEquals("N wrong", firstName, contactCard.getGivenName());
+        assertEquals("N wrong", lastName, contactCard.getFamilyName());
+        assertEquals("FN wrong", firstName + " " + lastName, contactCard.getFN());
         /*
          * move contact on server
          */
         contact.setParentFolderID(subFolder.getObjectID());
         super.update(super.getDefaultFolder().getObjectID(), contact);
         /*
-         * verify contact on client        
+         * verify contact on client
          */
         eTags = super.syncCollection(syncToken).getETagsStatusOK();
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         addressData = super.addressbookMultiget(eTags.keySet());
         contactCard = assertContains(uid, addressData);
-        assertEquals("N wrong", firstName, contactCard.getVCard().getName().getGivenName());
-        assertEquals("N wrong", lastName, contactCard.getVCard().getName().getFamilyName());
-        assertEquals("FN wrong", firstName + " " + lastName, contactCard.getVCard().getFormattedName().getFormattedName());
+        assertEquals("N wrong", firstName, contactCard.getGivenName());
+        assertEquals("N wrong", lastName, contactCard.getFamilyName());
+        assertEquals("FN wrong", firstName + " " + lastName, contactCard.getFN());
     }
 
 	public void testMoveContactToDefaultFolderOnServer() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
 		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());		
+		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
 		/*
 		 * create subfolder and contact on server
 		 */
@@ -128,7 +128,7 @@ public class MoveTest extends CardDAVTest {
 		super.rememberForCleanUp(subFolder);
     	String uid = randomUID();
     	String firstName = "test";
-    	String lastName = "jaqueline";    	
+    	String lastName = "jaqueline";
 		Contact contact = new Contact();
 		contact.setSurName(lastName);
 		contact.setGivenName(firstName);
@@ -142,9 +142,9 @@ public class MoveTest extends CardDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
         VCardResource contactCard = assertContains(uid, addressData);
-        assertEquals("N wrong", firstName, contactCard.getVCard().getName().getGivenName());
-        assertEquals("N wrong", lastName, contactCard.getVCard().getName().getFamilyName());
-        assertEquals("FN wrong", firstName + " " + lastName, contactCard.getVCard().getFormattedName().getFormattedName());
+        assertEquals("N wrong", firstName, contactCard.getGivenName());
+        assertEquals("N wrong", lastName, contactCard.getFamilyName());
+        assertEquals("FN wrong", firstName + " " + lastName, contactCard.getFN());
         /*
          * move contact on server
          */
@@ -152,15 +152,15 @@ public class MoveTest extends CardDAVTest {
         super.update(subFolder.getObjectID(), contact);
         contact.setParentFolderID(subFolder.getObjectID());
         /*
-         * verify contact on client        
+         * verify contact on client
          */
         eTags = super.syncCollection(syncToken).getETagsStatusOK();
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         addressData = super.addressbookMultiget(eTags.keySet());
         contactCard = assertContains(uid, addressData);
-        assertEquals("N wrong", firstName, contactCard.getVCard().getName().getGivenName());
-        assertEquals("N wrong", lastName, contactCard.getVCard().getName().getFamilyName());
-        assertEquals("FN wrong", firstName + " " + lastName, contactCard.getVCard().getFormattedName().getFormattedName());
+        assertEquals("N wrong", firstName, contactCard.getGivenName());
+        assertEquals("N wrong", lastName, contactCard.getFamilyName());
+        assertEquals("FN wrong", firstName + " " + lastName, contactCard.getFN());
     }
 
 }

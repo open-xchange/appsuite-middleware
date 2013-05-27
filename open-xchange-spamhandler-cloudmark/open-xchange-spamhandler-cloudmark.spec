@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core
 BuildRequires:  java-devel >= 1.6.0
 Version:	@OXVERSION@
-%define		ox_release 9
+%define		ox_release 3
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -20,7 +20,8 @@ Provides:	open-xchange-spamhandler
 Conflicts:      open-xchange-spamhandler-default open-xchange-spamhandler-spamassassin
 
 %description
-The Open-Xchange Cloudmark Spamhandler
+The Open-Xchange Cloudmark Spamhandler can be used in a generic way since it can just
+report Spam and/or Ham messages to any configured EMail address.
 
 Authors:
 --------
@@ -38,6 +39,17 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %clean
 %{__rm} -rf %{buildroot}
 
+%post
+if [ ${1:-0} -eq 2 ]; then
+  . /opt/open-xchange/lib/oxfunctions.sh
+
+  # SoftwareChange_Request-1452
+  pfile=/opt/open-xchange/etc/spamhandler_cloudmark.properties
+  if ! ox_exists_property com.openexchange.spamhandler.cloudmark.targetHamEmailAddress $pfile; then
+     ox_set_property com.openexchange.spamhandler.cloudmark.targetHamEmailAddress "" $pfile
+  fi
+fi
+
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
@@ -49,14 +61,34 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.spamhandler.cloudmark/ChangeLog
 
 %changelog
+* Thu May 23 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Third candidate for 7.2.1 release
 * Wed May 22 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 Build for patch 2013-05-22
+* Wed May 22 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Build for patch 2013-05-22
+* Wed May 15 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Second candidate for 7.2.1 release
 * Wed May 15 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 Build for patch 2013-05-10
 * Mon May 13 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 Build for patch 2013-05-09
+* Mon May 13 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Build for patch 2013-05-09
+* Mon May 13 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Build for patch 2013-05-09
+* Mon May 13 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Build for patch 2013-05-09
+* Mon May 13 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Build for patch 2013-05-09
 * Fri May 03 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 Build for patch 2013-04-23
+* Tue Apr 30 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Build for patch 2013-04-17
+* Mon Apr 22 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+First candidate for 7.2.1 release
+* Mon Apr 15 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+prepare for 7.2.1
 * Fri Apr 12 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 Build for patch 2013-04-12
 * Wed Apr 10 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
@@ -65,6 +97,12 @@ Fourth candidate for 7.2.0 release
 Third candidate for 7.2.0 release
 * Tue Apr 02 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 Second candidate for 7.2.0 release
+* Tue Apr 02 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Build for patch 2013-04-04
+* Tue Apr 02 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Build for patch 2013-04-04
+* Tue Apr 02 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+Build for patch 2013-04-04
 * Tue Apr 02 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
 Build for patch 2013-04-04
 * Tue Mar 26 2013 Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Contact JSON Bundle
 Bundle-SymbolicName: com.openexchange.contacts.json
-Bundle-Version: 7.2.0
+Bundle-Version: 7.2.1
 Bundle-Activator: com.openexchange.contacts.json.osgi.ContactJSONActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -62,6 +62,8 @@ Import-Package: com.openexchange.ajax.fields,
  javax.imageio.plugins.jpeg,
  javax.imageio.spi,
  javax.imageio.stream,
+ org.apache.commons.codec,
+ org.apache.commons.codec.binary,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework

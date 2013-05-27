@@ -68,7 +68,6 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionConstants;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
@@ -78,8 +77,8 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.log.LogFactory;
-import com.openexchange.version.Version;
 import com.openexchange.session.Session;
+import com.openexchange.version.Version;
 import com.openexchange.webdav.LastModifiedCache;
 import com.openexchange.webdav.PendingInvocations;
 import com.openexchange.webdav.PermissionServlet;
@@ -434,7 +433,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
         final String message;
         if (e instanceof OXException) {
             final OXException o = (OXException) e;
-            if (o.getPrefix().equals(EnumComponent.CONTACT.getAbbreviation()) && o.getCode() == ContactExceptionCodes.INVALID_EMAIL.getNumber()) {
+            if (ContactExceptionCodes.INVALID_EMAIL.equals(o)) {
                 descriptionCode = 1500;
                 message = o.getMessage();
             } else {
@@ -446,7 +445,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
             message = e.getMessage();
         }
 
-        return String.format(INDIVIDUAL_ERROR, descriptionCode, message);
+        return String.format(INDIVIDUAL_ERROR, Integer.valueOf(descriptionCode), message);
     }
 
     protected void parsePropertyUpdate(final HttpServletRequest req, final HttpServletResponse resp,

@@ -1,0 +1,73 @@
+<#macro timezone a_date>
+                  <span class="date timezone">${a_date?string("zzz")}</span>
+</#macro>
+
+<#macro date a_date>
+                  <span class="date">${a_date?string("dd.MM.yyyy, EEE")}</span>
+</#macro>
+
+<#macro month a_date>
+                  <span class="date">${a_date?string("MMM")}</span>
+</#macro>
+
+<#macro datetime a_date>
+                  <span class="date time">${a_date?string("dd.MM.yyyy, HH:mm")}</span>
+</#macro>
+
+<#macro time a_date>
+                  <span class="time">${a_date?string("HH:mm")}</span>
+</#macro>
+
+<#macro do_breaks formattinginfo appointment_index> 
+   <#list formattinginfo as info>
+      <#if info.position == appointment_index && info.type == 2>
+         <tr><td colspan="3"><h1><@month info.additionalInformation/></h1></td></tr>
+      </#if>
+   </#list>
+</#macro>
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="de">
+<head>
+   <title>${documentTitle} - Calendar PrintView</title>
+   <style type="text/css">
+      table, tr {
+         width: 100%;
+      }
+      td {
+         vertical-align: top;
+      }
+      .duration {
+         width: 10%;
+      }
+      .info {
+         padding-bottom: 0.5em;
+      }
+      h1,h2,h3,h4 {
+      	font-size: 1.1em;
+      }
+   </style>
+</head>
+
+<body onload="window.print()">
+   <table>
+      <#list appointments as appointment>
+         <@do_breaks formattinginfo appointment_index />
+         <tr>
+             <td class="duration">
+                <@date appointment.startDate />
+             </td>
+             <td class="duration">
+                <@time appointment.startDate /> - <@time appointment.endDate />
+             </td>
+             <td class="info">
+                ${appointment.title}
+             </td>
+         </tr>
+      </#list>
+   </table>
+</body>
+</html>

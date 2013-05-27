@@ -30,7 +30,6 @@ public class SafeContentHandlerTest extends TestCase {
 
     private ContentHandler safe;
 
-    @Override
     protected void setUp() {
         output = new WriteOutContentHandler();
         safe = new SafeContentHandler(output);

@@ -50,11 +50,8 @@
 package com.openexchange.file.storage.rdb.osgi;
 
 import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
@@ -74,6 +71,7 @@ import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
@@ -135,7 +133,8 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
             /*
              * Initialize and start service trackers
              */
-            final ServiceTracker<FileStorageService, FileStorageService> fileStorageServiceTracker = trackService(FileStorageService.class);
+            final NearRegistryServiceTracker<FileStorageService> fileStorageServiceTracker = new NearRegistryServiceTracker<FileStorageService>(context, FileStorageService.class);
+            rememberTracker(fileStorageServiceTracker);
             openTrackers();
             /*
              * Initialize and register services
@@ -159,15 +158,7 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
 
                     @Override
                     protected Collection<FileStorageService> getFileStorageServices() {
-                        final Object[] objects = fileStorageServiceTracker.getServices();
-                        if (objects == null) {
-                            return Collections.emptyList();
-                        }
-                        final List<FileStorageService> list = new ArrayList<FileStorageService>(objects.length);
-                        for (final Object o : objects) {
-                            list.add((FileStorageService) o);
-                        }
-                        return list;
+                        return Collections.unmodifiableList(fileStorageServiceTracker.getServiceList());
                     }
                 };
                 registerService(EncryptedItemDetectorService.class, secretHandling);

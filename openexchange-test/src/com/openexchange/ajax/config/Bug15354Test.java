@@ -51,9 +51,6 @@ package com.openexchange.ajax.config;
 
 import static com.openexchange.java.Autoboxing.B;
 import java.util.Arrays;
-import java.util.Random;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
@@ -62,26 +59,19 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 
 /**
- * {@link Bug15354Test}
- * 
+ * Verifies that bug 15354 does not appear again.
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Bug15354Test extends AbstractAJAXSession {
 
-    static final Log LOG = LogFactory.getLog(Bug15354Test.class);
-
     private static final int ITERATIONS = 10000;
 
-    private static final int NEEDED_BROKEN = 10;
-
     private final BetaWriter[] writer = new BetaWriter[5];
-
     private final Thread[] thread = new Thread[writer.length];
 
     private AJAXClient client;
-
     private boolean origValue;
-
     private Object[] origAliases;
 
     public Bug15354Test(String name) {
@@ -97,7 +87,7 @@ public class Bug15354Test extends AbstractAJAXSession {
         assertNotNull("Aliases are null.", origAliases);
         Arrays.sort(origAliases);
         for (int i = 0; i < writer.length; i++) {
-            writer[i] = new BetaWriter();
+            writer[i] = new BetaWriter(User.User1);
             thread[i] = new Thread(writer[i]);
         }
         for (int i = 0; i < thread.length; i++) {
@@ -122,13 +112,13 @@ public class Bug15354Test extends AbstractAJAXSession {
     }
 
     public void testAliases() throws Throwable {
-        int consecutiveBrokenReads = 0;
-        for (int i = 0; i < ITERATIONS && consecutiveBrokenReads < NEEDED_BROKEN; i++) {
+        boolean stop = false;
+        for (int i = 0; i < ITERATIONS && !stop; i++) {
             Object[] testAliases = client.execute(new GetRequest(Tree.MailAddresses)).getArray();
             if (null == testAliases) {
-                consecutiveBrokenReads++;
+                stop = true;
             } else if (origAliases.length != testAliases.length) {
-                consecutiveBrokenReads++;
+                stop = true;
             } else {
                 Arrays.sort(testAliases);
                 boolean match = true;
@@ -137,11 +127,10 @@ public class Bug15354Test extends AbstractAJAXSession {
                         match = false;
                     }
                 }
-                if (match) {
-                    consecutiveBrokenReads = 0;
-                } else {
-                    consecutiveBrokenReads++;
-                }
+                stop = stop || !match;
+            }
+            for (int j = 0; j < writer.length; j++) {
+                stop = stop || null != writer[j].getThrowable();
             }
         }
         // Final test.
@@ -153,40 +142,6 @@ public class Bug15354Test extends AbstractAJAXSession {
         Arrays.sort(testAliases);
         for (int i = 0; i < origAliases.length; i++) {
             assertEquals("Aliases are not the same.", origAliases[i], testAliases[i]);
-        }
-    }
-
-    private static final class BetaWriter implements Runnable {
-
-        private boolean run = true;
-
-        private Throwable t;
-
-        BetaWriter() {
-            super();
-        }
-
-        void stop() {
-            run = false;
-        }
-
-        Throwable getThrowable() {
-            return t;
-        }
-
-        @Override
-        public void run() {
-            Random rand = new Random(System.currentTimeMillis());
-            try {
-                AJAXClient client = new AJAXClient(User.User1);
-                while (run) {
-                    client.execute(new SetRequest(Tree.Beta, B(rand.nextBoolean())));
-                }
-                client.logout();
-            } catch (Throwable t2) {
-                LOG.error(t2.getMessage(), t2);
-                t = t2;
-            }
         }
     }
 }

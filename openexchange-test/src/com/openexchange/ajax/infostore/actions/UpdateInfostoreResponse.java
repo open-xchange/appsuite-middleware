@@ -50,11 +50,12 @@
 package com.openexchange.ajax.infostore.actions;
 
 import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * @author <a href="mailto:markus.wagner@open-xchange.com">Markus Wagner</a>
  */
-public class UpdateInfostoreResponse extends AbstractInfostoreResponse {
+public class UpdateInfostoreResponse extends AbstractAJAXResponse {
 
     protected UpdateInfostoreResponse(Response response) {
         super(response);

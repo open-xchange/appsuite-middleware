@@ -93,11 +93,19 @@ public abstract class DefaultResourceDirectory implements ResourceDirectory {
 
     @Override
     public Resource set(ID id, Resource resource) throws OXException {
-        Resource previousResource = doSet(id, resource);
+        Resource previousResource = doSet(id, resource, true);
         if (null == previousResource) {
             notifyAdded(id, resource);
         } else {
             notifyUpdated(id, resource, previousResource);
+        }
+        return previousResource;
+    }
+    
+    public Resource setIfAbsent(ID id, Resource resource) throws OXException {
+        Resource previousResource = doSet(id, resource, false);
+        if (null == previousResource) {
+            notifyAdded(id, resource);
         }
         return previousResource;
     }
@@ -117,7 +125,7 @@ public abstract class DefaultResourceDirectory implements ResourceDirectory {
         return notifyRemoved(doRemove(ids), true);
     }
 
-    private void notifyAdded(ID id, Resource addedResource) {
+    protected void notifyAdded(ID id, Resource addedResource) {
         id.trigger("add", this);
         for (ChangeListener listener : listeners) {
             listener.added(id, addedResource);
@@ -173,6 +181,6 @@ public abstract class DefaultResourceDirectory implements ResourceDirectory {
 
     protected abstract IDMap<Resource> doRemove(ID id) throws OXException;
 
-    protected abstract Resource doSet(ID id, Resource data) throws OXException;
-    
+    protected abstract Resource doSet(ID id, Resource data, boolean overwrite) throws OXException;
+
 }

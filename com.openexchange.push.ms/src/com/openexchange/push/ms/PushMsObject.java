@@ -54,6 +54,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -72,10 +74,60 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
 
     private static final long serialVersionUID = -8490584616201401142L;
 
+    public static PushMsObject valueFor(final Map<String, Object> pojo) {
+        if (null == pojo) {
+            return null;
+        }
+        try {
+            final int contextId;
+            {
+                final Integer i = (Integer) pojo.get("__contextId");
+                contextId = null == i ? 0 : i.intValue();
+            }
+            final boolean remote;
+            {
+                final Boolean b = (Boolean) pojo.get("__remote");
+                remote = null == b ? false : b.booleanValue();
+            }
+            final int folderId;
+            {
+                final Integer i = (Integer) pojo.get("__folderId");
+                folderId = null == i ? 0 : i.intValue();
+            }
+            final int module;
+            {
+                final Integer i = (Integer) pojo.get("__module");
+                module = null == i ? 0 : i.intValue();
+            }
+            final int hash;
+            {
+                final Integer i = (Integer) pojo.get("__hash");
+                hash = null == i ? 0 : i.intValue();
+            }
+            final int[] users = (int[]) pojo.get("__users");
+            final long creationDate;
+            {
+                final Long l = (Long) pojo.get("__creationDate");
+                creationDate = null == l ? 0 : l.longValue();
+            }
+            final long timestamp;
+            {
+                final Long l = (Long) pojo.get("__timestamp");
+                timestamp = null == l ? 0 : l.longValue();
+            }
+            final String hostname = (String) pojo.get("__hostname");
+            final String topicName = (String) pojo.get("__topicName");
+            return new PushMsObject(folderId, module, contextId, users, remote, timestamp, topicName, hostname, hash, new Date(creationDate));
+        } catch (final NullPointerException npe) {
+            LOG.warn("Missing required attribute.", npe);
+            return null;
+        }
+    }
+
     private final int folderId;
     private final int module;
     private final int users[];
-    private final Date creationDate = new Date();
+    private final Date creationDate;
     private final int hash;
     private final long timestamp;
     private final String topicName;
@@ -94,6 +146,7 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
      */
     public PushMsObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isRemote, final long timestamp, final String topicName) {
         super(contextId, isRemote);
+        creationDate = new Date();
         this.folderId = folderId;
         this.module = module;
         this.users = users;
@@ -112,7 +165,7 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
 
     /**
      * Initializes a new {@link PushMsObject}.
-     * 
+     *
      * @param folderId The folder ID
      * @param module The module
      * @param contextId The context ID
@@ -124,6 +177,7 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
      */
     public PushMsObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isRemote, final long timestamp, final String topicName, String hostname) {
         super(contextId, isRemote);
+        creationDate = new Date();
         this.folderId = folderId;
         this.module = module;
         this.users = users;
@@ -133,6 +187,18 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
         this.hostname = hostname;
     }
 
+    private PushMsObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isRemote, final long timestamp, final String topicName, String hostname, final int hash, final Date creationDate) {
+        super(contextId, isRemote);
+        this.folderId = folderId;
+        this.module = module;
+        this.users = users;
+        this.hash = hash;
+        this.timestamp = timestamp;
+        this.topicName = topicName;
+        this.hostname = hostname;
+        this.creationDate = creationDate;
+    }
+
     private int hashCode0() {
         final int prime = 31;
         int result = super.hashCode();
@@ -140,6 +206,42 @@ public class PushMsObject extends AbstractPushMsObject implements Serializable {
         result = prime * result + module;
         result = prime * result + Arrays.hashCode(users);
         return result;
+    }
+
+    /**
+     * Generates the POJO view for this instance.
+     *
+     * @return The POJO view
+     */
+    public Map<String, Object> writePojo() {
+        final Map<String, Object> m = new LinkedHashMap<String, Object>(10);
+        if (folderId > 0) {
+            m.put("__folderId", Integer.valueOf(folderId));
+        }
+        if (module > 0) {
+            m.put("__module", Integer.valueOf(module));
+        }
+        if (contextId > 0) {
+            m.put("__contextId", Integer.valueOf(contextId));
+        }
+        if (null != users) {
+            m.put("__users", users);
+        }
+        m.put("__remote", Boolean.valueOf(remote));
+        if (null != creationDate) {
+            m.put("__creationDate", Long.valueOf(creationDate.getTime()));
+        }
+        m.put("__hash", Integer.valueOf(hash));
+        if (timestamp > 0) {
+            m.put("__timestamp", Long.valueOf(timestamp));
+        }
+        if (null != hostname) {
+            m.put("__hostname", hostname);
+        }
+        if (null != topicName) {
+            m.put("__topicName", topicName);
+        }
+        return m;
     }
 
     /**

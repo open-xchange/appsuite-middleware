@@ -112,22 +112,31 @@ public final class SessionHandler {
         }
     };
 
+    /** The session identifier generator */
     private static volatile SessionIdGenerator sessionIdGenerator;
 
+    /** The applied configuration */
     static volatile SessiondConfigInterface config;
 
+    /** The {@link SessionData} reference */
     protected static final AtomicReference<SessionData> sessionDataRef = new AtomicReference<SessionData>();
 
+    /** Whether there is no limit when adding a new session */
     private static volatile boolean noLimit;
+
+    /** Whether there is no limit when adding a new session */
+    private static volatile boolean asyncPutToSessionStorage;
 
     /** The obfuscator */
     protected static Obfuscator obfuscator;
 
+    /** The initialized flag */
     private static final AtomicBoolean initialized = new AtomicBoolean();
 
     /** Logger */
     protected static final Log LOG = com.openexchange.log.Log.loggerFor(SessionHandler.class);
 
+    /** If INFO logging is enabled for this class */
     private static final boolean INFO = LOG.isInfoEnabled();
 
     /** Whether debug log level is enabled */
@@ -165,6 +174,7 @@ public final class SessionHandler {
                 LOG.error("create instance of SessionIdGenerator", exc);
             }
             noLimit = (config.getMaxSessions() == 0);
+            asyncPutToSessionStorage = config.isAsyncPutToSessionStorage();
             synchronized (SessionHandler.class) {
                 // Make it visible to other threads, too
                 obfuscator = new Obfuscator(config.getObfuscationKey());
@@ -430,7 +440,12 @@ public final class SessionHandler {
             if (false == session.isTransient()) {
                 final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
                 if (sessionStorageService != null) {
-                    storeSessionSync(addedSession, sessionStorageService, false);
+                    if (asyncPutToSessionStorage) {
+                        // Enforced asynchronous put
+                        storeSessionAsync(addedSession, sessionStorageService, false, null);
+                    } else {
+                        storeSessionSync(addedSession, sessionStorageService, false);
+                    }
                 }
             }
             // Post event for created session
@@ -485,7 +500,24 @@ public final class SessionHandler {
         if (async) {
             ThreadPools.getThreadPool().submit(new StoreSessionTask(session, sessionStorageService, addIfAbsent, latch));
         } else {
-            new StoreSessionTask(session, sessionStorageService, addIfAbsent, latch).call();
+            final StoreSessionTask task = new StoreSessionTask(session, sessionStorageService, addIfAbsent, latch);
+            final Thread thread = Thread.currentThread();
+            boolean ran = false;
+            task.beforeExecute(thread);
+            try {
+                task.call();
+                ran = true;
+                task.afterExecute(null);
+            } catch (final Exception ex) {
+                if (!ran) {
+                    task.afterExecute(ex);
+                }
+                // Else the exception occurred within
+                // afterExecute itself in which case we don't
+                // want to call it again.
+                final OXException oxe = (ex instanceof OXException ? (OXException) ex : SessionExceptionCodes.SESSIOND_EXCEPTION.create(ex, ex.getMessage()));
+                LOG.warn(oxe.getMessage(), oxe);
+            }
         }
     }
 
@@ -499,8 +531,14 @@ public final class SessionHandler {
         if (null == sessions || sessions.isEmpty() || null == sessionStorageService) {
             return;
         }
-        for (final SessionImpl session : sessions) {
-            storeSessionSync(session, sessionStorageService, true);
+        if (asyncPutToSessionStorage) {
+            for (final SessionImpl session : sessions) {
+                storeSessionAsync(session, sessionStorageService, true, null);
+            }
+        } else {
+            for (final SessionImpl session : sessions) {
+                storeSessionSync(session, sessionStorageService, true);
+            }
         }
     }
 
@@ -800,7 +838,11 @@ public final class SessionHandler {
         final SessionImpl addedSession = sessionControl.getSession();
         final SessionStorageService sessionStorageService = getServiceRegistry().getService(SessionStorageService.class);
         if (sessionStorageService != null) {
-            storeSessionSync(addedSession, sessionStorageService, false);
+            if (asyncPutToSessionStorage) {
+                storeSessionAsync(addedSession, sessionStorageService, false, null);
+            } else {
+                storeSessionSync(addedSession, sessionStorageService, false);
+            }
         }
         // Post event for created session
         postSessionCreation(addedSession);
@@ -969,10 +1011,14 @@ public final class SessionHandler {
             return;
         }
         final List<SessionControl> controls = sessionData.rotateShort();
+        final String message;
+        if (config.isAutoLogin()) {
+            message = "Session is moved to long life time container. All temporary session data will be cleaned up. ID: ";
+        } else {
+            message = "Session timed out. ID: ";
+        }
         for (final SessionControl sessionControl : controls) {
-            if (INFO) {
-                LOG.info("Session timed out. ID: " + sessionControl.getSession().getSessionID());
-            }
+            LOG.info(message + sessionControl.getSession().getSessionID());
         }
         postSessionDataRemoval(controls);
     }

@@ -50,12 +50,9 @@
 package com.openexchange.capabilities.osgi;
 
 import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityChecker;
@@ -88,7 +85,8 @@ public class CapabilitiesActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         SERVICES.set(this);
-        final ServiceTracker<CapabilityChecker, CapabilityChecker> capCheckers = track(CapabilityChecker.class);
+        final CapabilityCheckerRegistry capCheckers = new CapabilityCheckerRegistry(context);
+        rememberTracker(capCheckers);
 
         /*
          * Create & register CapabilityService
@@ -97,17 +95,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
 
             @Override
             public List<CapabilityChecker> getCheckers() {
-                Object[] services = capCheckers.getServices();
-                if (services == null) {
-                    return Collections.emptyList();
-                }
-                List<CapabilityChecker> checkers = new ArrayList<CapabilityChecker>(services.length);
-
-                for (Object service : services) {
-                    checkers.add((CapabilityChecker) service);
-                }
-
-                return checkers;
+                return capCheckers.getCheckers();
             }
         };
         registerService(CapabilityService.class, capService);

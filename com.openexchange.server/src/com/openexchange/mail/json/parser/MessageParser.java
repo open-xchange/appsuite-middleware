@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json.parser;
 
+import static com.openexchange.mail.mime.filler.MimeMessageFiller.isCustomOrReplyHeader;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.quotePersonal;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.shouldRetry;
@@ -91,6 +92,7 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadFileImpl;
 import com.openexchange.html.HtmlService;
+import com.openexchange.java.StringAllocator;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
@@ -522,8 +524,8 @@ public final class MessageParser {
             final Iterator<String> iter = obj.keys();
             for (int i = 0; i < size; i++) {
                 final String key = iter.next();
-                if (isCustomHeader(key) && !key.equalsIgnoreCase("x-original-headers")) {
-                    headers.addHeader(key, obj.getString(key));
+                if (isCustomOrReplyHeader(key) && !key.equalsIgnoreCase("x-original-headers")) {
+                    headers.setHeader(key, obj.getString(key));
                 }
             }
             mail.addHeaders(headers);
@@ -648,20 +650,6 @@ public final class MessageParser {
          * Drop special "x-original-headers" header
          */
         mail.removeHeader("x-original-headers");
-    }
-
-    /**
-     * Checks if specified header name is a custom header that is it starts ignore-case with <code>"X-"</code>.
-     *
-     * @param headerName The header name to check
-     * @return <code>true</code> if specified header name is a custom header; otherwise <code>false</code>
-     */
-    private static boolean isCustomHeader(final String headerName) {
-        if (null == headerName || headerName.length() < 2) {
-            return false;
-        }
-        final char first = headerName.charAt(0);
-        return (('X' == first) || ('x' == first)) && ('-' == headerName.charAt(1));
     }
 
     private static final String ROOT = "0";
@@ -1056,6 +1044,33 @@ public final class MessageParser {
             return new MailPath(arg.getAccountId(), arg.getFullname(), msgref.getMailID());
         }
         return msgref;
+    }
+
+    /** Check for an empty string */
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    /** ASCII-wise to lower-case */
+    private static String toLowerCase(final CharSequence chars) {
+        if (null == chars) {
+            return null;
+        }
+        final int length = chars.length();
+        final StringAllocator builder = new StringAllocator(length);
+        for (int i = 0; i < length; i++) {
+            final char c = chars.charAt(i);
+            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+        }
+        return builder.toString();
     }
 
 }

@@ -16,10 +16,11 @@ import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.log.LogFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link DistributedFileManagementActivator}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class DistributedFileManagementActivator extends HousekeepingActivator {
@@ -37,6 +38,7 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
 
         HazelcastConfigurationService hazelcastConfig = getService(HazelcastConfigurationService.class);
         final String prefix = getService(DispatcherPrefixService.class).getPrefix();
+        final ServiceLookup services = this;
         if (hazelcastConfig.isEnabled()) {
             track(HazelcastInstance.class, new SimpleRegistryListener<HazelcastInstance>() {
 
@@ -46,7 +48,7 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
                     String address = service.getCluster().getLocalMember().getInetSocketAddress().getHostName();
                     String mapName = discoverMapName(service.getConfig());
                     address += prefix;
-                    registerService(DistributedFileManagement.class, new DistributedFileManagementImpl(DistributedFileManagementActivator.this, address, mapName));
+                    registerService(DistributedFileManagement.class, new DistributedFileManagementImpl(services, address, mapName));
                 }
 
                 @Override
@@ -55,15 +57,19 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
                 }
             });
 
+            /*-
+             * Already registered by tracker above, isn't it?
+             *
             HazelcastInstance service = getOptionalService(HazelcastInstance.class);
             if (service != null) {
                 DistributedFileManagementImpl.setHazelcastInstance(service);
                 String address = service.getCluster().getLocalMember().getInetSocketAddress().getHostName();
                 String mapName = discoverMapName(service.getConfig());
                 address += prefix;
-                registerService(DistributedFileManagement.class, new DistributedFileManagementImpl(DistributedFileManagementActivator.this, address, mapName));
+                registerService(DistributedFileManagement.class, new DistributedFileManagementImpl(services, address, mapName));
             }
-            
+             *
+             */
         }
 
         openTrackers();
@@ -75,9 +81,14 @@ public class DistributedFileManagementActivator extends HousekeepingActivator {
         super.stopBundle();
     }
 
-    private static String discoverMapName(Config config) throws IllegalStateException {
+    @Override
+    public <S> void registerService(java.lang.Class<S> clazz, S service) {
+        super.registerService(clazz, service);
+    }
+
+    String discoverMapName(Config config) throws IllegalStateException {
         Map<String, MapConfig> mapConfigs = config.getMapConfigs();
-        if (null != mapConfigs && 0 < mapConfigs.size()) {
+        if (null != mapConfigs && !mapConfigs.isEmpty()) {
             for (String mapName : mapConfigs.keySet()) {
                 if (mapName.startsWith("distributedFiles-")) {
                     LOG.info("Using distributed map '" + mapName + "'.");

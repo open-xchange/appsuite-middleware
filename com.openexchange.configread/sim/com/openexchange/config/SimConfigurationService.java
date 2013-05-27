@@ -50,10 +50,12 @@
 package com.openexchange.config;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import com.openexchange.exception.OXException;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -76,6 +78,11 @@ public class SimConfigurationService implements ConfigurationService {
     public Filter getFilterFromProperty(String name) {
         // Nothing to do
         return null;
+    }
+
+    @Override
+    public Map<String, String> getProperties(PropertyFilter filter) throws OXException {
+        return Collections.emptyMap();
     }
 
     @Override

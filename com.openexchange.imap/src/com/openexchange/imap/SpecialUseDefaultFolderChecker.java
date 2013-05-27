@@ -66,7 +66,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.cache.ListLsubEntry;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.imap.services.Services;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -424,8 +424,7 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
                         throw new MessagingException("Unexpected index: " + index);
                     }
                     {
-                        final MailAccountStorageService storageService =
-                            IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
+                        final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
 
                         storageService.updateMailAccount(
                             mad,

@@ -2706,7 +2706,7 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
 
             @Override
             public boolean isSet(Contact contact) {
-            	return false;
+            	return 0 < contact.getNumberOfImages() || contact.containsImage1() && null != contact.getImage1();
             }
 
             @Override

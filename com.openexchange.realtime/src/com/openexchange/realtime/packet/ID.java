@@ -431,6 +431,7 @@ public class ID implements Serializable {
         trigger(event, source, new HashMap<String, Object>());
     }
 
+    
     private List<IDEventHandler> handlerList(String event) {
         ConcurrentHashMap<String, List<IDEventHandler>> events = listeners.get(this);
         if (events == null) {

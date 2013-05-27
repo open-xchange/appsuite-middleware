@@ -85,8 +85,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     // ([A-Za-z_]+)\((".*"),
     // $1($1_MSG,
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.exception.Log.valueOf(com.openexchange.log.LogFactory.getLog(OXException.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.loggerFor(OXException.class);
 
     private static final long serialVersionUID = 2058371531364916608L;
 
@@ -237,6 +236,8 @@ public class OXException extends Exception implements OXExceptionConstants {
     private String prefix;
 
     private Generic generic;
+
+    private LogLevel optLogLevel;
 
     /**
      * Initializes a default {@link OXException}.
@@ -661,7 +662,11 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return <code>true</code> if this {@link OXException} is loggable for specified log level; otherwise <code>false</code>
      */
     public boolean isLoggable(final LogLevel logLevel) {
-        return logLevel.implies(getCategories().get(0));
+        final LogLevel thisLogLevel = this.optLogLevel;
+        if (null == thisLogLevel) {
+            return logLevel.implies(getCategories().get(0));
+        }
+        return logLevel.implies(thisLogLevel);
     }
 
     /**
@@ -744,6 +749,19 @@ public class OXException extends Exception implements OXExceptionConstants {
             }
             categories.add(category);
         }
+        return this;
+    }
+
+    /**
+     * Sets the log level for this exception.
+     * <p>
+     * If <code>null</code> log level is taken from {@link #getCategory() category}.
+     *
+     * @param logLevel The log level to set
+     * @return This exception with log level applied
+     */
+    public OXException setLogLevel(final LogLevel logLevel) {
+        this.optLogLevel = logLevel;
         return this;
     }
 
@@ -953,7 +971,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * Adds an attribute identifier that has been truncated.
      *
      * @param truncatedId identifier of the truncated attribute.
-     * @deprecated use {@link #addProblematic(com.openexchange.groupware.AbstractOXException.Truncated)}
+     * @deprecated use {@link #addProblematic(ProblematicAttribute)}
      */
     @Deprecated
     public void addTruncatedId(final int truncatedId) {
