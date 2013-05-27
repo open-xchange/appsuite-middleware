@@ -96,7 +96,7 @@ public class InsertRequest extends AbstractFolderRequest<InsertResponse> {
     protected void addParameters(List<Parameter> params) {
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW));
 
-        if (folder.containsModule() && folder.getModule() == FolderObject.MAIL) {
+        if (folder.containsModule() && folder.getFullName() != null && folder.getModule() == FolderObject.MAIL) {
             final String[] parts = folder.getFullName().split("/");
             final StringBuilder parentBuilder = new StringBuilder();
             for (int i = 0; i < (parts.length - 1); i++) {
