@@ -148,8 +148,7 @@ public class DelegatingLdapStorage extends DefaultContactStorage {
 
     @Override
     public int count(Session session, String folderID, boolean canReadAll) throws OXException {
-        // TODO: Implement more efficient counting if possible and assure visibility rights
-        SearchIterator<Contact> contactsInFolder = delegate(session).getContactsInFolder(parse(folderID), 0, Integer.MAX_VALUE, 0, null, null, getColumns(new ContactField[] { ContactField.OBJECT_ID }));
+        SearchIterator<Contact> contactsInFolder = delegate(session).getContactsInFolder(parse(folderID), 0, Integer.MAX_VALUE, 0, Order.NO_ORDER, null, getColumns(new ContactField[] { ContactField.OBJECT_ID }));
         int retval = contactsInFolder.size();
         contactsInFolder.close();
         return retval;

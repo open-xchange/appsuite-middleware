@@ -332,7 +332,11 @@ public class LdapContactInterface implements ContactInterface {
             this.contactIFace.rwlock_cached_contacts.writeLock().lock();
             if (null == this.contactIFace.cached_contacts) {
                 try {
-                    // Fill
+                    // We have to load all columns before caching the contacts to satisfy any further requests
+                    int[] allColumns = Contact.ALL_COLUMNS;
+                    for (int column : allColumns) {
+                        columns.add(column);
+                    }
                     arrayList = getLDAPContacts(folderId, columns, null, null, new SortInfo(Contact.SUR_NAME, Order.ASCENDING), false);
                     this.contactIFace.cached_contacts = Collections.synchronizedList(new ArrayList<Contact>());
                     this.contactIFace.cached_contacts.addAll(arrayList);
