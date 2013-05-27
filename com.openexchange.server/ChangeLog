@@ -1,3 +1,7 @@
+* 2013-05-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 26779: Reduce log level for htmlunit.jar
+
 * 2013-05-27 - marcus.klein@open-xchange.com
 
  - US 47575615: Added interface method for counting tasks, using that for folder object count value and added the according acceptance test.
