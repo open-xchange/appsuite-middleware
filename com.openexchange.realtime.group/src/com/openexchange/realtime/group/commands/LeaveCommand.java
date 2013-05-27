@@ -65,7 +65,7 @@ public class LeaveCommand implements GroupCommand {
 
     @Override
     public void perform(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
-        if (isSynchronous(stanza)) {
+        if (isSynchronous(stanza) && groupDispatcher.isMember(stanza.getOnBehalfOf())) {
             Stanza signOffMessage = groupDispatcher.getSignOffMessage(stanza.getOnBehalfOf());
             signOffMessage.setFrom(groupDispatcher.getId());
             signOffMessage.setTo(stanza.getFrom());
