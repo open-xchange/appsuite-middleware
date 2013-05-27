@@ -138,6 +138,16 @@ public class CachingLdapContactStorage extends LdapContactStorage {
     }
 
     @Override
+    public int count(Session session, String folderId, boolean canReadAll) throws OXException {
+        check(session.getContextId(), folderId);
+        if (cache.isCacheReady()) {
+            return cache.values().size();
+        } else {
+            return super.count(session, folderId, canReadAll);
+        }
+    }
+
+    @Override
     public SearchIterator<Contact> modified(Session session, String folderID, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException {
         check(session.getContextId(), folderID);
         if (LdapContactCache.isCached(fields)) {

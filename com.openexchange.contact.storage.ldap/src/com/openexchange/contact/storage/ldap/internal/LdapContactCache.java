@@ -164,6 +164,13 @@ public class LdapContactCache {
             return contacts;
         }
     }
+    
+    /**
+     * @return If the cache is already filled with objects.
+     */
+    public boolean isCacheReady() {
+        return loader != null;
+    }
 
     /**
      * Gets a value indicating whether all of the supplied fields are present

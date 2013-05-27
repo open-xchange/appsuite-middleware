@@ -152,15 +152,11 @@ public class LdapContactStorage extends DefaultContactStorage {
         check(session.getContextId(), folderId);
         return doList(session, folderId, ids, fields, sortOptions);
     }
-    
+
     @Override
     public int count(Session session, String folderId, boolean canReadAll) throws OXException {
         check(session.getContextId(), folderId);
-        /*
-         * FIXME: Implement counting of contacts within a given folder.
-         * doList doesn't even use the folderId parameter. What has to be done here?
-         */
-        return -1;
+        return count(session, config.getBaseDN(), config.getSearchfilter());
     }
 
     @Override
@@ -315,6 +311,19 @@ public class LdapContactStorage extends DefaultContactStorage {
             return search(session, fields, mapper, baseDN, filter, sortKeys, getMaxResults(sortOptions), deleted);
         } else {
             return sort(search(session, fields, mapper, baseDN, filter, null, getMaxResults(sortOptions), deleted), mapper, sortOptions);
+        }
+    }
+
+    protected int count(Session session, String baseDN, String filter) throws OXException {
+        LdapExecutor executor = null;
+        try {
+            executor = new LdapExecutor(factory, session);
+            List<LdapResult> results = executor.search(baseDN, filter, new String[0], null, getMaxResults(SortOptions.EMPTY));
+            return results.size();
+        } finally {
+            if (null != executor) {
+                executor.close();
+            }
         }
     }
 
