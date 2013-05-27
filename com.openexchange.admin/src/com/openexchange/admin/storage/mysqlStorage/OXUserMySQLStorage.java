@@ -85,6 +85,7 @@ import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.PoolException;
@@ -895,13 +896,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             con.commit();
 
             /*-
-             * 
+             *
             try {
                 ClientAdminThread.cache.reinitAccessCombinations();
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
-             * 
+             *
              */
             // JCS
             final BundleContext context = AdminCache.getBundleContext();
@@ -1197,13 +1198,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 // Get user's default group ID anf check its existence
                 final int def_group_id;
-                if (usrdata.getDefault_group() == null) {
-                    // Set to context's default group
-                    def_group_id = tool.getDefaultGroupForContext(ctx, con);
-                } else {
-                    def_group_id = usrdata.getDefault_group().getId().intValue();
-                    if (!tool.existsGroup(ctx, con, def_group_id)) {
-                        throw new StorageException("No such group with ID " + def_group_id + " in context " + ctx.getId());
+                {
+                    final Group defaultGroup = usrdata.getDefault_group();
+                    if (defaultGroup == null) {
+                        // Set to context's default group
+                        def_group_id = tool.getDefaultGroupForContext(ctx, con);
+                    } else {
+                        def_group_id = defaultGroup.getId().intValue();
+                        if (!tool.existsGroup(ctx, con, def_group_id)) {
+                            throw new StorageException("No such group with ID " + def_group_id + " in context " + ctx.getId());
+                        }
                     }
                 }
 
@@ -2235,13 +2239,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
 
                 /*-
-                 * 
+                 *
                 try {
                     ClientAdminThread.cache.reinitAccessCombinations();
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }
-                 * 
+                 *
                  */
                 // JCS
                 final BundleContext context = AdminCache.getBundleContext();
@@ -2393,13 +2397,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             con.commit();
 
             /*-
-             * 
+             *
             try {
                 ClientAdminThread.cache.reinitAccessCombinations();
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }
-             * 
+             *
              */
             // JCS
             final BundleContext context = AdminCache.getBundleContext();
