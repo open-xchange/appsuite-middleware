@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.admin.index"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.admin.solr"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.index.solr"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.smal"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.smal.impl"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.service.indexing"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.service.indexing.impl"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.service.indexing.monitoring"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.solr"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.solr.monitoring"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.admin.index"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.admin.solr"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.index.solr"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.mail.smal"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.mail.smal.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.service.indexing"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.service.indexing.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.service.indexing.monitoring"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.solr"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.solr.monitoring"/>
 </provider>
 </psf>

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Basic Publication Implementation Plug-in
 Bundle-SymbolicName: com.openexchange.publish.basic
-Bundle-Version: 7.2.1
+Bundle-Version: 7.2.2
 Bundle-Activator: com.openexchange.publish.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
