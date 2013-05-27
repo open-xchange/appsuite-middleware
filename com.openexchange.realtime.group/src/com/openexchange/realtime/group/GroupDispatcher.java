@@ -496,4 +496,8 @@ public class GroupDispatcher implements ComponentHandle {
         throw new UnsupportedOperationException("Clients can not join this group synchronously");
     }
 
+    public Stanza getSignOffMessage(ID onBehalfOf) {
+        throw new UnsupportedOperationException("Clients can not leave this group synchronously");
+    }
+
 }

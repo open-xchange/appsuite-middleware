@@ -50,6 +50,7 @@
 package com.openexchange.realtime.group.commands;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.group.GroupCommand;
 import com.openexchange.realtime.group.GroupDispatcher;
 import com.openexchange.realtime.packet.Stanza;
@@ -64,7 +65,21 @@ public class LeaveCommand implements GroupCommand {
 
     @Override
     public void perform(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
-        groupDispatcher.leave(stanza.getFrom());
+        if (isSynchronous(stanza)) {
+            Stanza signOffMessage = groupDispatcher.getSignOffMessage(stanza.getOnBehalfOf());
+            signOffMessage.setFrom(groupDispatcher.getId());
+            signOffMessage.setTo(stanza.getFrom());
+
+            groupDispatcher.leave(stanza.getOnBehalfOf());
+           
+            GroupDispatcher.SERVICE_REF.get().getService(MessageDispatcher.class).send(signOffMessage);
+        } else {
+            groupDispatcher.leave(stanza.getFrom());
+        }
+    }
+    
+    private boolean isSynchronous(Stanza stanza) {
+        return stanza.getFrom().getProtocol().equals("call");
     }
 
 }

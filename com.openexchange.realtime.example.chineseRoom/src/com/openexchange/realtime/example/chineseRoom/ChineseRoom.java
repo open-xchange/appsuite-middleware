@@ -175,6 +175,22 @@ public @NotThreadSafe class ChineseRoom extends GroupDispatcher implements Compo
         return message;
     }
     
+    @Override
+    public Stanza getSignOffMessage(ID onBehalfOf) {
+        Message message = new Message();
+        message.setFrom(getId());
+        message.setTo(onBehalfOf);
+        message.addPayload(new PayloadTree(
+            PayloadTreeNode.builder()
+            .withPayload(
+                new PayloadElement("Goodbye " + onBehalfOf, "string", "china", "message")
+            )
+        .build()
+        ));
+        
+        return message;
+    }
+    
     // Droo Chonosen mot nom Kontrobo§, so§on oof dor Stro§o ond orzohtlon soch wos
     // Do kom do Polozoo jo wos ost donn doss? Droo Chonoson mot nom Kontrobo§
     private String chineseVersionOf(String string) {
