@@ -112,8 +112,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private int imapConnectionTimeout;
 
-    private int imapConnectionIdleTime;
-
     private int imapTemporaryDown;
 
     private String imapAuthEnc;
@@ -259,18 +257,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         }
 
         {
-            final String maxConIdleTime = configuration.getProperty("com.openexchange.imap.maxIMAPConnectionIdleTime", "60000").trim();
-            try {
-                imapConnectionIdleTime = Integer.parseInt(maxConIdleTime);
-                logBuilder.append("\tMax IMAP Connection Idle Time: ").append(imapConnectionIdleTime).append('\n');
-            } catch (final NumberFormatException e) {
-                imapConnectionIdleTime = 60000;
-                logBuilder.append("\tMax IMAP Connection Idle Time: Invalid value \"").append(maxConIdleTime).append(
-                    "\". Setting to fallback: ").append(imapConnectionIdleTime).append('\n');
-            }
-        }
-
-        {
             final String imapAuthEncStr = configuration.getProperty("com.openexchange.imap.imapAuthEnc", "UTF-8").trim();
             if (Charset.isSupported(imapAuthEncStr)) {
                 imapAuthEnc = imapAuthEncStr;
@@ -395,7 +381,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         supportsACLs = null;
         imapTimeout = 0;
         imapConnectionTimeout = 0;
-        imapConnectionIdleTime = 0;
         imapTemporaryDown = 0;
         imapAuthEnc = null;
         entity2AclImpl = null;
@@ -445,11 +430,6 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public String getImapAuthEnc() {
         return imapAuthEnc;
-    }
-
-    @Override
-    public int getImapConnectionIdleTime() {
-        return imapConnectionIdleTime;
     }
 
     @Override
