@@ -114,6 +114,7 @@ public final class FolderTestSuite {
         // Test for object counts for database folder
         tests.addTest(new JUnit4TestAdapter(ContactObjectCountTest.class));
         tests.addTest(new JUnit4TestAdapter(TaskObjectCountTest.class));
+        tests.addTest(new JUnit4TestAdapter(AppointmentObjectCountTest.class));
 
         // EAS subscribe
         tests.addTestSuite(com.openexchange.ajax.folder.eas.SubscribeTest.class);
