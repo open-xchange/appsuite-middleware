@@ -57,6 +57,7 @@ import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.linkedin.LinkedinInboxDataSource;
 import com.openexchange.halo.linkedin.LinkedinProfileDataSource;
 import com.openexchange.halo.linkedin.LinkedinUpdatesDataSource;
+import com.openexchange.halo.linkedin.LoFiLinkedinProfileDataSource;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -83,6 +84,8 @@ public class LinkedinHaloActivator extends HousekeepingActivator {
             registerService(HaloContactDataSource.class, new LinkedinProfileDataSource(this));
             registerService(HaloContactDataSource.class, new LinkedinInboxDataSource(this));
             registerService(HaloContactDataSource.class, new LinkedinUpdatesDataSource(this));
+        } else {
+            registerService(HaloContactDataSource.class, new LoFiLinkedinProfileDataSource(this));
         }
     }
 

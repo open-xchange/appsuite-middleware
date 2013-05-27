@@ -24,6 +24,7 @@ Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.session,
  com.openexchange.tools.session,
  com.openexchange.user,
+ javax.mail.internet,
  org.json,
  org.osgi.framework
 Bundle-Activator: com.openexchange.halo.linkedin.osgi.LinkedinHaloActivator
