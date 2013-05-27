@@ -309,4 +309,15 @@ public class TasksSQLImpl implements TasksSQLInterface {
             throw e;
         }
     }
+
+    @Override
+    public int countTasks(FolderObject folder) throws OXException {
+        final Context ctx = Tools.getContext(session.getContextId());
+        final int userId = session.getUserId();
+        final User user = Tools.getUser(ctx, userId);
+        final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, userId);
+        boolean onlyOwn = Permission.canReadInFolder(ctx, user, userConfig, folder);
+        boolean isShared = FolderObject.SHARED == folder.getType(userId);
+        return TaskStorage.getInstance().countTasks(ctx, userId, folder.getObjectID(), onlyOwn, isShared);
+    }
 }

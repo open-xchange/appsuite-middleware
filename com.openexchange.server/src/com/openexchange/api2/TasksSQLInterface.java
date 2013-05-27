@@ -51,6 +51,7 @@ package com.openexchange.api2;
 
 import java.util.Date;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
@@ -165,4 +166,15 @@ public interface TasksSQLInterface {
      * @throws OXException if setting the confirmation fails.
      */
     Date setUserConfirmation(int objectId, int userId, int confirm, String confirmMessage) throws OXException;
+
+    /**
+     * Counts the tasks that a specific user can see in a folder. The context and the user are passed within the session given to
+     * instantiate the implementation of this interface. The methods respects folder permissions having an effect on the tasks that can be
+     * seen - this are currently a user can only see tasks created by him or non private tasks in a shared folder.
+     *
+     * @param folder in this folder the tasks should be counted.
+     * @return
+     * @throws OXException
+     */
+    int countTasks(FolderObject folder) throws OXException;
 }
