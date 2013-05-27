@@ -3,6 +3,10 @@
  - Fix for bug 26807: Don't consider storage when checking for maximum allowed sessions
  - Fix for bug 26691: Modified error message in case of truncated fields
 
+* 2013-05-27 - marcus.klein@open-xchange.com
+
+ - US 47575615: Added interface method for counting tasks, using that for folder object count value and added the according acceptance test.
+
 * 2013-05-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 26737: Added update task to enlarge the UID field of calendar tables

@@ -59,6 +59,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.contact.ContactService;
 import com.openexchange.database.provider.DBPoolProvider;
@@ -76,6 +77,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.TaskStorage;
 import com.openexchange.groupware.tasks.Tasks;
+import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.DBPool;
@@ -571,8 +573,7 @@ public class OXFolderAccess {
             final int userId = session.getUserId();
             switch (folder.getModule()) {
             case FolderObject.TASK: {
-                final boolean isShared = FolderObject.SHARED == folder.getType(userId);
-                return TaskStorage.getInstance().countTasks(ctx, userId, folder.getObjectID(), false, isShared);
+                return new TasksSQLImpl(session).countTasks(folder);
             }
             case FolderObject.CALENDAR: {
                 final AppointmentSqlFactoryService service =
