@@ -9232,12 +9232,12 @@ msgid "Invoked method is not supported."
 msgstr ""
 
 #. Maximum message size is exceeded. Max. is %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:536
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:539
 msgid "Maximum message size is exceeded. Max. is %1$s."
 msgstr ""
 
 #. Re-sending message denied because message is not located in %1$s folder.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:539
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:542
 msgid ""
 "Re-sending message denied because message is not located in %1$s folder."
 msgstr ""
