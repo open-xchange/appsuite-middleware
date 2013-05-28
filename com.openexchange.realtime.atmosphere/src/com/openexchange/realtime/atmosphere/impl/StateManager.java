@@ -98,8 +98,8 @@ public class StateManager {
         transmitters.put(id, transmitter);
     }
     
-    public void forgetTransmitter(StanzaTransmitter transmitter) {
-        transmitters.remove(transmitter);
+    public void forgetTransmitter(ID id, StanzaTransmitter transmitter) {
+        transmitters.remove(id, transmitter);
     }
 
     /**

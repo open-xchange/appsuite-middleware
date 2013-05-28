@@ -52,11 +52,15 @@ package com.openexchange.realtime.atmosphere.impl;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import org.apache.commons.logging.Log;
 import org.atmosphere.cpr.AtmosphereResource;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.log.LogFactory;
 import com.openexchange.realtime.atmosphere.impl.stanza.writer.StanzaWriter;
 import com.openexchange.realtime.atmosphere.protocol.StanzaTransmitter;
+import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 
 
@@ -67,13 +71,19 @@ import com.openexchange.realtime.packet.Stanza;
  */
 public class AtmosphereStanzaTransmitter implements StanzaTransmitter {
     
+    private static final Log LOG = LogFactory.getLog(AtmosphereStanzaTransmitter.class);
+    
     private AtmosphereResource resource;
     private Lock lock = new ReentrantLock();
     private boolean canSend = true;
+    private StateManager stateManager;
+    private ID id;
     
-    public AtmosphereStanzaTransmitter(AtmosphereResource resource) {
+    public AtmosphereStanzaTransmitter(AtmosphereResource resource, ID id, StateManager stateManager) {
         super();
         this.resource = resource;
+        this.stateManager = stateManager;
+        this.id = id;
     }
 
     @Override
@@ -91,7 +101,9 @@ public class AtmosphereStanzaTransmitter implements StanzaTransmitter {
             JSONArray array = new JSONArray();
             StanzaWriter stanzaWriter = new StanzaWriter();
             for (Stanza stanza : stanzas) {
-                array.put(stanzaWriter.write(stanza));
+                JSONObject serialized = stanzaWriter.write(stanza);
+                serialized.remove("to"); // Redundant
+                array.put(serialized);
             }
             trace(stanzas, "Writing to stream");
             resource.getResponse().write(array.toString());
@@ -102,6 +114,7 @@ public class AtmosphereStanzaTransmitter implements StanzaTransmitter {
                     resource.resume(); 
                 }
                 canSend = false;
+                stateManager.forgetTransmitter(id, this);
             }
             trace(stanzas, "Done sending");
             return true;
@@ -113,6 +126,7 @@ public class AtmosphereStanzaTransmitter implements StanzaTransmitter {
     }
 
     private void trace(List<Stanza> stanzas, String string) {
+        LOG.debug(string);
         for (Stanza stanza : stanzas) {
             stanza.trace(string);
         }

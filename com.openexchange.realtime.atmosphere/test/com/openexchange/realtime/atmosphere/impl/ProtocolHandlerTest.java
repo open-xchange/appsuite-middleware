@@ -116,6 +116,34 @@ public class ProtocolHandlerTest {
     }
     
     @Test
+    public void acksCanBeCompressedIntoAnArrayOfValues() throws OXException, JSONException {
+        String message = "{type: 'ack', seq: [12, 13, 14, 15, 16]}";
+        handle(message);
+        
+        verify(protocol).acknowledgementReceived(12l, null);
+        verify(protocol).acknowledgementReceived(13l, null);
+        verify(protocol).acknowledgementReceived(14l, null);
+        verify(protocol).acknowledgementReceived(15l, null);
+        verify(protocol).acknowledgementReceived(16l, null);
+        
+    }
+    
+    @Test
+    public void acksCanBeCompressedIntoAnArrayOfValuesAndRanges() throws OXException, JSONException {
+        String message = "{type: 'ack', seq: [12, [16, 20], 22]}";
+        handle(message);
+        
+        verify(protocol).acknowledgementReceived(12l, null);
+        verify(protocol).acknowledgementReceived(16l, null);
+        verify(protocol).acknowledgementReceived(17l, null);
+        verify(protocol).acknowledgementReceived(18l, null);
+        verify(protocol).acknowledgementReceived(19l, null);
+        verify(protocol).acknowledgementReceived(20l, null);
+        verify(protocol).acknowledgementReceived(22l, null);
+        
+    }
+    
+    @Test
     public void passesARegularMessage() throws OXException, JSONException {
         String message = "{element: 'message', payloads: [{namespace: 'test', element: 'number', data: 23}], to: 'test@1', from: 'test@1'}";
         handle(message);

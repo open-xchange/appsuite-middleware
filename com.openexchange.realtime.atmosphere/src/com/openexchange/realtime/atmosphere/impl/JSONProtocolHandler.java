@@ -50,6 +50,7 @@
 package com.openexchange.realtime.atmosphere.impl;
 
 import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.atmosphere.impl.stanza.builder.StanzaBuilderSelector;
@@ -102,9 +103,13 @@ public class JSONProtocolHandler {
                     /*
                      * TODO: optimize this (e.g. client sends only the highest sequence number of a fully received sequence).
                      */
-                    long seq = json.optLong("seq");
+                    Object seqExpression = json.opt("seq");
+                    if (seqExpression instanceof JSONArray) {
+                        handleAcknowledgementArray(entry, (JSONArray) seqExpression);
+                    } else if (seqExpression instanceof Number) {
+                        protocol.acknowledgementReceived(Long.parseLong(seqExpression.toString()), entry.state);
+                    }
 
-                    protocol.acknowledgementReceived(seq, entry.state);
                     return;
                 }
             }
@@ -121,6 +126,23 @@ public class JSONProtocolHandler {
                 protocol.receivedMessage(stanza, gate, entry.state, entry.created, entry.transmitter, acknowledgements);
             }
 
+        }
+    }
+
+    private void handleAcknowledgementArray(StateEntry entry, JSONArray seqs) {
+        for(int i = 0, length = seqs.length(); i < length; i++) {
+            Object subExpression = seqs.opt(i);
+            if (subExpression instanceof JSONArray) {
+                handleAcknowledgementRange(entry, (JSONArray) subExpression);
+            } else {
+                protocol.acknowledgementReceived(Long.parseLong(subExpression.toString()), entry.state);
+            }
+        }
+    }
+
+    private void handleAcknowledgementRange(StateEntry entry, JSONArray range) {        
+        for(long j = range.optLong(0), end = range.optLong(1); j <= end; j++) {
+            protocol.acknowledgementReceived(j, entry.state);
         }
     }
 }

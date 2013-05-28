@@ -129,7 +129,7 @@ public class RTAtmosphereHandler implements AtmosphereHandler, StanzaSender {
             ID constructedId = constructId(resource, serverSession);
             if (method.equalsIgnoreCase("GET")) {
 
-                AtmosphereStanzaTransmitter transmitter = new AtmosphereStanzaTransmitter(resource);
+                AtmosphereStanzaTransmitter transmitter = new AtmosphereStanzaTransmitter(resource, constructedId, stateManager);
                 stateManager.rememberTransmitter(constructedId, transmitter);
 
                 StateEntry entry = stateManager.retrieveState(constructedId);

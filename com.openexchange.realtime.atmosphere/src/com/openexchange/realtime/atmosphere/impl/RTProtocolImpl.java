@@ -183,6 +183,9 @@ public class RTProtocolImpl implements RTProtocol {
      */
     @Override
     public void emptyBuffer(RTClientState state, StanzaTransmitter transmitter) throws OXException {
+        if (transmitter == null) {
+            return;
+        }
         try {
             state.lock();
             state.touch();
