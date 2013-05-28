@@ -50,7 +50,7 @@
 package com.openexchange.capabilities;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.session.Session;
 
 /**
  * A {@link CapabilityChecker} can check capabilities.
@@ -67,5 +67,5 @@ public interface CapabilityChecker {
      * @return Whether to award this capability or not
      * @throws OXException If check fails
      */
-    boolean isEnabled(String capability, ServerSession session) throws OXException;
+    boolean isEnabled(String capability, Session session) throws OXException;
 }

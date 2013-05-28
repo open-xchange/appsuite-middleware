@@ -83,6 +83,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.CacheService;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.charset.CustomCharsetProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -156,6 +157,7 @@ import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mail.loginhandler.MailLoginHandler;
 import com.openexchange.mail.loginhandler.TransportLoginHandler;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.osgi.MailCapabilityServiceTracker;
 import com.openexchange.mail.osgi.MailProviderServiceTracker;
 import com.openexchange.mail.osgi.MailcapServiceTracker;
 import com.openexchange.mail.osgi.TransportProviderServiceTracker;
@@ -421,6 +423,7 @@ public final class ServerActivator extends HousekeepingActivator {
         // Mail provider service tracker
         track(MailProvider.class, new MailProviderServiceTracker(context));
         track(MailcapCommandMap.class, new MailcapServiceTracker(context));
+        track(CapabilityService.class, new MailCapabilityServiceTracker(context));
 
         // Transport provider service tracker
         track(TransportProvider.class, new TransportProviderServiceTracker(context));
@@ -452,7 +455,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Folder Delete Listener Service Tracker
         track(FolderDeleteListenerService.class, new FolderDeleteListenerServiceTrackerCustomizer(context));
-        
+
         // Distributed files
         track(DistributedFileManagement.class, new DistributedFilesListener());
 

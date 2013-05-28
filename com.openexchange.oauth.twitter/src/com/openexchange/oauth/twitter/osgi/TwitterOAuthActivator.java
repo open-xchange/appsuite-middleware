@@ -59,7 +59,9 @@ import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.twitter.OAuthServiceMetaDataTwitterImpl;
 import com.openexchange.oauth.twitter.TwitterOAuthServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -95,8 +97,9 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
             registerService(CapabilityChecker.class, new CapabilityChecker() {
 
                 @Override
-                public boolean isEnabled(String capability, ServerSession session) throws OXException {
+                public boolean isEnabled(String capability, Session ses) throws OXException {
                     if ("twitter".equals(capability)) {
+                        final ServerSession session = ServerSessionAdapter.valueOf(ses);
                         if (session.isAnonymous()) {
                             return false;
                         }
@@ -105,7 +108,7 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
                         return view.opt("com.openexchange.oauth.twitter", boolean.class, Boolean.TRUE).booleanValue();
                     }
                     return true;
-                    
+
                 }
             });
             getService(CapabilityService.class).declareCapability("twitter");

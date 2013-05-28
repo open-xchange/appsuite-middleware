@@ -51,7 +51,9 @@ package com.openexchange.mailfilter.internal;
 
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -64,8 +66,9 @@ public class MailFilterChecker implements CapabilityChecker {
     public static final String CAPABILITY = "mailfilter";
 
     @Override
-    public boolean isEnabled(String capability, ServerSession session) throws OXException {
+    public boolean isEnabled(String capability, Session ses) throws OXException {
         if (capability.equals(CAPABILITY)) {
+            final ServerSession session = ServerSessionAdapter.valueOf(ses);
             if (session.isAnonymous()) {
                 return false;
             }

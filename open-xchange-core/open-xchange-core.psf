@@ -9,6 +9,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.calendar"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.calendar.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.capabilities"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.capabilities.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.capabilities.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.charset"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.2.2,com.openexchange.cluster.discovery"/>

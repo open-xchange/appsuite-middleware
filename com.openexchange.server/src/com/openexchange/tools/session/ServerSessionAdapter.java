@@ -428,7 +428,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
 
     @Override
     public boolean isAnonymous() {
-        return session.getUserId() == 0;
+        return session.getUserId() <= 0;
     }
 
     @Override
