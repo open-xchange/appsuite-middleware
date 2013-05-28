@@ -65,9 +65,18 @@ public class MailFilterChecker implements CapabilityChecker {
 
     public static final String CAPABILITY = "mailfilter";
 
+    private final String capability = CAPABILITY;
+
+    /**
+     * Initializes a new {@link MailFilterChecker}.
+     */
+    public MailFilterChecker() {
+        super();
+    }
+
     @Override
     public boolean isEnabled(String capability, Session ses) throws OXException {
-        if (capability.equals(CAPABILITY)) {
+        if (this.capability.equals(capability)) {
             final ServerSession session = ServerSessionAdapter.valueOf(ses);
             if (session.isAnonymous()) {
                 return false;

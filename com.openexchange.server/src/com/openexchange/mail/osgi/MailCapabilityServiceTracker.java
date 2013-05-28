@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -84,6 +86,7 @@ public final class MailCapabilityServiceTracker implements ServiceTrackerCustomi
     @Override
     public CapabilityService addingService(ServiceReference<CapabilityService> reference) {
         final CapabilityService service = context.getService(reference);
+
         final CapabilityChecker checker = new CapabilityChecker() {
 
             @Override
@@ -97,7 +100,10 @@ public final class MailCapabilityServiceTracker implements ServiceTrackerCustomi
                 return true;
             }
         };
-        registration = context.registerService(CapabilityChecker.class, checker, null);
+        final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, MSISDN);
+        registration = context.registerService(CapabilityChecker.class, checker, properties);
+
         service.declareCapability(MSISDN);
         return service;
     }

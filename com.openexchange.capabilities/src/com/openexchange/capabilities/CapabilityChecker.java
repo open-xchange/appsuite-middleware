@@ -54,10 +54,18 @@ import com.openexchange.session.Session;
 
 /**
  * A {@link CapabilityChecker} can check capabilities.
+ * <p>
+ * OSGi-wise registration of a {@code CapabilityChecker} may be accompanied by service properties providing the <code>"capabilities"</code>
+ * property that specifies to what capabilities that check applies.<br>
+ * See <code>org.osgi.framework.BundleContext.registerService(Class,&nbsp;S,&nbsp;<b>Dictionary&lt;String,&nbsp;?&gt;</b>)</code>.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface CapabilityChecker {
+
+    /** The name for optional <code>"capabilities"</code> property */
+    public static final String PROPERTY_CAPABILITIES = "capabilities";
 
     /**
      * Check whether the capability should be awarded for a certain user

@@ -51,6 +51,7 @@ package com.openexchange.capabilities.osgi;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.caching.CacheService;
@@ -94,7 +95,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
         final CapabilityServiceImpl capService = new CapabilityServiceImpl(this) {
 
             @Override
-            public List<CapabilityChecker> getCheckers() {
+            public Map<String, List<CapabilityChecker>> getCheckers() {
                 return capCheckers.getCheckers();
             }
         };

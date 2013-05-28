@@ -49,6 +49,8 @@
 
 package com.openexchange.rss.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityChecker;
@@ -76,6 +78,9 @@ public class RssActivator extends AJAXModuleActivator {
         RssServices.LOOKUP.set(this);
         registerModule(new RssActionFactory(), "rss");
         registerService(ResultConverter.class, new RssJsonConverter());
+
+        final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "rss");
         registerService(CapabilityChecker.class, new CapabilityChecker() {
 
             @Override
@@ -94,7 +99,8 @@ public class RssActivator extends AJAXModuleActivator {
                 return true;
 
             }
-        });
+        }, properties);
+
         getService(CapabilityService.class).declareCapability("rss");
     }
 
