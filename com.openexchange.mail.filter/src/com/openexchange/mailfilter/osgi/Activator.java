@@ -183,11 +183,15 @@ public class Activator extends DeferredActivator {
 
             serviceRegistration = context.registerService(PreferencesItemService.class, new MailFilterPreferencesItem(), null);
             getService(CapabilityService.class).declareCapability(MailFilterChecker.CAPABILITY);
-            capabilityRegistration = context.registerService(CapabilityChecker.class, new MailFilterChecker(), null);
-        } catch (final Throwable t) {
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
-        }
 
+            final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, MailFilterChecker.CAPABILITY);
+            capabilityRegistration = context.registerService(CapabilityChecker.class, new MailFilterChecker(), properties);
+
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
     }
 
     @Override
@@ -211,9 +215,9 @@ public class Activator extends DeferredActivator {
              * Clear service registry
              */
             MailFilterServletServiceRegistry.getServiceRegistry().clearRegistry();
-        } catch (final Throwable t) {
-            LOG.error(t.getMessage(), t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
         } finally {
             mstarted.set(false);
         }

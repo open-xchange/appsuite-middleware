@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.linkedin.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.apache.commons.logging.Log;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
@@ -126,6 +128,9 @@ public class Activator extends HousekeepingActivator {
         track(ConfigurationService.class, new ConfigurationServiceRegisterer(context, this));
         track(OAuthService.class, new OAuthServiceRegisterer(context, this));
         openTrackers();
+
+        final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "linkedin");
         registerService(CapabilityChecker.class, new CapabilityChecker() {
 
             @Override
@@ -142,7 +147,7 @@ public class Activator extends HousekeepingActivator {
                 return true;
 
             }
-        });
+        }, properties);
         getService(CapabilityService.class).declareCapability("linkedin");
     }
 

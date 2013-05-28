@@ -49,6 +49,8 @@
 
 package com.openexchange.oauth.twitter.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
@@ -94,6 +96,9 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
              * Register service
              */
             registerService(OAuthServiceMetaData.class, new OAuthServiceMetaDataTwitterImpl());
+
+            final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "twitter");
             registerService(CapabilityChecker.class, new CapabilityChecker() {
 
                 @Override
@@ -110,7 +115,8 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
                     return true;
 
                 }
-            });
+            }, properties);
+
             getService(CapabilityService.class).declareCapability("twitter");
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(com.openexchange.log.LogFactory.getLog(TwitterOAuthActivator.class)).error(e.getMessage(), e);

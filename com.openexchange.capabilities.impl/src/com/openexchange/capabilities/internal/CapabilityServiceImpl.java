@@ -56,6 +56,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -274,11 +275,26 @@ public class CapabilityServiceImpl implements CapabilityService {
     }
 
     private boolean check(String cap, ServerSession session) throws OXException {
-        for (CapabilityChecker checker : getCheckers()) {
-            if (!checker.isEnabled(cap, session)) {
-                return false;
+        final Map<String, List<CapabilityChecker>> checkers = getCheckers();
+
+        List<CapabilityChecker> list = checkers.get(cap);
+        if (null != list && !list.isEmpty()) {
+            for (CapabilityChecker checker : list) {
+                if (!checker.isEnabled(cap, session)) {
+                    return false;
+                }
             }
         }
+
+        list = checkers.get("*");
+        if (null != list && !list.isEmpty()) {
+            for (CapabilityChecker checker : list) {
+                if (!checker.isEnabled(cap, session)) {
+                    return false;
+                }
+            }
+        }
+
         return true;
     }
 
@@ -317,8 +333,8 @@ public class CapabilityServiceImpl implements CapabilityService {
      *
      * @return The checkers
      */
-    protected List<CapabilityChecker> getCheckers() {
-        return Collections.emptyList();
+    protected Map<String, List<CapabilityChecker>> getCheckers() {
+        return Collections.emptyMap();
     }
 
     private Set<String> getContextCaps(final int contextId) throws OXException {
