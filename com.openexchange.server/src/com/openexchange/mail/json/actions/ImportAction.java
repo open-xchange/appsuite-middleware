@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
@@ -306,7 +305,7 @@ public final class ImportAction extends AbstractMailAction {
         private final boolean force;
         private final int flags;
         private final BlockingQueue<MimeMessage> queue;
-        private final Map<String, Object> logProperties;
+        private final Props logProperties;
 
         protected AppenderTask(final MailServletInterface mailInterface, final String folder, final boolean force, final int flags, final BlockingQueue<MimeMessage> queue) {
             super();
@@ -317,7 +316,7 @@ public final class ImportAction extends AbstractMailAction {
             this.flags = flags;
             this.queue = queue;
             final Props props = LogProperties.optLogProperties();
-            logProperties = null == props ? null : props.asMap();
+            logProperties = null == props ? null : props;
         }
 
         protected void stop() throws OXException {
@@ -337,7 +336,7 @@ public final class ImportAction extends AbstractMailAction {
         }
 
         @Override
-        public Map<String, Object> optLogProperties() {
+        public Props optLogProperties() {
             return logProperties;
         }
 
