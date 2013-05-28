@@ -1,6 +1,7 @@
 * 2013-05-28 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 26807: Don't consider storage when checking for maximum allowed sessions
+ - Fix for bug 26691: Modified error message in case of truncated fields
 
 * 2013-05-24 - thorben.betten@open-xchange.com
 
