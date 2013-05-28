@@ -1,3 +1,9 @@
+open-xchange-admin-autocontextid (7.0.2-11) unstable; urgency=low
+
+  * Second build for patch 2013-05-28
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Tue, 28 May 2013 14:31:58 +0200
+
 open-xchange-admin-autocontextid (7.0.2-10) unstable; urgency=low
 
   * Build for patch 2013-05-22
